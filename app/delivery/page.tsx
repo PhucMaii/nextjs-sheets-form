@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 export default function CashFlow() {
   const [expense, setExpense] = useState<number>(0);
   const [revenue, setRevenue] = useState<number>(0);
+  const [row, setRow] = useState<number>(0)
   const handleSubmit = async () => {
     const form = [
       {
@@ -67,6 +68,22 @@ export default function CashFlow() {
               placeholder="Revenue"
               value={revenue}
               onChange={(e) => setRevenue(+e.target.value)}
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="row"
+            >
+              Row
+            </label>
+            <input
+              className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              id="row"
+              type="number"
+              placeholder="Row"
+              value={revenue}
+              onChange={(e) => setRow(+e.target.value)}
             />
           </div>
           <div className="flex items-center justify-between">
