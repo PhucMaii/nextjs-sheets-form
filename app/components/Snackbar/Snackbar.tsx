@@ -1,18 +1,6 @@
 import React from 'react';
 import { Transition } from '@headlessui/react';
 
-interface Fadein {
-    delay: string,
-    children: any
-}
-
-interface PropTypes {
-    open: boolean,
-    onClose: () => void,
-    message: string,
-    type: string
-}
-
 const FadeIn = (para: Fadein) => (
     <Transition.Child
       enter={`transition-all ease-in-out duration-700 ${para.delay}`}

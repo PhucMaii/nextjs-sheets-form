@@ -1,12 +1,7 @@
 import { google } from "googleapis";
 import { NextApiRequest, NextApiResponse } from "next";
+import { calculateNextPos } from "./utils";
 
-interface SheetForm  {
-    sheetName: string
-    row: number
-    expense: number
-    revenue: number
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if(req.method !== "POST") {
@@ -39,9 +34,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             let nextPos: string = '';
             if(response.data.values) {
                 if(response.data.values[sheet.row - 1]) {
-                    nextPos = calculateCurrentPos(response.data.values[sheet.row - 1].length, []);
+                    nextPos = calculateNextPos(response.data.values[sheet.row - 1].length, []);
                 } else {
-                    nextPos = calculateCurrentPos(0, []);
+                    nextPos = calculateNextPos(0, []);
                 }
             }
             const appendResponse = await sheets.spreadsheets.values.append({
@@ -65,19 +60,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch(error) {
         console.log(error);
     }
-}
-
-
-function calculateCurrentPos(currentPos: number, result: string[]) {
-    const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
-    if(currentPos < columns.length) {
-        return columns[currentPos];
-    }
-    result.unshift(columns[currentPos % columns.length]);
-    currentPos = Math.floor(currentPos / columns.length) - 1; 
-    if(currentPos < columns.length) {
-        result.unshift(columns[currentPos])
-        return result.join('');
-    } 
-    return calculateCurrentPos(currentPos, result);
 }
