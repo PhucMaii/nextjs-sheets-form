@@ -13,16 +13,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).send("Only Post method allowed");
     }
     const body: Array<SheetForm> = req.body;
-    /*
-    * should receive in a form [
-        {
-            sheetName: MAIN,
-            row: 5,
-            expense
-        }
-    ]
-    */
-    console.log(body);
     try {
         const auth = new google.auth.GoogleAuth({
             credentials: {
@@ -40,18 +30,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             version: 'v4'
         })
 
-        const data = [];
-        const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
-        const expenseRow = 5;
+        const data = []; 
+        // console.log(calculateCurrentPos(800, data), "Current Position");
         for (const sheet of body) {
             const response = await sheets.spreadsheets.values.get({
-              spreadsheetId: process.env.GOOGLE_SHEET_ID,
-              range: sheet.sheetName, // Assuming you want to retrieve all data from columns B to E
+                spreadsheetId: process.env.GOOGLE_SHEET_ID,
+                range: sheet.sheetName, // Assuming you want to retrieve all data from columns B to E
             });
-            const numCols = response.data.values ? response.data.values[sheet.row - 1].length : 0;
+            let nextPos: string = '';
+            if(response.data.values) {
+                nextPos = calculateCurrentPos(response.data.values[sheet.row - 1].length, []);
+            }
             const appendResponse = await sheets.spreadsheets.values.append({
                 spreadsheetId: process.env.GOOGLE_SHEET_ID,
-                range: `${sheet.sheetName}!${columns[numCols]}${sheet.row}`,
+                range: `${sheet.sheetName}!${nextPos}${sheet.row}`,
                 valueInputOption: "USER_ENTERED",
                 requestBody: {
                     values: [
@@ -69,4 +61,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch(error) {
         console.log(error);
     }
+}
+
+
+function calculateCurrentPos(currentPos: number, result: string[]) {
+    const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
+    if(currentPos < columns.length) {
+        return columns[currentPos];
+    }
+    result.unshift(columns[currentPos % columns.length]);
+    currentPos = Math.floor(currentPos / columns.length) - 1; 
+    if(currentPos < columns.length) {
+        result.unshift(columns[currentPos])
+        return result.join('');
+    } 
+    return calculateCurrentPos(currentPos, result);
 }
