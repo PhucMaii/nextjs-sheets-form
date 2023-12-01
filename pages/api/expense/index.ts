@@ -31,15 +31,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
 
         const data = []; 
-        // console.log(calculateCurrentPos(800, data), "Current Position");
         for (const sheet of body) {
             const response = await sheets.spreadsheets.values.get({
                 spreadsheetId: process.env.GOOGLE_SHEET_ID,
-                range: sheet.sheetName, // Assuming you want to retrieve all data from columns B to E
+                range: sheet.sheetName,
             });
             let nextPos: string = '';
             if(response.data.values) {
-                nextPos = calculateCurrentPos(response.data.values[sheet.row - 1].length, []);
+                if(response.data.values[sheet.row - 1]) {
+                    nextPos = calculateCurrentPos(response.data.values[sheet.row - 1].length, []);
+                } else {
+                    nextPos = calculateCurrentPos(0, []);
+                }
             }
             const appendResponse = await sheets.spreadsheets.values.append({
                 spreadsheetId: process.env.GOOGLE_SHEET_ID,
@@ -52,7 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     ]
                 }                
             })
-            data.push(appendResponse.data);
+            const appendData = appendResponse.data.updates
+            data.push(appendData);
         }
         return res.status(200).json({
             data
