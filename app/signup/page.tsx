@@ -125,13 +125,6 @@ export default function SignupForm() {
             type="password"
             value={confirmPassword}
           />
-          {/* <button
-            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            type="button"
-            onClick={handleSubmit}
-          >
-            Sign up
-          </button> */}
           <Button 
             color="blue"
             onClick={handleSubmit}
@@ -140,7 +133,7 @@ export default function SignupForm() {
           <h4 className="text-right mt-4">
             Have an account already? <a
             className="text-right inline-block align-baseline mb-2 font-bold text-sm text-blue-500 hover:text-blue-800"
-            href="#"
+            href="/api/auth/signin"
           >
             Log in here
           </a>    

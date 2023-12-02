@@ -69,7 +69,7 @@ export default function CashFlow() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-16">
+    <div className="max-w-2xl mx-auto py-16">
       <h4 className="px-8">Delivery Input Form</h4>
       <Snackbar 
         open={notification.on} 
