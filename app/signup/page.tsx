@@ -126,6 +126,7 @@ export default function SignupForm() {
             value={confirmPassword}
           />
           <Button 
+            width="full"
             color="blue"
             onClick={handleSubmit}
             label="Sign up"

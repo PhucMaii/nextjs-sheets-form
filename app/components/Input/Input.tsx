@@ -6,6 +6,7 @@ interface PropTypes<T> {
     type: string,
     placeholder: string,
     value: T,
+    disabled?: boolean
 }
 
 export default function Input<T,>({
@@ -14,6 +15,7 @@ export default function Input<T,>({
     placeholder,
     type, 
     value, 
+    disabled
 }: PropTypes<T>) {
 
   return (
@@ -25,7 +27,8 @@ export default function Input<T,>({
           {label}
         </label>
         <input
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+          disabled={disabled}
+          className={`${disabled && 'opacity-50'} shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline`}
           id={label}
           type={type}
           placeholder={placeholder}

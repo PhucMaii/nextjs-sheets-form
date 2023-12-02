@@ -15,6 +15,19 @@ const config: Config = {
       },
     },
   },
+  variants: {
+    extend: {
+        opacity: [
+            "disabled"
+        ],
+        backgroundColor: [
+            "disabled"
+        ],
+        cursor: [
+            "disabled"
+        ]
+    }
+},
   plugins: [
     require('@tailwindcss/forms')
   ],

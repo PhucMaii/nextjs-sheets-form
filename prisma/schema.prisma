@@ -16,3 +16,14 @@ model User {
   password String @db.VarChar(255) 
   firstName String @db.VarChar(255) @map("first_name") // @map change the db table
 }
+
+model Form {
+  form_id Int @id @default(autoincrement())
+  form_name String @db.VarChar(255)
+}
+
+model Input {
+  input_id Int @id @default(autoincrement())
+  sheet_name String @db.VarChar(255)
+  row Int
+}
