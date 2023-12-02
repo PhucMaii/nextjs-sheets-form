@@ -1,39 +1,8 @@
 "use client";
 import React, { useState, FC } from 'react';
-import { Transition } from '@headlessui/react';
 import Snackbar from '../components/Snackbar/Snackbar';
-
-interface SheetForm  {
-  sheetName: string,
-  row: number,
-  revenue?: number,
-  expense?: number
-
-}
-
-interface Fadein {
-  delay: string,
-  children: any
-}
-
-interface Notification {
-  on: boolean,
-  type: string,
-  message: string
-}
-
-const FadeIn = (para: Fadein) => (
-  <Transition.Child
-    enter={`transition-all ease-in-out duration-700 ${para.delay}`}
-    enterFrom="opacity-0 translate-y-6"
-    enterTo="opacity-100 translate-y-0"
-    leave="transition-all ease-in-out duration-300"
-    leaveFrom="opacity-100"
-    leaveTo="opacity-0"
-  >
-    {para.children}
-  </Transition.Child>
-)
+import { Notification, SheetForm } from './type';
+import Input from '../components/Input/Input';
 
 export default function CashFlow() {
   const [expense, setExpense] = useState<number>(0);
@@ -109,38 +78,20 @@ export default function CashFlow() {
         type={notification.type}
         />
       <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="expense"
-          >
-            Expense
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="expense"
-            type="number"
-            placeholder="Name"
-            value={expense}
-            onChange={(e) => setExpense(+e.target.value)}
-          />
-        </div>
-        <div className="mb-6">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="revenue"
-          >
-            Revenue
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            id="revenue"
-            type="number"
-            placeholder="Revenue"
-            value={revenue}
-            onChange={(e) => setRevenue(+e.target.value)}
-          />
-        </div>
+        <Input<number> 
+          label="Expense"
+          onChange={(e: any) => setExpense(+e.target.value)}
+          type="number"
+          placeholder="Expense"
+          value={expense}
+        />
+        <Input<number> 
+          label="Revenue"
+          onChange={(e: any) => setRevenue(+e.target.value)}
+          type="number"
+          placeholder="Expense"
+          value={revenue}
+        />
         <div className="border my-4"></div>
         <div className="grid grid-cols-2 gap-5 align-center">
           {
@@ -173,26 +124,13 @@ export default function CashFlow() {
               </React.Fragment>
             )
           }
-          <div className="mb-6 w-full">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="row"
-            >
-              Row
-            </label>
-            <input
-              className="w-full shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              id="row"
-              type="number"
-              placeholder="Row"
-              value={row}
-              onChange={(e) => {
-                if(+e.target.value > 0) {
-                  setRow(+e.target.value)
-                }
-              }}
-            />
-          </div>
+          <Input<number> 
+            label="Row"
+            onChange={(e: any) => setRow(+e.target.value)}
+            type="number"
+            placeholder="Enter row..."
+            value={row}
+          />
           <div className="mb-6 w-full">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"

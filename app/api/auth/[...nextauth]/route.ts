@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcrypt";
-import NextAuth, {type NextAuthOptions} from "next-auth";
+import NextAuth, {getServerSession, type NextAuthOptions} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 const prisma = new PrismaClient();
@@ -10,7 +10,6 @@ export const authOptions: NextAuthOptions = {
     },
     providers: [
         CredentialsProvider({
-            name: 'Sign in',
             credentials: {
                 email: {
                     label: 'Email',
@@ -20,6 +19,11 @@ export const authOptions: NextAuthOptions = {
                 password: { label: 'Password', type: 'password'}
             },
             async authorize(credentials) {
+                // Check if user is already authenticated
+                const existingSession = await getServerSession(authOptions);
+                if (existingSession) {
+                    return null;
+                }
                 if(!credentials?.email || !credentials?.password ){
                     return null;
                 } 
@@ -38,13 +42,36 @@ export const authOptions: NextAuthOptions = {
                 return {
                     id: user.id + '',
                     email: user.email,
-                    firtName: user.firstName
+                    firtName: user.firstName,
                 }
-
-
             }
         })
-    ]
+    ],
+    callbacks: {
+        session: ({ session, token }) => {
+            return {
+                ...session,
+                user: {
+                    ...session.user,
+                    id: token.id,
+                }
+            }
+        },
+        jwt: ({ token, user }) => {
+            if(user) {
+                const u = user as unknown as any
+                return {
+                    ...token,
+                    id: u.id,
+                }
+            }
+            return token;
+        },
+        signIn: ({ user, account, profile, email, credentials }) => {
+            console.log({ user, account, profile, email, credentials });
+            return true;
+        }
+    }
 }
 
 const handler = NextAuth(authOptions);
