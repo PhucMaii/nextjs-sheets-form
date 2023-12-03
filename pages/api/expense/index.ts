@@ -10,13 +10,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // const body: SheetForm[] = [
     //     {
     //         sheetName: "MAIN",
-    //         row: 3,
+    //         row: 5,
     //         revenue: 200,
     //         total: 400,
     //         name: "Bin"
     //     },
     //     {
     //         sheetName: "DELIVERY_APP",
+    //         row: 1,
+    //         expense: 2000,
+    //         revenue: 200,
+    //         total: 400,
+    //     },
+    //     {
+    //         sheetName: "MAIN",
     //         row: 1,
     //         expense: 2000,
     //         revenue: 200,
@@ -64,10 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 range: `${sheet.sheetName}!${nextPos}${sheet.row}`,
                 valueInputOption: "USER_ENTERED",
                 requestBody: {
-                    values: [
-                        [sheet.expense?.toString()],
-                        [sheet.revenue?.toString()]
-                    ]
+                    values
                 }                
             })
             const appendData = appendResponse.data.updates

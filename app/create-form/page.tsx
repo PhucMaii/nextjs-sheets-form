@@ -8,8 +8,12 @@ import { InputField, InsertPosition, Notification } from './type';
 import Button from '../components/Button/Button';
 import Snackbar from '../components/Snackbar/Snackbar';
 import Chip from '../components/Chip/Chip';
+import NestedCheckbox from '../components/NestedCheckbox/NestedCheckbox';
 
 export default function CreateForm() {
+    const [disableInput, setDisableInput] = useState<boolean>(true); 
+    const [disableInsertPosition, setDisableInsertPosition] = useState<boolean>(true); 
+    const [disableAddForm, setDisableAddForm] = useState<boolean>(true);
     const [formName, setFormName] = useState<string>('');
     const [inputField, setInputField] = useState<InputField>({
         name: '',
@@ -19,7 +23,7 @@ export default function CreateForm() {
     const [inputFieldList, setInputFieldList] = useState<InputField[]>([]);
     const [insertPosition, setInsertPosition] = useState<InsertPosition>({
         sheetName: '',
-        row: 0
+        row: 1
     })
     const [insertPositionList, setInsertPositionList] = useState<InsertPosition[]>([]);
     const [notification, setNotification] = useState<Notification>({
@@ -27,9 +31,7 @@ export default function CreateForm() {
         type: '',
         message: ''
     });
-    const [disableInput, setDisableInput] = useState<boolean>(true); 
-    const [disableInsertPosition, setDisableInsertPosition] = useState<boolean>(true); 
-    const [disableAddForm, setDisableAddForm] = useState<boolean>(true);
+    const [selectAll, setSelectAll] = useState<boolean>(true);
 
     useEffect(() => {
         if(formName.length > 0) {
@@ -58,6 +60,28 @@ export default function CreateForm() {
         }
     }, [insertPositionList])
 
+    useEffect(() => {
+        if(selectAll) {
+            setInputFieldList((prevList) => {
+                return prevList.map((input) => {
+                    return {
+                        ...input,
+                        isChoose: true
+                    }
+                })
+            })
+        } else {
+            setInputFieldList((prevList) => {
+                return prevList.map((input) => {
+                    return {
+                        ...input,
+                        isChoose: false
+                    }
+                })
+            })
+        }
+    }, [selectAll])
+
     const handleAddInputField = () => {
         if(!inputField.name || !inputField.type) {
             setNotification({
@@ -85,15 +109,87 @@ export default function CreateForm() {
         setNotification({
             on: true,
             type: 'success',
-            message: 'Added input successfully'
+            message: 'Added Input Successfully'
         })
     }
 
-    const handleRemoveSheet = (e: any, id: number ) => {
+    const handleAddForm = async () => {
+        try {
+            const response = await fetch('/api/form', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+        } catch(error) {
+            console.log(error);
+        }
+    }
+
+    const handleAddPosition = () => {
+        if(insertPosition.sheetName === '' || insertPosition.row < 1) {
+            setNotification({
+                on: true,
+                type: 'error',
+                message: 'You are missing either sheet name or row field'
+            })
+            return;
+        }
+        const isInsertFieldInvalid = insertPositionList.some((pos) => {
+            return pos.sheetName === insertPosition.sheetName && pos.row == insertPosition.row
+        }) 
+        if(isInsertFieldInvalid) {
+            setNotification({
+                on: true,
+                type: 'error',
+                message: `Sheet name ${insertPosition.sheetName} and row ${insertPosition.row} have already taken`
+            })
+            return;
+        }
+        const insertInputFields = inputFieldList.filter((input) => input.isChoose === true);
+        const validPos = {
+            ...insertPosition,
+            inputFields: [...insertInputFields]
+        }
+        setInsertPositionList([...insertPositionList, validPos]);
+        setInsertPosition({
+            sheetName: '',
+            row: 1
+        })
+        setNotification({
+            on: true,
+            type: 'success',
+            message: 'Added Position Successfully'
+        })
+    }
+
+    const handleToggleIsChoose = (id: number) => {
+        setInputFieldList((prevList) => {
+            return prevList.map((input, index) => {
+                if(id === index) {
+                    return {
+                        ...input,
+                        isChoose: !input.isChoose
+                    }
+                }   
+                return input 
+            })
+        })
+    }
+
+    const handleRemoveInputField = (e: any, id: number ) => {
         e.preventDefault();
         const newInputFieldList = inputFieldList.filter((_, index) => index !== id);
         setInputFieldList(newInputFieldList);
-      }
+    }
+
+    const handleRemoveInsertPosition = (e: any, id: number ) => {
+        e.preventDefault();
+        const newInsertPositionList = insertPositionList.filter((_, index) => index !== id);
+        setInsertPositionList(newInsertPositionList);
+    }
+
     return (
         <div>
             <Snackbar 
@@ -120,8 +216,8 @@ export default function CreateForm() {
                         return (
                             <Chip 
                                 key={index}
-                                content={`Input Name: ${input.name}, Inputt ${input.type}`}
-                                handleRemove={(e: any) => handleRemoveSheet(e, index)}
+                                content={`Input Name: ${input.name}, Input type: ${input.type}`}
+                                handleRemove={(e: any) => handleRemoveInputField(e, index)}
                             />
                         )
                     })
@@ -161,6 +257,17 @@ export default function CreateForm() {
             </div>
             <Divider label="Insert Position" />
             <div className="mx-80 my-4">
+                {
+                    insertPositionList.length > 0 && insertPositionList.map((insertPos, index) => {
+                        return (
+                            <Chip 
+                                key={index}
+                                content={`Sheet Name: ${insertPos.sheetName}, Row: ${insertPos.row}`}
+                                handleRemove={(e: any) => handleRemoveInsertPosition(e, index)}
+                            />
+                        )
+                    })
+                }
                 <Input 
                     disabled={disableInsertPosition}
                     label="Sheet Name"
@@ -172,47 +279,33 @@ export default function CreateForm() {
                 <Input 
                     disabled={disableInsertPosition}
                     label="Row"
-                    onChange={(e: any) => {setInsertPosition({...insertPosition, row: +e.target.value})}}
+                    onChange={(e: any) => {
+                        if(insertPosition.row >= 0) {
+                            if(+e.target.value === 0) {
+                                return;
+                            }
+                            setInsertPosition({...insertPosition, row: +e.target.value})
+                        }
+                    }}
                     type="number"
                     placeholder="Enter row number"
                     value={insertPosition.row}
                 />
                 <div>
                     <h2 className="text-lg font-medium mb-4">Select fields to insert position</h2>
-                    <div className="flex items-center mb-4">
-                        <input 
-                            disabled={disableInsertPosition}
-                            id="default-checkbox" 
-                            type="checkbox" 
-                            className="w-4 h-4 text-blue-600 bg-white-100 border-black-300 rounded focus:ring-blue-500 focus:ring-2" 
-                        />
-                        <label 
-                            htmlFor="default-checkbox" 
-                            className="ms-2 text-sm font-medium"
-                        >
-                            Input Name
-                        </label>
-                    </div>
-                    <div className="flex items-center ml-4 mb-4">
-                        <input 
-                            disabled={disableInsertPosition}
-                            id="default-checkbox" 
-                            type="checkbox" 
-                            className="w-4 h-4 text-blue-600 bg-white-100 border-black-300 rounded focus:ring-blue-500 focus:ring-2" 
-                        />
-                        <label 
-                            htmlFor="default-checkbox" 
-                            className="ms-2 text-sm font-medium"
-                        >
-                            Input Name
-                        </label>
-                    </div>
+                    <NestedCheckbox 
+                        disabled={disableInsertPosition}
+                        checkboxList={inputFieldList}
+                        handleToggleCheckbox={handleToggleIsChoose}
+                        toggleAll={selectAll}
+                        handleToggleAll={setSelectAll}
+                    />
                 </div>
                 <Button 
                     color="blue"
                     disabled={disableInsertPosition}
                     label="Add Position"
-                    onClick={() => {}}
+                    onClick={handleAddPosition}
                     width="full"
                 />
             </div>
@@ -221,7 +314,7 @@ export default function CreateForm() {
                     disabled={disableAddForm}
                     color="green"
                     label="Add Form"
-                    onClick={() => {}}
+                    onClick={handleAddForm}
                     width="full"
                     className="my-8"
                 />

@@ -15,15 +15,34 @@ model User {
   email String @db.VarChar(255) @unique
   password String @db.VarChar(255) 
   firstName String @db.VarChar(255) @map("first_name") // @map change the db table
+
+  forms Form[]
 }
 
 model Form {
   form_id Int @id @default(autoincrement())
   form_name String @db.VarChar(255)
+  positions Position[]
+
+  user User @relation(fields: [user_id], references: [id])
+  user_id Int
+}
+
+model Position {
+  position_id Int @id @default(autoincrement())
+  sheet_name String @db.VarChar(255)
+  row Int
+  inputs Input[]
+
+  form Form @relation(fields: [form_id], references: [form_id])
+  form_id Int
 }
 
 model Input {
   input_id Int @id @default(autoincrement())
-  sheet_name String @db.VarChar(255)
-  row Int
+  input_name String @db.VarChar(255)
+  input_type String @db.VarChar(10)
+
+  position Position @relation(fields: [position_id], references: [position_id])
+  position_id Int
 }

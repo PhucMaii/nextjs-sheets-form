@@ -22,7 +22,8 @@ export default function Navbar({ isLogin }: PropTypes) {
             <h2 className="text-blue-500 font-bold text-xl">DataHabor Pro</h2>
         </div>
         <div className="m-4">
-            <Button 
+            <Button
+                width="full" 
                 color="blue"
                 label={isLogin ? "Sign out" : "Sign in"}
                 onClick={(e: any) => {
