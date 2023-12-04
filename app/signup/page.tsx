@@ -77,12 +77,15 @@ export default function SignupForm() {
   }
   
   if(session) {
-    return redirect('/dashboard');
+    return redirect('/');
   }
   
   if(isLoading) {
     return (
-      <LoadingComponent color="blue" loadingMsg="Loading"/>
+      <div className="flex flex-col gap-8 items-center mt-4">
+        <LoadingComponent color="blue"/>
+        <h2 className="font-bold text-lg">Loading...</h2>
+      </div>
     )
   }
 

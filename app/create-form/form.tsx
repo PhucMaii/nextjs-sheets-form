@@ -15,6 +15,7 @@ export default function CreateForm({ session }: any) {
     const [disableInput, setDisableInput] = useState<boolean>(true); 
     const [disableInsertPosition, setDisableInsertPosition] = useState<boolean>(true); 
     const [disableAddForm, setDisableAddForm] = useState<boolean>(true);
+    const [fadeIn, setFadeIn] = useState(false);
     const [formName, setFormName] = useState<string>('');
     const [inputField, setInputField] = useState<InputField>({
         name: '',
@@ -28,6 +29,7 @@ export default function CreateForm({ session }: any) {
         inputFields: []
     })
     const [insertPositionList, setInsertPositionList] = useState<InsertPosition[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [notification, setNotification] = useState<Notification>({
         on: false,
         type: '',
@@ -87,6 +89,7 @@ export default function CreateForm({ session }: any) {
 
     useEffect(() => {
         fetchSheetsName();
+        setFadeIn(true);
     }, [])
 
     const fetchSheetsName = async () => {
@@ -142,6 +145,7 @@ export default function CreateForm({ session }: any) {
     }
 
     const handleAddForm = async () => {
+        setIsLoading(true);
         try {
             const body = {
                 form_name: formName,
@@ -162,6 +166,7 @@ export default function CreateForm({ session }: any) {
                 message: data.message
             })
             setFormName('');
+            setIsLoading(false);
             setInputFieldList([]);
             setInsertPositionList([]);
         } catch(error) {
@@ -234,7 +239,7 @@ export default function CreateForm({ session }: any) {
     }
 
     return (
-        <div>
+        <div className={`transition-opacity duration-700 ease-in ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
             <Snackbar 
                 open={notification.on}
                 onClose={() => setNotification({...notification, on: false})}
@@ -357,6 +362,8 @@ export default function CreateForm({ session }: any) {
                     disabled={disableAddForm}
                     color="green"
                     label="Add Form"
+                    isLoading={isLoading}
+                    loadingButton
                     onClick={handleAddForm}
                     width="full"
                     className="my-2"
