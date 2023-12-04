@@ -32,6 +32,7 @@ export default function CreateForm() {
         message: ''
     });
     const [selectAll, setSelectAll] = useState<boolean>(true);
+    const [sheetNames, setSheetNames] = useState<any[]>([]);
 
     useEffect(() => {
         if(formName.length > 0) {
@@ -81,6 +82,32 @@ export default function CreateForm() {
             })
         }
     }, [selectAll])
+
+    useEffect(() => {
+        fetchSheetsName();
+    }, [])
+
+    const fetchSheetsName = async () => {
+        try {
+            const response = await fetch('/api/sheets', {
+                method: 'GET',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            let data = await response.json();
+            data = data.map((sheet: any) => {
+                return {
+                    value: sheet,
+                    label: sheet
+                }
+            })
+            console.log(data);
+            setSheetNames(data);
+        } catch(error) {
+            console.log(error);
+        } 
+    }
 
     const handleAddInputField = () => {
         if(!inputField.name || !inputField.type) {
@@ -268,13 +295,13 @@ export default function CreateForm() {
                         )
                     })
                 }
-                <Input 
+                <Select 
                     disabled={disableInsertPosition}
+                    description="Choose a sheet name"
                     label="Sheet Name"
-                    onChange={(e: any) => {setInsertPosition({...insertPosition, sheetName: e.target.value})}}
-                    type="text"
-                    placeholder="Enter sheet name"
                     value={insertPosition.sheetName}
+                    onChange={(e) => setInsertPosition({...insertPosition, sheetName: e.target.value})}
+                    values={sheetNames}
                 />
                 <Input 
                     disabled={disableInsertPosition}
