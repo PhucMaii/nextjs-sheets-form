@@ -4,9 +4,3 @@ export interface SheetForm  {
     revenue?: number,
     expense: number
 }
-
-export interface Notification {
-  on: boolean,
-  type: string,
-  message: string
-}

@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, FC } from 'react';
 import Snackbar from '../components/Snackbar/Snackbar';
-import { Notification, SheetForm } from './type';
+import { SheetForm } from './type';
 import Input from '../components/Input/Input';
+import { Notification } from '../utils/type';
 
 export default function CashFlow() {
   const [expense, setExpense] = useState<number>(0);

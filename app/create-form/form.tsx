@@ -4,11 +4,13 @@ import Navbar from '../components/Navbar/Navbar'
 import Input from '../components/Input/Input'
 import Divider from '../components/Divider/Divider';
 import Select from '../components/Select/Select';
-import { InputField, InsertPosition, Notification } from './type';
+import { InputField, InsertPosition } from './type';
 import Button from '../components/Button/Button';
 import Snackbar from '../components/Snackbar/Snackbar';
 import Chip from '../components/Chip/Chip';
 import NestedCheckbox from '../components/NestedCheckbox/NestedCheckbox';
+import { Notification } from '../utils/type';
+import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 
 
 export default function CreateForm({ session }: any) {
@@ -89,7 +91,6 @@ export default function CreateForm({ session }: any) {
 
     useEffect(() => {
         fetchSheetsName();
-        setFadeIn(true);
     }, [])
 
     const fetchSheetsName = async () => {
@@ -108,6 +109,7 @@ export default function CreateForm({ session }: any) {
                 }
             })
             setSheetNames(data);
+            setFadeIn(true);
         } catch(error) {
             console.log(error);
         } 

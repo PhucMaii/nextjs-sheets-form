@@ -3,10 +3,11 @@ import { redirect } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react';
 import Snackbar from '../components/Snackbar/Snackbar';
-import { Notification, User } from './type';
+import { User } from './type';
 import Input from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
+import { Notification } from '../utils/type';
 
 
 export default function SignupForm() {

@@ -9,9 +9,3 @@ export interface InsertPosition {
     row: number,
     inputFields: InputField[]
 }
-
-export interface Notification {
-    on: boolean,
-    type: string,
-    message: string
-}
