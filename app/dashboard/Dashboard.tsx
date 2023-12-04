@@ -26,7 +26,7 @@ export default function Dashboard({ isLogin }: PropTypes) {
                     <Button 
                         label={isLogin ? "Create Forms" : "Get Started"}
                         color="blue"
-                        onClick={(e: any) => router.push('/delivery')}
+                        onClick={(e: any) => router.push('/create-form')}
                         width="full"
                     />
                 </div>

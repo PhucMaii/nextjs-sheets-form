@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import React from 'react'
 import Button from '../Button/Button'
-import { redirect } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import { signIn, signOut } from 'next-auth/react';
 
 interface PropTypes {
@@ -10,9 +10,13 @@ interface PropTypes {
 }
 
 export default function Navbar({ isLogin }: PropTypes) {
+    const router = useRouter();
   return (
     <div className="flex justify-between">
-        <div className="flex gap-4 m-4 items-center">
+        <div 
+            className="flex gap-4 m-4 items-center cursor-pointer"
+            onClick={() => router.push('/')}
+        >
             <Image 
                 width={30} 
                 height={30}

@@ -6,7 +6,8 @@ export interface InputField {
 
 export interface InsertPosition {
     sheetName: string,
-    row: number
+    row: number,
+    inputFields: InputField[]
 }
 
 export interface Notification {

@@ -15,13 +15,13 @@ const FadeIn = (para: Fadein) => (
 )
 
 export default function Snackbar(props: PropTypes) {
-  const containerStyle = props.type === 'error' ? 'animation ease-in absolute top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-red-100 bg-red-600 rounded-lg shadow':
-  'animation ease-in absolute top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-green-100 bg-green-600 rounded-lg shadow'
+  const containerStyle = props.type === 'error' ? 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-red-100 bg-red-600 rounded-lg shadow':
+  'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-green-100 bg-green-600 rounded-lg shadow'
   const textStyle = props.type === 'error' ? 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-500 rounded-lg' :
   'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-500 rounded-lg'
 
   return (
-    <Transition.Root className="absolute top-0 right-0 mx-auto my-8 w-full space-y-4" show={props.open}>
+    <Transition.Root className="fixed top-0 right-0 mx-auto my-8 w-full space-y-4" show={props.open}>
     <FadeIn delay="delay-[0ms]">
       <div id="toast-default" className={containerStyle} role="alert">
         <div className={textStyle}>
