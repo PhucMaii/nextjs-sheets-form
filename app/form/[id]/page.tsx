@@ -3,6 +3,7 @@ import Button from '@/app/components/Button/Button';
 import Input from '@/app/components/Input/Input';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import Navbar from '@/app/components/Navbar/Navbar';
+import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { Notification } from '@/app/utils/type';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
@@ -18,6 +19,14 @@ interface InputValues {
   [key: string] : string | number
 }
 
+interface Position {
+  form_id: number,
+  position_id: number,
+  sheet_name: string,
+  row: number,
+  inputs: Input[]
+}
+
 export default function Form() {
   const [formData, setFormData] = useState<any>({});
   const [inputList, setInputList] = useState<Input[]>([]);
@@ -29,6 +38,7 @@ export default function Form() {
     type: '',
     message: ''
   });
+  const [positionList, setPositionList] = useState<Position[]>([]);
   const { id } : any = useParams();
   const { data: session, status}: any = useSession();
   const router = useRouter();
@@ -59,7 +69,9 @@ export default function Form() {
         setIsLoading(false);
         return;
       }
+      console.log(data);
       getMostInputsPosition(data);
+      setPositionList(data.positions);
       setFormData(data);
       setIsLoading(false);
     } catch(error) {
@@ -91,7 +103,41 @@ export default function Form() {
         newInputValues[input.input_name] = 0;
       }
     }
+    console.log(newInputValues, "new input values");
     setInputValues(newInputValues);
+  }
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      const submitForm = positionList.map((pos) => {
+        const validInputs: InputValues = {};
+        for(let input of pos.inputs) {
+          validInputs[input.input_name] = inputValues[input.input_name];
+        }
+        // const validInputs = pos.inputs.map((input) => ({[input.input_name]: inputValues[input.input_name]}));
+        return {
+          sheetName: pos.sheet_name,
+          row: pos.row,
+          ...validInputs
+        }
+      })
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(submitForm)
+      });
+      const res = await response.json();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: res.message
+      })
+    } catch(error) {
+      console.log(error);
+    }
   }
 
   if(isLoading || status === 'loading') {
@@ -122,6 +168,12 @@ export default function Form() {
 
   return (
     <div>
+      <Snackbar 
+        open={notification.on}
+        onClose={() => setNotification({...notification, on: false})}
+        type={notification.type}
+        message={notification.message}
+      />
       <Navbar isLogin={true}/>
       <div className="max-w-2xl mx-auto py-16">
         <h4 className="text-center font-bold text-2xl text-blue-600 px-8">{formData.form_name}</h4>
@@ -155,7 +207,7 @@ export default function Form() {
           <Button 
             color="blue"
             label="Submit"
-            onClick={() => {}}
+            onClick={handleSubmit}
             width="full"
             loadingButton
           />
