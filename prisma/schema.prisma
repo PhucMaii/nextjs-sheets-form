@@ -22,10 +22,10 @@ model User {
 model Form {
   form_id Int @id @default(autoincrement())
   form_name String @db.VarChar(255)
-  lastOpened DateTime @default(now()) @updatedAt @db.Timestamp() @map("last_opened")
+  lastOpened DateTime @updatedAt @db.Timestamp() @map("last_opened")
   positions Position[]
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id Int
 }
 
@@ -35,7 +35,7 @@ model Position {
   row Int
   inputs Input[]
 
-  form Form @relation(fields: [form_id], references: [form_id])
+  form Form @relation(fields: [form_id], references: [form_id], onDelete: Cascade)
   form_id Int
 }
 
@@ -44,6 +44,6 @@ model Input {
   input_name String @db.VarChar(255)
   input_type String @db.VarChar(10)
 
-  position Position @relation(fields: [position_id], references: [position_id])
+  position Position @relation(fields: [position_id], references: [position_id], onDelete: Cascade)
   position_id Int
 }

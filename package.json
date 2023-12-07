@@ -12,7 +12,10 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@headlessui/react": "^1.7.17",
+    "@mui/material": "^5.14.20",
     "@prisma/client": "^5.6.0",
     "@tailwindcss/forms": "^0.5.7",
     "@types/bcrypt": "^5.0.2",
@@ -24,12 +27,14 @@
     "next": "^14.0.3",
     "next-auth": "^4.24.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-modal": "^3.16.1"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-modal": "^3.16.3",
     "autoprefixer": "^10.4.16",
     "eslint": "^8",
     "eslint-config-next": "14.0.3",

@@ -5,7 +5,6 @@ import Button from '../components/Button/Button'
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import FormCard from '../components/FormCard/FormCard';
-import { useSession } from 'next-auth/react';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 
 interface PropTypes {
@@ -42,6 +41,7 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
     }, [])
 
     const fetchForms = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/allForms/?userId=${userId}`, {
                 method: 'GET',
@@ -50,6 +50,7 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
                 }
             });
             if (!response.ok) {
+                setIsLoading(false);
                 console.error(`Error fetching data. Status: ${response.status}`);
                 throw new Error('Failed to fetch data');
               }
@@ -62,12 +63,18 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
             setIsLoading(false);
         }
     }
+
+    const handleDeleteForm = (id: number) => {
+        const newForm = formList.filter((form) => form.form_id !== id);
+        setFormList(newForm);
+    }
+
     if(isLoading) {
         return (
-          <div className="flex flex-col gap-8 items-center mt-8">
-            <LoadingComponent color="blue"/>
-            <h2 className="font-bold text-lg">Loading...</h2>
-          </div>
+            <div className="flex flex-col gap-8 items-center pt-8">
+              <LoadingComponent color="blue"/>
+              <h2 className="font-bold text-lg">Loading...</h2>
+            </div>
         )
     }
     return (
@@ -92,11 +99,11 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
                             <div className="flex gap-8 justify-center flex-wrap mx-auto">
                                 {
                                     formList.length > 0 ? formList.map((form) => {
-                                        return <FormCard key={form.form_id} form={form} />
+                                        return <FormCard key={form.form_id} form={form} handleDelete={handleDeleteForm} />
                                     }) : (
                                         <div className="flex flex-col gap-4 justify-center items-center text-gray-600">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-12 h-12 font-bold text-center">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-12 h-12 font-bold text-center">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                             </svg>
                                             <h1 className="text-xl text-gray-500 font-medium">You currently do not have any forms</h1>
                                         </div>    
