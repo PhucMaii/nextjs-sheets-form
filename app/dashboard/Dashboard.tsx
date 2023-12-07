@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import FormCard from '../components/FormCard/FormCard';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
+import { Notification } from '../utils/type';
+import Snackbar from '../components/Snackbar/Snackbar';
 
 interface PropTypes {
     userId: string,
@@ -24,6 +26,11 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
     const [fadeIn, setFadeIn] = useState(false);
     const [formList, setFormList] = useState<FormType[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [notification, setNotification] = useState<Notification>({
+        on: false,
+        type: '',
+        message: ''
+    });
 
     useEffect(() => {
         if(!isLoading) {
@@ -64,9 +71,25 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
         }
     }
 
-    const handleDeleteForm = (id: number) => {
-        const newForm = formList.filter((form) => form.form_id !== id);
-        setFormList(newForm);
+    const handleDeleteForm = async (id: number) => {
+        try {
+            const response: any = await fetch(`api/form/?formId=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            const res = await response.json();
+            const newFormList = formList.filter((form) => form.form_id !== res.data.form_id);
+            setFormList(newFormList);
+            setNotification({
+                on: true,
+                type: 'success',
+                message: res.message
+            })
+        } catch(error) {
+            console.log(error);
+        }
     }
 
     if(isLoading) {
@@ -80,6 +103,12 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
     return (
         <div className={`transition-opacity duration-700 ease-in ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
             <Navbar isLogin={isLogin} />
+            <Snackbar 
+                open={notification.on}
+                onClose={() => setNotification({...notification, on: false})}
+                message={notification.message}
+                type={notification.type}
+            />
             <div className="flex flex-col items-center gap-4 m-8 p-8 ">
                 <h1 className="text-6xl text-center text-blue-500 font-bold">Empower Your Business With Precision and Ease</h1>
                 <div className="w-1/3 mt-4">

@@ -3,23 +3,19 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function DELETEMethod(req: NextApiRequest, res: NextApiResponse, prisma: PrismaClient,) {
     try {
-        const { userId, formId } = req.query;
+        const { formId } = req.query;
         if(!formId) {
             return res.status(400).send('Missing form id');
         }
-        const deletedData = await prisma.user.update({
+        const deletedData = await prisma.form.delete({
             where: {
-                id: Number(userId)
+                form_id: Number(formId)
             }, 
-            data: {
-                forms: {
-                    delete: {
-                        form_id: Number(formId),
-                    }, 
-                }
-            }
         })
-
+        return res.status(200).json({
+            data: deletedData,
+            message: `Delete ${deletedData.form_name} form successfully`
+        })
     } catch(error) {
         return res.status(500).send('There was something wrong ' + error);
     }
