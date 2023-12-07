@@ -5,12 +5,12 @@ import { LoginButton, LogoutButton } from "./auth";
 import Dashboard from "./dashboard/Dashboard";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session: any = await getServerSession(authOptions);
   console.log(session);
 
   return (
-    <main className="bg-gray-100 min-h-screen">
-      <Dashboard isLogin={!!session}/>
+    <main className="bg-gray-100 min-h-screen pb-4">
+      <Dashboard userId={session?.user.id} isLogin={!!session}/>
     </main>
   );
 }

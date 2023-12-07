@@ -22,6 +22,7 @@ model User {
 model Form {
   form_id Int @id @default(autoincrement())
   form_name String @db.VarChar(255)
+  lastOpened DateTime @default(now()) @updatedAt @db.Timestamp() @map("last_opened")
   positions Position[]
 
   user User @relation(fields: [user_id], references: [id])

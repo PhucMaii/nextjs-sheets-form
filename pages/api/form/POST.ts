@@ -42,7 +42,8 @@ export const POSTMethod = async (req: NextApiRequest, res: NextApiResponse, pris
                 user: { connect: { id: parseInt(body.userId) }},
                 positions: {
                     create: [...submitPositions] 
-                }
+                },
+                lastOpened: new Date()
             }
         })
         return res.status(200).json({

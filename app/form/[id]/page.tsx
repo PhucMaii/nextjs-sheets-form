@@ -63,13 +63,11 @@ export default function Form() {
       }
       const comingData = await response.json();
       const data = comingData.data;
-      console.log((session?.user?.id))
       if(parseInt(session?.user?.id as string) !== data.user_id) {
         setIsAuthorized(false);
         setIsLoading(false);
         return;
       }
-      console.log(data);
       getMostInputsPosition(data);
       setPositionList(data.positions);
       setFormData(data);

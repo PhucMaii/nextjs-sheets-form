@@ -240,6 +240,15 @@ export default function CreateForm({ session }: any) {
         setInsertPositionList(newInsertPositionList);
     }
 
+    if(isLoading) {
+        return (
+          <div className="flex flex-col gap-8 items-center mt-8">
+            <LoadingComponent color="blue"/>
+            <h2 className="font-bold text-lg">Loading...</h2>
+          </div>
+        )
+    }
+    
     return (
         <div className={`transition-opacity duration-700 ease-in ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
             <Snackbar 
