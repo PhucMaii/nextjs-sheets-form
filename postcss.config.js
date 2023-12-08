@@ -4,7 +4,6 @@ module.exports = {
     autoprefixer: {},
   },
   variants: {
-    opacity: ({ after }) => after(['disabled'])
+    opacity: ({ after }) => after(['disabled']),
   },
-
-}
+};

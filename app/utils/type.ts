@@ -1,5 +1,5 @@
 export interface Notification {
-    on: boolean,
-    type: string,
-    message: string
+  on: boolean;
+  type: string;
+  message: string;
 }

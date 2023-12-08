@@ -1,11 +1,11 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
-  ], 
+  ],
   theme: {
     extend: {
       backgroundImage: {
@@ -17,19 +17,11 @@ const config: Config = {
   },
   variants: {
     extend: {
-        opacity: [
-            "disabled"
-        ],
-        backgroundColor: [
-            "disabled"
-        ],
-        cursor: [
-            "disabled"
-        ]
-    }
-},
-  plugins: [
-    require('@tailwindcss/forms')
-  ],
-}
-export default config
+      opacity: ['disabled'],
+      backgroundColor: ['disabled'],
+      cursor: ['disabled'],
+    },
+  },
+  plugins: [require('@tailwindcss/forms')],
+};
+export default config;

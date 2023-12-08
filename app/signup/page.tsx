@@ -1,6 +1,6 @@
-"use client";
+'use client';
+import React, { ChangeEvent, Reference, useEffect, useRef, useState } from 'react';
 import { redirect } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react';
 import Snackbar from '../components/Snackbar/Snackbar';
 import { User } from './type';
@@ -8,7 +8,7 @@ import Input from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import { Notification } from '../utils/type';
-
+import { useRouter } from 'next/navigation';
 
 export default function SignupForm() {
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -16,14 +16,15 @@ export default function SignupForm() {
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: '',
-    message: ''
+    message: '',
   });
   const [userData, setUserData] = useState<User>({
     firstName: '',
     email: '',
     password: '',
   });
-  const {data: session} = useSession();
+  const router = useRouter();
+  const { data: session } = useSession();
   const sessionRef: any = useRef(); // for ignoring the first run of useEffect
 
   useEffect(() => {
@@ -38,110 +39,130 @@ export default function SignupForm() {
     // Update the ref with the current value of session
     sessionRef.current = '';
   }, [session, sessionRef]);
-  
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if(userData.password.length < 6){
+    if (userData.password.length < 6) {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Password length must be greater than 6'
+        message: 'Password length must be greater than 6',
       });
       return;
     }
-    if(userData.password !== confirmPassword) {
+    if (userData.password !== confirmPassword) {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Confirm Password does not match'
+        message: 'Confirm Password does not match',
       });
       return;
     }
     try {
       const response = await fetch('/api/signup', {
-        method: "POST",
+        method: 'POST',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
         },
-        body: JSON.stringify(userData)
-      }) 
+        body: JSON.stringify(userData),
+      });
       setUserData({
         firstName: '',
         email: '',
-        password: ''
-      })
+        password: '',
+      });
       setConfirmPassword('');
-      redirect('/api/auth/signin');
-    } catch(error) {
+      setNotification({
+        on: true,
+        type: 'success',
+        message: 'Sign up Successfully'
+      })
+      router.push('/api/auth/signin');
+    } catch (error) {
       console.log(error);
     }
+  };
+
+  if (session) {
+    return router.push('/');
   }
-  
-  if(session) {
-    return redirect('/');
-  }
-  
-  if(isLoading) {
+
+  if (isLoading) {
     return (
       <div className="flex flex-col gap-8 items-center mt-4">
-        <LoadingComponent color="blue"/>
+        <LoadingComponent color="blue" />
         <h2 className="font-bold text-lg">Loading...</h2>
       </div>
-    )
+    );
   }
 
   return (
     <main className="bg-gray-100 min-h-screen">
-      <Snackbar  
-        open={notification.on} 
-        type={notification.type} 
-        onClose={() => setNotification({...notification, on: false})} 
-        message={notification.message}   
+      <Snackbar
+        open={notification.on}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, on: false })}
+        message={notification.message}
       />
       <div className="max-w-2xl mx-auto py-16">
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          <h2 className="text-center text-lg font-bold my-4">Welcome To Our Sheets App</h2>
-          <Input<string> 
+          <h2 className="text-center text-lg font-bold my-4">
+            Welcome To Our Sheets App
+          </h2>
+          <Input<string>
             label="Name"
-            onChange={(e) => setUserData({...userData, firstName: e.target.value})}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setUserData({
+                ...userData,
+                firstName: e.target.value,
+              })
+            }
             placeholder="Enter your name..."
             type="text"
             value={userData.firstName}
           />
-          <Input<string> 
+          <Input<string>
             label="Email"
-            onChange={(e) => setUserData({...userData, email: e.target.value})}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setUserData({ ...userData, email: e.target.value })
+            }
             placeholder="Enter your email..."
             type="email"
             value={userData.email}
           />
-          <Input<string> 
+          <Input<string>
             label="Password"
-            onChange={(e) => setUserData({...userData, password: e.target.value})}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setUserData({
+                ...userData,
+                password: e.target.value,
+              })
+            }
             placeholder="Enter your password..."
             type="password"
             value={userData.password}
           />
-          <Input<string> 
+          <Input<string>
             label="Confirm Password"
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
             placeholder="Enter your confirm password..."
             type="password"
             value={confirmPassword}
           />
-          <Button 
+          <Button
             width="full"
             color="blue"
             onClick={handleSubmit}
             label="Sign up"
           />
           <h4 className="text-right mt-4">
-            Have an account already? <a
-            className="text-right inline-block align-baseline mb-2 font-bold text-sm text-blue-500 hover:text-blue-800"
-            href="/api/auth/signin"
-          >
-            Log in here
-          </a>    
+            Have an account already?{' '}
+            <a
+              className="text-right inline-block align-baseline mb-2 font-bold text-sm text-blue-500 hover:text-blue-800"
+              href="/api/auth/signin"
+            >
+              Log in here
+            </a>
           </h4>
         </form>
       </div>

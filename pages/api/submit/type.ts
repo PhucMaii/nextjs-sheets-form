@@ -1,5 +1,5 @@
-interface SheetForm  {
-    sheetName: string
-    row: number
-    [key: string]: number | string
+interface SheetForm {
+  sheetName: string;
+  row: number;
+  [key: string]: number | string;
 }
