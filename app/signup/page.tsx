@@ -1,5 +1,11 @@
 'use client';
-import React, { ChangeEvent, Reference, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  Reference,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { redirect } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Snackbar from '../components/Snackbar/Snackbar';
@@ -75,8 +81,8 @@ export default function SignupForm() {
       setNotification({
         on: true,
         type: 'success',
-        message: 'Sign up Successfully'
-      })
+        message: 'Sign up Successfully',
+      });
       router.push('/api/auth/signin');
     } catch (error) {
       console.log(error);
@@ -144,7 +150,9 @@ export default function SignupForm() {
           />
           <Input<string>
             label="Confirm Password"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setConfirmPassword(e.target.value)
+            }
             placeholder="Enter your confirm password..."
             type="password"
             value={confirmPassword}

@@ -1,6 +1,8 @@
 'use client';
+import { customStyles } from '@/app/utils/styles';
 import moment from 'moment/moment';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Modal from 'react-modal';
 
@@ -9,24 +11,9 @@ interface PropTypes {
   handleDelete: (id: number) => void;
 }
 
-const customStyles: any = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
-    borderRadius: '20px',
-    border: 'none',
-    boxShadow: ' rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
-    textAlign: 'center',
-    outline: 'none',
-  },
-};
-
 export default function FormCard({ form, handleDelete }: PropTypes) {
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
+  const router = useRouter();
   return (
     <div className="w-full relative flex flex-col gap-2 w-1/4 p-6 sm:p-2 rounded-2xl bg-white border border-gray-200 rounded-lg shadow">
       <Modal isOpen={openDeleteModal} style={customStyles}>
@@ -97,7 +84,7 @@ export default function FormCard({ form, handleDelete }: PropTypes) {
         </div>
       </Modal>
       <div className="text-right">
-        <button className="inline-block text-blue-500 hover:bg-blue-100 focus:ring-4 focus:outline-none focus:ring-blue-200 rounded-lg text-sm p-1.5">
+        <button onClick={() => router.push(`/edit-form/${form.form_id}`)} className="inline-block text-blue-500 hover:bg-blue-100 focus:ring-4 focus:outline-none focus:ring-blue-200 rounded-lg text-sm p-1.5">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

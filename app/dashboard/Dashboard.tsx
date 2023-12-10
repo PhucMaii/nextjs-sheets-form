@@ -22,16 +22,16 @@ interface FormType {
 }
 
 export default function Dashboard({ userId, isLogin }: PropTypes) {
-    const [fadeIn, setFadeIn] = useState(false);
-    const [formList, setFormList] = useState<FormType[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [notification, setNotification] = useState<Notification>({
-        on: false,
-        type: '',
-        message: '',
-    });
-    const router = useRouter();
-    
+  const [fadeIn, setFadeIn] = useState(false);
+  const [formList, setFormList] = useState<FormType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [notification, setNotification] = useState<Notification>({
+    on: false,
+    type: '',
+    message: '',
+  });
+  const router = useRouter();
+
   useEffect(() => {
     if (!isLoading) {
       setFadeIn(true);
@@ -59,10 +59,10 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
       if (!response.ok) {
         setIsLoading(false);
         setNotification({
-            on: true,
-            type: 'error',
-            message: `Couldn't fetch data. Status ${response.status}`
-        })
+          on: true,
+          type: 'error',
+          message: `Couldn't fetch data. Status ${response.status}`,
+        });
         return;
       }
       const res = await response.json();

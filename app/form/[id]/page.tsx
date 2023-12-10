@@ -44,8 +44,8 @@ export default function Form() {
         setNotification({
           on: true,
           type: 'error',
-          message: `Error fetching data. Status: ${response.status}`
-        })
+          message: `Error fetching data. Status: ${response.status}`,
+        });
         return;
       }
       const comingData = await response.json();
@@ -63,25 +63,28 @@ export default function Form() {
       setNotification({
         on: true,
         type: 'error',
-        message: error.message
-      })
+        message: error.message,
+      });
       console.log(error);
     }
   };
 
   const getMostInputsPosition = (data: any) => {
     const positionList = data.positions;
-    let posIndex = 0;
-    let longestInputList = positionList[0].inputs.length;
-    for (let i = 1; i < positionList.length; i++) {
-      if (positionList[i].inputs.length > longestInputList) {
-        longestInputList = positionList[i].inputs.length;
-        posIndex = i;
-      }
-    }
-    const newInputList = data.positions[posIndex].inputs;
-    createInputValues(newInputList);
-    setInputList(newInputList);
+    let newInputList: InputType[] = [];
+    const uniqueInputIds = new Set<string>();
+    newInputList = positionList.map((position: any) => {
+      return position.inputs.filter((input: InputType) => {
+        if (!uniqueInputIds.has(input.input_name)) {
+          uniqueInputIds.add(input.input_name);
+          return true;
+        }
+        return false;
+      });
+    });
+    console.log(uniqueInputIds);
+    createInputValues(newInputList.flat());
+    setInputList(newInputList.flat());
   };
 
   const createInputValues = (inputs: InputType[]) => {
@@ -93,7 +96,6 @@ export default function Form() {
         newInputValues[input.input_name] = 0;
       }
     }
-    console.log(newInputValues, 'new input values');
     setInputValues(newInputValues);
   };
 

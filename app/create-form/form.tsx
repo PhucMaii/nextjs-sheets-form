@@ -14,7 +14,8 @@ import Snackbar from '../components/Snackbar/Snackbar';
 
 export default function CreateForm({ session }: any) {
   const [disableInput, setDisableInput] = useState<boolean>(true);
-  const [disableInsertPosition, setDisableInsertPosition] = useState<boolean>(true);
+  const [disableInsertPosition, setDisableInsertPosition] =
+    useState<boolean>(true);
   const [disableAddForm, setDisableAddForm] = useState<boolean>(true);
   const [fadeIn, setFadeIn] = useState(false);
   const [formName, setFormName] = useState<string>('');
@@ -29,7 +30,9 @@ export default function CreateForm({ session }: any) {
     row: 1,
     inputFields: [],
   });
-  const [insertPositionList, setInsertPositionList] = useState<InsertPosition[]>([]);
+  const [insertPositionList, setInsertPositionList] = useState<
+    InsertPosition[]
+  >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -38,7 +41,7 @@ export default function CreateForm({ session }: any) {
   });
   const [selectAll, setSelectAll] = useState<boolean>(true);
   const [sheetNames, setSheetNames] = useState<any[]>([]);
-  
+
   useEffect(() => {
     fetchSheetsName();
   }, []);
@@ -68,7 +71,7 @@ export default function CreateForm({ session }: any) {
     } else {
       setDisableAddForm(true);
     }
-}, [insertPositionList]);
+  }, [insertPositionList]);
 
   useEffect(() => {
     if (selectAll) {
@@ -292,7 +295,9 @@ export default function CreateForm({ session }: any) {
               <Chip
                 key={index}
                 content={`Input Name: ${input.name}, Input type: ${input.type}`}
-                handleRemove={(e: MouseEvent) => handleRemoveInputField(e, index)}
+                handleRemove={(e: MouseEvent) =>
+                  handleRemoveInputField(e, index)
+                }
               />
             );
           })}
@@ -341,7 +346,9 @@ export default function CreateForm({ session }: any) {
               <Chip
                 key={index}
                 content={`Sheet Name: ${insertPos.sheetName}, Row: ${insertPos.row}`}
-                handleRemove={(e: MouseEvent) => handleRemoveInsertPosition(e, index)}
+                handleRemove={(e: MouseEvent) =>
+                  handleRemoveInsertPosition(e, index)
+                }
               />
             );
           })}

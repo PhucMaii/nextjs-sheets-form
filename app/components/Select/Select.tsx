@@ -2,17 +2,17 @@ import { ObjectEnumValue } from '@prisma/client/runtime/library';
 import React from 'react';
 
 interface ValueType {
-  label: string,
-  value: string
+  label: string;
+  value: string;
 }
 
 interface PropTypes {
-  description: string,
-  disabled?: boolean,
-  label: string,
-  onChange: (e: any) => void,
-  values: ValueType[],
-  value: string
+  description: string;
+  disabled?: boolean;
+  label: string;
+  onChange: (e: any) => void;
+  values: ValueType[];
+  value: string;
 }
 
 export default function Select({

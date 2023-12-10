@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
-    userId?: string
+  userId?: string;
 }
 
 export default async function handler(

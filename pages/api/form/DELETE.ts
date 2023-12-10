@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
-    formId?: string
+  formId?: string;
 }
 export default async function DELETEMethod(
   req: NextApiRequest,

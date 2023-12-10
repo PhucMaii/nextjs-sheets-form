@@ -81,14 +81,18 @@ export default function CashFlow() {
       <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <Input<number>
           label="Expense"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setExpense(+e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setExpense(+e.target.value)
+          }
           type="number"
           placeholder="Expense"
           value={expense}
         />
         <Input<number>
           label="Revenue"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setRevenue(+e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setRevenue(+e.target.value)
+          }
           type="number"
           placeholder="Expense"
           value={revenue}
