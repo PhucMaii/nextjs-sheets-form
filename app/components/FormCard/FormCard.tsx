@@ -28,7 +28,7 @@ const customStyles: any = {
 export default function FormCard({ form, handleDelete }: PropTypes) {
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   return (
-    <div className="relative flex flex-col gap-2 w-1/4 p-6 rounded-2xl bg-white border border-gray-200 rounded-lg shadow">
+    <div className="w-full relative flex flex-col gap-2 w-1/4 p-6 sm:p-2 rounded-2xl bg-white border border-gray-200 rounded-lg shadow">
       <Modal isOpen={openDeleteModal} style={customStyles}>
         <div className="relative p-4 w-full max-w-md max-h-full">
           <div className="relative bg-white rounded-lg">

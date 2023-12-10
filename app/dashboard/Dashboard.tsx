@@ -124,11 +124,11 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
         message={notification.message}
         type={notification.type}
       />
-      <div className="flex flex-col items-center gap-4 m-8 p-8 ">
+      <div className="flex flex-col items-center gap-4 sm:m-2 m-8 p-8 ">
         <h1 className="text-6xl text-center text-blue-500 font-bold">
           Empower Your Business With Precision and Ease
         </h1>
-        <div className="w-1/3 mt-4">
+        <div className="w-lg mt-4 sm:w-full lg:w-1/3">
           <Button
             label={isLogin ? 'Create Forms' : 'Get Started'}
             color="blue"
@@ -139,11 +139,11 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
       </div>
       {isLogin ? (
         <>
-          <div className="m-8 px-8 ">
+          <div className="sm:m-2 sm:px-0 md:m-8 m-8 px-8 ">
             <h1 className="text-4xl text-blue-500 text-center font-bold mb-8">
               YOUR FORMS
             </h1>
-            <div className="flex gap-8 justify-center flex-wrap mx-auto">
+            <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4 justify-center flex-wrap mx-auto">
               {formList.length > 0 ? (
                 formList.map((form) => {
                   return (

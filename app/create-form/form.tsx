@@ -273,7 +273,7 @@ export default function CreateForm({ session }: any) {
       <h2 className="mb-4 text-4xl text-center text-blue-600 font-bold">
         Create Form
       </h2>
-      <div className="mx-80 my-4">
+      <div className="sm:mx-4 lg:mx-80 my-4">
         <Input
           label="Form Name"
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -285,7 +285,7 @@ export default function CreateForm({ session }: any) {
         />
       </div>
       <Divider label="Inputs" />
-      <div className="mx-80 my-4">
+      <div className="sm:mx-4 lg:mx-80 my-4">
         {inputFieldList.length > 0 &&
           inputFieldList.map((input, index) => {
             return (
@@ -334,7 +334,7 @@ export default function CreateForm({ session }: any) {
         />
       </div>
       <Divider label="Insert Position" />
-      <div className="mx-80 my-4">
+      <div className="sm:mx-4 lg:mx-80 my-4">
         {insertPositionList.length > 0 &&
           insertPositionList.map((insertPos, index) => {
             return (
@@ -396,7 +396,7 @@ export default function CreateForm({ session }: any) {
           width="full"
         />
       </div>
-      <div className="flex justify-center mx-80">
+      <div className="flex justify-center sm:mx-4 lg:mx-80">
         <Button
           disabled={disableAddForm}
           color="green"
