@@ -1,10 +1,8 @@
 'use client';
-import { customStyles } from '@/app/utils/styles';
 import moment from 'moment/moment';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import Modal from 'react-modal';
 import IconButton from '../IconButton/IconButton';
 import DeleteFormModal from '../Modals/DeleteFormModal';
 
@@ -18,7 +16,7 @@ export default function FormCard({ form, handleDelete }: PropTypes) {
   const router = useRouter();
   return (
     <div className="w-full relative flex flex-col gap-2 w-1/4 p-6 sm:p-2 rounded-2xl bg-white border border-gray-200 rounded-lg shadow">
-      <DeleteFormModal 
+      <DeleteFormModal
         isOpen={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
         handleDelete={() => handleDelete(form.formId)}

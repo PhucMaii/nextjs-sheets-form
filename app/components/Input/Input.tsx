@@ -7,7 +7,7 @@ interface PropTypes<T> {
   placeholder: string;
   value: T;
   disabled?: boolean;
-  className?: string
+  className?: string;
 }
 
 export default function Input<T>({
@@ -17,20 +17,18 @@ export default function Input<T>({
   type,
   value,
   disabled,
-  className
+  className,
 }: PropTypes<T>) {
   return (
     <div className={`${className ? className : `mb-6`}`}>
-      {
-        label && (
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor={label}
-          >
-            {label}
-          </label>
-        )
-      }
+      {label && (
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor={label}
+        >
+          {label}
+        </label>
+      )}
       <input
         disabled={disabled}
         className={`${

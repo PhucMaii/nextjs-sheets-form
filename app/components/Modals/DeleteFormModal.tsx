@@ -9,7 +9,7 @@ import IconButton from '../IconButton/IconButton';
 interface PropTypes {
   isOpen: boolean;
   onClose: () => void;
-  handleDelete: () => void
+  handleDelete: () => void;
 }
 
 export default function DeleteFormModal({

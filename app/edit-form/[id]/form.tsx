@@ -31,7 +31,7 @@ export default function EditForm() {
   // ********************** TEST **********************
   useEffect(() => {
     console.log(positionList, 'TEST');
-  }, [positionList])
+  }, [positionList]);
   // ********************** TEST **********************
 
   useEffect(() => {
@@ -99,7 +99,6 @@ export default function EditForm() {
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-
     }
   };
 
@@ -107,44 +106,44 @@ export default function EditForm() {
     const newPosition = {
       ...position,
       [field]: value,
-    }
+    };
     const newPositionList = positionList.map((position) => {
-      if(position.positionId === newPosition.positionId) {
+      if (position.positionId === newPosition.positionId) {
         return newPosition;
       }
       return position;
-    })
+    });
     setPositionList(newPositionList);
-  }
+  };
 
   const updateFormName = async () => {
     try {
       const body = {
         formId: id,
-        formName
-      }
+        formName,
+      };
       const response = await fetch('/api/form', {
         method: 'PUT',
         headers: {
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
         },
-        body: JSON.stringify(body)
-      })
+        body: JSON.stringify(body),
+      });
       const res = await response.json();
       setNotification({
         on: true,
         type: 'success',
-        message: res.message
-      })
-    } catch(error) {
+        message: res.message,
+      });
+    } catch (error) {
       console.log('There was an error updating form name, ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to update form name: ' + error
-      })
+        message: 'Fail to update form name: ' + error,
+      });
     }
-  } 
+  };
 
   if (isLoading || status === 'loading') {
     return (
@@ -184,7 +183,7 @@ export default function EditForm() {
         />
       </div>
     );
-    }
+  }
 
   return (
     <div>
@@ -207,7 +206,7 @@ export default function EditForm() {
           value={formName}
           className="w-full"
         />
-        <Button 
+        <Button
           label="Save"
           color="blue"
           onClick={updateFormName}
@@ -219,11 +218,12 @@ export default function EditForm() {
         {positionList.length > 0 &&
           positionList.map((position) => {
             return (
-              <EditPositionCard 
+              <EditPositionCard
                 key={Number(position.positionId)}
                 position={position}
                 handleChangePosition={handleChangePosition}
                 sheetNames={sheetNames}
+                setNotification={setNotification}
               />
             );
           })}

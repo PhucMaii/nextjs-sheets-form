@@ -23,7 +23,7 @@ export default async function handler(
       const response = await DELETEMethod(req, res, prisma);
       return response;
     }
-    if(req.method === 'PUT') {
+    if (req.method === 'PUT') {
       const response = await PUTMethod(req, res, prisma);
       return response;
     }

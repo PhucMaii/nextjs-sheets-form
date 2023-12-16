@@ -10,7 +10,7 @@ interface PropTypes {
   label: string | ReactNode;
   onClick: (e: MouseEvent) => void;
   width: string;
-  justify?: string
+  justify?: string;
 }
 
 export default function Button({
@@ -22,10 +22,12 @@ export default function Button({
   loadingButton,
   onClick,
   width,
-  justify
+  justify,
 }: PropTypes) {
   const style = `
-        flex justify-${justify ? justify : 'center'} items-center gap-4 w-${width} bg-${color}-600 ${
+        flex justify-${
+          justify ? justify : 'center'
+        } items-center gap-4 w-${width} bg-${color}-600 ${
           !disabled && `hover:bg-${color}-700`
         }
         ${disabled && `opacity-80`} text-white font-bold py-2 px-4 rounded 

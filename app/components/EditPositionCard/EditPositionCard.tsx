@@ -1,6 +1,5 @@
 import { InputType, Notification, PositionType } from '../../utils/type';
-import React, { useEffect, useState } from 'react';
-import Input from '../Input/Input';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import InputChip from '../DraggableChip/InputChip';
 import Button from '../Button/Button';
 import EditSheetName from '../Modals/EditSheetName';
@@ -11,26 +10,24 @@ import IconButton from '../IconButton/IconButton';
 interface PropTypes {
   position: PositionType;
   sheetNames: any;
-  handleChangePosition: (position: any, field: string, value: any) => void
+  handleChangePosition: (position: any, field: string, value: any) => void;
+  setNotification: Dispatch<SetStateAction<Notification>>
 }
 
 export default function EditPositionCard({
   position,
   sheetNames,
-  handleChangePosition
+  handleChangePosition,
+  setNotification
 }: PropTypes) {
   const [isOpenAddInput, setIsOpenAddInput] = useState<boolean>(false);
-  const [isOpenEditSheetName, setIsOpenEditSheetName] = useState<boolean>(false);
+  const [isOpenEditSheetName, setIsOpenEditSheetName] =
+    useState<boolean>(false);
   const [isOpenEditRow, setIsOpenEditRow] = useState<boolean>(false);
   const [newInput, setNewInput] = useState<InputType>({
     inputId: -1,
     inputName: '',
-    inputType: ''
-  });
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: '',
-    message: ''
+    inputType: '',
   });
 
   const handleSubmit = () => {
@@ -39,29 +36,9 @@ export default function EditPositionCard({
     setNewInput({
       inputId: newInput.inputId - 1, // use negative number for temp id
       inputName: '',
-      inputType: ''
-    })
-  }
-
-  const handleSaveUpdate = async () => {
-    try {
-      const repsonse = await fetch('/api/position', {
-        method: 'PUT',
-        headers: {
-          'Content-type': 'application/json'
-        },
-        body: JSON.stringify({...position})
-      })
-      const res = await repsonse.json();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Update Position Successfully'
-      })
-    } catch(error) {
-      console.log(error);
-    }
-  }
+      inputType: '',
+    });
+  };
 
   return (
     <div
@@ -73,29 +50,39 @@ export default function EditPositionCard({
         onClose={() => setIsOpenEditSheetName(false)}
         type="text"
         value={position.sheetName}
-        onChange={(e: any) => handleChangePosition(position, 'sheetName', e.target.value)}
+        onChange={(e: any) =>
+          handleChangePosition(position, 'sheetName', e.target.value)
+        }
         values={sheetNames}
+        position={position}
+        setNotification={setNotification}
       />
-      <EditRow 
+      <EditRow
         isOpen={isOpenEditRow}
         onClose={() => setIsOpenEditRow(false)}
         value={position.row}
         onChange={(e) => handleChangePosition(position, 'row', +e.target.value)}
+        position={position}
+        setNotification={setNotification}
       />
-      <EditInputModal 
+      <EditInputModal
         handleSubmit={handleSubmit}
         isOpen={isOpenAddInput}
         inputType={newInput.inputType}
         inputName={newInput.inputName}
         onClose={() => setIsOpenAddInput(false)}
         placeholder="Enter input name"
-        setInputName={(e: any) => setNewInput({...newInput, inputName: e.target.value})}
-        setInputType={(e: any) => setNewInput({...newInput, inputType: e.target.value})}
+        setInputName={(e: any) =>
+          setNewInput({ ...newInput, inputName: e.target.value })
+        }
+        setInputType={(e: any) =>
+          setNewInput({ ...newInput, inputType: e.target.value })
+        }
         title="Add Input"
       />
       <div className="flex items-center gap-2">
         <h1 className="text-white font-bold text-lg">{position.sheetName}</h1>
-        <IconButton 
+        <IconButton
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -119,8 +106,10 @@ export default function EditPositionCard({
         />
       </div>
       <div className="flex items-center gap-2">
-        <h1 className="text-white font-bold text-lg">Start Row: {position.row}</h1>
-        <IconButton 
+        <h1 className="text-white font-bold text-lg">
+          Start Row: {position.row}
+        </h1>
+        <IconButton
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"

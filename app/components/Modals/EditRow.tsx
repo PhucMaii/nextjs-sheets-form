@@ -1,42 +1,73 @@
 import { customStyles } from '@/app/utils/styles';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import Modal from 'react-modal';
 import Input from '../Input/Input';
 import Button from '../Button/Button';
+import { Notification, PositionType } from '@/app/utils/type';
 
 interface PropTypes {
-    isOpen: boolean
-    onClose: () => void 
-    value: number,
-    onChange: (e: any) => void,
+  isOpen: boolean;
+  onClose: () => void;
+  value: number;
+  onChange: (e: any) => void;
+  position: PositionType;
+  setNotification: Dispatch<SetStateAction<Notification>>
 }
 
 export default function EditRow({
-    isOpen,
-    onClose,
-    value,
-    onChange
-} : PropTypes) {
-    return (
-        <Modal 
-        isOpen={isOpen} 
-        onRequestClose={onClose} 
-        style={customStyles}
-    >
+  isOpen,
+  onClose,
+  value,
+  onChange,
+  position,
+  setNotification
+}: PropTypes) {
+  const updateRow = async () => {
+    try {
+      const response = await fetch('/api/position', {
+        method: 'PUT',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify({
+            ...position,
+            row: value
+        }),
+      });
+      const res = await response.json();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: res.message
+      })
+    } catch (error) {
+        setNotification({
+            on: true,
+            type: 'error',
+            message: 'Fail to update row. Refresh page to see result'
+        })
+      console.log(error);
+    }
+  };
+  return (
+    <Modal isOpen={isOpen} onRequestClose={onClose} style={customStyles}>
       <h1 className="font-bold text-center text-lg mb-4">Edit Start Row</h1>
-      <Input<number> 
+      <Input<number>
         label="Row"
         onChange={onChange}
         value={value}
         type="number"
         placeholder="Enter row"
-      /> 
-      <Button 
+      />
+      <Button
         label="Save"
         color="blue"
-        onClick={onClose}
+        onClick={() => {
+          updateRow();
+          onClose();
+        }}
         width="full"
       />
     </Modal>
-    )
+  );
 }
