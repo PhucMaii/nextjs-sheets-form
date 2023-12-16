@@ -8,15 +8,15 @@ interface PositionType {
 }
 
 interface SubmitType {
-  sheet_name: string;
+  sheetName: string;
   row: number;
   inputs: {
-    create: Array<{ input_name: string; input_type: string }>;
+    create: Array<{ inputName: string; inputType: string }>;
   };
 }
 
 interface BodyType {
-  form_name: string;
+  formName: string;
   userId: string;
   positions: PositionType[];
 }
@@ -29,12 +29,12 @@ export const POSTMethod = async (
   const body: BodyType = req.body;
   const submitPositions: SubmitType[] = body.positions.map((pos) => {
     return {
-      sheet_name: pos.sheetName,
+      sheetName: pos.sheetName,
       row: pos.row,
       inputs: {
         create: pos.inputFields?.map((input: any) => ({
-          input_name: input.name,
-          input_type: input.type,
+          inputName: input.name,
+          inputType: input.type,
         })),
       },
     };
@@ -42,7 +42,7 @@ export const POSTMethod = async (
   try {
     const newForm = await prisma.form.create({
       data: {
-        form_name: body.form_name,
+        formName: body.formName,
         user: { connect: { id: parseInt(body.userId) } },
         positions: {
           create: [...submitPositions],

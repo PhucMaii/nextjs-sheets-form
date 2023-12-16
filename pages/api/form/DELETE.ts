@@ -16,12 +16,12 @@ export default async function DELETEMethod(
     }
     const deletedData = await prisma.form.delete({
       where: {
-        form_id: Number(formId),
+        formId: Number(formId),
       },
     });
     return res.status(200).json({
       data: deletedData,
-      message: `Delete ${deletedData.form_name} form successfully`,
+      message: `Delete ${deletedData.formName} form successfully`,
     });
   } catch (error) {
     return res.status(500).send('There was something wrong ' + error);

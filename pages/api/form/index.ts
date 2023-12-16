@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { POSTMethod } from './POST';
 import { GETMethod } from './GET';
 import DELETEMethod from './DELETE';
+import PUTMethod from './PUT';
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,6 +21,10 @@ export default async function handler(
     }
     if (req.method === 'DELETE') {
       const response = await DELETEMethod(req, res, prisma);
+      return response;
+    }
+    if(req.method === 'PUT') {
+      const response = await PUTMethod(req, res, prisma);
       return response;
     }
     return res.status(500).send(`${req.method} is not allowed`);

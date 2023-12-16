@@ -7,10 +7,11 @@ import Input from '../../components/Input/Input';
 import Divider from '@/app/components/Divider/Divider';
 import { Notification } from '@/app/utils/type';
 import { useSession } from 'next-auth/react';
-import { Position } from '@/app/form/[id]/type';
+import { PositionType } from '../../utils/type';
 import Button from '@/app/components/Button/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import EditPositionCard from '@/app/components/EditPositionCard/EditPositionCard';
+import Snackbar from '@/app/components/Snackbar/Snackbar';
 
 export default function EditForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -21,16 +22,17 @@ export default function EditForm() {
     message: '',
   });
   const [formName, setFormName] = useState<string>();
-  const [positionList, setPositionList] = useState<Position[]>([]);
+  const [positionList, setPositionList] = useState<PositionType[]>([]);
   const [sheetNames, setSheetNames] = useState<any>([]);
   const { id }: any = useParams();
   const { data: session, status }: any = useSession();
   const router = useRouter();
 
-  // TEST
+  // ********************** TEST **********************
   useEffect(() => {
     console.log(positionList, 'TEST');
   }, [positionList])
+  // ********************** TEST **********************
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -57,12 +59,13 @@ export default function EditForm() {
       }
       const comingData = await response.json();
       const data = comingData.data;
-      if (parseInt(session?.user?.id as string) !== data.user_id) {
+      console.log(session.user);
+      if (parseInt(session?.user?.id as string) !== data.userId) {
         setIsAuthorized(false);
         setIsLoading(false);
         return;
       }
-      setFormName(data.form_name);
+      setFormName(data.formName);
       setPositionList(data.positions);
       setIsLoading(false);
     } catch (error: any) {
@@ -106,13 +109,42 @@ export default function EditForm() {
       [field]: value,
     }
     const newPositionList = positionList.map((position) => {
-      if(position.position_id === newPosition.position_id) {
+      if(position.positionId === newPosition.positionId) {
         return newPosition;
       }
       return position;
     })
     setPositionList(newPositionList);
   }
+
+  const updateFormName = async () => {
+    try {
+      const body = {
+        formId: id,
+        formName
+      }
+      const response = await fetch('/api/form', {
+        method: 'PUT',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      })
+      const res = await response.json();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: res.message
+      })
+    } catch(error) {
+      console.log('There was an error updating form name, ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update form name: ' + error
+      })
+    }
+  } 
 
   if (isLoading || status === 'loading') {
     return (
@@ -157,6 +189,12 @@ export default function EditForm() {
   return (
     <div>
       <Navbar isLogin={true} />
+      <Snackbar
+        open={notification.on}
+        onClose={() => setNotification({ ...notification, on: false })}
+        type={notification.type}
+        message={notification.message}
+      />
       <h2 className="mb-4 text-4xl text-center text-blue-600 font-bold">
         Edit Form
       </h2>
@@ -172,7 +210,7 @@ export default function EditForm() {
         <Button 
           label="Save"
           color="blue"
-          onClick={() => {}}
+          onClick={updateFormName}
           width="full"
         />
       </div>
@@ -182,7 +220,7 @@ export default function EditForm() {
           positionList.map((position) => {
             return (
               <EditPositionCard 
-                key={Number(position.position_id)}
+                key={Number(position.positionId)}
                 position={position}
                 handleChangePosition={handleChangePosition}
                 sheetNames={sheetNames}

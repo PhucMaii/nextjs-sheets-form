@@ -154,7 +154,7 @@ export default function CreateForm({ session }: any) {
     setIsLoading(true);
     try {
       const body = {
-        form_name: formName,
+        formName,
         userId: session.user.id,
         positions: [...insertPositionList],
       };

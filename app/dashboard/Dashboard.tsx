@@ -143,17 +143,20 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
             <h1 className="text-4xl text-blue-500 text-center font-bold mb-8">
               YOUR FORMS
             </h1>
-            <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4 justify-center flex-wrap mx-auto">
               {formList.length > 0 ? (
-                formList.map((form) => {
-                  return (
-                    <FormCard
-                      key={form.form_id}
-                      form={form}
-                      handleDelete={handleDeleteForm}
-                    />
-                  );
-                })
+                <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4 justify-center flex-wrap mx-auto">
+                  {
+                  formList.map((form) => {
+                    return (
+                      <FormCard
+                        key={form.form_id}
+                        form={form}
+                        handleDelete={handleDeleteForm}
+                      />
+                    );
+                  })
+                  }
+                </div>
               ) : (
                 <div className="flex flex-col gap-4 justify-center items-center text-gray-600">
                   <svg
@@ -176,7 +179,6 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
                 </div>
               )}
             </div>
-          </div>
         </>
       ) : (
         <>

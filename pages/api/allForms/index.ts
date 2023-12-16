@@ -20,7 +20,7 @@ export default async function handler(
     }
     const data = await prisma.form.findMany({
       where: {
-        user_id: Number(userId),
+        userId: Number(userId),
       },
     });
     return res.status(200).json({

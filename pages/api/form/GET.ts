@@ -17,7 +17,7 @@ export const GETMethod = async (
     }
     const updateLastOpened = await prisma.form.update({
       where: {
-        form_id: Number(id),
+        formId: Number(id),
       },
       data: {
         lastOpened: new Date(),
@@ -25,7 +25,7 @@ export const GETMethod = async (
     });
     const data = await prisma.form.findUnique({
       where: {
-        form_id: Number(id),
+        formId: Number(id),
       },
       include: {
         positions: {

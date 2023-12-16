@@ -20,30 +20,30 @@ model User {
 }
 
 model Form {
-  form_id Int @id @default(autoincrement())
-  form_name String @db.VarChar(255)
+  formId Int @id @default(autoincrement()) @map("form_id")
+  formName String @db.VarChar(255) @map("form_name")
   lastOpened DateTime @updatedAt @db.Timestamp() @map("last_opened")
   positions Position[]
 
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 }
 
 model Position {
-  position_id Int @id @default(autoincrement())
-  sheet_name String @db.VarChar(255)
+  positionId Int @id @default(autoincrement()) @map("position_id")
+  sheetName String @db.VarChar(255) @map("sheet_name")
   row Int
   inputs Input[]
 
-  form Form @relation(fields: [form_id], references: [form_id], onDelete: Cascade)
-  form_id Int
+  form Form @relation(fields: [formId], references: [formId], onDelete: Cascade)
+  formId Int
 }
 
 model Input {
-  input_id Int @id @default(autoincrement())
-  input_name String @db.VarChar(255)
-  input_type String @db.VarChar(10)
+  inputId Int @id @default(autoincrement()) @map("input_id")
+  inputName String @db.VarChar(255) @map("input_name")
+  inputType String @db.VarChar(10) @map("input_type")
 
-  position Position @relation(fields: [position_id], references: [position_id], onDelete: Cascade)
-  position_id Int
+  position Position @relation(fields: [positionId], references: [positionId], onDelete: Cascade)
+  positionId Int
 }

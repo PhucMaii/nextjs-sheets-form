@@ -7,7 +7,7 @@ import Button from '@/app/components/Button/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import Navbar from '@/app/components/Navbar/Navbar';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
-import { InputType, InputValues, Position } from './type';
+import { InputType, InputValues, PositionType } from '../../utils/type';
 import Input from '@/app/components/Input/Input';
 
 export default function Form() {
@@ -21,7 +21,7 @@ export default function Form() {
     type: '',
     message: '',
   });
-  const [positionList, setPositionList] = useState<Position[]>([]);
+  const [positionList, setPositionList] = useState<PositionType[]>([]);
   const { id }: any = useParams();
   const { data: session, status }: any = useSession();
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function Form() {
       }
       const comingData = await response.json();
       const data = comingData.data;
-      if (parseInt(session?.user?.id as string) !== data.user_id) {
+      if (parseInt(session?.user?.id as string) !== data.userId) {
         setIsAuthorized(false);
         setIsLoading(false);
         return;
@@ -75,8 +75,8 @@ export default function Form() {
     const uniqueInputIds = new Set<string>();
     newInputList = positionList.map((position: any) => {
       return position.inputs.filter((input: InputType) => {
-        if (!uniqueInputIds.has(input.input_name)) {
-          uniqueInputIds.add(input.input_name);
+        if (!uniqueInputIds.has(input.inputName)) {
+          uniqueInputIds.add(input.inputName);
           return true;
         }
         return false;
@@ -90,10 +90,10 @@ export default function Form() {
   const createInputValues = (inputs: InputType[]) => {
     const newInputValues: InputValues = {};
     for (let input of inputs) {
-      if (input.input_type === 'text') {
-        newInputValues[input.input_name] = '';
+      if (input.inputType === 'text') {
+        newInputValues[input.inputName] = '';
       } else {
-        newInputValues[input.input_name] = 0;
+        newInputValues[input.inputName] = 0;
       }
     }
     setInputValues(newInputValues);
@@ -105,11 +105,10 @@ export default function Form() {
       const submitForm = positionList.map((pos) => {
         const validInputs: InputValues = {};
         for (let input of pos.inputs) {
-          validInputs[input.input_name] = inputValues[input.input_name];
+          validInputs[input.inputName] = inputValues[input.inputName];
         }
-        // const validInputs = pos.inputs.map((input) => ({[input.input_name]: inputValues[input.input_name]}));
         return {
-          sheetName: pos.sheet_name,
+          sheetName: pos.sheetName,
           row: pos.row,
           ...validInputs,
         };
@@ -183,7 +182,7 @@ export default function Form() {
       <Navbar isLogin={true} />
       <div className="max-w-2xl mx-auto py-16">
         <h4 className="text-center font-bold text-2xl text-blue-600 px-8">
-          {formData.form_name}
+          {formData.formName}
         </h4>
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           {inputList.length > 0 &&
@@ -191,25 +190,25 @@ export default function Form() {
               return (
                 <Input<string | number>
                   key={index}
-                  label={input.input_name}
-                  type={input.input_type}
-                  value={inputValues[input.input_name]}
+                  label={input.inputName}
+                  type={input.inputType}
+                  value={inputValues[input.inputName]}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     setInputValues((prevInputValues) => {
                       if (e.target.type === 'text') {
                         return {
                           ...prevInputValues,
-                          [input.input_name]: e.target.value,
+                          [input.inputName]: e.target.value,
                         };
                       } else {
                         return {
                           ...prevInputValues,
-                          [input.input_name]: +e.target.value,
+                          [input.inputName]: +e.target.value,
                         };
                       }
                     });
                   }}
-                  placeholder={`Enter ${input.input_name} here...`}
+                  placeholder={`Enter ${input.inputName} here...`}
                 />
               );
             })}
