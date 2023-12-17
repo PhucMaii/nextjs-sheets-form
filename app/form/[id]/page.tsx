@@ -82,7 +82,6 @@ export default function Form() {
         return false;
       });
     });
-    console.log(uniqueInputIds);
     createInputValues(newInputList.flat());
     setInputList(newInputList.flat());
   };
@@ -140,6 +139,7 @@ export default function Form() {
     );
   }
 
+  // If this form is not created by that user
   if (!isAuthorized) {
     return (
       <div className="bg-red-100 p-20 w-full h-full flex flex-col justify-center items-center gap-8">

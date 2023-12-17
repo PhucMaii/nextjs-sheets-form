@@ -6,27 +6,27 @@ import Select from '../Select/Select';
 import { FetchForm, Notification, PositionType } from '@/app/utils/type';
 
 interface PropTypes {
-  isOpen: boolean;
+  fetchForm: FetchForm;
+  onChange: (e: any) => void;
   onClose: () => void;
+  isOpen: boolean;
+  position: PositionType;
+  setNotification: Dispatch<SetStateAction<Notification>>;
   type: string;
   value: string;
   values: any;
-  onChange: (e: any) => void;
-  position: PositionType;
-  setNotification: Dispatch<SetStateAction<Notification>>;
-  fetchForm: FetchForm;
 }
 Modal.setAppElement('#root');
 export default function EditSheetName({
-  isOpen,
-  onClose,
+  fetchForm,
   onChange,
+  onClose,
+  isOpen,
+  position,
+  setNotification,
   type,
   value,
   values,
-  position,
-  setNotification,
-  fetchForm,
 }: PropTypes) {
   const updateSheetName = async () => {
     try {
@@ -41,7 +41,7 @@ export default function EditSheetName({
         }),
       });
       const res = await response.json();
-      await fetchForm();
+      await fetchForm(); // get the latest updated form with out refresh page
       setNotification({
         on: true,
         type: 'success',

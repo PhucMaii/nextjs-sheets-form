@@ -7,19 +7,19 @@ interface Checkbox {
 }
 
 interface PropTypes {
-  disabled: boolean;
   checkboxList: Checkbox[];
+  disabled: boolean;
+  handleToggleAll: (toggleAll: boolean) => void;
   handleToggleCheckbox: (index: number) => void;
   toggleAll: boolean;
-  handleToggleAll: (toggleAll: boolean) => void;
 }
 
 export default function NestedCheckbox({
-  disabled,
   checkboxList,
+  disabled,
+  handleToggleAll,
   handleToggleCheckbox,
   toggleAll,
-  handleToggleAll,
 }: PropTypes) {
   return (
     <div>

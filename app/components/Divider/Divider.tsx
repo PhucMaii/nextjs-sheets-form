@@ -3,6 +3,7 @@ import React from 'react';
 interface PropTypes {
   label?: string;
 }
+
 export default function Divider({ label }: PropTypes) {
   return (
     <div className="flex mt-4 items-center">

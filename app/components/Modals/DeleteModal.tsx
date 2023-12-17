@@ -1,8 +1,4 @@
 import { customStyles } from '@/app/utils/styles';
-import moment from 'moment/moment';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import Modal from 'react-modal';
 import IconButton from '../IconButton/IconButton';
 

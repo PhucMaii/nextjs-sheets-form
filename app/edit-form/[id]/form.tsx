@@ -14,6 +14,7 @@ import EditPositionCard from '@/app/components/EditPositionCard/EditPositionCard
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 
 export default function EditForm() {
+  const [formName, setFormName] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [notification, setNotification] = useState<Notification>({
@@ -21,7 +22,6 @@ export default function EditForm() {
     type: '',
     message: '',
   });
-  const [formName, setFormName] = useState<string>();
   const [positionList, setPositionList] = useState<PositionType[]>([]);
   const [sheetNames, setSheetNames] = useState<any>([]);
   const { id }: any = useParams();
@@ -95,6 +95,7 @@ export default function EditForm() {
     }
   };
 
+  // handling edit position then affect it in ui
   const handleChangePosition = (position: any, field: string, value: any) => {
     const newPosition = {
       ...position,
@@ -147,6 +148,7 @@ export default function EditForm() {
     );
   }
 
+  // If this form is not created by that user
   if (!isAuthorized) {
     return (
       <div className="bg-red-100 p-20 w-full h-full flex flex-col justify-center items-center gap-8">

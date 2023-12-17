@@ -1,23 +1,23 @@
 import React, { ChangeEvent } from 'react';
 
 interface PropTypes<T> {
+  className?: string;
+  disabled?: boolean;
   label?: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  type: string;
   placeholder: string;
+  type: string;
   value: T;
-  disabled?: boolean;
-  className?: string;
 }
 
 export default function Input<T>({
+  className,
+  disabled,
   label,
   onChange,
   placeholder,
   type,
   value,
-  disabled,
-  className,
 }: PropTypes<T>) {
   return (
     <div className={`${className ? className : `mb-6`}`}>

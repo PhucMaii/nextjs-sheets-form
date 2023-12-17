@@ -7,26 +7,27 @@ import Button from '../Button/Button';
 import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
-  isOpen: boolean;
-  onClose: () => void;
+  handleSubmit: () => void;
   inputName: string;
   inputType: string;
+  isOpen: boolean;
+  onClose: () => void;
   placeholder?: string;
   setInputName: (e: any) => void;
   setInputType: (e: any) => void;
-  handleSubmit: () => void;
   title: string;
 }
 Modal.setAppElement('#root');
+
 export default function EditInputModal({
-  isOpen,
-  onClose,
+  handleSubmit,
   inputName,
   inputType,
+  isOpen,
+  onClose,
   placeholder,
   setInputName,
   setInputType,
-  handleSubmit,
   title,
 }: PropTypes) {
   const [notification, setNotification] = useState<Notification>({

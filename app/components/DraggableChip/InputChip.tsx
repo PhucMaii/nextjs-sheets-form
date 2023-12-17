@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import EditInputModal from '../Modals/EditInputModal';
-import { FetchForm, InputType, Notification } from '../../utils/type';
+import { FetchForm, InputType, Notification, PositionType } from '../../utils/type';
 import IconButton from '../IconButton/IconButton';
 import DeleteModal from '../Modals/DeleteModal';
 
@@ -8,9 +8,9 @@ interface PropTypes {
   className?: string;
   id: string;
   input: InputType;
-  handleChangePosition: (position: any, field: string, value: any) => void;
-  position: any;
   fetchForm: FetchForm;
+  handleChangePosition: (position: PositionType, field: string, value: any) => void;
+  position: PositionType;
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
@@ -18,9 +18,9 @@ export default function InputChip({
   className,
   id,
   input,
+  fetchForm,
   handleChangePosition,
   position,
-  fetchForm,
   setNotification,
 }: PropTypes) {
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);

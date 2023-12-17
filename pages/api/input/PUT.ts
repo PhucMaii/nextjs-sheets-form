@@ -23,6 +23,8 @@ export default async function PUTMethod(
         inputType: body.inputType,
       },
     });
+
+    // update inputs which have same name to be same as type
     await prisma.input.updateMany({
       where: {
         inputName: updatedInput.inputName,

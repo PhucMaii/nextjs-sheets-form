@@ -23,6 +23,7 @@ export interface PositionType {
   inputs: InputType[];
 }
 
+// async function type
 export interface FetchForm {
   (fetchForm: void): Promise<void>;
 }

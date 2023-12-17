@@ -46,6 +46,7 @@ export default function CreateForm({ session }: any) {
     fetchSheetsName();
   }, []);
 
+  // Logic handling is disable next field of form name or not
   useEffect(() => {
     if (formName.length > 0) {
       setDisableInput(false);
@@ -56,6 +57,7 @@ export default function CreateForm({ session }: any) {
     }
   }, [formName]);
 
+  // Logic handling is disable next field of input or not
   useEffect(() => {
     if (inputFieldList.length > 0) {
       setDisableInsertPosition(false);
@@ -65,6 +67,7 @@ export default function CreateForm({ session }: any) {
     }
   }, [inputFieldList]);
 
+  // Logic handling is disable add form button or not
   useEffect(() => {
     if (insertPositionList.length > 0) {
       setDisableAddForm(false);
@@ -73,6 +76,7 @@ export default function CreateForm({ session }: any) {
     }
   }, [insertPositionList]);
 
+  // Logic for select all function
   useEffect(() => {
     if (selectAll) {
       setInputFieldList((prevList) => {

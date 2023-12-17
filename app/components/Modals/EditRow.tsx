@@ -6,23 +6,23 @@ import Button from '../Button/Button';
 import { FetchForm, Notification, PositionType } from '@/app/utils/type';
 
 interface PropTypes {
+  fetchForm: FetchForm;
   isOpen: boolean;
-  onClose: () => void;
-  value: number;
   onChange: (e: any) => void;
+  onClose: () => void;
   position: PositionType;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  fetchForm: FetchForm;
+  value: number;
 }
 
 export default function EditRow({
+  fetchForm,
   isOpen,
-  onClose,
-  value,
   onChange,
+  onClose,
   position,
   setNotification,
-  fetchForm,
+  value,
 }: PropTypes) {
   const updateRow = async () => {
     try {

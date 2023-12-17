@@ -14,23 +14,22 @@ import EditRow from '../Modals/EditRow';
 import IconButton from '../IconButton/IconButton';
 
 interface PropTypes {
-  position: PositionType;
-  sheetNames: any;
-  handleChangePosition: (position: any, field: string, value: any) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>;
   fetchForm: FetchForm;
+  handleChangePosition: (position: any, field: string, value: any) => void;
+  position: PositionType;
+  setNotification: Dispatch<SetStateAction<Notification>>;
+  sheetNames: any;
 }
 
 export default function EditPositionCard({
-  position,
-  sheetNames,
-  handleChangePosition,
-  setNotification,
   fetchForm,
+  handleChangePosition,
+  position,
+  setNotification,
+  sheetNames,
 }: PropTypes) {
   const [isOpenAddInput, setIsOpenAddInput] = useState<boolean>(false);
-  const [isOpenEditSheetName, setIsOpenEditSheetName] =
-    useState<boolean>(false);
+  const [isOpenEditSheetName, setIsOpenEditSheetName] = useState<boolean>(false);
   const [isOpenEditRow, setIsOpenEditRow] = useState<boolean>(false);
   const [newInput, setNewInput] = useState<InputType>({
     positionId: position.positionId,
@@ -39,7 +38,7 @@ export default function EditPositionCard({
     inputType: '',
   });
 
-  const handleSubmit = async () => {
+  const handleAddInput = async () => {
     try {
       const response = await fetch('/api/input', {
         method: 'POST',
@@ -48,13 +47,13 @@ export default function EditPositionCard({
         },
         body: JSON.stringify(newInput),
       });
-      const res: any = await response.json();
+      const res = await response.json();
       setNotification({
         on: true,
         type: 'success',
         message: res.message,
       });
-      await fetchForm();
+      await fetchForm(); // get the latest updated form without refresh the page
       setNewInput({
         positionId: position.positionId,
         inputId: newInput.inputId - 1, // use negative number for temp id
@@ -99,7 +98,7 @@ export default function EditPositionCard({
         fetchForm={fetchForm}
       />
       <EditInputModal
-        handleSubmit={handleSubmit}
+        handleSubmit={handleAddInput}
         isOpen={isOpenAddInput}
         inputType={newInput.inputType}
         inputName={newInput.inputName}

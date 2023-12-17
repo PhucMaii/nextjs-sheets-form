@@ -10,7 +10,7 @@ interface PropTypes {
   label: string | ReactNode;
   onClick: (e: MouseEvent) => void;
   width: string;
-  justify?: string;
+  justify?: string; // justify the label
 }
 
 export default function Button({

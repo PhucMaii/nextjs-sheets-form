@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 import React, { MouseEvent, useEffect, useState } from 'react';
 import Navbar from '../components/Navbar/Navbar';

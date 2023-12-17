@@ -1,5 +1,6 @@
 import React from 'react';
 import { Transition } from '@headlessui/react';
+import { Fadein, PropTypes } from './type';
 
 const FadeIn = (para: Fadein) => (
   <Transition.Child

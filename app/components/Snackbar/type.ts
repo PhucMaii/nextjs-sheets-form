@@ -1,9 +1,9 @@
-interface Fadein {
+export interface Fadein {
   delay: string;
   children: any;
 }
 
-interface PropTypes {
+export interface PropTypes {
   open: boolean;
   onClose: () => void;
   message: string;
