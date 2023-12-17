@@ -3,7 +3,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import Modal from 'react-modal';
 import Button from '../Button/Button';
 import Select from '../Select/Select';
-import { Notification, PositionType } from '@/app/utils/type';
+import { FetchForm, Notification, PositionType } from '@/app/utils/type';
 
 interface PropTypes {
   isOpen: boolean;
@@ -13,7 +13,8 @@ interface PropTypes {
   values: any;
   onChange: (e: any) => void;
   position: PositionType;
-  setNotification: Dispatch<SetStateAction<Notification>>
+  setNotification: Dispatch<SetStateAction<Notification>>;
+  fetchForm: FetchForm;
 }
 Modal.setAppElement('#root');
 export default function EditSheetName({
@@ -24,7 +25,8 @@ export default function EditSheetName({
   value,
   values,
   position,
-  setNotification
+  setNotification,
+  fetchForm,
 }: PropTypes) {
   const updateSheetName = async () => {
     try {
@@ -35,21 +37,22 @@ export default function EditSheetName({
         },
         body: JSON.stringify({
           ...position,
-          sheetName: value
+          sheetName: value,
         }),
       });
       const res = await response.json();
+      await fetchForm();
       setNotification({
         on: true,
         type: 'success',
-        message: res.message
-      })
+        message: res.message,
+      });
     } catch (error) {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to update sheet name. Refresh page to see result'
-      })
+        message: 'Fail to update sheet name. Refresh page to see result',
+      });
       console.log(error);
     }
   };

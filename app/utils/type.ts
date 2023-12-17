@@ -5,6 +5,7 @@ export interface Notification {
 }
 
 export interface InputType {
+  positionId?: number;
   inputId: number;
   inputName: string;
   inputType: string;
@@ -20,4 +21,8 @@ export interface PositionType {
   sheetName: string;
   row: number;
   inputs: InputType[];
+}
+
+export interface FetchForm {
+  (fetchForm: void): Promise<void>;
 }

@@ -11,8 +11,8 @@ export default async function PUTMethod(
   try {
     const body: BodyType = req.body;
     const isValidToUpdate = await checkPositionUpdate(prisma, body);
-    if(!isValidToUpdate) {
-        return res.status(400).send('The updated position existed');
+    if (!isValidToUpdate) {
+      return res.status(400).send('The updated position existed');
     }
     const updatePosition = await prisma.position.update({
       where: {
@@ -20,8 +20,8 @@ export default async function PUTMethod(
       },
       data: {
         sheetName: body.sheetName,
-        row: body.row
-      }
+        row: body.row,
+      },
     });
 
     return res.status(200).json({

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import EditInputModal from '../Modals/EditInputModal';
-import { InputType } from '../../utils/type';
+import { FetchForm, InputType, Notification } from '../../utils/type';
 import IconButton from '../IconButton/IconButton';
+import DeleteModal from '../Modals/DeleteModal';
 
 interface PropTypes {
   className?: string;
@@ -9,6 +10,8 @@ interface PropTypes {
   input: InputType;
   handleChangePosition: (position: any, field: string, value: any) => void;
   position: any;
+  fetchForm: FetchForm;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 export default function InputChip({
@@ -17,25 +20,52 @@ export default function InputChip({
   input,
   handleChangePosition,
   position,
+  fetchForm,
+  setNotification,
 }: PropTypes) {
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [newInput, setNewInput] = useState<InputType>(input);
 
-  const handleDelete = () => {
-    const newInputs = position.inputs.filter((input: InputType) => {
-      return input.inputId !== newInput.inputId;
-    });
-    handleChangePosition(position, 'inputs', newInputs);
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`/api/input?inputId=${input.inputId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-type': 'application/json',
+        },
+      });
+      const res = await response.json();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: res.message,
+      });
+      await fetchForm();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleSubmit = () => {
-    const newInputs = position.inputs.map((input: InputType) => {
-      if (input.inputId === newInput.inputId) {
-        return newInput;
-      }
-      return input;
-    });
-    handleChangePosition(position, 'inputs', newInputs);
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('/api/input', {
+        method: 'PUT',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify({ ...newInput }),
+      });
+      const res = await response.json();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: res.message,
+      });
+      await fetchForm();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -43,6 +73,11 @@ export default function InputChip({
       id={id}
       className={`flex items-center justify-between h-auto bg-blue-50 text-black p-2 rounded-lg ${className}`}
     >
+      <DeleteModal
+        isOpen={isOpenDeleteModal}
+        onClose={() => setIsOpenDeleteModal(false)}
+        handleDelete={handleDelete}
+      />
       <EditInputModal
         isOpen={isOpenEditModal}
         onClose={() => setIsOpenEditModal(false)}
@@ -132,7 +167,7 @@ export default function InputChip({
           }
           color="red"
           backgroundColor="red"
-          onClick={handleDelete}
+          onClick={() => setIsOpenDeleteModal(true)}
         />
       </div>
     </div>

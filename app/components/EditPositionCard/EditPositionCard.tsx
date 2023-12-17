@@ -1,4 +1,10 @@
-import { InputType, Notification, PositionType } from '../../utils/type';
+'use client';
+import {
+  FetchForm,
+  InputType,
+  Notification,
+  PositionType,
+} from '../../utils/type';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import InputChip from '../DraggableChip/InputChip';
 import Button from '../Button/Button';
@@ -11,33 +17,58 @@ interface PropTypes {
   position: PositionType;
   sheetNames: any;
   handleChangePosition: (position: any, field: string, value: any) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>
+  setNotification: Dispatch<SetStateAction<Notification>>;
+  fetchForm: FetchForm;
 }
 
 export default function EditPositionCard({
   position,
   sheetNames,
   handleChangePosition,
-  setNotification
+  setNotification,
+  fetchForm,
 }: PropTypes) {
   const [isOpenAddInput, setIsOpenAddInput] = useState<boolean>(false);
   const [isOpenEditSheetName, setIsOpenEditSheetName] =
     useState<boolean>(false);
   const [isOpenEditRow, setIsOpenEditRow] = useState<boolean>(false);
   const [newInput, setNewInput] = useState<InputType>({
+    positionId: position.positionId,
     inputId: -1,
     inputName: '',
     inputType: '',
   });
 
-  const handleSubmit = () => {
-    const newInputList = [...position.inputs, newInput];
-    handleChangePosition(position, 'inputs', newInputList);
-    setNewInput({
-      inputId: newInput.inputId - 1, // use negative number for temp id
-      inputName: '',
-      inputType: '',
-    });
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('/api/input', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify(newInput),
+      });
+      const res: any = await response.json();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: res.message,
+      });
+      await fetchForm();
+      setNewInput({
+        positionId: position.positionId,
+        inputId: newInput.inputId - 1, // use negative number for temp id
+        inputName: '',
+        inputType: '',
+      });
+    } catch (error) {
+      console.log(error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to add input',
+      });
+    }
   };
 
   return (
@@ -56,6 +87,7 @@ export default function EditPositionCard({
         values={sheetNames}
         position={position}
         setNotification={setNotification}
+        fetchForm={fetchForm}
       />
       <EditRow
         isOpen={isOpenEditRow}
@@ -64,6 +96,7 @@ export default function EditPositionCard({
         onChange={(e) => handleChangePosition(position, 'row', +e.target.value)}
         position={position}
         setNotification={setNotification}
+        fetchForm={fetchForm}
       />
       <EditInputModal
         handleSubmit={handleSubmit}
@@ -145,6 +178,8 @@ export default function EditPositionCard({
                 id={input.inputId ? input.inputId.toString() : index.toString()}
                 input={input}
                 handleChangePosition={handleChangePosition}
+                fetchForm={fetchForm}
+                setNotification={setNotification}
               />
             );
           })}

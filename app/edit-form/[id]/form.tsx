@@ -28,12 +28,6 @@ export default function EditForm() {
   const { data: session, status }: any = useSession();
   const router = useRouter();
 
-  // ********************** TEST **********************
-  useEffect(() => {
-    console.log(positionList, 'TEST');
-  }, [positionList]);
-  // ********************** TEST **********************
-
   useEffect(() => {
     if (status === 'authenticated') {
       fetchForm();
@@ -59,7 +53,6 @@ export default function EditForm() {
       }
       const comingData = await response.json();
       const data = comingData.data;
-      console.log(session.user);
       if (parseInt(session?.user?.id as string) !== data.userId) {
         setIsAuthorized(false);
         setIsLoading(false);
@@ -224,6 +217,7 @@ export default function EditForm() {
                 handleChangePosition={handleChangePosition}
                 sheetNames={sheetNames}
                 setNotification={setNotification}
+                fetchForm={fetchForm}
               />
             );
           })}

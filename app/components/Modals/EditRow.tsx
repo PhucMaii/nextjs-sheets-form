@@ -3,7 +3,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import Modal from 'react-modal';
 import Input from '../Input/Input';
 import Button from '../Button/Button';
-import { Notification, PositionType } from '@/app/utils/type';
+import { FetchForm, Notification, PositionType } from '@/app/utils/type';
 
 interface PropTypes {
   isOpen: boolean;
@@ -11,7 +11,8 @@ interface PropTypes {
   value: number;
   onChange: (e: any) => void;
   position: PositionType;
-  setNotification: Dispatch<SetStateAction<Notification>>
+  setNotification: Dispatch<SetStateAction<Notification>>;
+  fetchForm: FetchForm;
 }
 
 export default function EditRow({
@@ -20,7 +21,8 @@ export default function EditRow({
   value,
   onChange,
   position,
-  setNotification
+  setNotification,
+  fetchForm,
 }: PropTypes) {
   const updateRow = async () => {
     try {
@@ -30,22 +32,23 @@ export default function EditRow({
           'Content-type': 'application/json',
         },
         body: JSON.stringify({
-            ...position,
-            row: value
+          ...position,
+          row: value,
         }),
       });
       const res = await response.json();
+      await fetchForm();
       setNotification({
         on: true,
         type: 'success',
-        message: res.message
-      })
+        message: res.message,
+      });
     } catch (error) {
-        setNotification({
-            on: true,
-            type: 'error',
-            message: 'Fail to update row. Refresh page to see result'
-        })
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update row. Refresh page to see result',
+      });
       console.log(error);
     }
   };

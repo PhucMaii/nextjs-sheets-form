@@ -12,7 +12,7 @@ interface PropTypes {
   handleDelete: () => void;
 }
 
-export default function DeleteFormModal({
+export default function DeleteModal({
   isOpen,
   onClose,
   handleDelete,
@@ -61,7 +61,7 @@ export default function DeleteFormModal({
               />
             </svg>
             <h3 className="mb-5 text-lg font-normal text-gray-500">
-              Are you sure you want to delete this product?
+              Are you sure you want to delete?
             </h3>
             <button
               onClick={() => {
