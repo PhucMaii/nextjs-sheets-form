@@ -32,7 +32,7 @@ export const POSTMethod = async (
       sheetName: pos.sheetName,
       row: pos.row,
       inputs: {
-        create: pos.inputFields?.map((input: any) => ({
+        create: pos.inputFields?.map((input) => ({
           inputName: input.name,
           inputType: input.type,
         })),

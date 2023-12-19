@@ -1,7 +1,7 @@
 'use client';
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
 import { InputField, InsertPosition } from './type';
-import { Notification } from '../utils/type';
+import { Notification, SessionWithId } from '../utils/type';
 import Button from '../components/Button/Button';
 import Chip from '../components/Chip/Chip';
 import Divider from '../components/Divider/Divider';
@@ -9,10 +9,14 @@ import Input from '../components/Input/Input';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import Navbar from '../components/Navbar/Navbar';
 import NestedCheckbox from '../components/NestedCheckbox/NestedCheckbox';
-import Select from '../components/Select/Select';
+import Select, { ValueType } from '../components/Select/Select';
 import Snackbar from '../components/Snackbar/Snackbar';
 
-export default function CreateForm({ session }: any) {
+export default function CreateForm({
+  session,
+}: {
+  session: SessionWithId | null;
+}) {
   const [disableInput, setDisableInput] = useState<boolean>(true);
   const [disableInsertPosition, setDisableInsertPosition] =
     useState<boolean>(true);
@@ -40,7 +44,7 @@ export default function CreateForm({ session }: any) {
     message: '',
   });
   const [selectAll, setSelectAll] = useState<boolean>(true);
-  const [sheetNames, setSheetNames] = useState<any[]>([]);
+  const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
 
   useEffect(() => {
     fetchSheetsName();
@@ -108,7 +112,7 @@ export default function CreateForm({ session }: any) {
         },
       });
       let data = await response.json();
-      data = data.map((sheet: any) => {
+      data = data.map((sheet: string) => {
         return {
           value: sheet,
           label: sheet,
@@ -159,7 +163,7 @@ export default function CreateForm({ session }: any) {
     try {
       const body = {
         formName,
-        userId: session.user.id,
+        userId: session?.user.id,
         positions: [...insertPositionList],
       };
       const response = await fetch('/api/form', {

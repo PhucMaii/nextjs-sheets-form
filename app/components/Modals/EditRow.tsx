@@ -1,5 +1,5 @@
 import { customStyles } from '@/app/utils/styles';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import Modal from 'react-modal';
 import Input from '../Input/Input';
 import Button from '../Button/Button';
@@ -8,7 +8,7 @@ import { FetchForm, Notification, PositionType } from '@/app/utils/type';
 interface PropTypes {
   fetchForm: FetchForm;
   isOpen: boolean;
-  onChange: (e: any) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
   position: PositionType;
   setNotification: Dispatch<SetStateAction<Notification>>;

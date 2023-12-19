@@ -2,24 +2,18 @@ import React, { ReactNode } from 'react';
 
 interface PropTypes {
   backgroundColor: string;
-  color: string;
   icon: ReactNode;
   onClick: () => void;
   className?: string;
   isBackgroundBold?: boolean;
-  width?: string;
-  height?: string;
 }
 
 export default function IconButton({
   backgroundColor,
-  color,
   icon,
   onClick,
   className,
   isBackgroundBold,
-  width,
-  height,
 }: PropTypes) {
   return (
     <button

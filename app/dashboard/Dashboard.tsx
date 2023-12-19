@@ -1,25 +1,17 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
-import React, { MouseEvent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar/Navbar';
 import Button from '../components/Button/Button';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import FormCard from '../components/FormCard/FormCard';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
-import { Notification } from '../utils/type';
+import { FormType, Notification } from '../utils/type';
 import Snackbar from '../components/Snackbar/Snackbar';
 
 interface PropTypes {
   userId: string;
   isLogin: boolean;
-}
-
-interface FormType {
-  form_id: number;
-  form_name: string;
-  user_id: number;
-  lastOpened: Date;
 }
 
 export default function Dashboard({ userId, isLogin }: PropTypes) {
@@ -90,7 +82,7 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
       });
       const res = await response.json();
       const newFormList = formList.filter(
-        (form) => form.form_id !== res.data.form_id,
+        (form) => form.formId !== res.data.formId,
       );
       setFormList(newFormList);
       setNotification({
@@ -133,7 +125,7 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
           <Button
             label={isLogin ? 'Create Forms' : 'Get Started'}
             color="blue"
-            onClick={(e: MouseEvent) => router.push('/create-form')}
+            onClick={() => router.push('/create-form')}
             width="full"
           />
         </div>
@@ -149,7 +141,7 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
                 {formList.map((form) => {
                   return (
                     <FormCard
-                      key={form.form_id}
+                      key={form.formId}
                       form={form}
                       handleDelete={handleDeleteForm}
                     />

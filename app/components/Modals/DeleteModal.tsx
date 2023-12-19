@@ -35,7 +35,6 @@ export default function DeleteModal({
                 />
               </svg>
             }
-            color="gray"
             backgroundColor="gray"
             onClick={onClose}
             className="absolute top-1 right-2.5 text-center"

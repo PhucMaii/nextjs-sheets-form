@@ -37,7 +37,7 @@ export default function Input<T>({
         id={label}
         type={type}
         placeholder={placeholder}
-        value={value as any}
+        value={value as string | number}
         onChange={onChange}
       />
     </div>

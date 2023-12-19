@@ -1,7 +1,6 @@
-import { ObjectEnumValue } from '@prisma/client/runtime/library';
-import React from 'react';
+import React, { ChangeEventHandler } from 'react';
 
-interface ValueType {
+export interface ValueType {
   label: string;
   value: string;
 }
@@ -10,7 +9,7 @@ interface PropTypes {
   description: string;
   disabled?: boolean;
   label: string;
-  onChange: (e: any) => void;
+  onChange: ChangeEventHandler<HTMLSelectElement>;
   values: ValueType[];
   value: string;
 }

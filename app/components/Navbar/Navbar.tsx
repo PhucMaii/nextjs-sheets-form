@@ -25,7 +25,7 @@ export default function Navbar({ isLogin }: PropTypes) {
           width="full"
           color="blue"
           label={isLogin ? 'Sign out' : 'Sign in'}
-          onClick={(e: any) => {
+          onClick={() => {
             if (isLogin) {
               signOut();
             } else {

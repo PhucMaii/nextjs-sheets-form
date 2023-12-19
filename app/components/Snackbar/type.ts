@@ -1,6 +1,8 @@
+import { ReactNode } from 'react';
+
 export interface Fadein {
   delay: string;
-  children: any;
+  children: ReactNode;
 }
 
 export interface PropTypes {

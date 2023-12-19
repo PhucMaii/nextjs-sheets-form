@@ -1,17 +1,17 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '../../components/Navbar/Navbar';
 import Input from '../../components/Input/Input';
 import Divider from '@/app/components/Divider/Divider';
-import { Notification } from '@/app/utils/type';
+import { Notification, SessionClientType } from '@/app/utils/type';
 import { useSession } from 'next-auth/react';
 import { PositionType } from '../../utils/type';
 import Button from '@/app/components/Button/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import EditPositionCard from '@/app/components/EditPositionCard/EditPositionCard';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
+import { ValueType } from '@/app/components/Select/Select';
 
 export default function EditForm() {
   const [formName, setFormName] = useState<string>();
@@ -23,9 +23,10 @@ export default function EditForm() {
     message: '',
   });
   const [positionList, setPositionList] = useState<PositionType[]>([]);
-  const [sheetNames, setSheetNames] = useState<any>([]);
-  const { id }: any = useParams();
-  const { data: session, status }: any = useSession();
+  const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
+  const { id }: { id: string | null } = useParams() as { id: string | null };
+  const { data: session, status }: SessionClientType =
+    useSession() as SessionClientType;
   const router = useRouter();
 
   useEffect(() => {
@@ -61,11 +62,11 @@ export default function EditForm() {
       setFormName(data.formName);
       setPositionList(data.positions);
       setIsLoading(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setNotification({
         on: true,
         type: 'error',
-        message: error.message,
+        message: 'Fail to fetch',
       });
       console.log(error);
     }
@@ -81,7 +82,7 @@ export default function EditForm() {
         },
       });
       let data = await response.json();
-      data = data.map((sheet: any) => {
+      data = data.map((sheet: ValueType) => {
         return {
           value: sheet,
           label: sheet,
@@ -93,21 +94,6 @@ export default function EditForm() {
       console.log(error);
       setIsLoading(false);
     }
-  };
-
-  // handling edit position then affect it in ui
-  const handleChangePosition = (position: any, field: string, value: any) => {
-    const newPosition = {
-      ...position,
-      [field]: value,
-    };
-    const newPositionList = positionList.map((position) => {
-      if (position.positionId === newPosition.positionId) {
-        return newPosition;
-      }
-      return position;
-    });
-    setPositionList(newPositionList);
   };
 
   const updateFormName = async () => {
@@ -195,7 +181,9 @@ export default function EditForm() {
       <div className="sm:mx-4 lg:mx-80 my-4">
         <Input
           label="Form Name"
-          onChange={(e: any) => setFormName(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setFormName(e.target.value)
+          }
           type="text"
           placeholder="Enter form name"
           value={formName}
@@ -216,7 +204,6 @@ export default function EditForm() {
               <EditPositionCard
                 key={Number(position.positionId)}
                 position={position}
-                handleChangePosition={handleChangePosition}
                 sheetNames={sheetNames}
                 setNotification={setNotification}
                 fetchForm={fetchForm}

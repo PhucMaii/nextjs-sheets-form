@@ -1,5 +1,5 @@
 import { customStyles } from '@/app/utils/styles';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import Modal from 'react-modal';
 import Input from '../Input/Input';
 import Select from '../Select/Select';
@@ -13,8 +13,8 @@ interface PropTypes {
   isOpen: boolean;
   onClose: () => void;
   placeholder?: string;
-  setInputName: (e: any) => void;
-  setInputType: (e: any) => void;
+  setInputName: (e: ChangeEvent<HTMLInputElement>) => void;
+  setInputType: (e: ChangeEvent<HTMLSelectElement>) => void;
   title: string;
 }
 Modal.setAppElement('#root');

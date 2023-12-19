@@ -1,20 +1,19 @@
 import { customStyles } from '@/app/utils/styles';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import Modal from 'react-modal';
 import Button from '../Button/Button';
-import Select from '../Select/Select';
+import Select, { ValueType } from '../Select/Select';
 import { FetchForm, Notification, PositionType } from '@/app/utils/type';
 
 interface PropTypes {
   fetchForm: FetchForm;
-  onChange: (e: any) => void;
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   onClose: () => void;
   isOpen: boolean;
   position: PositionType;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  type: string;
   value: string;
-  values: any;
+  values: ValueType[];
 }
 Modal.setAppElement('#root');
 export default function EditSheetName({
@@ -24,7 +23,6 @@ export default function EditSheetName({
   isOpen,
   position,
   setNotification,
-  type,
   value,
   values,
 }: PropTypes) {

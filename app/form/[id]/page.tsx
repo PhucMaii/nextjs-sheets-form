@@ -1,8 +1,8 @@
 'use client';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Notification } from '@/app/utils/type';
+import { FormType, Notification, SessionClientType } from '@/app/utils/type';
 import Button from '@/app/components/Button/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import Navbar from '@/app/components/Navbar/Navbar';
@@ -11,7 +11,12 @@ import { InputType, InputValues, PositionType } from '../../utils/type';
 import Input from '@/app/components/Input/Input';
 
 export default function Form() {
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<FormType>({
+    userId: 0,
+    formId: 0,
+    formName: '',
+    lastOpened: new Date(),
+  });
   const [inputList, setInputList] = useState<InputType[]>([]);
   const [inputValues, setInputValues] = useState<InputValues>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -22,8 +27,9 @@ export default function Form() {
     message: '',
   });
   const [positionList, setPositionList] = useState<PositionType[]>([]);
-  const { id }: any = useParams();
-  const { data: session, status }: any = useSession();
+  const { id }: { id: string | null } = useParams() as { id: string | null };
+  const { data: session, status }: SessionClientType =
+    useSession() as SessionClientType;
   const router = useRouter();
 
   useEffect(() => {
@@ -59,36 +65,41 @@ export default function Form() {
       setPositionList(data.positions);
       setFormData(data);
       setIsLoading(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setNotification({
         on: true,
         type: 'error',
-        message: error.message,
+        message: 'Fail to fetch data',
       });
       console.log(error);
     }
   };
 
-  const getMostInputsPosition = (data: any) => {
+  const getMostInputsPosition = (data: FormType) => {
     const positionList = data.positions;
     let newInputList: InputType[] = [];
     const uniqueInputIds = new Set<string>();
-    newInputList = positionList.map((position: any) => {
-      return position.inputs.filter((input: InputType) => {
-        if (!uniqueInputIds.has(input.inputName)) {
-          uniqueInputIds.add(input.inputName);
-          return true;
-        }
-        return false;
-      });
-    });
-    createInputValues(newInputList.flat());
+    if (!positionList) {
+      return;
+    }
+    newInputList = positionList
+      .map((position: PositionType) => {
+        return position.inputs.filter((input: InputType) => {
+          if (!uniqueInputIds.has(input.inputName)) {
+            uniqueInputIds.add(input.inputName);
+            return true;
+          }
+          return false;
+        });
+      })
+      .flat();
+    createInputValues(newInputList);
     setInputList(newInputList.flat());
   };
 
   const createInputValues = (inputs: InputType[]) => {
     const newInputValues: InputValues = {};
-    for (let input of inputs) {
+    for (const input of inputs) {
       if (input.inputType === 'text') {
         newInputValues[input.inputName] = '';
       } else {
@@ -98,12 +109,12 @@ export default function Form() {
     setInputValues(newInputValues);
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: MouseEvent) => {
     e.preventDefault();
     try {
       const submitForm = positionList.map((pos) => {
         const validInputs: InputValues = {};
-        for (let input of pos.inputs) {
+        for (const input of pos.inputs) {
           validInputs[input.inputName] = inputValues[input.inputName];
         }
         return {

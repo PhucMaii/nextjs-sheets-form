@@ -1,4 +1,5 @@
 'use client';
+import { FormType } from '@/app/utils/type';
 import moment from 'moment/moment';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -7,7 +8,7 @@ import IconButton from '../IconButton/IconButton';
 import DeleteModal from '../Modals/DeleteModal';
 
 interface PropTypes {
-  form: any;
+  form: FormType;
   handleDelete: (id: number) => void;
 }
 
@@ -39,7 +40,6 @@ export default function FormCard({ form, handleDelete }: PropTypes) {
               />
             </svg>
           }
-          color="blue"
           backgroundColor="blue"
           onClick={() => router.push(`/edit-form/${form.formId}`)}
         />
@@ -60,7 +60,6 @@ export default function FormCard({ form, handleDelete }: PropTypes) {
               />
             </svg>
           }
-          color="red"
           backgroundColor="red"
           onClick={() => setOpenDeleteModal(true)}
         />

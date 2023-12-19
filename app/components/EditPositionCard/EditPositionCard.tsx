@@ -5,31 +5,31 @@ import {
   Notification,
   PositionType,
 } from '../../utils/type';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import InputChip from '../DraggableChip/InputChip';
 import Button from '../Button/Button';
 import EditSheetName from '../Modals/EditSheetName';
 import EditInputModal from '../Modals/EditInputModal';
 import EditRow from '../Modals/EditRow';
 import IconButton from '../IconButton/IconButton';
+import { ValueType } from '../Select/Select';
 
 interface PropTypes {
   fetchForm: FetchForm;
-  handleChangePosition: (position: any, field: string, value: any) => void;
   position: PositionType;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  sheetNames: any;
+  sheetNames: ValueType[];
 }
 
 export default function EditPositionCard({
   fetchForm,
-  handleChangePosition,
   position,
   setNotification,
   sheetNames,
 }: PropTypes) {
   const [isOpenAddInput, setIsOpenAddInput] = useState<boolean>(false);
-  const [isOpenEditSheetName, setIsOpenEditSheetName] = useState<boolean>(false);
+  const [isOpenEditSheetName, setIsOpenEditSheetName] =
+    useState<boolean>(false);
   const [isOpenEditRow, setIsOpenEditRow] = useState<boolean>(false);
   const [newInput, setNewInput] = useState<InputType>({
     positionId: position.positionId,
@@ -37,6 +37,8 @@ export default function EditPositionCard({
     inputName: '',
     inputType: '',
   });
+  const [sheetName, setSheetName] = useState<string>(position.sheetName);
+  const [row, setRow] = useState<number>(position.row);
 
   const handleAddInput = async () => {
     try {
@@ -78,10 +80,9 @@ export default function EditPositionCard({
       <EditSheetName
         isOpen={isOpenEditSheetName}
         onClose={() => setIsOpenEditSheetName(false)}
-        type="text"
-        value={position.sheetName}
-        onChange={(e: any) =>
-          handleChangePosition(position, 'sheetName', e.target.value)
+        value={sheetName}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+          setSheetName(e.target.value)
         }
         values={sheetNames}
         position={position}
@@ -91,8 +92,8 @@ export default function EditPositionCard({
       <EditRow
         isOpen={isOpenEditRow}
         onClose={() => setIsOpenEditRow(false)}
-        value={position.row}
-        onChange={(e) => handleChangePosition(position, 'row', +e.target.value)}
+        value={row}
+        onChange={(e) => setRow(+e.target.value)}
         position={position}
         setNotification={setNotification}
         fetchForm={fetchForm}
@@ -104,10 +105,10 @@ export default function EditPositionCard({
         inputName={newInput.inputName}
         onClose={() => setIsOpenAddInput(false)}
         placeholder="Enter input name"
-        setInputName={(e: any) =>
+        setInputName={(e: ChangeEvent<HTMLInputElement>) =>
           setNewInput({ ...newInput, inputName: e.target.value })
         }
-        setInputType={(e: any) =>
+        setInputType={(e: ChangeEvent<HTMLSelectElement>) =>
           setNewInput({ ...newInput, inputType: e.target.value })
         }
         title="Add Input"
@@ -132,7 +133,6 @@ export default function EditPositionCard({
             </svg>
           }
           backgroundColor="blue"
-          color="white"
           isBackgroundBold
           onClick={() => setIsOpenEditSheetName(true)}
         />
@@ -159,7 +159,6 @@ export default function EditPositionCard({
             </svg>
           }
           backgroundColor="blue"
-          color="white"
           isBackgroundBold
           onClick={() => setIsOpenEditRow(true)}
         />
@@ -173,10 +172,8 @@ export default function EditPositionCard({
             return (
               <InputChip
                 key={input.inputId}
-                position={position}
                 id={input.inputId ? input.inputId.toString() : index.toString()}
                 input={input}
-                handleChangePosition={handleChangePosition}
                 fetchForm={fetchForm}
                 setNotification={setNotification}
               />

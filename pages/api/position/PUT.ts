@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { BodyType } from './type';
 import checkPositionUpdate from '../utils/checkPositionUpdate';
+import { PositionType } from '@/app/utils/type';
 
 export default async function PUTMethod(
   req: NextApiRequest,
@@ -9,7 +9,7 @@ export default async function PUTMethod(
   prisma: PrismaClient,
 ) {
   try {
-    const body: BodyType = req.body;
+    const body: PositionType = req.body;
     const isValidToUpdate = await checkPositionUpdate(prisma, body);
     if (!isValidToUpdate) {
       return res.status(400).send('The updated position existed');

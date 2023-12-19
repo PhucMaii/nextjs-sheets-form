@@ -13,7 +13,7 @@ export default async function checkValidInput(
   methodType: string,
 ) {
   try {
-    let fieldCheck: FieldCheck = {
+    const fieldCheck: FieldCheck = {
       inputName: targetInput.inputName,
       inputType: targetInput.inputType,
       positionId: targetInput.positionId,

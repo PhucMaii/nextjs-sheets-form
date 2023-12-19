@@ -1,4 +1,4 @@
-export function calculateNextPos(currentPos: number, result: string[]) {
+export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   if (currentPos < columns.length) {
     return columns[currentPos];

@@ -12,14 +12,14 @@ export default async function POSTMethod(
     const body: InputType = req.body;
     const isInputNameUnique = await checkValidInput(prisma, body, 'POST');
     if (!isInputNameUnique) {
-        const updateSameInput = await prisma.input.updateMany({
-            where: {
-                inputName: body.inputName
-            },
-            data: {
-                inputType: body.inputType
-            }
-        })
+      await prisma.input.updateMany({
+        where: {
+          inputName: body.inputName,
+        },
+        data: {
+          inputType: body.inputType,
+        },
+      });
     }
     const addedInput = await prisma.input.create({
       data: {

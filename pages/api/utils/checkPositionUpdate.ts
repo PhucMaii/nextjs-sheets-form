@@ -1,13 +1,14 @@
+import { PositionType } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
-import { BodyType } from '../position/type';
 
 export default async function checkPositionUpdate(
   prisma: PrismaClient,
-  updatePosition: BodyType,
+  updatePosition: PositionType,
 ) {
   try {
     const isPositionValid = await prisma.position.findMany({
       where: {
+        formId: updatePosition.formId,
         sheetName: updatePosition.sheetName,
         row: updatePosition.row,
       },

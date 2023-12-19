@@ -1,4 +1,6 @@
-export const customStyles: any = {
+import { Styles } from 'react-modal';
+
+export const customStyles: Styles = {
   content: {
     top: '50%',
     left: '50%',

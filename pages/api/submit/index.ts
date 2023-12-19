@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { SheetForm } from './type';
 import { calculateNextPos } from './utils';
 
 export default async function handler(
