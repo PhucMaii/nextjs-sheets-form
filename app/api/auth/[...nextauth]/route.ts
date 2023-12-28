@@ -24,6 +24,7 @@ export const authOptions: NextAuthOptions = {
         if (existingSession) {
           return null;
         }
+        console.log(existingSession);
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
