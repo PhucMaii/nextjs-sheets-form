@@ -1,12 +1,5 @@
 'use client';
-import React, {
-  ChangeEvent,
-  Reference,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { redirect } from 'next/navigation';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Snackbar from '../components/Snackbar/Snackbar';
 import { User } from './type';
@@ -65,7 +58,7 @@ export default function SignupForm() {
       return;
     }
     try {
-      const response = await fetch('/api/signup', {
+      await fetch('/api/signup', {
         method: 'POST',
         headers: {
           'Content-type': 'application/json',

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
