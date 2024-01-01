@@ -74,7 +74,7 @@ export default function EditPositionCard({
 
   return (
     <div
-      id={position.positionId.toString()}
+      id={position.positionId?.toString()}
       className="self-start flex-none min-w-max w-1/4 bg-blue-600 shadow rounded-lg p-4"
     >
       <EditSheetName
@@ -165,7 +165,7 @@ export default function EditPositionCard({
       </div>
       <div
         className="flex flex-col gap-4 my-4"
-        id={position.positionId.toString()}
+        id={position.positionId?.toString()}
       >
         {position.inputs &&
           position.inputs.map((input, index) => {

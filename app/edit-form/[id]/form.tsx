@@ -12,11 +12,13 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import EditPositionCard from '@/app/components/EditPositionCard/EditPositionCard';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { ValueType } from '@/app/components/Select/Select';
+import AddPosition from '@/app/components/Modals/AddPosition';
 
 export default function EditForm() {
   const [formName, setFormName] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
+  const [isAddPositionOpen, setIsAddPositionOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: '',
@@ -175,6 +177,13 @@ export default function EditForm() {
         type={notification.type}
         message={notification.message}
       />
+      <AddPosition
+        fetchForm={fetchForm}
+        formId={id}
+        isOpen={isAddPositionOpen}
+        onClose={() => setIsAddPositionOpen(false)}
+        setNotification={setNotification}
+      />
       <h2 className="mb-4 text-4xl text-center text-blue-600 font-bold">
         Edit Form
       </h2>
@@ -210,6 +219,13 @@ export default function EditForm() {
               />
             );
           })}
+        <Button
+          label="+ Add Position"
+          color="sky"
+          onClick={() => setIsAddPositionOpen(true)}
+          width="auto"
+          className="bg-sky-600 hover:bg-sky-800 h-1/5"
+        />
       </div>
     </div>
   );

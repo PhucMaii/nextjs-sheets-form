@@ -27,7 +27,7 @@ export interface InputValues {
 
 export interface PositionType {
   formId: number;
-  positionId: number;
+  positionId?: number;
   sheetName: string;
   row: number;
   inputs: InputType[];
