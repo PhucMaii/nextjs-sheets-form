@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Transition } from '@headlessui/react';
 import { Fadein, PropTypes } from './type';
 
@@ -16,10 +16,19 @@ const FadeIn = (para: Fadein) => (
 );
 
 export default function Snackbar(props: PropTypes) {
+  useEffect(() => {
+    if (props.open) {
+      const timeoutId = setTimeout(() => {
+        props.onClose();
+      }, 5000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [props.open]);
   const containerStyle =
     props.type === 'error'
-      ? 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-red-100 bg-red-600 rounded-lg shadow'
-      : 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-green-100 bg-green-600 rounded-lg shadow';
+      ? 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-red-600 bg-red-100 rounded-lg shadow'
+      : 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-green-600 bg-green-200 rounded-lg shadow';
   const textStyle =
     props.type === 'error'
       ? 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-500 rounded-lg'
