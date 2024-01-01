@@ -22,7 +22,7 @@ export default async function POSTMEthod(
     const isValidPos = await checkPositionUpdate(prisma, req.body);
 
     if (!isValidPos) {
-      return res.status(400).json({ message: 'Position Is Not Valid' });
+      return res.status(400).json({ error: 'Position Is Not Valid' });
     }
 
     const newPos = await prisma.position.create({

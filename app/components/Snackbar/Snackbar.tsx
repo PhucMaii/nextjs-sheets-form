@@ -31,8 +31,8 @@ export default function Snackbar(props: PropTypes) {
       : 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-green-600 bg-green-200 rounded-lg shadow';
   const textStyle =
     props.type === 'error'
-      ? 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-500 rounded-lg'
-      : 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-500 rounded-lg';
+      ? 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-300 bg-red-500 rounded-lg'
+      : 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-300 bg-green-500 rounded-lg';
 
   return (
     <Transition.Root
@@ -44,8 +44,8 @@ export default function Snackbar(props: PropTypes) {
           <div className={textStyle}>
             {props.type === 'error' ? (
               <svg
-                width="64"
-                height="64"
+                width="20"
+                height="20"
                 viewBox="0 0 42 42"
                 xmlns="http://www.w3.org/2000/svg"
               >

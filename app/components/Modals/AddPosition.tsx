@@ -53,6 +53,15 @@ export default function AddPosition({
 
   const handleAddPosition = async () => {
     setIsLoading(true);
+    if (!sheetName) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Sheet Name is required',
+      });
+      setIsLoading(false);
+      return;
+    }
     const data = { formId: Number(formId), sheetName, row };
     try {
       const response = await fetch('/api/position', {
@@ -67,8 +76,8 @@ export default function AddPosition({
       onClose();
       setNotification({
         on: true,
-        type: 'success',
-        message: pos.message,
+        type: pos.error ? 'error' : 'success',
+        message: pos.message || pos.error,
       });
       setIsLoading(false);
     } catch (error: any) {
