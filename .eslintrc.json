@@ -12,7 +12,8 @@
   "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
     "react-hooks/exhaustive-deps": "off",
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-explicit-any": "off"
   },
   "ignorePatterns": ["src/**/*.test.ts", "src/frontend/generated/*"]
 }

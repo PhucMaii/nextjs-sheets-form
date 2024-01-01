@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import POSTMEthod from './POST';
 import PUTMethod from './PUT';
 
 export default async function handler(
@@ -10,6 +11,11 @@ export default async function handler(
   try {
     if (req.method === 'PUT') {
       const response = await PUTMethod(req, res, prisma);
+      return response;
+    }
+
+    if (req.method === 'POST') {
+      const response = await POSTMEthod(req, res, prisma);
       return response;
     }
   } catch (error) {

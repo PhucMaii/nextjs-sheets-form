@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import checkPositionUpdate from '../utils/checkPositionUpdate';
 
 interface PositionType {
   formId: number;
@@ -17,6 +18,11 @@ export default async function POSTMEthod(
 
     if (!sheetName || !row) {
       return res.status(400).send('Missing either sheet name or row');
+    }
+    const isValidPos = await checkPositionUpdate(prisma, req.body);
+
+    if (!isValidPos) {
+      return res.status(400).json({ message: 'Position Is Not Valid' });
     }
 
     const newPos = await prisma.position.create({
