@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import POSTMEthod from './POST';
 import PUTMethod from './PUT';
+import DELETEMethod from './DELETE';
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,6 +17,11 @@ export default async function handler(
 
     if (req.method === 'POST') {
       const response = await POSTMEthod(req, res, prisma);
+      return response;
+    }
+
+    if (req.method === 'DELETE') {
+      const response = await DELETEMethod(req, res, prisma);
       return response;
     }
   } catch (error) {

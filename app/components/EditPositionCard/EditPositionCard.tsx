@@ -13,6 +13,7 @@ import EditInputModal from '../Modals/EditInputModal';
 import EditRow from '../Modals/EditRow';
 import IconButton from '../IconButton/IconButton';
 import { ValueType } from '../Select/Select';
+import DeleteModal from '../Modals/DeleteModal';
 
 interface PropTypes {
   fetchForm: FetchForm;
@@ -28,6 +29,7 @@ export default function EditPositionCard({
   sheetNames,
 }: PropTypes) {
   const [isOpenAddInput, setIsOpenAddInput] = useState<boolean>(false);
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isOpenEditSheetName, setIsOpenEditSheetName] =
     useState<boolean>(false);
   const [isOpenEditRow, setIsOpenEditRow] = useState<boolean>(false);
@@ -72,11 +74,40 @@ export default function EditPositionCard({
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(
+        `/api/position?positionId=${position.positionId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-type': 'applicaiton/json',
+          },
+        },
+      );
+
+      const res = await response.json();
+      await fetchForm();
+      setNotification({
+        on: true,
+        type: res.error ? 'error' : 'success',
+        message: res.error || res.message,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div
       id={position.positionId?.toString()}
-      className="self-start flex-none min-w-max w-1/4 bg-blue-600 shadow rounded-lg p-4"
+      className="relative self-start flex-none min-w-max w-1/4 bg-blue-600 shadow rounded-lg p-4"
     >
+      <DeleteModal
+        isOpen={isOpenDeleteModal}
+        onClose={() => setIsOpenDeleteModal(false)}
+        handleDelete={handleDelete}
+      />
       <EditSheetName
         isOpen={isOpenEditSheetName}
         onClose={() => setIsOpenEditSheetName(false)}
@@ -113,6 +144,15 @@ export default function EditPositionCard({
         }
         title="Add Input"
       />
+      <div className="flex justify-end w-full">
+        <Button
+          className="bg-red-400 rounded-lg p-0 hover:bg-red-500"
+          label="x"
+          color="red"
+          onClick={() => setIsOpenDeleteModal(true)}
+          width="auto"
+        />
+      </div>
       <div className="flex items-center gap-2">
         <h1 className="text-white font-bold text-lg">{position.sheetName}</h1>
         <IconButton
