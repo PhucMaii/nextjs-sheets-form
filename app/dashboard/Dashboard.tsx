@@ -127,6 +127,7 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
             color="blue"
             onClick={() => router.push('/create-form')}
             width="full"
+            className="hover:bg-blue-700"
           />
         </div>
       </div>

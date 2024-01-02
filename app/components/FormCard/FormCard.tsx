@@ -41,6 +41,7 @@ export default function FormCard({ form, handleDelete }: PropTypes) {
             </svg>
           }
           backgroundColor="blue"
+          className="hover:bg-blue-100"
           onClick={() => router.push(`/edit-form/${form.formId}`)}
         />
         <IconButton
@@ -61,6 +62,7 @@ export default function FormCard({ form, handleDelete }: PropTypes) {
             </svg>
           }
           backgroundColor="red"
+          className="hover:bg-red-100 text-red-500"
           onClick={() => setOpenDeleteModal(true)}
         />
       </div>

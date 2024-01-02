@@ -52,17 +52,17 @@ export default function EditPositionCard({
         body: JSON.stringify(newInput),
       });
       const res = await response.json();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: res.message,
-      });
       await fetchForm(); // get the latest updated form without refresh the page
       setNewInput({
         positionId: position.positionId,
         inputId: newInput.inputId - 1, // use negative number for temp id
         inputName: '',
         inputType: '',
+      });
+      setNotification({
+        on: true,
+        type: 'success',
+        message: res.message,
       });
     } catch (error) {
       console.log(error);
@@ -148,7 +148,7 @@ export default function EditPositionCard({
         <Button
           className="bg-red-400 rounded-lg p-0 hover:bg-red-500"
           label="x"
-          color="red"
+          color=""
           onClick={() => setIsOpenDeleteModal(true)}
           width="auto"
         />
@@ -226,6 +226,7 @@ export default function EditPositionCard({
         onClick={() => setIsOpenAddInput(true)}
         width="full"
         justify="start"
+        className="hover:bg-blue-800 rounded-lg"
       />
     </div>
   );

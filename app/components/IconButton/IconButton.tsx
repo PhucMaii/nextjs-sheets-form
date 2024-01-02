@@ -17,7 +17,7 @@ export default function IconButton({
 }: PropTypes) {
   return (
     <button
-      className={`inline-block text-${backgroundColor}-500 hover:bg-${backgroundColor}-${
+      className={`animation duration-300 inline-block text-${backgroundColor}-500 hover:bg-${backgroundColor}-${
         isBackgroundBold ? '700' : '100'
       } focus:ring-4 focus:outline-none focus:ring-${backgroundColor}-200 rounded-lg text-sm p-1.5 ${className}`}
       onClick={onClick}

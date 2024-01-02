@@ -30,6 +30,7 @@ export default function Button({
         } items-center gap-4 w-${width} bg-${color}-600 ${
           !disabled && `hover:bg-${color}-700`
         }
+        animation duration-300
         ${disabled && `opacity-80`} text-white font-bold py-2 px-4 rounded 
         focus:outline-none focus:shadow-outline ${className}
     `;
