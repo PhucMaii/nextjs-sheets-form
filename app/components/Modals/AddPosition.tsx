@@ -8,7 +8,7 @@ import Select, { ValueType } from '../Select/Select';
 
 interface PropTypes {
   fetchForm: FetchForm;
-  formId: string | null;
+  handleAddPosition: (sheetName: string, row: number) => void;
   isOpen: boolean;
   onClose: () => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
@@ -16,7 +16,7 @@ interface PropTypes {
 
 export default function AddPosition({
   fetchForm,
-  formId,
+  handleAddPosition,
   isOpen,
   onClose,
   setNotification,
@@ -29,6 +29,12 @@ export default function AddPosition({
   useEffect(() => {
     fetchSheetsName();
   }, []);
+
+  useEffect(() => {
+    if (sheetName === '') {
+      fetchForm();
+    }
+  }, [sheetName]);
 
   const fetchSheetsName = async () => {
     try {
@@ -51,7 +57,7 @@ export default function AddPosition({
     }
   };
 
-  const handleAddPosition = async () => {
+  const addPosition = async () => {
     setIsLoading(true);
     if (!sheetName) {
       setNotification({
@@ -62,32 +68,14 @@ export default function AddPosition({
       setIsLoading(false);
       return;
     }
-    const data = { formId: Number(formId), sheetName, row };
     try {
-      const response = await fetch('/api/position', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      const pos = await response.json();
-      await fetchForm();
-      onClose();
-      setNotification({
-        on: true,
-        type: pos.error ? 'error' : 'success',
-        message: pos.message || pos.error,
-      });
+      await handleAddPosition(sheetName, row);
+      setSheetName('');
+      setRow(1);
       setIsLoading(false);
     } catch (error: any) {
       console.log(error);
       setIsLoading(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.message,
-      });
     }
   };
 
@@ -117,7 +105,7 @@ export default function AddPosition({
       />
       <Button
         label="Add"
-        onClick={handleAddPosition}
+        onClick={addPosition}
         color="blue"
         width="full"
         loadingButton

@@ -26,6 +26,7 @@ export default async function DELETEMethod(
     });
 
     return res.status(200).json({
+      data: deletedPos,
       message: 'Position Deleted Succesfully',
     });
   } catch (error) {

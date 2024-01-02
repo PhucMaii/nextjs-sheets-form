@@ -31,11 +31,17 @@ export default function Button({
           !disabled && `hover:bg-${color}-700`
         }
         animation duration-300
-        ${disabled && `opacity-80`} text-white font-bold py-2 px-4 rounded 
+        ${
+          (disabled || isLoading) && `opacity-70`
+        } text-white font-bold py-2 px-4 rounded 
         focus:outline-none focus:shadow-outline ${className}
     `;
   return (
-    <button disabled={disabled} className={style} onClick={onClick}>
+    <button
+      disabled={disabled || isLoading}
+      className={style}
+      onClick={onClick}
+    >
       {loadingButton &&
         (isLoading ? (
           <LoadingComponent color="white" width="4" height="4" />

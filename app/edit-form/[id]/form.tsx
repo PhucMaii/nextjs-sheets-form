@@ -14,9 +14,13 @@ import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { ValueType } from '@/app/components/Select/Select';
 import AddPosition from '@/app/components/Modals/AddPosition';
 
+interface OwnPositionType extends PositionType {
+  positionId: number;
+}
+
 export default function EditForm() {
   const [formName, setFormName] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [isAddPositionOpen, setIsAddPositionOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
@@ -24,7 +28,7 @@ export default function EditForm() {
     type: '',
     message: '',
   });
-  const [positionList, setPositionList] = useState<PositionType[]>([]);
+  const [positionList, setPositionList] = useState<OwnPositionType[]>([]);
   const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
   const { id }: { id: string | null } = useParams() as { id: string | null };
   const { data: session, status }: SessionClientType =
@@ -37,6 +41,24 @@ export default function EditForm() {
       fetchSheetsName();
     }
   }, [status]);
+
+  const handleChangePositionList = (
+    positionId: number,
+    field: string,
+    value: any,
+  ) => {
+    setPositionList((prevList) => {
+      return prevList.map((pos) => {
+        if (pos.positionId === positionId) {
+          return {
+            ...pos,
+            [field]: value,
+          };
+        }
+        return pos;
+      });
+    });
+  };
 
   const fetchForm = async () => {
     try {
@@ -95,6 +117,79 @@ export default function EditForm() {
     } catch (error) {
       console.log(error);
       setIsLoading(false);
+    }
+  };
+
+  const handleAddPosition = async (sheetName: string, row: number) => {
+    if (!sheetName) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Sheet Name is required',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const data = { formId: Number(id), sheetName, row };
+
+    try {
+      const response = await fetch('/api/position', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const pos = await response.json();
+
+      setPositionList([
+        ...positionList,
+        { ...data, positionId: pos.data.positionId, inputs: [] },
+      ]);
+
+      setNotification({
+        on: true,
+        type: pos.error ? 'error' : 'success',
+        message: pos.message || pos.error,
+      });
+
+      setIsAddPositionOpen(false);
+    } catch (error: any) {
+      console.log(error);
+      setIsLoading(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.message,
+      });
+    }
+  };
+
+  const handleDeletePosition = async (positionId: number) => {
+    try {
+      const response = await fetch(`/api/position?positionId=${positionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-type': 'application/json',
+        },
+      });
+
+      const res = await response.json();
+
+      const updatedPositions = positionList.filter((pos) => {
+        return pos.positionId !== positionId;
+      });
+
+      setPositionList(updatedPositions);
+      setNotification({
+        on: true,
+        type: res.error ? 'error' : 'success',
+        message: res.error || res.message,
+      });
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -179,10 +274,10 @@ export default function EditForm() {
       />
       <AddPosition
         fetchForm={fetchForm}
-        formId={id}
         isOpen={isAddPositionOpen}
         onClose={() => setIsAddPositionOpen(false)}
         setNotification={setNotification}
+        handleAddPosition={handleAddPosition}
       />
       <h2 className="mb-4 text-4xl text-center text-blue-600 font-bold">
         Edit Form
@@ -212,6 +307,8 @@ export default function EditForm() {
             return (
               <EditPositionCard
                 key={Number(position.positionId)}
+                handleChangePositionList={handleChangePositionList}
+                handleDeletePos={handleDeletePosition}
                 position={position}
                 sheetNames={sheetNames}
                 setNotification={setNotification}

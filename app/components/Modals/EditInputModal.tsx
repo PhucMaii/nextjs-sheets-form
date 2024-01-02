@@ -7,7 +7,8 @@ import Button from '../Button/Button';
 import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
-  handleSubmit: () => void;
+  isDisableOnClick?: boolean;
+  handleSubmit: () => any;
   inputName: string;
   inputType: string;
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface PropTypes {
 Modal.setAppElement('#root');
 
 export default function EditInputModal({
+  isDisableOnClick,
   handleSubmit,
   inputName,
   inputType,
@@ -30,25 +32,43 @@ export default function EditInputModal({
   setInputType,
   title,
 }: PropTypes) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: '',
     message: '',
   });
   const handleAddInput = async () => {
+    setIsLoading(true);
     if (inputName === '' || inputType === '') {
       setNotification({
         on: true,
         type: 'error',
         message: 'Please Fill Out All Blanks',
       });
+      setIsLoading(false);
       return;
     }
-    handleSubmit();
-    onClose();
+    const isValid = await handleSubmit();
+    if (!isValid) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Input Name Exist',
+      });
+    }
+    setIsLoading(false);
   };
+
   return (
-    <Modal isOpen={isOpen} style={customStyles} onRequestClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      style={customStyles}
+      onRequestClose={() => {
+        onClose();
+        setNotification({ on: false, type: '', message: '' });
+      }}
+    >
       <h1 className="font-bold text-center text-lg mb-4">{title}</h1>
       {notification.on && (
         <div
@@ -92,7 +112,15 @@ export default function EditInputModal({
           },
         ]}
       />
-      <Button label="Save" color="blue" onClick={handleAddInput} width="full" />
+      <Button
+        label="Save"
+        color="blue"
+        onClick={handleAddInput}
+        width="full"
+        loadingButton
+        isLoading={isLoading}
+        disabled={isDisableOnClick ? isDisableOnClick : false}
+      />
     </Modal>
   );
 }

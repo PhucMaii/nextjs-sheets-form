@@ -1,12 +1,16 @@
 import { customStyles } from '@/app/utils/styles';
-import React, { ChangeEvent, Dispatch, SetStateAction } from 'react';
+import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import Modal from 'react-modal';
 import Input from '../Input/Input';
 import Button from '../Button/Button';
-import { FetchForm, Notification, PositionType } from '@/app/utils/type';
+import { Notification, PositionType } from '@/app/utils/type';
 
 interface PropTypes {
-  fetchForm: FetchForm;
+  handleChangePositionList: (
+    positionId: number,
+    field: string,
+    value: any,
+  ) => void;
   isOpen: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
@@ -16,7 +20,7 @@ interface PropTypes {
 }
 
 export default function EditRow({
-  fetchForm,
+  handleChangePositionList,
   isOpen,
   onChange,
   onClose,
@@ -24,7 +28,10 @@ export default function EditRow({
   setNotification,
   value,
 }: PropTypes) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const updateRow = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch('/api/position', {
         method: 'PUT',
@@ -37,18 +44,22 @@ export default function EditRow({
         }),
       });
       const res = await response.json();
-      await fetchForm();
+      const id = position.positionId as number;
+      handleChangePositionList(id, 'row', value);
       setNotification({
         on: true,
         type: 'success',
         message: res.message,
       });
+      setIsLoading(false);
+      onClose();
     } catch (error) {
       setNotification({
         on: true,
         type: 'error',
         message: 'Fail to update row. Refresh page to see result',
       });
+      setIsLoading(false);
       console.log(error);
     }
   };
@@ -65,11 +76,10 @@ export default function EditRow({
       <Button
         label="Save"
         color="blue"
-        onClick={() => {
-          updateRow();
-          onClose();
-        }}
+        onClick={updateRow}
         width="full"
+        loadingButton
+        isLoading={isLoading}
       />
     </Modal>
   );

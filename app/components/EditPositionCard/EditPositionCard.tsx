@@ -5,7 +5,13 @@ import {
   Notification,
   PositionType,
 } from '../../utils/type';
-import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
+import React, {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import InputChip from '../DraggableChip/InputChip';
 import Button from '../Button/Button';
 import EditSheetName from '../Modals/EditSheetName';
@@ -15,15 +21,27 @@ import IconButton from '../IconButton/IconButton';
 import { ValueType } from '../Select/Select';
 import DeleteModal from '../Modals/DeleteModal';
 
+interface OwnPositionType extends PositionType {
+  positionId: number;
+}
+
 interface PropTypes {
   fetchForm: FetchForm;
-  position: PositionType;
+  handleChangePositionList: (
+    positionId: number,
+    field: string,
+    value: any,
+  ) => void;
+  handleDeletePos: (positionId: number) => void;
+  position: OwnPositionType;
   setNotification: Dispatch<SetStateAction<Notification>>;
   sheetNames: ValueType[];
 }
 
 export default function EditPositionCard({
   fetchForm,
+  handleChangePositionList,
+  handleDeletePos,
   position,
   setNotification,
   sheetNames,
@@ -42,6 +60,17 @@ export default function EditPositionCard({
   const [sheetName, setSheetName] = useState<string>(position.sheetName);
   const [row, setRow] = useState<number>(position.row);
 
+  useEffect(() => {
+    if (
+      newInput.positionId === position.positionId &&
+      newInput.inputId === -1 &&
+      newInput.inputName === '' &&
+      newInput.inputType === ''
+    ) {
+      fetchForm();
+    }
+  }, [newInput]);
+
   const handleAddInput = async () => {
     try {
       const response = await fetch('/api/input', {
@@ -51,11 +80,16 @@ export default function EditPositionCard({
         },
         body: JSON.stringify(newInput),
       });
+      if (!response.ok) {
+        await fetchForm();
+        return false;
+      }
       const res = await response.json();
-      await fetchForm(); // get the latest updated form without refresh the page
+      const id: number = position.positionId as number;
+      handleChangePositionList(id, 'inputs', [...position.inputs, newInput]);
       setNewInput({
         positionId: position.positionId,
-        inputId: newInput.inputId - 1, // use negative number for temp id
+        inputId: -1, // use negative number for temp id
         inputName: '',
         inputType: '',
       });
@@ -64,6 +98,8 @@ export default function EditPositionCard({
         type: 'success',
         message: res.message,
       });
+      setIsOpenAddInput(false);
+      return true;
     } catch (error) {
       console.log(error);
       setNotification({
@@ -71,30 +107,7 @@ export default function EditPositionCard({
         type: 'error',
         message: 'Fail to add input',
       });
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(
-        `/api/position?positionId=${position.positionId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-type': 'applicaiton/json',
-          },
-        },
-      );
-
-      const res = await response.json();
-      await fetchForm();
-      setNotification({
-        on: true,
-        type: res.error ? 'error' : 'success',
-        message: res.error || res.message,
-      });
-    } catch (error) {
-      console.log(error);
+      return false;
     }
   };
 
@@ -106,7 +119,7 @@ export default function EditPositionCard({
       <DeleteModal
         isOpen={isOpenDeleteModal}
         onClose={() => setIsOpenDeleteModal(false)}
-        handleDelete={handleDelete}
+        handleDelete={() => handleDeletePos(position.positionId)}
       />
       <EditSheetName
         isOpen={isOpenEditSheetName}
@@ -118,17 +131,18 @@ export default function EditPositionCard({
         values={sheetNames}
         position={position}
         setNotification={setNotification}
-        fetchForm={fetchForm}
+        handleChangePositionList={handleChangePositionList}
       />
       <EditRow
+        handleChangePositionList={handleChangePositionList}
         isOpen={isOpenEditRow}
         onClose={() => setIsOpenEditRow(false)}
         value={row}
         onChange={(e) => setRow(+e.target.value)}
         position={position}
         setNotification={setNotification}
-        fetchForm={fetchForm}
       />
+      {/* Add Input Modal */}
       <EditInputModal
         handleSubmit={handleAddInput}
         isOpen={isOpenAddInput}
@@ -213,7 +227,9 @@ export default function EditPositionCard({
               <InputChip
                 key={input.inputId}
                 id={input.inputId ? input.inputId.toString() : index.toString()}
+                handleChangePositionList={handleChangePositionList}
                 input={input}
+                position={position}
                 fetchForm={fetchForm}
                 setNotification={setNotification}
               />

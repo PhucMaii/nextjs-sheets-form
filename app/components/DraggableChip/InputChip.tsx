@@ -1,4 +1,10 @@
-import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
+import React, {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import EditInputModal from '../Modals/EditInputModal';
 import { FetchForm, InputType, Notification } from '../../utils/type';
 import IconButton from '../IconButton/IconButton';
@@ -6,22 +12,43 @@ import DeleteModal from '../Modals/DeleteModal';
 
 interface PropTypes {
   className?: string;
+  handleChangePositionList: (
+    positionId: number,
+    field: string,
+    value: any,
+  ) => void;
   id: string;
   input: InputType;
+  position: any;
   fetchForm: FetchForm;
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 export default function InputChip({
   className,
+  fetchForm,
+  handleChangePositionList,
   id,
   input,
-  fetchForm,
+  position,
   setNotification,
 }: PropTypes) {
+  const [isDisableButton, setIsDisableButton] = useState<boolean>(false);
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [newInput, setNewInput] = useState<InputType>(input);
+  const oldInput: InputType = input;
+
+  useEffect(() => {
+    if (
+      oldInput.inputName === newInput.inputName &&
+      oldInput.inputType === newInput.inputType
+    ) {
+      setIsDisableButton(true);
+    } else {
+      setIsDisableButton(false);
+    }
+  }, [newInput]);
 
   const handleDelete = async () => {
     try {
@@ -32,18 +59,32 @@ export default function InputChip({
         },
       });
       const res = await response.json();
+
+      const newInputs = position.inputs.filter((inputObj: InputType) => {
+        return inputObj.inputId !== input.inputId;
+      });
+
+      const id = position.positionId as number;
+      handleChangePositionList(id, 'inputs', newInputs);
+
       setNotification({
         on: true,
         type: 'success',
         message: res.message,
       });
-      await fetchForm();
+      setIsOpenDeleteModal(false);
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleSubmit = async () => {
+    if (
+      newInput.inputName === oldInput.inputName &&
+      newInput.inputType === oldInput.inputType
+    ) {
+      return false;
+    }
     try {
       const response = await fetch('/api/input', {
         method: 'PUT',
@@ -52,15 +93,33 @@ export default function InputChip({
         },
         body: JSON.stringify({ ...newInput }),
       });
+
+      if (!response.ok) {
+        await fetchForm();
+        return false;
+      }
       const res = await response.json();
+
+      const newInputs = position.inputs.map((inputObj: InputType) => {
+        if (inputObj.inputId === input.inputId) {
+          return { ...newInput };
+        }
+        return inputObj;
+      });
+
+      const id = position.positionId as number;
+      handleChangePositionList(id, 'inputs', newInputs);
+
+      setIsOpenEditModal(false);
       setNotification({
         on: true,
         type: 'success',
         message: res.message,
       });
-      await fetchForm();
+      return true;
     } catch (error) {
       console.log(error);
+      return false;
     }
   };
 
@@ -75,14 +134,15 @@ export default function InputChip({
         handleDelete={handleDelete}
       />
       <EditInputModal
+        isDisableOnClick={isDisableButton}
         isOpen={isOpenEditModal}
         onClose={() => setIsOpenEditModal(false)}
-        setInputName={(e: ChangeEvent<HTMLInputElement>) =>
-          setNewInput({ ...newInput, inputName: e.target.value })
-        }
-        setInputType={(e: ChangeEvent<HTMLSelectElement>) =>
-          setNewInput({ ...newInput, inputType: e.target.value })
-        }
+        setInputName={(e: ChangeEvent<HTMLInputElement>) => {
+          setNewInput({ ...newInput, inputName: e.target.value });
+        }}
+        setInputType={(e: ChangeEvent<HTMLSelectElement>) => {
+          setNewInput({ ...newInput, inputType: e.target.value });
+        }}
         inputName={newInput.inputName}
         inputType={newInput.inputType}
         handleSubmit={handleSubmit}

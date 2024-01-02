@@ -1,6 +1,8 @@
 import { customStyles } from '@/app/utils/styles';
 import Modal from 'react-modal';
 import IconButton from '../IconButton/IconButton';
+import { useState } from 'react';
+import Button from '../Button/Button';
 
 interface PropTypes {
   isOpen: boolean;
@@ -13,6 +15,13 @@ export default function DeleteModal({
   onClose,
   handleDelete,
 }: PropTypes) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleClick = async () => {
+    setIsLoading(true);
+    await handleDelete();
+    setIsLoading(false);
+  };
   return (
     <Modal isOpen={isOpen} style={customStyles}>
       <div className="relative p-4 w-full max-w-md max-h-full">
@@ -58,25 +67,25 @@ export default function DeleteModal({
             <h3 className="mb-5 text-lg font-normal text-gray-500">
               Are you sure you want to delete?
             </h3>
-            <button
-              onClick={() => {
-                handleDelete();
-                onClose();
-              }}
-              data-modal-hide="popup-modal"
-              type="button"
-              className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center me-2"
-            >
-              Yes, I&apos;m sure
-            </button>
-            <button
-              onClick={onClose}
-              data-modal-hide="popup-modal"
-              type="button"
-              className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10-600-600"
-            >
-              No, cancel
-            </button>
+            <div className="flex gap-2">
+              <Button
+                label="Yes I'm sure"
+                color=""
+                className="rounded-lg bg-red-500 hover:bg-red-700"
+                width="auto"
+                onClick={handleClick}
+                loadingButton
+                isLoading={isLoading}
+              />
+              <button
+                onClick={onClose}
+                data-modal-hide="popup-modal"
+                type="button"
+                className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10-600-600"
+              >
+                No, cancel
+              </button>
+            </div>
           </div>
         </div>
       </div>
