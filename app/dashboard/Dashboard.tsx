@@ -120,15 +120,17 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
         <h1 className="text-6xl text-center text-blue-500 font-bold">
           Empower Your Business With Precision and Ease
         </h1>
-        <div className="w-lg mt-4 sm:w-full lg:w-1/3">
-          <Button
-            label={isLogin ? 'Create Forms' : 'Get Started'}
-            color="blue"
-            onClick={() => router.push('/create-form')}
-            width="full"
-            className="hover:bg-blue-700"
-          />
-        </div>
+        {isLogin && (
+          <div className="w-lg mt-4 sm:w-full lg:w-1/3">
+            <Button
+              label="Create Forms"
+              color="blue"
+              onClick={() => router.push('/create-form')}
+              width="full"
+              className="hover:bg-blue-700"
+            />
+          </div>
+        )}
       </div>
       {isLogin ? (
         <>
