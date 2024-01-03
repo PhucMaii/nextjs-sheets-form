@@ -97,9 +97,8 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-8 items-center pt-8">
-        <LoadingComponent color="blue" />
-        <h2 className="font-bold text-lg">Loading...</h2>
+      <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+        <LoadingComponent color="blue" width="12" height="12" />
       </div>
     );
   }
