@@ -242,7 +242,7 @@ export default function EditPositionCard({
         onClick={() => setIsOpenAddInput(true)}
         width="full"
         justify="start"
-        className="hover:bg-blue-800 rounded-lg"
+        className="hover:bg-blue-800 rounded-lg shadow-none"
       />
     </div>
   );
