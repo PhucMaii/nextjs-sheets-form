@@ -72,9 +72,9 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    signIn: ({ user, account, profile, email, credentials }) => {
-      return true;
-    },
+    // signIn: ({ user, account, profile, email, credentials }) => {
+    //   return true;
+    // },
   },
 };
 

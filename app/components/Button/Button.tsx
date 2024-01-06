@@ -8,9 +8,10 @@ interface PropTypes {
   isLoading?: boolean;
   loadingButton?: boolean;
   label: string | ReactNode;
-  onClick: (e: MouseEvent) => void;
+  onClick?: (e: MouseEvent) => void;
   width: string;
   justify?: string; // justify the label
+  type?: 'button' | 'submit' | 'reset' | undefined;
 }
 
 export default function Button({
@@ -23,6 +24,7 @@ export default function Button({
   onClick,
   width,
   justify,
+  type,
 }: PropTypes) {
   const style = `
         flex justify-${
@@ -41,6 +43,7 @@ export default function Button({
       disabled={disabled || isLoading}
       className={style}
       onClick={onClick}
+      type={type}
     >
       {loadingButton &&
         (isLoading ? (

@@ -8,6 +8,10 @@ interface PropTypes<T> {
   placeholder: string;
   type: string;
   value: T;
+  error?: any;
+  onBlur?: any;
+  name?: string;
+  helperText?: any;
 }
 
 export default function Input<T>({
@@ -18,6 +22,10 @@ export default function Input<T>({
   placeholder,
   type,
   value,
+  error,
+  onBlur,
+  name,
+  helperText,
 }: PropTypes<T>) {
   return (
     <div className={`${className ? className : `mb-6`}`}>
@@ -33,13 +41,17 @@ export default function Input<T>({
         disabled={disabled}
         className={`${
           disabled && 'opacity-50'
-        } shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 ${className} leading-tight focus:outline-none focus:shadow-outline`}
+        }  shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 mb-3 ${className} leading-tight focus:outline-none focus:shadow-outline`}
         id={label}
         type={type}
         placeholder={placeholder}
         value={value as string | number}
         onChange={onChange}
+        onError={error ? error : null}
+        onBlur={onBlur ? onBlur : null}
+        name={name ? name : undefined}
       />
+      {helperText && <h6 className="text-red-500 text-md">{helperText}</h6>}
     </div>
   );
 }

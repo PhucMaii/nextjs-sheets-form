@@ -2,8 +2,8 @@
 import Image from 'next/image';
 import React from 'react';
 import Button from '../Button/Button';
-import { redirect, useRouter } from 'next/navigation';
-import { signIn, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 interface PropTypes {
   isLogin: boolean;
@@ -29,9 +29,8 @@ export default function Navbar({ isLogin }: PropTypes) {
             if (isLogin) {
               signOut();
             } else {
-              signIn();
+              router.push('/auth/login');
             }
-            redirect('/api/auth/signin');
           }}
         />
       </div>
