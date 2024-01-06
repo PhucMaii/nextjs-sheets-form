@@ -1,7 +1,7 @@
 import React from 'react';
 import CreateForm from './form';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import { authOptions } from '../api/auth/[...nextauth]/option';
 import { SessionWithId } from '../utils/type';
 
 export default async function CreateFormPage() {

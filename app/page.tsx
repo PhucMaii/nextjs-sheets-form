@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth';
-import { authOptions } from './api/auth/[...nextauth]/route';
+import { authOptions } from './api/auth/[...nextauth]/option';
 import Dashboard from './dashboard/Dashboard';
 
 export default async function Home() {
