@@ -19,7 +19,9 @@ interface OwnPositionType extends PositionType {
 }
 
 export default function EditForm() {
-  const [formName, setFormName] = useState<string>();
+  const [formName, setFormName] = useState<string>('');
+  const [saveFormNameLoading, setSaveFormNameLoading] =
+    useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [isAddPositionOpen, setIsAddPositionOpen] = useState<boolean>(false);
@@ -37,7 +39,11 @@ export default function EditForm() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      fetchForm();
+      const fetching = async () => {
+        const name = await fetchForm();
+        setFormName(name);
+      };
+      fetching();
       fetchSheetsName();
     }
   }, [status]);
@@ -83,9 +89,9 @@ export default function EditForm() {
         setIsLoading(false);
         return;
       }
-      setFormName(data.formName);
       setPositionList(data.positions);
       setIsLoading(false);
+      return data.formName;
     } catch (error: unknown) {
       setNotification({
         on: true,
@@ -194,6 +200,7 @@ export default function EditForm() {
   };
 
   const updateFormName = async () => {
+    setSaveFormNameLoading(true);
     try {
       const body = {
         formId: id,
@@ -212,6 +219,7 @@ export default function EditForm() {
         type: 'success',
         message: res.message,
       });
+      setSaveFormNameLoading(false);
     } catch (error) {
       console.log('There was an error updating form name, ', error);
       setNotification({
@@ -219,6 +227,7 @@ export default function EditForm() {
         type: 'error',
         message: 'Fail to update form name: ' + error,
       });
+      setSaveFormNameLoading(false);
     }
   };
 
@@ -297,6 +306,8 @@ export default function EditForm() {
           color="blue"
           onClick={updateFormName}
           width="full"
+          loadingButton
+          isLoading={saveFormNameLoading}
         />
       </div>
       <Divider label="Positions" />
