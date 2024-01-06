@@ -48,7 +48,7 @@ export default function LoginPage() {
         email: values.email,
         password: values.password,
       });
-
+      console.log(user, 'user');
       if (user && user.error) {
         setNotification({
           on: true,

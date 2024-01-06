@@ -3,9 +3,11 @@ import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 
 const prisma = new PrismaClient();
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'jwt',
   },
@@ -20,12 +22,6 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        // Check if user is already authenticated
-        const existingSession = await getServerSession(authOptions);
-        if (existingSession) {
-          return null;
-        }
-        console.log(existingSession);
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
@@ -79,4 +75,4 @@ export const authOptions: NextAuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+export { handler as default };
