@@ -21,6 +21,7 @@ export default function Form() {
   const [inputList, setInputList] = useState<InputType[]>([]);
   const [inputValues, setInputValues] = useState<InputValues>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -112,6 +113,7 @@ export default function Form() {
 
   const handleSubmit = async (e: MouseEvent) => {
     e.preventDefault();
+    setIsButtonLoading(true);
     try {
       const submitForm = positionList.map((pos) => {
         const validInputs: InputValues = {};
@@ -137,6 +139,7 @@ export default function Form() {
         type: 'success',
         message: res.message,
       });
+      setIsButtonLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -229,6 +232,7 @@ export default function Form() {
             onClick={handleSubmit}
             width="full"
             loadingButton
+            isLoading={isButtonLoading}
           />
         </form>
       </div>

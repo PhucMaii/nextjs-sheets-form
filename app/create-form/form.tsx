@@ -414,7 +414,7 @@ export default function CreateForm({
           loadingButton
           onClick={handleAddForm}
           width="full"
-          className="my-2"
+          className="my-2 bg-green-600 hover:bg-green-700"
         />
       </div>
     </FadeIn>
