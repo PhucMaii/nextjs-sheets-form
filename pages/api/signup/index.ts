@@ -18,6 +18,16 @@ export default async function handler(
   }
   try {
     const userData: UserForm = req.body;
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: userData.email,
+      },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email Already Existed' });
+    }
+
     const password = await hash(userData.password, 12);
     const newUser = await prisma.user.create({
       data: {

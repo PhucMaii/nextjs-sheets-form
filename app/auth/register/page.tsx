@@ -5,76 +5,97 @@ import Input from '@/app/components/Input/Input';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { Notification } from '@/app/utils/type';
 import { useFormik } from 'formik';
-import { signIn, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
 
 interface FormValues {
+  name: string;
   email: string;
   password: string;
-  submit: any;
+  confirmPassword: string;
 }
 
-export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState<boolean>(false);
+const API_REGISTER = '/api/signup';
+export default function page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: '',
     message: '',
   });
-  const { data: session } = useSession();
   const router = useRouter();
 
   const formik = useFormik<FormValues>({
     initialValues: {
+      name: '',
       email: '',
       password: '',
-      submit: null,
+      confirmPassword: '',
     },
     validationSchema: Yup.object({
+      name: Yup.string().required('Please enter your name'),
       email: Yup.string()
         .email('Must be a valid email!')
         .max(255)
         .required('Email is required'),
-      password: Yup.string().max(255).required('Password is required'),
+      password: Yup.string()
+        .min(6, 'Password need to be at least 6 characters')
+        .max(255)
+        .required('Password is required'),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref('password'), 'Passwords Do Not Match'])
+        .required('Password confirm is required'),
     }),
     onSubmit: async (values) => {
-      setIsLogin(true);
       setIsLoading(true);
-      const user = await signIn('credentials', {
-        redirect: false,
+      const submittedData = {
+        firstName: values.name,
         email: values.email,
         password: values.password,
-      });
-      console.log(user, 'user');
-      if (user && user.error) {
+      };
+      try {
+        const response = await fetch(API_REGISTER, {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+          },
+          body: JSON.stringify(submittedData),
+        });
+        const res = await response.json();
+
+        if (res.error) {
+          setNotification({
+            on: true,
+            type: 'error',
+            message: res.error,
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        setNotification({
+          on: true,
+          type: 'success',
+          message: `Register Successfully, Let's Log Back In`,
+        });
+        setIsLoading(false);
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 3000);
+      } catch (error) {
+        console.log(error);
         setNotification({
           on: true,
           type: 'error',
-          message: user.error,
+          message: 'Internal Server Error',
         });
         setIsLoading(false);
-        return;
       }
-
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Login Successful',
-      });
-      setIsLoading(false);
-      setTimeout(() => {
-        window.location.reload(); // with auth guard => redirect user to homepage
-      }, 3000);
     },
   });
 
-  if (!isLogin && session) {
-    router.push('/');
-  }
   return (
     <FadeIn>
       <div className="flex flex-col justify-center items-center h-screen gap-2">
@@ -95,14 +116,29 @@ export default function LoginPage() {
             <h2 className="text-blue-500 font-bold text-lg">DataHabor Pro</h2>
           </div>
           <form className="p-16" noValidate onSubmit={formik.handleSubmit}>
-            <h4 className="text-3xl font-bold text-left">Welcome Back</h4>
-            <h4 className="text-md text-gray-500 mb-8 text-left">
-              Login to access more enhanced features
+            <h4 className="text-3xl font-bold text-left mb-8">
+              Register New Account
             </h4>
             <div className="flex flex-col gap-2">
               <Input
-                label="Email"
+                label="Name"
                 placeholder="eg: John"
+                onChange={formik.handleChange}
+                type="text"
+                value={formik.values.name}
+                className={`m-0 p-0 w-80 ${
+                  !(formik.touched.name && formik.errors.name)
+                    ? ''
+                    : 'border-red-500'
+                }`}
+                onBlur={formik.handleBlur}
+                name="name"
+                error={!!(formik.touched.name && formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+              />
+              <Input
+                label="Email"
+                placeholder="eg: john@gmail.com"
                 onChange={formik.handleChange}
                 type="email"
                 value={formik.values.email}
@@ -118,7 +154,7 @@ export default function LoginPage() {
               />
               <Input
                 label="Password"
-                placeholder="eg: john@gmail.com"
+                placeholder="eg: strongpassword"
                 onChange={formik.handleChange}
                 type="password"
                 value={formik.values.password}
@@ -132,9 +168,36 @@ export default function LoginPage() {
                 onBlur={formik.handleBlur}
                 helperText={formik.touched.password && formik.errors.password}
               />
+              <Input
+                label="Confirm Password"
+                placeholder="eg: strongpassword"
+                onChange={formik.handleChange}
+                type="password"
+                value={formik.values.confirmPassword}
+                className={`m-0 p-0 w-80 ${
+                  !(
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                  )
+                    ? ''
+                    : 'border-red-500'
+                }`}
+                name="confirmPassword"
+                error={
+                  !!(
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                  )
+                }
+                onBlur={formik.handleBlur}
+                helperText={
+                  formik.touched.confirmPassword &&
+                  formik.errors.confirmPassword
+                }
+              />
               <Button
                 color="blue"
-                label="Sign in"
+                label="Register"
                 width="full"
                 loadingButton
                 isLoading={isLoading}
