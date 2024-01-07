@@ -13,6 +13,7 @@ import EditPositionCard from '@/app/components/EditPositionCard/EditPositionCard
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { ValueType } from '@/app/components/Select/Select';
 import AddPosition from '@/app/components/Modals/AddPosition';
+import FadeIn from '@/app/HOC/FadeIn';
 
 interface OwnPositionType extends PositionType {
   positionId: number;
@@ -272,7 +273,7 @@ export default function EditForm() {
   }
 
   return (
-    <div>
+    <FadeIn>
       <Navbar isLogin={true} />
       <Snackbar
         open={notification.on}
@@ -334,6 +335,6 @@ export default function EditForm() {
           className="bg-sky-600 hover:bg-sky-800 h-1/5"
         />
       </div>
-    </div>
+    </FadeIn>
   );
 }

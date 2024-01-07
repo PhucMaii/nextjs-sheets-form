@@ -11,6 +11,7 @@ import Navbar from '../components/Navbar/Navbar';
 import NestedCheckbox from '../components/NestedCheckbox/NestedCheckbox';
 import Select, { ValueType } from '../components/Select/Select';
 import Snackbar from '../components/Snackbar/Snackbar';
+import FadeIn from '../HOC/FadeIn';
 
 export default function CreateForm({
   session,
@@ -21,7 +22,6 @@ export default function CreateForm({
   const [disableInsertPosition, setDisableInsertPosition] =
     useState<boolean>(true);
   const [disableAddForm, setDisableAddForm] = useState<boolean>(true);
-  const [fadeIn, setFadeIn] = useState(false);
   const [formName, setFormName] = useState<string>('');
   const [inputField, setInputField] = useState<InputField>({
     name: '',
@@ -119,7 +119,6 @@ export default function CreateForm({
         };
       });
       setSheetNames(data);
-      setFadeIn(true);
     } catch (error) {
       console.log(error);
     }
@@ -268,11 +267,7 @@ export default function CreateForm({
   }
 
   return (
-    <div
-      className={`transition-opacity duration-700 ease-in ${
-        fadeIn ? 'opacity-100' : 'opacity-0'
-      }`}
-    >
+    <FadeIn>
       <Snackbar
         open={notification.on}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -422,6 +417,6 @@ export default function CreateForm({
           className="my-2"
         />
       </div>
-    </div>
+    </FadeIn>
   );
 }

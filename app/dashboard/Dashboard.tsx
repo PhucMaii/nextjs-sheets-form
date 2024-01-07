@@ -8,6 +8,7 @@ import FormCard from '../components/FormCard/FormCard';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import { FormType, Notification } from '../utils/type';
 import Snackbar from '../components/Snackbar/Snackbar';
+import FadeIn from '../HOC/FadeIn';
 
 interface PropTypes {
   userId: string;
@@ -15,7 +16,6 @@ interface PropTypes {
 }
 
 export default function Dashboard({ userId, isLogin }: PropTypes) {
-  const [fadeIn, setFadeIn] = useState(false);
   const [formList, setFormList] = useState<FormType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [notification, setNotification] = useState<Notification>({
@@ -24,12 +24,6 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
     message: '',
   });
   const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading) {
-      setFadeIn(true);
-    }
-  }, [isLoading]);
 
   useEffect(() => {
     if (userId) {
@@ -104,11 +98,7 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
   }
 
   return (
-    <div
-      className={`transition-opacity duration-700 ease-in ${
-        fadeIn ? 'opacity-100' : 'opacity-0'
-      }`}
-    >
+    <FadeIn>
       <Navbar isLogin={isLogin} />
       <Snackbar
         open={notification.on}
@@ -202,6 +192,6 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
           </div>
         </>
       )}
-    </div>
+    </FadeIn>
   );
 }

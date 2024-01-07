@@ -9,6 +9,7 @@ import Navbar from '@/app/components/Navbar/Navbar';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { InputType, InputValues, PositionType } from '../../utils/type';
 import Input from '@/app/components/Input/Input';
+import FadeIn from '@/app/HOC/FadeIn';
 
 export default function Form() {
   const [formData, setFormData] = useState<FormType>({
@@ -182,7 +183,7 @@ export default function Form() {
   }
 
   return (
-    <div>
+    <FadeIn>
       <Snackbar
         open={notification.on}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -231,6 +232,6 @@ export default function Form() {
           />
         </form>
       </div>
-    </div>
+    </FadeIn>
   );
 }
