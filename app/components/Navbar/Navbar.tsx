@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Avatar, Divider, Menu, MenuItem } from '@mui/material';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import FaceIcon from '@mui/icons-material/Face';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 interface PropTypes {
@@ -71,12 +70,7 @@ export default function Navbar({ isLogin }: PropTypes) {
               transformOrigin={{ horizontal: 'right', vertical: 'top' }}
               anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-              <MenuItem>
-                <div className="flex gap-2">
-                  <FaceIcon /> Profile
-                </div>
-              </MenuItem>
-              <MenuItem>
+              <MenuItem onClick={() => router.push('/settings')}>
                 <div className="flex gap-2">
                   <AdminPanelSettingsIcon /> My Account
                 </div>
