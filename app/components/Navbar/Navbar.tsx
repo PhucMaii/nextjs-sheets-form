@@ -23,7 +23,7 @@ export default function Navbar({ isLogin }: PropTypes) {
   };
 
   return (
-    <div className="flex justify-between">
+    <div className="flex justify-between mx-2">
       <div
         className="flex gap-4 m-4 items-center cursor-pointer"
         onClick={() => router.push('/')}

@@ -51,3 +51,10 @@ export interface SessionClientType {
   data: SessionWithId | null;
   status: string;
 }
+
+export interface UserType {
+  id?: string;
+  email: string;
+  password?: string;
+  firstName?: string;
+}

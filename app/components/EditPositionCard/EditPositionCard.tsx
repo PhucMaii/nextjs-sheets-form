@@ -114,7 +114,7 @@ export default function EditPositionCard({
   return (
     <div
       id={position.positionId?.toString()}
-      className="relative self-start flex-none min-w-max w-1/4 bg-blue-600 shadow rounded-lg p-4"
+      className="relative self-start flex-none min-w-max w-1/4 bg-blue-500 shadow rounded-lg p-4"
     >
       <DeleteModal
         isOpen={isOpenDeleteModal}
