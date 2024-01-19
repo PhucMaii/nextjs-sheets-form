@@ -139,6 +139,7 @@ export default function LoginPage() {
                 loadingButton
                 isLoading={isLoading}
                 type="submit"
+                className="bg-blue-600"
               />
             </div>
           </form>

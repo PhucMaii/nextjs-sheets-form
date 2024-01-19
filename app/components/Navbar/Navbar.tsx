@@ -37,7 +37,6 @@ export default function Navbar({ isLogin }: PropTypes) {
             <Avatar onClick={(e: any) => handleClick(e)} />
             <Menu
               anchorEl={anchorEl}
-              id="account-menu"
               open={openUserMenu}
               onClose={() => setOpenUserMenu(false)}
               onClick={() => setOpenUserMenu(false)}
@@ -89,6 +88,7 @@ export default function Navbar({ isLogin }: PropTypes) {
             color="blue"
             label="Sign in"
             onClick={() => router.push('/auth/login')}
+            className="bg-blue-600"
           />
         )}
       </div>
