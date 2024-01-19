@@ -1,13 +1,24 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import FadeIn from '../HOC/FadeIn';
 import Divider from '../components/Divider/Divider';
 import Input from '../components/Input/Input';
 import Button from '../components/Button/Button';
+import Navbar from '../components/Navbar/Navbar';
 
 export default function page() {
+  const [userData, setUserData] = useState<any>();
+
+  const fetchUserData = async () => {
+    try {
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <FadeIn>
+      <Navbar isLogin={true} />
       <div className="max-w-6xl mx-auto py-16">
         <h4 className="text-2xl font-bold">Settings</h4>
         <Divider />
