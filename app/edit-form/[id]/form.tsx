@@ -26,8 +26,6 @@ export default function EditForm() {
   const [saveFormNameLoading, setSaveFormNameLoading] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [isAddPositionOpen, setIsAddPositionOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -77,11 +75,14 @@ export default function EditForm() {
       setPositionList(data.positions);
       setIsLoading(false);
       return data.formName;
-    } catch (error: unknown) {
+    } catch (error: any) {
+      if (error.response.status === 404) {
+        router.push('/404');
+      }
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to fetch',
+        message: error.response.data.message,
       });
       console.log(error);
     }
@@ -201,40 +202,6 @@ export default function EditForm() {
     return (
       <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
         <LoadingComponent color="blue" width="12" height="12" />
-      </div>
-    );
-  }
-
-  /* If this form is not created by that user
-   * Create an auth guard to determine which user is authorize to use this
-   */
-  if (!isAuthorized) {
-    return (
-      <div className="bg-red-100 p-20 w-full h-full flex flex-col justify-center items-center gap-8">
-        <h1 className="text-2xl text-red-800 font-bold text-center">
-          Sorry You Do Not Have Access To This Page
-        </h1>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-10 h-10"
-        >
-          <path
-            className="text-red-600"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-          />
-        </svg>
-        <Button
-          color="blue"
-          label="Back Home"
-          onClick={() => router.push('/')}
-          width="auto"
-        />
       </div>
     );
   }
