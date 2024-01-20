@@ -14,6 +14,8 @@ import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { ValueType } from '@/app/components/Select/Select';
 import AddPosition from '@/app/components/Modals/AddPosition';
 import FadeIn from '@/app/HOC/FadeIn';
+import { API_URL } from '@/app/utils/enum';
+import axios from 'axios';
 
 interface OwnPositionType extends PositionType {
   positionId: number;
@@ -34,8 +36,7 @@ export default function EditForm() {
   const [positionList, setPositionList] = useState<OwnPositionType[]>([]);
   const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
   const { id }: { id: string | null } = useParams() as { id: string | null };
-  const { data: session, status }: SessionClientType =
-    useSession() as SessionClientType;
+  const { status }: SessionClientType = useSession() as SessionClientType;
   const router = useRouter();
 
   useEffect(() => {
@@ -69,27 +70,9 @@ export default function EditForm() {
 
   const fetchForm = async () => {
     try {
-      const response = await fetch(`/api/form/?id=${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: `Error fetching data. Status: ${response.status}`,
-        });
-        return;
-      }
-      const comingData = await response.json();
-      const data = comingData.data;
-      if (parseInt(session?.user?.id as string) !== data.userId) {
-        setIsAuthorized(false);
-        setIsLoading(false);
-        return;
-      }
+      const response = await axios.get(`${API_URL.FORM}?id=${id}`);
+      const data = response.data.data;
+
       setPositionList(data.positions);
       setIsLoading(false);
       return data.formName;
@@ -106,14 +89,9 @@ export default function EditForm() {
   const fetchSheetsName = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/sheets', {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      let data = await response.json();
-      data = data.map((sheet: ValueType) => {
+      const response = await axios.get(API_URL.SHEETS);
+
+      const data = response.data.data.map((sheet: ValueType) => {
         return {
           value: sheet,
           label: sheet,
@@ -141,25 +119,17 @@ export default function EditForm() {
     const data = { formId: Number(id), sheetName, row };
 
     try {
-      const response = await fetch('/api/position', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const pos = await response.json();
+      const response = await axios.post(API_URL.POSITION, data);
 
       setPositionList([
         ...positionList,
-        { ...data, positionId: pos.data.positionId, inputs: [] },
+        { ...data, positionId: response.data.data.positionId, inputs: [] },
       ]);
 
       setNotification({
         on: true,
-        type: pos.error ? 'error' : 'success',
-        message: pos.message || pos.error,
+        type: 'success',
+        message: response.data.message,
       });
 
       setIsAddPositionOpen(false);
@@ -169,21 +139,16 @@ export default function EditForm() {
       setNotification({
         on: true,
         type: 'error',
-        message: error.message,
+        message: error.response.data.error,
       });
     }
   };
 
   const handleDeletePosition = async (positionId: number) => {
     try {
-      const response = await fetch(`/api/position?positionId=${positionId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-
-      const res = await response.json();
+      const response = await axios.delete(
+        `${API_URL.POSITION}?positionId=${positionId}`,
+      );
 
       const updatedPositions = positionList.filter((pos) => {
         return pos.positionId !== positionId;
@@ -192,41 +157,40 @@ export default function EditForm() {
       setPositionList(updatedPositions);
       setNotification({
         on: true,
-        type: res.error ? 'error' : 'success',
-        message: res.error || res.message,
+        type: 'success',
+        message: response.data.message,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
     }
   };
 
   const updateFormName = async () => {
     setSaveFormNameLoading(true);
     try {
-      const body = {
+      const submittedData = {
         formId: id,
         formName,
       };
-      const response = await fetch('/api/form', {
-        method: 'PUT',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      const res = await response.json();
+      const response = await axios.put(API_URL.FORM, submittedData);
+
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
       setSaveFormNameLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.log('There was an error updating form name, ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to update form name: ' + error,
+        message: error.response.data.error,
       });
       setSaveFormNameLoading(false);
     }
@@ -240,7 +204,9 @@ export default function EditForm() {
     );
   }
 
-  // If this form is not created by that user
+  /* If this form is not created by that user
+   * Create an auth guard to determine which user is authorize to use this
+   */
   if (!isAuthorized) {
     return (
       <div className="bg-red-100 p-20 w-full h-full flex flex-col justify-center items-center gap-8">

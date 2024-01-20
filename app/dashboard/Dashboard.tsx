@@ -9,6 +9,8 @@ import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import { FormType, Notification } from '../utils/type';
 import Snackbar from '../components/Snackbar/Snackbar';
 import FadeIn from '../HOC/FadeIn';
+import axios from 'axios';
+import { API_URL } from '../utils/enum';
 
 interface PropTypes {
   userId: string;
@@ -37,28 +39,15 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
   const fetchForms = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/allForms/?userId=${userId}`, {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        setIsLoading(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: `Couldn't fetch data. Status ${response.status}`,
-        });
-        return;
-      }
-      const res = await response.json();
-      res.data.sort(
+      const response = await axios.get(`${API_URL.ALL_FORMS}?userId=${userId}`);
+
+      response.data.data.sort(
         (formA: FormType, formB: FormType) =>
           new Date(formB.lastOpened).valueOf() -
           new Date(formA.lastOpened).valueOf(),
       );
-      setFormList(res.data);
+
+      setFormList(response.data.data);
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -68,21 +57,15 @@ export default function Dashboard({ userId, isLogin }: PropTypes) {
 
   const handleDeleteForm = async (id: number) => {
     try {
-      const response = await fetch(`api/form/?formId=${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      const res = await response.json();
+      const response = await axios.delete(`${API_URL.FORM}?formId=${id}`);
       const newFormList = formList.filter(
-        (form) => form.formId !== res.data.formId,
+        (form) => form.formId !== response.data.data.formId,
       );
       setFormList(newFormList);
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
     } catch (error) {
       console.log(error);

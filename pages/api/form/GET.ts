@@ -15,6 +15,7 @@ export const GETMethod = async (
     if (!id) {
       return res.status(400).send('Missing id');
     }
+
     const updateLastOpened = await prisma.form.update({
       where: {
         formId: Number(id),
@@ -23,6 +24,7 @@ export const GETMethod = async (
         lastOpened: new Date(),
       },
     });
+
     const data = await prisma.form.findUnique({
       where: {
         formId: Number(id),
@@ -35,6 +37,7 @@ export const GETMethod = async (
         },
       },
     });
+
     if (data && updateLastOpened) {
       return res.status(200).json({
         data,

@@ -12,7 +12,7 @@ export default async function PUTMethod(
     const body: PositionType = req.body;
     const isValidToUpdate = await checkPositionUpdate(prisma, body);
     if (!isValidToUpdate) {
-      return res.status(400).send('The updated position existed');
+      return res.status(400).json({ error: 'The updated position existed' });
     }
     const updatePosition = await prisma.position.update({
       where: {
@@ -32,6 +32,6 @@ export default async function PUTMethod(
     console.log(error, 'UPdate error');
     return res
       .status(500)
-      .send('There was an error with Update Method ' + error);
+      .json({ error: 'Internal Sever Error with Update Method ' + error });
   }
 }
