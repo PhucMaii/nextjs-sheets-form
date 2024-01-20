@@ -9,6 +9,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface FormValues {
   name: string;
@@ -17,7 +19,6 @@ interface FormValues {
   confirmPassword: string;
 }
 
-const API_REGISTER = '/api/signup';
 export default function page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
@@ -56,40 +57,23 @@ export default function page() {
         password: values.password,
       };
       try {
-        const response = await fetch(API_REGISTER, {
-          method: 'POST',
-          headers: {
-            'Content-type': 'application/json',
-          },
-          body: JSON.stringify(submittedData),
-        });
-        const res = await response.json();
-
-        if (res.error) {
-          setNotification({
-            on: true,
-            type: 'error',
-            message: res.error,
-          });
-          setIsLoading(false);
-          return;
-        }
+        const response = await axios.post(API_URL.SIGNUP, submittedData);
 
         setNotification({
           on: true,
           type: 'success',
-          message: `Register Successfully, Let's Log Back In`,
+          message: response.data.message,
         });
         setIsLoading(false);
         setTimeout(() => {
           router.push('/auth/login');
-        }, 3000);
-      } catch (error) {
+        }, 2000);
+      } catch (error: any) {
         console.log(error);
         setNotification({
           on: true,
           type: 'error',
-          message: 'Internal Server Error',
+          message: error.response.data.error,
         });
         setIsLoading(false);
       }

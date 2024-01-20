@@ -10,6 +10,8 @@ import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { InputType, InputValues, PositionType } from '../../utils/type';
 import Input from '@/app/components/Input/Input';
 import FadeIn from '@/app/HOC/FadeIn';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 export default function Form() {
   const [formData, setFormData] = useState<FormType>({
@@ -42,27 +44,15 @@ export default function Form() {
 
   const fetchForm = async () => {
     try {
-      const response = await fetch(`/api/form/?id=${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: `Error fetching data. Status: ${response.status}`,
-        });
-        return;
-      }
-      const comingData = await response.json();
-      const data = comingData.data;
+      const response = await axios.get(`${API_URL.FORM}?id=${id}`);
+      const data = response.data.data;
+
       if (parseInt(session?.user?.id as string) !== data.userId) {
         setIsAuthorized(false);
         setIsLoading(false);
         return;
       }
+
       getMostInputsPosition(data);
       setPositionList(data.positions);
       setFormData(data);
@@ -126,22 +116,21 @@ export default function Form() {
           ...validInputs,
         };
       });
-      const response = await fetch('/api/submit', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(submitForm),
-      });
-      const res = await response.json();
+      const response = await axios.post(API_URL.IMPORT_SHEETS, submitForm);
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
       setIsButtonLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+      setIsButtonLoading(false);
     }
   };
 

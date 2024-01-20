@@ -5,6 +5,8 @@ import Modal from 'react-modal';
 import Button from '../Button/Button';
 import Input from '../Input/Input';
 import Select, { ValueType } from '../Select/Select';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface PropTypes {
   fetchForm: FetchForm;
@@ -38,14 +40,8 @@ export default function AddPosition({
 
   const fetchSheetsName = async () => {
     try {
-      const response = await fetch('/api/sheets', {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      let data = await response.json();
-      data = data.map((sheet: string) => {
+      const response = await axios.get(API_URL.SHEETS);
+      const data = response.data.data.map((sheet: string) => {
         return {
           value: sheet,
           label: sheet,
