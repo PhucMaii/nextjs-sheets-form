@@ -44,12 +44,13 @@ export default function LoginPage() {
     onSubmit: async (values) => {
       setIsLogin(true);
       setIsLoading(true);
+
       const user = await signIn('credentials', {
         redirect: false,
         email: values.email,
         password: values.password,
       });
-      console.log(user, 'user');
+
       if (user && user.error) {
         setNotification({
           on: true,
@@ -68,13 +69,14 @@ export default function LoginPage() {
       setIsLoading(false);
       setTimeout(() => {
         window.location.reload(); // with auth guard => redirect user to homepage
-      }, 3000);
+      }, 1000);
     },
   });
 
   if (!isLogin && session) {
     router.push('/');
   }
+
   return (
     <FadeIn>
       <div className="flex flex-col justify-center items-center h-screen gap-2">

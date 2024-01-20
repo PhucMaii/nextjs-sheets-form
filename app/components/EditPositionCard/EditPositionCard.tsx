@@ -20,6 +20,8 @@ import EditRow from '../Modals/EditRow';
 import IconButton from '../IconButton/IconButton';
 import { ValueType } from '../Select/Select';
 import DeleteModal from '../Modals/DeleteModal';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface OwnPositionType extends PositionType {
   positionId: number;
@@ -73,20 +75,10 @@ export default function EditPositionCard({
 
   const handleAddInput = async () => {
     try {
-      const response = await fetch('/api/input', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(newInput),
-      });
-      if (!response.ok) {
-        await fetchForm();
-        return false;
-      }
-      const res = await response.json();
+      const response = await axios.post(API_URL.INPUT, newInput);
       const id: number = position.positionId as number;
       handleChangePositionList(id, 'inputs', [...position.inputs, newInput]);
+
       setNewInput({
         positionId: position.positionId,
         inputId: -1, // use negative number for temp id
@@ -96,11 +88,13 @@ export default function EditPositionCard({
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
       setIsOpenAddInput(false);
+
       return true;
     } catch (error) {
+      await fetchForm();
       console.log(error);
       setNotification({
         on: true,

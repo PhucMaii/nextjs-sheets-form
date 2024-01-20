@@ -4,6 +4,8 @@ import Modal from 'react-modal';
 import Button from '../Button/Button';
 import Select, { ValueType } from '../Select/Select';
 import { Notification, PositionType } from '@/app/utils/type';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface PropTypes {
   handleChangePositionList: (
@@ -35,31 +37,27 @@ export default function EditSheetName({
   const updateSheetName = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/position', {
-        method: 'PUT',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...position,
-          sheetName: value,
-        }),
+      const response = await axios.put(API_URL.POSITION, {
+        ...position,
+        sheetName: value,
       });
-      const res = await response.json();
       const id = position.positionId as number;
+
       handleChangePositionList(id, 'sheetName', value);
+
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
       setIsLoading(false);
+
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to update sheet name. Refresh page to see result',
+        message: error.response.data.error,
       });
       setIsLoading(false);
       console.log(error);
