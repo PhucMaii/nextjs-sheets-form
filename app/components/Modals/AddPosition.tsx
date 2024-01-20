@@ -24,7 +24,7 @@ export default function AddPosition({
   setNotification,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [sheetName, setSheetName] = useState<string>('');
+  const [sheetName, setSheetName] = useState<any>();
   const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
   const [row, setRow] = useState<number>(1);
 
