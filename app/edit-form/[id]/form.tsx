@@ -26,6 +26,7 @@ export default function EditForm() {
   const [saveFormNameLoading, setSaveFormNameLoading] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [isAddPositionOpen, setIsAddPositionOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
