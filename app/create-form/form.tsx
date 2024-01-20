@@ -1,7 +1,7 @@
 'use client';
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
 import { InputField, InsertPosition } from './type';
-import { Notification, SessionWithId } from '../utils/type';
+import { Notification } from '../utils/type';
 import Button from '../components/Button/Button';
 import Chip from '../components/Chip/Chip';
 import Divider from '../components/Divider/Divider';
@@ -13,12 +13,9 @@ import Snackbar from '../components/Snackbar/Snackbar';
 import FadeIn from '../HOC/FadeIn';
 import axios from 'axios';
 import { API_URL } from '../utils/enum';
+import { useSession } from 'next-auth/react';
 
-export default function CreateForm({
-  session,
-}: {
-  session: SessionWithId | null;
-}) {
+export default function CreateForm() {
   const [disableInput, setDisableInput] = useState<boolean>(true);
   const [disableInsertPosition, setDisableInsertPosition] =
     useState<boolean>(true);
@@ -46,10 +43,13 @@ export default function CreateForm({
   });
   const [selectAll, setSelectAll] = useState<boolean>(true);
   const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
+  const { data: session, status }: any = useSession();
 
   useEffect(() => {
-    fetchSheetsName();
-  }, []);
+    if (status === 'authenticated') {
+      fetchSheetsName();
+    }
+  }, [status]);
 
   // Logic handling is disable next field of form name or not
   useEffect(() => {
@@ -156,11 +156,14 @@ export default function CreateForm({
   };
 
   const handleAddForm = async () => {
+    if (!session) {
+      return;
+    }
     setIsLoading(true);
     try {
       const submittedData = {
         formName,
-        userId: session?.user.id,
+        userId: session?.user?.id,
         positions: [...insertPositionList],
       };
 
