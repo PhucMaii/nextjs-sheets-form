@@ -54,7 +54,7 @@ export default function Form() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to fetch data',
+        message: error.response.data.error,
       });
       console.log(error);
     }

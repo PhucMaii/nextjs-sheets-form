@@ -1,5 +1,5 @@
 'use client';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '../../components/Navbar/Navbar';
 import Input from '../../components/Input/Input';
@@ -11,17 +11,19 @@ import Button from '@/app/components/Button/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import EditPositionCard from '@/app/components/EditPositionCard/EditPositionCard';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
-import { ValueType } from '@/app/components/Select/Select';
 import AddPosition from '@/app/components/Modals/AddPosition';
 import FadeIn from '@/app/HOC/FadeIn';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
+import { SheetNamesContext } from '@/app/context/SheetNamesContext';
 
 interface OwnPositionType extends PositionType {
   positionId: number;
 }
 
 export default function EditForm() {
+  const sheetNames = useContext(SheetNamesContext);
+
   const [formName, setFormName] = useState<string>('');
   const [saveFormNameLoading, setSaveFormNameLoading] =
     useState<boolean>(false);
@@ -33,7 +35,6 @@ export default function EditForm() {
     message: '',
   });
   const [positionList, setPositionList] = useState<OwnPositionType[]>([]);
-  const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
   const { id }: { id: string | null } = useParams() as { id: string | null };
   const { status }: SessionClientType = useSession() as SessionClientType;
   const router = useRouter();
@@ -45,7 +46,6 @@ export default function EditForm() {
         setFormName(name);
       };
       fetching();
-      fetchSheetsName();
     }
   }, [status]);
 
@@ -85,25 +85,6 @@ export default function EditForm() {
         message: error.response.data.message,
       });
       console.log(error);
-    }
-  };
-
-  const fetchSheetsName = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(API_URL.SHEETS);
-
-      const data = response.data.data.map((sheet: ValueType) => {
-        return {
-          value: sheet,
-          label: sheet,
-        };
-      });
-      setSheetNames(data);
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
     }
   };
 
@@ -216,7 +197,6 @@ export default function EditForm() {
         message={notification.message}
       />
       <AddPosition
-        fetchForm={fetchForm}
         isOpen={isAddPositionOpen}
         onClose={() => setIsAddPositionOpen(false)}
         setNotification={setNotification}
@@ -257,7 +237,6 @@ export default function EditForm() {
                 position={position}
                 sheetNames={sheetNames}
                 setNotification={setNotification}
-                fetchForm={fetchForm}
               />
             );
           })}

@@ -1,17 +1,6 @@
 'use client';
-import {
-  FetchForm,
-  InputType,
-  Notification,
-  PositionType,
-} from '../../utils/type';
-import React, {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
+import { InputType, Notification, PositionType } from '../../utils/type';
+import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import InputChip from '../DraggableChip/InputChip';
 import Button from '../Button/Button';
 import EditSheetName from '../Modals/EditSheetName';
@@ -28,7 +17,6 @@ interface OwnPositionType extends PositionType {
 }
 
 interface PropTypes {
-  fetchForm: FetchForm;
   handleChangePositionList: (
     positionId: number,
     field: string,
@@ -41,7 +29,6 @@ interface PropTypes {
 }
 
 export default function EditPositionCard({
-  fetchForm,
   handleChangePositionList,
   handleDeletePos,
   position,
@@ -62,22 +49,14 @@ export default function EditPositionCard({
   const [sheetName, setSheetName] = useState<string>(position.sheetName);
   const [row, setRow] = useState<number>(position.row);
 
-  useEffect(() => {
-    if (
-      newInput.positionId === position.positionId &&
-      newInput.inputId === -1 &&
-      newInput.inputName === '' &&
-      newInput.inputType === ''
-    ) {
-      fetchForm();
-    }
-  }, [newInput]);
-
   const handleAddInput = async () => {
     try {
       const response = await axios.post(API_URL.INPUT, newInput);
       const id: number = position.positionId as number;
-      handleChangePositionList(id, 'inputs', [...position.inputs, newInput]);
+      handleChangePositionList(id, 'inputs', [
+        ...position.inputs,
+        response.data.data,
+      ]);
 
       setNewInput({
         positionId: position.positionId,
@@ -94,7 +73,6 @@ export default function EditPositionCard({
 
       return true;
     } catch (error) {
-      await fetchForm();
       console.log(error);
       setNotification({
         on: true,
@@ -224,7 +202,6 @@ export default function EditPositionCard({
                 handleChangePositionList={handleChangePositionList}
                 input={input}
                 position={position}
-                fetchForm={fetchForm}
                 setNotification={setNotification}
               />
             );
