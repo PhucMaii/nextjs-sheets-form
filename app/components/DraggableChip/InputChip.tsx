@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import EditInputModal from '../Modals/EditInputModal';
-import { FetchForm, InputType, Notification } from '../../utils/type';
+import { InputType, Notification } from '../../utils/type';
 import IconButton from '../IconButton/IconButton';
 import DeleteModal from '../Modals/DeleteModal';
 import { API_URL } from '@/app/utils/enum';
@@ -22,13 +22,11 @@ interface PropTypes {
   id: string;
   input: InputType;
   position: any;
-  fetchForm: FetchForm;
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 export default function InputChip({
   className,
-  fetchForm,
   handleChangePositionList,
   id,
   input,
@@ -93,7 +91,7 @@ export default function InputChip({
 
       const newInputs = position.inputs.map((inputObj: InputType) => {
         if (inputObj.inputId === input.inputId) {
-          return { ...newInput };
+          return { ...response.data.data };
         }
         return inputObj;
       });
@@ -110,7 +108,6 @@ export default function InputChip({
       return true;
     } catch (error) {
       console.log(error);
-      await fetchForm();
       return false;
     }
   };

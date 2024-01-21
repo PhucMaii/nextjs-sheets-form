@@ -17,7 +17,7 @@ export default function LoginAndRegisterGuard({ children }: any) {
   useEffect(() => {
     const checkSession = async () => {
       const session = await getSession();
-      console.log(session, 'Session');
+
       if (session) {
         router.push('/');
       }

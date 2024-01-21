@@ -1,15 +1,13 @@
 import { customStyles } from '@/app/utils/styles';
-import { FetchForm, Notification } from '@/app/utils/type';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Notification } from '@/app/utils/type';
+import React, { Dispatch, SetStateAction, useContext, useState } from 'react';
 import Modal from 'react-modal';
 import Button from '../Button/Button';
 import Input from '../Input/Input';
-import Select, { ValueType } from '../Select/Select';
-import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import Select from '../Select/Select';
+import { SheetNamesContext } from '@/app/context/SheetNamesContext';
 
 interface PropTypes {
-  fetchForm: FetchForm;
   handleAddPosition: (sheetName: string, row: number) => void;
   isOpen: boolean;
   onClose: () => void;
@@ -17,41 +15,15 @@ interface PropTypes {
 }
 
 export default function AddPosition({
-  fetchForm,
   handleAddPosition,
   isOpen,
   onClose,
   setNotification,
 }: PropTypes) {
+  const sheetNames = useContext(SheetNamesContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sheetName, setSheetName] = useState<any>();
-  const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
   const [row, setRow] = useState<number>(1);
-
-  useEffect(() => {
-    fetchSheetsName();
-  }, []);
-
-  useEffect(() => {
-    if (sheetName === '') {
-      fetchForm();
-    }
-  }, [sheetName]);
-
-  const fetchSheetsName = async () => {
-    try {
-      const response = await axios.get(API_URL.SHEETS);
-      const data = response.data.data.map((sheet: string) => {
-        return {
-          value: sheet,
-          label: sheet,
-        };
-      });
-      setSheetNames(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const addPosition = async () => {
     setIsLoading(true);

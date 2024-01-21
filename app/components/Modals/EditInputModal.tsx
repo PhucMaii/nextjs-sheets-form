@@ -56,6 +56,10 @@ export default function EditInputModal({
         type: 'error',
         message: 'Input Name Exist',
       });
+
+      setTimeout(() => {
+        setNotification({ ...notification, on: false });
+      }, 2000);
     }
     setIsLoading(false);
   };
