@@ -5,11 +5,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId }: any = req.query.id as string;
+    const userId: string = req.query.id as string;
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        id: userId,
+        id: parseInt(userId),
       },
     });
 
@@ -18,8 +18,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     return res.status(200).json({
-        data: existingUser,
-        message: 'Fetch User Successfully'
+      data: existingUser,
+      message: 'Fetch User Successfully',
     });
   } catch (error) {
     console.log(error);
