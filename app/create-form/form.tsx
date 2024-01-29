@@ -1,23 +1,21 @@
 'use client';
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
 import { InputField, InsertPosition } from './type';
-import { Notification, SessionWithId } from '../utils/type';
+import { Notification } from '../utils/type';
 import Button from '../components/Button/Button';
 import Chip from '../components/Chip/Chip';
 import Divider from '../components/Divider/Divider';
 import Input from '../components/Input/Input';
-import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import Navbar from '../components/Navbar/Navbar';
 import NestedCheckbox from '../components/NestedCheckbox/NestedCheckbox';
 import Select, { ValueType } from '../components/Select/Select';
 import Snackbar from '../components/Snackbar/Snackbar';
 import FadeIn from '../HOC/FadeIn';
+import axios from 'axios';
+import { API_URL } from '../utils/enum';
+import { useSession } from 'next-auth/react';
 
-export default function CreateForm({
-  session,
-}: {
-  session: SessionWithId | null;
-}) {
+export default function CreateForm() {
   const [disableInput, setDisableInput] = useState<boolean>(true);
   const [disableInsertPosition, setDisableInsertPosition] =
     useState<boolean>(true);
@@ -45,10 +43,13 @@ export default function CreateForm({
   });
   const [selectAll, setSelectAll] = useState<boolean>(true);
   const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
+  const { data: session, status }: any = useSession();
 
   useEffect(() => {
-    fetchSheetsName();
-  }, []);
+    if (status === 'authenticated') {
+      fetchSheetsName();
+    }
+  }, [status]);
 
   // Logic handling is disable next field of form name or not
   useEffect(() => {
@@ -105,14 +106,8 @@ export default function CreateForm({
 
   const fetchSheetsName = async () => {
     try {
-      const response = await fetch('/api/sheets', {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      let data = await response.json();
-      data = data.map((sheet: string) => {
+      const response = await axios.get(API_URL.SHEETS);
+      const data = response.data.data.map((sheet: string) => {
         return {
           value: sheet,
           label: sheet,
@@ -133,9 +128,11 @@ export default function CreateForm({
       });
       return;
     }
+
     const isInputFieldInvalid = inputFieldList.some(
       (input) => input.name === inputField.name,
     );
+
     if (isInputFieldInvalid) {
       setNotification({
         on: true,
@@ -144,6 +141,7 @@ export default function CreateForm({
       });
       return;
     }
+
     setInputFieldList([...inputFieldList, inputField]);
     setInputField({
       name: '',
@@ -158,32 +156,36 @@ export default function CreateForm({
   };
 
   const handleAddForm = async () => {
+    if (!session) {
+      return;
+    }
     setIsLoading(true);
     try {
-      const body = {
+      const submittedData = {
         formName,
-        userId: session?.user.id,
+        userId: session?.user?.id,
         positions: [...insertPositionList],
       };
-      const response = await fetch('/api/form', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      const data = await response.json();
+
+      const response = await axios.post(API_URL.FORM, submittedData);
+
       setNotification({
         on: true,
         type: 'success',
-        message: data.message,
+        message: response.data.message,
       });
       setFormName('');
       setIsLoading(false);
       setInputFieldList([]);
       setInsertPositionList([]);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: error.response.data.error,
+      });
+      setIsLoading(false);
     }
   };
 
@@ -257,14 +259,6 @@ export default function CreateForm({
     );
     setInsertPositionList(newInsertPositionList);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-        <LoadingComponent color="blue" width="12" height="12" />
-      </div>
-    );
-  }
 
   return (
     <FadeIn>

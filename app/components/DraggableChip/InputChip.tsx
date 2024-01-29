@@ -6,9 +6,11 @@ import React, {
   useState,
 } from 'react';
 import EditInputModal from '../Modals/EditInputModal';
-import { FetchForm, InputType, Notification } from '../../utils/type';
+import { InputType, Notification } from '../../utils/type';
 import IconButton from '../IconButton/IconButton';
 import DeleteModal from '../Modals/DeleteModal';
+import { API_URL } from '@/app/utils/enum';
+import axios from 'axios';
 
 interface PropTypes {
   className?: string;
@@ -20,13 +22,11 @@ interface PropTypes {
   id: string;
   input: InputType;
   position: any;
-  fetchForm: FetchForm;
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 export default function InputChip({
   className,
-  fetchForm,
   handleChangePositionList,
   id,
   input,
@@ -52,13 +52,9 @@ export default function InputChip({
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/input?inputId=${input.inputId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      const res = await response.json();
+      const response = await axios.delete(
+        `${API_URL.INPUT}?inputId=${input.inputId}`,
+      );
 
       const newInputs = position.inputs.filter((inputObj: InputType) => {
         return inputObj.inputId !== input.inputId;
@@ -70,11 +66,16 @@ export default function InputChip({
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
       setIsOpenDeleteModal(false);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: error.response.data.error,
+      });
     }
   };
 
@@ -86,23 +87,11 @@ export default function InputChip({
       return false;
     }
     try {
-      const response = await fetch('/api/input', {
-        method: 'PUT',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify({ ...newInput }),
-      });
-
-      if (!response.ok) {
-        await fetchForm();
-        return false;
-      }
-      const res = await response.json();
+      const response = await axios.put(API_URL.INPUT, newInput);
 
       const newInputs = position.inputs.map((inputObj: InputType) => {
         if (inputObj.inputId === input.inputId) {
-          return { ...newInput };
+          return { ...response.data.data };
         }
         return inputObj;
       });
@@ -114,7 +103,7 @@ export default function InputChip({
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
       return true;
     } catch (error) {

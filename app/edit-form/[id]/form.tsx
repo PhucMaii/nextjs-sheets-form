@@ -1,5 +1,5 @@
 'use client';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '../../components/Navbar/Navbar';
 import Input from '../../components/Input/Input';
@@ -11,20 +11,23 @@ import Button from '@/app/components/Button/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import EditPositionCard from '@/app/components/EditPositionCard/EditPositionCard';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
-import { ValueType } from '@/app/components/Select/Select';
 import AddPosition from '@/app/components/Modals/AddPosition';
 import FadeIn from '@/app/HOC/FadeIn';
+import { API_URL } from '@/app/utils/enum';
+import axios from 'axios';
+import { SheetNamesContext } from '@/app/context/SheetNamesContext';
 
 interface OwnPositionType extends PositionType {
   positionId: number;
 }
 
 export default function EditForm() {
+  const sheetNames = useContext(SheetNamesContext);
+
   const [formName, setFormName] = useState<string>('');
   const [saveFormNameLoading, setSaveFormNameLoading] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(true);
   const [isAddPositionOpen, setIsAddPositionOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -32,10 +35,8 @@ export default function EditForm() {
     message: '',
   });
   const [positionList, setPositionList] = useState<OwnPositionType[]>([]);
-  const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
   const { id }: { id: string | null } = useParams() as { id: string | null };
-  const { data: session, status }: SessionClientType =
-    useSession() as SessionClientType;
+  const { status }: SessionClientType = useSession() as SessionClientType;
   const router = useRouter();
 
   useEffect(() => {
@@ -45,7 +46,6 @@ export default function EditForm() {
         setFormName(name);
       };
       fetching();
-      fetchSheetsName();
     }
   }, [status]);
 
@@ -69,61 +69,22 @@ export default function EditForm() {
 
   const fetchForm = async () => {
     try {
-      const response = await fetch(`/api/form/?id=${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: `Error fetching data. Status: ${response.status}`,
-        });
-        return;
-      }
-      const comingData = await response.json();
-      const data = comingData.data;
-      if (parseInt(session?.user?.id as string) !== data.userId) {
-        setIsAuthorized(false);
-        setIsLoading(false);
-        return;
-      }
+      const response = await axios.get(`${API_URL.FORM}?id=${id}`);
+      const data = response.data.data;
+
       setPositionList(data.positions);
       setIsLoading(false);
       return data.formName;
-    } catch (error: unknown) {
+    } catch (error: any) {
+      if (error.response.status === 404) {
+        router.push('/404');
+      }
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to fetch',
+        message: error.response.data.message,
       });
       console.log(error);
-    }
-  };
-
-  const fetchSheetsName = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/sheets', {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-      let data = await response.json();
-      data = data.map((sheet: ValueType) => {
-        return {
-          value: sheet,
-          label: sheet,
-        };
-      });
-      setSheetNames(data);
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
     }
   };
 
@@ -141,25 +102,17 @@ export default function EditForm() {
     const data = { formId: Number(id), sheetName, row };
 
     try {
-      const response = await fetch('/api/position', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const pos = await response.json();
+      const response = await axios.post(API_URL.POSITION, data);
 
       setPositionList([
         ...positionList,
-        { ...data, positionId: pos.data.positionId, inputs: [] },
+        { ...data, positionId: response.data.data.positionId, inputs: [] },
       ]);
 
       setNotification({
         on: true,
-        type: pos.error ? 'error' : 'success',
-        message: pos.message || pos.error,
+        type: 'success',
+        message: response.data.message,
       });
 
       setIsAddPositionOpen(false);
@@ -169,21 +122,16 @@ export default function EditForm() {
       setNotification({
         on: true,
         type: 'error',
-        message: error.message,
+        message: error.response.data.error,
       });
     }
   };
 
   const handleDeletePosition = async (positionId: number) => {
     try {
-      const response = await fetch(`/api/position?positionId=${positionId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-type': 'application/json',
-        },
-      });
-
-      const res = await response.json();
+      const response = await axios.delete(
+        `${API_URL.POSITION}?positionId=${positionId}`,
+      );
 
       const updatedPositions = positionList.filter((pos) => {
         return pos.positionId !== positionId;
@@ -192,41 +140,40 @@ export default function EditForm() {
       setPositionList(updatedPositions);
       setNotification({
         on: true,
-        type: res.error ? 'error' : 'success',
-        message: res.error || res.message,
+        type: 'success',
+        message: response.data.message,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
     }
   };
 
   const updateFormName = async () => {
     setSaveFormNameLoading(true);
     try {
-      const body = {
+      const submittedData = {
         formId: id,
         formName,
       };
-      const response = await fetch('/api/form', {
-        method: 'PUT',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      const res = await response.json();
+      const response = await axios.put(API_URL.FORM, submittedData);
+
       setNotification({
         on: true,
         type: 'success',
-        message: res.message,
+        message: response.data.message,
       });
       setSaveFormNameLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.log('There was an error updating form name, ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to update form name: ' + error,
+        message: error.response.data.error,
       });
       setSaveFormNameLoading(false);
     }
@@ -236,38 +183,6 @@ export default function EditForm() {
     return (
       <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
         <LoadingComponent color="blue" width="12" height="12" />
-      </div>
-    );
-  }
-
-  // If this form is not created by that user
-  if (!isAuthorized) {
-    return (
-      <div className="bg-red-100 p-20 w-full h-full flex flex-col justify-center items-center gap-8">
-        <h1 className="text-2xl text-red-800 font-bold text-center">
-          Sorry You Do Not Have Access To This Page
-        </h1>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-10 h-10"
-        >
-          <path
-            className="text-red-600"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-          />
-        </svg>
-        <Button
-          color="blue"
-          label="Back Home"
-          onClick={() => router.push('/')}
-          width="auto"
-        />
       </div>
     );
   }
@@ -282,7 +197,6 @@ export default function EditForm() {
         message={notification.message}
       />
       <AddPosition
-        fetchForm={fetchForm}
         isOpen={isAddPositionOpen}
         onClose={() => setIsAddPositionOpen(false)}
         setNotification={setNotification}
@@ -323,7 +237,6 @@ export default function EditForm() {
                 position={position}
                 sheetNames={sheetNames}
                 setNotification={setNotification}
-                fetchForm={fetchForm}
               />
             );
           })}

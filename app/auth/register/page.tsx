@@ -9,6 +9,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
+import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
 
 interface FormValues {
   name: string;
@@ -17,7 +20,6 @@ interface FormValues {
   confirmPassword: string;
 }
 
-const API_REGISTER = '/api/signup';
 export default function page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
@@ -56,40 +58,23 @@ export default function page() {
         password: values.password,
       };
       try {
-        const response = await fetch(API_REGISTER, {
-          method: 'POST',
-          headers: {
-            'Content-type': 'application/json',
-          },
-          body: JSON.stringify(submittedData),
-        });
-        const res = await response.json();
-
-        if (res.error) {
-          setNotification({
-            on: true,
-            type: 'error',
-            message: res.error,
-          });
-          setIsLoading(false);
-          return;
-        }
+        const response = await axios.post(API_URL.SIGNUP, submittedData);
 
         setNotification({
           on: true,
           type: 'success',
-          message: `Register Successfully, Let's Log Back In`,
+          message: response.data.message,
         });
         setIsLoading(false);
         setTimeout(() => {
           router.push('/auth/login');
-        }, 3000);
-      } catch (error) {
+        }, 2000);
+      } catch (error: any) {
         console.log(error);
         setNotification({
           on: true,
           type: 'error',
-          message: 'Internal Server Error',
+          message: error.response.data.error,
         });
         setIsLoading(false);
       }
@@ -97,116 +82,118 @@ export default function page() {
   });
 
   return (
-    <FadeIn>
-      <div className="flex flex-col justify-center items-center h-screen gap-2">
-        <Snackbar
-          open={notification.on}
-          onClose={() => setNotification({ ...notification, on: false })}
-          type={notification.type}
-          message={notification.message}
-        />
-        <div className="shadow-lg rounded-3xl">
-          <div className="flex gap-2 m-4 items-center cursor-pointer">
-            <Image
-              width={20}
-              height={20}
-              src="/computer-icon.png"
-              alt="computer"
-            />
-            <h2 className="text-blue-500 font-bold text-lg">DataHabor Pro</h2>
-          </div>
-          <form className="p-16" noValidate onSubmit={formik.handleSubmit}>
-            <h4 className="text-3xl font-bold text-left mb-8">
-              Register New Account
-            </h4>
-            <div className="flex flex-col gap-2">
-              <Input
-                label="Name"
-                placeholder="eg: John"
-                onChange={formik.handleChange}
-                type="text"
-                value={formik.values.name}
-                className={`m-0 p-0 w-80 ${
-                  !(formik.touched.name && formik.errors.name)
-                    ? ''
-                    : 'border-red-500'
-                }`}
-                onBlur={formik.handleBlur}
-                name="name"
-                error={!!(formik.touched.name && formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
+    <LoginAndRegisterGuard>
+      <FadeIn>
+        <div className="flex flex-col justify-center items-center h-screen gap-2">
+          <Snackbar
+            open={notification.on}
+            onClose={() => setNotification({ ...notification, on: false })}
+            type={notification.type}
+            message={notification.message}
+          />
+          <div className="shadow-lg rounded-3xl">
+            <div className="flex gap-2 m-4 items-center cursor-pointer">
+              <Image
+                width={20}
+                height={20}
+                src="/computer-icon.png"
+                alt="computer"
               />
-              <Input
-                label="Email"
-                placeholder="eg: john@gmail.com"
-                onChange={formik.handleChange}
-                type="email"
-                value={formik.values.email}
-                className={`m-0 p-0 w-80 ${
-                  !(formik.touched.email && formik.errors.email)
-                    ? ''
-                    : 'border-red-500'
-                }`}
-                onBlur={formik.handleBlur}
-                name="email"
-                error={!!(formik.touched.email && formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-              />
-              <Input
-                label="Password"
-                placeholder="eg: strongpassword"
-                onChange={formik.handleChange}
-                type="password"
-                value={formik.values.password}
-                className={`m-0 p-0 w-80 ${
-                  !(formik.touched.password && formik.errors.password)
-                    ? ''
-                    : 'border-red-500'
-                }`}
-                name="password"
-                error={!!(formik.touched.password && formik.errors.password)}
-                onBlur={formik.handleBlur}
-                helperText={formik.touched.password && formik.errors.password}
-              />
-              <Input
-                label="Confirm Password"
-                placeholder="eg: strongpassword"
-                onChange={formik.handleChange}
-                type="password"
-                value={formik.values.confirmPassword}
-                className={`m-0 p-0 w-80 ${
-                  !(
-                    formik.touched.confirmPassword &&
-                    formik.errors.confirmPassword
-                  )
-                    ? ''
-                    : 'border-red-500'
-                }`}
-                name="confirmPassword"
-                error={
-                  !!(
-                    formik.touched.confirmPassword &&
-                    formik.errors.confirmPassword
-                  )
-                }
-                onBlur={formik.handleBlur}
-                helperText={
-                  formik.touched.confirmPassword &&
-                  formik.errors.confirmPassword
-                }
-              />
-              <Button
-                color="blue"
-                label="Register"
-                width="full"
-                loadingButton
-                isLoading={isLoading}
-                type="submit"
-              />
+              <h2 className="text-blue-500 font-bold text-lg">DataHabor Pro</h2>
             </div>
-          </form>
+            <form className="p-16" noValidate onSubmit={formik.handleSubmit}>
+              <h4 className="text-3xl font-bold text-left mb-8">
+                Register New Account
+              </h4>
+              <div className="flex flex-col gap-2">
+                <Input
+                  label="Name"
+                  placeholder="eg: John"
+                  onChange={formik.handleChange}
+                  type="text"
+                  value={formik.values.name}
+                  className={`m-0 p-0 w-80 ${
+                    !(formik.touched.name && formik.errors.name)
+                      ? ''
+                      : 'border-red-500'
+                  }`}
+                  onBlur={formik.handleBlur}
+                  name="name"
+                  error={!!(formik.touched.name && formik.errors.name)}
+                  helperText={formik.touched.name && formik.errors.name}
+                />
+                <Input
+                  label="Email"
+                  placeholder="eg: john@gmail.com"
+                  onChange={formik.handleChange}
+                  type="email"
+                  value={formik.values.email}
+                  className={`m-0 p-0 w-80 ${
+                    !(formik.touched.email && formik.errors.email)
+                      ? ''
+                      : 'border-red-500'
+                  }`}
+                  onBlur={formik.handleBlur}
+                  name="email"
+                  error={!!(formik.touched.email && formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                />
+                <Input
+                  label="Password"
+                  placeholder="eg: strongpassword"
+                  onChange={formik.handleChange}
+                  type="password"
+                  value={formik.values.password}
+                  className={`m-0 p-0 w-80 ${
+                    !(formik.touched.password && formik.errors.password)
+                      ? ''
+                      : 'border-red-500'
+                  }`}
+                  name="password"
+                  error={!!(formik.touched.password && formik.errors.password)}
+                  onBlur={formik.handleBlur}
+                  helperText={formik.touched.password && formik.errors.password}
+                />
+                <Input
+                  label="Confirm Password"
+                  placeholder="eg: strongpassword"
+                  onChange={formik.handleChange}
+                  type="password"
+                  value={formik.values.confirmPassword}
+                  className={`m-0 p-0 w-80 ${
+                    !(
+                      formik.touched.confirmPassword &&
+                      formik.errors.confirmPassword
+                    )
+                      ? ''
+                      : 'border-red-500'
+                  }`}
+                  name="confirmPassword"
+                  error={
+                    !!(
+                      formik.touched.confirmPassword &&
+                      formik.errors.confirmPassword
+                    )
+                  }
+                  onBlur={formik.handleBlur}
+                  helperText={
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                  }
+                />
+                <Button
+                  color="blue"
+                  label="Register"
+                  width="full"
+                  loadingButton
+                  isLoading={isLoading}
+                  type="submit"
+                />
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </FadeIn>
+      </FadeIn>
+    </LoginAndRegisterGuard>
   );
 }

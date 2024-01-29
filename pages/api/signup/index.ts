@@ -14,7 +14,7 @@ export default async function handler(
 ) {
   const prisma = new PrismaClient();
   if (req.method !== 'POST') {
-    return res.status(500).send({ message: 'Only POST method allowed' });
+    return res.status(500).json({ error: 'Only POST method allowed' });
   }
   try {
     const userData: UserForm = req.body;
@@ -36,9 +36,12 @@ export default async function handler(
         password,
       },
     });
-    return res.status(201).send(newUser);
+    return res.status(201).json({
+      data: newUser,
+      message: `Register Successfully, Let's Log Back In`,
+    });
   } catch (error) {
     console.log(error);
-    return res.status(500).send({ message: 'Something went wrong' });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

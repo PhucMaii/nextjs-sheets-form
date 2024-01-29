@@ -26,7 +26,7 @@ export default async function POSTMethod(
       message: 'Input Created Succesfully',
     });
   } catch (error) {
-    console.log('Fail to create input, ', error);
-    return res.status(500).send('Fail to create input ' + error);
+    console.log('Fail to create input', error);
+    return res.status(500).json({ error: 'Internal Server Error' + error });
   }
 }

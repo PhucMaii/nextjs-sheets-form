@@ -20,17 +20,24 @@ export default async function handler(
         'https://www.googleapis.com/auth/spreadsheets',
       ],
     });
+
     const sheets = google.sheets({
       auth,
       version: 'v4',
     });
+
     const response = await sheets.spreadsheets.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       ranges: [],
     });
+
     const sheetNames =
       response.data.sheets?.map((sheet) => sheet.properties?.title) || [];
-    return res.status(200).send(sheetNames);
+
+    return res.status(200).json({
+      data: sheetNames,
+      message: 'Data Fetched Successfully',
+    });
   } catch (error) {
     console.log(error);
   }

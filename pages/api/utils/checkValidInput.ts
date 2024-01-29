@@ -18,13 +18,30 @@ export default async function checkValidInput(
       inputType: targetInput.inputType,
       positionId: targetInput.positionId,
     };
-    if (methodType === 'POST') {
+
+    if (methodType !== 'POST') {
       delete fieldCheck.inputType;
       delete fieldCheck.positionId;
     }
+
+    // Handle user just update one field only - START HERE
+    const existingInput = await prisma.input.findUnique({
+      where: {
+        inputId: targetInput.inputId,
+      },
+    });
+
+    if (existingInput) {
+      if (targetInput.inputName === existingInput.inputName) {
+        return true;
+      }
+    }
+    // END HERE
+
     const isValid = await prisma.input.findMany({
       where: { ...fieldCheck },
     });
+
     return isValid.length === 0;
   } catch (error) {
     console.log(error);
