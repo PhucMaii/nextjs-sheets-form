@@ -10,7 +10,6 @@ export default async function checkValidEmail(
         email,
       },
     });
-
     return existingEmail.length === 0;
   } catch (error) {
     console.log('Error Occurred In Checking Valid Email', error);
