@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  email     String @unique @db.VarChar(255)
+  password  String @db.VarChar(255)
+  firstName String @map("first_name") @db.VarChar(255) // @map change the db table
+
+  forms Form[]
+}
+
+model Form {
+  formId     Int        @id @default(autoincrement()) @map("form_id")
+  formName   String     @map("form_name") @db.VarChar(255)
+  lastOpened DateTime   @updatedAt @map("last_opened") @db.Timestamp()
+  positions  Position[]
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@index([userId])
+}
+
+model Position {
+  positionId Int     @id @default(autoincrement()) @map("position_id")
+  sheetName  String  @map("sheet_name") @db.VarChar(255)
+  row        Int
+  inputs     Input[]
+
+  form   Form @relation(fields: [formId], references: [formId], onDelete: Cascade)
+  formId Int
+
+  @@index([formId])
+}
+
+model Input {
+  inputId   Int    @id @default(autoincrement()) @map("input_id")
+  inputName String @map("input_name") @db.VarChar(255)
+  inputType String @map("input_type") @db.VarChar(10)
+
+  position   Position @relation(fields: [positionId], references: [positionId], onDelete: Cascade)
+  positionId Int
+
+  @@index([positionId])
+}
