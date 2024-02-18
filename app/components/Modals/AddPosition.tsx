@@ -2,9 +2,9 @@ import { customStyles } from '@/app/utils/styles';
 import { Notification } from '@/app/utils/type';
 import React, { Dispatch, SetStateAction, useContext, useState } from 'react';
 import Modal from 'react-modal';
-import Button from '../Button/Button';
-import Input from '../Input/Input';
-import Select from '../Select/Select';
+import Button from '../Button';
+import Input from '../Input';
+import Select from '../Select';
 import { SheetNamesContext } from '@/app/context/SheetNamesContext';
 
 interface PropTypes {

@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import FadeIn from '../HOC/FadeIn';
-import Divider from '../components/Divider/Divider';
-import Input from '../components/Input/Input';
-import Button from '../components/Button/Button';
-import Navbar from '../components/Navbar/Navbar';
+import Divider from '../components/Divider';
+import Input from '../components/Input';
+import Button from '../components/Button';
+import Navbar from '../components/Navbar';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { Notification, UserType } from '../utils/type';

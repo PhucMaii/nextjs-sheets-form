@@ -5,10 +5,10 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import EditInputModal from '../Modals/EditInputModal';
-import { InputType, Notification } from '../../utils/type';
-import IconButton from '../IconButton/IconButton';
-import DeleteModal from '../Modals/DeleteModal';
+import EditInputModal from './Modals/EditInputModal';
+import { InputType, Notification } from '../utils/type';
+import IconButton from './IconButton';
+import DeleteModal from './Modals/DeleteModal';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 

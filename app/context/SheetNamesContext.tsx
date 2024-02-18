@@ -2,7 +2,7 @@
 import axios from 'axios';
 import React, { createContext, useEffect, useState } from 'react';
 import { API_URL } from '../utils/enum';
-import { ValueType } from '../components/Select/Select';
+import { ValueType } from '../components/Select';
 
 export const SheetNamesContext = createContext<ValueType[]>([]);
 

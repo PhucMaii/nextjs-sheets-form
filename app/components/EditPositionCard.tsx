@@ -1,14 +1,14 @@
 'use client';
-import { InputType, Notification, PositionType } from '../../utils/type';
+import { InputType, Notification, PositionType } from '../utils/type';
 import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
-import InputChip from '../DraggableChip/InputChip';
-import Button from '../Button/Button';
-import EditSheetName from '../Modals/EditSheetName';
-import EditInputModal from '../Modals/EditInputModal';
-import EditRow from '../Modals/EditRow';
-import IconButton from '../IconButton/IconButton';
-import { ValueType } from '../Select/Select';
-import DeleteModal from '../Modals/DeleteModal';
+import InputChip from './InputChip';
+import Button from './Button';
+import EditSheetName from './Modals/EditSheetName';
+import EditInputModal from './Modals/EditInputModal';
+import EditRow from './Modals/EditRow';
+import IconButton from './IconButton';
+import { ValueType } from './Select';
+import DeleteModal from './Modals/DeleteModal';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 

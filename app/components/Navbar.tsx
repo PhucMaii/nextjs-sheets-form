@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import React, { MouseEvent, useState } from 'react';
-import Button from '../Button/Button';
+import Button from './Button';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Avatar, Divider, Menu, MenuItem } from '@mui/material';

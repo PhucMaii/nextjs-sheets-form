@@ -1,8 +1,8 @@
 import { customStyles } from '@/app/utils/styles';
 import React, { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import Modal from 'react-modal';
-import Input from '../Input/Input';
-import Button from '../Button/Button';
+import Input from '../Input';
+import Button from '../Button';
 import { Notification, PositionType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
