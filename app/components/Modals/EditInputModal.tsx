@@ -114,6 +114,10 @@ export default function EditInputModal({
             label: 'Number',
             value: 'number',
           },
+          {
+            label: 'Date',
+            value: 'date',
+          },
         ]}
       />
       <Button

@@ -39,8 +39,8 @@ export default function Input<T>({
       )}
       <input
         disabled={disabled}
-        className={`${disabled && 'opacity-50'}  shadow appearance-none ${
-          error ? 'border-2' : 'border'
+        className={`${disabled && 'opacity-50'} appearance-none ${
+          error ? 'border-2' : 'border-solid border-slate-800'
         } rounded w-full py-2 px-3 text-gray-700 mb-3 ${className} leading-tight focus:outline-none focus:shadow-outline`}
         id={label}
         type={type}

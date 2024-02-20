@@ -326,8 +326,8 @@ export default function CreateForm() {
             },
             {
               label: 'Date',
-              value: 'date'
-            }
+              value: 'date',
+            },
           ]}
         />
         <Button

@@ -3,7 +3,7 @@ import React from 'react';
 import CreateForm from './form';
 import AuthenGuard from '../HOC/AuthenGuard';
 
-export default async function CreateFormPage() {
+export default function CreateFormPage() {
   return (
     <AuthenGuard>
       <CreateForm />

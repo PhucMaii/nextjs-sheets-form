@@ -6,10 +6,7 @@ import DELETEMethod from './DELETE';
 import PUTMethod from './PUT';
 import withAuthGuard from '../utils/withAuthGuard';
 
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const prisma = new PrismaClient();
   try {
     if (req.method === 'POST') {
@@ -32,6 +29,6 @@ const handler = async (
   } finally {
     await prisma.$disconnect();
   }
-}
+};
 
 export default withAuthGuard(handler);
