@@ -93,7 +93,17 @@ export default function Form() {
       if (input.inputType === 'text') {
         newInputValues[input.inputName] = '';
       } else if (input.inputType === 'date') {
-        newInputValues[input.inputName] = new Date();
+        // format initial date
+        const dateObj = new Date();
+        const month = dateObj.getUTCMonth() + 1;
+        const day = dateObj.getUTCDate();
+        const year = dateObj.getUTCFullYear();
+    
+        const formattedDate = `${month.toString().padStart(2, '0')}/${day
+          .toString()
+          .padStart(2, '0')}/${year.toString().padStart(2, '0')}`;
+        
+        newInputValues[input.inputName] = formattedDate;
       } else {
         newInputValues[input.inputName] = 0;
       }
