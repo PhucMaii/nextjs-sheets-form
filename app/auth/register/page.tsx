@@ -123,8 +123,12 @@ export default function page() {
                   }`}
                   onBlur={formik.handleBlur}
                   name="sheetName"
-                  error={!!(formik.touched.sheetName && formik.errors.sheetName)}
-                  helperText={formik.touched.sheetName && formik.errors.sheetName}
+                  error={
+                    !!(formik.touched.sheetName && formik.errors.sheetName)
+                  }
+                  helperText={
+                    formik.touched.sheetName && formik.errors.sheetName
+                  }
                 />
                 <Input
                   label="Client Id"

@@ -98,11 +98,11 @@ export default function Form() {
         const month = dateObj.getUTCMonth() + 1;
         const day = dateObj.getUTCDate();
         const year = dateObj.getUTCFullYear();
-    
+
         const formattedDate = `${month.toString().padStart(2, '0')}/${day
           .toString()
           .padStart(2, '0')}/${year.toString().padStart(2, '0')}`;
-        
+
         newInputValues[input.inputName] = formattedDate;
       } else {
         newInputValues[input.inputName] = 0;

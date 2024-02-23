@@ -1,24 +1,26 @@
 export const generateOrderTemplate = (
-    clientName: string, 
-    clientNumber: string, 
-    orderDetails: any,
-    phoneNumber: string,
-    deliveryAddress: string,
+  clientName: string,
+  clientNumber: string,
+  orderDetails: any,
+  phoneNumber: string,
+  deliveryAddress: string,
 ) => {
-    let orderDetailsTemplate = '';
+  let orderDetailsTemplate = '';
 
-    for (const key of Object.keys(orderDetails)) {
-        if (key === 'sheetName' || key === 'row') {
-            continue;
-        }
-        if (key === 'Order Date' || key === 'ORDER DATE') {
-            orderDetailsTemplate += `<h4 style="text-align: left;">${key.toUpperCase()}: ${orderDetails[key]}</h4></br>`
-        } else {
-            if (parseInt(orderDetails[key]) > 0) {
-                orderDetailsTemplate += `<h4 style="text-align: left;">${orderDetails[key]}x ${key}</h4>`
-            }
-        }
+  for (const key of Object.keys(orderDetails)) {
+    if (key === 'sheetName' || key === 'row') {
+      continue;
     }
+    if (key === 'Order Date' || key === 'ORDER DATE') {
+      orderDetailsTemplate += `<h4 style="text-align: left;">${key.toUpperCase()}: ${
+        orderDetails[key]
+      }</h4></br>`;
+    } else {
+      if (parseInt(orderDetails[key]) > 0) {
+        orderDetailsTemplate += `<h4 style="text-align: left;">${orderDetails[key]}x ${key}</h4>`;
+      }
+    }
+  }
   return `
     <div style="margin: auto; width: 500px">
         <div style="width: 100%;">

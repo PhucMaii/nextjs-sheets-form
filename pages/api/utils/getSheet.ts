@@ -22,16 +22,16 @@ const getSheet = async (sheetName: string) => {
     const range = `${sheetName}!A1:Z2`;
     const sheetData = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range 
+      range,
     });
-    
-    const returnData: any = sheetData.data.values
+
+    const returnData: any = sheetData.data.values;
 
     return {
       clientName: returnData[0][1],
       clientId: returnData[1][0],
       contactNumber: returnData[0][4],
-      deliveryAddress: returnData[0][5]
+      deliveryAddress: returnData[0][5],
     };
   } catch (error) {
     console.log(error);

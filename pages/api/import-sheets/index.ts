@@ -43,25 +43,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       const appendData = appendResponse.data.updates;
       data.push(appendData);
-    };
+    }
 
     // Notify Email
     const clientData: any = await getSheet(body[0].sheetName);
-    const emailSendTo: any = process.env.NODEMAILER_EMAIL; 
+    const emailSendTo: any = process.env.NODEMAILER_EMAIL;
     const htmlTemplate: string = generateOrderTemplate(
       clientData.clientName,
       clientData.clientId,
       body[0],
       clientData.contactNumber,
-      clientData.deliveryAddress
+      clientData.deliveryAddress,
     );
 
     await emailHandler(
       emailSendTo,
       'TEST: Order Supreme Sprouts',
       'Supreme Sprouts LTD',
-      htmlTemplate
-    )
+      htmlTemplate,
+    );
 
     return res.status(200).json({
       data,
