@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 
 type UserForm = {
   firstName: string;
+  clientId: string;
   email: string;
   password: string;
 };
@@ -32,9 +33,10 @@ export default async function handler(
     const newUser = await prisma.user.create({
       data: {
         firstName: userData.firstName,
+        clientId: userData.clientId,
         email: userData.email,
         password,
-      },
+      } as Prisma.UserCreateInput,
     });
     return res.status(201).json({
       data: newUser,

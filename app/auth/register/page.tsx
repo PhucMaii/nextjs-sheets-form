@@ -15,6 +15,7 @@ import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
 
 interface FormValues {
   name: string;
+  clientId: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -32,12 +33,14 @@ export default function page() {
   const formik = useFormik<FormValues>({
     initialValues: {
       name: '',
+      clientId: '',
       email: '',
       password: '',
       confirmPassword: '',
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Please enter your name'),
+      clientId: Yup.string().required('Please enter client id'),
       email: Yup.string()
         .email('Must be a valid email!')
         .max(255)
@@ -54,6 +57,7 @@ export default function page() {
       setIsLoading(true);
       const submittedData = {
         firstName: values.name,
+        clientId: values.clientId,
         email: values.email,
         password: values.password,
       };
@@ -121,6 +125,22 @@ export default function page() {
                   name="name"
                   error={!!(formik.touched.name && formik.errors.name)}
                   helperText={formik.touched.name && formik.errors.name}
+                />
+                <Input
+                  label="Client Id"
+                  placeholder="eg: 11111"
+                  onChange={formik.handleChange}
+                  type="text"
+                  value={formik.values.clientId}
+                  className={`m-0 p-0 w-80 ${
+                    !(formik.touched.clientId && formik.errors.clientId)
+                      ? ''
+                      : 'border-red-500'
+                  }`}
+                  onBlur={formik.handleBlur}
+                  name="clientId"
+                  error={!!(formik.touched.clientId && formik.errors.clientId)}
+                  helperText={formik.touched.clientId && formik.errors.clientId}
                 />
                 <Input
                   label="Email"

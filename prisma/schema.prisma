@@ -16,6 +16,7 @@ model User {
   email     String @unique @db.VarChar(255)
   password  String @db.VarChar(255)
   firstName String @map("first_name") @db.VarChar(255) // @map change the db table
+  clientId  String @unique @db.VarChar(255)
 
   forms Form[]
 }

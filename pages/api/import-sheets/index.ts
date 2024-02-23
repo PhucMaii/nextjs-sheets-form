@@ -2,14 +2,24 @@ import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SheetForm } from './type';
 import withAuthGuard from '../utils/withAuthGuard';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
+import { PrismaClient } from '@prisma/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
     return res.status(500).send('Only Post method allowed');
   }
+  const prisma = new PrismaClient();
   const body: SheetForm[] = req.body;
-  console.log(body, 'BODY');
   try {
+    const session: any = await getServerSession(req, res, authOptions);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: Number(session.user.id)
+      }
+    })
+    
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -27,23 +37,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     const data = [];
     for (const sheet of body) {
-      // Get Sheet Value
-      // const response = await sheets.spreadsheets.values.get({
-      //   spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      //   range: sheet.sheetName,
-      // });
-      // // Calculate next position
-      // let nextPos: string = '';
-      // if (response.data.values) {
-      //   if (response.data.values[sheet.row - 1]) {
-      //     nextPos = calculateNextPos(
-      //       response.data.values[sheet.row - 1].length,
-      //       [],
-      //     );
-      //   } else {
-      //     nextPos = calculateNextPos(0, []);
-      //   }
-      // }
       const validKeys = Object.keys(sheet).filter((key) => {
         return key !== 'sheetName' && key !== 'row';
       }) as (keyof SheetForm)[];
