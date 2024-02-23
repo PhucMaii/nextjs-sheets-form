@@ -5,6 +5,9 @@ import withAuthGuard from '../utils/withAuthGuard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
+import getSheet from '../utils/getSheet';
+import emailHandler from '../utils/email';
+import { generateOrderTemplate } from '@/config/email';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
@@ -14,11 +17,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const body: SheetForm[] = req.body;
   try {
     const session: any = await getServerSession(req, res, authOptions);
-    const user = await prisma.user.findUnique({
+    const user: any = await prisma.user.findUnique({
       where: {
         id: Number(session.user.id)
       }
-    })
+    });
     
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -51,7 +54,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       const appendData = appendResponse.data.updates;
       data.push(appendData);
-    }
+    };
+
+    // Notify Email
+    const clientData: any = await getSheet(user.clientId);
+    const emailSendTo: any = process.env.NODEMAILER_EMAIL; 
+    const htmlTemplate: string = generateOrderTemplate(
+      clientData.clientName,
+      user.clientId,
+      body[0],
+      clientData.contactNumber,
+      clientData.deliveryAddress
+    );
+
+    await emailHandler(
+      emailSendTo,
+      'TEST: Order Supreme Sprouts',
+      'Supreme Sprouts LTD',
+      htmlTemplate
+    )
+
     return res.status(200).json({
       data,
       message: 'Data Added Successfully',

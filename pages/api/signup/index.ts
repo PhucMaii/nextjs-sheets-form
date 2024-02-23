@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 
 type UserForm = {
@@ -36,7 +36,7 @@ export default async function handler(
         clientId: userData.clientId,
         email: userData.email,
         password,
-      } as Prisma.UserCreateInput,
+      },
     });
     return res.status(201).json({
       data: newUser,

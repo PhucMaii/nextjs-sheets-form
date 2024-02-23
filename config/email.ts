@@ -1,18 +1,3 @@
-export const orderTemplate = `
-    <div>
-        <div>
-            <h2>Supreme Sprouts LTD</h2>
-            <h4>1-6420 Beresford Street, Burnaby, BC, V5E 1B3
-            <h4>778 789 1060</h4>
-            <h4>709 789 6000</h4>
-        </div>
-        <div style="height: 1px; background-color: black; width: 100%"></div>
-        <div>
-
-        </div>
-    </div>
-`;
-
 export const generateOrderTemplate = (
     clientName: string, 
     clientNumber: string, 
@@ -20,28 +5,40 @@ export const generateOrderTemplate = (
     phoneNumber: string,
     deliveryAddress: string,
 ) => {
+    let orderDetailsTemplate = '';
+
+    for (const key of Object.keys(orderDetails)) {
+        if (key === 'sheetName' || key === 'row') {
+            continue;
+        }
+        if (key === 'Order Date') {
+            orderDetailsTemplate += `<h4 style="text-align: left;">${key.toUpperCase()}: ${orderDetails[key]}</h4></br>`
+        } else {
+            if (parseInt(orderDetails[key]) > 0) {
+                orderDetailsTemplate += `<h4 style="text-align: left;">${orderDetails[key]}x ${key}</h4>`
+            }
+        }
+    }
   return `
-    <div>
-    <div>
-        <h2>Supreme Sprouts LTD</h2>
-        <h4>1-6420 Beresford Street, Burnaby, BC, V5E 1B3
-        <h4>778 789 1060</h4>
-        <h4>709 789 6000</h4>
-    </div>
-    <div style="height: 1px; background-color: black; width: 100%"></div>
-    <div>
-        <h4>Client Name: ${clientName}</h4>
-        <h4>Client Number: ${clientNumber}>/h4>
-        <h4>Date: ${orderDetails.date}</h4>
-        <h4>Orders:</h4>
-        <div>
-            <h6>1x Beansprout 10lbs</h6>
-            <h6>2x Basil 10lbs</h6>
-            <h6>1x Jumbo Eggs 10lbs</h6>
+    <div style="margin: auto; width: 500px">
+        <div style="width: 100%;">
+            <h2 style="text-align: center;">TEST: Supreme Sprouts LTD</h2>
+            <h4 style="text-align: center;font-weight: 300;">1-6420 Beresford Street, Burnaby, BC, V5E 1B3</h4>
+            <div style="text-align: center;font-weight: 300;">
+                778 789 1060
+                <br/>
+                709 789 6000
+            </div>
         </div>
-        <h4>Delivery Address: ${deliveryAddress}</h4>
-        <h4>Contact: ${phoneNumber}</h4>
+        <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
+        <div style="width: 100%;">
+            <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
+            <h3 style="text-align: left;font-weight: 300;">Client Number: ${clientNumber}</h3>
+            <h3 style="text-align: left;">ORDER DETAILS</h3>
+            ${orderDetailsTemplate}
+            <h4 style="text-align: left;font-weight: 300;">DELIVERY ADDRESS: ${deliveryAddress}</h4>
+            <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
+        </div>
     </div>
-</div>
     `;
 };
