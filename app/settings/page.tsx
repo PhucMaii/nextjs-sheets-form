@@ -22,7 +22,7 @@ export default function page() {
     type: '',
     message: '',
   });
-  const [userData, setUserData] = useState<UserType>();
+  const [userData, setUserData] = useState<any>();
   const { data: session }: any = useSession();
 
   useEffect(() => {
@@ -34,8 +34,8 @@ export default function page() {
   const fetchUserData = async () => {
     try {
       const response = await axios.get(`/api/user?id=${session?.user.id}`);
-      const { id, email, firstName }: UserType = response.data.data;
-      setUserData({ id, email, firstName });
+      const { id, email, sheetName }: UserType = response.data.data;
+      setUserData({ id, email, sheetName });
     } catch (error) {
       console.log(error);
     }
@@ -91,7 +91,7 @@ export default function page() {
       const response = await axios.put('/api/user', {
         userId: userData?.id,
         email: userData?.email,
-        firstName: userData?.firstName,
+        sheetName: userData?.sheetName,
       });
 
       setNotification({
@@ -130,8 +130,8 @@ export default function page() {
               label="Name"
               placeholder="Enter your name"
               type="text"
-              value={userData?.firstName}
-              onChange={(e) => editUserData('firstName', e.target.value)}
+              value={userData?.sheetName}
+              onChange={(e) => editUserData('sheetName', e.target.value)}
               className="mb-0"
             />
             <Divider />

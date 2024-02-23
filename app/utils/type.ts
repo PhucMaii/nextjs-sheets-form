@@ -54,7 +54,8 @@ export interface SessionClientType {
 
 export interface UserType {
   id?: string;
+  clientId: string;
   email: string;
   password?: string;
-  firstName?: string;
+  sheetName?: string;
 }

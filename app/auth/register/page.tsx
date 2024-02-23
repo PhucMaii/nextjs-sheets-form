@@ -14,7 +14,7 @@ import { API_URL } from '@/app/utils/enum';
 import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
 
 interface FormValues {
-  name: string;
+  sheetName: string;
   clientId: string;
   email: string;
   password: string;
@@ -32,14 +32,14 @@ export default function page() {
 
   const formik = useFormik<FormValues>({
     initialValues: {
-      name: '',
+      sheetName: '',
       clientId: '',
       email: '',
       password: '',
       confirmPassword: '',
     },
     validationSchema: Yup.object({
-      name: Yup.string().required('Please enter your name'),
+      sheetName: Yup.string().required('Please enter your name'),
       clientId: Yup.string().required('Please enter client id'),
       email: Yup.string()
         .email('Must be a valid email!')
@@ -56,7 +56,7 @@ export default function page() {
     onSubmit: async (values) => {
       setIsLoading(true);
       const submittedData = {
-        firstName: values.name,
+        sheetName: values.sheetName,
         clientId: values.clientId,
         email: values.email,
         password: values.password,
@@ -111,20 +111,20 @@ export default function page() {
               </h4>
               <div className="flex flex-col gap-2">
                 <Input
-                  label="Name"
+                  label="Sheet Name"
                   placeholder="eg: John"
                   onChange={formik.handleChange}
                   type="text"
-                  value={formik.values.name}
+                  value={formik.values.sheetName}
                   className={`m-0 p-0 w-80 ${
-                    !(formik.touched.name && formik.errors.name)
+                    !(formik.touched.sheetName && formik.errors.sheetName)
                       ? ''
                       : 'border-red-500'
                   }`}
                   onBlur={formik.handleBlur}
-                  name="name"
-                  error={!!(formik.touched.name && formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
+                  name="sheetName"
+                  error={!!(formik.touched.sheetName && formik.errors.sheetName)}
+                  helperText={formik.touched.sheetName && formik.errors.sheetName}
                 />
                 <Input
                   label="Client Id"

@@ -8,7 +8,7 @@ interface BodyProps {
   email?: string;
   currentPassword?: string;
   newPassword?: string;
-  firstName?: string;
+  sheetName?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -20,7 +20,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       email,
       currentPassword,
       newPassword,
-      firstName,
+      sheetName,
     }: BodyProps = req.body;
 
     const existingUser = await prisma.user.findUnique({
@@ -61,8 +61,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateFields.password = await bcrypt.hash(newPassword, 12);
     }
 
-    if (firstName) {
-      updateFields.firstName = firstName;
+    if (sheetName) {
+      updateFields.sheetName = sheetName;
     }
 
     const updatedUser = await prisma.user.update({

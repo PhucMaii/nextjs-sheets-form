@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 
 type UserForm = {
-  firstName: string;
+  sheetName: string;
   clientId: string;
   email: string;
   password: string;
@@ -32,7 +32,7 @@ export default async function handler(
     const password = await hash(userData.password, 12);
     const newUser = await prisma.user.create({
       data: {
-        firstName: userData.firstName,
+        sheetName: userData.sheetName,
         clientId: userData.clientId,
         email: userData.email,
         password,

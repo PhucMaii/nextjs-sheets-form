@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 
-const getSheet = async (clientId: string) => {
+const getSheet = async (sheetName: string) => {
   try {
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -19,39 +19,17 @@ const getSheet = async (clientId: string) => {
       version: 'v4',
     });
 
-    const response = await sheets.spreadsheets.get({
+    const range = `${sheetName}!A1:Z2`;
+    const sheetData = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range 
     });
-
-    const sheetsData: any = response.data.sheets;
-
-    // Binary Search to find client sheet based on id 
-    let left = 0;
-    let right = sheetsData.length - 1;
-    let returnData: any = [];
-
-    while (left < right) {
-        const mid = Math.floor((right + left) / 2) - 1; // index start at 0
-        
-        const range = `${sheetsData[mid].properties.title}!A1:Z2`;
-        const sheetData = await sheets.spreadsheets.values.get({
-          spreadsheetId: process.env.GOOGLE_SHEET_ID,
-          range 
-        });
-        const values: any = sheetData.data.values;
-
-        if (parseInt(values[1][0]) === parseInt(clientId)) {
-            returnData = sheetData.data.values;
-            break;
-        } else if (parseInt(values[1][0]) < parseInt(clientId)) {
-            right = mid - 1;
-        } else {
-            left = mid + 1;
-        }
-    }
+    
+    const returnData: any = sheetData.data.values
 
     return {
       clientName: returnData[0][1],
+      clientId: returnData[1][0],
       contactNumber: returnData[0][4],
       deliveryAddress: returnData[0][5]
     };

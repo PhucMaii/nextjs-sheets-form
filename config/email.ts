@@ -11,7 +11,7 @@ export const generateOrderTemplate = (
         if (key === 'sheetName' || key === 'row') {
             continue;
         }
-        if (key === 'Order Date') {
+        if (key === 'Order Date' || key === 'ORDER DATE') {
             orderDetailsTemplate += `<h4 style="text-align: left;">${key.toUpperCase()}: ${orderDetails[key]}</h4></br>`
         } else {
             if (parseInt(orderDetails[key]) > 0) {

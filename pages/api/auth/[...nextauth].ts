@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user.id + '',
           email: user.email,
-          firtName: user.firstName,
+          sheetName: user.sheetName,
         };
       },
     }),

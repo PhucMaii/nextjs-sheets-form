@@ -2,9 +2,6 @@ import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SheetForm } from './type';
 import withAuthGuard from '../utils/withAuthGuard';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
-import { PrismaClient } from '@prisma/client';
 import getSheet from '../utils/getSheet';
 import emailHandler from '../utils/email';
 import { generateOrderTemplate } from '@/config/email';
@@ -13,16 +10,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
     return res.status(500).send('Only Post method allowed');
   }
-  const prisma = new PrismaClient();
   const body: SheetForm[] = req.body;
   try {
-    const session: any = await getServerSession(req, res, authOptions);
-    const user: any = await prisma.user.findUnique({
-      where: {
-        id: Number(session.user.id)
-      }
-    });
-    
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -57,11 +46,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     };
 
     // Notify Email
-    const clientData: any = await getSheet(user.clientId);
+    const clientData: any = await getSheet(body[0].sheetName);
     const emailSendTo: any = process.env.NODEMAILER_EMAIL; 
     const htmlTemplate: string = generateOrderTemplate(
       clientData.clientName,
-      user.clientId,
+      clientData.clientId,
       body[0],
       clientData.contactNumber,
       clientData.deliveryAddress
