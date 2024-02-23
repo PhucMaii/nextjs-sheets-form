@@ -1,11 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
 import PUT from './PUT';
+import withAuthGuard from '../utils/withAuthGuard';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const response = await GET(req, res);
@@ -22,4 +20,6 @@ export default async function handler(
       error: 'Internal Server Error',
     });
   }
-}
+};
+
+export default withAuthGuard(handler);

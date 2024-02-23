@@ -4,11 +4,9 @@ import { POSTMethod } from './POST';
 import { GETMethod } from './GET';
 import DELETEMethod from './DELETE';
 import PUTMethod from './PUT';
+import withAuthGuard from '../utils/withAuthGuard';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const prisma = new PrismaClient();
   try {
     if (req.method === 'POST') {
@@ -31,4 +29,6 @@ export default async function handler(
   } finally {
     await prisma.$disconnect();
   }
-}
+};
+
+export default withAuthGuard(handler);

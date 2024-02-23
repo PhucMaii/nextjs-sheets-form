@@ -4,8 +4,8 @@ import moment from 'moment/moment';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import IconButton from '../IconButton/IconButton';
-import DeleteModal from '../Modals/DeleteModal';
+import IconButton from './IconButton';
+import DeleteModal from './Modals/DeleteModal';
 
 interface PropTypes {
   form: FormType;

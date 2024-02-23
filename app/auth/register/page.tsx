@@ -1,7 +1,7 @@
 'use client';
 import FadeIn from '@/app/HOC/FadeIn';
-import Button from '@/app/components/Button/Button';
-import Input from '@/app/components/Input/Input';
+import Button from '@/app/components/Button';
+import Input from '@/app/components/Input';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { Notification } from '@/app/utils/type';
 import { useFormik } from 'formik';

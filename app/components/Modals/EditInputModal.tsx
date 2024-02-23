@@ -1,9 +1,9 @@
 import { customStyles } from '@/app/utils/styles';
 import React, { ChangeEvent, useState } from 'react';
 import Modal from 'react-modal';
-import Input from '../Input/Input';
-import Select from '../Select/Select';
-import Button from '../Button/Button';
+import Input from '../Input';
+import Select from '../Select';
+import Button from '../Button';
 import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
@@ -113,6 +113,10 @@ export default function EditInputModal({
           {
             label: 'Number',
             value: 'number',
+          },
+          {
+            label: 'Date',
+            value: 'date',
           },
         ]}
       />

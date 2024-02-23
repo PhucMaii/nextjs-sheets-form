@@ -1,49 +1,42 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]";
-import { PrismaClient } from "@prisma/client";
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
+import { PrismaClient } from '@prisma/client';
 
 type HandlerFunction = (
-    req: NextApiRequest,
-    res: NextApiResponse
+  req: NextApiRequest,
+  res: NextApiResponse,
 ) => Promise<any>;
 
-const withAuthGuard = <T extends HandlerFunction>(handler: T) => async (req: NextApiRequest, res: NextApiResponse) => {
+const withAuthGuard =
+  <T extends HandlerFunction>(handler: T) =>
+  async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-        const prisma = new PrismaClient();
-        const compareId = req.query.id as string;
+      const prisma = new PrismaClient();
 
-        if (!compareId) {
-            return res.status(404).json({error: 'Missing ID'});
-        }
+      const session: any = await getServerSession(req, res, authOptions);
 
-        const session: any = await getServerSession(req, res, authOptions);
+      if (!session) {
+        return res.status(401).json({ error: 'You are not authenticated' });
+      }
 
-        if (!session) {
-            return res.status(401).json({error: 'You are not authenticated'});
-        }
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          id: Number(session.user.id),
+        },
+      });
 
-        if (session.user?.id !== compareId) {
-            return res.status(401).json({error: 'You are not authorized'});
-        }
+      if (!existingUser) {
+        return res.status(404).json({ error: 'User Not Found in DB' });
+      }
 
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                id: Number(compareId)
-            }
-        })
-
-        if (!existingUser) {
-            return res.status(404).json({error: 'User Not Found in DB'});
-        }
-        
-        return handler;
+      return await handler(req, res);
     } catch (error: any) {
-        console.log('Internal Server Error in checking auth');
-        return res.status(500).json({
-            error: 'Internal Server Error: ' + error
-        })
+      console.log('Internal Server Error in checking auth', error);
+      return res.status(500).json({
+        error: 'Internal Server Error: ' + error,
+      });
     }
-}
+  };
 
 export default withAuthGuard;

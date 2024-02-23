@@ -2,13 +2,13 @@
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
 import { InputField, InsertPosition } from './type';
 import { Notification } from '../utils/type';
-import Button from '../components/Button/Button';
-import Chip from '../components/Chip/Chip';
-import Divider from '../components/Divider/Divider';
-import Input from '../components/Input/Input';
-import Navbar from '../components/Navbar/Navbar';
-import NestedCheckbox from '../components/NestedCheckbox/NestedCheckbox';
-import Select, { ValueType } from '../components/Select/Select';
+import Button from '../components/Button';
+import Chip from '../components/Chip';
+import Divider from '../components/Divider';
+import Input from '../components/Input';
+import Navbar from '../components/Navbar';
+import NestedCheckbox from '../components/NestedCheckbox';
+import Select, { ValueType } from '../components/Select';
 import Snackbar from '../components/Snackbar/Snackbar';
 import FadeIn from '../HOC/FadeIn';
 import axios from 'axios';
@@ -323,6 +323,10 @@ export default function CreateForm() {
             {
               label: 'Number',
               value: 'number',
+            },
+            {
+              label: 'Date',
+              value: 'date',
             },
           ]}
         />

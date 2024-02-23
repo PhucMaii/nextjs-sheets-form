@@ -26,7 +26,6 @@ export const GETMethod = async (
       },
     });
 
-    console.log({ session, existingForm }, 'Session');
     if (parseInt(session?.user.id) !== existingForm?.userId) {
       return res.status(404).json({ error: 'You are not authorized' });
     }

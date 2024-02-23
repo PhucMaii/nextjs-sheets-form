@@ -1,5 +1,5 @@
 import React, { MouseEvent, ReactNode } from 'react';
-import LoadingComponent from '../LoadingComponent/LoadingComponent';
+import LoadingComponent from './LoadingComponent';
 
 interface PropTypes {
   className?: string;

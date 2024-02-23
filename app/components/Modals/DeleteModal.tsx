@@ -1,8 +1,8 @@
 import { customStyles } from '@/app/utils/styles';
 import Modal from 'react-modal';
-import IconButton from '../IconButton/IconButton';
+import IconButton from '../IconButton';
 import { useState } from 'react';
-import Button from '../Button/Button';
+import Button from '../Button';
 
 interface PropTypes {
   isOpen: boolean;

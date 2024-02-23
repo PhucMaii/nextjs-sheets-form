@@ -1,11 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar/Navbar';
-import Button from '../components/Button/Button';
+import Navbar from '../components/Navbar';
+import Button from '../components/Button';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import FormCard from '../components/FormCard/FormCard';
-import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
+import FormCard from '../components/FormCard';
+import LoadingComponent from '../components/LoadingComponent';
 import { FormType, Notification } from '../utils/type';
 import Snackbar from '../components/Snackbar/Snackbar';
 import FadeIn from '../HOC/FadeIn';

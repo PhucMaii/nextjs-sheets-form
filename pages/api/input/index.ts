@@ -3,11 +3,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import DELETEMethod from './DELETE';
 import POSTMethod from './POST';
 import PUTMethod from './PUT';
+import withAuthGuard from '../utils/withAuthGuard';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const prisma = new PrismaClient();
   try {
     if (req.method === 'DELETE') {
@@ -26,4 +24,6 @@ export default async function handler(
     console.log(error);
     return res.status(500).send('There was something wrong, ' + error);
   }
-}
+};
+
+export default withAuthGuard(handler);

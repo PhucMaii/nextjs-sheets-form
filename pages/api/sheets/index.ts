@@ -1,10 +1,8 @@
 import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
+import withAuthGuard from '../utils/withAuthGuard';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'GET') {
     return res.status(401).send('Only GET method is allowed');
   }
@@ -41,4 +39,6 @@ export default async function handler(
   } catch (error) {
     console.log(error);
   }
-}
+};
+
+export default withAuthGuard(handler);

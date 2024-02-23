@@ -15,12 +15,10 @@ export default async function checkValidInput(
   try {
     const fieldCheck: FieldCheck = {
       inputName: targetInput.inputName,
-      inputType: targetInput.inputType,
       positionId: targetInput.positionId,
     };
 
-    if (methodType !== 'POST') {
-      delete fieldCheck.inputType;
+    if (methodType !== 'PUT') {
       delete fieldCheck.positionId;
     }
 

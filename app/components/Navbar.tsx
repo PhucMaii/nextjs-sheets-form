@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import React, { MouseEvent, useState } from 'react';
-import Button from '../Button/Button';
+import Button from './Button';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Avatar, Divider, Menu, MenuItem } from '@mui/material';
@@ -75,7 +75,11 @@ export default function Navbar({ isLogin }: PropTypes) {
                 </div>
               </MenuItem>
               <Divider />
-              <MenuItem onClick={() => signOut()}>
+              <MenuItem
+                onClick={() =>
+                  signOut({ callbackUrl: 'http://localhost:3000/auth/login' })
+                }
+              >
                 <div className="flex gap-2">
                   <LogoutIcon /> Sign out
                 </div>
