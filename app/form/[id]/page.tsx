@@ -7,7 +7,7 @@ import Button from '@/app/components/Button';
 import LoadingComponent from '@/app/components/LoadingComponent';
 import Navbar from '@/app/components/Navbar';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
-import { InputType, InputValues, PositionType } from '../../utils/type';
+import { InputType } from '../../utils/type';
 import Input from '@/app/components/Input';
 import FadeIn from '@/app/HOC/FadeIn';
 import axios from 'axios';
@@ -16,6 +16,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { Box, Typography } from '@mui/material';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 export default function Form() {
   const [formData, setFormData] = useState<FormType>({
@@ -33,7 +34,6 @@ export default function Form() {
     type: '',
     message: '',
   });
-  const [positionList, setPositionList] = useState<PositionType[]>([]);
   const { id }: { id: string | null } = useParams() as { id: string | null };
   const { status }: SessionClientType = useSession() as SessionClientType;
   const router = useRouter();
@@ -47,8 +47,8 @@ export default function Form() {
       const response = await axios.get(`${API_URL.FORM}?id=${id}`);
       const data = response.data.data;
 
-      getMostInputsPosition(data);
-      setPositionList(data.positions);
+      createInputValues(data.inputs);
+      setInputList(data.inputs);
       setFormData(data);
       setIsLoading(false);
     } catch (error: any) {
@@ -64,29 +64,6 @@ export default function Form() {
     }
   };
 
-  const getMostInputsPosition = (data: FormType) => {
-    const positionList = data.positions;
-    let newInputList: InputType[] = [];
-    const uniqueInputIds = new Set<string>();
-    if (!positionList) {
-      return;
-    }
-    newInputList = positionList
-      .map((position: PositionType) => {
-        return position.inputs.filter((input: InputType) => {
-          if (!uniqueInputIds.has(input.inputName)) {
-            uniqueInputIds.add(input.inputName);
-            return true;
-          }
-          return false;
-        });
-      })
-      .flat();
-
-    createInputValues(newInputList);
-    setInputList(newInputList.flat());
-  };
-
   const createInputValues = (inputs: InputType[]) => {
     const newInputValues: any = {};
     for (const input of inputs) {
@@ -95,13 +72,7 @@ export default function Form() {
       } else if (input.inputType === 'date') {
         // format initial date
         const dateObj = new Date();
-        const month = dateObj.getUTCMonth() + 1;
-        const day = dateObj.getUTCDate();
-        const year = dateObj.getUTCFullYear();
-
-        const formattedDate = `${month.toString().padStart(2, '0')}/${day
-          .toString()
-          .padStart(2, '0')}/${year.toString().padStart(2, '0')}`;
+        const formattedDate = YYYYMMDDFormat(dateObj);
 
         newInputValues[input.inputName] = formattedDate;
       } else {
@@ -115,18 +86,7 @@ export default function Form() {
     e.preventDefault();
     setIsButtonLoading(true);
     try {
-      const submitForm = positionList.map((pos) => {
-        const validInputs: InputValues = {};
-        for (const input of pos.inputs) {
-          validInputs[input.inputName] = inputValues[input.inputName];
-        }
-        return {
-          sheetName: pos.sheetName,
-          row: pos.row,
-          ...validInputs,
-        };
-      });
-      const response = await axios.post(API_URL.IMPORT_SHEETS, submitForm);
+      const response = await axios.post(API_URL.IMPORT_SHEETS, inputValues);
       setNotification({
         on: true,
         type: 'success',
@@ -147,13 +107,7 @@ export default function Form() {
   const handleDateChange = (e: any, input: any) => {
     const dateObj = new Date(e.$d);
 
-    const month = dateObj.getUTCMonth() + 1;
-    const day = dateObj.getUTCDate();
-    const year = dateObj.getUTCFullYear();
-
-    const formattedDate = `${month.toString().padStart(2, '0')}/${day
-      .toString()
-      .padStart(2, '0')}/${year.toString().padStart(2, '0')}`;
+    const formattedDate = YYYYMMDDFormat(dateObj);
 
     setInputValues((prevInputValues: any) => {
       return {

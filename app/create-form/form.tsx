@@ -1,14 +1,13 @@
 'use client';
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
-import { InputField, InsertPosition } from './type';
+import { InputField } from './type';
 import { Notification } from '../utils/type';
 import Button from '../components/Button';
 import Chip from '../components/Chip';
 import Divider from '../components/Divider';
 import Input from '../components/Input';
 import Navbar from '../components/Navbar';
-import NestedCheckbox from '../components/NestedCheckbox';
-import Select, { ValueType } from '../components/Select';
+import Select from '../components/Select';
 import Snackbar from '../components/Snackbar/Snackbar';
 import FadeIn from '../HOC/FadeIn';
 import axios from 'axios';
@@ -17,107 +16,39 @@ import { useSession } from 'next-auth/react';
 
 export default function CreateForm() {
   const [disableInput, setDisableInput] = useState<boolean>(true);
-  const [disableInsertPosition, setDisableInsertPosition] =
-    useState<boolean>(true);
   const [disableAddForm, setDisableAddForm] = useState<boolean>(true);
   const [formName, setFormName] = useState<string>('');
   const [inputField, setInputField] = useState<InputField>({
     name: '',
-    type: '',
-    isChoose: true,
+    type: ''
   });
   const [inputFieldList, setInputFieldList] = useState<InputField[]>([]);
-  const [insertPosition, setInsertPosition] = useState<InsertPosition>({
-    sheetName: '',
-    row: 1,
-    inputFields: [],
-  });
-  const [insertPositionList, setInsertPositionList] = useState<
-    InsertPosition[]
-  >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: '',
     message: '',
   });
-  const [selectAll, setSelectAll] = useState<boolean>(true);
-  const [sheetNames, setSheetNames] = useState<ValueType[]>([]);
-  const { data: session, status }: any = useSession();
+  const { data: session }: any = useSession();
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchSheetsName();
-    }
-  }, [status]);
-
-  // Logic handling is disable next field of form name or not
+  // Handling disable inserting input fields
   useEffect(() => {
     if (formName.length > 0) {
       setDisableInput(false);
     } else {
       setDisableInput(true);
-      setDisableInsertPosition(true);
       setDisableAddForm(true);
     }
   }, [formName]);
 
-  // Logic handling is disable next field of input or not
+  // Handling disable add form button
   useEffect(() => {
     if (inputFieldList.length > 0) {
-      setDisableInsertPosition(false);
-    } else {
-      setDisableInsertPosition(true);
-      setDisableAddForm(true);
-    }
-  }, [inputFieldList]);
-
-  // Logic handling is disable add form button or not
-  useEffect(() => {
-    if (insertPositionList.length > 0) {
       setDisableAddForm(false);
     } else {
       setDisableAddForm(true);
     }
-  }, [insertPositionList]);
-
-  // Logic for select all function
-  useEffect(() => {
-    if (selectAll) {
-      setInputFieldList((prevList) => {
-        return prevList.map((input) => {
-          return {
-            ...input,
-            isChoose: true,
-          };
-        });
-      });
-    } else {
-      setInputFieldList((prevList) => {
-        return prevList.map((input) => {
-          return {
-            ...input,
-            isChoose: false,
-          };
-        });
-      });
-    }
-  }, [selectAll]);
-
-  const fetchSheetsName = async () => {
-    try {
-      const response = await axios.get(API_URL.SHEETS);
-      const data = response.data.data.map((sheet: string) => {
-        return {
-          value: sheet,
-          label: sheet,
-        };
-      });
-      setSheetNames(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  }, [inputFieldList])
 
   const handleAddInputField = () => {
     if (!inputField.name || !inputField.type) {
@@ -146,7 +77,6 @@ export default function CreateForm() {
     setInputField({
       name: '',
       type: '',
-      isChoose: true,
     });
     setNotification({
       on: true,
@@ -164,7 +94,7 @@ export default function CreateForm() {
       const submittedData = {
         formName,
         userId: session?.user?.id,
-        positions: [...insertPositionList],
+        inputs: inputFieldList
       };
 
       const response = await axios.post(API_URL.FORM, submittedData);
@@ -177,7 +107,6 @@ export default function CreateForm() {
       setFormName('');
       setIsLoading(false);
       setInputFieldList([]);
-      setInsertPositionList([]);
     } catch (error: any) {
       console.log(error);
       setNotification({
@@ -189,75 +118,10 @@ export default function CreateForm() {
     }
   };
 
-  const handleAddPosition = () => {
-    if (insertPosition.sheetName === '' || insertPosition.row < 1) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'You are missing either sheet name or row field',
-      });
-      return;
-    }
-    const isInsertFieldInvalid = insertPositionList.some((pos) => {
-      return (
-        pos.sheetName === insertPosition.sheetName &&
-        pos.row == insertPosition.row
-      );
-    });
-    if (isInsertFieldInvalid) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: `Sheet name ${insertPosition.sheetName} and row ${insertPosition.row} have already taken`,
-      });
-      return;
-    }
-    const insertInputFields = inputFieldList.filter(
-      (input) => input.isChoose === true,
-    );
-    const validPos = {
-      ...insertPosition,
-      inputFields: [...insertInputFields],
-    };
-    setInsertPositionList([...insertPositionList, validPos]);
-    setInsertPosition({
-      sheetName: '',
-      row: 1,
-      inputFields: [],
-    });
-    setNotification({
-      on: true,
-      type: 'success',
-      message: 'Added Position Successfully',
-    });
-  };
-
-  const handleToggleIsChoose = (id: number) => {
-    setInputFieldList((prevList) => {
-      return prevList.map((input, index) => {
-        if (id === index) {
-          return {
-            ...input,
-            isChoose: !input.isChoose,
-          };
-        }
-        return input;
-      });
-    });
-  };
-
   const handleRemoveInputField = (e: MouseEvent, id: number) => {
     e.preventDefault();
     const newInputFieldList = inputFieldList.filter((_, index) => index !== id);
     setInputFieldList(newInputFieldList);
-  };
-
-  const handleRemoveInsertPosition = (e: MouseEvent, id: number) => {
-    e.preventDefault();
-    const newInsertPositionList = insertPositionList.filter(
-      (_, index) => index !== id,
-    );
-    setInsertPositionList(newInsertPositionList);
   };
 
   return (
@@ -336,71 +200,6 @@ export default function CreateForm() {
           onClick={handleAddInputField}
           width="full"
           disabled={disableInput}
-        />
-      </div>
-      <Divider label="Insert Position" />
-      <div className="sm:mx-4 lg:mx-80 my-4">
-        {insertPositionList.length > 0 &&
-          insertPositionList.map((insertPos, index) => {
-            return (
-              <Chip
-                key={index}
-                content={`Sheet Name: ${insertPos.sheetName}, Row: ${insertPos.row}`}
-                handleRemove={(e: MouseEvent) =>
-                  handleRemoveInsertPosition(e, index)
-                }
-              />
-            );
-          })}
-        <Select
-          disabled={disableInsertPosition}
-          description="Choose a sheet name"
-          label="Sheet Name"
-          value={insertPosition.sheetName}
-          onChange={(e) =>
-            setInsertPosition({
-              ...insertPosition,
-              sheetName: e.target.value,
-            })
-          }
-          values={sheetNames}
-        />
-        <Input
-          disabled={disableInsertPosition}
-          label="Row"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            if (insertPosition.row >= 0) {
-              if (+e.target.value === 0) {
-                return;
-              }
-              setInsertPosition({
-                ...insertPosition,
-                row: +e.target.value,
-              });
-            }
-          }}
-          type="number"
-          placeholder="Enter row number"
-          value={insertPosition.row}
-        />
-        <div>
-          <h2 className="text-lg font-medium mb-4">
-            Select fields to insert position
-          </h2>
-          <NestedCheckbox
-            disabled={disableInsertPosition}
-            checkboxList={inputFieldList}
-            handleToggleCheckbox={handleToggleIsChoose}
-            toggleAll={selectAll}
-            handleToggleAll={setSelectAll}
-          />
-        </div>
-        <Button
-          color="blue"
-          disabled={disableInsertPosition}
-          label="Add Position"
-          onClick={handleAddPosition}
-          width="full"
         />
       </div>
       <div className="flex justify-center sm:mx-4 lg:mx-80">

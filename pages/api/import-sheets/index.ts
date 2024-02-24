@@ -1,17 +1,36 @@
 import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { SheetForm } from './type';
-import withAuthGuard from '../utils/withAuthGuard';
-import getSheet from '../utils/getSheet';
+import getSheet, { ClientData } from '../utils/getSheet';
 import emailHandler from '../utils/email';
 import { generateOrderTemplate } from '@/config/email';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
+import { PrismaClient } from '@prisma/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
     return res.status(500).send('Only Post method allowed');
   }
-  const body: SheetForm[] = req.body;
+
   try {
+    const prisma = new PrismaClient();
+    const session: any = await getServerSession(req, res, authOptions);
+  
+    if (!session) {
+      return res.status(401).json({ error: 'You are not authenticated' });
+    }
+  
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        id: Number(session.user.id),
+      },
+    });
+  
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User Not Found in DB' });
+    }
+
+    const body: any = req.body;
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -28,30 +47,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       version: 'v4',
     });
     const data = [];
-    for (const sheet of body) {
-      const validKeys = Object.keys(sheet).filter((key) => {
-        return key !== 'sheetName' && key !== 'row';
-      }) as (keyof SheetForm)[];
-      const values = validKeys.map((key) => sheet[key]);
-      const appendResponse = await sheets.spreadsheets.values.append({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: 'A1:I1',
-        valueInputOption: 'USER_ENTERED',
-        requestBody: {
-          values: [values],
-        },
-      });
-      const appendData = appendResponse.data.updates;
-      data.push(appendData);
-    }
+    const formattedValues = Object.keys(body).map((key) => body[key]);
+    const appendResponse = await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: `${existingUser.sheetName}!A1:I1`,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values: [formattedValues],
+      },
+    });
+    const appendData = appendResponse.data.updates;
+    data.push(appendData);
 
     // Notify Email
-    const clientData: any = await getSheet(body[0].sheetName);
+    const clientData = await getSheet(existingUser.sheetName) as ClientData;
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;
     const htmlTemplate: string = generateOrderTemplate(
       clientData.clientName,
       clientData.clientId,
-      body[0],
+      body,
       clientData.contactNumber,
       clientData.deliveryAddress,
     );
@@ -75,4 +89,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default withAuthGuard(handler);
+export default handler;

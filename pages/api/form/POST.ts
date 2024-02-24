@@ -1,24 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-interface PositionType {
-  sheetName: string;
-  row: number;
-  inputFields: Array<{ name: string; type: string; isChoose: boolean }>;
-}
-
-interface SubmitType {
-  sheetName: string;
-  row: number;
-  inputs: {
-    create: Array<{ inputName: string; inputType: string }>;
-  };
+interface InputType {
+  name: string;
+  type: string;
 }
 
 interface BodyType {
   formName: string;
   userId: string;
-  positions: PositionType[];
+  inputs: InputType[];
 }
 
 export const POSTMethod = async (
@@ -27,29 +18,22 @@ export const POSTMethod = async (
   prisma: PrismaClient,
 ) => {
   const body: BodyType = req.body;
-  const submitPositions: SubmitType[] = body.positions.map((pos) => {
-    return {
-      sheetName: pos.sheetName,
-      row: pos.row,
-      inputs: {
-        create: pos.inputFields?.map((input) => ({
-          inputName: input.name,
-          inputType: input.type,
-        })),
-      },
-    };
-  });
+  const submitInputs: InputType[] = body.inputs;
   try {
     const newForm = await prisma.form.create({
       data: {
         formName: body.formName,
         user: { connect: { id: parseInt(body.userId) } },
-        positions: {
-          create: [...submitPositions],
+        inputs: {
+          create: [...submitInputs.map((input: InputType) => ({
+            inputName: input.name,
+            inputType: input.type
+          }))]
         },
         lastOpened: new Date(),
-      },
-    });
+      } as any,
+    })
+    
     return res.status(200).json({
       data: newForm,
       message: 'Form Created Successfully',

@@ -1,5 +1,12 @@
 import { google } from 'googleapis';
 
+export interface ClientData {
+  clientName: string;
+  clientId: string;
+  contactNumber: string;
+  deliveryAddress: string;
+}
+
 const getSheet = async (sheetName: string) => {
   try {
     const auth = new google.auth.GoogleAuth({
