@@ -5,7 +5,6 @@ import { hash } from 'bcrypt';
 type UserForm = {
   sheetName: string;
   clientId: string;
-  email: string;
   password: string;
 };
 
@@ -21,12 +20,12 @@ export default async function handler(
     const userData: UserForm = req.body;
     const existingUser = await prisma.user.findUnique({
       where: {
-        email: userData.email,
+        clientId: userData.clientId,
       },
     });
 
     if (existingUser) {
-      return res.status(400).json({ error: 'Email Already Existed' });
+      return res.status(400).json({ error: 'Client ID Already Existed' });
     }
 
     const password = await hash(userData.password, 12);
@@ -34,9 +33,8 @@ export default async function handler(
       data: {
         sheetName: userData.sheetName,
         clientId: userData.clientId,
-        email: userData.email,
         password,
-      },
+      } as any,
     });
     return res.status(201).json({
       data: newUser,

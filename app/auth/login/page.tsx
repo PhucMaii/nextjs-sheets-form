@@ -13,7 +13,7 @@ import React, { useState } from 'react';
 import * as Yup from 'yup';
 
 interface FormValues {
-  email: string;
+  clientId: string;
   password: string;
   submit: any;
 }
@@ -31,15 +31,12 @@ export default function LoginPage() {
 
   const formik = useFormik<FormValues>({
     initialValues: {
-      email: '',
+      clientId: '',
       password: '',
       submit: null,
     },
     validationSchema: Yup.object({
-      email: Yup.string()
-        .email('Must be a valid email!')
-        .max(255)
-        .required('Email is required'),
+      clientId: Yup.string().max(255).required('Client ID is required'),
       password: Yup.string().max(255).required('Password is required'),
     }),
     onSubmit: async (values) => {
@@ -48,7 +45,7 @@ export default function LoginPage() {
 
       const user = await signIn('credentials', {
         redirect: false,
-        email: values.email,
+        clientId: values.clientId,
         password: values.password,
       });
 
@@ -105,20 +102,20 @@ export default function LoginPage() {
               </h4>
               <div className="flex flex-col gap-2">
                 <Input
-                  label="Email"
+                  label="ClientId"
                   placeholder="eg: John"
                   onChange={formik.handleChange}
-                  type="email"
-                  value={formik.values.email}
+                  type="text"
+                  value={formik.values.clientId}
                   className={`m-0 p-0 w-80 ${
-                    !(formik.touched.email && formik.errors.email)
+                    !(formik.touched.clientId && formik.errors.clientId)
                       ? ''
                       : 'border-red-500'
                   }`}
                   onBlur={formik.handleBlur}
-                  name="email"
-                  error={!!(formik.touched.email && formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
+                  name="clientId"
+                  error={!!(formik.touched.clientId && formik.errors.clientId)}
+                  helperText={formik.touched.clientId && formik.errors.clientId}
                 />
                 <Input
                   label="Password"

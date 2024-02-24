@@ -16,7 +16,6 @@ import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
 interface FormValues {
   sheetName: string;
   clientId: string;
-  email: string;
   password: string;
   confirmPassword: string;
 }
@@ -34,17 +33,12 @@ export default function page() {
     initialValues: {
       sheetName: '',
       clientId: '',
-      email: '',
       password: '',
       confirmPassword: '',
     },
     validationSchema: Yup.object({
       sheetName: Yup.string().required('Please enter your name'),
       clientId: Yup.string().required('Please enter client id'),
-      email: Yup.string()
-        .email('Must be a valid email!')
-        .max(255)
-        .required('Email is required'),
       password: Yup.string()
         .min(6, 'Password need to be at least 6 characters')
         .max(255)
@@ -58,7 +52,6 @@ export default function page() {
       const submittedData = {
         sheetName: values.sheetName,
         clientId: values.clientId,
-        email: values.email,
         password: values.password,
       };
       try {
@@ -145,22 +138,6 @@ export default function page() {
                   name="clientId"
                   error={!!(formik.touched.clientId && formik.errors.clientId)}
                   helperText={formik.touched.clientId && formik.errors.clientId}
-                />
-                <Input
-                  label="Email"
-                  placeholder="eg: john@gmail.com"
-                  onChange={formik.handleChange}
-                  type="email"
-                  value={formik.values.email}
-                  className={`m-0 p-0 w-80 ${
-                    !(formik.touched.email && formik.errors.email)
-                      ? ''
-                      : 'border-red-500'
-                  }`}
-                  onBlur={formik.handleBlur}
-                  name="email"
-                  error={!!(formik.touched.email && formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
                 />
                 <Input
                   label="Password"

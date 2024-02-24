@@ -1,11 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcrypt';
-import checkValidEmail from '../utils/checkValidEmail';
 
 interface BodyProps {
   userId: string;
-  email?: string;
+  clientId: string;
   currentPassword?: string;
   newPassword?: string;
   sheetName?: string;
@@ -17,8 +16,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const {
       userId,
-      email,
       currentPassword,
+      clientId,
       newPassword,
       sheetName,
     }: BodyProps = req.body;
@@ -35,17 +34,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updateFields: any = {};
 
-    if (email) {
-      const correctEmail = email.trim();
-      if (correctEmail !== existingUser.email) {
-        const isEmailValid = await checkValidEmail(prisma, correctEmail);
-        if (!isEmailValid) {
-          return res.status(400).json({
-            error: 'Email Is Existed',
-          });
-        }
-      }
-      updateFields.email = correctEmail;
+    if (clientId) {
+      updateFields.clientId = clientId;
     }
 
     if (currentPassword && newPassword) {

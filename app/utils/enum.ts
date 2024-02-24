@@ -6,5 +6,5 @@ export enum API_URL {
   INPUT = '/api/input',
   POSITION = '/api/position',
   SHEETS = '/api/sheets',
-  IMPORT_SHEETS = '/api/submit',
+  IMPORT_SHEETS = '/api/import-sheets',
 }

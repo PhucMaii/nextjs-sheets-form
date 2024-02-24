@@ -14,20 +14,20 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       credentials: {
-        email: {
-          label: 'Email',
-          type: 'email',
-          placeholder: 'hello@example.com',
+        clientId: {
+          label: 'Client Id',
+          type: 'text',
+          placeholder: '00123',
         },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.clientId || !credentials?.password) {
           return null;
         }
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email,
+            clientId: credentials.clientId,
           },
         });
         if (!user) {
@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
         }
         return {
           id: user.id + '',
-          email: user.email,
+          clientId: user.clientId,
           sheetName: user.sheetName,
         };
       },
@@ -68,9 +68,6 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    // signIn: ({ user, account, profile, email, credentials }) => {
-    //   return true;
-    // },
   },
 };
 

@@ -34,8 +34,8 @@ export default function page() {
   const fetchUserData = async () => {
     try {
       const response = await axios.get(`/api/user?id=${session?.user.id}`);
-      const { id, email, sheetName }: UserType = response.data.data;
-      setUserData({ id, email, sheetName });
+      const { id, sheetName }: UserType = response.data.data;
+      setUserData({ id, sheetName });
     } catch (error) {
       console.log(error);
     }
@@ -90,7 +90,6 @@ export default function page() {
     try {
       const response = await axios.put('/api/user', {
         userId: userData?.id,
-        email: userData?.email,
         sheetName: userData?.sheetName,
       });
 
@@ -135,14 +134,6 @@ export default function page() {
               className="mb-0"
             />
             <Divider />
-            <Input
-              label="Email"
-              placeholder="Enter your email"
-              type="text"
-              value={userData?.email}
-              onChange={(e) => editUserData('email', e.target.value)}
-              className="mb-0"
-            />
             <Button
               color="blue"
               label="Update"
