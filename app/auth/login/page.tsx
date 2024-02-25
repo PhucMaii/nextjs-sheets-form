@@ -96,14 +96,14 @@ export default function LoginPage() {
               <h2 className="text-blue-500 font-bold text-lg">DataHabor Pro</h2>
             </div>
             <form className="p-16" noValidate onSubmit={formik.handleSubmit}>
-              <h4 className="text-3xl font-bold text-left">Welcome Back</h4>
+              <h4 className="text-3xl font-bold text-left">Hello there</h4>
               <h4 className="text-md text-gray-500 mb-8 text-left">
-                Login to access more enhanced features
+                Log in to place your order
               </h4>
               <div className="flex flex-col gap-2">
                 <Input
-                  label="ClientId"
-                  placeholder="eg: John"
+                  label="Client Id"
+                  placeholder="Enter your client id"
                   onChange={formik.handleChange}
                   type="text"
                   value={formik.values.clientId}
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 />
                 <Input
                   label="Password"
-                  placeholder="eg: john@gmail.com"
+                  placeholder="Enter your password"
                   onChange={formik.handleChange}
                   type="password"
                   value={formik.values.password}

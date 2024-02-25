@@ -15,8 +15,9 @@ import { API_URL } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import { grey } from '@mui/material/colors';
 
 export default function OrderForm() {
   const [formData, setFormData] = useState<FormType>({
@@ -134,7 +135,7 @@ export default function OrderForm() {
       />
       <Navbar isLogin={true} />
       <div className="max-w-2xl mx-auto py-16">
-        <h4 className="text-center font-bold text-2xl text-blue-600 px-8">
+        <h4 className="text-center font-bold text-4xl px-8">
           {formData.formName}
         </h4>
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -143,12 +144,16 @@ export default function OrderForm() {
               if (input.inputType === 'date') {
                 return (
                   <Box key={index} mb={4}>
-                    <Typography>{input.inputName}</Typography>
+                    <label
+                      className="block text-gray-700 text-sm font-bold mb-2"
+                    >
+                      {input.inputName}
+                    </label>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
                         value={dayjs(inputValues[input.inputName])}
                         onChange={(e: any) => handleDateChange(e, input)}
-                        sx={{ width: '100%', height: '80%' }}
+                        sx={{ width: '100%', height: '0.1%', border: `1px solid ${grey[600]}`, borderRadius: 2 }}
                       />
                     </LocalizationProvider>
                   </Box>
