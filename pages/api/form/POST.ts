@@ -23,17 +23,18 @@ export const POSTMethod = async (
     const newForm = await prisma.form.create({
       data: {
         formName: body.formName,
-        user: { connect: { id: parseInt(body.userId) } },
         inputs: {
-          create: [...submitInputs.map((input: InputType) => ({
-            inputName: input.name,
-            inputType: input.type
-          }))]
+          create: [
+            ...submitInputs.map((input: InputType) => ({
+              inputName: input.name,
+              inputType: input.type,
+            })),
+          ],
         },
         lastOpened: new Date(),
       } as any,
-    })
-    
+    });
+
     return res.status(200).json({
       data: newForm,
       message: 'Form Created Successfully',

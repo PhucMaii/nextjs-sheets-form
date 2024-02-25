@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
 
 interface RequestQuery {
   id?: string;
@@ -19,36 +17,16 @@ export const GETMethod = async (
       return res.status(400).json({ error: 'Missing form id' });
     }
 
-    const session: any = await getServerSession(req, res, authOptions);
-    const existingForm = await prisma.form.findUnique({
-      where: {
-        formId: Number(id),
-      },
-    });
-
-    if (parseInt(session?.user.id) !== existingForm?.userId) {
-      return res.status(404).json({ error: 'You are not authorized' });
-    }
-
-    const updateLastOpened = await prisma.form.update({
-      where: {
-        formId: Number(id),
-      },
-      data: {
-        lastOpened: new Date(),
-      },
-    });
-
     const data = await prisma.form.findUnique({
       where: {
         formId: Number(id),
       },
       include: {
-        inputs: true
-      } as any
+        inputs: true,
+      } as any,
     });
 
-    if (data && updateLastOpened) {
+    if (data) {
       return res.status(200).json({
         data,
         message: `Fetch Form with id ${id} Successfully`,

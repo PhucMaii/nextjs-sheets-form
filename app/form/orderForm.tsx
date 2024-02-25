@@ -1,13 +1,13 @@
 'use client';
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { FormType, Notification, SessionClientType } from '@/app/utils/type';
 import Button from '@/app/components/Button';
 import LoadingComponent from '@/app/components/LoadingComponent';
 import Navbar from '@/app/components/Navbar';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
-import { InputType } from '../../utils/type';
+import { InputType } from '../utils/type';
 import Input from '@/app/components/Input';
 import FadeIn from '@/app/HOC/FadeIn';
 import axios from 'axios';
@@ -18,7 +18,7 @@ import dayjs from 'dayjs';
 import { Box, Typography } from '@mui/material';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 
-export default function Form() {
+export default function OrderForm() {
   const [formData, setFormData] = useState<FormType>({
     userId: 0,
     formId: 0,
@@ -34,7 +34,6 @@ export default function Form() {
     type: '',
     message: '',
   });
-  const { id }: { id: string | null } = useParams() as { id: string | null };
   const { status }: SessionClientType = useSession() as SessionClientType;
   const router = useRouter();
 
@@ -44,7 +43,7 @@ export default function Form() {
 
   const fetchForm = async () => {
     try {
-      const response = await axios.get(`${API_URL.FORM}?id=${id}`);
+      const response = await axios.get(`${API_URL.FORM}?id=${1}`);
       const data = response.data.data;
 
       createInputValues(data.inputs);

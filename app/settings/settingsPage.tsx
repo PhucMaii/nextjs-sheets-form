@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react';
 import { Notification, UserType } from '../utils/type';
 import Snackbar from '../components/Snackbar/Snackbar';
 
-export default function page() {
+export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState<string>('');
   const [updateGeneralInfoLoading, setUpdateGeneralInfoLoading] =
     useState<boolean>(false);

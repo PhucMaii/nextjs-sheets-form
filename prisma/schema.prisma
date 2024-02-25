@@ -9,22 +9,38 @@ datasource db {
 }
 
 model User {
-  id        Int    @id @default(autoincrement())
-  password  String @db.VarChar(255)
-  clientId  String @unique @db.VarChar(255)
-  sheetName String @db.VarChar(255)
-  forms     Form[]
+  id              Int      @id @default(autoincrement())
+  categoryId      Int
+  clientName      String   @db.VarChar(255)
+  clientId        String   @unique @db.VarChar(255)
+  contactNumber   String   @db.VarChar(11)
+  deliveryAddress String   @db.VarChar(255)
+  password        String   @db.VarChar(255)
+  sheetName       String   @db.VarChar(255)
+  category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(255)
+  users User[]
+  items Item[]
+}
+
+model Item {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(255)
+  categoryId Int
+  price      Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
 }
 
 model Form {
   formId     Int      @id @default(autoincrement()) @map("form_id")
   formName   String   @map("form_name") @db.VarChar(255)
-  lastOpened DateTime @updatedAt @map("last_opened") @db.Timestamp(0)
-  userId     Int
   inputs     Input[]
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model Input {

@@ -1,10 +1,10 @@
-import React from 'react'
-import CreateForm from './form'
+import React from 'react';
+import CreateForm from './form';
 
 export default function CreateFormPage() {
   return (
     <div>
-        <CreateForm />
+      <CreateForm />
     </div>
-  )
+  );
 }
