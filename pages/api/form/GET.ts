@@ -47,7 +47,6 @@ export const GETMethod = async (
         inputs: true
       } as any
     });
-    console.log(data, 'data');
 
     if (data && updateLastOpened) {
       return res.status(200).json({
