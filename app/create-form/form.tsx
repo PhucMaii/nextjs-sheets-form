@@ -20,7 +20,7 @@ export default function CreateForm() {
   const [formName, setFormName] = useState<string>('');
   const [inputField, setInputField] = useState<InputField>({
     name: '',
-    type: ''
+    type: '',
   });
   const [inputFieldList, setInputFieldList] = useState<InputField[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -48,7 +48,7 @@ export default function CreateForm() {
     } else {
       setDisableAddForm(true);
     }
-  }, [inputFieldList])
+  }, [inputFieldList]);
 
   const handleAddInputField = () => {
     if (!inputField.name || !inputField.type) {
@@ -94,7 +94,7 @@ export default function CreateForm() {
       const submittedData = {
         formName,
         userId: session?.user?.id,
-        inputs: inputFieldList
+        inputs: inputFieldList,
       };
 
       const response = await axios.post(API_URL.FORM, submittedData);

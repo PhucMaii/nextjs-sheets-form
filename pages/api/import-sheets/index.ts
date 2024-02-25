@@ -1,6 +1,5 @@
 import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
-import getSheet, { ClientData } from '../utils/getSheet';
 import emailHandler from '../utils/email';
 import { generateOrderTemplate } from '@/config/email';
 import { getServerSession } from 'next-auth';
@@ -15,20 +14,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
     const session: any = await getServerSession(req, res, authOptions);
-  
+
     if (!session) {
       return res.status(401).json({ error: 'You are not authenticated' });
     }
-  
+
     const existingUser = await prisma.user.findUnique({
       where: {
         id: Number(session.user.id),
       },
     });
-  
+
     if (!existingUser) {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }
+
+    const items = await prisma.item.findMany({
+      where: {
+        categoryId: existingUser.categoryId,
+      },
+    });
 
     const body: any = req.body;
     const auth = new google.auth.GoogleAuth({
@@ -59,15 +64,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const appendData = appendResponse.data.updates;
     data.push(appendData);
 
+    // Generate price
+    const orderDetails = body;
+    for (const item of items) {
+      if (Object.prototype.hasOwnProperty.call(body, item.name)) {
+        orderDetails[item.name] = `${Number(
+          orderDetails[item.name],
+        )} x $${Number(item.price)} = $${
+          Number(orderDetails[item.name]) * Number(item.price)
+        }`;
+      }
+    }
+
     // Notify Email
-    const clientData = await getSheet(existingUser.sheetName) as ClientData;
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;
     const htmlTemplate: string = generateOrderTemplate(
-      clientData.clientName,
-      clientData.clientId,
-      body,
-      clientData.contactNumber,
-      clientData.deliveryAddress,
+      existingUser.clientName,
+      existingUser.clientId,
+      orderDetails,
+      existingUser.contactNumber,
+      existingUser.deliveryAddress,
     );
 
     await emailHandler(

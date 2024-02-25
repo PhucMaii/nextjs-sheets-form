@@ -17,7 +17,7 @@ export const generateOrderTemplate = (
       }</h4></br>`;
     } else {
       if (parseInt(orderDetails[key]) > 0) {
-        orderDetailsTemplate += `<h4 style="text-align: left;">${orderDetails[key]}x ${key}</h4>`;
+        orderDetailsTemplate += `<h4 style="text-align: left;">${orderDetails[key]} ${key}</h4>`;
       }
     }
   }

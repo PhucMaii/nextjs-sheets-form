@@ -1,26 +1,16 @@
 'use client';
 import Image from 'next/image';
-import React, { MouseEvent, useState } from 'react';
+import React from 'react';
 import Button from './Button';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { Avatar, Divider, Menu, MenuItem } from '@mui/material';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import LogoutIcon from '@mui/icons-material/Logout';
 
 interface PropTypes {
   isLogin: boolean;
 }
 
 export default function Navbar({ isLogin }: PropTypes) {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [openUserMenu, setOpenUserMenu] = useState<boolean>(false);
   const router = useRouter();
-
-  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(e.currentTarget);
-    setOpenUserMenu(true);
-  };
 
   return (
     <div className="flex justify-between mx-2">
@@ -34,57 +24,13 @@ export default function Navbar({ isLogin }: PropTypes) {
       <div className="m-4">
         {isLogin ? (
           <>
-            <Avatar onClick={(e: any) => handleClick(e)} />
-            <Menu
-              anchorEl={anchorEl}
-              open={openUserMenu}
-              onClose={() => setOpenUserMenu(false)}
-              onClick={() => setOpenUserMenu(false)}
-              PaperProps={{
-                elevation: 0,
-                sx: {
-                  overflow: 'visible',
-                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                  mt: 1.5,
-                  '& .MuiAvatar-root': {
-                    width: 32,
-                    height: 32,
-                    ml: -0.5,
-                    mr: 1,
-                  },
-                  '&::before': {
-                    content: '""',
-                    display: 'block',
-                    position: 'absolute',
-                    top: 0,
-                    right: 14,
-                    width: 10,
-                    height: 10,
-                    bgcolor: 'background.paper',
-                    transform: 'translateY(-50%) rotate(45deg)',
-                    zIndex: 0,
-                  },
-                },
-              }}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            >
-              <MenuItem onClick={() => router.push('/settings')}>
-                <div className="flex gap-2">
-                  <AdminPanelSettingsIcon /> My Account
-                </div>
-              </MenuItem>
-              <Divider />
-              <MenuItem
-                onClick={() =>
-                  signOut({ callbackUrl: 'http://localhost:3000/auth/login' })
-                }
-              >
-                <div className="flex gap-2">
-                  <LogoutIcon /> Sign out
-                </div>
-              </MenuItem>
-            </Menu>
+            <Button
+              width="full"
+              color="blue"
+              label="Sign in"
+              onClick={() => signOut({callbackUrl: 'http://localhost:3000/auth/login'})}
+              className="bg-blue-600"
+            />  
           </>
         ) : (
           <Button

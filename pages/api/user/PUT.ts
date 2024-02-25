@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 interface BodyProps {
   userId: string;
   clientId: string;
+  clientName: string;
   currentPassword?: string;
   newPassword?: string;
   sheetName?: string;
@@ -17,6 +18,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const {
       userId,
       currentPassword,
+      clientName,
       clientId,
       newPassword,
       sheetName,
@@ -36,6 +38,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     if (clientId) {
       updateFields.clientId = clientId;
+    }
+
+    if (clientName) {
+      updateFields.clientName = clientName;
     }
 
     if (currentPassword && newPassword) {
