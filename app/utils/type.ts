@@ -15,7 +15,7 @@ export interface FormType {
 }
 
 export interface InputType {
-  positionId?: number;
+  formId?: number;
   inputId: number;
   inputName: string;
   inputType: string;

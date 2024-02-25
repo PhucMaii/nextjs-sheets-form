@@ -1,7 +1,6 @@
 import { InputType } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import checkValidInput from '../utils/checkValidInput';
 
 export default async function POSTMethod(
   req: NextApiRequest,
@@ -10,16 +9,12 @@ export default async function POSTMethod(
 ) {
   try {
     const body: InputType = req.body;
-    const isInputNameUnique = await checkValidInput(prisma, body, 'POST');
-    if (!isInputNameUnique) {
-      return res.status(400).json({ error: 'Input Name Existed' });
-    }
     const addedInput = await prisma.input.create({
       data: {
-        positionId: Number(body.positionId),
+        formId: body.formId,
         inputName: body.inputName,
         inputType: body.inputType,
-      },
+      } as any,
     });
     return res.status(201).json({
       data: addedInput,

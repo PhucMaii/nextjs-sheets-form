@@ -28,9 +28,11 @@ export default function Navbar({ isLogin }: PropTypes) {
               width="full"
               color="blue"
               label="Sign in"
-              onClick={() => signOut({callbackUrl: 'http://localhost:3000/auth/login'})}
+              onClick={() =>
+                signOut({ callbackUrl: 'http://localhost:3000/auth/login' })
+              }
               className="bg-blue-600"
-            />  
+            />
           </>
         ) : (
           <Button

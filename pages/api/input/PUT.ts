@@ -1,7 +1,6 @@
 import { InputType } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import checkValidInput from '../utils/checkValidInput';
 
 export default async function PUTMethod(
   req: NextApiRequest,
@@ -10,10 +9,6 @@ export default async function PUTMethod(
 ) {
   try {
     const body: InputType = req.body;
-    const isValidInput = await checkValidInput(prisma, body, 'PUT');
-    if (!isValidInput) {
-      return res.status(400).send('Input Name Existed');
-    }
     const updatedInput = await prisma.input.update({
       where: {
         inputId: body.inputId,
