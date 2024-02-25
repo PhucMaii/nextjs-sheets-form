@@ -27,7 +27,7 @@ export default function Navbar({ isLogin }: PropTypes) {
             <Button
               width="full"
               color="blue"
-              label="Sign in"
+              label="Sign out"
               onClick={() =>
                 signOut({ callbackUrl: 'http://localhost:3000/auth/login' })
               }
