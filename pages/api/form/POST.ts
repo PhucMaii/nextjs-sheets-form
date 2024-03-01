@@ -31,8 +31,7 @@ export const POSTMethod = async (
             })),
           ],
         },
-        lastOpened: new Date(),
-      } as any,
+      },
     });
 
     return res.status(200).json({

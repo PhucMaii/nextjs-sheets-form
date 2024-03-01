@@ -23,7 +23,7 @@ export const GETMethod = async (
       },
       include: {
         inputs: true,
-      } as any,
+      },
     });
 
     if (data) {
