@@ -2,7 +2,6 @@
 import Image from 'next/image';
 import React from 'react';
 import { Dropdown } from 'flowbite-react';
-import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { MdOutlineSecurity } from 'react-icons/md';
@@ -12,13 +11,11 @@ interface PropTypes {
 }
 
 export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
-  const router = useRouter();
 
   return (
     <div className="flex justify-between mx-2">
       <div
         className="flex gap-4 m-4 items-center cursor-pointer"
-        onClick={() => router.push('/')}
       >
         <Image width={30} height={30} src="/computer-icon.png" alt="computer" />
         <h2 className="text-blue-500 font-bold text-xl">DataHabor Pro</h2>

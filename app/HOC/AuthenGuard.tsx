@@ -1,11 +1,11 @@
 import { getSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { FC, useEffect, useState } from 'react';
-import LoadingComponent from '../components/LoadingComponent';
+import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 
 const SplashScreen: FC = () => (
   <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-    <LoadingComponent color="blue" width="12" height="12" />
+    <LoadingComponent color="blue" />
   </div>
 );
 

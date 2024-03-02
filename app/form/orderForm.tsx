@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { FormType, Notification, SessionClientType } from '@/app/utils/type';
 import Button from '@/app/components/Button';
-import LoadingComponent from '@/app/components/LoadingComponent';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import Navbar from '@/app/components/Navbar';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 import { InputType } from '../utils/type';
@@ -123,7 +123,7 @@ export default function OrderForm() {
   if (isLoading || status === 'loading') {
     return (
       <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-        <LoadingComponent color="blue" width="12" height="12" />
+        <LoadingComponent color="blue" />
       </div>
     );
   }

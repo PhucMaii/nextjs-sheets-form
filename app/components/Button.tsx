@@ -1,5 +1,5 @@
 import React, { MouseEvent, ReactNode } from 'react';
-import LoadingComponent from './LoadingComponent';
+import LoadingComponent from './LoadingComponent/LoadingComponent';
 
 interface PropTypes {
   className?: string;
@@ -47,7 +47,7 @@ export default function Button({
     >
       {loadingButton &&
         (isLoading ? (
-          <LoadingComponent color="white" width="4" height="4" />
+          <LoadingComponent color="white" width="6" />
         ) : (
           <svg
             width="25"
