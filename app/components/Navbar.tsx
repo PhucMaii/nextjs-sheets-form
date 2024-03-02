@@ -1,15 +1,17 @@
 'use client';
 import Image from 'next/image';
 import React from 'react';
-import Button from './Button';
+import { Dropdown } from 'flowbite-react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import { FaSignOutAlt } from 'react-icons/fa';
+import { MdOutlineSecurity } from 'react-icons/md';
 
 interface PropTypes {
-  isLogin: boolean;
+  handleOpenSecurityModal?: () => void;
 }
 
-export default function Navbar({ isLogin }: PropTypes) {
+export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
   const router = useRouter();
 
   return (
@@ -22,27 +24,22 @@ export default function Navbar({ isLogin }: PropTypes) {
         <h2 className="text-blue-500 font-bold text-xl">DataHabor Pro</h2>
       </div>
       <div className="m-4">
-        {isLogin ? (
-          <>
-            <Button
-              width="full"
-              color="blue"
-              label="Sign out"
-              onClick={() =>
-                signOut({ callbackUrl: 'http://localhost:3000/auth/login' })
-              }
-              className="bg-blue-600"
-            />
-          </>
-        ) : (
-          <Button
-            width="full"
-            color="blue"
-            label="Sign in"
-            onClick={() => router.push('/auth/login')}
-            className="bg-blue-600"
-          />
-        )}
+        <Dropdown style={{ background: 'black' }} label="My Account">
+          <Dropdown.Item
+            icon={MdOutlineSecurity}
+            onClick={handleOpenSecurityModal}
+          >
+            Security
+          </Dropdown.Item>
+          <Dropdown.Item
+            icon={FaSignOutAlt}
+            onClick={() =>
+              signOut({ callbackUrl: 'http://localhost:3000/auth/login' })
+            }
+          >
+            Sign out
+          </Dropdown.Item>
+        </Dropdown>
       </div>
     </div>
   );

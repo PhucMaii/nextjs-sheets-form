@@ -1,8 +1,8 @@
-import { customStyles } from '@/app/utils/styles';
 import Modal from 'react-modal';
 import IconButton from '../IconButton';
 import { useState } from 'react';
 import Button from '../Button';
+import { modalStyles } from './styles';
 
 interface PropTypes {
   isOpen: boolean;
@@ -23,7 +23,7 @@ export default function DeleteModal({
     setIsLoading(false);
   };
   return (
-    <Modal isOpen={isOpen} style={customStyles}>
+    <Modal isOpen={isOpen} style={modalStyles}>
       <div className="relative p-4 w-full max-w-md max-h-full">
         <div className="relative bg-white rounded-lg">
           <IconButton

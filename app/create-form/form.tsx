@@ -132,7 +132,7 @@ export default function CreateForm() {
         type={notification.type}
         message={notification.message}
       />
-      <Navbar isLogin={true} />
+      <Navbar />
       <h2 className="mb-4 text-4xl text-center text-blue-600 font-bold">
         Create Form
       </h2>

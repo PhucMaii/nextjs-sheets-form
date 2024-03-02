@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import withAuthGuard from '../utils/withAuthGuard';
 
-export default async function GET(req: NextApiRequest, res: NextApiResponse) {
+const GET = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
 
@@ -27,4 +28,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       error: 'Internal Server Occur in GET USER request',
     });
   }
-}
+};
+
+export default withAuthGuard(GET);

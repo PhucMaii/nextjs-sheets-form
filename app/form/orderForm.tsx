@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import { Box } from '@mui/material';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
+import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 
 export default function OrderForm() {
   const [formData, setFormData] = useState<FormType>({
@@ -30,6 +31,8 @@ export default function OrderForm() {
   const [inputValues, setInputValues] = useState<any>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
+  const [isOpenSecurityModal, setIsOpenSecurityModal] =
+    useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: '',
@@ -133,7 +136,11 @@ export default function OrderForm() {
         type={notification.type}
         message={notification.message}
       />
-      <Navbar isLogin={true} />
+      <ChangePasswordModal
+        isOpen={isOpenSecurityModal}
+        onClose={() => setIsOpenSecurityModal(false)}
+      />
+      <Navbar handleOpenSecurityModal={() => setIsOpenSecurityModal(true)} />
       <div className="max-w-2xl mx-auto py-16">
         <h4 className="text-center font-bold text-4xl px-8">
           {formData.formName}
@@ -144,16 +151,19 @@ export default function OrderForm() {
               if (input.inputType === 'date') {
                 return (
                   <Box key={index} mb={4}>
-                    <label
-                      className="block text-gray-700 text-sm font-bold mb-2"
-                    >
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
                       {input.inputName}
                     </label>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
                         value={dayjs(inputValues[input.inputName])}
                         onChange={(e: any) => handleDateChange(e, input)}
-                        sx={{ width: '100%', height: '0.1%', border: `1px solid ${grey[600]}`, borderRadius: 2 }}
+                        sx={{
+                          width: '100%',
+                          height: '0.1%',
+                          border: `1px solid ${grey[600]}`,
+                          borderRadius: 2,
+                        }}
                       />
                     </LocalizationProvider>
                   </Box>

@@ -1,10 +1,10 @@
-import { customStyles } from '@/app/utils/styles';
 import React, { ChangeEvent, useState } from 'react';
 import Modal from 'react-modal';
 import Input from '../Input';
 import Select from '../Select';
 import Button from '../Button';
 import { Notification } from '@/app/utils/type';
+import { modalStyles } from './styles';
 
 interface PropTypes {
   isDisableOnClick?: boolean;
@@ -67,7 +67,7 @@ export default function EditInputModal({
   return (
     <Modal
       isOpen={isOpen}
-      style={customStyles}
+      style={modalStyles}
       onRequestClose={() => {
         onClose();
         setNotification({ on: false, type: '', message: '' });
