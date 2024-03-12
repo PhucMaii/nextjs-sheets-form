@@ -36,6 +36,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const body: any = req.body;
+    // Get item id
+    // Get order id
+    // Add quantity for each item into ordered items
+    await prisma.orderedItems.createMany({
+      data: [...body]
+    });
+
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,

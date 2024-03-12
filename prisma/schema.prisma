@@ -28,19 +28,20 @@ model Category {
 }
 
 model Item {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(255)
-  categoryId Int
-  price      Int
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(255)
+  categoryId   Int
+  price        Int
+  category     Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  OrderedItems OrderedItems[]
 
   @@index([categoryId])
 }
 
 model Form {
-  formId     Int      @id @default(autoincrement()) @map("form_id")
-  formName   String   @map("form_name") @db.VarChar(255)
-  inputs     Input[]
+  formId   Int     @id @default(autoincrement()) @map("form_id")
+  formName String  @map("form_name") @db.VarChar(255)
+  inputs   Input[]
 }
 
 model Input {
@@ -51,4 +52,21 @@ model Input {
   form      Form   @relation(fields: [formId], references: [formId], onDelete: Cascade)
 
   @@index([formId])
+}
+
+model OrderedItems {
+  id       Int @id @default(autoincrement())
+  itemId   Int
+  orderId  Int
+  quantity Int
+
+  item     Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  Orders   Orders? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Orders {
+  id         Int            @id @default(autoincrement())
+  userId     Int
+  totalPrice Int
+  items      OrderedItems[]
 }
