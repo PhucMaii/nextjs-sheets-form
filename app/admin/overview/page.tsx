@@ -1,49 +1,55 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { Box, Typography } from '@mui/material';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import { API_URL } from '../../utils/enum';
 import axios from 'axios';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+
+interface Item {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface Order {
+  id: number;
+  category: string;
+  date: string;
+  clientId: string;
+  deliveryAddress: string;
+  clientName: string;
+  contactNumber: string;
+  totalPrice: number;
+  userId: number;
+  items: Item[];
+}
 
 export default function MainPage() {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [orderData, setOrderData] = useState<any>([]);
+
   useEffect(() => {
     fetchOrders();
-  }, [])
-  const data = [
-    {
-      clientName: 'Little Minh',
-      clientAddress: '7533 Market Crossing, Burnaby, BC V3M 2E1',
-      contactNumber: '111111',
-      category: 'Special Customers',
-      orderDate: '03/11/2024',
-      totalPrice: 300,
-    },
-    {
-      clientName: 'Pho Mr Do',
-      clientAddress: 'Vancouver BC',
-      contactNumber: '111111',
-      category: 'Restaurant',
-      orderDate: '03/11/2024',
-      totalPrice: 530,
-    },
-    {
-      clientName: 'Costco',
-      clientAddress: 'Chinatown',
-      contactNumber: '111111',
-      category: 'Supermarket',
-      orderDate: '03/11/2024',
-      totalPrice: 600,
-    }
-  ];
+  }, []);
 
   const fetchOrders = async () => {
     try {
-      const orders = await axios.get(API_URL.ORDER);
-      console.log(orders, 'orders');
+      const response = await axios.get(API_URL.ORDER);
+      setOrderData(response.data.data);
+      setIsLoading(false);
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
     }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+        <LoadingComponent color="blue" />
+      </div>
+    );
   }
 
   return (
@@ -52,8 +58,10 @@ export default function MainPage() {
         <Typography fontWeight="bold" variant="h4">
           Today&apos;s Order
         </Typography>
-        <OrderAccordion />
-        <OrderAccordion />
+        {orderData.length > 0 &&
+          orderData.map((order: Order, index: number) => {
+            return <OrderAccordion key={index} order={order} />;
+          })}
       </Box>
     </Sidebar>
   );

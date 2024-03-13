@@ -1,5 +1,5 @@
 import React from 'react';
-import loaderStyle from './style.module.css'
+import loaderStyle from './style.module.css';
 
 interface PropTypes {
   color: string;

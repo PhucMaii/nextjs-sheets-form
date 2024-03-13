@@ -9,6 +9,6 @@ interface ItemButtonStyled extends ListItemButtonProps {
 export const ListItemButtonStyled = styled(ListItemButton)<ItemButtonStyled>`
   background-color: ${(props) => props.$currentTab && `${blue[50]} !important`};
   width: 80%;
-  margin: auto;
-  border-radius: 10px;
+  margin: auto !important;
+  border-radius: 10px !important;
 `;

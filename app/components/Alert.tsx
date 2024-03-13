@@ -2,12 +2,17 @@ import React from 'react';
 import { Notification } from '../utils/type';
 
 interface PropTypes {
-    notification: Notification;
-    onClose: () => void;
+  notification: Notification;
+  onClose: () => void;
 }
 
 export default function Alert({ notification, onClose }: PropTypes) {
-    const color = notification.type === 'success' ? 'green' : notification.type === 'error' ? 'red' : 'yellow' 
+  const color =
+    notification.type === 'success'
+      ? 'green'
+      : notification.type === 'error'
+        ? 'red'
+        : 'yellow';
   return (
     <div
       className={`w-full flex items-center p-4 mb-4 text-sm text-${color}-800 border border-${color}-300 rounded-lg bg-${color}-50`}

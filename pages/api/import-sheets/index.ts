@@ -41,8 +41,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         date: body['ORDER DATE'],
         userId: existingUser.id,
         totalPrice: 0,
-      }
-    })
+      },
+    });
 
     let totalPrice = 0;
     const itemList: any = [];
@@ -51,37 +51,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (item === 'ORDER DATE') {
         continue;
       }
-    
+
       const itemData = await prisma.item.findFirst({
         where: {
           name: item,
-          categoryId: existingUser.categoryId
-        }
+          categoryId: existingUser.categoryId,
+        },
       });
-    
+
       if (itemData) {
         const orderedItems = await prisma.orderedItems.create({
           data: {
             itemId: itemData.id,
             orderId: newOrder.id,
-            quantity: body[item]
-          }
+            quantity: body[item],
+          },
         });
 
         itemList.push(orderedItems);
         totalPrice += itemData.price * body[item];
       }
     }
-    
+
     // Update the order with the totalPrice
     await prisma.orders.update({
       where: {
-        id: newOrder.id
+        id: newOrder.id,
       },
       data: {
         totalPrice: totalPrice,
-        items: itemList
-      }
+      },
     });
 
     const auth = new google.auth.GoogleAuth({
