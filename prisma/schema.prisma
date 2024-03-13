@@ -60,12 +60,13 @@ model OrderedItems {
   orderId  Int
   quantity Int
 
-  item     Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  Orders   Orders? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  item   Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  Orders Orders? @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Orders {
   id         Int            @id @default(autoincrement())
+  date       String
   userId     Int
   totalPrice Int
   items      OrderedItems[]

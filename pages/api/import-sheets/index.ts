@@ -36,11 +36,52 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const body: any = req.body;
-    // Get item id
-    // Get order id
-    // Add quantity for each item into ordered items
-    await prisma.orderedItems.createMany({
-      data: [...body]
+    const newOrder = await prisma.orders.create({
+      data: {
+        date: body['ORDER DATE'],
+        userId: existingUser.id,
+        totalPrice: 0,
+      }
+    })
+
+    let totalPrice = 0;
+    const itemList: any = [];
+    // Loop through each item from request and save it to order
+    for (const item of Object.keys(body)) {
+      if (item === 'ORDER DATE') {
+        continue;
+      }
+    
+      const itemData = await prisma.item.findFirst({
+        where: {
+          name: item,
+          categoryId: existingUser.categoryId
+        }
+      });
+    
+      if (itemData) {
+        const orderedItems = await prisma.orderedItems.create({
+          data: {
+            itemId: itemData.id,
+            orderId: newOrder.id,
+            quantity: body[item]
+          }
+        });
+
+        itemList.push(orderedItems);
+        totalPrice += itemData.price * body[item];
+      }
+    }
+    
+    // Update the order with the totalPrice
+    await prisma.orders.update({
+      where: {
+        id: newOrder.id
+      },
+      data: {
+        totalPrice: totalPrice,
+        items: itemList
+      }
     });
 
     const auth = new google.auth.GoogleAuth({

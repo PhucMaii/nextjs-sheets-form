@@ -4,4 +4,5 @@ export enum API_URL {
   FORM = '/api/form',
   SHEETS = '/api/sheets',
   IMPORT_SHEETS = '/api/import-sheets',
+  ORDER = '/api/admin/orders'
 }
