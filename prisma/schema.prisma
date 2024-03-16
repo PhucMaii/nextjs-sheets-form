@@ -67,6 +67,8 @@ model OrderedItems {
 model Orders {
   id         Int            @id @default(autoincrement())
   date       String
+  note       String
+  status     String
   userId     Int
   totalPrice Int
   items      OrderedItems[]

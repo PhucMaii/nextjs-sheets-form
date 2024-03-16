@@ -26,7 +26,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
-    type: '',
+    type: 'info',
     message: '',
   });
 

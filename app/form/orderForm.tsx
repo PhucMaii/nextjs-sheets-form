@@ -1,5 +1,5 @@
 'use client';
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
+import React, { MouseEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { FormType, Notification, SessionClientType } from '@/app/utils/type';
@@ -35,7 +35,7 @@ export default function OrderForm() {
     useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
-    type: '',
+    type: 'info',
     message: '',
   });
   const { status }: SessionClientType = useSession() as SessionClientType;
@@ -169,6 +169,27 @@ export default function OrderForm() {
                   </Box>
                 );
               }
+
+              if (input.inputName === 'NOTE') {
+                return (
+                  <Input<string>
+                    key={index}
+                    label={input.inputName}
+                    multiline
+                    value={inputValues[input.inputName]}
+                    className="border-neutral-400 h-full mb-4"
+                    onChange={(e: any) => {
+                      setInputValues((prevInputValues: any) => {
+                        return {
+                          ...prevInputValues,
+                          [input.inputName]: e.target.value,
+                        };
+                      });
+                    }}
+                    placeholder={`Enter ${input.inputName} here...`}
+                  />
+                );
+              }
               return (
                 <Input<string | number>
                   key={index}
@@ -176,7 +197,7 @@ export default function OrderForm() {
                   type={input.inputType}
                   value={inputValues[input.inputName]}
                   className="border-neutral-400 h-full mb-4"
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  onChange={(e: any) => {
                     setInputValues((prevInputValues: any) => {
                       if (e.target.type === 'text') {
                         return {

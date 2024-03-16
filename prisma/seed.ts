@@ -264,6 +264,11 @@ async function main() {
         inputName: 'TOMATO',
         inputType: 'number',
       },
+      {
+        formId: 1,
+        inputName: 'NOTE',
+        inputType: 'text',
+      },
     ],
   });
 }

@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './provider';
 import SheetNamesContextAPI from './context/SheetNamesContext';
+import { ThemeProvider } from '@mui/material';
+import { theme } from './utils/theme';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,9 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body id="root" className={inter.className}>
-        <SheetNamesContextAPI>
-          <Providers>{children}</Providers>
-        </SheetNamesContextAPI>
+        <ThemeProvider theme={theme}>
+          <SheetNamesContextAPI>
+            <Providers>{children}</Providers>
+          </SheetNamesContextAPI>
+        </ThemeProvider>
       </body>
     </html>
   );

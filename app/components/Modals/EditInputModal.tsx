@@ -14,8 +14,8 @@ interface PropTypes {
   isOpen: boolean;
   onClose: () => void;
   placeholder?: string;
-  setInputName: (e: ChangeEvent<HTMLInputElement>) => void;
-  setInputType: (e: ChangeEvent<HTMLSelectElement>) => void;
+  setInputName: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
+  setInputType: (e: ChangeEvent<HTMLSelectElement>| ChangeEvent<HTMLTextAreaElement>) => void;
   title: string;
 }
 Modal.setAppElement('#root');
@@ -35,7 +35,7 @@ export default function EditInputModal({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
-    type: '',
+    type: 'info',
     message: '',
   });
   const handleAddInput = async () => {
@@ -70,7 +70,7 @@ export default function EditInputModal({
       style={modalStyles}
       onRequestClose={() => {
         onClose();
-        setNotification({ on: false, type: '', message: '' });
+        setNotification({ on: false, type: 'info', message: '' });
       }}
     >
       <h1 className="font-bold text-center text-lg mb-4">{title}</h1>

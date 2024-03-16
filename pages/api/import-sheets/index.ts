@@ -5,6 +5,7 @@ import { generateOrderTemplate } from '@/config/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
@@ -41,6 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         date: body['ORDER DATE'],
         userId: existingUser.id,
         totalPrice: 0,
+        note: body['NOTE'],
+        status: ORDER_STATUS.INCOMPLETED,
       },
     });
 
@@ -131,6 +134,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       orderDetails,
       existingUser.contactNumber,
       existingUser.deliveryAddress,
+      newOrder.id,
     );
 
     await emailHandler(

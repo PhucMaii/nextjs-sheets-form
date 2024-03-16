@@ -1,8 +1,9 @@
+import { AlertColor } from '@mui/material';
 import { Session } from 'next-auth';
 
 export interface Notification {
   on: boolean;
-  type: string;
+  type: AlertColor;
   message: string;
 }
 

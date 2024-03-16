@@ -4,11 +4,12 @@ export const generateOrderTemplate = (
   orderDetails: any,
   phoneNumber: string,
   deliveryAddress: string,
+  orderId: number,
 ) => {
   let orderDetailsTemplate = '';
 
   for (const key of Object.keys(orderDetails)) {
-    if (key === 'sheetName' || key === 'row') {
+    if (key === 'NOTE') {
       continue;
     }
     if (key === 'Order Date' || key === 'ORDER DATE') {
@@ -17,7 +18,7 @@ export const generateOrderTemplate = (
       }</h4></br>`;
     } else {
       if (parseInt(orderDetails[key]) > 0) {
-        orderDetailsTemplate += `<h4 style="text-align: left;">${orderDetails[key]} ${key}</h4>`;
+        orderDetailsTemplate += `<h4 style="text-align: left;">${key}: ${orderDetails[key]} </h4>`;
       }
     }
   }
@@ -34,12 +35,16 @@ export const generateOrderTemplate = (
         </div>
         <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
         <div style="width: 100%;">
+            <h3 style="text-align: left;font-weight: 300;">Order Id: #${orderId}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
-            <h3 style="text-align: left;font-weight: 300;">Client Number: ${clientNumber}</h3>
+            <h3 style="text-align: left;font-weight: 300;">Client Number: #${clientNumber}</h3>
             <h3 style="text-align: left;">ORDER DETAILS</h3>
             ${orderDetailsTemplate}
             <h4 style="text-align: left;font-weight: 300;">DELIVERY ADDRESS: ${deliveryAddress}</h4>
             <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
+            <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
+            <h4 style="text-align: left;font-weight: 300;">NOTE</h4>
+            <h4 style="text-align: left;font-weight: 300;">${orderDetails.NOTE}</h4>
         </div>
     </div>
     `;
