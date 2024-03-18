@@ -4,6 +4,8 @@ import { hash } from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  const password = await hash('maiphuc0102', 12);
+
   await prisma.category.createMany({
     data: [
       {
@@ -21,8 +23,6 @@ async function main() {
     ],
   });
 
-  const password = await hash('maiphuc0102', 12);
-
   await prisma.user.createMany({
     data: [
       {
@@ -33,6 +33,7 @@ async function main() {
         contactNumber: '16045406746',
         categoryId: 2,
         password,
+        role: 'client'
       },
       {
         clientId: '00210',
@@ -42,6 +43,17 @@ async function main() {
         contactNumber: '16045583838',
         categoryId: 1,
         password,
+        role: 'client'
+      },
+      {
+        clientId: '1',
+        clientName: 'Admin 1',
+        sheetName: 'Admin 1',
+        deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
+        contactNumber: '7787891060',
+        categoryId: 1,
+        password,
+        role: 'admin'
       },
     ],
   });

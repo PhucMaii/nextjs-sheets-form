@@ -11,6 +11,7 @@ interface PropTypes {
 }
 
 export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
+  const url = process.env.NEXT_PUBLIC_WEB_URL;
   return (
     <div className="flex justify-between mx-2">
       <div className="flex gap-4 m-4 items-center cursor-pointer">
@@ -28,7 +29,7 @@ export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
           <Dropdown.Item
             icon={FaSignOutAlt}
             onClick={() =>
-              signOut({ callbackUrl: 'http://localhost:3000/auth/login' })
+              signOut({ callbackUrl: `${url}/auth/login` })
             }
           >
             Sign out

@@ -4,9 +4,11 @@ import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
 import Button from '@/app/components/Button';
 import Input from '@/app/components/Input';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
+import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
+import axios from 'axios';
 import { useFormik } from 'formik';
-import { signIn, useSession } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -19,14 +21,12 @@ interface FormValues {
 }
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
     message: '',
   });
-  const { data: session } = useSession();
   const router = useRouter();
 
   const formik = useFormik<FormValues>({
@@ -40,7 +40,6 @@ export default function LoginPage() {
       password: Yup.string().max(255).required('Password is required'),
     }),
     onSubmit: async (values) => {
-      setIsLogin(true);
       setIsLoading(true);
 
       const user = await signIn('credentials', {
@@ -48,6 +47,11 @@ export default function LoginPage() {
         clientId: values.clientId,
         password: values.password,
       });
+
+      const session: any = await getSession();
+      const response = await axios.get(`${API_URL.USER}?id=${session?.user.id}`);
+      const userData = response.data.data;
+      console.log('session', session);
 
       if (user && user.error) {
         setNotification({
@@ -66,14 +70,18 @@ export default function LoginPage() {
       });
       setIsLoading(false);
       setTimeout(() => {
-        window.location.reload(); // with auth guard => redirect user to homepage
+        if (userData.role === 'client') {
+          router.push('/');
+        } else {
+          router.push('/admin/overview');
+        }
       }, 1000);
     },
   });
 
-  if (!isLogin && session) {
-    router.push('/');
-  }
+  // if (!isLogin && session) {
+  //   router.push('/');
+  // }
 
   return (
     <LoginAndRegisterGuard>

@@ -1,10 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import PUT from './PUT';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 
-export default async function handler(
+const handler = async (
   req: NextApiRequest,
   res: NextApiResponse,
-) {
+) => {
   try {
     if (req.method === 'PUT') {
       const response = await PUT(req, res);
@@ -21,3 +22,5 @@ export default async function handler(
     });
   }
 }
+
+export default withAdminAuthGuard(handler);

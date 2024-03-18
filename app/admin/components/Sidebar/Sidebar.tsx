@@ -1,6 +1,7 @@
 'use client';
 import {
   Box,
+  Button,
   Drawer,
   IconButton,
   List,
@@ -12,9 +13,10 @@ import {
 import React, { ReactNode, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { tabs } from '../../lib/constant';
-import Button from '@/app/components/Button';
 import { ListItemButtonStyled } from './styled';
 import { usePathname, useRouter } from 'next/navigation';
+import AuthenGuard from '@/app/HOC/AuthenGuard';
+import { signOut } from 'next-auth/react';
 
 interface PropTypes {
   children: ReactNode;
@@ -26,6 +28,7 @@ export default function Sidebar({ children }: PropTypes) {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const router = useRouter();
   const pathname: any = usePathname();
+  const url = process.env.NEXT_PUBLIC_WEB_URL;
 
   useEffect(() => {
     setCurrentTab(pathname);
@@ -69,14 +72,16 @@ export default function Sidebar({ children }: PropTypes) {
       </List>
 
       <Box sx={{ m: 2, mt: 4 }}>
-        <Button label="Sign out" color="blue" width="full" />
+        <Button onClick={() => signOut({ callbackUrl: `${url}/auth/login` })} variant="outlined" fullWidth>
+          Sign out
+        </Button>
       </Box>
     </>
   );
 
   if (mdDown) {
     return (
-      <>
+      <AuthenGuard>
         <IconButton onClick={() => setIsNavOpen(true)}>
           <MenuIcon />
         </IconButton>
@@ -100,29 +105,31 @@ export default function Sidebar({ children }: PropTypes) {
           </Drawer>
           {children}
         </Box>
-      </>
+      </AuthenGuard>
     );
   }
 
   return (
-    <Box display="flex">
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
+    <AuthenGuard>
+      <Box display="flex">
+        <Drawer
+          sx={{
             width: drawerWidth,
-            boxSizing: 'border-box',
-            borderRight: 'none',
-          },
-        }}
-        variant="permanent"
-        anchor="left"
-      >
-        {content}
-      </Drawer>
-      {children}
-    </Box>
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
+              width: drawerWidth,
+              boxSizing: 'border-box',
+              borderRight: 'none',
+            },
+          }}
+          variant="permanent"
+          anchor="left"
+        >
+          {content}
+        </Drawer>
+        {children}
+      </Box>
+    </AuthenGuard>
   );
 }

@@ -17,6 +17,7 @@ model User {
   deliveryAddress String   @db.VarChar(255)
   password        String   @db.VarChar(255)
   sheetName       String   @db.VarChar(255)
+  role            String   @db.VarChar(255)
   category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
