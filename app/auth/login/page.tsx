@@ -51,7 +51,6 @@ export default function LoginPage() {
       const session: any = await getSession();
       const response = await axios.get(`${API_URL.USER}?id=${session?.user.id}`);
       const userData = response.data.data;
-      console.log('session', session);
 
       if (user && user.error) {
         setNotification({

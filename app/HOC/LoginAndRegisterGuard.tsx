@@ -19,8 +19,8 @@ export default function LoginAndRegisterGuard({ children }: any) {
   useEffect(() => {
     const checkSession = async () => {
       const session: any = await getSession();
-      const response: any = await axios.get(`${API_URL.USER}?id=${session?.user.id}`);
       if (session) {
+        const response: any = await axios.get(`${API_URL.USER}?id=${session?.user.id}`);
         if (response.data.data.role === 'client') {
           router.push('/');
         } else {

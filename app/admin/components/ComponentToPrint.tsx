@@ -33,6 +33,10 @@ export const ComponentToPrint = forwardRef(
           </div>
           <div className="h-px bg-black w-full m=auto"></div>
           <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-wrap gap-2">
+              <h3 className="text-left font-bold">Order Id: </h3>
+              <h3 className="text-left">#{order.id}</h3>
+            </div>
             <div className="flex flex-wrap">
               <h3 className="text-left font-bold">Client Name: </h3>
               <h3 className="text-left">{order.clientName}</h3>
