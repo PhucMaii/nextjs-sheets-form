@@ -32,7 +32,7 @@ model Item {
   id           Int            @id @default(autoincrement())
   name         String         @db.VarChar(255)
   categoryId   Int
-  price        Int
+  price        Float
   category     Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   OrderedItems OrderedItems[]
 
@@ -71,6 +71,6 @@ model Orders {
   note       String
   status     String
   userId     Int
-  totalPrice Int
+  totalPrice Float
   items      OrderedItems[]
 }

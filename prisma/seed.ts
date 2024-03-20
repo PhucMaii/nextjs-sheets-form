@@ -9,32 +9,29 @@ async function main() {
   await prisma.category.createMany({
     data: [
       {
-        name: 'Restaurant',
-      },
-      {
-        name: 'Retail',
-      },
-      {
         name: 'Wholesale',
       },
       {
-        name: 'Unique Client',
+        name: 'Retail/Restaurant',
+      },
+      {
+        name: 'Special price',
       },
     ],
   });
 
   await prisma.user.createMany({
     data: [
-      {
-        clientId: '00208',
-        clientName: 'Mr. Ho Wonton House',
-        sheetName: 'Mr. Ho',
-        deliveryAddress: '6731 Kingsway, Burnaby, BC V5E 1E4',
-        contactNumber: '16045406746',
-        categoryId: 2,
-        password,
-        role: 'client',
-      },
+      // {
+      //   clientId: '00100',
+      //   clientName: `Pho d'lite - 6717 Randolph Ave, Burnaby`,
+      //   sheetName: 'Mr. Ho',
+      //   deliveryAddress: '6731 Kingsway, Burnaby, BC V5E 1E4',
+      //   contactNumber: '16045406746',
+      //   categoryId: 2,
+      //   password,
+      //   role: 'client',
+      // },
       {
         clientId: '00210',
         clientName: 'Brokenrice Vietnamese Restaurant',
@@ -63,163 +60,143 @@ async function main() {
       {
         name: 'BEANSPROUTS 10 LBS',
         categoryId: 1,
-        price: 20,
+        price: 8.50,
       },
       {
         name: 'BEANSPROUTS 10 LBS',
         categoryId: 2,
-        price: 18,
+        price: 9.50,
       },
       {
         name: 'BEANSPROUTS 10 LBS',
         categoryId: 3,
-        price: 15,
-      },
-      {
-        name: 'BEANSPROUTS 10 LBS',
-        categoryId: 4,
-        price: 10,
+        price: 9.50, 
       },
       {
         name: 'BEANSPROUTS 5 LBS',
         categoryId: 1,
-        price: 15,
+        price: 4.25,
       },
       {
         name: 'BEANSPROUTS 5 LBS',
         categoryId: 2,
-        price: 13,
+        price: 4.75,
       },
       {
         name: 'BEANSPROUTS 5 LBS',
         categoryId: 3,
-        price: 10,
+        price: 0,
       },
-      {
-        name: 'BEANSPROUTS 5 LBS',
-        categoryId: 4,
-        price: 8,
-      },
-      {
-        name: 'SOYA SPROUTS 10 LBS',
-        categoryId: 1,
-        price: 20,
-      },
-      {
-        name: 'SOYA SPROUTS 10 LBS',
-        categoryId: 2,
-        price: 18,
-      },
-      {
-        name: 'SOYA SPROUTS 10 LBS',
-        categoryId: 3,
-        price: 15,
-      },
-      {
-        name: 'SOYA SPROUTS 10 LBS',
-        categoryId: 4,
-        price: 10,
-      },
-      {
-        name: 'SOYA SPROUTS 5 LBS',
-        categoryId: 1,
-        price: 16,
-      },
-      {
-        name: 'SOYA SPROUTS 5 LBS',
-        categoryId: 2,
-        price: 14,
-      },
-      {
-        name: 'SOYA SPROUTS 5 LBS',
-        categoryId: 3,
-        price: 12,
-      },
-      {
-        name: 'SOYA SPROUTS 5 LBS',
-        categoryId: 4,
-        price: 10,
-      },
+      // {
+      //   name: 'SOYA SPROUTS 10 LBS',
+      //   categoryId: 1,
+      //   price: 20,
+      // },
+      // {
+      //   name: 'SOYA SPROUTS 10 LBS',
+      //   categoryId: 2,
+      //   price: 18,
+      // },
+      // {
+      //   name: 'SOYA SPROUTS 10 LBS',
+      //   categoryId: 3,
+      //   price: 15,
+      // },
+      // {
+      //   name: 'SOYA SPROUTS 10 LBS',
+      //   categoryId: 4,
+      //   price: 10,
+      // },
+      // {
+      //   name: 'SOYA SPROUTS 5 LBS',
+      //   categoryId: 1,
+      //   price: 16,
+      // },
+      // {
+      //   name: 'SOYA SPROUTS 5 LBS',
+      //   categoryId: 2,
+      //   price: 14,
+      // },
+      // {
+      //   name: 'SOYA SPROUTS 5 LBS',
+      //   categoryId: 3,
+      //   price: 12,
+      // },
+      // {
+      //   name: 'SOYA SPROUTS 5 LBS',
+      //   categoryId: 4,
+      //   price: 10,
+      // },
       {
         name: 'BASIL',
         categoryId: 1,
-        price: 10,
+        price: 0,
       },
       {
         name: 'BASIL',
         categoryId: 2,
-        price: 8,
+        price: 7.75,
       },
       {
         name: 'BASIL',
         categoryId: 3,
-        price: 6,
-      },
-      {
-        name: 'BASIL',
-        categoryId: 4,
-        price: 4,
+        price: 6.5,
       },
       {
         name: 'JUMBO EGGS',
         categoryId: 1,
-        price: 10,
+        price: 0,
       },
       {
         name: 'JUMBO EGGS',
         categoryId: 2,
-        price: 14,
+        price: 48,
       },
       {
         name: 'JUMBO EGGS',
         categoryId: 3,
-        price: 12,
+        price: 0,
       },
-      {
-        name: 'JUMBO EGGS',
-        categoryId: 4,
-        price: 10,
-      },
-      {
-        name: 'CUCCUMBER',
-        categoryId: 1,
-        price: 10,
-      },
-      {
-        name: 'CUCCUMBER',
-        categoryId: 2,
-        price: 14,
-      },
-      {
-        name: 'CUCCUMBER',
-        categoryId: 3,
-        price: 12,
-      },
-      {
-        name: 'CUCCUMBER',
-        categoryId: 4,
-        price: 10,
-      },
-      {
-        name: 'TOMATO',
-        categoryId: 1,
-        price: 10,
-      },
-      {
-        name: 'TOMATO',
-        categoryId: 2,
-        price: 14,
-      },
-      {
-        name: 'TOMATO',
-        categoryId: 3,
-        price: 12,
-      },
-      {
-        name: 'TOMATO',
-        categoryId: 4,
-        price: 10,
-      },
+      // {
+      //   name: 'CUCCUMBER',
+      //   categoryId: 1,
+      //   price: 10,
+      // },
+      // {
+      //   name: 'CUCCUMBER',
+      //   categoryId: 2,
+      //   price: 14,
+      // },
+      // {
+      //   name: 'CUCCUMBER',
+      //   categoryId: 3,
+      //   price: 12,
+      // },
+      // {
+      //   name: 'CUCCUMBER',
+      //   categoryId: 4,
+      //   price: 10,
+      // },
+      // {
+      //   name: 'TOMATO',
+      //   categoryId: 1,
+      //   price: 10,
+      // },
+      // {
+      //   name: 'TOMATO',
+      //   categoryId: 2,
+      //   price: 14,
+      // },
+      // {
+      //   name: 'TOMATO',
+      //   categoryId: 3,
+      //   price: 12,
+      // },
+      // {
+      //   name: 'TOMATO',
+      //   categoryId: 4,
+      //   price: 10,
+      // },
     ],
   });
 

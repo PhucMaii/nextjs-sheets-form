@@ -118,11 +118,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const orderDetails = body;
     for (const item of items) {
       if (Object.prototype.hasOwnProperty.call(body, item.name)) {
-        orderDetails[item.name] = `${Number(
-          orderDetails[item.name],
-        )} x $${Number(item.price)} = $${
-          Number(orderDetails[item.name]) * Number(item.price)
-        }`;
+        orderDetails[item.name] = {
+          quantity: orderDetails[item.name],
+          price: item.price,
+          totalPrice: orderDetails[item.name] * item.price,
+        };
       }
     }
 
