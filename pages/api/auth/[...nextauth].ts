@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id + '',
           clientId: user.clientId,
           sheetName: user.sheetName,
-          role: user.role
+          role: user.role,
         };
       },
     }),

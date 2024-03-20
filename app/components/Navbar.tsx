@@ -28,9 +28,7 @@ export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
           </Dropdown.Item>
           <Dropdown.Item
             icon={FaSignOutAlt}
-            onClick={() =>
-              signOut({ callbackUrl: `${url}/auth/login` })
-            }
+            onClick={() => signOut({ callbackUrl: `${url}/auth/login` })}
           >
             Sign out
           </Dropdown.Item>

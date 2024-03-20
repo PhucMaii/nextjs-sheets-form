@@ -19,18 +19,19 @@ export default function AuthenGuard({ children }: any) {
   useEffect(() => {
     const checkSession = async () => {
       const session: any = await getSession();
-      
+
       if (!session) {
         router.push('/auth/login');
       } else {
         if (pathname?.startsWith('/admin')) {
-          const response: any = await axios.get(`${API_URL.USER}?id=${session?.user.id}`);
+          const response: any = await axios.get(
+            `${API_URL.USER}?id=${session?.user.id}`,
+          );
           if (response.data.data.role === 'client') {
             router.push('/');
           }
         }
       }
-      
 
       setIsLoading(false);
     };

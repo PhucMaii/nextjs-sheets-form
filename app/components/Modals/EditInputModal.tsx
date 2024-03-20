@@ -14,8 +14,12 @@ interface PropTypes {
   isOpen: boolean;
   onClose: () => void;
   placeholder?: string;
-  setInputName: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
-  setInputType: (e: ChangeEvent<HTMLSelectElement>| ChangeEvent<HTMLTextAreaElement>) => void;
+  setInputName: (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
+  ) => void;
+  setInputType: (
+    e: ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLTextAreaElement>,
+  ) => void;
   title: string;
 }
 Modal.setAppElement('#root');

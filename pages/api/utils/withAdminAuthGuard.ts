@@ -31,7 +31,9 @@ const withAdminAuthGuard =
       }
 
       if (existingUser.role === 'client') {
-        return res.status(404).json({ error: 'You are not authorized to access' });
+        return res
+          .status(404)
+          .json({ error: 'You are not authorized to access' });
       }
 
       return await handler(req, res);

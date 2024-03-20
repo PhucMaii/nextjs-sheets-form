@@ -139,7 +139,9 @@ export default function CreateForm() {
       <div className="sm:mx-4 lg:mx-80 my-4">
         <Input
           label="Form Name"
-          onChange={(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
+          onChange={(
+            e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
+          ) => {
             setFormName(e.target.value);
           }}
           type="text"
@@ -164,7 +166,9 @@ export default function CreateForm() {
         <Input
           disabled={disableInput}
           label="Input Name (Label)"
-          onChange={(e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => {
+          onChange={(
+            e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
+          ) => {
             setInputField({ ...inputField, name: e.target.value });
           }}
           type="text"

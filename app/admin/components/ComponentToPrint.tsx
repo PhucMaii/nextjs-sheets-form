@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import { Order } from '../overview/page';
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 
 export const ComponentToPrint = forwardRef(
   ({ order }: { order: Order }, ref: any) => {
@@ -10,10 +11,12 @@ export const ComponentToPrint = forwardRef(
       if (item.quantity > 0) {
         totalPrice += item.totalPrice;
         orderDetailsTemplate.push(
-          <h6 className="text-left text-sm">
-            <strong>{item.name}</strong>: {item.quantity} x ${item.price} = $
-            {item.totalPrice}
-          </h6>,
+          <TableRow key={item.name}>
+            <TableCell>{item.name}</TableCell>
+            <TableCell>{item.quantity}</TableCell>
+            <TableCell>${item.price}</TableCell>
+            <TableCell>${item.totalPrice}</TableCell>
+          </TableRow>
         );
       }
     }
@@ -46,7 +49,20 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left">#{order.clientId}</h3>
             </div>
             <h3 className="text-left font-bold">ORDER DETAILS</h3>
-            {orderDetailsTemplate}
+            {/* {orderDetailsTemplate} */}
+            <Table sx={{ minWidth: '100%', mr: 4 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Total Price</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {orderDetailsTemplate}
+                </TableBody>
+              </Table>
             <div className="h-px bg-black w-full m=auto"></div>
             <div className="flex justify-between">
               <h3 className="text-left font-bold">Total:</h3>

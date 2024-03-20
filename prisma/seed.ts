@@ -33,7 +33,7 @@ async function main() {
         contactNumber: '16045406746',
         categoryId: 2,
         password,
-        role: 'client'
+        role: 'client',
       },
       {
         clientId: '00210',
@@ -43,7 +43,7 @@ async function main() {
         contactNumber: '16045583838',
         categoryId: 1,
         password,
-        role: 'client'
+        role: 'client',
       },
       {
         clientId: '1',
@@ -53,7 +53,7 @@ async function main() {
         contactNumber: '7787891060',
         categoryId: 1,
         password,
-        role: 'admin'
+        role: 'admin',
       },
     ],
   });

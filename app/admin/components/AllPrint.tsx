@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { ComponentToPrint } from './ComponentToPrint';
-import './AllPrint.css'
+import './AllPrint.css';
 
 export const AllPrint = forwardRef(({ orders }: { orders: any }, ref: any) => {
   return (
