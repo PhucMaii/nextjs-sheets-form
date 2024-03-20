@@ -40,6 +40,7 @@ export default function OrderForm() {
   });
   const { status }: SessionClientType = useSession() as SessionClientType;
   const router = useRouter();
+  const minDate = new Date();
 
   useEffect(() => {
     fetchForm();
@@ -156,6 +157,8 @@ export default function OrderForm() {
                     </label>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
+                        disablePast
+                        minDate={minDate}
                         value={dayjs(inputValues[input.inputName])}
                         onChange={(e: any) => handleDateChange(e, input)}
                         sx={{

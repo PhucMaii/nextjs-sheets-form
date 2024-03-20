@@ -42,47 +42,53 @@ export default function LoginPage() {
     onSubmit: async (values) => {
       setIsLoading(true);
 
-      const user = await signIn('credentials', {
-        redirect: false,
-        clientId: values.clientId,
-        password: values.password,
-      });
-
-      const session: any = await getSession();
-      const response = await axios.get(
-        `${API_URL.USER}?id=${session?.user.id}`,
-      );
-      const userData = response.data.data;
-
-      if (user && user.error) {
+      try {
+        const user = await signIn('credentials', {
+          redirect: false,
+          clientId: values.clientId,
+          password: values.password,
+        });
+  
+        const session: any = await getSession();
+        const response = await axios.get(
+          `${API_URL.USER}?id=${session?.user.id}`,
+        );
+        const userData = response.data.data;
+  
+        if (user && user.error) {
+          setNotification({
+            on: true,
+            type: 'error',
+            message: user.error,
+          });
+          setIsLoading(false);
+          return;
+        }
+  
+        setNotification({
+          on: true,
+          type: 'success',
+          message: 'Login Successful',
+        });
+        setIsLoading(false);
+        setTimeout(() => {
+          if (userData.role === 'client') {
+            router.push('/');
+          } else {
+            router.push('/admin/overview');
+          }
+        }, 1000);
+      } catch (error: any) {
+        console.log('Fail to sign in: ', error);
         setNotification({
           on: true,
           type: 'error',
-          message: user.error,
+          message: 'Your client id and/or password are not correct'
         });
         setIsLoading(false);
-        return;
       }
-
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Login Successful',
-      });
-      setIsLoading(false);
-      setTimeout(() => {
-        if (userData.role === 'client') {
-          router.push('/');
-        } else {
-          router.push('/admin/overview');
-        }
-      }, 1000);
     },
   });
-
-  // if (!isLogin && session) {
-  //   router.push('/');
-  // }
 
   return (
     <LoginAndRegisterGuard>
