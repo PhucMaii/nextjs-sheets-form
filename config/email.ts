@@ -7,19 +7,25 @@ export const generateOrderTemplate = (
   orderId: number,
 ) => {
   let orderDetailsTemplate = '';
+  let total = 0;
 
   for (const key of Object.keys(orderDetails)) {
-    if (key === 'NOTE') {
-      continue;
-    }
-    if (key === 'Order Date' || key === 'ORDER DATE') {
-      orderDetailsTemplate += `<h4 style="text-align: left;">${key.toUpperCase()}: ${
-        orderDetails[key]
-      }</h4></br>`;
-    } else {
-      if (parseInt(orderDetails[key]) > 0) {
-        orderDetailsTemplate += `<h4 style="text-align: left;">${key}: ${orderDetails[key]} </h4>`;
-      }
+    if (key !== 'Order Date' && key !== 'ORDER DATE' && key !== 'NOTE') {
+      total += orderDetails[key].totalPrice;
+      orderDetailsTemplate += `
+        <tr>
+          <td style="padding: 8px">${key}</td>
+          <td style="padding: 8px; text-align: center">${
+            orderDetails[key].quantity
+          }</td>
+          <td style="padding: 8px; text-align: center">$${orderDetails[
+            key
+          ].price.toFixed(2)}</td>
+          <td style="padding: 8px; text-align: center">$${orderDetails[
+            key
+          ].totalPrice.toFixed(2)}</td>
+        </tr>
+      `;
     }
   }
   return `
@@ -38,13 +44,34 @@ export const generateOrderTemplate = (
             <h3 style="text-align: left;font-weight: 300;">Order Id: #${orderId}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Number: #${clientNumber}</h3>
+            <h3 style="text-align: left;font-weight: 300;">Order Date: ${
+              orderDetails['ORDER DATE']
+            }</h3>
             <h3 style="text-align: left;">ORDER DETAILS</h3>
-            ${orderDetailsTemplate}
+            <table style="width: 100%"; border-collapse: collapse;>
+              <thead>
+                <tr>
+                  <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Item</th>
+                  <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Quantity</th>
+                  <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Unit Price</th>
+                  <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${orderDetailsTemplate}
+              </tbody>
+            </table>
+            <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
+            <h4 style="text-align: right;font-weight: 300;">Total: $${total.toFixed(
+              2,
+            )}</h4>
             <h4 style="text-align: left;font-weight: 300;">DELIVERY ADDRESS: ${deliveryAddress}</h4>
             <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
             <h4 style="text-align: left;font-weight: 300;">NOTE</h4>
-            <h4 style="text-align: left;font-weight: 300;">${orderDetails.NOTE}</h4>
+            <h4 style="text-align: left;font-weight: 300;">${
+              orderDetails.NOTE
+            }</h4>
         </div>
     </div>
     `;

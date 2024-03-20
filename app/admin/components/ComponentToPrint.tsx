@@ -1,6 +1,12 @@
 import React, { forwardRef } from 'react';
 import { Order } from '../overview/page';
-import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 
 export const ComponentToPrint = forwardRef(
   ({ order }: { order: Order }, ref: any) => {
@@ -16,7 +22,7 @@ export const ComponentToPrint = forwardRef(
             <TableCell>{item.quantity}</TableCell>
             <TableCell>${item.price}</TableCell>
             <TableCell>${item.totalPrice}</TableCell>
-          </TableRow>
+          </TableRow>,
         );
       }
     }
@@ -48,21 +54,22 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left font-bold">Client Number:</h3>
               <h3 className="text-left">#{order.clientId}</h3>
             </div>
+            <div className="flex gap-2">
+              <h3 className="text-left font-bold">Order Date:</h3>
+              <h3 className="text-left">#{order.date}</h3>
+            </div>
             <h3 className="text-left font-bold">ORDER DETAILS</h3>
-            {/* {orderDetailsTemplate} */}
             <Table sx={{ minWidth: '100%', mr: 4 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Total Price</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {orderDetailsTemplate}
-                </TableBody>
-              </Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Total Price</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>{orderDetailsTemplate}</TableBody>
+            </Table>
             <div className="h-px bg-black w-full m=auto"></div>
             <div className="flex justify-between">
               <h3 className="text-left font-bold">Total:</h3>

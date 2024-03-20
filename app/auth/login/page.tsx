@@ -48,13 +48,13 @@ export default function LoginPage() {
           clientId: values.clientId,
           password: values.password,
         });
-  
+
         const session: any = await getSession();
         const response = await axios.get(
           `${API_URL.USER}?id=${session?.user.id}`,
         );
         const userData = response.data.data;
-  
+
         if (user && user.error) {
           setNotification({
             on: true,
@@ -64,7 +64,7 @@ export default function LoginPage() {
           setIsLoading(false);
           return;
         }
-  
+
         setNotification({
           on: true,
           type: 'success',
@@ -83,7 +83,7 @@ export default function LoginPage() {
         setNotification({
           on: true,
           type: 'error',
-          message: 'Your client id and/or password are not correct'
+          message: 'Your client id and/or password are not correct',
         });
         setIsLoading(false);
       }

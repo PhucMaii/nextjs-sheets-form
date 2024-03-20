@@ -74,7 +74,9 @@ export default function Sidebar({ children }: PropTypes) {
 
       <Box sx={{ m: 2, mt: 4 }}>
         <Button
-          onClick={() => signOut({ callbackUrl: `https://supremesprouts.com/auth/login` })}
+          onClick={() =>
+            signOut({ callbackUrl: `https://supremesprouts.com/auth/login` })
+          }
           variant="outlined"
           fullWidth
         >
