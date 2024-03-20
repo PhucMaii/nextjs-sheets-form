@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import Image from 'next/image';
 import React from 'react';
@@ -28,7 +29,7 @@ export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
           </Dropdown.Item>
           <Dropdown.Item
             icon={FaSignOutAlt}
-            onClick={() => signOut({ callbackUrl: `${url}/auth/login` })}
+            onClick={() => signOut({ callbackUrl: `https://supremesprouts.com/auth/login` })}
           >
             Sign out
           </Dropdown.Item>
