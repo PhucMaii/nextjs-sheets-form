@@ -26,6 +26,7 @@ model Category {
   name  String @unique @db.VarChar(255)
   users User[]
   items Item[]
+  forms Form[]
 }
 
 model Item {
@@ -40,9 +41,13 @@ model Item {
 }
 
 model Form {
-  formId   Int     @id @default(autoincrement()) @map("form_id")
-  formName String  @map("form_name") @db.VarChar(255)
-  inputs   Input[]
+  formId     Int      @id @default(autoincrement()) @map("form_id")
+  formName   String   @map("form_name") @db.VarChar(255)
+  categoryId Int
+  inputs     Input[]
+  Category   Category @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
 }
 
 model Input {
@@ -66,11 +71,12 @@ model OrderedItems {
 }
 
 model Orders {
-  id         Int            @id @default(autoincrement())
-  date       String
-  note       String
-  status     String
-  userId     Int
-  totalPrice Float
-  items      OrderedItems[]
+  id           Int            @id @default(autoincrement())
+  orderTime    String
+  deliveryDate String
+  note         String
+  status       String
+  userId       Int
+  totalPrice   Float
+  items        OrderedItems[]
 }

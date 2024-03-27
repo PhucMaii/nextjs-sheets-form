@@ -55,8 +55,17 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left">#{order.clientId}</h3>
             </div>
             <div className="flex gap-2">
+<<<<<<< HEAD
               <h3 className="text-left font-bold">Order Date:</h3>
               <h3 className="text-left">#{order.date}</h3>
+=======
+              <h3 className="text-left font-bold">Order Time:</h3>
+              <h3 className="text-left">{order.orderTime}</h3>
+            </div>
+            <div className="flex gap-2">
+              <h3 className="text-left font-bold">Delivery Date:</h3>
+              <h3 className="text-left">{order.deliveryDate}</h3>
+>>>>>>> 211d25a07bfd7b389f92eb4c224f7a16d9f65935
             </div>
             <h3 className="text-left font-bold">ORDER DETAILS</h3>
             <Table sx={{ minWidth: '100%', mr: 4 }}>

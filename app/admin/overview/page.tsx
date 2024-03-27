@@ -23,7 +23,8 @@ interface Item {
 export interface Order {
   id: number;
   category: string;
-  date: string;
+  orderTime: string;
+  deliveryDate: string;
   clientId: string;
   deliveryAddress: string;
   clientName: string;

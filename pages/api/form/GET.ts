@@ -1,9 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-
-interface RequestQuery {
-  id?: string;
-}
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
 
 export const GETMethod = async (
   req: NextApiRequest,
@@ -11,29 +9,35 @@ export const GETMethod = async (
   prisma: PrismaClient,
 ) => {
   try {
-    const { id }: RequestQuery = req.query;
+    const session: any = await getServerSession(req, res, authOptions);
 
-    if (!id) {
-      return res.status(400).json({ error: 'Missing form id' });
+    if (!session) {
+      return res.status(401).json({ error: 'You are not authenticated' });
     }
 
-    const data = await prisma.form.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: {
-        formId: Number(id),
+        id: Number(session.user.id),
+      },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User Not Found in DB' });
+    }
+
+    const formData = await prisma.form.findFirst({
+      where: {
+        categoryId: existingUser.categoryId,
       },
       include: {
         inputs: true,
       },
     });
 
-    if (data) {
-      return res.status(200).json({
-        data,
-        message: `Fetch Form with id ${id} Successfully`,
-      });
-    } else {
-      return res.status(500).send('Failed to fetch or update form data');
-    }
+    return res.status(200).json({
+      data: formData,
+      message: 'Fetch form successfully',
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).send('There was an error ' + error);
