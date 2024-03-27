@@ -10,7 +10,7 @@ export const generateOrderTemplate = (
   let total = 0;
 
   for (const key of Object.keys(orderDetails)) {
-    if (key !== 'Order Date' && key !== 'ORDER DATE' && key !== 'NOTE') {
+    if (key !== 'DELIVERY DATE' && key !== 'orderTime' && key !== 'NOTE') {
       total += orderDetails[key].totalPrice;
       orderDetailsTemplate += `
         <tr>
@@ -44,8 +44,9 @@ export const generateOrderTemplate = (
             <h3 style="text-align: left;font-weight: 300;">Order Id: #${orderId}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Number: #${clientNumber}</h3>
-            <h3 style="text-align: left;font-weight: 300;">Order Date: ${
-              orderDetails['ORDER DATE']
+            <h3 style="text-align: left;font-weight: 300;">Order Time: ${orderDetails.orderTime}</h3>
+            <h3 style="text-align: left;font-weight: 300;">Delivery Date: ${
+              orderDetails['DELIVERY DATE']
             }</h3>
             <h3 style="text-align: left;">ORDER DETAILS</h3>
             <table style="width: 100%"; border-collapse: collapse;>

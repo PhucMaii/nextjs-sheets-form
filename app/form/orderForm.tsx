@@ -48,12 +48,12 @@ export default function OrderForm() {
 
   const fetchForm = async () => {
     try {
-      const response = await axios.get(`${API_URL.FORM}?id=${1}`);
-      const data = response.data.data;
+      const response = await axios.get(`${API_URL.FORM}`);
+      const formData = response.data.data;
 
-      createInputValues(data.inputs);
-      setInputList(data.inputs);
-      setFormData(data);
+      createInputValues(formData.inputs);
+      setInputList(formData.inputs);
+      setFormData(formData);
       setIsLoading(false);
     } catch (error: any) {
       if (error.response.status === 404) {

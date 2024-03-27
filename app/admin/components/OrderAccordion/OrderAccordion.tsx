@@ -152,7 +152,7 @@ export default function OrderAccordion({
               <Typography fontWeight="bold" variant="subtitle1">
                 #{order.id}
               </Typography>
-              <Typography variant="body2">Date: {order.date}</Typography>
+              <Typography variant="body2">Delivery Date: {order.deliveryDate}</Typography>
             </Grid>
             <Grid item xs={12} md={5}>
               <Button

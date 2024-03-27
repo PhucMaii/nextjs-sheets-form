@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { sheetStructure } from '@/config/sheetStructure';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
@@ -39,7 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const body: any = req.body;
     const newOrder = await prisma.orders.create({
       data: {
-        date: body['ORDER DATE'],
+        deliveryDate: body['DELIVERY DATE'],
         userId: existingUser.id,
         totalPrice: 0,
         note: body['NOTE'],
@@ -51,7 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const itemList: any = [];
     // Loop through each item from request and save it to order
     for (const item of Object.keys(body)) {
-      if (item === 'ORDER DATE') {
+      if (item === 'DELIVERY DATE') {
         continue;
       }
 
@@ -77,12 +78,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Update the order with the totalPrice
+    const currentDate = new Date();
+    const dateString = currentDate.toISOString().split('T')[0];
+    const timeString = currentDate.toTimeString().split(' ')[0];
     await prisma.orders.update({
       where: {
         id: newOrder.id,
       },
       data: {
-        totalPrice: totalPrice,
+        totalPrice,
+        orderTime: `${timeString} ${dateString}`,
       },
     });
 
@@ -102,7 +107,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       version: 'v4',
     });
     const data = [];
-    const formattedValues = Object.keys(body).map((key) => body[key]);
+    // format data to append into client sheet
+    const formattedValues: any[] = sheetStructure;
+    Object.keys(body).forEach((key) => {
+      const keyStructureIndex = sheetStructure.indexOf(key);
+      formattedValues[keyStructureIndex] = parseFloat(body[key]);
+    });
+
+    for (let i = 1; i < formattedValues.length; i++) {
+      if (typeof formattedValues[i] === 'string') {
+        formattedValues[i] = 0;
+      }
+    }
+
     const appendResponse = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: `${existingUser.sheetName}!A1:I1`,
@@ -114,8 +131,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const appendData = appendResponse.data.updates;
     data.push(appendData);
 
+    // format data to append into overview sheet
+    const overviewFormattedData = [
+      newOrder.id,
+      existingUser.clientId,
+      existingUser.clientName,
+      ...formattedValues,
+    ];
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: `Overview!A1:L1`,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values: [overviewFormattedData],
+      },
+    });
+
     // Generate price
-    const orderDetails = body;
+    const orderDetails = {orderTime: `${timeString} ${dateString}` ,...body};
     for (const item of items) {
       if (Object.prototype.hasOwnProperty.call(body, item.name)) {
         orderDetails[item.name] = {
