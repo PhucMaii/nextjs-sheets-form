@@ -26,7 +26,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const formattedDate = YYYYMMDDFormat(currentDate);
     await prisma.orders.updateMany({
       where: {
-        date: formattedDate,
+        deliveryDate: formattedDate,
       },
       data: {
         status,
