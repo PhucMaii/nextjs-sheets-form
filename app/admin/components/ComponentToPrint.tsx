@@ -28,7 +28,7 @@ export const ComponentToPrint = forwardRef(
     }
     return (
       <div ref={ref}>
-        <div className="flex gap-2 flex-col ml-4 mr-4 mb-24 mt-4 ">
+        <div className="flex gap-2 flex-col ml-4 mr-6 mb-24 mt-4 ">
           <div className="w-full">
             <h2 className="text-center">TEST: Supreme Sprouts LTD</h2>
             <h4 className="text-center font-semibold">
@@ -46,7 +46,7 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left font-bold">Order Id: </h3>
               <h3 className="text-left">#{order.id}</h3>
             </div>
-            <div className="flex flex-wrap">
+            <div className="flex flex-wrap gap-2">
               <h3 className="text-left font-bold">Client Name: </h3>
               <h3 className="text-left">{order.clientName}</h3>
             </div>
@@ -55,26 +55,21 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left">#{order.clientId}</h3>
             </div>
             <div className="flex gap-2">
-<<<<<<< HEAD
-              <h3 className="text-left font-bold">Order Date:</h3>
-              <h3 className="text-left">#{order.date}</h3>
-=======
               <h3 className="text-left font-bold">Order Time:</h3>
               <h3 className="text-left">{order.orderTime}</h3>
             </div>
             <div className="flex gap-2">
               <h3 className="text-left font-bold">Delivery Date:</h3>
               <h3 className="text-left">{order.deliveryDate}</h3>
->>>>>>> 211d25a07bfd7b389f92eb4c224f7a16d9f65935
             </div>
             <h3 className="text-left font-bold">ORDER DETAILS</h3>
-            <Table sx={{ minWidth: '100%', mr: 4 }}>
+            <Table>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>No. Items</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Total Price</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', marginRight: 4 }}>Total Price</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>{orderDetailsTemplate}</TableBody>
@@ -82,7 +77,7 @@ export const ComponentToPrint = forwardRef(
             <div className="h-px bg-black w-full m=auto"></div>
             <div className="flex justify-between">
               <h3 className="text-left font-bold">Total:</h3>
-              <h3 className="text-left font-bold">${totalPrice}</h3>
+              <h3 className="text-left font-bold mr-4">${totalPrice}</h3>
             </div>
             <h4 className="text-left font-medium">
               DELIVERY ADDRESS: {order.deliveryAddress}

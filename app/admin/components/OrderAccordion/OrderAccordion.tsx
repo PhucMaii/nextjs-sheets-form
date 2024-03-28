@@ -148,13 +148,13 @@ export default function OrderAccordion({
                 </MenuItem>
               </Menu>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={2} sx={{mr: 2}}>
               <Typography fontWeight="bold" variant="subtitle1">
                 #{order.id}
               </Typography>
-              <Typography variant="body2">Delivery Date: {order.deliveryDate}</Typography>
+              <Typography variant="body2">Order at: {order.orderTime}</Typography>
             </Grid>
-            <Grid item xs={12} md={5}>
+            <Grid item xs={12} md={6}>
               <Button
                 label={order.clientName}
                 color="blue"
@@ -167,14 +167,17 @@ export default function OrderAccordion({
                 Items: {order.items.length}
               </Typography>
               <Typography fontWeight="bold" variant="subtitle1">
-                Total: ${order.totalPrice}
+                Total: ${order.totalPrice.toFixed(2)}
+              </Typography>
+              <Typography fontWeight="bold" variant="subtitle1">
+              Delivery Date: {order.deliveryDate}
               </Typography>
             </Grid>
           </Grid>
         </AccordionSummary>
         <AccordionDetails sx={{ backgroundColor: grey[50] }}>
           <Grid container rowGap={4} alignItems="flex-start">
-            <Grid item textAlign="center" xs={6}>
+            <Grid item textAlign="center" xs={12} md={6}>
               <Typography fontWeight="bold" variant="h6">
                 ORDER
               </Typography>
@@ -192,7 +195,7 @@ export default function OrderAccordion({
                       <TableRow key={index}>
                         <TableCell>{row.name}</TableCell>
                         <TableCell>{row.quantity}</TableCell>
-                        <TableCell>${row.totalPrice}</TableCell>
+                        <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
@@ -204,7 +207,8 @@ export default function OrderAccordion({
               textAlign="center"
               alignItems="center"
               rowGap={2}
-              xs={6}
+              xs={12}
+              md={6}
             >
               <Grid item xs={12}>
                 <Typography fontWeight="bold" variant="h6">
@@ -236,7 +240,7 @@ export default function OrderAccordion({
                 <Typography fontWeight="bold">Total</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">${order.totalPrice}</Typography>
+                <Typography fontWeight="bold">${order.totalPrice.toFixed(2)}</Typography>
               </Grid>
             </Grid>
           </Grid>

@@ -19,6 +19,7 @@ import { Box } from '@mui/material';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
+import moment from 'moment';
 
 export default function OrderForm() {
   const [formData, setFormData] = useState<FormType>({
@@ -48,7 +49,7 @@ export default function OrderForm() {
 
   const fetchForm = async () => {
     try {
-      const response = await axios.get(`${API_URL.FORM}`);
+      const response = await axios.get(API_URL.FORM);
       const formData = response.data.data;
 
       createInputValues(formData.inputs);
@@ -90,7 +91,10 @@ export default function OrderForm() {
     e.preventDefault();
     setIsButtonLoading(true);
     try {
-      const response = await axios.post(API_URL.IMPORT_SHEETS, inputValues);
+      const currentDate = new Date();
+      const dateString = moment(currentDate).format('YYYY-MM-DD');
+      const timeString = moment(currentDate).format('HH:mm:ss');
+      const response = await axios.post(API_URL.IMPORT_SHEETS, {...inputValues, orderTime: `${timeString} ${dateString}` });
       setNotification({
         on: true,
         type: 'success',
@@ -143,10 +147,10 @@ export default function OrderForm() {
       />
       <Navbar handleOpenSecurityModal={() => setIsOpenSecurityModal(true)} />
       <div className="max-w-2xl mx-auto py-16">
-        <h4 className="text-center font-bold text-4xl px-8">
+        <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h4 className="text-center font-bold text-4xl px-8 mb-8">
           {formData.formName}
         </h4>
-        <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           {inputList.length > 0 &&
             inputList.map((input, index) => {
               if (input.inputType === 'date') {

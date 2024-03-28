@@ -49,6 +49,16 @@ async function main() {
         role: 'client',
       },
       {
+        clientId: '00265',
+        clientName: 'Dafa Natural Foods',
+        sheetName: '00265',
+        deliveryAddress: '5489 Byrne Rd #170, Burnaby, BC V5J 3J1',
+        contactNumber: '16043383010',
+        categoryId: 2,
+        password,
+        role: 'client',
+      },
+      {
         clientId: '1',
         clientName: 'Admin 1',
         sheetName: 'Admin 1',
@@ -77,6 +87,11 @@ async function main() {
         name: 'BEANSPROUTS 10 LBS',
         categoryId: 3,
         price: 8.5,
+      },
+      {
+        name: 'BEANSPROUTS 10 LBS',
+        categoryId: 4,
+        price: 9.5,
       },
       {
         name: 'BEANSPROUTS 10 LBS',
@@ -158,60 +173,20 @@ async function main() {
         categoryId: 4,
         price: 4.75,
       },
-      // {
-      //   name: 'SOYA SPROUTS 10 LBS',
-      //   categoryId: 1,
-      //   price: 20,
-      // },
-      // {
-      //   name: 'SOYA SPROUTS 10 LBS',
-      //   categoryId: 2,
-      //   price: 18,
-      // },
-      // {
-      //   name: 'SOYA SPROUTS 10 LBS',
-      //   categoryId: 3,
-      //   price: 15,
-      // },
-      // {
-      //   name: 'SOYA SPROUTS 10 LBS',
-      //   categoryId: 4,
-      //   price: 10,
-      // },
-      // {
-      //   name: 'SOYA SPROUTS 5 LBS',
-      //   categoryId: 1,
-      //   price: 16,
-      // },
-      // {
-      //   name: 'SOYA SPROUTS 5 LBS',
-      //   categoryId: 2,
-      //   price: 14,
-      // },
-      // {
-      //   name: 'SOYA SPROUTS 5 LBS',
-      //   categoryId: 3,
-      //   price: 12,
-      // },
-      // {
-      //   name: 'SOYA SPROUTS 5 LBS',
-      //   categoryId: 4,
-      //   price: 10,
-      // },
       {
         name: 'SOYA SPROUTS 24 x 1 LB',
-        categoryId: 4,
-        price: 4.75,
+        categoryId: 1,
+        price: 26,
       },
       {
         name: 'BASIL',
         categoryId: 4,
-        price: 7.5,
+        price: 7.75,
       },
       {
         name: 'BASIL',
         categoryId: 5,
-        price: 7.5,
+        price: 7.75,
       },
       // {
       //   name: 'JUMBO EGGS',
@@ -243,21 +218,6 @@ async function main() {
         categoryId: 5,
         price: 1,
       },
-      // {
-      //   name: 'TOMATO',
-      //   categoryId: 1,
-      //   price: 10,
-      // },
-      // {
-      //   name: 'TOMATO',
-      //   categoryId: 2,
-      //   price: 14,
-      // },
-      // {
-      //   name: 'TOMATO',
-      //   categoryId: 3,
-      //   price: 12,
-      // },
       {
         name: 'LIMES',
         categoryId: 2,
@@ -341,11 +301,6 @@ async function main() {
       {
         formId: 1,
         inputName: 'SOYA SPROUTS 24 x 1 LB',
-        inputType: 'number',
-      },
-      {
-        formId: 1,
-        inputName: 'BASIL',
         inputType: 'number',
       },
       {
