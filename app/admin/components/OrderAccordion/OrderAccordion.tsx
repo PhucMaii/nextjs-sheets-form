@@ -1,5 +1,11 @@
 'use client';
-import React, { Dispatch, SetStateAction, useRef, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Accordion,
   AccordionDetails,
@@ -42,6 +48,11 @@ export default function OrderAccordion({
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
+  const [totalQuantity, setTotalQuantity] = useState(0);
+
+  useEffect(() => {
+    calculateTotalQuantity();
+  }, []);
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -71,6 +82,15 @@ export default function OrderAccordion({
     } catch (error) {
       console.log('Fail to mark as completed: ', error);
     }
+  };
+
+  const calculateTotalQuantity = () => {
+    const quantity = order.items.reduce((acc: number, cV: any) => {
+      console.log(acc, cV);
+      return acc + cV.quantity;
+    }, 0);
+
+    setTotalQuantity(quantity);
   };
 
   return (
@@ -148,11 +168,13 @@ export default function OrderAccordion({
                 </MenuItem>
               </Menu>
             </Grid>
-            <Grid item xs={12} md={2} sx={{mr: 2}}>
+            <Grid item xs={12} md={2} sx={{ mr: 2 }}>
               <Typography fontWeight="bold" variant="subtitle1">
                 #{order.id}
               </Typography>
-              <Typography variant="body2">Order at: {order.orderTime}</Typography>
+              <Typography variant="body2">
+                Order at: {order.orderTime}
+              </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Button
@@ -164,13 +186,13 @@ export default function OrderAccordion({
             </Grid>
             <Grid item xs={12} md={3} textAlign="center">
               <Typography fontWeight="bold" variant="subtitle1">
-                Items: {order.items.length}
+                Items: {totalQuantity}
               </Typography>
               <Typography fontWeight="bold" variant="subtitle1">
                 Total: ${order.totalPrice.toFixed(2)}
               </Typography>
               <Typography fontWeight="bold" variant="subtitle1">
-              Delivery Date: {order.deliveryDate}
+                Delivery Date: {order.deliveryDate}
               </Typography>
             </Grid>
           </Grid>
@@ -230,7 +252,7 @@ export default function OrderAccordion({
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">
-                  {order.items.length} items
+                  {totalQuantity} items
                 </Typography>
               </Grid>
               <Grid item xs={12}>
@@ -240,7 +262,9 @@ export default function OrderAccordion({
                 <Typography fontWeight="bold">Total</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">${order.totalPrice.toFixed(2)}</Typography>
+                <Typography fontWeight="bold">
+                  ${order.totalPrice.toFixed(2)}
+                </Typography>
               </Grid>
             </Grid>
           </Grid>

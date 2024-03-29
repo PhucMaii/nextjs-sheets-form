@@ -110,7 +110,9 @@ export default function Sidebar({ children }: PropTypes) {
           >
             {content}
           </Drawer>
-          {children}
+          <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+            {children}
+          </Box>
         </Box>
       </AuthenGuard>
     );
@@ -135,7 +137,9 @@ export default function Sidebar({ children }: PropTypes) {
         >
           {content}
         </Drawer>
-        {children}
+        <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+          {children}
+        </Box>
       </Box>
     </AuthenGuard>
   );

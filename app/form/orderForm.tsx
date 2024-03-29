@@ -94,7 +94,10 @@ export default function OrderForm() {
       const currentDate = new Date();
       const dateString = moment(currentDate).format('YYYY-MM-DD');
       const timeString = moment(currentDate).format('HH:mm:ss');
-      const response = await axios.post(API_URL.IMPORT_SHEETS, {...inputValues, orderTime: `${timeString} ${dateString}` });
+      const response = await axios.post(API_URL.IMPORT_SHEETS, {
+        ...inputValues,
+        orderTime: `${timeString} ${dateString}`,
+      });
       setNotification({
         on: true,
         type: 'success',
@@ -148,9 +151,9 @@ export default function OrderForm() {
       <Navbar handleOpenSecurityModal={() => setIsOpenSecurityModal(true)} />
       <div className="max-w-2xl mx-auto py-16">
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <h4 className="text-center font-bold text-4xl px-8 mb-8">
-          {formData.formName}
-        </h4>
+          <h4 className="text-center font-bold text-4xl px-8 mb-8">
+            {formData.formName}
+          </h4>
           {inputList.length > 0 &&
             inputList.map((input, index) => {
               if (input.inputType === 'date') {

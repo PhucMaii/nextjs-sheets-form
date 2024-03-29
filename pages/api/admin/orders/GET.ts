@@ -1,18 +1,21 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+
+interface RequestQuery {
+  date?: string;
+}
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const currentDate = new Date();
-    const formattedDate = YYYYMMDDFormat(currentDate);
+
+    const { date } = req.query as RequestQuery;
 
     // Fetch today's order and status Incompleted only
     const orders = await prisma.orders.findMany({
       where: {
-        deliveryDate: formattedDate,
+        deliveryDate: date,
         status: ORDER_STATUS.INCOMPLETED,
       },
     });

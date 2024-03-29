@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, FormControl, Typography } from '@mui/material';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
@@ -12,6 +12,10 @@ import { Notification } from '@/app/utils/type';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import NotificationPopup from '../components/Notification';
 import { grey } from '@mui/material/colors';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 interface Item {
   name: string;
@@ -44,15 +48,21 @@ export default function MainPage() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
+  const [date, setDate] = useState(() => {
+    const dateObj = new Date();
+    const formattedDate = YYYYMMDDFormat(dateObj);
+    return formattedDate;
+  });
   const componentRef: any = useRef();
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [date]);
 
   const fetchOrders = async () => {
+    setIsLoading(true);
     try {
-      const response = await axios.get(API_URL.ORDER);
+      const response = await axios.get(`${API_URL.ORDER}?date=${date}`);
 
       if (response.data.error) {
         setOrderData([]);
@@ -67,6 +77,14 @@ export default function MainPage() {
       setIsLoading(false);
       return;
     }
+  };
+
+  const handleDateChange = (e: any) => {
+    const dateObj = new Date(e.$d);
+
+    const formattedDate = YYYYMMDDFormat(dateObj);
+
+    setDate(formattedDate);
   };
 
   const handleMarkAllCompleted = async () => {
@@ -91,9 +109,11 @@ export default function MainPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-        <LoadingComponent color="blue" />
-      </div>
+      <Sidebar>
+        <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+          <LoadingComponent color="blue" />
+        </div>
+      </Sidebar>
     );
   }
 
@@ -106,64 +126,65 @@ export default function MainPage() {
       <div style={{ display: 'none' }}>
         <AllPrint orders={orderData} ref={componentRef} />
       </div>
-      <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography fontWeight="bold" variant="h4">
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        {/* <Typography fontWeight="bold" variant="h4">
             Today&apos;s Order
-          </Typography>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            gap={2}
+          </Typography> */}
+        <FormControl>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Date Filter"
+              value={dayjs(date)}
+              onChange={(e: any) => handleDateChange(e)}
+              sx={{
+                borderRadius: 2,
+              }}
+            />
+          </LocalizationProvider>
+        </FormControl>
+        <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
+          <Button
+            disabled={orderData.length === 0}
+            onClick={handlePrinting}
+            variant="outlined"
           >
-            <Button
-              disabled={orderData.length === 0}
-              onClick={handlePrinting}
-              variant="outlined"
-            >
-              Print All
-            </Button>
-            <Button
-              color="success"
-              disabled={orderData.length === 0}
-              onClick={handleMarkAllCompleted}
-              variant="outlined"
-            >
-              Mark all as completed
-            </Button>
-          </Box>
+            Print All
+          </Button>
+          <Button
+            color="success"
+            disabled={orderData.length === 0}
+            onClick={handleMarkAllCompleted}
+            variant="outlined"
+          >
+            Mark all as completed
+          </Button>
         </Box>
-        {orderData.length > 0 ? (
-          orderData.map((order: any, index: number) => {
-            return (
-              <OrderAccordion
-                key={index}
-                order={order}
-                setNotification={setNotification}
-                fetchOrders={fetchOrders}
-              />
-            );
-          })
-        ) : (
-          <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            mt={4}
-          >
-            <ErrorOutlineIcon sx={{ color: grey[600], fontSize: 50 }} />
-            <Typography
-              fontWeight="bold"
-              sx={{ color: grey[600] }}
-              variant="h4"
-            >
-              There is no orders
-            </Typography>
-          </Box>
-        )}
       </Box>
+      {orderData.length > 0 ? (
+        orderData.map((order: any, index: number) => {
+          return (
+            <OrderAccordion
+              key={index}
+              order={order}
+              setNotification={setNotification}
+              fetchOrders={fetchOrders}
+            />
+          );
+        })
+      ) : (
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          mt={4}
+        >
+          <ErrorOutlineIcon sx={{ color: grey[600], fontSize: 50 }} />
+          <Typography fontWeight="bold" sx={{ color: grey[600] }} variant="h4">
+            There is no orders
+          </Typography>
+        </Box>
+      )}
     </Sidebar>
   );
 }
