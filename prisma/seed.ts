@@ -5,19 +5,19 @@ import { hash } from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  const users = await generateUsers();
+  // const users = await generateUsers();
 
-  for (const user of users) {
-    const password = await hash(user.contactNumber, 12);
-    await prisma.user.update({
-      where: {
-        clientId: user.clientId,
-      },
-      data: {
-        password,
-      },
-    });
-  }
+  // for (const user of users) {
+  //   const password = await hash(user.contactNumber, 12);
+  //   await prisma.user.update({
+  //     where: {
+  //       clientId: user.clientId,
+  //     },
+  //     data: {
+  //       password,
+  //     },
+  //   });
+  // }
 
   // await prisma.user.createMany({
   //   data: [
