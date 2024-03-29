@@ -187,7 +187,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     await emailHandler(
       emailSendTo,
-      'TEST: Order Supreme Sprouts',
+      'Order Supreme Sprouts',
       'Supreme Sprouts LTD',
       htmlTemplate,
     );

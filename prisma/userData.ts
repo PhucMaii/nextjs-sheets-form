@@ -209,7 +209,7 @@ export const generateUsers = async () => {
         sheetName: '00120',
         deliveryAddress: '8251 Westminster Hwy Unit 20, Richmond, BC V6X 1A7',
         contactNumber: '16042739877',
-        categoryId: 4,
+        categoryId: 1,
         password,
         role: 'client'
       },

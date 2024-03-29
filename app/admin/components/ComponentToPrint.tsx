@@ -30,7 +30,7 @@ export const ComponentToPrint = forwardRef(
       <div ref={ref}>
         <div className="flex gap-2 flex-col ml-4 mr-6 mb-24 mt-4 ">
           <div className="w-full">
-            <h2 className="text-center">TEST: Supreme Sprouts LTD</h2>
+            <h2 className="text-center font-semibold">SUPREME SPROUTS LTD</h2>
             <h4 className="text-center font-semibold">
               1-6420 Beresford Street, Burnaby, BC, V5E 1B3
             </h4>

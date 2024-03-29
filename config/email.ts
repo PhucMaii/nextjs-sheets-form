@@ -32,7 +32,7 @@ export const generateOrderTemplate = (
   return `
     <div style="margin: auto; width: 500px">
         <div style="width: 100%;">
-            <h2 style="text-align: center;">TEST: Supreme Sprouts LTD</h2>
+            <h2 style="text-align: center; font-weight: 300">Supreme Sprouts LTD</h2>
             <h4 style="text-align: center;font-weight: 300;">1-6420 Beresford Street, Burnaby, BC, V5E 1B3</h4>
             <div style="text-align: center;font-weight: 300;">
                 778 789 1060
