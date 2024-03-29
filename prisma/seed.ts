@@ -11,12 +11,12 @@ async function main() {
     const password = await hash(user.contactNumber, 12);
     await prisma.user.update({
       where: {
-        clientId: user.clientId
+        clientId: user.clientId,
       },
       data: {
-        password
-      }
-    })
+        password,
+      },
+    });
   }
 
   // await prisma.user.createMany({
@@ -34,26 +34,26 @@ async function main() {
   //     // },
   //   ],
   // });
-      
-      // await prisma.category.createMany({
-      //   data: [
-      //     {
-      //       name: 'Wholesale',
-      //     },
-      //     {
-      //       name: 'Wholesale - partner 1',
-      //     },
-      //     {
-      //       name: 'Wholesale - partner 2',
-      //     },
-      //     {
-      //       name: 'Retail/Restaurant',
-      //     },
-      //     {
-      //       name: 'Special price',
-      //     },
-      //   ],
-      // });
+
+  // await prisma.category.createMany({
+  //   data: [
+  //     {
+  //       name: 'Wholesale',
+  //     },
+  //     {
+  //       name: 'Wholesale - partner 1',
+  //     },
+  //     {
+  //       name: 'Wholesale - partner 2',
+  //     },
+  //     {
+  //       name: 'Retail/Restaurant',
+  //     },
+  //     {
+  //       name: 'Special price',
+  //     },
+  //   ],
+  // });
 
   // await prisma.item.createMany({
   //   data: [

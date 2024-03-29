@@ -12,7 +12,6 @@ export interface FormType {
   formId: number;
   formName: string;
   lastOpened: Date;
-  positions?: PositionType[];
 }
 
 export interface InputType {
@@ -24,14 +23,6 @@ export interface InputType {
 
 export interface InputValues {
   [key: string]: string | number;
-}
-
-export interface PositionType {
-  formId: number;
-  positionId?: number;
-  sheetName: string;
-  row: number;
-  inputs: InputType[];
 }
 
 // async function type

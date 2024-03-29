@@ -69,7 +69,9 @@ export const ComponentToPrint = forwardRef(
                   <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>No. Items</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', marginRight: 4 }}>Total Price</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', marginRight: 4 }}>
+                    Total Price
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>{orderDetailsTemplate}</TableBody>

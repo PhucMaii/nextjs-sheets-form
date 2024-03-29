@@ -45,7 +45,9 @@ export const generateOrderTemplate = (
             <h3 style="text-align: left;font-weight: 300;">Order Id: #${orderId}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Number: #${clientNumber}</h3>
-            <h3 style="text-align: left;font-weight: 300;">Order Time: ${orderDetails.orderTime}</h3>
+            <h3 style="text-align: left;font-weight: 300;">Order Time: ${
+              orderDetails.orderTime
+            }</h3>
             <h3 style="text-align: left;font-weight: 300;">Delivery Date: ${
               orderDetails['DELIVERY DATE']
             }</h3>
