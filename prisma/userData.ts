@@ -1,7 +1,7 @@
 import { hash } from 'bcrypt';
 
 export const generateUsers = async () => {
-  const password = await hash('16042556436', 12);
+  const password = await hash('17782403534', 12);
   const users = [
     // {
     //   clientId: '00100',
@@ -1061,7 +1061,7 @@ export const generateUsers = async () => {
     //   sheetName: '00209',
     //   deliveryAddress: '788 Malkin Ave, Vancouver, BC V6A 2K2',
     //   contactNumber: '16042513383',
-    //   categoryId: 1,
+    //   categoryId: 7,
     //   password,
     //   role: 'client',
     // },
@@ -1135,16 +1135,16 @@ export const generateUsers = async () => {
     //   password,
     //   role: 'client'
     // },
-    {
-      clientId: '00217',
-      clientName: "Thai Son (2800 E 1st Ave, Vancouver)",
-      sheetName: '00217',
-      deliveryAddress: '373 E Broadway, Vancouver, BC V5T 1W6',
-      contactNumber: '16042556436',
-      categoryId: 4,
-      password,
-      role: 'client'
-    },
+    // {
+    //   clientId: '00217',
+    //   clientName: "Thai Son (2800 E 1st Ave, Vancouver)",
+    //   sheetName: '00217',
+    //   deliveryAddress: '373 E Broadway, Vancouver, BC V5T 1W6',
+    //   contactNumber: '16042556436',
+    //   categoryId: 4,
+    //   password,
+    //   role: 'client'
+    // },
     // {
     //   clientId: '00218',
     //   clientName: "Pho Kitchen",
@@ -1634,7 +1634,17 @@ export const generateUsers = async () => {
     //   categoryId: 4,
     //   password,
     //   role: 'client'
-    // }
+    // },
+    {
+      clientId: '00267',
+      clientName: "Super Save Produce",
+      sheetName: '00267',
+      deliveryAddress: '15625 96 Ave, Surrey, BC V4N 2T6',
+      contactNumber: '17782403534',
+      categoryId: 6,
+      password,
+      role: 'client'
+    }
   ];
   return users;
 };

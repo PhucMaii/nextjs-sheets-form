@@ -55,6 +55,7 @@ export default function Input<T>({
           onError={error ? error : null}
           onBlur={onBlur ? onBlur : null}
           name={name ? name : undefined}
+          min="0"
         />
       ) : (
         <textarea
