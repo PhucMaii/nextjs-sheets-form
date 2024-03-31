@@ -9,7 +9,7 @@ export const sheetStructure: Array<string | number> = [
   'SOYA SPROUTS 24 x 1 LB',
   'BASIL',
   'JUMBO EGGS',
-  'LIQUID EGG',
+  'LIQUID EGGS',
   'CUCCUMBER',
   'TOMATO',
   'LIMES',
