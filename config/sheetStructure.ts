@@ -3,7 +3,7 @@ export const sheetStructure: Array<string | number> = [
   'BEANSPROUTS 10 LBS',
   'BEANSPROUTS 5 LBS',
   'BEANSPROUTS 24 x 1 LB',
-  'BEANSPROUTS 1x5',
+  'BEANSPROUTS 5 x 1 LB',
   'SOYA SPROUTS 10 LBS',
   'SOYA SPROUTS 5 LBS',
   'SOYA SPROUTS 24 x 1 LB',
@@ -13,7 +13,7 @@ export const sheetStructure: Array<string | number> = [
   'CUCCUMBER',
   'TOMATO',
   'LIMES',
-  'BEANSPROUTS 9 OZ x 10',
+  'BEANSPROUTS 8 OZ x 10',
   'MUSHROOM',
   'EGGPLANT',
   'RICE NOODLES'

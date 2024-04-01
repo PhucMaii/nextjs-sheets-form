@@ -61,14 +61,17 @@ export default function MainPage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
+  
   useEffect(() => {
     setPage(1);
     fetchOrders(1);
+    setHasMore(true); // setHasMore back to true whenever date change
   }, [date])
 
   useEffect(() => {
-    fetchOrders(page);
+    if (hasMore) {
+      fetchOrders(page);
+    }
   }, [page]);
 
 
@@ -80,8 +83,8 @@ export default function MainPage() {
       );
 
       if (response.data.error) {
-        setOrderData([]);
         setIsLoading(false);
+        setHasMore(false);
         return;
       }
 
@@ -97,8 +100,8 @@ export default function MainPage() {
       }
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
-      setOrderData([]);
       setIsLoading(false);
+      setHasMore(false);
       return;
     }
   };

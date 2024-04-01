@@ -212,6 +212,11 @@ export const items = [
           // BASIL
           {
             name: 'BASIL',
+            categoryId: 6,
+            price: 6.75
+          },
+          {
+            name: 'BASIL',
             categoryId: 9,
             price: 7,
           },
@@ -308,7 +313,7 @@ export const items = [
 
           // BEANSPROUT 8 OZ x 10
           {
-            name: 'BEANSPROUT 8 OZ x 10',
+            name: 'BEANSPROUTS 8 OZ x 10',
             categoryId: 2,
             price: 7,
           },
@@ -322,7 +327,7 @@ export const items = [
           {
             name: 'MUSHROOM',
             categoryId: 12,
-            price: 25
+            price: 28
           },
 
           // EGGPLANT
@@ -336,7 +341,7 @@ export const items = [
           {
             name: 'RICE NOODLES',
             categoryId: 12,
-            price: 10
+            price: 18
           },
 
 ]

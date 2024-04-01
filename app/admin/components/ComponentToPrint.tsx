@@ -30,7 +30,7 @@ export const ComponentToPrint = forwardRef(
     }
     return (
       <div ref={ref}>
-        <div className="flex gap-2 flex-col ml-4 mr-auto mb-24 mt-4">
+        <div className="flex gap-2 flex-col ml-6 mr-auto mb-24 mt-4">
           <div className="w-full">
             <h2 className="text-center font-semibold text-2xl">
               SUPREME SPROUTS LTD
@@ -50,7 +50,7 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left font-bold">Order Id: </h3>
               <h3 className="text-left text-2xl">#{order.id}</h3>
             </div>
-            <div className="flex flex-wrap gap-2 text-2xl mr-2">
+            <div className="flex flex-wrap gap-2 text-2xl mr-6">
               <h3 className="text-left font-bold">Client Name: </h3>
               <h3 className="text-left font-bold">{order.clientName}</h3>
             </div>
@@ -67,7 +67,7 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left">{order.deliveryDate}</h3>
             </div>
             <h3 className="text-left font-bold text-2xl">ORDER DETAILS</h3>
-            <Table sx={{ marginLeft: '-14px' }}>
+            <Table sx={{ marginLeft: '-16px' }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
