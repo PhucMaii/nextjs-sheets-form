@@ -53,24 +53,37 @@ export default function MainPage() {
     const formattedDate = YYYYMMDDFormat(dateObj);
     return formattedDate;
   });
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
   const componentRef: any = useRef();
 
   useEffect(() => {
-    fetchOrders();
-  }, [date]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const fetchOrders = async () => {
+  useEffect(() => {
+    fetchOrders();
+  }, [date, page]);
+
+  const fetchOrders = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${API_URL.ORDER}?date=${date}`);
+      const response = await axios.get(
+        `${API_URL.ORDER}?date=${date}&page=${page}`,
+      );
 
       if (response.data.error) {
         setOrderData([]);
         setIsLoading(false);
         return;
       }
-      setOrderData(response.data.data);
+      setOrderData((prevOrders) => [...prevOrders, ...response.data.data]);
       setIsLoading(false);
+
+      if (response.data.data.length === 0) {
+        setHasMore(false);
+      }
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
       setOrderData([]);
@@ -79,7 +92,7 @@ export default function MainPage() {
     }
   };
 
-  const handleDateChange = (e: any) => {
+  const handleDateChange = (e: any): void => {
     const dateObj = new Date(e.$d);
 
     const formattedDate = YYYYMMDDFormat(dateObj);
@@ -87,7 +100,7 @@ export default function MainPage() {
     setDate(formattedDate);
   };
 
-  const handleMarkAllCompleted = async () => {
+  const handleMarkAllCompleted = async (): Promise<void> => {
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status: ORDER_STATUS.COMPLETED,
@@ -103,15 +116,87 @@ export default function MainPage() {
     }
   };
 
+  const handleMarkSingleCompletedUI = (orderId: number): void => {
+    const newOrders = orderData.filter((order) => order.id !== orderId);
+    setOrderData(newOrders);
+  };
+
   const handlePrinting = useReactToPrint({
     content: () => componentRef.current,
   });
+
+  const handleScroll = (): void => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop ===
+      document.documentElement.offsetHeight
+    ) {
+      if (hasMore) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
       <Sidebar>
         <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-          <LoadingComponent color="blue" />
+          {orderData.length > 0 ? (
+            <>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <FormControl>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Date Filter"
+                      value={dayjs(date)}
+                      onChange={(e: any) => handleDateChange(e)}
+                      sx={{
+                        borderRadius: 2,
+                      }}
+                    />
+                  </LocalizationProvider>
+                </FormControl>
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <Button
+                    disabled={orderData.length === 0}
+                    onClick={handlePrinting}
+                    variant="outlined"
+                  >
+                    Print All
+                  </Button>
+                  <Button
+                    color="success"
+                    disabled={orderData.length === 0}
+                    onClick={handleMarkAllCompleted}
+                    variant="outlined"
+                  >
+                    Mark all as completed
+                  </Button>
+                </Box>
+              </Box>
+              {orderData.map((order: any, index: number) => {
+                return (
+                  <OrderAccordion
+                    key={index}
+                    order={order}
+                    setNotification={setNotification}
+                    updateUI={handleMarkSingleCompletedUI}
+                  />
+                );
+              })}
+              <LoadingComponent color="blue" />
+            </>
+          ) : (
+            <LoadingComponent color="blue" />
+          )}
         </div>
       </Sidebar>
     );
@@ -127,9 +212,6 @@ export default function MainPage() {
         <AllPrint orders={orderData} ref={componentRef} />
       </div>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        {/* <Typography fontWeight="bold" variant="h4">
-            Today&apos;s Order
-          </Typography> */}
         <FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
@@ -167,7 +249,8 @@ export default function MainPage() {
               key={index}
               order={order}
               setNotification={setNotification}
-              fetchOrders={fetchOrders}
+              // fetchOrders={fetchOrders}
+              updateUI={handleMarkSingleCompletedUI}
             />
           );
         })

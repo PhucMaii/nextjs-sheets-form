@@ -18,19 +18,23 @@ export const ComponentToPrint = forwardRef(
         totalPrice += item.totalPrice;
         orderDetailsTemplate.push(
           <TableRow key={item.name}>
-            <TableCell sx={{fontSize: 20}}>{item.name}</TableCell>
-            <TableCell sx={{fontWeight: 'bold', fontSize: 18}}>{item.quantity}</TableCell>
-            <TableCell sx={{fontSize: 20}}>${item.price}</TableCell>
-            <TableCell sx={{fontSize: 20}}>${item.totalPrice}</TableCell>
+            <TableCell sx={{ fontSize: 18 }}>{item.name}</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
+              {item.quantity}
+            </TableCell>
+            <TableCell sx={{ fontSize: 18 }}>${item.price}</TableCell>
+            <TableCell sx={{ fontSize: 18 }}>${item.totalPrice}</TableCell>
           </TableRow>,
         );
       }
     }
     return (
       <div ref={ref}>
-        <div className="flex gap-2 flex-col ml-4 mr-6 mb-24 mt-4">
+        <div className="flex gap-2 flex-col ml-4 mr-auto mb-24 mt-4">
           <div className="w-full">
-            <h2 className="text-center font-semibold text-2xl">SUPREME SPROUTS LTD</h2>
+            <h2 className="text-center font-semibold text-2xl">
+              SUPREME SPROUTS LTD
+            </h2>
             <h4 className="text-center font-semibold text-2xl">
               1-6420 Beresford Street, Burnaby, BC, V5E 1B3
             </h4>
@@ -63,13 +67,21 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left">{order.deliveryDate}</h3>
             </div>
             <h3 className="text-left font-bold text-2xl">ORDER DETAILS</h3>
-            <Table>
+            <Table sx={{ marginLeft: '-14px' }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>No. Items</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Unit Price</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', marginRight: 4 }}>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
+                    Item
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
+                    No. Items
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
+                    Unit Price
+                  </TableCell>
+                  <TableCell
+                    sx={{ fontWeight: 'bold', fontSize: 15, marginRight: 4 }}
+                  >
                     Total Price
                   </TableCell>
                 </TableRow>

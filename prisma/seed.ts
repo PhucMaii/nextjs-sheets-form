@@ -59,8 +59,8 @@ async function main() {
       //   name: 'Wholesale - Terminal' // id 7
       // },
       {
-        name: 'Wholesale - Consumer Produce' // id 8
-      }
+        name: 'Wholesale - Consumer Produce', // id 8
+      },
     ],
   });
 
@@ -91,12 +91,12 @@ async function main() {
       //   categoryId: 5,
       //   price: 9.5,
       // },
-      // { 
+      // {
       //   name: 'BEANSPROUTS 10 LBS',
       //   categoryId: 6,
       //   price: 7.5,
       // },
-      // { 
+      // {
       //   name: 'BEANSPROUTS 10 LBS',
       //   categoryId: 7,
       //   price: 7.75,
@@ -126,12 +126,12 @@ async function main() {
       //   categoryId: 5,
       //   price: 4.75,
       // },
-      // { 
+      // {
       //   name: 'BEANSPROUTS 5 LBS',
       //   categoryId: 6,
       //   price: 3.75,
       // },
-      // { 
+      // {
       //   name: 'BEANSPROUTS 5 LBS',
       //   categoryId: 7,
       //   price: 3.875,
@@ -215,7 +215,7 @@ async function main() {
       //   name: 'SOYA SPROUTS 24 x 1 LB',
       //   categoryId: 1,
       //   price: 26,
-      // },     
+      // },
       // {
       //   name: 'SOYA SPROUTS 24 x 1 LB',
       //   categoryId: 6,
@@ -271,7 +271,8 @@ async function main() {
       //   categoryId: 2,
       //   price: 35,
       // },
-    ]});
+    ],
+  });
 
   await prisma.form.createMany({
     data: [

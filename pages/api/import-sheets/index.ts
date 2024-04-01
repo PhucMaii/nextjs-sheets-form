@@ -106,7 +106,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const data = [];
     // format data to append into client sheet
-    const formattedValues: any[] = sheetStructure;
+    // make a copy of sheet structure to avoid changed on formatted values affect sheet structure
+    const formattedValues: any[] = [...sheetStructure];
     Object.keys(body).forEach((key) => {
       const keyStructureIndex = sheetStructure.indexOf(key);
       if (keyStructureIndex === -1) {
@@ -193,7 +194,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     return res.status(200).json({
-      data,
+      overviewFormattedData,
       message: 'Data Added Successfully',
     });
   } catch (error) {

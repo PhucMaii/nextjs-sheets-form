@@ -1647,13 +1647,13 @@ export const generateUsers = async () => {
     // },
     {
       clientId: '00268',
-      clientName: "Quynh Express (W Georgia St)",
+      clientName: 'Quynh Express (W Georgia St)',
       sheetName: '00268',
       deliveryAddress: '575 W Georgia St, Vancouver, BC V6B 2A3',
       contactNumber: 'N/A',
       categoryId: 4,
       password,
-      role: 'client'
+      role: 'client',
     },
   ];
   return users;

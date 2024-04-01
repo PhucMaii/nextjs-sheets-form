@@ -88,6 +88,7 @@ export default function OrderForm() {
   };
 
   const handleSubmit = async (e: MouseEvent) => {
+    console.log(inputValues, 'inputValues');
     e.preventDefault();
     setIsButtonLoading(true);
     try {
@@ -98,6 +99,7 @@ export default function OrderForm() {
         ...inputValues,
         orderTime: `${timeString} ${dateString}`,
       });
+
       setNotification({
         on: true,
         type: 'success',

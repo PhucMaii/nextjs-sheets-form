@@ -4,13 +4,17 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
   date?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { date } = req.query as RequestQuery;
+    const { date, page = 1, pageSize = 10 } = req.query as RequestQuery;
+
+    const skip = (page - 1) * pageSize;
 
     // Fetch today's order and status Incompleted only
     const orders = await prisma.orders.findMany({
@@ -18,6 +22,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         deliveryDate: date,
         status: ORDER_STATUS.INCOMPLETED,
       },
+      skip,
+      take: pageSize,
     });
 
     if (!orders || orders.length === 0) {

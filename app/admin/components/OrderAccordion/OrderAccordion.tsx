@@ -35,14 +35,14 @@ import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
   order: Order;
-  fetchOrders: () => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
+  updateUI: (orderId: number) => void;
 }
 
 export default function OrderAccordion({
   order,
   setNotification,
-  fetchOrders,
+  updateUI,
 }: PropTypes) {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
@@ -72,7 +72,7 @@ export default function OrderAccordion({
         ...order,
         status: ORDER_STATUS.COMPLETED,
       });
-      await fetchOrders();
+      updateUI(order.id);
       setNotification({
         on: true,
         type: 'success',
@@ -86,7 +86,6 @@ export default function OrderAccordion({
 
   const calculateTotalQuantity = () => {
     const quantity = order.items.reduce((acc: number, cV: any) => {
-      console.log(acc, cV);
       return acc + cV.quantity;
     }, 0);
 
@@ -251,9 +250,7 @@ export default function OrderAccordion({
                 <Typography fontWeight="bold">Number of items</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">
-                  {totalQuantity} items
-                </Typography>
+                <Typography fontWeight="bold">{totalQuantity} items</Typography>
               </Grid>
               <Grid item xs={12}>
                 <Divider />
