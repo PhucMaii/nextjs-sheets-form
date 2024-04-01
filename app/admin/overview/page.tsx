@@ -63,14 +63,20 @@ export default function MainPage() {
   }, []);
 
   useEffect(() => {
-    fetchOrders();
-  }, [date, page]);
+    setPage(1);
+    fetchOrders(1);
+  }, [date])
 
-  const fetchOrders = async (): Promise<void> => {
+  useEffect(() => {
+    fetchOrders(page);
+  }, [page]);
+
+
+  const fetchOrders = async (currentPage: number): Promise<void> => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${API_URL.ORDER}?date=${date}&page=${page}`,
+        `${API_URL.ORDER}?date=${date}&page=${currentPage}`,
       );
 
       if (response.data.error) {
@@ -78,7 +84,12 @@ export default function MainPage() {
         setIsLoading(false);
         return;
       }
-      setOrderData((prevOrders) => [...prevOrders, ...response.data.data]);
+
+      if (currentPage === 1) {
+        setOrderData(response.data.data);
+      } else {
+        setOrderData((prevOrders) => [...prevOrders, ...response.data.data]);
+      }
       setIsLoading(false);
 
       if (response.data.data.length === 0) {
@@ -91,7 +102,7 @@ export default function MainPage() {
       return;
     }
   };
-
+  
   const handleDateChange = (e: any): void => {
     const dateObj = new Date(e.$d);
 
@@ -105,7 +116,7 @@ export default function MainPage() {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status: ORDER_STATUS.COMPLETED,
       });
-      await fetchOrders();
+      await fetchOrders(1);
       setNotification({
         on: true,
         type: 'success',
@@ -139,7 +150,6 @@ export default function MainPage() {
   if (isLoading) {
     return (
       <Sidebar>
-        <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
           {orderData.length > 0 ? (
             <>
               <Box
@@ -195,9 +205,10 @@ export default function MainPage() {
               <LoadingComponent color="blue" />
             </>
           ) : (
-            <LoadingComponent color="blue" />
+            <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+              <LoadingComponent color="blue" />
+            </div>
           )}
-        </div>
       </Sidebar>
     );
   }

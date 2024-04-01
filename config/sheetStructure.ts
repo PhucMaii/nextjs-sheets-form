@@ -13,4 +13,8 @@ export const sheetStructure: Array<string | number> = [
   'CUCCUMBER',
   'TOMATO',
   'LIMES',
+  'BEANSPROUTS 9 OZ x 10',
+  'MUSHROOM',
+  'EGGPLANT',
+  'RICE NOODLES'
 ];

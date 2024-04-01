@@ -50,7 +50,7 @@ export const ComponentToPrint = forwardRef(
               <h3 className="text-left font-bold">Order Id: </h3>
               <h3 className="text-left text-2xl">#{order.id}</h3>
             </div>
-            <div className="flex flex-wrap gap-2 text-2xl">
+            <div className="flex flex-wrap gap-2 text-2xl mr-2">
               <h3 className="text-left font-bold">Client Name: </h3>
               <h3 className="text-left font-bold">{order.clientName}</h3>
             </div>
@@ -88,22 +88,22 @@ export const ComponentToPrint = forwardRef(
               </TableHead>
               <TableBody>{orderDetailsTemplate}</TableBody>
             </Table>
-            <div className="h-px bg-black w-full m=auto"></div>
+            <div className="h-px bg-black w-full m-auto"></div>
             <div className="flex justify-between text-2xl">
               <h3 className="text-left font-bold">Total:</h3>
-              <h3 className="text-left font-bold mr-4">${totalPrice}</h3>
+              <h3 className="text-left font-bold mr-8">${totalPrice}</h3>
             </div>
-            <h4 className="text-left font-medium text-2xl">
+            <h4 className="text-left font-medium text-xl">
               DELIVERY ADDRESS: {order.deliveryAddress}
             </h4>
-            <h4 className="text-left font-medium text-2xl">
+            <h4 className="text-left font-medium text-xl">
               CONTACT: {order.contactNumber}
             </h4>
             {order.note && (
               <>
-                <div className="h-px bg-black w-full m=auto"></div>
-                <h4 className="text-left font-bold text-2xl">NOTE</h4>
-                <h4 className="text-2xl">{order.note}</h4>
+                <div className="h-px bg-black w-full m-auto"></div>
+                <h4 className="text-left font-bold text-xl">NOTE</h4>
+                <h4 className="text-xl">{order.note}</h4>
               </>
             )}
           </div>
