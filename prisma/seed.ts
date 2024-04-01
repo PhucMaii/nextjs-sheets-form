@@ -5,7 +5,7 @@ import { hash } from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  // const users = await generateUsers();
+  const users = await generateUsers();
 
   // for (const user of users) {
   //   const password = await hash(user.contactNumber, 12);
@@ -19,47 +19,50 @@ async function main() {
   //   });
   // }
 
-  // await prisma.user.createMany({
-  //   data: [
-  //     ...users,
-  //     // {
-  //     //   clientId: '1',
-  //     //   clientName: 'Admin 1',
-  //     //   sheetName: 'Admin 1',
-  //     //   deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
-  //     //   contactNumber: '7787891060',
-  //     //   categoryId: 1,
-  //     //   password,
-  //     //   role: 'admin',
-  //     // },
-  //   ],
-  // });
+  await prisma.user.createMany({
+    data: [
+      ...users,
+      // {
+      //   clientId: '1',
+      //   clientName: 'Admin 1',
+      //   sheetName: 'Admin 1',
+      //   deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
+      //   contactNumber: '7787891060',
+      //   categoryId: 1,
+      //   password,
+      //   role: 'admin',
+      // },
+    ],
+  });
 
-  // await prisma.category.createMany({
-  //   data: [
-  //     // {
-  //     //   name: 'Wholesale', // id: 1
-  //     // },
-  //     // {
-  //     //   name: 'Wholesale - partner 1', // id: 2
-  //     // },
-  //     // {
-  //     //   name: 'Wholesale - partner 2', // id: 3
-  //     // },
-  //     // {
-  //     //   name: 'Retail/Restaurant', // id: 4
-  //     // },
-  //     // {
-  //     //   name: 'Special price', // id: 5
-  //     // },
-  //     {
-  //       name: 'Wholesale - partner 3' // id 6
-  //     },
-  //     {
-  //       name: 'Wholesale - Terminal' // id 7
-  //     },
-  //   ],
-  // });
+  await prisma.category.createMany({
+    data: [
+      // {
+      //   name: 'Wholesale', // id: 1
+      // },
+      // {
+      //   name: 'Wholesale - partner 1', // id: 2
+      // },
+      // {
+      //   name: 'Wholesale - partner 2', // id: 3
+      // },
+      // {
+      //   name: 'Retail/Restaurant', // id: 4
+      // },
+      // {
+      //   name: 'Special price', // id: 5
+      // },
+      // {
+      //   name: 'Wholesale - partner 3' // id 6
+      // },
+      // {
+      //   name: 'Wholesale - Terminal' // id 7
+      // },
+      {
+        name: 'Wholesale - Consumer Produce' // id 8
+      }
+    ],
+  });
 
   await prisma.item.createMany({
     data: [
@@ -233,11 +236,11 @@ async function main() {
       //   categoryId: 4,
       //   price: 48.5
       // },
-      {
-        name: 'LIQUID EGGS',
-        categoryId: 4,
-        price: 92
-      },
+      // {
+      //   name: 'LIQUID EGGS',
+      //   categoryId: 4,
+      //   price: 92
+      // },
       // {
       //   name: 'CUCCUMBER',
       //   categoryId: 2,
@@ -454,11 +457,11 @@ async function main() {
       //   inputName: 'JUMBO EGGS',
       //   inputType: 'number',
       // },
-      {
-        formId: 4,
-        inputName: 'LIQUID EGGS',
-        inputType: 'number',
-      },
+      // {
+      //   formId: 4,
+      //   inputName: 'LIQUID EGGS',
+      //   inputType: 'number',
+      // },
       // {
       //   formId: 4,
       //   inputName: 'CUCCUMBER',
