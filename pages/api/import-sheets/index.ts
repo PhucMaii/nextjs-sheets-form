@@ -67,7 +67,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (itemData) {
         const orderedItems = await prisma.orderedItems.create({
           data: {
-            itemId: itemData.id,
+            name: itemData.name,
+            price: itemData.price,
             orderId: newOrder.id,
             quantity: body[item],
           },
