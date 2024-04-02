@@ -25,7 +25,7 @@ import {
 import Button from '@/app/components/Button';
 import { grey } from '@mui/material/colors';
 import ClientDetailsModal from '../Modals/ClientDetailsModal';
-import { Order } from '../../overview/page';
+import { Item, Order } from '../../overview/page';
 import { useReactToPrint } from 'react-to-print';
 import { ComponentToPrint } from '../ComponentToPrint';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -37,12 +37,14 @@ import EditIcon from '@mui/icons-material/Edit';
 
 interface PropTypes {
   order: Order;
+  updateUIItem: (targetOrder: Order, targetItem: Item) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
   updateUI: (orderId: number) => void;
 }
 
 export default function OrderAccordion({
   order,
+  updateUIItem,
   setNotification,
   updateUI,
 }: PropTypes) {
@@ -56,19 +58,19 @@ export default function OrderAccordion({
     name: '',
     price: 0,
     totalPrice: 0,
-    quantity: 0
+    quantity: 0,
   });
   const [totalQuantity, setTotalQuantity] = useState(0);
 
   useEffect(() => {
     calculateTotalQuantity();
-  }, []);
+  }, [order]);
 
   useEffect(() => {
     if (Object.keys(selectedItem).length > 0) {
       setIsOpenEditModal(true);
     }
-  }, [selectedItem])
+  }, [selectedItem]);
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -120,12 +122,17 @@ export default function OrderAccordion({
         contactNumber={order.contactNumber}
         categoryName={order.category}
       />
-      <EditItemModal 
-        open={isOpenEditModal} 
-        onClose={() => setIsOpenEditModal(false)} 
-        item={updatedItem} 
-        setItem={setUpdatedItem}  
+      <EditItemModal
+        open={isOpenEditModal}
+        onClose={() => {
+          setIsOpenEditModal(false);
+          setSelectedItem({});
+        }}
+        item={updatedItem}
+        setItem={setUpdatedItem}
         setNotification={setNotification}
+        updateUIItem={updateUIItem}
+        order={order}
       />
       <Accordion
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
@@ -241,11 +248,12 @@ export default function OrderAccordion({
                         <TableCell>{row.quantity}</TableCell>
                         <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
                         <TableCell>
-                          <IconButton onClick={() => {
+                          <IconButton
+                            onClick={() => {
                               setSelectedItem(row);
                               setUpdatedItem(row);
-                            }
-                            }>
+                            }}
+                          >
                             <EditIcon />
                           </IconButton>
                         </TableCell>

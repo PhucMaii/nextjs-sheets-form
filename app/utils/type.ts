@@ -52,7 +52,7 @@ export interface UserType {
   sheetName?: string;
 }
 
-export interface Item{
+export interface Item {
   id?: number;
   name: string;
   categoryId?: number;
@@ -62,8 +62,8 @@ export interface Item{
 export interface OrderedItems {
   id?: number;
   name: string;
-  categoryId?: number;
   price: number;
   quantity: number;
   totalPrice: number;
+  orderId?: number;
 }

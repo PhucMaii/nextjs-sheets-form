@@ -41,22 +41,27 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
-        // get item info and price
-        const newItems = await Promise.all(
-          items.map(async (item: any) => {
-            const newItem: any = await prisma.item.findFirst({
-              where: {
-                id: item.itemId,
-              },
-            });
-            return {
-              ...item,
-              ...newItem,
-              totalPrice: newItem.price * item.quantity,
-              price: newItem.price,
-            };
-          }),
-        );
+        const newItems = items.map((item: any) => {
+          const totalPrice = item.quantity * item.price;
+          return { ...item, totalPrice };
+        });
+
+        // // get item info and price
+        // const newItems = await Promise.all(
+        //   items.map(async (item: any) => {
+        //     const newItem: any = await prisma.orderedItems.findUnique({
+        //       where: {
+        //         id: item.id,
+        //       },
+        //     });
+        //     return {
+        //       ...item,
+        //       ...newItem,
+        //       totalPrice: newItem.price * item.quantity,
+        //       price: newItem.price,
+        //     };
+        //   }),
+        // );
 
         // get user
         const user: any = await prisma.user.findUnique({
@@ -65,18 +70,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
-        // get category
-        const category: any = await prisma.category.findUnique({
-          where: {
-            id: user.categoryId,
-          },
-        });
-
         return {
           ...order,
           items: newItems,
           ...user,
-          category: category.name,
           id: order.id,
         };
       }),

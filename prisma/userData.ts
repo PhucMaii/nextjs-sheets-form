@@ -1333,7 +1333,7 @@ export const generateUsers = async () => {
       sheetName: '00235',
       deliveryAddress: '200 Burrard St, Vancouver, BC V6C 3L6',
       contactNumber: '16043369282',
-      categoryId: 104,
+      categoryId: 10,
       password,
       role: 'client',
     },

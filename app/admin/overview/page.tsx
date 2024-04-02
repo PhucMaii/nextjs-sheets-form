@@ -17,7 +17,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 
-interface Item {
+export interface Item {
+  id: number;
   name: string;
   price: number;
   quantity: number;
@@ -103,6 +104,30 @@ export default function MainPage() {
       setHasMore(false);
       return;
     }
+  };
+
+  const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
+    const newOrderData: Order[] = orderData.map((order: Order) => {
+      // If order is at targetOrder, then update
+      if (order.id === targetOrder.id) {
+        // update total price of the order
+        let orderTotalPrice = 0;
+        
+        const newItems = order.items.map((item: Item) => {
+          if (item.id === targetItem.id) {
+            const totalPrice = targetItem.quantity * targetItem.price;
+            orderTotalPrice += totalPrice;
+            return { ...targetItem, totalPrice };
+          }
+          orderTotalPrice += item.totalPrice;
+          return item;
+        });
+        return { ...order, items: newItems, totalPrice: orderTotalPrice };
+      }
+      return order;
+    });
+
+    setOrderData(newOrderData);
   };
 
   const handleDateChange = (e: any): void => {
@@ -201,6 +226,7 @@ export default function MainPage() {
                   order={order}
                   setNotification={setNotification}
                   updateUI={handleMarkSingleCompletedUI}
+                  updateUIItem={handleUpdateUISingleOrder}
                 />
               );
             })}
@@ -264,6 +290,7 @@ export default function MainPage() {
               setNotification={setNotification}
               // fetchOrders={fetchOrders}
               updateUI={handleMarkSingleCompletedUI}
+              updateUIItem={handleUpdateUISingleOrder}
             />
           );
         })
