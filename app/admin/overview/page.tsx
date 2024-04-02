@@ -61,19 +61,18 @@ export default function MainPage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
+
   useEffect(() => {
     setPage(1);
     fetchOrders(1);
     setHasMore(true); // setHasMore back to true whenever date change
-  }, [date])
+  }, [date]);
 
   useEffect(() => {
     if (hasMore) {
       fetchOrders(page);
     }
   }, [page]);
-
 
   const fetchOrders = async (currentPage: number): Promise<void> => {
     setIsLoading(true);
@@ -105,7 +104,7 @@ export default function MainPage() {
       return;
     }
   };
-  
+
   const handleDateChange = (e: any): void => {
     const dateObj = new Date(e.$d);
 
@@ -153,65 +152,65 @@ export default function MainPage() {
   if (isLoading) {
     return (
       <Sidebar>
-          {orderData.length > 0 ? (
-            <>
+        {orderData.length > 0 ? (
+          <>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <FormControl>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Date Filter"
+                    value={dayjs(date)}
+                    onChange={(e: any) => handleDateChange(e)}
+                    sx={{
+                      borderRadius: 2,
+                    }}
+                  />
+                </LocalizationProvider>
+              </FormControl>
               <Box
                 display="flex"
-                justifyContent="space-between"
+                justifyContent="center"
                 alignItems="center"
+                gap={2}
               >
-                <FormControl>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Date Filter"
-                      value={dayjs(date)}
-                      onChange={(e: any) => handleDateChange(e)}
-                      sx={{
-                        borderRadius: 2,
-                      }}
-                    />
-                  </LocalizationProvider>
-                </FormControl>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap={2}
+                <Button
+                  disabled={orderData.length === 0}
+                  onClick={handlePrinting}
+                  variant="outlined"
                 >
-                  <Button
-                    disabled={orderData.length === 0}
-                    onClick={handlePrinting}
-                    variant="outlined"
-                  >
-                    Print All
-                  </Button>
-                  <Button
-                    color="success"
-                    disabled={orderData.length === 0}
-                    onClick={handleMarkAllCompleted}
-                    variant="outlined"
-                  >
-                    Mark all as completed
-                  </Button>
-                </Box>
+                  Print All
+                </Button>
+                <Button
+                  color="success"
+                  disabled={orderData.length === 0}
+                  onClick={handleMarkAllCompleted}
+                  variant="outlined"
+                >
+                  Mark all as completed
+                </Button>
               </Box>
-              {orderData.map((order: any, index: number) => {
-                return (
-                  <OrderAccordion
-                    key={index}
-                    order={order}
-                    setNotification={setNotification}
-                    updateUI={handleMarkSingleCompletedUI}
-                  />
-                );
-              })}
-              <LoadingComponent color="blue" />
-            </>
-          ) : (
-            <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-              <LoadingComponent color="blue" />
-            </div>
-          )}
+            </Box>
+            {orderData.map((order: any, index: number) => {
+              return (
+                <OrderAccordion
+                  key={index}
+                  order={order}
+                  setNotification={setNotification}
+                  updateUI={handleMarkSingleCompletedUI}
+                />
+              );
+            })}
+            <LoadingComponent color="blue" />
+          </>
+        ) : (
+          <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+            <LoadingComponent color="blue" />
+          </div>
+        )}
       </Sidebar>
     );
   }

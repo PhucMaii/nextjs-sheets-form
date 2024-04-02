@@ -8,34 +8,35 @@ const prisma = new PrismaClient();
 
 async function main() {
   const users = await generateUsers();
-
-  // for (const user of users) {
-  //   const password = await hash(user.contactNumber, 12);
-  //   await prisma.user.update({
-  //     where: {
-  //       clientId: user.clientId,
-  //     },
-  //     data: {
-  //       password,
-  //     },
-  //   });
-  // }
+  const adminPassword = await hash('admin123', 12);
 
   await prisma.user.createMany({
     data: [
       ...users,
-      // {
-      //   clientId: '1',
-      //   clientName: 'Admin 1',
-      //   sheetName: 'Admin 1',
-      //   deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
-      //   contactNumber: '7787891060',
-      //   categoryId: 1,
-      //   password,
-      //   role: 'admin',
-      // },
+      {
+        clientId: '1',
+        clientName: 'Admin 1',
+        sheetName: 'Admin 1',
+        deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
+        contactNumber: '7787891060',
+        categoryId: 1,
+        password: adminPassword,
+        role: 'admin',
+      },
     ],
   });
+
+  for (const user of users) {
+    const password = await hash(user.contactNumber, 12);
+    await prisma.user.update({
+      where: {
+        clientId: user.clientId,
+      },
+      data: {
+        password,
+      },
+    });
+  }
 
   await prisma.category.createMany({
     data: [
@@ -55,10 +56,10 @@ async function main() {
         name: 'Wholesale - Super Save Produce', // id: 5
       },
       {
-        name: 'Wholesale - Standard Trading' // id 6
+        name: 'Wholesale - Standard Trading', // id 6
       },
       {
-        name: 'Wholesale - Freeman' // id 7
+        name: 'Wholesale - Freeman', // id 7
       },
       {
         name: 'Wholesale - Doli', // id 8
@@ -67,21 +68,19 @@ async function main() {
         name: 'Special Client - MIXED', // id 9
       },
       {
-        name: 'Retail - B.K' // id 10
+        name: 'Retail - B.K', // id 10
       },
       {
-        name: 'Retail - P.P' // id 11
+        name: 'Retail - P.P', // id 11
       },
       {
-        name: 'Retail - Thai Basil' // id 12
-      }
+        name: 'Retail - Thai Basil', // id 12
+      },
     ],
   });
 
   await prisma.item.createMany({
-    data: [
-      ...items
-    ],
+    data: [...items],
   });
 
   await prisma.form.createMany({
@@ -108,40 +107,37 @@ async function main() {
       },
       {
         formName: 'Order Form',
-        categoryId: 6
+        categoryId: 6,
       },
       {
         formName: 'Order Form',
-        categoryId: 7
+        categoryId: 7,
       },
       {
         formName: 'Order Form',
-        categoryId: 8
+        categoryId: 8,
       },
       {
         formName: 'Order Form',
-        categoryId: 9
+        categoryId: 9,
       },
       {
         formName: 'Order Form',
-        categoryId: 10
+        categoryId: 10,
       },
       {
         formName: 'Order Form',
-        categoryId: 11
+        categoryId: 11,
       },
       {
         formName: 'Order Form',
-        categoryId: 12
+        categoryId: 12,
       },
-
     ],
   });
 
   await prisma.input.createMany({
-    data: [
-      ...inputs
-    ],
+    data: [...inputs],
   });
 }
 

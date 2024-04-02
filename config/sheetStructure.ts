@@ -16,5 +16,5 @@ export const sheetStructure: Array<string | number> = [
   'BEANSPROUTS 8 OZ x 10',
   'MUSHROOM',
   'EGGPLANT',
-  'RICE NOODLES'
+  'RICE NOODLES',
 ];
