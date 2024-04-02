@@ -6,6 +6,7 @@ export enum API_URL {
   IMPORT_SHEETS = '/api/import-sheets',
   ORDER = '/api/admin/orders',
   ORDER_STATUS = '/api/admin/orders/status',
+  ORDERED_ITEMS = '/api/admin/orderedItems'
 }
 
 export enum ORDER_STATUS {

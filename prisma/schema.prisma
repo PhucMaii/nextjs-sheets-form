@@ -30,12 +30,11 @@ model Category {
 }
 
 model Item {
-  id           Int            @id @default(autoincrement())
-  name         String         @db.VarChar(255)
-  categoryId   Int
-  price        Float
-  category     Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  OrderedItems OrderedItems[]
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(255)
+  categoryId Int
+  price      Float
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
 }
@@ -61,12 +60,12 @@ model Input {
 }
 
 model OrderedItems {
-  id       Int @id @default(autoincrement())
-  itemId   Int
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(255)
+  price    Float
   orderId  Int
   quantity Int
 
-  item   Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
   Orders Orders? @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 

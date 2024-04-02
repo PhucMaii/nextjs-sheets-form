@@ -31,7 +31,9 @@ import { ComponentToPrint } from '../ComponentToPrint';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
-import { Notification } from '@/app/utils/type';
+import { Notification, OrderedItems } from '@/app/utils/type';
+import EditItemModal from '../Modals/EditItemModal';
+import EditIcon from '@mui/icons-material/Edit';
 
 interface PropTypes {
   order: Order;
@@ -48,11 +50,25 @@ export default function OrderAccordion({
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
+  const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
+  const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
+    name: '',
+    price: 0,
+    totalPrice: 0,
+    quantity: 0
+  });
   const [totalQuantity, setTotalQuantity] = useState(0);
 
   useEffect(() => {
     calculateTotalQuantity();
   }, []);
+
+  useEffect(() => {
+    if (Object.keys(selectedItem).length > 0) {
+      setIsOpenEditModal(true);
+    }
+  }, [selectedItem])
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -103,6 +119,13 @@ export default function OrderAccordion({
         deliveryAddress={order.deliveryAddress}
         contactNumber={order.contactNumber}
         categoryName={order.category}
+      />
+      <EditItemModal 
+        open={isOpenEditModal} 
+        onClose={() => setIsOpenEditModal(false)} 
+        item={updatedItem} 
+        setItem={setUpdatedItem}  
+        setNotification={setNotification}
       />
       <Accordion
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
@@ -217,6 +240,15 @@ export default function OrderAccordion({
                         <TableCell>{row.name}</TableCell>
                         <TableCell>{row.quantity}</TableCell>
                         <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <IconButton onClick={() => {
+                              setSelectedItem(row);
+                              setUpdatedItem(row);
+                            }
+                            }>
+                            <EditIcon />
+                          </IconButton>
+                        </TableCell>
                       </TableRow>
                     ))}
                 </TableBody>

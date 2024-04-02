@@ -51,3 +51,19 @@ export interface UserType {
   password?: string;
   sheetName?: string;
 }
+
+export interface Item{
+  id?: number;
+  name: string;
+  categoryId?: number;
+  price: number;
+}
+
+export interface OrderedItems {
+  id?: number;
+  name: string;
+  categoryId?: number;
+  price: number;
+  quantity: number;
+  totalPrice: number;
+}
