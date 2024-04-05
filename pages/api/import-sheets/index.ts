@@ -4,9 +4,10 @@ import emailHandler from '../utils/email';
 import { generateOrderTemplate } from '@/config/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { PrismaClient } from '@prisma/client';
+import { Orders, PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { sheetStructure } from '@/config/sheetStructure';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
@@ -207,3 +208,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default handler;
+
+const checkHasUserOrderedToday = async (userId: number) => {
+  const prisma = new PrismaClient();
+
+  const userOrders = await prisma.orders.findMany({
+    where: {
+      userId
+    }
+  });
+
+  const today = new Date();
+  const formattedDate: string = YYYYMMDDFormat(today);
+
+  const hasUserOrderedToday: boolean = userOrders.some((order: Orders) => {
+    const orderDate = order.orderTime.split(' ')[1];
+    return orderDate === formattedDate;
+  });
+
+  return hasUserOrderedToday;
+}
