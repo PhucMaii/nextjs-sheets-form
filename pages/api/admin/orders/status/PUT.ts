@@ -1,4 +1,4 @@
-import { Order } from '@/app/admin/overview/page';
+import { Order } from '@/app/admin/orders/page';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

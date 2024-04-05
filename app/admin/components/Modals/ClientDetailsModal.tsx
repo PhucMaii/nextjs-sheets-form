@@ -1,10 +1,9 @@
 import { Divider, Grid, Modal, Typography } from '@mui/material';
 import React from 'react';
 import { BoxModal } from './styled';
+import { ModalProps } from './type';
 
-interface PropTypes {
-  open: boolean;
-  onClose: () => void;
+interface PropTypes extends ModalProps {
   deliveryAddress: string;
   contactNumber: string;
   categoryName: string;

@@ -28,20 +28,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const updateOrderTotalPrice = async (orderId: number, newTotalPrice: number) => {
-    try {
-        const prisma = new PrismaClient();
+const updateOrderTotalPrice = async (
+  orderId: number,
+  newTotalPrice: number,
+) => {
+  try {
+    const prisma = new PrismaClient();
 
-        await prisma.orders.update({
-            where: {
-                id: orderId,
-            },
-            data: {
-                totalPrice: newTotalPrice
-            }
-        });
-
-    } catch (error: any) {
-        console.log('Internal Server Error: ', error);
-    }
-}
+    await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        totalPrice: newTotalPrice,
+      },
+    });
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+  }
+};

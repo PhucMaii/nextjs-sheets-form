@@ -41,7 +41,7 @@
     "next-auth": "^4.24.5",
     "nodemailer": "^6.9.10",
     "pdf-lib": "^1.17.1",
-    "puppeteer": "^22.4.1",
+    "puppeteer": "^22.6.2",
     "react": "^18.2.0",
     "react-dnd": "^15.1.2",
     "react-dnd-html5-backend": "^15.1.3",

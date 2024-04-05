@@ -1,5 +1,5 @@
 import { ListItemButton, ListItemButtonProps } from '@mui/material';
-import { blue } from '@mui/material/colors';
+import { blueGrey } from '@mui/material/colors';
 import styled from 'styled-components';
 
 interface ItemButtonStyled extends ListItemButtonProps {
@@ -7,7 +7,9 @@ interface ItemButtonStyled extends ListItemButtonProps {
 }
 
 export const ListItemButtonStyled = styled(ListItemButton)<ItemButtonStyled>`
-  background-color: ${(props) => props.$currentTab && `${blue[50]} !important`};
+  background-color: ${(props) =>
+    props.$currentTab && `${blueGrey[50]} !important`};
+  color: ${(props) => props.$currentTab && ` ${blueGrey[900]} !important`};
   width: 80%;
   margin: auto !important;
   border-radius: 10px !important;

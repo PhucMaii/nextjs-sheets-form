@@ -12,11 +12,10 @@ import { Notification, OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { LoadingButton } from '@mui/lab';
-import { Item, Order } from '../../overview/page';
+import { Item, Order } from '../../orders/page';
+import { ModalProps } from './type';
 
-interface PropTypes {
-  open: boolean;
-  onClose: () => void;
+interface PropTypes extends ModalProps {
   order: Order;
   item: OrderedItems;
   updateUIItem: (targetOrder: Order, targetItem: Item) => void;
@@ -38,20 +37,24 @@ export default function EditItemModal({
   const handleUpdateData = async () => {
     setIsLoading(true);
     try {
-        const orderTotalPrice = calculateNewTotalPrice();
-        const response = await axios.put(API_URL.ORDERED_ITEMS, {...item, orderId: order.id, orderTotalPrice });
-        
-        if (response.data.error) {
-            setNotification({
-                on: true,
-                type: 'error',
-                message: response.data.error,
-            });
-            setIsLoading(false);
-            return;
-        }
-        
-        updateUIItem(order, response.data.data);
+      const orderTotalPrice = calculateNewTotalPrice();
+      const response = await axios.put(API_URL.ORDERED_ITEMS, {
+        ...item,
+        orderId: order.id,
+        orderTotalPrice,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      updateUIItem(order, response.data.data);
 
       setNotification({
         on: true,
@@ -72,13 +75,13 @@ export default function EditItemModal({
 
   const calculateNewTotalPrice = () => {
     const totalPrice = order.items.reduce((acc: number, cV: Item) => {
-        if (cV.id === item.id) {
-            return acc + item.totalPrice;
-        }
-        return acc + cV.totalPrice;
-    }, 0)
+      if (cV.id === item.id) {
+        return acc + item.totalPrice;
+      }
+      return acc + cV.totalPrice;
+    }, 0);
     return totalPrice;
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>

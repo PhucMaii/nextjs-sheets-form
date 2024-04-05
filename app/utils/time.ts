@@ -9,3 +9,11 @@ export const YYYYMMDDFormat = (date: Date) => {
 
   return formattedDate;
 };
+
+export const formatDateChanged = (e: any): string => {
+  const dateObj = new Date(e.$d);
+
+  const formattedDate = YYYYMMDDFormat(dateObj);
+
+  return formattedDate;
+};

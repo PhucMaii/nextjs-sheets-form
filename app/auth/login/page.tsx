@@ -75,7 +75,7 @@ export default function LoginPage() {
           if (userData.role === 'client') {
             router.push('/');
           } else {
-            router.push('/admin/overview');
+            router.push('/admin/orders');
           }
         }, 1000);
       } catch (error: any) {

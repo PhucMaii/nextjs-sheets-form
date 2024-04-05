@@ -16,7 +16,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { Box } from '@mui/material';
-import { YYYYMMDDFormat } from '@/app/utils/time';
+import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
@@ -41,7 +41,13 @@ export default function OrderForm() {
   });
   const { status }: SessionClientType = useSession() as SessionClientType;
   const router = useRouter();
-  const minDate = new Date();
+
+  let today: any = dayjs();
+  if (today.$H >= 10) {
+    today = today.add(1, 'day');
+  }
+
+  const minDate = today.startOf('day');
 
   useEffect(() => {
     fetchForm();
@@ -77,6 +83,7 @@ export default function OrderForm() {
       } else if (input.inputType === 'date') {
         // format initial date
         const dateObj = new Date();
+        dateObj.setDate(dateObj.getDate() + 1);
         const formattedDate = YYYYMMDDFormat(dateObj);
 
         newInputValues[input.inputName] = formattedDate;
@@ -88,7 +95,6 @@ export default function OrderForm() {
   };
 
   const handleSubmit = async (e: MouseEvent) => {
-    console.log(inputValues, 'inputValues');
     e.preventDefault();
     setIsButtonLoading(true);
     try {
@@ -99,6 +105,7 @@ export default function OrderForm() {
         ...inputValues,
         orderTime: `${timeString} ${dateString}`,
       });
+      console.log(response, 'response');
 
       setNotification({
         on: true,
@@ -118,9 +125,7 @@ export default function OrderForm() {
   };
 
   const handleDateChange = (e: any, input: any) => {
-    const dateObj = new Date(e.$d);
-
-    const formattedDate = YYYYMMDDFormat(dateObj);
+    const formattedDate = formatDateChanged(e);
 
     setInputValues((prevInputValues: any) => {
       return {

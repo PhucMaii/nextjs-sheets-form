@@ -26,7 +26,7 @@ export default function LoginAndRegisterGuard({ children }: any) {
         if (response.data.data.role === 'client') {
           router.push('/');
         } else {
-          router.push('/admin/overview');
+          router.push('/admin/orders');
         }
       }
 

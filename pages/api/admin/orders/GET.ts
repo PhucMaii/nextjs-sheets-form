@@ -6,13 +6,19 @@ interface RequestQuery {
   date?: string;
   page?: number;
   pageSize?: number;
+  status?: ORDER_STATUS;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { date, page = 1, pageSize = 10 } = req.query as RequestQuery;
+    const {
+      date,
+      page = 1,
+      pageSize = 10,
+      status = ORDER_STATUS.INCOMPLETED,
+    } = req.query as RequestQuery;
 
     const skip = (page - 1) * pageSize;
 
@@ -20,15 +26,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const orders = await prisma.orders.findMany({
       where: {
         deliveryDate: date,
-        status: ORDER_STATUS.INCOMPLETED,
+        status,
       },
       skip,
       take: pageSize,
     });
 
     if (!orders || orders.length === 0) {
-      return res.status(400).json({
-        error: 'There is no orders at the momment',
+      return res.status(200).json({
+        message: 'There is no orders at the momment',
+        data: orders,
       });
     }
 

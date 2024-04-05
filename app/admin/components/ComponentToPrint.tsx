@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { Order } from '../overview/page';
+import { Order } from '../orders/page';
 import {
   Table,
   TableBody,
@@ -91,7 +91,9 @@ export const ComponentToPrint = forwardRef(
             <div className="h-px bg-black w-full m-auto"></div>
             <div className="flex justify-between text-2xl">
               <h3 className="text-left font-bold">Total:</h3>
-              <h3 className="text-left font-bold mr-8">${totalPrice.toFixed(2)}</h3>
+              <h3 className="text-left font-bold mr-8">
+                ${totalPrice.toFixed(2)}
+              </h3>
             </div>
             <h4 className="text-left font-medium text-xl">
               DELIVERY ADDRESS: {order.deliveryAddress}

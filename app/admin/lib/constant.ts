@@ -1,8 +1,9 @@
-import DashboardIcon from '@mui/icons-material/Dashboard';
+// import DashboardIcon from '@mui/icons-material/Dashboard';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 export const tabs = [
   {
-    name: 'Overview',
-    icon: DashboardIcon,
-    path: '/admin/overview',
+    name: 'Orders',
+    icon: ReceiptLongIcon,
+    path: '/admin/orders',
   },
 ];

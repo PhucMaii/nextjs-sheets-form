@@ -10,6 +10,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Divider,
   Grid,
   IconButton,
@@ -25,7 +26,7 @@ import {
 import Button from '@/app/components/Button';
 import { grey } from '@mui/material/colors';
 import ClientDetailsModal from '../Modals/ClientDetailsModal';
-import { Item, Order } from '../../overview/page';
+import { Item, Order } from '../../orders/page';
 import { useReactToPrint } from 'react-to-print';
 import { ComponentToPrint } from '../ComponentToPrint';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -34,12 +35,14 @@ import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Notification, OrderedItems } from '@/app/utils/type';
 import EditItemModal from '../Modals/EditItemModal';
 import EditIcon from '@mui/icons-material/Edit';
+import EditDeliveryDate from '../Modals/EditDeliveryDate';
 
 interface PropTypes {
   order: Order;
   updateUIItem: (targetOrder: Order, targetItem: Item) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
   updateUI: (orderId: number) => void;
+  handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
 }
 
 export default function OrderAccordion({
@@ -47,8 +50,10 @@ export default function OrderAccordion({
   updateUIItem,
   setNotification,
   updateUI,
+  handleUpdateDateUI,
 }: PropTypes) {
   const [anchorEl, setAnchorEl] = useState<any>(null);
+  const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
@@ -121,6 +126,13 @@ export default function OrderAccordion({
         deliveryAddress={order.deliveryAddress}
         contactNumber={order.contactNumber}
         categoryName={order.category}
+      />
+      <EditDeliveryDate
+        open={isEditDateOpen}
+        onClose={() => setIsEditDateOpen(false)}
+        order={order}
+        setNotification={setNotification}
+        handleUpdateDateUI={handleUpdateDateUI}
       />
       <EditItemModal
         open={isOpenEditModal}
@@ -220,9 +232,20 @@ export default function OrderAccordion({
               <Typography fontWeight="bold" variant="subtitle1">
                 Total: ${order.totalPrice.toFixed(2)}
               </Typography>
-              <Typography fontWeight="bold" variant="subtitle1">
-                Delivery Date: {order.deliveryDate}
-              </Typography>
+              <Box display="flex" gap={2} alignItems="center">
+                <Typography fontWeight="bold" variant="subtitle1">
+                  Delivery Date: {order.deliveryDate}
+                </Typography>
+                <IconButton
+                  sx={{ width: '25px', height: '25px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditDateOpen(true);
+                  }}
+                >
+                  <EditIcon sx={{ width: '20px', height: '20px' }} />
+                </IconButton>
+              </Box>
             </Grid>
           </Grid>
         </AccordionSummary>

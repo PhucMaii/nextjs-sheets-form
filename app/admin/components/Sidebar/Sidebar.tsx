@@ -18,6 +18,7 @@ import { ListItemButtonStyled } from './styled';
 import { usePathname, useRouter } from 'next/navigation';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { signOut } from 'next-auth/react';
+import { blueGrey } from '@mui/material/colors';
 
 interface PropTypes {
   children: ReactNode;
@@ -64,7 +65,7 @@ export default function Sidebar({ children }: PropTypes) {
               onClick={() => handleChangeTab(tab.path)}
             >
               <ListItemIcon>
-                {tab.icon && <tab.icon sx={{ color: 'black' }} />}
+                {tab.icon && <tab.icon sx={{ color: blueGrey[800] }} />}
               </ListItemIcon>
               <ListItemText primary={tab.name} />
             </ListItemButtonStyled>
