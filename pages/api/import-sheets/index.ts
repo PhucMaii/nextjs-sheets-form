@@ -145,10 +145,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     pusherServer.trigger('admin', 'incoming-order', {
-      ...newOrder,
       items: itemList,
-      totalPrice,
       ...existingUser,
+      ...newOrder,
+      totalPrice,
     });
 
     // Append to Client Sheet
