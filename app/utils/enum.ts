@@ -7,6 +7,7 @@ export enum API_URL {
   ORDER = '/api/admin/orders',
   ORDER_STATUS = '/api/admin/orders/status',
   ORDERED_ITEMS = '/api/admin/orderedItems',
+  ITEM = '/api/item',
 }
 
 export enum ORDER_STATUS {
