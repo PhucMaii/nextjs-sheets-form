@@ -9,7 +9,11 @@ import {
 } from '@mui/material';
 
 export const ComponentToPrint = forwardRef(
-  ({ order }: { order: Order }, ref: any) => {
+  ({ order }: { order: Order | null }, ref: any) => {
+    if (!order) {
+      return null;
+    }
+
     const orderDetailsTemplate = [];
     let totalPrice = 0;
 

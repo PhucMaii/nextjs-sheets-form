@@ -70,12 +70,21 @@ model OrderedItems {
 }
 
 model Orders {
-  id           Int            @id @default(autoincrement())
-  orderTime    String
-  deliveryDate String
-  note         String
-  status       String
-  userId       Int
-  totalPrice   Float
-  items        OrderedItems[]
+  id              Int               @id @default(autoincrement())
+  orderTime       String
+  deliveryDate    String
+  note            String
+  status          String
+  userId          Int
+  totalPrice      Float
+  items           OrderedItems[]
+  OrderPreference OrderPreference[] // Should remove
+}
+
+model OrderPreference {
+  id          Int     @id @default(autoincrement())
+  isAutoPrint Boolean
+  orderId     Int
+
+  order Orders @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

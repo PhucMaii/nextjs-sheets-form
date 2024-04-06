@@ -7,6 +7,7 @@ import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { sheetStructure } from '@/config/sheetStructure';
+import { pusherServer } from '@/app/pusher';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
@@ -38,6 +39,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const body: any = req.body;
+    // Initialize new order
     const newOrder = await prisma.orders.create({
       data: {
         deliveryDate: body['DELIVERY DATE'],
@@ -46,6 +48,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalPrice: 0,
         note: body['NOTE'],
         status: ORDER_STATUS.INCOMPLETED,
+      },
+    });
+
+    await prisma.orderPreference.create({
+      data: {
+        orderId: newOrder.id,
+        isAutoPrint: true,
       },
     });
 
@@ -65,6 +74,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
       if (itemData) {
+        totalPrice += itemData.price * body[item];
         const orderedItems = await prisma.orderedItems.create({
           data: {
             name: itemData.name,
@@ -74,8 +84,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
 
-        itemList.push(orderedItems);
-        totalPrice += itemData.price * body[item];
+        itemList.push({
+          ...orderedItems,
+          totalPrice: itemData.price * body[item],
+        });
       }
     }
 
@@ -131,6 +143,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         formattedValues[i] = 0;
       }
     }
+
+    pusherServer.trigger('admin', 'incoming-order', {
+      ...newOrder,
+      items: itemList,
+      totalPrice,
+      ...existingUser,
+    });
 
     // Append to Client Sheet
     const appendResponse = await sheets.spreadsheets.values.append({

@@ -7,3 +7,5 @@ export const tabs = [
     path: '/admin/orders',
   },
 ];
+
+export const limitOrderHour = 9;

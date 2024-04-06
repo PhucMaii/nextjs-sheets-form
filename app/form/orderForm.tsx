@@ -20,6 +20,7 @@ import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
+import { limitOrderHour } from '../admin/lib/constant';
 
 export default function OrderForm() {
   const [formData, setFormData] = useState<FormType>({
@@ -43,7 +44,7 @@ export default function OrderForm() {
   const router = useRouter();
 
   let today: any = dayjs();
-  if (today.$H >= 10) {
+  if (today.$H >= limitOrderHour) {
     today = today.add(1, 'day');
   }
 
@@ -83,7 +84,10 @@ export default function OrderForm() {
       } else if (input.inputType === 'date') {
         // format initial date
         const dateObj = new Date();
-        dateObj.setDate(dateObj.getDate() + 1);
+        // if current hour is greater limit hour, then recommend the next day
+        if (dateObj.getHours() >= limitOrderHour) {
+          dateObj.setDate(dateObj.getDate() + 1);
+        }
         const formattedDate = YYYYMMDDFormat(dateObj);
 
         newInputValues[input.inputName] = formattedDate;
@@ -166,7 +170,7 @@ export default function OrderForm() {
               if (input.inputType === 'date') {
                 return (
                   <Box key={index} mb={4}>
-                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <label className="block text-red-700 text-sm font-bold mb-2">
                       {input.inputName}
                     </label>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>

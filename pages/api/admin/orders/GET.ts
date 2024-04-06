@@ -28,6 +28,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         deliveryDate: date,
         status,
       },
+      include: {
+        OrderPreference: true,
+      },
+      orderBy: {
+        id: 'desc',
+      },
       skip,
       take: pageSize,
     });
@@ -50,25 +56,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
         const newItems = items.map((item: any) => {
           const totalPrice = item.quantity * item.price;
-          return { ...item, totalPrice };
+          return { ...item, totalPrice, isAutoPrint: order.isAutoPrint };
         });
-
-        // // get item info and price
-        // const newItems = await Promise.all(
-        //   items.map(async (item: any) => {
-        //     const newItem: any = await prisma.orderedItems.findUnique({
-        //       where: {
-        //         id: item.id,
-        //       },
-        //     });
-        //     return {
-        //       ...item,
-        //       ...newItem,
-        //       totalPrice: newItem.price * item.quantity,
-        //       price: newItem.price,
-        //     };
-        //   }),
-        // );
 
         // get user
         const user: any = await prisma.user.findUnique({

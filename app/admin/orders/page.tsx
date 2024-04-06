@@ -30,6 +30,8 @@ import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/Pending';
 import { DropdownItemContainer } from './styled';
 import { infoColor, successColor, warningColor } from '@/app/theme';
+import { pusherClient } from '@/app/pusher';
+import { ComponentToPrint } from '../components/ComponentToPrint';
 
 export interface Item {
   id: number;
@@ -37,6 +39,12 @@ export interface Item {
   price: number;
   quantity: number;
   totalPrice: number;
+}
+
+interface OrderPreference {
+  id: number;
+  isAutoPrint: boolean;
+  orderId: number;
 }
 
 export interface Order {
@@ -53,9 +61,10 @@ export interface Order {
   items: Item[];
   note: string;
   status: ORDER_STATUS;
+  OrderPreference?: OrderPreference[];
 }
 
-export default function MainPage() {
+export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
@@ -63,6 +72,7 @@ export default function MainPage() {
     ORDER_STATUS.INCOMPLETED,
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -77,11 +87,36 @@ export default function MainPage() {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const componentRef: any = useRef();
+  const singlePrint: any = useRef();
 
+  // Scroll loading
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Subscribe admin whenever they logged in
+  useEffect(() => {
+    pusherClient.subscribe('admin');
+
+    pusherClient.bind('incoming-order', (order: Order) => {
+      if (order.deliveryDate === date) {
+        setOrderData((prevOrders) => [...prevOrders, order]);
+      }
+      setIncomingOrder(order);
+    });
+
+    return () => {
+      pusherClient.unsubscribe('admin');
+    };
+  }, [date]);
+
+  useEffect(() => {
+    if (incomingOrder) {
+      handleSinglePrint();
+      setIncomingOrder(null);
+    }
+  }, [incomingOrder]);
 
   useEffect(() => {
     setPage(1);
@@ -107,7 +142,7 @@ export default function MainPage() {
         setHasMore(false);
         return;
       }
-      console.log({ currentPage, data: response.data.data });
+
       if (currentPage === 1) {
         setOrderData(response.data.data);
       } else {
@@ -183,6 +218,10 @@ export default function MainPage() {
 
   const handlePrinting = useReactToPrint({
     content: () => componentRef.current,
+  });
+
+  const handleSinglePrint = useReactToPrint({
+    content: () => singlePrint.current,
   });
 
   const handleScroll = (): void => {
@@ -361,6 +400,10 @@ export default function MainPage() {
       <div style={{ display: 'none' }}>
         <AllPrint orders={orderData} ref={componentRef} />
       </div>
+      <div style={{ display: 'none' }}>
+        <ComponentToPrint order={incomingOrder} ref={singlePrint} />
+      </div>
+
       <Typography variant="h4" fontWeight="bold">
         Orders
       </Typography>
