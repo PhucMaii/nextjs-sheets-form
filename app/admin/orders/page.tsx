@@ -28,8 +28,9 @@ import PrintIcon from '@mui/icons-material/Print';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/Pending';
+import BlockIcon from '@mui/icons-material/Block';
 import { DropdownItemContainer } from './styled';
-import { infoColor, successColor, warningColor } from '@/app/theme';
+import { errorColor, infoColor, successColor, warningColor } from '@/app/theme';
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 
@@ -339,6 +340,21 @@ export default function Orders() {
             >
               <PendingIcon sx={{ color: warningColor }} />
               <Typography>Filter: Incompleted Orders</Typography>
+            </DropdownItemContainer>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setCurrentStatus(ORDER_STATUS.VOID);
+              handleCloseAnchor();
+            }}
+          >
+            <DropdownItemContainer
+              display="flex"
+              gap={2}
+              isSelected={currentStatus === ORDER_STATUS.VOID}
+            >
+              <BlockIcon sx={{ color: errorColor }} />
+              <Typography>Filter: Void Orders</Typography>
             </DropdownItemContainer>
           </MenuItem>
         </Menu>

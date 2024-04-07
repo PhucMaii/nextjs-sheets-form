@@ -1,13 +1,11 @@
 'use client';
 import React, { MouseEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { FormType, Notification, SessionClientType } from '@/app/utils/type';
+import { Notification, SessionClientType } from '@/app/utils/type';
 import Button from '@/app/components/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import Navbar from '@/app/components/Navbar';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
-import { InputType } from '../utils/type';
 import Input from '@/app/components/Input';
 import FadeIn from '@/app/HOC/FadeIn';
 import axios from 'axios';
@@ -23,12 +21,6 @@ import moment from 'moment';
 import { limitOrderHour } from '../admin/lib/constant';
 
 export default function OrderForm() {
-  const [formData, setFormData] = useState<FormType>({
-    userId: 0,
-    formId: 0,
-    formName: '',
-    lastOpened: new Date(),
-  });
   const [itemList, setItemList] = useState<any>([]);
   const [clientName, setClientName] = useState<string>('');
   const [deliveryDate, setDeliveryDate] = useState<string>(() => {
@@ -52,7 +44,6 @@ export default function OrderForm() {
     message: '',
   });
   const { status }: SessionClientType = useSession() as SessionClientType;
-  const router = useRouter();
 
   let today: any = dayjs();
   if (today.$H >= limitOrderHour) {

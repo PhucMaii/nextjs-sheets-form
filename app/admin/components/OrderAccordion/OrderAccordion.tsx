@@ -89,13 +89,13 @@ export default function OrderAccordion({
     content: () => componentRef.current,
   });
 
-  const handleMarkCompleted = async (e: any) => {
+  const handleChangeStatus = async (e: any, status: ORDER_STATUS) => {
     e.stopPropagation();
     try {
       setIsMarkButtonDisabled(true);
       const response = await axios.put(API_URL.ORDER_STATUS, {
         ...order,
-        status: ORDER_STATUS.COMPLETED,
+        status,
       });
       updateUI(order.id);
       setNotification({
@@ -203,7 +203,7 @@ export default function OrderAccordion({
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
                 <MenuItem onClick={() => setIsOpenEditPrice(true)}>
-                  Edit Price
+                  Edit price
                 </MenuItem>
                 <MenuItem
                   onClick={(e) => {
@@ -214,10 +214,30 @@ export default function OrderAccordion({
                   Print
                 </MenuItem>
                 <MenuItem
-                  disabled={isMarkButtonDisabled}
-                  onClick={handleMarkCompleted}
+                  disabled={
+                    isMarkButtonDisabled ||
+                    order.status === ORDER_STATUS.COMPLETED
+                  }
+                  onClick={(e) => handleChangeStatus(e, ORDER_STATUS.COMPLETED)}
                 >
                   Mark as completed
+                </MenuItem>
+                <MenuItem
+                  disabled={
+                    isMarkButtonDisabled ||
+                    order.status === ORDER_STATUS.INCOMPLETED
+                  }
+                  onClick={(e) => handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)}
+                >
+                  Mark as incompleted
+                </MenuItem>
+                <MenuItem
+                  disabled={
+                    isMarkButtonDisabled || order.status === ORDER_STATUS.VOID
+                  }
+                  onClick={(e) => handleChangeStatus(e, ORDER_STATUS.VOID)}
+                >
+                  Mark as void
                 </MenuItem>
               </Menu>
             </Grid>
