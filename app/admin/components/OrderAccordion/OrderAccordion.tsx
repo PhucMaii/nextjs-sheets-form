@@ -36,6 +36,7 @@ import { Notification, OrderedItems } from '@/app/utils/type';
 import EditItemModal from '../Modals/EditItemModal';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from '../Modals/EditDeliveryDate';
+import EditPrice from '../Modals/EditPrice';
 
 interface PropTypes {
   order: Order;
@@ -58,6 +59,7 @@ export default function OrderAccordion({
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
+  const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
   const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
     name: '',
@@ -146,6 +148,11 @@ export default function OrderAccordion({
         updateUIItem={updateUIItem}
         order={order}
       />
+      <EditPrice 
+        open={isOpenEditPrice}
+        onClose={() => setIsOpenEditPrice(false)}
+        items={order.items}
+      />
       <Accordion
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
       >
@@ -193,6 +200,11 @@ export default function OrderAccordion({
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
+                <MenuItem
+                  onClick={() => setIsOpenEditPrice(true)}
+                >
+                  Edit Price
+                </MenuItem>
                 <MenuItem
                   onClick={(e) => {
                     e.stopPropagation();
