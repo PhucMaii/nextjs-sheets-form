@@ -1,12 +1,10 @@
-import { Order } from '@/app/admin/orders/page';
-import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   const prisma = new PrismaClient();
   try {
-    const { id, status } = req.body as Order;
+    const { id, status, updatedOrders } = req.body as any;
 
     if (id) {
       await prisma.orders.update({
@@ -22,16 +20,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const currentDate = new Date();
-    const formattedDate = YYYYMMDDFormat(currentDate);
-    await prisma.orders.updateMany({
-      where: {
-        deliveryDate: formattedDate,
-      },
-      data: {
-        status,
-      },
-    });
+    for (const order of updatedOrders) {
+      await prisma.orders.updateMany({
+        where: {
+          id: order.id,
+        },
+        data: {
+          status,
+        },
+      });
+    }
 
     return res.status(200).json({
       message: 'Order Status Updated Successfully',

@@ -205,6 +205,7 @@ export default function Orders() {
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status: ORDER_STATUS.COMPLETED,
+        updatedOrders: orderData
       });
       await fetchOrders(1);
       setNotification({
