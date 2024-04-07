@@ -66,11 +66,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
+        const category = await prisma.category.findUnique({
+          where: {
+            id: user.categoryId,
+          },
+        });
+
         return {
           ...order,
           items: newItems,
           ...user,
           id: order.id,
+          category,
         };
       }),
     );

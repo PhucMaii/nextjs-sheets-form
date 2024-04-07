@@ -33,6 +33,11 @@ import { infoColor, successColor, warningColor } from '@/app/theme';
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 export interface Item {
   id: number;
   name: string;
@@ -49,7 +54,7 @@ interface OrderPreference {
 
 export interface Order {
   id: number;
-  category: string;
+  category: Category;
   orderTime: string;
   deliveryDate: string;
   clientId: string;

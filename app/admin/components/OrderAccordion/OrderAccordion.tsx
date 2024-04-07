@@ -127,7 +127,7 @@ export default function OrderAccordion({
         onClose={() => setIsClientModalOpen(false)}
         deliveryAddress={order.deliveryAddress}
         contactNumber={order.contactNumber}
-        categoryName={order.category}
+        categoryName={order.category.name}
       />
       <EditDeliveryDate
         open={isEditDateOpen}
@@ -148,10 +148,12 @@ export default function OrderAccordion({
         updateUIItem={updateUIItem}
         order={order}
       />
-      <EditPrice 
+      <EditPrice
         open={isOpenEditPrice}
         onClose={() => setIsOpenEditPrice(false)}
         items={order.items}
+        setNotification={setNotification}
+        order={order}
       />
       <Accordion
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
@@ -200,9 +202,7 @@ export default function OrderAccordion({
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                <MenuItem
-                  onClick={() => setIsOpenEditPrice(true)}
-                >
+                <MenuItem onClick={() => setIsOpenEditPrice(true)}>
                   Edit Price
                 </MenuItem>
                 <MenuItem

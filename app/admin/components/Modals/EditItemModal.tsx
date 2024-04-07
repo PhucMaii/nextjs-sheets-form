@@ -38,7 +38,7 @@ export default function EditItemModal({
     setIsLoading(true);
     try {
       const orderTotalPrice = calculateNewTotalPrice();
-      const response = await axios.put(API_URL.ORDERED_ITEMS, {
+      const response = await axios.put(`${API_URL.ORDERED_ITEMS}/single`, {
         ...item,
         orderId: order.id,
         orderTotalPrice,

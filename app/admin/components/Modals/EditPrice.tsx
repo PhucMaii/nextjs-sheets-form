@@ -1,36 +1,99 @@
-import { OrderedItems } from '@/app/utils/type';
+import { Notification, OrderedItems } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
-import { Box, Checkbox, Divider, FormControlLabel, Grid, Modal, Radio, RadioGroup, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import {
+  Box,
+  Divider,
+  FormControlLabel,
+  Grid,
+  Modal,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from '@mui/material';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { BoxModal } from './styled';
 import { ModalProps } from './type';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
+import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
+import { Order } from '../../orders/page';
 
 interface PropTypes extends ModalProps {
-    items: OrderedItems[];
+  items: OrderedItems[];
+  setNotification: Dispatch<SetStateAction<Notification>>;
+  order: Order;
 }
 
 export default function EditPrice({
-    open,
-    onClose,
-    items
+  open,
+  onClose,
+  items,
+  setNotification,
+  order,
 }: PropTypes) {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [itemList, setItemList] = useState<OrderedItems[]>(items);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [itemList, setItemList] = useState<OrderedItems[]>([...items]);
+  const [updateOption, setUpdateOption] = useState<UpdateOption>(
+    UpdateOption.NONE,
+  );
+  const [newCategoryName, setNewCategoryName] = useState<string>('');
 
-    const handleUpdatePrice = async () => {
+  const calculateNewTotalPrice = () => {
+    const totalPrice = itemList.reduce((acc: number, cV: any) => {
+      return acc + cV.totalPrice;
+    }, 0);
+    return totalPrice;
+  };
 
-    }
+  const handleUpdatePrice = async () => {
+    try {
+      setIsLoading(true);
+      const totalPrice = calculateNewTotalPrice();
+      const response = await axios.put(API_URL.ORDERED_ITEMS, {
+        updatedItems: [...itemList],
+        orderTotalPrice: totalPrice,
+        orderId: order.id,
+        updateOption,
+        categoryName: newCategoryName,
+        userId: order.userId,
+        userCategoryId: order.category.id,
+      });
 
-    const handleItemOnChange = (e: any, targetItem: OrderedItems) => {
-        console.log('run')
-        const newItemList = itemList.map((item: OrderedItems) => {
-            if(item.id === targetItem.id) {
-                return {...item, price: +e.target.value};
-            }
-            return item;
+      if (response.data.error) {
+        setIsLoading(false);
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
         });
-        setItemList(newItemList);
+        return;
+      }
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
     }
+  };
+
+  const handleItemOnChange = (e: any, targetItem: OrderedItems) => {
+    const newItemList = itemList.map((item: OrderedItems) => {
+      if (item.id === targetItem.id) {
+        const newPrice = Number(e.target.value);
+        const newTotal = newPrice * item.quantity;
+        return { ...item, price: newPrice, totalPrice: newTotal };
+      }
+      return item;
+    });
+    setItemList(newItemList);
+  };
+
+  console.log({ order, items }, 'order');
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -46,9 +109,26 @@ export default function EditPrice({
             Save
           </LoadingButton>
         </Box>
-        <RadioGroup row>
-          <FormControlLabel value="create" control={<Radio />} label="Create new category" />
-          <FormControlLabel value="update" control={<Radio />} label="Update the category" />
+        <RadioGroup
+          row
+          value={updateOption}
+          onChange={(e) => setUpdateOption(e.target.value as UpdateOption)}
+        >
+          <FormControlLabel
+            value={UpdateOption.NONE}
+            control={<Radio />}
+            label="Only for this time"
+          />
+          <FormControlLabel
+            value={UpdateOption.CREATE}
+            control={<Radio />}
+            label="Create new category"
+          />
+          <FormControlLabel
+            value={UpdateOption.UPDATE}
+            control={<Radio />}
+            label="Update the category"
+          />
         </RadioGroup>
         <Divider />
         <Box overflow="auto" maxHeight="70vh" mt={2}>
@@ -59,6 +139,21 @@ export default function EditPrice({
             rowGap={4}
             mt={2}
           >
+            {updateOption === UpdateOption.CREATE && (
+              <>
+                <Grid item xs={6}>
+                  New Category Name
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="New category name"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                  />
+                </Grid>
+              </>
+            )}
             {itemList.length > 0 &&
               itemList.map((item: any) => {
                 return (
