@@ -158,13 +158,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       category: userCategory
     });
 
-    console.log({
-    items: itemList,
-    ...existingUser,
-    ...newOrder,
-    totalPrice,
-    })
-
     // Append to Client Sheet
     const appendResponse = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,

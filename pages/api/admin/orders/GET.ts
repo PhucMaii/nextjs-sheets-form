@@ -16,7 +16,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const {
       date,
       page = 1,
-      pageSize = 10,
+      pageSize = 100,
       status = ORDER_STATUS.INCOMPLETED,
     } = req.query as RequestQuery;
 
