@@ -30,7 +30,12 @@ import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
 import { DropdownItemContainer } from './styled';
-import { errorColor, infoColor, successColor, warningColor } from '@/app/theme';
+import {
+  errorColor,
+  infoColor,
+  successColor,
+  warningColor,
+} from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 
@@ -205,7 +210,7 @@ export default function Orders() {
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status: ORDER_STATUS.COMPLETED,
-        updatedOrders: orderData
+        updatedOrders: orderData,
       });
       await fetchOrders(1);
       setNotification({

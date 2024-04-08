@@ -4,7 +4,7 @@ import './globals.css';
 import { Providers } from './provider';
 import SheetNamesContextAPI from './context/SheetNamesContext';
 import { ThemeProvider } from '@mui/material';
-import { theme } from './utils/theme';
+import { theme } from './theme/theme';
 
 const inter = Inter({ subsets: ['latin'] });
 

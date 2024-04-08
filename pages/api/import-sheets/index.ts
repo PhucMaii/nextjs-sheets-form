@@ -34,9 +34,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const userCategory = await prisma.category.findUnique({
       where: {
-        id: existingUser.categoryId
-      }
-    })
+        id: existingUser.categoryId,
+      },
+    });
 
     const items = await prisma.item.findMany({
       where: {
@@ -155,7 +155,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ...existingUser,
       ...newOrder,
       totalPrice,
-      category: userCategory
+      category: userCategory,
     });
 
     // Append to Client Sheet

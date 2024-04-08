@@ -37,6 +37,7 @@ import EditItemModal from '../Modals/EditItemModal';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from '../Modals/EditDeliveryDate';
 import EditPrice from '../Modals/EditPrice';
+import StatusText, { COLOR_TYPE } from '../StatusText';
 
 interface PropTypes {
   order: Order;
@@ -68,6 +69,15 @@ export default function OrderAccordion({
     quantity: 0,
   });
   const [totalQuantity, setTotalQuantity] = useState(0);
+  const statusText = {
+    text: order.status,
+    type:
+      order.status === ORDER_STATUS.COMPLETED
+        ? COLOR_TYPE.SUCCESS
+        : order.status === ORDER_STATUS.INCOMPLETED
+          ? COLOR_TYPE.WARNING
+          : COLOR_TYPE.ERROR,
+  };
 
   useEffect(() => {
     calculateTotalQuantity();
@@ -160,86 +170,97 @@ export default function OrderAccordion({
       >
         <AccordionSummary>
           <Grid container alignItems="center">
-            <Grid item xs={12} textAlign="right">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setAnchorEl(e.currentTarget);
-                }}
+            <Grid item xs={12}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
               >
-                <MoreHorizIcon />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={!!anchorEl}
-                onClose={() => setAnchorEl(null)}
-                PaperProps={{
-                  elevation: 0,
-                  sx: {
-                    overflow: 'visible',
-                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                    mt: 1.5,
-                    '& .MuiAvatar-root': {
-                      width: 32,
-                      height: 32,
-                      ml: -0.5,
-                      mr: 1,
-                    },
-                    '&::before': {
-                      content: '""',
-                      display: 'block',
-                      position: 'absolute',
-                      top: 0,
-                      right: 14,
-                      width: 10,
-                      height: 10,
-                      bgcolor: 'background.paper',
-                      transform: 'translateY(-50%) rotate(45deg)',
-                      zIndex: 0,
-                    },
-                  },
-                }}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              >
-                <MenuItem onClick={() => setIsOpenEditPrice(true)}>
-                  Edit price
-                </MenuItem>
-                <MenuItem
+                <StatusText text={statusText.text} type={statusText.type} />
+                <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
-                    handlePrinting();
+                    setAnchorEl(e.currentTarget);
                   }}
                 >
-                  Print
-                </MenuItem>
-                <MenuItem
-                  disabled={
-                    isMarkButtonDisabled ||
-                    order.status === ORDER_STATUS.COMPLETED
-                  }
-                  onClick={(e) => handleChangeStatus(e, ORDER_STATUS.COMPLETED)}
+                  <MoreHorizIcon />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={!!anchorEl}
+                  onClose={() => setAnchorEl(null)}
+                  PaperProps={{
+                    elevation: 0,
+                    sx: {
+                      overflow: 'visible',
+                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                      mt: 1.5,
+                      '& .MuiAvatar-root': {
+                        width: 32,
+                        height: 32,
+                        ml: -0.5,
+                        mr: 1,
+                      },
+                      '&::before': {
+                        content: '""',
+                        display: 'block',
+                        position: 'absolute',
+                        top: 0,
+                        right: 14,
+                        width: 10,
+                        height: 10,
+                        bgcolor: 'background.paper',
+                        transform: 'translateY(-50%) rotate(45deg)',
+                        zIndex: 0,
+                      },
+                    },
+                  }}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                  Mark as completed
-                </MenuItem>
-                <MenuItem
-                  disabled={
-                    isMarkButtonDisabled ||
-                    order.status === ORDER_STATUS.INCOMPLETED
-                  }
-                  onClick={(e) => handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)}
-                >
-                  Mark as incompleted
-                </MenuItem>
-                <MenuItem
-                  disabled={
-                    isMarkButtonDisabled || order.status === ORDER_STATUS.VOID
-                  }
-                  onClick={(e) => handleChangeStatus(e, ORDER_STATUS.VOID)}
-                >
-                  Mark as void
-                </MenuItem>
-              </Menu>
+                  <MenuItem onClick={() => setIsOpenEditPrice(true)}>
+                    Edit price
+                  </MenuItem>
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrinting();
+                    }}
+                  >
+                    Print
+                  </MenuItem>
+                  <MenuItem
+                    disabled={
+                      isMarkButtonDisabled ||
+                      order.status === ORDER_STATUS.COMPLETED
+                    }
+                    onClick={(e) =>
+                      handleChangeStatus(e, ORDER_STATUS.COMPLETED)
+                    }
+                  >
+                    Mark as completed
+                  </MenuItem>
+                  <MenuItem
+                    disabled={
+                      isMarkButtonDisabled ||
+                      order.status === ORDER_STATUS.INCOMPLETED
+                    }
+                    onClick={(e) =>
+                      handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)
+                    }
+                  >
+                    Mark as incompleted
+                  </MenuItem>
+                  <MenuItem
+                    disabled={
+                      isMarkButtonDisabled || order.status === ORDER_STATUS.VOID
+                    }
+                    onClick={(e) => handleChangeStatus(e, ORDER_STATUS.VOID)}
+                  >
+                    Mark as void
+                  </MenuItem>
+                </Menu>
+              </Box>
             </Grid>
             <Grid item xs={12} md={2} sx={{ mr: 2 }}>
               <Typography fontWeight="bold" variant="subtitle1">
