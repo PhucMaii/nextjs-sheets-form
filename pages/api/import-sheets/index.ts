@@ -32,6 +32,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }
 
+    const userCategory = await prisma.category.findUnique({
+      where: {
+        id: existingUser.categoryId
+      }
+    })
+
     const items = await prisma.item.findMany({
       where: {
         categoryId: existingUser.categoryId,
@@ -149,7 +155,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ...existingUser,
       ...newOrder,
       totalPrice,
+      category: userCategory
     });
+
+    console.log({
+    items: itemList,
+    ...existingUser,
+    ...newOrder,
+    totalPrice,
+    })
 
     // Append to Client Sheet
     const appendResponse = await sheets.spreadsheets.values.append({
