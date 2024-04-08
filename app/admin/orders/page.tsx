@@ -111,9 +111,6 @@ export default function Orders() {
     pusherClient.subscribe('admin');
 
     pusherClient.bind('incoming-order', (order: Order) => {
-      if (order.deliveryDate === date) {
-        setOrderData((prevOrders) => [...prevOrders, order]);
-      }
       setIncomingOrder(order);
     });
 
@@ -126,6 +123,12 @@ export default function Orders() {
     if (incomingOrder) {
       handleSinglePrint();
       setIncomingOrder(null);
+      if (
+        incomingOrder.deliveryDate === date &&
+        incomingOrder.status === currentStatus
+      ) {
+        setOrderData((prevOrders) => [...prevOrders, incomingOrder]);
+      }
     }
   }, [incomingOrder]);
 
