@@ -11,7 +11,12 @@ export const generateOrderTemplate = (
 
   for (const key of Object.keys(orderDetails)) {
     console.log(orderDetails[key], key);
-    if (key !== 'DELIVERY DATE' && key !== 'orderTime' && key !== 'NOTE') {
+    if (
+      key !== 'DELIVERY DATE' &&
+      key !== 'orderTime' &&
+      key !== 'NOTE' &&
+      key !== 'clientId'
+    ) {
       total += orderDetails[key].totalPrice;
       orderDetailsTemplate += `
         <tr>

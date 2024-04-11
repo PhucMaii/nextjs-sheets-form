@@ -61,7 +61,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // Second case: if user want ot create new category
+    // Second case: if user want to create new category
     if (updateOption === UpdateOption.CREATE) {
       const newCategory = await prisma.category.create({
         data: {
