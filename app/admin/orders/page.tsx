@@ -7,7 +7,6 @@ import {
   FormControl,
   Menu,
   MenuItem,
-  TextField,
   Typography,
 } from '@mui/material';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
@@ -40,6 +39,7 @@ import {
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
+import TextInput from '../components/TextInput';
 
 interface Category {
   id: number;
@@ -439,13 +439,13 @@ export default function Orders() {
               mt={2}
               gap={4}
             >
-              <TextField
-                fullWidth
-                variant="filled"
+              <TextInput
+                name="Search"
+                // variant="filled"
                 label="Search orders"
-                placeholder="Search by client id, invoice id, or client name"
+                // placeholder="Search by client id, invoice id, or client name"
                 value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
+                onChange={setSearchKeywords}
               />
               {actionDropdown}
             </Box>
@@ -509,14 +509,22 @@ export default function Orders() {
         mt={2}
         gap={4}
       >
-        <TextField
+        {/* <TextField
           fullWidth
           variant="filled"
           label="Search orders"
           placeholder="Search by client id, invoice id, or client name"
           value={searchKeywords}
           onChange={(e) => setSearchKeywords(e.target.value)}
-        />
+        /> */}
+              <TextInput
+                name="Search"
+                // variant="filled"
+                label="Search orders"
+                // placeholder="Search by client id, invoice id, or client name"
+                value={searchKeywords}
+                onChange={setSearchKeywords}
+              />
         {actionDropdown}
       </Box>
       {orderData.length > 0 ? (
