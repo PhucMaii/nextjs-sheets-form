@@ -30,7 +30,7 @@ export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
           <Dropdown.Item
             icon={FaSignOutAlt}
             onClick={() =>
-              signOut({ callbackUrl: `https://supremesprouts.com/auth/login` })
+              signOut({ callbackUrl: `https://www.supremesprouts.com/auth/login` })
             }
           >
             Sign out
