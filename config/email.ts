@@ -10,7 +10,6 @@ export const generateOrderTemplate = (
   let total = 0;
 
   for (const key of Object.keys(orderDetails)) {
-    console.log(orderDetails[key], key);
     if (
       key !== 'DELIVERY DATE' &&
       key !== 'orderTime' &&
