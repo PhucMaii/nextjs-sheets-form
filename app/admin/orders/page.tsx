@@ -39,6 +39,7 @@ import {
 } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
+import useDebounce from '@/hooks/useDebounce';
 
 interface Category {
   id: number;
@@ -95,9 +96,12 @@ export default function Orders() {
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
-  const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
+
+  const debouncedKeywords = useDebounce(searchKeywords, 500);
+  console.log(debouncedKeywords, 'debounce keywords');
 
   // Scroll loading
   useEffect(() => {
@@ -145,28 +149,27 @@ export default function Orders() {
   }, [page]);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchKeywords) {
+      if (debouncedKeywords) {
+        setIsLoading(true);
         const newOrderData = baseOrderData.filter((order: Order) => {
           if (
-            order.clientId.includes(searchKeywords) ||
-            searchKeywords == order.id.toString() ||
-            order.clientName.toLowerCase().includes(searchKeywords.toLowerCase())
+            order.clientId.includes(debouncedKeywords) ||
+            debouncedKeywords == order.id.toString() ||
+            order.clientName.toLowerCase().includes(debouncedKeywords.toLowerCase())
           ) {
             return true;
           }
           return false;
         });
         setOrderData(newOrderData);
-      } else {
+        setIsLoading(false);
+      } else if (debouncedKeywords === '') {
         setIsLoading(true);
         setOrderData(baseOrderData);
         setIsLoading(false);
       }
-    }, 500)
 
-    return () => clearTimeout(timeoutId);
-  }, [searchKeywords]);
+  }, [debouncedKeywords, baseOrderData]);
 
   const fetchOrders = async (currentPage: number): Promise<void> => {
     setIsLoading(true);
