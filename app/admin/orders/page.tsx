@@ -158,7 +158,9 @@ export default function Orders() {
       });
       setOrderData(newOrderData);
     } else {
+      setIsLoading(true);
       setOrderData(baseOrderData);
+      setIsLoading(false);
     }
   }, [searchKeywords]);
 

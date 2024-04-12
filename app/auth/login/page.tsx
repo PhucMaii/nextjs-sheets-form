@@ -39,8 +39,9 @@ export default function LoginPage() {
       clientId: Yup.string().max(255).required('Client ID is required'),
       password: Yup.string().max(255).required('Password is required'),
     }),
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setSubmitting }) => {
       setIsLoading(true);
+      setSubmitting(true);
 
       try {
         const user = await signIn('credentials', {
@@ -49,9 +50,8 @@ export default function LoginPage() {
           password: values.password,
         });
 
-        const session: any = await getSession();
         const response = await axios.get(
-          `${API_URL.USER}?id=${session?.user.id}`,
+          `${API_URL.USER}?clientId=${values.clientId}`,
         );
         const userData = response.data.data;
 
@@ -62,8 +62,12 @@ export default function LoginPage() {
             message: user.error,
           });
           setIsLoading(false);
+          setSubmitting(false);
           return;
         }
+
+        const session = await getSession();
+        console.log(session, 'session');
 
         setNotification({
           on: true,
@@ -86,6 +90,7 @@ export default function LoginPage() {
           message: 'Your client id and/or password are not correct',
         });
         setIsLoading(false);
+        setSubmitting(false);
       }
     },
   });
@@ -110,7 +115,7 @@ export default function LoginPage() {
               />
               <h2 className="text-blue-500 font-bold text-lg">DataHabor Pro</h2>
             </div>
-            <form className="p-16" noValidate onSubmit={formik.handleSubmit}>
+            <form className="p-16" noValidate>
               <h4 className="text-3xl font-bold text-left">Hello there</h4>
               <h4 className="text-md text-gray-500 mb-8 text-left">
                 Log in to place your order
@@ -154,7 +159,7 @@ export default function LoginPage() {
                   width="full"
                   loadingButton
                   isLoading={isLoading}
-                  type="submit"
+                  onClick={() => formik.handleSubmit()}
                   className="bg-blue-600"
                 />
               </div>
