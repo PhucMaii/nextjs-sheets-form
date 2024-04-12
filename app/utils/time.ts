@@ -1,3 +1,6 @@
+import dayjs from 'dayjs';
+import { limitOrderHour } from '../admin/lib/constant';
+
 export const YYYYMMDDFormat = (date: Date) => {
   const month = date.getUTCMonth() + 1;
   const day = date.getDate();
@@ -15,5 +18,26 @@ export const formatDateChanged = (e: any): string => {
 
   const formattedDate = YYYYMMDDFormat(dateObj);
 
+  return formattedDate;
+};
+
+export const generateMinDate = () => {
+  let today: any = dayjs();
+  if (today.$H >= limitOrderHour) {
+    today = today.add(1, 'day');
+  }
+
+  const minDate = today.startOf('day');
+  return minDate;
+};
+
+export const generateRecommendDate = () => {
+  // format initial date
+  const dateObj = new Date();
+  // if current hour is greater limit hour, then recommend the next day
+  if (dateObj.getHours() >= limitOrderHour) {
+    dateObj.setDate(dateObj.getDate() + 1);
+  }
+  const formattedDate = YYYYMMDDFormat(dateObj);
   return formattedDate;
 };
