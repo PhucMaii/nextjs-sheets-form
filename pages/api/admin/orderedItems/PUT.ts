@@ -38,7 +38,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userId,
       userCategoryId,
     } = updatedData as BodyType;
-    console.log(updatedData, 'updatedData');
 
     for (const item of updatedItems) {
       await prisma.orderedItems.update({
