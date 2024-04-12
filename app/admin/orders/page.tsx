@@ -7,6 +7,7 @@ import {
   FormControl,
   Menu,
   MenuItem,
+  TextField,
   Typography,
 } from '@mui/material';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
@@ -22,7 +23,7 @@ import { grey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PrintIcon from '@mui/icons-material/Print';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -78,6 +79,7 @@ export interface Order {
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
+  const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.INCOMPLETED,
@@ -90,13 +92,10 @@ export default function Orders() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
-  const [date, setDate] = useState(() => {
-    const dateObj = new Date();
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
+  const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
 
@@ -128,6 +127,7 @@ export default function Orders() {
         incomingOrder.status === currentStatus
       ) {
         setOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
+        setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
       }
     }
   }, [incomingOrder]);
@@ -144,6 +144,24 @@ export default function Orders() {
     }
   }, [page]);
 
+  useEffect(() => {
+    if (searchKeywords) {
+      const newOrderData = baseOrderData.filter((order: Order) => {
+        if (
+          order.clientId.includes(searchKeywords) ||
+          searchKeywords == order.id.toString() ||
+          order.clientName.toLowerCase().includes(searchKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setOrderData(newOrderData);
+    } else {
+      setOrderData(baseOrderData);
+    }
+  }, [searchKeywords]);
+
   const fetchOrders = async (currentPage: number): Promise<void> => {
     setIsLoading(true);
     try {
@@ -159,8 +177,13 @@ export default function Orders() {
 
       if (currentPage === 1) {
         setOrderData(response.data.data);
+        setBaseOrderData(response.data.data);
       } else {
         setOrderData((prevOrders) => [...prevOrders, ...response.data.data]);
+        setBaseOrderData((prevOrders) => [
+          ...prevOrders,
+          ...response.data.data,
+        ]);
       }
       setIsLoading(false);
 
@@ -197,6 +220,7 @@ export default function Orders() {
     });
 
     setOrderData(newOrderData);
+    setBaseOrderData(newOrderData);
   };
 
   const handleCloseAnchor = () => {
@@ -229,6 +253,7 @@ export default function Orders() {
   const handleMarkSingleCompletedUI = (orderId: number): void => {
     const newOrders = orderData.filter((order) => order.id !== orderId);
     setOrderData(newOrders);
+    setBaseOrderData(newOrders);
   };
 
   const handlePrinting = useReactToPrint({
@@ -264,6 +289,7 @@ export default function Orders() {
     });
 
     setOrderData(newOrders);
+    setBaseOrderData(newOrders);
   };
 
   const actionDropdown = (
@@ -381,7 +407,7 @@ export default function Orders() {
             </Typography>
             <Box
               display="flex"
-              justifyContent="space-between"
+              // justifyContent="space-between"
               alignItems="center"
             >
               <FormControl>
@@ -434,15 +460,10 @@ export default function Orders() {
         <ComponentToPrint order={incomingOrder} ref={singlePrint} />
       </div>
 
-      <Typography variant="h4" fontWeight="bold">
-        Orders
-      </Typography>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mt={2}
-      >
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Typography variant="h4" fontWeight="bold">
+          Orders
+        </Typography>
         <FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
@@ -455,16 +476,31 @@ export default function Orders() {
             />
           </LocalizationProvider>
         </FormControl>
-        <Box
+      </Box>
+      <Box
+        display="flex"
+        justifyContent="space-around"
+        alignItems="center"
+        mt={2}
+        gap={4}
+      >
+        {/* <Box
           display="flex"
           justifyContent="right"
           alignItems="center"
           mt={2}
           gap={2}
-        >
-          {/* <Button variant="contained">Add +</Button> */}
-          {actionDropdown}
-        </Box>
+        > */}
+        <TextField
+          fullWidth
+          variant="filled"
+          label="Search orders"
+          placeholder="Search by client id, invoice id, or client name"
+          value={searchKeywords}
+          onChange={(e) => setSearchKeywords(e.target.value)}
+        />
+        {actionDropdown}
+        {/* </Box> */}
       </Box>
       {orderData.length > 0 ? (
         orderData.map((order: any, index: number) => {

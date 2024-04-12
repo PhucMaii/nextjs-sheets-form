@@ -14,7 +14,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { Box } from '@mui/material';
-import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
@@ -23,16 +23,9 @@ import { limitOrderHour } from '../admin/lib/constant';
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
   const [clientName, setClientName] = useState<string>('');
-  const [deliveryDate, setDeliveryDate] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
-      dateObj.setDate(dateObj.getDate() + 1);
-    }
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
+  const [deliveryDate, setDeliveryDate] = useState<string>(() =>
+    generateRecommendDate(),
+  );
   const [note, setNote] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
@@ -44,7 +37,6 @@ export default function OrderForm() {
     message: '',
   });
   const { status }: SessionClientType = useSession() as SessionClientType;
-
   let today: any = dayjs();
   if (today.$H >= limitOrderHour) {
     today = today.add(1, 'day');
