@@ -11,41 +11,46 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
+  secret: 'secret',
   providers: [
     CredentialsProvider({
       credentials: {
         clientId: {
           label: 'Client Id',
           type: 'text',
-          placeholder: '00123',
         },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.clientId || !credentials?.password) {
+        try {
+          if (!credentials?.clientId || !credentials?.password) {
+            throw new Error('Email or Password missing');
+          }
+          const user = await prisma.user.findUnique({
+            where: {
+              clientId: credentials.clientId,
+            },
+          });
+          if (!user) {
+            throw new Error('User does not Exist');
+          }
+          const isPasswordValid = await compare(
+            credentials.password,
+            user.password,
+          );
+          if (!isPasswordValid) {
+            throw new Error('Incorrect Credentials');
+          }
+          return {
+            id: user.id + '',
+            clientId: user.clientId,
+            sheetName: user.sheetName,
+            role: user.role,
+          };
+        } catch (error: any) {
+          console.error('Authorize error: ', error);
           return null;
         }
-        const user = await prisma.user.findUnique({
-          where: {
-            clientId: credentials.clientId,
-          },
-        });
-        if (!user) {
-          return null;
-        }
-        const isPasswordValid = await compare(
-          credentials.password,
-          user.password,
-        );
-        if (!isPasswordValid) {
-          return null;
-        }
-        return {
-          id: user.id + '',
-          clientId: user.clientId,
-          sheetName: user.sheetName,
-          role: user.role,
-        };
       },
     }),
   ],
