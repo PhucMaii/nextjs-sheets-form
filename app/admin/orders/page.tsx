@@ -9,7 +9,6 @@ import {
   MenuItem,
   Typography,
 } from '@mui/material';
-import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -40,6 +39,9 @@ import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
 import TextInput from '../components/TextInput';
+import OrderList from '../components/OrderList';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { LoadingButton } from '@mui/lab';
 
 interface Category {
   id: number;
@@ -101,7 +103,6 @@ export default function Orders() {
   const singlePrint: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 500);
-  console.log(debouncedKeywords, 'debounce keywords');
 
   // Scroll loading
   useEffect(() => {
@@ -149,26 +150,23 @@ export default function Orders() {
   }, [page]);
 
   useEffect(() => {
-      if (debouncedKeywords) {
-        setIsLoading(true);
-        const newOrderData = baseOrderData.filter((order: Order) => {
-          if (
-            order.clientId.includes(debouncedKeywords) ||
-            debouncedKeywords == order.id.toString() ||
-            order.clientName.toLowerCase().includes(debouncedKeywords.toLowerCase())
-          ) {
-            return true;
-          }
-          return false;
-        });
-        setOrderData(newOrderData);
-        setIsLoading(false);
-      } else if (debouncedKeywords === '') {
-        setIsLoading(true);
-        setOrderData(baseOrderData);
-        setIsLoading(false);
-      }
-
+    if (debouncedKeywords) {
+      setIsLoading(true);
+      const newOrderData = baseOrderData.filter((order: Order) => {
+        if (
+          order.clientId.includes(debouncedKeywords) ||
+          debouncedKeywords == order.id.toString() ||
+          order.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setOrderData(newOrderData);
+      setIsLoading(false);
+    }
   }, [debouncedKeywords, baseOrderData]);
 
   const fetchOrders = async (currentPage: number): Promise<void> => {
@@ -302,107 +300,98 @@ export default function Orders() {
   };
 
   const actionDropdown = (
-    <Box
-      display="flex"
-      justifyContent="right"
-      alignItems="center"
-      mt={2}
-      gap={2}
-    >
-      {/* <Button variant="contained">Add +</Button> */}
-      <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
-        <Button
-          aria-controls={openDropdown ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={openDropdown ? 'true' : undefined}
-          onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-          endIcon={<ArrowDownwardIcon />}
-          variant="outlined"
+    <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
+      <Button
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+        endIcon={<ArrowDownwardIcon />}
+        variant="outlined"
+      >
+        Actions
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={actionButtonAnchor}
+        open={openDropdown}
+        onClose={handleCloseAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handlePrinting();
+            handleCloseAnchor();
+          }}
+          disabled={orderData.length === 0}
         >
-          Actions
-        </Button>
-        <Menu
-          id="basic-menu"
-          anchorEl={actionButtonAnchor}
-          open={openDropdown}
-          onClose={handleCloseAnchor}
-          MenuListProps={{
-            'aria-labelledby': 'basic-button',
+          <DropdownItemContainer display="flex" gap={2}>
+            <PrintIcon sx={{ color: infoColor }} />
+            <Typography>Print all</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleMarkAllCompleted();
+            handleCloseAnchor();
+          }}
+          disabled={
+            currentStatus === ORDER_STATUS.COMPLETED || orderData.length === 0
+          }
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Mark all as completed</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.COMPLETED);
+            handleCloseAnchor();
           }}
         >
-          <MenuItem
-            onClick={() => {
-              handlePrinting();
-              handleCloseAnchor();
-            }}
-            disabled={orderData.length === 0}
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.COMPLETED}
           >
-            <DropdownItemContainer display="flex" gap={2}>
-              <PrintIcon sx={{ color: infoColor }} />
-              <Typography>Print all</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleMarkAllCompleted();
-              handleCloseAnchor();
-            }}
-            disabled={
-              currentStatus === ORDER_STATUS.COMPLETED || orderData.length === 0
-            }
+            <DoneIcon sx={{ color: successColor }} />
+            <Typography>Filter: Completed Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.INCOMPLETED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.INCOMPLETED}
           >
-            <DropdownItemContainer display="flex" gap={2}>
-              <CheckCircleIcon sx={{ color: successColor }} />
-              <Typography>Mark all as completed</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setCurrentStatus(ORDER_STATUS.COMPLETED);
-              handleCloseAnchor();
-            }}
+            <PendingIcon sx={{ color: warningColor }} />
+            <Typography>Filter: Incompleted Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.VOID);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.VOID}
           >
-            <DropdownItemContainer
-              display="flex"
-              gap={2}
-              isSelected={currentStatus === ORDER_STATUS.COMPLETED}
-            >
-              <DoneIcon sx={{ color: successColor }} />
-              <Typography>Filter: Completed Orders</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setCurrentStatus(ORDER_STATUS.INCOMPLETED);
-              handleCloseAnchor();
-            }}
-          >
-            <DropdownItemContainer
-              display="flex"
-              gap={2}
-              isSelected={currentStatus === ORDER_STATUS.INCOMPLETED}
-            >
-              <PendingIcon sx={{ color: warningColor }} />
-              <Typography>Filter: Incompleted Orders</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setCurrentStatus(ORDER_STATUS.VOID);
-              handleCloseAnchor();
-            }}
-          >
-            <DropdownItemContainer
-              display="flex"
-              gap={2}
-              isSelected={currentStatus === ORDER_STATUS.VOID}
-            >
-              <BlockIcon sx={{ color: errorColor }} />
-              <Typography>Filter: Void Orders</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-        </Menu>
-      </Box>
+            <BlockIcon sx={{ color: errorColor }} />
+            <Typography>Filter: Void Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 
@@ -447,20 +436,24 @@ export default function Orders() {
                 value={searchKeywords}
                 onChange={setSearchKeywords}
               />
+              <LoadingButton
+                loading={isLoading}
+                loadingIndicator="Refresh..."
+                variant="outlined"
+                onClick={() => window.location.reload()}
+              >
+                <RefreshIcon />
+              </LoadingButton>
               {actionDropdown}
             </Box>
-            {orderData.map((order: any, index: number) => {
-              return (
-                <OrderAccordion
-                  key={index}
-                  order={order}
-                  setNotification={setNotification}
-                  updateUI={handleMarkSingleCompletedUI}
-                  updateUIItem={handleUpdateUISingleOrder}
-                  handleUpdateDateUI={handleUpdateDateUI}
-                />
-              );
-            })}
+            <OrderList
+              orderData={orderData}
+              setNotification={setNotification}
+              updateUI={handleMarkSingleCompletedUI}
+              updateUIItem={handleUpdateUISingleOrder}
+              handleUpdateDateUI={handleUpdateDateUI}
+            />
+
             <LoadingComponent color="blue" />
           </>
         ) : (
@@ -509,38 +502,33 @@ export default function Orders() {
         mt={2}
         gap={4}
       >
-        {/* <TextField
-          fullWidth
+        <TextInput
+          name="Search"
           variant="filled"
           label="Search orders"
           placeholder="Search by client id, invoice id, or client name"
           value={searchKeywords}
-          onChange={(e) => setSearchKeywords(e.target.value)}
-        /> */}
-              <TextInput
-                name="Search"
-                // variant="filled"
-                label="Search orders"
-                // placeholder="Search by client id, invoice id, or client name"
-                value={searchKeywords}
-                onChange={setSearchKeywords}
-              />
+          onChange={setSearchKeywords}
+        />
+        <LoadingButton
+          disabled={orderData.length === baseOrderData.length}
+          loading={isLoading}
+          loadingIndicator="Refresh..."
+          variant="outlined"
+          onClick={() => window.location.reload()}
+        >
+          <RefreshIcon />
+        </LoadingButton>
         {actionDropdown}
       </Box>
       {orderData.length > 0 ? (
-        orderData.map((order: any, index: number) => {
-          return (
-            <OrderAccordion
-              key={index}
-              order={order}
-              setNotification={setNotification}
-              // fetchOrders={fetchOrders}
-              updateUI={handleMarkSingleCompletedUI}
-              updateUIItem={handleUpdateUISingleOrder}
-              handleUpdateDateUI={handleUpdateDateUI}
-            />
-          );
-        })
+        <OrderList
+          orderData={orderData}
+          setNotification={setNotification}
+          updateUI={handleMarkSingleCompletedUI}
+          updateUIItem={handleUpdateUISingleOrder}
+          handleUpdateDateUI={handleUpdateDateUI}
+        />
       ) : (
         <Box
           display="flex"

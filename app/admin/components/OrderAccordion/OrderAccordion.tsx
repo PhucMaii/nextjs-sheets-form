@@ -55,7 +55,7 @@ const OrderAccordion = ({
   updateUI,
   handleUpdateDateUI,
 }: PropTypes) => {
-  console.log('Order ACcrodion re render')
+  console.log('Order Accordion re render');
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
@@ -387,8 +387,9 @@ const OrderAccordion = ({
       </Accordion>
     </>
   );
-}
+};
 
+// only re renders if th order data change
 export default memo(OrderAccordion, (prev, next) => {
-  return prev.order === next.order
+  return prev.order === next.order;
 });
