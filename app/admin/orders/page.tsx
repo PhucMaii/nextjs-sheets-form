@@ -145,23 +145,27 @@ export default function Orders() {
   }, [page]);
 
   useEffect(() => {
-    if (searchKeywords) {
-      const newOrderData = baseOrderData.filter((order: Order) => {
-        if (
-          order.clientId.includes(searchKeywords) ||
-          searchKeywords == order.id.toString() ||
-          order.clientName.toLowerCase().includes(searchKeywords.toLowerCase())
-        ) {
-          return true;
-        }
-        return false;
-      });
-      setOrderData(newOrderData);
-    } else {
-      setIsLoading(true);
-      setOrderData(baseOrderData);
-      setIsLoading(false);
-    }
+    const timeoutId = setTimeout(() => {
+      if (searchKeywords) {
+        const newOrderData = baseOrderData.filter((order: Order) => {
+          if (
+            order.clientId.includes(searchKeywords) ||
+            searchKeywords == order.id.toString() ||
+            order.clientName.toLowerCase().includes(searchKeywords.toLowerCase())
+          ) {
+            return true;
+          }
+          return false;
+        });
+        setOrderData(newOrderData);
+      } else {
+        setIsLoading(true);
+        setOrderData(baseOrderData);
+        setIsLoading(false);
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId);
   }, [searchKeywords]);
 
   const fetchOrders = async (currentPage: number): Promise<void> => {
