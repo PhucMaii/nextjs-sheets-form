@@ -127,7 +127,7 @@ export default function Orders() {
         incomingOrder.deliveryDate === date &&
         incomingOrder.status === currentStatus
       ) {
-        setOrderData((prevOrders) => [...prevOrders, incomingOrder]);
+        setOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
       }
     }
   }, [incomingOrder]);
