@@ -55,7 +55,6 @@ const OrderAccordion = ({
   updateUI,
   handleUpdateDateUI,
 }: PropTypes) => {
-  console.log('Order Accordion re render');
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
