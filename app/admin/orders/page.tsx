@@ -149,6 +149,8 @@ export default function Orders() {
     }
   }, [page]);
 
+  console.log(debouncedKeywords,)
+
   useEffect(() => {
     if (debouncedKeywords) {
       setIsLoading(true);

@@ -5,6 +5,7 @@ import { Providers } from './provider';
 import SheetNamesContextAPI from './context/SheetNamesContext';
 import { ThemeProvider } from '@mui/material';
 import { theme } from './theme/theme';
+import '../styles/reactCalendar.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
