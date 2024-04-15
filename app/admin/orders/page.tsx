@@ -17,7 +17,7 @@ import { AllPrint } from '../components/AllPrint';
 import { Notification } from '@/app/utils/type';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import NotificationPopup from '../components/Notification';
-import { grey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -520,6 +520,9 @@ export default function Orders() {
           <RefreshIcon />
         </LoadingButton>
         {actionDropdown}
+      </Box>
+      <Box sx={{backgroundColor: blueGrey[800], color: "white", width: 'fit-content', padding: 1, borderRadius: 2}}>
+        <Typography variant="h6">Total: {orderData.length} orders</Typography>
       </Box>
       {orderData.length > 0 ? (
         <OrderList
