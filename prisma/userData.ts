@@ -1771,7 +1771,7 @@ export const generateUsers = async () => {
     },
     {
       clientId: '00279',
-      clientName: "Wing Hing",
+      clientName: 'Wing Hing',
       sheetName: '00279',
       deliveryAddress: '5872 Victoria Dr, Vancouver, BC V5P 3W9',
       contactNumber: '16043252783',
@@ -1781,7 +1781,7 @@ export const generateUsers = async () => {
     },
     {
       clientId: '00280',
-      clientName: "Thaigo",
+      clientName: 'Thaigo',
       sheetName: '00280',
       deliveryAddress: 'N/A',
       contactNumber: '17787137999',
