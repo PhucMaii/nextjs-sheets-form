@@ -14,16 +14,16 @@ import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { useReactToPrint } from 'react-to-print';
 import { AllPrint } from '../components/AllPrint';
-import { Notification } from '@/app/utils/type';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { Notification, UserType } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
-import { blueGrey, grey } from '@mui/material/colors';
+import { blueGrey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PrintIcon from '@mui/icons-material/Print';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/Pending';
@@ -39,10 +39,11 @@ import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
 import TextInput from '../components/TextInput';
-// import OrderList from '../components/OrderList';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
+import AddOrder from '../components/Modals/AddOrder';
+import ErrorComponent from '../components/ErrorComponent';
 
 interface Category {
   id: number;
@@ -83,12 +84,14 @@ export interface Order {
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
+  const [clientList, setClientList] = useState<UserType[]>([]);
   const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.INCOMPLETED,
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -107,6 +110,7 @@ export default function Orders() {
 
   // Scroll loading
   useEffect(() => {
+    fetchAllClients();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -169,6 +173,25 @@ export default function Orders() {
       setIsLoading(false);
     }
   }, [debouncedKeywords, baseOrderData]);
+
+  const fetchAllClients = async () => {
+    try {
+      const response = await axios.get(API_URL.CLIENTS);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      setClientList(response.data.data);
+    } catch (error: any) {
+      console.log('Fail to fetch all clients: ' + error);
+    }
+  };
 
   const fetchOrders = async (currentPage: number): Promise<void> => {
     setIsLoading(true);
@@ -333,6 +356,12 @@ export default function Orders() {
             <Typography>Print all</Typography>
           </DropdownItemContainer>
         </MenuItem>
+        <MenuItem onClick={() => setIsAddOrderOpen(true)}>
+          <DropdownItemContainer display="flex" gap={2}>
+            <PostAddIcon sx={{ color: infoColor }} />
+            <Typography>Add Order</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
         <MenuItem
           onClick={() => {
             handleMarkAllCompleted();
@@ -447,13 +476,6 @@ export default function Orders() {
               </LoadingButton>
               {actionDropdown}
             </Box>
-            {/* <OrderList
-              orderData={orderData}
-              setNotification={setNotification}
-              updateUI={handleMarkSingleCompletedUI}
-              updateUIItem={handleUpdateUISingleOrder}
-              handleUpdateDateUI={handleUpdateDateUI}
-            /> */}
             {orderData.map((order: any, index: number) => {
               return (
                 <OrderAccordion
@@ -490,6 +512,12 @@ export default function Orders() {
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={incomingOrder} ref={singlePrint} />
       </div>
+      <AddOrder
+        open={isAddOrderOpen}
+        onClose={() => setIsAddOrderOpen(false)}
+        clientList={clientList}
+        setNotification={setNotification}
+      />
 
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography variant="h4" fontWeight="bold">
@@ -559,18 +587,7 @@ export default function Orders() {
           );
         })
       ) : (
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          mt={4}
-        >
-          <ErrorOutlineIcon sx={{ color: grey[600], fontSize: 50 }} />
-          <Typography fontWeight="bold" sx={{ color: grey[600] }} variant="h4">
-            There is no orders
-          </Typography>
-        </Box>
+        <ErrorComponent errorText="There is no orders" />
       )}
     </Sidebar>
   );

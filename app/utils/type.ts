@@ -47,9 +47,10 @@ export interface SessionClientType {
 export interface UserType {
   id?: string;
   clientId: string;
-  email: string;
+  clientName: string;
   password?: string;
   sheetName?: string;
+  categoryId?: number;
 }
 
 export interface Item {
@@ -57,6 +58,7 @@ export interface Item {
   name: string;
   categoryId?: number;
   price: number;
+  quantity?: number;
 }
 
 export interface OrderedItems {

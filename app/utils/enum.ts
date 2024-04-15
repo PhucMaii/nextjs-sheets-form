@@ -4,10 +4,11 @@ export enum API_URL {
   FORM = '/api/form',
   SHEETS = '/api/sheets',
   IMPORT_SHEETS = '/api/import-sheets',
+  ITEM = '/api/item',
   ORDER = '/api/admin/orders',
   ORDER_STATUS = '/api/admin/orders/status',
   ORDERED_ITEMS = '/api/admin/orderedItems',
-  ITEM = '/api/item',
+  CLIENTS = '/api/admin/clients',
 }
 
 export enum ORDER_STATUS {

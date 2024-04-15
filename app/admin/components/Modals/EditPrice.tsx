@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
 import { BoxModal } from './styled';
 import { ModalProps } from './type';
 import axios from 'axios';
@@ -153,9 +153,9 @@ export default function EditPrice({
               </>
             )}
             {itemList.length > 0 &&
-              itemList.map((item: any) => {
+              itemList.map((item: any, index: number) => {
                 return (
-                  <>
+                  <Fragment key={index}>
                     <Grid item xs={6}>
                       {item.name} (Unit Price $)
                     </Grid>
@@ -169,7 +169,7 @@ export default function EditPrice({
                         inputProps={{ min: 0 }}
                       />
                     </Grid>
-                  </>
+                  </Fragment>
                 );
               })}
           </Grid>
