@@ -103,7 +103,7 @@ export default function Orders() {
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
 
-  const debouncedKeywords = useDebounce(searchKeywords, 500);
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   // Scroll loading
   useEffect(() => {
