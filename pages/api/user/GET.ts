@@ -1,15 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import withAuthGuard from '../utils/withAuthGuard';
 
 const GET = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
 
-    const clientId: string = req.query.id as string;
+    const userId: string = req.query.id as string;
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        clientId,
+        id: parseInt(userId),
       },
     });
 
@@ -29,4 +30,4 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default GET;
+export default withAuthGuard(GET);
