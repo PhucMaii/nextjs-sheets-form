@@ -11,7 +11,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: 'secret',
+  secret: process.env.AUTH_SECRET,
   providers: [
     CredentialsProvider({
       credentials: {
@@ -22,7 +22,6 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        console.log(credentials, 'credentials');
         try {
           if (!credentials?.clientId || !credentials?.password) {
             throw new Error('Email or Password missing');
