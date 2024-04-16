@@ -8,7 +8,7 @@ import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
 import axios from 'axios';
 import { useFormik } from 'formik';
-import { getSession, signIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -49,9 +49,8 @@ export default function LoginPage() {
           password: values.password,
         });
 
-        const session: any = await getSession();
         const response = await axios.get(
-          `${API_URL.USER}?id=${session?.user.id}`,
+          `${API_URL.USER}?id=${values.clientId}`,
         );
         const userData = response.data.data;
 
