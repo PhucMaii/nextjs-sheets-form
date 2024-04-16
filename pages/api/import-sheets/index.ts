@@ -16,17 +16,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const prisma = new PrismaClient();
-    const session: any = await getServerSession(req, res, authOptions);
+    const body: any = req.body;
+    let existingUser: any;
 
-    if (!session) {
-      return res.status(401).json({ error: 'You are not authenticated' });
+    if (!body.clientId) {
+      const session: any = await getServerSession(req, res, authOptions);
+
+      if (!session) {
+        return res.status(401).json({ error: 'You are not authenticated' });
+      }
+
+      existingUser = await prisma.user.findUnique({
+        where: {
+          id: Number(session.user.id),
+        },
+      });
+    } else {
+      existingUser = await prisma.user.findUnique({
+        where: {
+          clientId: body.clientId,
+        },
+      });
     }
-
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        id: Number(session.user.id),
-      },
-    });
 
     if (!existingUser) {
       return res.status(404).json({ error: 'User Not Found in DB' });
@@ -44,7 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const body: any = req.body;
+    console.log(body, 'body');
     // Initialize new order
     const newOrder = await prisma.orders.create({
       data: {

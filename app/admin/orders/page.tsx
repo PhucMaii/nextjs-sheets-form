@@ -17,7 +17,7 @@ import { AllPrint } from '../components/AllPrint';
 import { Notification } from '@/app/utils/type';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import NotificationPopup from '../components/Notification';
-import { grey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -39,9 +39,10 @@ import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
 import TextInput from '../components/TextInput';
-import OrderList from '../components/OrderList';
+// import OrderList from '../components/OrderList';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
+import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 
 interface Category {
   id: number;
@@ -102,7 +103,7 @@ export default function Orders() {
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
 
-  const debouncedKeywords = useDebounce(searchKeywords, 500);
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   // Scroll loading
   useEffect(() => {
@@ -446,13 +447,25 @@ export default function Orders() {
               </LoadingButton>
               {actionDropdown}
             </Box>
-            <OrderList
+            {/* <OrderList
               orderData={orderData}
               setNotification={setNotification}
               updateUI={handleMarkSingleCompletedUI}
               updateUIItem={handleUpdateUISingleOrder}
               handleUpdateDateUI={handleUpdateDateUI}
-            />
+            /> */}
+            {orderData.map((order: any, index: number) => {
+              return (
+                <OrderAccordion
+                  key={index}
+                  order={order}
+                  setNotification={setNotification}
+                  updateUI={handleMarkSingleCompletedUI}
+                  updateUIItem={handleUpdateUISingleOrder}
+                  handleUpdateDateUI={handleUpdateDateUI}
+                />
+              );
+            })}
 
             <LoadingComponent color="blue" />
           </>
@@ -521,14 +534,30 @@ export default function Orders() {
         </LoadingButton>
         {actionDropdown}
       </Box>
+      <Box
+        sx={{
+          backgroundColor: blueGrey[800],
+          color: 'white',
+          width: 'fit-content',
+          padding: 1,
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant="h6">Total: {orderData.length} orders</Typography>
+      </Box>
       {orderData.length > 0 ? (
-        <OrderList
-          orderData={orderData}
-          setNotification={setNotification}
-          updateUI={handleMarkSingleCompletedUI}
-          updateUIItem={handleUpdateUISingleOrder}
-          handleUpdateDateUI={handleUpdateDateUI}
-        />
+        orderData.map((order: any, index: number) => {
+          return (
+            <OrderAccordion
+              key={index}
+              order={order}
+              setNotification={setNotification}
+              updateUI={handleMarkSingleCompletedUI}
+              updateUIItem={handleUpdateUISingleOrder}
+              handleUpdateDateUI={handleUpdateDateUI}
+            />
+          );
+        })
       ) : (
         <Box
           display="flex"
