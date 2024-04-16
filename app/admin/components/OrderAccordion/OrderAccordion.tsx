@@ -2,6 +2,7 @@
 import React, {
   Dispatch,
   SetStateAction,
+  memo,
   useEffect,
   useRef,
   useState,
@@ -47,13 +48,13 @@ interface PropTypes {
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
 }
 
-export default function OrderAccordion({
+const OrderAccordion = ({
   order,
   updateUIItem,
   setNotification,
   updateUI,
   handleUpdateDateUI,
-}: PropTypes) {
+}: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
@@ -385,4 +386,9 @@ export default function OrderAccordion({
       </Accordion>
     </>
   );
-}
+};
+
+// only re renders if th order data change
+export default memo(OrderAccordion, (prev, next) => {
+  return prev.order === next.order;
+});

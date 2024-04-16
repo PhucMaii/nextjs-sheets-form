@@ -9,7 +9,6 @@ import {
   MenuItem,
   Typography,
 } from '@mui/material';
-import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -18,11 +17,11 @@ import { AllPrint } from '../components/AllPrint';
 import { Notification } from '@/app/utils/type';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import NotificationPopup from '../components/Notification';
-import { grey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PrintIcon from '@mui/icons-material/Print';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -38,6 +37,12 @@ import {
 } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
+import useDebounce from '@/hooks/useDebounce';
+import TextInput from '../components/TextInput';
+// import OrderList from '../components/OrderList';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { LoadingButton } from '@mui/lab';
+import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 
 interface Category {
   id: number;
@@ -78,6 +83,7 @@ export interface Order {
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
+  const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.INCOMPLETED,
@@ -90,15 +96,14 @@ export default function Orders() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
-  const [date, setDate] = useState(() => {
-    const dateObj = new Date();
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
+  const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
+  const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
+
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   // Scroll loading
   useEffect(() => {
@@ -128,6 +133,7 @@ export default function Orders() {
         incomingOrder.status === currentStatus
       ) {
         setOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
+        setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
       }
     }
   }, [incomingOrder]);
@@ -144,6 +150,26 @@ export default function Orders() {
     }
   }, [page]);
 
+  useEffect(() => {
+    if (debouncedKeywords) {
+      setIsLoading(true);
+      const newOrderData = baseOrderData.filter((order: Order) => {
+        if (
+          order.clientId.includes(debouncedKeywords) ||
+          debouncedKeywords == order.id.toString() ||
+          order.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setOrderData(newOrderData);
+      setIsLoading(false);
+    }
+  }, [debouncedKeywords, baseOrderData]);
+
   const fetchOrders = async (currentPage: number): Promise<void> => {
     setIsLoading(true);
     try {
@@ -159,8 +185,13 @@ export default function Orders() {
 
       if (currentPage === 1) {
         setOrderData(response.data.data);
+        setBaseOrderData(response.data.data);
       } else {
         setOrderData((prevOrders) => [...prevOrders, ...response.data.data]);
+        setBaseOrderData((prevOrders) => [
+          ...prevOrders,
+          ...response.data.data,
+        ]);
       }
       setIsLoading(false);
 
@@ -197,6 +228,7 @@ export default function Orders() {
     });
 
     setOrderData(newOrderData);
+    setBaseOrderData(newOrderData);
   };
 
   const handleCloseAnchor = () => {
@@ -229,6 +261,7 @@ export default function Orders() {
   const handleMarkSingleCompletedUI = (orderId: number): void => {
     const newOrders = orderData.filter((order) => order.id !== orderId);
     setOrderData(newOrders);
+    setBaseOrderData(newOrders);
   };
 
   const handlePrinting = useReactToPrint({
@@ -264,110 +297,102 @@ export default function Orders() {
     });
 
     setOrderData(newOrders);
+    setBaseOrderData(newOrders);
   };
 
   const actionDropdown = (
-    <Box
-      display="flex"
-      justifyContent="right"
-      alignItems="center"
-      mt={2}
-      gap={2}
-    >
-      {/* <Button variant="contained">Add +</Button> */}
-      <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
-        <Button
-          aria-controls={openDropdown ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={openDropdown ? 'true' : undefined}
-          onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-          endIcon={<ArrowDownwardIcon />}
-          variant="outlined"
+    <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
+      <Button
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+        endIcon={<ArrowDownwardIcon />}
+        variant="outlined"
+      >
+        Actions
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={actionButtonAnchor}
+        open={openDropdown}
+        onClose={handleCloseAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handlePrinting();
+            handleCloseAnchor();
+          }}
+          disabled={orderData.length === 0}
         >
-          Actions
-        </Button>
-        <Menu
-          id="basic-menu"
-          anchorEl={actionButtonAnchor}
-          open={openDropdown}
-          onClose={handleCloseAnchor}
-          MenuListProps={{
-            'aria-labelledby': 'basic-button',
+          <DropdownItemContainer display="flex" gap={2}>
+            <PrintIcon sx={{ color: infoColor }} />
+            <Typography>Print all</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleMarkAllCompleted();
+            handleCloseAnchor();
+          }}
+          disabled={
+            currentStatus === ORDER_STATUS.COMPLETED || orderData.length === 0
+          }
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Mark all as completed</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.COMPLETED);
+            handleCloseAnchor();
           }}
         >
-          <MenuItem
-            onClick={() => {
-              handlePrinting();
-              handleCloseAnchor();
-            }}
-            disabled={orderData.length === 0}
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.COMPLETED}
           >
-            <DropdownItemContainer display="flex" gap={2}>
-              <PrintIcon sx={{ color: infoColor }} />
-              <Typography>Print all</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleMarkAllCompleted();
-              handleCloseAnchor();
-            }}
-            disabled={
-              currentStatus === ORDER_STATUS.COMPLETED || orderData.length === 0
-            }
+            <DoneIcon sx={{ color: successColor }} />
+            <Typography>Filter: Completed Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.INCOMPLETED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.INCOMPLETED}
           >
-            <DropdownItemContainer display="flex" gap={2}>
-              <CheckCircleIcon sx={{ color: successColor }} />
-              <Typography>Mark all as completed</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setCurrentStatus(ORDER_STATUS.COMPLETED);
-              handleCloseAnchor();
-            }}
+            <PendingIcon sx={{ color: warningColor }} />
+            <Typography>Filter: Incompleted Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.VOID);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.VOID}
           >
-            <DropdownItemContainer
-              display="flex"
-              gap={2}
-              isSelected={currentStatus === ORDER_STATUS.COMPLETED}
-            >
-              <DoneIcon sx={{ color: successColor }} />
-              <Typography>Filter: Completed Orders</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setCurrentStatus(ORDER_STATUS.INCOMPLETED);
-              handleCloseAnchor();
-            }}
-          >
-            <DropdownItemContainer
-              display="flex"
-              gap={2}
-              isSelected={currentStatus === ORDER_STATUS.INCOMPLETED}
-            >
-              <PendingIcon sx={{ color: warningColor }} />
-              <Typography>Filter: Incompleted Orders</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setCurrentStatus(ORDER_STATUS.VOID);
-              handleCloseAnchor();
-            }}
-          >
-            <DropdownItemContainer
-              display="flex"
-              gap={2}
-              isSelected={currentStatus === ORDER_STATUS.VOID}
-            >
-              <BlockIcon sx={{ color: errorColor }} />
-              <Typography>Filter: Void Orders</Typography>
-            </DropdownItemContainer>
-          </MenuItem>
-        </Menu>
-      </Box>
+            <BlockIcon sx={{ color: errorColor }} />
+            <Typography>Filter: Void Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 
@@ -376,14 +401,14 @@ export default function Orders() {
       <Sidebar>
         {orderData.length > 0 ? (
           <>
-            <Typography variant="h4" fontWeight="bold">
-              Orders
-            </Typography>
             <Box
               display="flex"
-              justifyContent="space-between"
               alignItems="center"
+              justifyContent="space-between"
             >
+              <Typography variant="h4" fontWeight="bold">
+                Orders
+              </Typography>
               <FormControl>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
@@ -396,8 +421,39 @@ export default function Orders() {
                   />
                 </LocalizationProvider>
               </FormControl>
+            </Box>
+            <Box
+              display="flex"
+              justifyContent="space-around"
+              alignItems="center"
+              mt={2}
+              gap={4}
+            >
+              <TextInput
+                name="Search"
+                // variant="filled"
+                label="Search orders"
+                // placeholder="Search by client id, invoice id, or client name"
+                value={searchKeywords}
+                onChange={setSearchKeywords}
+              />
+              <LoadingButton
+                loading={isLoading}
+                loadingIndicator="Refresh..."
+                variant="outlined"
+                onClick={() => window.location.reload()}
+              >
+                <RefreshIcon />
+              </LoadingButton>
               {actionDropdown}
             </Box>
+            {/* <OrderList
+              orderData={orderData}
+              setNotification={setNotification}
+              updateUI={handleMarkSingleCompletedUI}
+              updateUIItem={handleUpdateUISingleOrder}
+              handleUpdateDateUI={handleUpdateDateUI}
+            /> */}
             {orderData.map((order: any, index: number) => {
               return (
                 <OrderAccordion
@@ -410,6 +466,7 @@ export default function Orders() {
                 />
               );
             })}
+
             <LoadingComponent color="blue" />
           </>
         ) : (
@@ -434,15 +491,10 @@ export default function Orders() {
         <ComponentToPrint order={incomingOrder} ref={singlePrint} />
       </div>
 
-      <Typography variant="h4" fontWeight="bold">
-        Orders
-      </Typography>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mt={2}
-      >
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Typography variant="h4" fontWeight="bold">
+          Orders
+        </Typography>
         <FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
@@ -455,16 +507,43 @@ export default function Orders() {
             />
           </LocalizationProvider>
         </FormControl>
-        <Box
-          display="flex"
-          justifyContent="right"
-          alignItems="center"
-          mt={2}
-          gap={2}
+      </Box>
+      <Box
+        display="flex"
+        justifyContent="space-around"
+        alignItems="center"
+        mt={2}
+        gap={4}
+      >
+        <TextInput
+          name="Search"
+          variant="filled"
+          label="Search orders"
+          placeholder="Search by client id, invoice id, or client name"
+          value={searchKeywords}
+          onChange={setSearchKeywords}
+        />
+        <LoadingButton
+          disabled={orderData.length === baseOrderData.length}
+          loading={isLoading}
+          loadingIndicator="Refresh..."
+          variant="outlined"
+          onClick={() => window.location.reload()}
         >
-          {/* <Button variant="contained">Add +</Button> */}
-          {actionDropdown}
-        </Box>
+          <RefreshIcon />
+        </LoadingButton>
+        {actionDropdown}
+      </Box>
+      <Box
+        sx={{
+          backgroundColor: blueGrey[800],
+          color: 'white',
+          width: 'fit-content',
+          padding: 1,
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant="h6">Total: {orderData.length} orders</Typography>
       </Box>
       {orderData.length > 0 ? (
         orderData.map((order: any, index: number) => {
@@ -473,7 +552,6 @@ export default function Orders() {
               key={index}
               order={order}
               setNotification={setNotification}
-              // fetchOrders={fetchOrders}
               updateUI={handleMarkSingleCompletedUI}
               updateUIItem={handleUpdateUISingleOrder}
               handleUpdateDateUI={handleUpdateDateUI}

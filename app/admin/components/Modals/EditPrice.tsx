@@ -93,8 +93,6 @@ export default function EditPrice({
     setItemList(newItemList);
   };
 
-  console.log({ order, items }, 'order');
-
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>

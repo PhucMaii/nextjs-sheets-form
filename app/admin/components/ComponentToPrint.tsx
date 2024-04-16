@@ -51,8 +51,8 @@ export const ComponentToPrint = forwardRef(
           <div className="h-px bg-black w-full m-auto"></div>
           <div className="flex flex-col gap-2 w-full">
             <div className="flex flex-wrap gap-2 text-2xl items-center ">
-              <h3 className="text-left font-bold">Order Id: </h3>
-              <h3 className="text-left text-2xl">#{order.id}</h3>
+              <h3 className="text-left font-bold">Invoice Id: </h3>
+              <h3 className="text-left text-2xl">{order.id}</h3>
             </div>
             <div className="flex flex-wrap gap-2 text-2xl mr-6">
               <h3 className="text-left font-bold">Client Name: </h3>
@@ -60,7 +60,7 @@ export const ComponentToPrint = forwardRef(
             </div>
             <div className="flex gap-2 text-2xl">
               <h3 className="text-left font-bold">Client Number:</h3>
-              <h3 className="text-left">#{order.clientId}</h3>
+              <h3 className="text-left">{order.clientId}</h3>
             </div>
             <div className="flex gap-2 text-2xl">
               <h3 className="text-left font-bold">Order Time:</h3>

@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { generateUsers } from './userData';
 import { hash } from 'bcrypt';
-import { items } from './itemData';
-import { inputs } from './inputFieldData';
+// import { items } from './itemData';
+// import { inputs } from './inputFieldData';
 
 const prisma = new PrismaClient();
 
@@ -38,107 +38,107 @@ async function main() {
     });
   }
 
-  await prisma.category.createMany({
-    data: [
-      {
-        name: 'Wholesale', // id: 1
-      },
-      {
-        name: 'Wholesale - Terminal', // id: 2
-      },
-      {
-        name: 'Wholesale - Consumer Produce', // id: 3
-      },
-      {
-        name: 'Wholesale - Dafa Natural Foods', // id: 4
-      },
-      {
-        name: 'Wholesale - Super Save Produce', // id: 5
-      },
-      {
-        name: 'Wholesale - Standard Trading', // id 6
-      },
-      {
-        name: 'Wholesale - Freeman', // id 7
-      },
-      {
-        name: 'Wholesale - Doli', // id 8
-      },
-      {
-        name: 'Special Client - MIXED', // id 9
-      },
-      {
-        name: 'Retail - B.K', // id 10
-      },
-      {
-        name: 'Retail - P.P', // id 11
-      },
-      {
-        name: 'Retail - Thai Basil', // id 12
-      },
-    ],
-  });
+  // await prisma.category.createMany({
+  //   data: [
+  //     {
+  //       name: 'Wholesale', // id: 1
+  //     },
+  //     {
+  //       name: 'Wholesale - Terminal', // id: 2
+  //     },
+  //     {
+  //       name: 'Wholesale - Consumer Produce', // id: 3
+  //     },
+  //     {
+  //       name: 'Wholesale - Dafa Natural Foods', // id: 4
+  //     },
+  //     {
+  //       name: 'Wholesale - Super Save Produce', // id: 5
+  //     },
+  //     {
+  //       name: 'Wholesale - Standard Trading', // id 6
+  //     },
+  //     {
+  //       name: 'Wholesale - Freeman', // id 7
+  //     },
+  //     {
+  //       name: 'Wholesale - Doli', // id 8
+  //     },
+  //     {
+  //       name: 'Special Client - MIXED', // id 9
+  //     },
+  //     {
+  //       name: 'Retail - B.K', // id 10
+  //     },
+  //     {
+  //       name: 'Retail - P.P', // id 11
+  //     },
+  //     {
+  //       name: 'Retail - Thai Basil', // id 12
+  //     },
+  //   ],
+  // });
 
-  await prisma.item.createMany({
-    data: [...items],
-  });
+  // await prisma.item.createMany({
+  //   data: [...items],
+  // });
 
-  await prisma.form.createMany({
-    data: [
-      {
-        formName: 'Order Form',
-        categoryId: 1,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 2,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 3,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 4,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 5,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 6,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 7,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 8,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 9,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 10,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 11,
-      },
-      {
-        formName: 'Order Form',
-        categoryId: 12,
-      },
-    ],
-  });
+  // await prisma.form.createMany({
+  //   data: [
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 1,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 2,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 3,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 4,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 5,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 6,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 7,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 8,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 9,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 10,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 11,
+  //     },
+  //     {
+  //       formName: 'Order Form',
+  //       categoryId: 12,
+  //     },
+  //   ],
+  // });
 
-  await prisma.input.createMany({
-    data: [...inputs],
-  });
+  // await prisma.input.createMany({
+  //   data: [...inputs],
+  // });
 }
 
 main()
