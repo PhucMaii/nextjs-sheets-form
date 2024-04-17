@@ -42,6 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }
 
+    const body: any = req.body;
+
     const userCategory = await prisma.category.findUnique({
       where: {
         id: existingUser.categoryId,
@@ -54,7 +56,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const body: any = req.body;
+    console.log(body, 'body');
     // Initialize new order
     const newOrder = await prisma.orders.create({
       data: {

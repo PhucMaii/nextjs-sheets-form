@@ -28,9 +28,5 @@ function TextInput(props: TextInputProps) {
 
 // Avoid many re renders
 export default React.memo(TextInput, (prev, next) => {
-  return (
-    prev.name === next.name &&
-    prev.label === next.label &&
-    prev.value === next.value
-  );
+  return prev.name === next.name && prev.label === next.label;
 });
