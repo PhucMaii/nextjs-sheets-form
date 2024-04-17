@@ -17,8 +17,8 @@ export default function ErrorComponent({ errorText }: PropTypes) {
       mt={4}
       sx={{ width: '100%', height: '100%' }}
     >
-      <ErrorOutlineIcon sx={{ color: grey[600], fontSize: 50 }} />
-      <Typography fontWeight="bold" sx={{ color: grey[600] }} variant="h4">
+      <ErrorOutlineIcon sx={{ color: grey[600], fontSize: 30 }} />
+      <Typography fontWeight="bold" sx={{ color: grey[600] }} variant="h6">
         {errorText}
       </Typography>
     </Box>

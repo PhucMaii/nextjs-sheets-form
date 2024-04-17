@@ -84,7 +84,7 @@ export default function AddOrder({
         return;
       }
 
-      const lastOrder = response.data.data[response.data.data.length - 1];
+      const lastOrder = response.data.data[0];
 
       const newItemList = itemList.map((item: Item) => {
         const targetItem = lastOrder.items.find((targetItem: OrderedItems) => {

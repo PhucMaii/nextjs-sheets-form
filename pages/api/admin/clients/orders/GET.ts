@@ -17,6 +17,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         items: true,
       },
+      orderBy: {
+        id: 'desc',
+      },
     });
 
     return res.status(200).json({
