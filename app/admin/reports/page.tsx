@@ -4,14 +4,8 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Autocomplete,
   Box,
-  Button,
+  Grid,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
 } from '@mui/material';
@@ -21,32 +15,52 @@ import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
 import NotificationPopup from '../components/Notification';
 import { Order } from '../orders/page';
-import StatusText, { COLOR_TYPE } from '../components/StatusText';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import SelectDateRange from '../components/SelectDateRange';
+import SearchInput from '../components/SearchInput';
+import OverviewCard from '../components/OverviewCard/OverviewCard';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { blue } from '@mui/material/colors';
+import ClientOrdersTable from '../components/ClientOrdersTable';
+
+const generateMonthRange = () => {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+
+  const firstDayOfThisMonth = new Date(year, month, 1);
+  return [firstDayOfThisMonth, today];
+};
 
 export default function ReportPage() {
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
+  const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
+  const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
     message: '',
   });
+  const [totalBill, setTotalBill] = useState<number>(0);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   useEffect(() => {
     fetchAllClients();
   }, []);
 
   useEffect(() => {
-    if (clientValue) {
+    if (clientValue && dateRange.length > 0) {
       fetchClientOrders();
     } else {
       setClientOrders([]);
     }
-  }, [clientValue]);
+  }, [clientValue, dateRange]);
 
   const fetchAllClients = async () => {
     try {
@@ -71,7 +85,7 @@ export default function ReportPage() {
     try {
       setIsFetching(true);
       const response = await axios.get(
-        `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
+        `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
       );
 
       if (response.data.error) {
@@ -84,6 +98,16 @@ export default function ReportPage() {
         return;
       }
 
+      const bill = response.data.data.reduce((acc: number, cV: Order) => {
+        return acc + cV.totalPrice;
+      }, 0);
+
+      const completedOrders = response.data.data.filter((order: Order) => {
+        return order.status === ORDER_STATUS.COMPLETED;
+      });
+
+      setCompletedOrders(completedOrders);
+      setTotalBill(bill);
       setClientOrders(response.data.data);
       setIsFetching(false);
     } catch (error: any) {
@@ -103,7 +127,10 @@ export default function ReportPage() {
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
       />
-      <Typography variant="h4">Reports</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h4">Reports</Typography>
+        <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+      </Box>
       <ShadowSection display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6">Clients</Typography>
         <Autocomplete
@@ -128,54 +155,45 @@ export default function ReportPage() {
             <LoadingComponent color="blue" />
           </Box>
         ) : clientOrders.length > 0 ? (
-          <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer sx={{ maxHeight: 800 }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Invoice Id</TableCell>
-                    <TableCell>Order Time</TableCell>
-                    <TableCell>Delivery Date</TableCell>
-                    <TableCell>Total Bill</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {clientOrders.map((order: Order) => {
-                    const statusText = {
-                      text: order.status,
-                      type:
-                        order.status === ORDER_STATUS.COMPLETED
-                          ? COLOR_TYPE.SUCCESS
-                          : order.status === ORDER_STATUS.INCOMPLETED
-                            ? COLOR_TYPE.WARNING
-                            : COLOR_TYPE.ERROR,
-                    };
-                    return (
-                      <TableRow>
-                        <TableCell>{order.id}</TableCell>
-                        <TableCell>{order.orderTime}</TableCell>
-                        <TableCell>{order.deliveryDate}</TableCell>
-                        <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <StatusText
-                            text={statusText.text}
-                            type={statusText.type}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Box display="flex" gap={1}>
-                            <Button>Edit</Button>
-                            <Button color="error">Delete</Button>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+          <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
+            <Grid container spacing={3} mb={2}>
+              <Grid item xs={12} md={4}>
+                <OverviewCard
+                  icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
+                  text="Total Orders"
+                  value={clientOrders.length}
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <OverviewCard
+                  icon={
+                    <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
+                  }
+                  text="Total Bill"
+                  value={`$${totalBill}`}
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <OverviewCard
+                  icon={
+                    <CheckCircleOutlineIcon
+                      sx={{ color: blue[700], fontSize: 50 }}
+                    />
+                  }
+                  text="Completed orders"
+                  value={completedOrders.length}
+                />
+              </Grid>
+            </Grid>
+            <SearchInput
+              name="Search"
+              variant="filled"
+              label="Search orders"
+              placeholder="Search by invoice id"
+              value={searchKeywords}
+              onChange={setSearchKeywords}
+            />
+            <ClientOrdersTable clientOrders={clientOrders} />
           </Paper>
         ) : (
           <ErrorComponent errorText="No Order Available" />

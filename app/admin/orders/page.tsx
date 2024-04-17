@@ -38,7 +38,7 @@ import {
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
-import TextInput from '../components/TextInput';
+import SearchInput from '../components/SearchInput';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
@@ -154,7 +154,7 @@ export default function Orders() {
     }
   }, [page]);
 
-  console.log(debouncedKeywords,)
+  console.log(debouncedKeywords);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -460,7 +460,7 @@ export default function Orders() {
               mt={2}
               gap={4}
             >
-              <TextInput
+              <SearchInput
                 name="Search"
                 // variant="filled"
                 label="Search orders"
@@ -545,7 +545,7 @@ export default function Orders() {
         mt={2}
         gap={4}
       >
-        <TextInput
+        <SearchInput
           name="Search"
           variant="filled"
           label="Search orders"

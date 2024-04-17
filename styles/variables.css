@@ -1,39 +1,39 @@
 :root {
-    --error-lightest: '#FEF3F2';
-    --error-light: '#FEE4E2';
-    --error-main: '#F04438';
-    --error-dark: '#B42318';
-    --error-darkest: '#7A271A';
-    --error-contrastText: '#FFFFFF';
-    
-    --success-lightest: #F0FDF9;
-    --success-light: #3FC79A;
-    --success-main: #10B981;
-    --success-dark: #0B815A;
-    --success-darkest: #134E48;
-    --success-contrast: #FFFFFF;
-  
-    --neutral-50: '#F8F9FA';
-    --neutral-100: '#F3F4F6';
-    --neutral-200: '#E5E7EB';
-    --neutral-250: '#D2D6DB';
-    --neutral-400: '#9DA4AE';
-    --neutral-500: '#6C737F';
-    --neutral-600: '#4D5761';
-    --neutral-700: '#2F3746';
-    --neutral-800: '#1C2536';
-    --neutral-900: '#111927';
-      
-    --indigo-lightest: '#F5F7FF';
-    --indigo-light: '#EBEEFE';
-    --indigo-main: '#6366F1';
-    --indigo-dark: '#4338CA';
-    --indigo-darkest: '#312E81';
-    --indigo-contrastText: '#FFFFFF';
+  --error-lightest: '#FEF3F2';
+  --error-light: '#FEE4E2';
+  --error-main: '#F04438';
+  --error-dark: '#B42318';
+  --error-darkest: '#7A271A';
+  --error-contrastText: '#FFFFFF';
 
-    --primary-main: #3498DB;
-    --primary-lightest: #dceaf5;
-    --primary-light: #7EC2EF;
-    --primary-dark: #0B588B;
-    --primary-darkest: #0A4064;
+  --success-lightest: #f0fdf9;
+  --success-light: #3fc79a;
+  --success-main: #10b981;
+  --success-dark: #0b815a;
+  --success-darkest: #134e48;
+  --success-contrast: #ffffff;
+
+  --neutral-50: '#F8F9FA';
+  --neutral-100: '#F3F4F6';
+  --neutral-200: '#E5E7EB';
+  --neutral-250: '#D2D6DB';
+  --neutral-400: '#9DA4AE';
+  --neutral-500: '#6C737F';
+  --neutral-600: '#4D5761';
+  --neutral-700: '#2F3746';
+  --neutral-800: '#1C2536';
+  --neutral-900: '#111927';
+
+  --indigo-lightest: '#F5F7FF';
+  --indigo-light: '#EBEEFE';
+  --indigo-main: '#6366F1';
+  --indigo-dark: '#4338CA';
+  --indigo-darkest: '#312E81';
+  --indigo-contrastText: '#FFFFFF';
+
+  --primary-main: #3498db;
+  --primary-lightest: #dceaf5;
+  --primary-light: #7ec2ef;
+  --primary-dark: #0b588b;
+  --primary-darkest: #0a4064;
 }

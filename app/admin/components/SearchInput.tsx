@@ -10,7 +10,7 @@ interface TextInputProps {
   variant?: TextFieldVariants;
 }
 
-function TextInput(props: TextInputProps) {
+function SearchInput(props: TextInputProps) {
   return (
     <TextField
       label={props.label}
@@ -27,6 +27,10 @@ function TextInput(props: TextInputProps) {
 }
 
 // Avoid many re renders
-export default React.memo(TextInput, (prev, next) => {
-  return prev.name === next.name && prev.label === next.label;
+export default React.memo(SearchInput, (prev, next) => {
+  return (
+    prev.name === next.name &&
+    prev.label === next.label &&
+    prev.value === next.value
+  );
 });
