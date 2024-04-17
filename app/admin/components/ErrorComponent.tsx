@@ -15,7 +15,7 @@ export default function ErrorComponent({ errorText }: PropTypes) {
       justifyContent="center"
       alignItems="center"
       mt={4}
-      sx={{width: '100%', height: '100%'}}
+      sx={{ width: '100%', height: '100%' }}
     >
       <ErrorOutlineIcon sx={{ color: grey[600], fontSize: 50 }} />
       <Typography fontWeight="bold" sx={{ color: grey[600] }} variant="h4">

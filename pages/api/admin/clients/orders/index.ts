@@ -13,9 +13,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       error: 'Your method is not supported',
     });
   } catch (error: any) {
-    console.log('Internal Server Error: ' + error);
+    console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      message: 'Internal Server Error: ' + error,
+      error: 'Internal Server Error: ' + error,
     });
   }
 };

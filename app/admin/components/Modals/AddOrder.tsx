@@ -1,4 +1,11 @@
-import React, { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { ModalProps } from './type';
 import {
   Autocomplete,
@@ -16,6 +23,14 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ErrorComponent from '../ErrorComponent';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { OrderedItems } from '@prisma/client';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { limitOrderHour } from '../../lib/constant';
+import moment from 'moment';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -29,16 +44,71 @@ export default function AddOrder({
   setNotification,
 }: PropTypes) {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
+  const [deliveryDate, setDeliveryDate] = useState<string>(() => {
+    // format initial date
+    const dateObj = new Date();
+    // if current hour is greater limit hour, then recommend the next day
+    if (dateObj.getHours() >= limitOrderHour) {
+      dateObj.setDate(dateObj.getDate() + 1);
+    }
+    const formattedDate = YYYYMMDDFormat(dateObj);
+    return formattedDate;
+  });
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
+  const [note, setNote] = useState<string>('');
 
   useEffect(() => {
     if (clientValue) {
       fetchClientItems();
     } else {
-        setItemList([]);
+      setItemList([]);
     }
   }, [clientValue]);
+
+  const copyLastOrder = async () => {
+    try {
+      setIsButtonLoading(true);
+      const response = await axios.get(
+        `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
+      );
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        setIsButtonLoading(false);
+        return;
+      }
+
+      const lastOrder = response.data.data[response.data.data.length - 1];
+
+      const newItemList = itemList.map((item: Item) => {
+        const targetItem = lastOrder.items.find((targetItem: OrderedItems) => {
+          return targetItem.name === item.name;
+        });
+
+        if (targetItem) {
+          return { ...item, quantity: targetItem.quantity };
+        }
+        return item;
+      });
+
+      setItemList(newItemList);
+      setIsButtonLoading(false);
+    } catch (error: any) {
+      console.log('Fail to copy from last order: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to copy from last order: ' + error,
+      });
+      setIsButtonLoading(false);
+    }
+  };
 
   const fetchClientItems = async () => {
     try {
@@ -58,14 +128,76 @@ export default function AddOrder({
       }
 
       const quantitySetUp = response.data.data.map((item: Item) => {
-        return {...item, quantity: 0}
-      })
+        return { ...item, quantity: 0 };
+      });
 
       setItemList(quantitySetUp);
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client items: ', error);
       setIsFetching(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to copy from last order: ' + error,
+      });
+    }
+  };
+
+  const handleChangeItem = (e: any, targetItem: any) => {
+    const newItems = itemList.map((item: any) => {
+      if (item.id === targetItem.id) {
+        return { ...targetItem, quantity: +e.target.value };
+      }
+      return item;
+    });
+
+    setItemList(newItems);
+  };
+
+  const handleDateChange = (e: any) => {
+    const formattedDate = formatDateChanged(e);
+    setDeliveryDate(formattedDate);
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsButtonLoading(true);
+    try {
+      const currentDate = new Date();
+      const dateString = moment(currentDate).format('YYYY-MM-DD');
+      const timeString = moment(currentDate).format('HH:mm:ss');
+
+      // Format data to have the same structure as backend
+      let submittedData: any = {
+        ['DELIVERY DATE']: deliveryDate,
+        ['NOTE']: note,
+        orderTime: `${timeString} ${dateString}`,
+      };
+
+      for (const item of itemList) {
+        submittedData = { ...submittedData, [item.name]: item.quantity };
+      }
+
+      const response = await axios.post(
+        `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
+        submittedData,
+      );
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsButtonLoading(false);
+    } catch (error: any) {
+      console.log(error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+      setIsButtonLoading(false);
     }
   };
 
@@ -81,11 +213,11 @@ export default function AddOrder({
           <Typography variant="h4">Add Order</Typography>
           <LoadingButton
             variant="contained"
-            loadingIndicator="Saving..."
-            // loading={isLoading}
-            // onClick={handleUpdatePrice}
+            disabled={itemList.length === 0}
+            loading={isButtonLoading}
+            onClick={handleSubmit}
           >
-            Save
+            ADD
           </LoadingButton>
         </Box>
         <Divider />
@@ -115,17 +247,53 @@ export default function AddOrder({
               />
             </Grid>
             <Grid item xs={12}>
-                <Divider textAlign="center">Items</Divider>
+              <Divider textAlign="center">Items</Divider>
+            </Grid>
+            <Grid item xs={12} textAlign="right">
+              <LoadingButton
+                onClick={copyLastOrder}
+                loading={isButtonLoading}
+                disabled={itemList.length === 0}
+              >
+                <Box display="flex" gap={1}>
+                  <ContentCopyIcon />
+                  <Typography variant="subtitle1">Copy last order</Typography>
+                </Box>
+              </LoadingButton>
+            </Grid>
+            <Grid item xs={6}>
+              DELIVERY DATE
+            </Grid>
+            <Grid item xs={6}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={dayjs(deliveryDate)}
+                  onChange={handleDateChange}
+                />
+              </LocalizationProvider>
+            </Grid>
+            <Grid item xs={6}>
+              NOTE
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                type="text"
+                inputProps={{ min: 0 }}
+              />
             </Grid>
             {isFetching ? (
-                <Box 
-                    display="flex" 
-                    justifyContent="center" 
-                    alignItems="center"
-                    sx={{width: '100%'}}
-                >
-                    <LoadingComponent color="blue" />
-                </Box>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ width: '100%' }}
+              >
+                <LoadingComponent color="blue" />
+              </Box>
             ) : itemList.length === 0 ? (
               <ErrorComponent errorText="User Has No Items" />
             ) : (
@@ -140,7 +308,7 @@ export default function AddOrder({
                         fullWidth
                         label="Quantity"
                         value={item.quantity}
-                        // onChange={(e) => handleItemOnChange(e, item)}
+                        onChange={(e) => handleChangeItem(e, item)}
                         type="number"
                         inputProps={{ min: 0 }}
                       />

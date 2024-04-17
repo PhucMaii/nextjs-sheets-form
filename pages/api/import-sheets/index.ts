@@ -9,6 +9,10 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
 
+interface RequestQuery {
+  userId?: string;
+}
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
     return res.status(500).send('Only Post method allowed');
@@ -16,15 +20,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const prisma = new PrismaClient();
-    const session: any = await getServerSession(req, res, authOptions);
+    const { userId } = req.query as RequestQuery;
 
-    if (!session) {
-      return res.status(401).json({ error: 'You are not authenticated' });
+    let id = userId;
+
+    if (!userId) {
+      const session: any = await getServerSession(req, res, authOptions);
+      if (!session) {
+        return res.status(401).json({ error: 'You are not authenticated' });
+      }
+      id = session.user.id;
     }
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        id: Number(session.user.id),
+        id: Number(id),
       },
     });
 
