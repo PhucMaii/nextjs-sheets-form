@@ -6,7 +6,7 @@ export const BoxModal = styled(Box)`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 500px;
+  max-width: 600px;
   background-color: white;
   border-radius: 10px;
   padding: 20px;

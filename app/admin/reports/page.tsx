@@ -24,8 +24,8 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { blue } from '@mui/material/colors';
-import ClientOrdersTable from '../components/ClientOrdersTable';
 import useDebounce from '@/hooks/useDebounce';
+import ClientOrdersTable from '../components/ClientOrdersTable';
 
 const generateMonthRange = () => {
   const today = new Date();
@@ -226,7 +226,7 @@ export default function ReportPage() {
               <LoadingComponent color="blue" />
             </Box>
           ) : clientOrders.length > 0 ? (
-            <ClientOrdersTable clientOrders={clientOrders} />
+            <ClientOrdersTable clientOrders={clientOrders} setNotification={setNotification} />
           ) : (
             <ErrorComponent errorText="No Order Available" />
           )}
