@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { filterDateRangeOrders } from '../../utils/date';
 
 interface RequestQuery {
+  date?: string;
   startDate?: string;
   endDate?: string;
   page?: number;
@@ -16,6 +17,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const {
+      date,
       startDate,
       endDate,
       page = 1,
@@ -25,11 +27,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const skip = (page - 1) * pageSize;
 
+    const fetchCondition: any = { status };
+
+    if (date) {
+      fetchCondition.deliveryDate = date;
+    }
+
     // Fetch today's order and status Incompleted only
     const orders = await prisma.orders.findMany({
-      where: {
-        status,
-      },
+      where: fetchCondition,
       include: {
         OrderPreference: true,
       },
