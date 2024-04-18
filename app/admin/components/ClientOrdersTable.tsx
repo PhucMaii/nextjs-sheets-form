@@ -9,7 +9,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, memo } from 'react';
 import StatusText, { COLOR_TYPE } from './StatusText';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../orders/page';
@@ -81,4 +81,4 @@ const ClientOrdersTable = ({
   );
 };
 
-export default ClientOrdersTable;
+export default memo(ClientOrdersTable);

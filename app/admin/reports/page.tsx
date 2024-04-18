@@ -26,6 +26,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { blue } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/ClientOrdersTable';
+import AuthenGuard from '@/app/HOC/AuthenGuard';
 
 const generateMonthRange = () => {
   const today = new Date();
@@ -175,6 +176,8 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
+        <AuthenGuard>
+
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -198,7 +201,7 @@ export default function ReportPage() {
       </ShadowSection>
       <ShadowSection display="flex" alignItems="center">
         <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
-          <Grid container spacing={3} mb={2}>
+          <Grid container spacing={3} mb={4}>
             <Grid item xs={12} md={4}>
               <OverviewCard
                 icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
@@ -240,7 +243,7 @@ export default function ReportPage() {
               display="flex"
               justifyContent="center"
               alignItems="center"
-              sx={{ width: '100%' }}
+              sx={{ width: '100%', mt: 2 }}
             >
               <LoadingComponent color="blue" />
             </Box>
@@ -255,6 +258,8 @@ export default function ReportPage() {
           )}
         </Paper>
       </ShadowSection>
+      </AuthenGuard>
+
     </Sidebar>
   );
 }

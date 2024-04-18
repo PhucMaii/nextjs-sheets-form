@@ -44,6 +44,7 @@ import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import AddOrder from '../components/Modals/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
+import AuthenGuard from '@/app/HOC/AuthenGuard';
 
 interface Category {
   id: number;
@@ -502,6 +503,8 @@ export default function Orders() {
 
   return (
     <Sidebar>
+      <AuthenGuard>
+
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -589,6 +592,7 @@ export default function Orders() {
       ) : (
         <ErrorComponent errorText="There is no orders" />
       )}
+      </AuthenGuard>
     </Sidebar>
   );
 }

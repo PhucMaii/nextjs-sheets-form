@@ -16,7 +16,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { tabs } from '../../lib/constant';
 import { ListItemButtonStyled } from './styled';
 import { usePathname, useRouter } from 'next/navigation';
-import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { signOut } from 'next-auth/react';
 import { blueGrey } from '@mui/material/colors';
 
@@ -91,7 +90,7 @@ export default function Sidebar({ children }: PropTypes) {
 
   if (mdDown) {
     return (
-      <AuthenGuard>
+      <>
         <IconButton onClick={() => setIsNavOpen(true)}>
           <MenuIcon />
         </IconButton>
@@ -117,12 +116,12 @@ export default function Sidebar({ children }: PropTypes) {
             {children}
           </Box>
         </Box>
-      </AuthenGuard>
+      </>
     );
   }
 
   return (
-    <AuthenGuard>
+    <>
       <Box display="flex">
         <Drawer
           sx={{
@@ -144,6 +143,6 @@ export default function Sidebar({ children }: PropTypes) {
           {children}
         </Box>
       </Box>
-    </AuthenGuard>
+    </>
   );
 }
