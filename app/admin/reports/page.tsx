@@ -176,90 +176,88 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
-        <AuthenGuard>
-
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h4">Reports</Typography>
-        <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
-      </Box>
-      <ShadowSection display="flex" flexDirection="column" gap={1}>
-        <Typography variant="h6">Clients</Typography>
-        <Autocomplete
-          options={clientList as UserType[]}
-          getOptionLabel={(option) =>
-            `${option.clientName} - ${option.clientId}`
-          }
-          renderInput={(params) => <TextField {...params} label="Client" />}
-          value={clientValue}
-          onChange={(e, newValue) => setClientValue(newValue)}
-          sx={{ width: 'auto' }}
+      <AuthenGuard>
+        <NotificationPopup
+          notification={notification}
+          onClose={() => setNotification({ ...notification, on: false })}
         />
-      </ShadowSection>
-      <ShadowSection display="flex" alignItems="center">
-        <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
-          <Grid container spacing={3} mb={4}>
-            <Grid item xs={12} md={4}>
-              <OverviewCard
-                icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
-                text="Total Orders"
-                value={clientOrders.length}
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <OverviewCard
-                icon={
-                  <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
-                }
-                text="Total Bill"
-                value={`$${totalBill.toFixed(2)}`}
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <OverviewCard
-                icon={
-                  <CheckCircleOutlineIcon
-                    sx={{ color: blue[700], fontSize: 50 }}
-                  />
-                }
-                text="Completed orders"
-                value={completedOrders.length}
-              />
-            </Grid>
-          </Grid>
-          <SearchInput
-            name="Search"
-            variant="filled"
-            label="Search orders"
-            placeholder="Search by invoice id or status"
-            value={searchKeywords}
-            onChange={setSearchKeywords}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h4">Reports</Typography>
+          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+        </Box>
+        <ShadowSection display="flex" flexDirection="column" gap={1}>
+          <Typography variant="h6">Clients</Typography>
+          <Autocomplete
+            options={clientList as UserType[]}
+            getOptionLabel={(option) =>
+              `${option.clientName} - ${option.clientId}`
+            }
+            renderInput={(params) => <TextField {...params} label="Client" />}
+            value={clientValue}
+            onChange={(e, newValue) => setClientValue(newValue)}
+            sx={{ width: 'auto' }}
           />
-          {isFetching ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              sx={{ width: '100%', mt: 2 }}
-            >
-              <LoadingComponent color="blue" />
-            </Box>
-          ) : clientOrders.length > 0 ? (
-            <ClientOrdersTable
-              handleUpdateOrderUI={handleUpdateOrderUI}
-              clientOrders={clientOrders}
-              setNotification={setNotification}
+        </ShadowSection>
+        <ShadowSection display="flex" alignItems="center">
+          <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
+            <Grid container spacing={3} mb={4}>
+              <Grid item xs={12} md={4}>
+                <OverviewCard
+                  icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
+                  text="Total Orders"
+                  value={clientOrders.length}
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <OverviewCard
+                  icon={
+                    <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
+                  }
+                  text="Total Bill"
+                  value={`$${totalBill.toFixed(2)}`}
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <OverviewCard
+                  icon={
+                    <CheckCircleOutlineIcon
+                      sx={{ color: blue[700], fontSize: 50 }}
+                    />
+                  }
+                  text="Completed orders"
+                  value={completedOrders.length}
+                />
+              </Grid>
+            </Grid>
+            <SearchInput
+              name="Search"
+              variant="filled"
+              label="Search orders"
+              placeholder="Search by invoice id or status"
+              value={searchKeywords}
+              onChange={setSearchKeywords}
             />
-          ) : (
-            <ErrorComponent errorText="No Order Available" />
-          )}
-        </Paper>
-      </ShadowSection>
+            {isFetching ? (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ width: '100%', mt: 2 }}
+              >
+                <LoadingComponent color="blue" />
+              </Box>
+            ) : clientOrders.length > 0 ? (
+              <ClientOrdersTable
+                handleUpdateOrderUI={handleUpdateOrderUI}
+                clientOrders={clientOrders}
+                setNotification={setNotification}
+              />
+            ) : (
+              <ErrorComponent errorText="No Order Available" />
+            )}
+          </Paper>
+        </ShadowSection>
       </AuthenGuard>
-
     </Sidebar>
   );
 }

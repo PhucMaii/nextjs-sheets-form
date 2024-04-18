@@ -504,94 +504,93 @@ export default function Orders() {
   return (
     <Sidebar>
       <AuthenGuard>
-
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
-      <div style={{ display: 'none' }}>
-        <AllPrint orders={orderData} ref={componentRef} />
-      </div>
-      <div style={{ display: 'none' }}>
-        <ComponentToPrint order={incomingOrder} ref={singlePrint} />
-      </div>
-      <AddOrder
-        open={isAddOrderOpen}
-        onClose={() => setIsAddOrderOpen(false)}
-        clientList={clientList}
-        setNotification={setNotification}
-      />
-
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Typography variant="h4" fontWeight="bold">
-          Orders
-        </Typography>
-        <FormControl>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Date Filter"
-              value={dayjs(date)}
-              onChange={(e: any) => handleDateChange(e)}
-              sx={{
-                borderRadius: 2,
-              }}
-            />
-          </LocalizationProvider>
-        </FormControl>
-      </Box>
-      <Box
-        display="flex"
-        justifyContent="space-around"
-        alignItems="center"
-        mt={2}
-        gap={4}
-      >
-        <SearchInput
-          name="Search"
-          variant="filled"
-          label="Search orders"
-          placeholder="Search by client id, invoice id, or client name"
-          value={searchKeywords}
-          onChange={setSearchKeywords}
+        <NotificationPopup
+          notification={notification}
+          onClose={() => setNotification({ ...notification, on: false })}
         />
-        <LoadingButton
-          disabled={orderData.length === baseOrderData.length}
-          loading={isLoading}
-          loadingIndicator="Refresh..."
-          variant="outlined"
-          onClick={() => window.location.reload()}
+        <div style={{ display: 'none' }}>
+          <AllPrint orders={orderData} ref={componentRef} />
+        </div>
+        <div style={{ display: 'none' }}>
+          <ComponentToPrint order={incomingOrder} ref={singlePrint} />
+        </div>
+        <AddOrder
+          open={isAddOrderOpen}
+          onClose={() => setIsAddOrderOpen(false)}
+          clientList={clientList}
+          setNotification={setNotification}
+        />
+
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography variant="h4" fontWeight="bold">
+            Orders
+          </Typography>
+          <FormControl>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Date Filter"
+                value={dayjs(date)}
+                onChange={(e: any) => handleDateChange(e)}
+                sx={{
+                  borderRadius: 2,
+                }}
+              />
+            </LocalizationProvider>
+          </FormControl>
+        </Box>
+        <Box
+          display="flex"
+          justifyContent="space-around"
+          alignItems="center"
+          mt={2}
+          gap={4}
         >
-          <RefreshIcon />
-        </LoadingButton>
-        {actionDropdown}
-      </Box>
-      <Box
-        sx={{
-          backgroundColor: blueGrey[800],
-          color: 'white',
-          width: 'fit-content',
-          padding: 1,
-          borderRadius: 2,
-        }}
-      >
-        <Typography variant="h6">Total: {orderData.length} orders</Typography>
-      </Box>
-      {orderData.length > 0 ? (
-        orderData.map((order: any, index: number) => {
-          return (
-            <OrderAccordion
-              key={index}
-              order={order}
-              setNotification={setNotification}
-              updateUI={handleMarkSingleCompletedUI}
-              updateUIItem={handleUpdateUISingleOrder}
-              handleUpdateDateUI={handleUpdateDateUI}
-            />
-          );
-        })
-      ) : (
-        <ErrorComponent errorText="There is no orders" />
-      )}
+          <SearchInput
+            name="Search"
+            variant="filled"
+            label="Search orders"
+            placeholder="Search by client id, invoice id, or client name"
+            value={searchKeywords}
+            onChange={setSearchKeywords}
+          />
+          <LoadingButton
+            disabled={orderData.length === baseOrderData.length}
+            loading={isLoading}
+            loadingIndicator="Refresh..."
+            variant="outlined"
+            onClick={() => window.location.reload()}
+          >
+            <RefreshIcon />
+          </LoadingButton>
+          {actionDropdown}
+        </Box>
+        <Box
+          sx={{
+            backgroundColor: blueGrey[800],
+            color: 'white',
+            width: 'fit-content',
+            padding: 1,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6">Total: {orderData.length} orders</Typography>
+        </Box>
+        {orderData.length > 0 ? (
+          orderData.map((order: any, index: number) => {
+            return (
+              <OrderAccordion
+                key={index}
+                order={order}
+                setNotification={setNotification}
+                updateUI={handleMarkSingleCompletedUI}
+                updateUIItem={handleUpdateUISingleOrder}
+                handleUpdateDateUI={handleUpdateDateUI}
+              />
+            );
+          })
+        ) : (
+          <ErrorComponent errorText="There is no orders" />
+        )}
       </AuthenGuard>
     </Sidebar>
   );
