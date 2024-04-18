@@ -53,7 +53,7 @@ const ClientOrdersTable = ({
                       : COLOR_TYPE.ERROR,
               };
               return (
-                <TableRow>
+                <TableRow key={order.id}>
                   <TableCell>{order.id}</TableCell>
                   <TableCell>{order.orderTime}</TableCell>
                   <TableCell>{order.deliveryDate}</TableCell>

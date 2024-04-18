@@ -36,7 +36,7 @@ export default function EditReportOrder({
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [itemList, setItemList] = useState<Item[]>(order.items);
+  const [itemList, setItemList] = useState<Item[]>([...order.items]);
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
   const [status, setStatus] = useState<ORDER_STATUS>(order.status);
 
