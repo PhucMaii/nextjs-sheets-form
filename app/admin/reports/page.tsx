@@ -25,6 +25,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { blue } from '@mui/material/colors';
 import ClientOrdersTable from '../components/ClientOrdersTable';
+import useDebounce from '@/hooks/useDebounce';
 
 const generateMonthRange = () => {
   const today = new Date();
@@ -36,6 +37,7 @@ const generateMonthRange = () => {
 };
 
 export default function ReportPage() {
+  const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
@@ -49,18 +51,53 @@ export default function ReportPage() {
   });
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
     fetchAllClients();
   }, []);
 
   useEffect(() => {
+    if (clientOrders.length > 0) {
+      calculateTotalBill();
+    } else {
+      setTotalBill(0);
+    }
+  }, [clientOrders]);
+
+  useEffect(() => {
     if (clientValue && dateRange.length > 0) {
       fetchClientOrders();
     } else {
       setClientOrders([]);
+      setBaseClientOrders([]);
     }
   }, [clientValue, dateRange]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newOrderData = baseClientOrders.filter((order: Order) => {
+        if (
+          order.id.toString().includes(debouncedKeywords) ||
+          order.status.toLowerCase() === debouncedKeywords.toLowerCase()
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setClientOrders(newOrderData);
+    } else {
+      setClientOrders(baseClientOrders);
+    }
+  }, [debouncedKeywords, baseClientOrders]);
+
+  const calculateTotalBill = () => {
+    const bill = clientOrders.reduce((acc: number, cV: Order) => {
+      return acc + cV.totalPrice;
+    }, 0);
+
+    setTotalBill(bill);
+  };
 
   const fetchAllClients = async () => {
     try {
@@ -98,17 +135,13 @@ export default function ReportPage() {
         return;
       }
 
-      const bill = response.data.data.reduce((acc: number, cV: Order) => {
-        return acc + cV.totalPrice;
-      }, 0);
-
       const completedOrders = response.data.data.filter((order: Order) => {
         return order.status === ORDER_STATUS.COMPLETED;
       });
 
       setCompletedOrders(completedOrders);
-      setTotalBill(bill);
       setClientOrders(response.data.data);
+      setBaseClientOrders(response.data.data);
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client orders: ', error);
@@ -145,59 +178,59 @@ export default function ReportPage() {
         />
       </ShadowSection>
       <ShadowSection display="flex" alignItems="center">
-        {isFetching ? (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            sx={{ width: '100%' }}
-          >
-            <LoadingComponent color="blue" />
-          </Box>
-        ) : clientOrders.length > 0 ? (
-          <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
-            <Grid container spacing={3} mb={2}>
-              <Grid item xs={12} md={4}>
-                <OverviewCard
-                  icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
-                  text="Total Orders"
-                  value={clientOrders.length}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <OverviewCard
-                  icon={
-                    <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
-                  }
-                  text="Total Bill"
-                  value={`$${totalBill}`}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <OverviewCard
-                  icon={
-                    <CheckCircleOutlineIcon
-                      sx={{ color: blue[700], fontSize: 50 }}
-                    />
-                  }
-                  text="Completed orders"
-                  value={completedOrders.length}
-                />
-              </Grid>
+        <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
+          <Grid container spacing={3} mb={2}>
+            <Grid item xs={12} md={4}>
+              <OverviewCard
+                icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
+                text="Total Orders"
+                value={clientOrders.length}
+              />
             </Grid>
-            <SearchInput
-              name="Search"
-              variant="filled"
-              label="Search orders"
-              placeholder="Search by invoice id"
-              value={searchKeywords}
-              onChange={setSearchKeywords}
-            />
+            <Grid item xs={12} md={4}>
+              <OverviewCard
+                icon={
+                  <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
+                }
+                text="Total Bill"
+                value={`$${totalBill.toFixed(2)}`}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <OverviewCard
+                icon={
+                  <CheckCircleOutlineIcon
+                    sx={{ color: blue[700], fontSize: 50 }}
+                  />
+                }
+                text="Completed orders"
+                value={completedOrders.length}
+              />
+            </Grid>
+          </Grid>
+          <SearchInput
+            name="Search"
+            variant="filled"
+            label="Search orders"
+            placeholder="Search by invoice id or status"
+            value={searchKeywords}
+            onChange={setSearchKeywords}
+          />
+          {isFetching ? (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ width: '100%' }}
+            >
+              <LoadingComponent color="blue" />
+            </Box>
+          ) : clientOrders.length > 0 ? (
             <ClientOrdersTable clientOrders={clientOrders} />
-          </Paper>
-        ) : (
-          <ErrorComponent errorText="No Order Available" />
-        )}
+          ) : (
+            <ErrorComponent errorText="No Order Available" />
+          )}
+        </Paper>
       </ShadowSection>
     </Sidebar>
   );
