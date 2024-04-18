@@ -15,17 +15,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updateData: { deliveryDate: string; status?: ORDER_STATUS } = {
       deliveryDate,
-    }
+    };
 
     if (status) {
-      updateData.status = status
+      updateData.status = status;
     }
 
     const updatedOrder = await prisma.orders.update({
       where: {
         id: orderId,
       },
-      data: updateData
+      data: updateData,
     });
 
     return res.status(200).json({

@@ -154,6 +154,25 @@ export default function ReportPage() {
     }
   };
 
+  const handleUpdateOrderUI = (updatedOrder: Order) => {
+    const newBaseOrderList = baseClientOrders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
+
+    const newOrderList = clientOrders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
+
+    setClientOrders(newOrderList);
+    setBaseClientOrders(newBaseOrderList);
+  };
+
   return (
     <Sidebar>
       <NotificationPopup
@@ -226,7 +245,11 @@ export default function ReportPage() {
               <LoadingComponent color="blue" />
             </Box>
           ) : clientOrders.length > 0 ? (
-            <ClientOrdersTable clientOrders={clientOrders} setNotification={setNotification} />
+            <ClientOrdersTable
+              handleUpdateOrderUI={handleUpdateOrderUI}
+              clientOrders={clientOrders}
+              setNotification={setNotification}
+            />
           ) : (
             <ErrorComponent errorText="No Order Available" />
           )}

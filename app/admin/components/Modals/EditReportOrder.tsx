@@ -25,10 +25,15 @@ import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
   order: Order;
+  handleUpdateOrderUI: (updatedOrder: Order) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-export default function EditReportOrder({ order, setNotification }: PropTypes) {
+export default function EditReportOrder({
+  order,
+  handleUpdateOrderUI,
+  setNotification,
+}: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>(order.items);
@@ -42,70 +47,84 @@ export default function EditReportOrder({ order, setNotification }: PropTypes) {
 
   const handleChangeItem = (e: any, targetItem: Item, keyChange: string) => {
     const newItemList = itemList.map((item: Item) => {
-        if (item.id === targetItem.id) {
-            if (keyChange === 'quantity') {
-                return {...item, quantity: +e.target.value}
-            }
-            if (keyChange === 'price') {
-                return { ...item, price: +e.target.value }
-            }
-            return item;
+      if (item.id === targetItem.id) {
+        if (keyChange === 'quantity') {
+          return { ...item, quantity: +e.target.value };
         }
-
+        if (keyChange === 'price') {
+          return { ...item, price: +e.target.value };
+        }
         return item;
-    })
+      }
+
+      return item;
+    });
 
     setItemList(newItemList);
-  }
+  };
 
   const handleUpdateOrder = async () => {
     try {
-        setIsSubmitting(true);
-        if (updatedDate !== order.deliveryDate || status !== order.status) {
-            const orderUpdateResponse = await axios.put(API_URL.ORDER, {orderId: order.id, deliveryDate: updatedDate, status});
-    
-            if (orderUpdateResponse.data.error) {
-                setNotification({
-                    on: true,
-                    type: 'error',
-                    message: 'Fail to update date and status: ' + orderUpdateResponse.data.error 
-                });
-                setIsSubmitting(false);
-                return;
-            }
-        }
-
-        const newOrderTotalPrice = itemList.reduce((acc: number, cV: Item) => {
-            return acc + (cV.price * cV.quantity);
-        }, 0);
-
-        const itemUpdateResponse = await axios.put(API_URL.ORDERED_ITEMS, {
-            orderId: order.id,
-            updatedItems: itemList,
-            orderTotalPrice: newOrderTotalPrice
+      setIsSubmitting(true);
+      if (updatedDate !== order.deliveryDate || status !== order.status) {
+        const orderUpdateResponse = await axios.put(API_URL.ORDER, {
+          orderId: order.id,
+          deliveryDate: updatedDate,
+          status,
         });
 
-        if (itemUpdateResponse.data.error) {
-            setNotification({
-                on: true,
-                type: 'error',
-                message: 'Fail to update date and status: ' + itemUpdateResponse.data.error 
-            });
-            setIsSubmitting(false);
-            return;
-        }
-
-        setNotification({
+        if (orderUpdateResponse.data.error) {
+          setNotification({
             on: true,
-            type: 'success',
-            message: 'Update Order Successfully'
+            type: 'error',
+            message:
+              'Fail to update date and status: ' +
+              orderUpdateResponse.data.error,
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const newOrderTotalPrice = itemList.reduce((acc: number, cV: Item) => {
+        return acc + cV.price * cV.quantity;
+      }, 0);
+
+      const itemUpdateResponse = await axios.put(API_URL.ORDERED_ITEMS, {
+        orderId: order.id,
+        updatedItems: itemList,
+        orderTotalPrice: newOrderTotalPrice,
+      });
+
+      if (itemUpdateResponse.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message:
+            'Fail to update date and status: ' + itemUpdateResponse.data.error,
         });
         setIsSubmitting(false);
+        return;
+      }
+
+      handleUpdateOrderUI({
+        ...order,
+        deliveryDate: updatedDate,
+        status,
+        items: itemList,
+        totalPrice: newOrderTotalPrice,
+      });
+      setNotification({
+        on: true,
+        type: 'success',
+        message: 'Update Order Successfully',
+      });
+      setIsSubmitting(false);
     } catch (error: any) {
-        console.log('Fail to update order: ', error);
-        setIsSubmitting(false);
+      console.log('Fail to update order: ', error);
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <>
@@ -172,41 +191,44 @@ export default function EditReportOrder({ order, setNotification }: PropTypes) {
                 </FormControl>
               </Grid>
             </Grid>
-            <Divider textAlign="center" sx={{my: 2}}>Items</Divider>
+            <Divider textAlign="center" sx={{ my: 2 }}>
+              Items
+            </Divider>
             <Grid container rowGap={3}>
-                {
-                    itemList.length > 0 && itemList.map((item: Item, index) => {
-                        return (
-                            <Fragment key={index}>
-                            <Grid item xs={12} fontWeight="bold">
-                              {item.name}
-                            </Grid>
-                            <Grid item container columnSpacing={2}>
-                                <Grid item xs={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Quantity"
-                                    value={item.quantity}
-                                    onChange={(e) => handleChangeItem(e, item, 'quantity')}
-                                    type="number"
-                                    inputProps={{ min: 0 }}
-                                />
-                                </Grid>
-                                <Grid item xs={6} textAlign="right">
-                                <TextField
-                                    fullWidth
-                                    label="Unit Price ($)"
-                                    value={item.price}
-                                    onChange={(e) => handleChangeItem(e, item, 'price')}
-                                    type="number"
-                                    inputProps={{ min: 0 }}
-                                />
-                                </Grid>
-                            </Grid>
-                          </Fragment> 
-                        )
-                    })
-                }
+              {itemList.length > 0 &&
+                itemList.map((item: Item, index) => {
+                  return (
+                    <Fragment key={index}>
+                      <Grid item xs={12} fontWeight="bold">
+                        {item.name}
+                      </Grid>
+                      <Grid item container columnSpacing={2}>
+                        <Grid item xs={6}>
+                          <TextField
+                            fullWidth
+                            label="Quantity"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              handleChangeItem(e, item, 'quantity')
+                            }
+                            type="number"
+                            inputProps={{ min: 0 }}
+                          />
+                        </Grid>
+                        <Grid item xs={6} textAlign="right">
+                          <TextField
+                            fullWidth
+                            label="Unit Price ($)"
+                            value={item.price}
+                            onChange={(e) => handleChangeItem(e, item, 'price')}
+                            type="number"
+                            inputProps={{ min: 0 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Fragment>
+                  );
+                })}
             </Grid>
           </Box>
         </BoxModal>

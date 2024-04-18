@@ -18,10 +18,15 @@ import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
   clientOrders: Order[];
-  setNotification: Dispatch<SetStateAction<Notification>>
+  handleUpdateOrderUI: (updatedOrder: Order) => void;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-const ClientOrdersTable = ({ clientOrders, setNotification }: PropTypes) => {
+const ClientOrdersTable = ({
+  clientOrders,
+  handleUpdateOrderUI,
+  setNotification,
+}: PropTypes) => {
   return (
     <>
       <TableContainer sx={{ maxHeight: 800, mt: 2 }}>
@@ -59,7 +64,11 @@ const ClientOrdersTable = ({ clientOrders, setNotification }: PropTypes) => {
                   <TableCell>
                     <Box display="flex" gap={1}>
                       <Button color="error">Delete</Button>
-                      <EditReportOrder order={order} setNotification={setNotification} />
+                      <EditReportOrder
+                        order={order}
+                        setNotification={setNotification}
+                        handleUpdateOrderUI={handleUpdateOrderUI}
+                      />
                     </Box>
                   </TableCell>
                 </TableRow>
