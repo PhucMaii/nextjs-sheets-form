@@ -1,7 +1,6 @@
 'use clients';
 import {
   Box,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -15,6 +14,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification } from '@/app/utils/type';
+import DeleteOrder from './Modals/DeleteOrder';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -62,7 +62,10 @@ const ClientOrdersTable = ({
                 </TableCell>
                 <TableCell>
                   <Box display="flex" gap={1}>
-                    <Button color="error">Delete</Button>
+                    {/* <Button color="error">Delete</Button> */}
+                    <DeleteOrder 
+                      order={order}
+                    />
                     <EditReportOrder
                       order={order}
                       setNotification={setNotification}
