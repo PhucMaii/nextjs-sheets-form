@@ -50,8 +50,6 @@ interface Category {
   name: string;
 }
 
-//REDEPLOY
-
 export interface Item {
   id: number;
   name: string;
