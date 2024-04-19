@@ -22,6 +22,7 @@ import { formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
 import { Notification } from '@/app/utils/type';
+import { infoColor } from '@/app/theme/color';
 
 interface PropTypes {
   order: Order;
@@ -142,6 +143,7 @@ export default function EditReportOrder({
               disabled={itemList.length === 0}
               loading={isSubmitting}
               onClick={handleUpdateOrder}
+              sx={{backgroundColor: `${infoColor} !important`}}
             >
               SAVE
             </LoadingButton>
