@@ -19,12 +19,14 @@ import DeleteOrder from './Modals/DeleteOrder';
 interface PropTypes {
   clientOrders: Order[];
   handleUpdateOrderUI: (updatedOrder: Order) => void;
+  handleDeleteOrderUI: (deletedOrder: Order) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 const ClientOrdersTable = ({
   clientOrders,
   handleUpdateOrderUI,
+  handleDeleteOrderUI,
   setNotification,
 }: PropTypes) => {
   return (
@@ -63,8 +65,10 @@ const ClientOrdersTable = ({
                 <TableCell>
                   <Box display="flex" gap={1}>
                     {/* <Button color="error">Delete</Button> */}
-                    <DeleteOrder 
+                    <DeleteOrder
                       order={order}
+                      setNotification={setNotification}
+                      handleDeleteOrderUI={handleDeleteOrderUI}
                     />
                     <EditReportOrder
                       order={order}

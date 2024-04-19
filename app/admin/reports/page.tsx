@@ -94,7 +94,14 @@ export default function ReportPage() {
 
   const calculateTotalBill = () => {
     const bill = clientOrders.reduce((acc: number, cV: Order) => {
-      return acc + cV.totalPrice;
+      // Only calculate total incompleted and completed orders
+      if (
+        cV.status === ORDER_STATUS.COMPLETED ||
+        cV.status === ORDER_STATUS.INCOMPLETED
+      ) {
+        return acc + cV.totalPrice;
+      }
+      return acc + 0;
     }, 0);
 
     setTotalBill(bill);
@@ -136,11 +143,11 @@ export default function ReportPage() {
         return;
       }
 
-      const completedOrders = response.data.data.filter((order: Order) => {
+      const newCompletedOrders = response.data.data.filter((order: Order) => {
         return order.status === ORDER_STATUS.COMPLETED;
       });
 
-      setCompletedOrders(completedOrders);
+      setCompletedOrders(newCompletedOrders);
       setClientOrders(response.data.data);
       setBaseClientOrders(response.data.data);
       setIsFetching(false);
@@ -155,7 +162,31 @@ export default function ReportPage() {
     }
   };
 
+  const handleDeleteOrderUI = (deletedOrder: Order) => {
+    // update base order list
+    const newBaseOrderList = baseClientOrders.filter((order: Order) => {
+      return order.id !== deletedOrder.id;
+    });
+
+    // update current displaying list
+    const newOrderList = clientOrders.filter((order: Order) => {
+      return order.id !== deletedOrder.id;
+    });
+
+    // update completed order list
+    if (deletedOrder.status === ORDER_STATUS.COMPLETED) {
+      const newCompletedOrders = newBaseOrderList.filter((order: Order) => {
+        return order.status === ORDER_STATUS.COMPLETED;
+      });
+      setCompletedOrders(newCompletedOrders);
+    }
+
+    setBaseClientOrders(newBaseOrderList);
+    setClientOrders(newOrderList);
+  };
+
   const handleUpdateOrderUI = (updatedOrder: Order) => {
+    // update base order list
     const newBaseOrderList = baseClientOrders.map((order: Order) => {
       if (order.id === updatedOrder.id) {
         return updatedOrder;
@@ -163,6 +194,7 @@ export default function ReportPage() {
       return order;
     });
 
+    // update current displaying order list
     const newOrderList = clientOrders.map((order: Order) => {
       if (order.id === updatedOrder.id) {
         return updatedOrder;
@@ -170,8 +202,14 @@ export default function ReportPage() {
       return order;
     });
 
-    setClientOrders(newOrderList);
+    // update completed order list
+    const newCompletedOrders = newBaseOrderList.filter((order: Order) => {
+      return order.status === ORDER_STATUS.COMPLETED;
+    });
+
     setBaseClientOrders(newBaseOrderList);
+    setClientOrders(newOrderList);
+    setCompletedOrders(newCompletedOrders);
   };
 
   return (
@@ -248,6 +286,7 @@ export default function ReportPage() {
               </Box>
             ) : clientOrders.length > 0 ? (
               <ClientOrdersTable
+                handleDeleteOrderUI={handleDeleteOrderUI}
                 handleUpdateOrderUI={handleUpdateOrderUI}
                 clientOrders={clientOrders}
                 setNotification={setNotification}
