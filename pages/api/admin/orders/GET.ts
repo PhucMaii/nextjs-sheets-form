@@ -1,9 +1,12 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { filterDateRangeOrders } from '../../utils/date';
 
 interface RequestQuery {
   date?: string;
+  startDate?: string;
+  endDate?: string;
   page?: number;
   pageSize?: number;
   status?: ORDER_STATUS;
@@ -15,6 +18,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const {
       date,
+      startDate,
+      endDate,
       page = 1,
       pageSize = 100,
       status = ORDER_STATUS.INCOMPLETED,
@@ -22,12 +27,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const skip = (page - 1) * pageSize;
 
+    const fetchCondition: any = { status };
+
+    if (date) {
+      fetchCondition.deliveryDate = date;
+    }
+
     // Fetch today's order and status Incompleted only
     const orders = await prisma.orders.findMany({
-      where: {
-        deliveryDate: date,
-        status,
-      },
+      where: fetchCondition,
       include: {
         OrderPreference: true,
       },
@@ -82,9 +90,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }),
     );
 
+    if (!startDate || !endDate) {
+      return res.status(200).json({
+        message: 'Fetch all orders successfully',
+        data: newOrders,
+      });
+    }
+
+    const filteredDateRangeOrders = filterDateRangeOrders(
+      newOrders,
+      startDate,
+      endDate,
+    );
+
     return res.status(200).json({
-      message: 'Fetch all orders successfully',
-      data: newOrders,
+      message: 'Fetch All Orders Successfully',
+      data: filteredDateRangeOrders,
     });
   } catch (error: any) {
     console.log('Fail to get order: ', error);

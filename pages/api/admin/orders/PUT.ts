@@ -1,23 +1,31 @@
+import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyPropTypes {
   orderId: number;
   deliveryDate: string;
+  status?: ORDER_STATUS;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { orderId, deliveryDate } = req.body as BodyPropTypes;
+    const { orderId, deliveryDate, status } = req.body as BodyPropTypes;
+
+    const updateData: { deliveryDate: string; status?: ORDER_STATUS } = {
+      deliveryDate,
+    };
+
+    if (status) {
+      updateData.status = status;
+    }
 
     const updatedOrder = await prisma.orders.update({
       where: {
         id: orderId,
       },
-      data: {
-        deliveryDate,
-      },
+      data: updateData,
     });
 
     return res.status(200).json({
