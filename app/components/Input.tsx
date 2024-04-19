@@ -7,7 +7,7 @@ interface PropTypes<T> {
   onChange: (
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
   ) => void;
-  placeholder: string;
+  placeholder?: string;
   type?: string;
   value: T;
   error?: any;

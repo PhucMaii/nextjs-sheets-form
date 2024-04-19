@@ -24,6 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let id = userId;
 
+    // Check is user authenticated
     if (!userId) {
       const session: any = await getServerSession(req, res, authOptions);
       if (!session) {
@@ -32,6 +33,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       id = session.user.id;
     }
 
+    // Check does user exist
     const existingUser = await prisma.user.findUnique({
       where: {
         id: Number(id),
@@ -42,7 +44,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }
 
+    // Check has user ordered for target delivery date yet
     const body: any = req.body;
+    const userOrder = await checkHasClientOrder(existingUser.id, body.deliveryDate);
+
+    if (userOrder) {
+      return res.status(200).json({
+        warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
+        data: userOrder
+      })
+    }
 
     const userCategory = await prisma.category.findUnique({
       where: {
@@ -56,7 +67,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    console.log(body, 'body');
     // Initialize new order
     const newOrder = await prisma.orders.create({
       data: {
@@ -245,3 +255,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default handler;
+
+const checkHasClientOrder = async (id: number, deliveryDate: string) => {
+  const prisma = new PrismaClient();
+
+  const userOrders = await prisma.orders.findFirst({
+    where: {
+      userId: id,
+      deliveryDate
+    },
+    include: {
+      items: true
+    }
+  });
+
+  return userOrders;
+}
