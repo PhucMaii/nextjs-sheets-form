@@ -85,7 +85,7 @@ export default function EditDeliveryDate({
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdateDate}
-            sx={{backgroundColor: `${infoColor} !important`}}
+            sx={{ backgroundColor: `${infoColor} !important` }}
           >
             Save
           </LoadingButton>

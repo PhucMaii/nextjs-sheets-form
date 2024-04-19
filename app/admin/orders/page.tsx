@@ -39,7 +39,7 @@ import {
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
-       import RefreshIcon from '@mui/icons-material/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import AddOrder from '../components/Modals/AddOrder';
@@ -555,13 +555,13 @@ export default function Orders() {
           /> */}
           <TextField
             fullWidth
-                name="Search"
-                variant="filled"
-                // label="Search orders"
-                placeholder="Search by client id, invoice id, or client name"
-                value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
-              />
+            name="Search"
+            variant="filled"
+            // label="Search orders"
+            placeholder="Search by client id, invoice id, or client name"
+            value={searchKeywords}
+            onChange={(e) => setSearchKeywords(e.target.value)}
+          />
           <LoadingButton
             disabled={orderData.length === baseOrderData.length}
             loading={isLoading}

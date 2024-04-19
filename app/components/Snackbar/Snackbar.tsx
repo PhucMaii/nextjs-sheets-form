@@ -28,13 +28,15 @@ export default function Snackbar(props: PropTypes) {
   const containerStyle =
     props.type === 'error'
       ? 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-red-600 bg-red-100 rounded-lg shadow'
-      : props.type === 'success' ? 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-green-600 bg-green-200 rounded-lg shadow'
-      : 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-yellow-600 bg-yellow-200 rounded-lg shadow';
+      : props.type === 'success'
+        ? 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-green-600 bg-green-200 rounded-lg shadow'
+        : 'animation ease-in fixed top-0 right-0 m-5 flex items-center w-full max-w-xs p-4 text-yellow-600 bg-yellow-200 rounded-lg shadow';
   const textStyle =
     props.type === 'error'
       ? 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-300 bg-red-500 rounded-lg'
-      : props.type === 'success' ? 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-300 bg-green-500 rounded-lg'
-      : 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-yellow-300 bg-yellow-500 rounded-lg' ;
+      : props.type === 'success'
+        ? 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-300 bg-green-500 rounded-lg'
+        : 'inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-yellow-300 bg-yellow-500 rounded-lg';
 
   return (
     <Transition.Root
@@ -44,7 +46,7 @@ export default function Snackbar(props: PropTypes) {
       <FadeIn delay="delay-[0ms]">
         <div id="toast-default" className={containerStyle} role="alert">
           <div className={textStyle}>
-            {props.type === 'error' || props.type === 'warning'  ? (
+            {props.type === 'error' || props.type === 'warning' ? (
               <svg
                 width="20"
                 height="20"

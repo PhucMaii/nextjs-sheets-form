@@ -41,7 +41,8 @@ export default function OrderForm() {
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const [isOpenSecurityModal, setIsOpenSecurityModal] =
     useState<boolean>(false);
-  const [isOverrideOrderOpen, setIsOverrideOrderOpen] = useState<boolean>(false);
+  const [isOverrideOrderOpen, setIsOverrideOrderOpen] =
+    useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -64,7 +65,7 @@ export default function OrderForm() {
     if (lastOrder) {
       setIsOverrideOrderOpen(true);
     }
-  }, [lastOrder])
+  }, [lastOrder]);
 
   // Get list of items to render input field
   const fetchItems = async () => {
@@ -123,7 +124,7 @@ export default function OrderForm() {
         setNotification({
           on: true,
           type: 'warning',
-          message: response.data.warning
+          message: response.data.warning,
         });
         setLastOrder(response.data.data);
         setIsButtonLoading(false);
@@ -183,12 +184,17 @@ export default function OrderForm() {
         isOpen={isOpenSecurityModal}
         onClose={() => setIsOpenSecurityModal(false)}
       />
-      <OverrideOrder 
-        open={isOverrideOrderOpen}
-        onClose={() => setIsOverrideOrderOpen(false)}
-        order={lastOrder}
-        deliveryDate={deliveryDate}
-      />
+      {lastOrder && (
+        <OverrideOrder
+          open={isOverrideOrderOpen}
+          onClose={() => setIsOverrideOrderOpen(false)}
+          currentItems={itemList}
+          currentNote={note}
+          lastOrder={lastOrder}
+          deliveryDate={deliveryDate}
+          setNotification={setNotification}
+        />
+      )}
       <Navbar handleOpenSecurityModal={() => setIsOpenSecurityModal(true)} />
       <div className="max-w-2xl mx-auto py-16">
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">

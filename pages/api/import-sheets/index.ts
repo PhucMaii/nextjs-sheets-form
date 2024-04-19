@@ -46,13 +46,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Check has user ordered for target delivery date yet
     const body: any = req.body;
-    const userOrder = await checkHasClientOrder(existingUser.id, body.deliveryDate);
+    const userOrder = await checkHasClientOrder(
+      existingUser.id,
+      body['DELIVERY DATE'],
+    );
 
     if (userOrder) {
       return res.status(200).json({
         warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
-        data: userOrder
-      })
+        data: userOrder,
+      });
     }
 
     const userCategory = await prisma.category.findUnique({
@@ -262,12 +265,12 @@ const checkHasClientOrder = async (id: number, deliveryDate: string) => {
   const userOrders = await prisma.orders.findFirst({
     where: {
       userId: id,
-      deliveryDate
+      deliveryDate,
     },
     include: {
-      items: true
-    }
+      items: true,
+    },
   });
 
   return userOrders;
-}
+};
