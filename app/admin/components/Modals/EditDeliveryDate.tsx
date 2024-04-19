@@ -11,7 +11,6 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { formatDateChanged } from '@/app/utils/time';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { infoColor } from '@/app/theme/color';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -85,7 +84,6 @@ export default function EditDeliveryDate({
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdateDate}
-            sx={{backgroundColor: `${infoColor} !important`}}
           >
             Save
           </LoadingButton>
