@@ -31,6 +31,7 @@ import dayjs from 'dayjs';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import { limitOrderHour } from '../../lib/constant';
 import moment from 'moment';
+import { infoColor } from '@/app/theme/color';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -216,6 +217,7 @@ export default function AddOrder({
             disabled={itemList.length === 0}
             loading={isButtonLoading}
             onClick={handleSubmit}
+            sx={{backgroundColor: `${infoColor} !important`}}
           >
             ADD
           </LoadingButton>

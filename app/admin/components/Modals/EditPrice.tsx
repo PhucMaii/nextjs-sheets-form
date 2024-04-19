@@ -18,6 +18,7 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { Order } from '../../orders/page';
+import { infoColor } from '@/app/theme/color';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
@@ -103,6 +104,7 @@ export default function EditPrice({
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdatePrice}
+            sx={{backgroundColor: `${infoColor} !important`}}
           >
             Save
           </LoadingButton>

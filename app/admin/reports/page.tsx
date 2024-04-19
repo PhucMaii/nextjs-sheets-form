@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Autocomplete,
   Box,
+  Button,
   Grid,
   Paper,
   TextField,
@@ -18,7 +19,6 @@ import { Order } from '../orders/page';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import SelectDateRange from '../components/SelectDateRange';
-import SearchInput from '../components/SearchInput';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -27,6 +27,7 @@ import { blue } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/ClientOrdersTable';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
+import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 
 const generateMonthRange = () => {
   const today = new Date();
@@ -267,14 +268,26 @@ export default function ReportPage() {
                 />
               </Grid>
             </Grid>
-            <SearchInput
-              name="Search"
-              variant="filled"
-              label="Search orders"
-              placeholder="Search by invoice id or status"
-              value={searchKeywords}
-              onChange={setSearchKeywords}
-            />
+            <Grid container columnSpacing={2} alignItems="center">
+              <Grid item md={10}>
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    // label="Search orders"
+                    placeholder="Search by invoice id or status"
+                    value={searchKeywords}
+                    onChange={(e) => setSearchKeywords(e.target.value)}
+                  />
+              </Grid>
+              <Grid item md={2} textAlign="right">
+                <Button variant="outlined">
+                  <Box display="flex" gap={2}>
+                    <LocalPrintshopIcon />
+                    <Typography>Print</Typography>
+                  </Box>
+                </Button>
+              </Grid>
+            </Grid>
             {isFetching ? (
               <Box
                 display="flex"

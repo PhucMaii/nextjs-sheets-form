@@ -14,6 +14,7 @@ import { API_URL } from '@/app/utils/enum';
 import { LoadingButton } from '@mui/lab';
 import { Item, Order } from '../../orders/page';
 import { ModalProps } from './type';
+import { infoColor } from '@/app/theme/color';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -93,6 +94,7 @@ export default function EditItemModal({
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdateData}
+            sx={{backgroundColor: `${infoColor} !important`}}
           >
             Save
           </LoadingButton>

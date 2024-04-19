@@ -7,6 +7,7 @@ import {
   FormControl,
   Menu,
   MenuItem,
+  TextField,
   Typography,
 } from '@mui/material';
 import { API_URL, ORDER_STATUS } from '../../utils/enum';
@@ -38,8 +39,7 @@ import {
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
-import SearchInput from '../components/SearchInput';
-import RefreshIcon from '@mui/icons-material/Refresh';
+       import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import AddOrder from '../components/Modals/AddOrder';
@@ -459,13 +459,13 @@ export default function Orders() {
               mt={2}
               gap={4}
             >
-              <SearchInput
+              <TextField
                 name="Search"
-                // variant="filled"
-                label="Search orders"
+                variant="filled"
+                // label="Search orders"
                 // placeholder="Search by client id, invoice id, or client name"
                 value={searchKeywords}
-                onChange={setSearchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
               />
               <LoadingButton
                 loading={isLoading}
@@ -545,14 +545,23 @@ export default function Orders() {
           mt={2}
           gap={4}
         >
-          <SearchInput
+          {/* <SearchInput
             name="Search"
             variant="filled"
             label="Search orders"
             placeholder="Search by client id, invoice id, or client name"
             value={searchKeywords}
             onChange={setSearchKeywords}
-          />
+          /> */}
+          <TextField
+            fullWidth
+                name="Search"
+                variant="filled"
+                // label="Search orders"
+                placeholder="Search by client id, invoice id, or client name"
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
+              />
           <LoadingButton
             disabled={orderData.length === baseOrderData.length}
             loading={isLoading}

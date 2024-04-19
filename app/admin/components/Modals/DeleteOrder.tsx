@@ -84,6 +84,7 @@ export default function DeleteOrder({
               loading={isDeleting}
               onClick={handleDeleteOrder}
               variant="contained"
+              sx={{backgroundColor: `${errorColor} !important`}}
             >
               DELETE
             </LoadingButton>

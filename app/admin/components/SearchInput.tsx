@@ -22,6 +22,7 @@ function SearchInput(props: TextInputProps) {
       fullWidth
       value={props.value}
       onChange={(e) => props.onChange(e.target.value)}
+      sx={{paddingTop: 2 }}
     />
   );
 }
