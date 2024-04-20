@@ -104,7 +104,7 @@ export default function EditPrice({
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdatePrice}
-            sx={{backgroundColor: `${infoColor} !important`}}
+            sx={{ backgroundColor: `${infoColor} !important` }}
           >
             Save
           </LoadingButton>

@@ -270,14 +270,14 @@ export default function ReportPage() {
             </Grid>
             <Grid container columnSpacing={2} alignItems="center">
               <Grid item md={10}>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    // label="Search orders"
-                    placeholder="Search by invoice id or status"
-                    value={searchKeywords}
-                    onChange={(e) => setSearchKeywords(e.target.value)}
-                  />
+                <TextField
+                  fullWidth
+                  variant="filled"
+                  // label="Search orders"
+                  placeholder="Search by invoice id or status"
+                  value={searchKeywords}
+                  onChange={(e) => setSearchKeywords(e.target.value)}
+                />
               </Grid>
               <Grid item md={2} textAlign="right">
                 <Button variant="outlined">

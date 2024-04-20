@@ -217,7 +217,7 @@ export default function AddOrder({
             disabled={itemList.length === 0}
             loading={isButtonLoading}
             onClick={handleSubmit}
-            sx={{backgroundColor: `${infoColor} !important`}}
+            sx={{ backgroundColor: `${infoColor} !important` }}
           >
             ADD
           </LoadingButton>

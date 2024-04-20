@@ -143,7 +143,7 @@ export default function EditReportOrder({
               disabled={itemList.length === 0}
               loading={isSubmitting}
               onClick={handleUpdateOrder}
-              sx={{backgroundColor: `${infoColor} !important`}}
+              sx={{ backgroundColor: `${infoColor} !important` }}
             >
               SAVE
             </LoadingButton>

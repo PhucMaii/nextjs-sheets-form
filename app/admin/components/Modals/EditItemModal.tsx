@@ -94,7 +94,7 @@ export default function EditItemModal({
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdateData}
-            sx={{backgroundColor: `${infoColor} !important`}}
+            sx={{ backgroundColor: `${infoColor} !important` }}
           >
             Save
           </LoadingButton>

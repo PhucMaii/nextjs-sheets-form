@@ -39,12 +39,13 @@ import {
 import { pusherClient } from '@/app/pusher';
 import { ComponentToPrint } from '../components/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
-       import RefreshIcon from '@mui/icons-material/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
 import AddOrder from '../components/Modals/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
+import { Virtuoso } from 'react-virtuoso';
 
 interface Category {
   id: number;
@@ -101,19 +102,18 @@ export default function Orders() {
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
+  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(
+    window.innerHeight,
+  );
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
+  const totalPosition: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  // Scroll loading
   useEffect(() => {
     fetchAllClients();
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Subscribe admin whenever they logged in
@@ -130,6 +130,16 @@ export default function Orders() {
   }, [date]);
 
   useEffect(() => {
+    if (totalPosition.current) {
+      const currentOffSetHeight = window.innerHeight;
+      setVirtuosoHeight(
+        currentOffSetHeight -
+          totalPosition.current?.getBoundingClientRect().bottom,
+      );
+    }
+  }, [totalPosition]);
+
+  useEffect(() => {
     if (incomingOrder) {
       handleSinglePrint();
       setIncomingOrder(null);
@@ -144,20 +154,11 @@ export default function Orders() {
   }, [incomingOrder]);
 
   useEffect(() => {
-    setPage(1);
-    fetchOrders(1);
-    setHasMore(true); // setHasMore back to true whenever date change
+    fetchOrders();
   }, [date, currentStatus]);
 
   useEffect(() => {
-    if (hasMore) {
-      fetchOrders(page);
-    }
-  }, [page]);
-
-  useEffect(() => {
     if (debouncedKeywords) {
-      setIsLoading(true);
       const newOrderData = baseOrderData.filter((order: Order) => {
         if (
           order.clientId.includes(debouncedKeywords) ||
@@ -171,7 +172,8 @@ export default function Orders() {
         return false;
       });
       setOrderData(newOrderData);
-      setIsLoading(false);
+    } else {
+      setOrderData(baseOrderData);
     }
   }, [debouncedKeywords, baseOrderData]);
 
@@ -194,38 +196,26 @@ export default function Orders() {
     }
   };
 
-  const fetchOrders = async (currentPage: number): Promise<void> => {
+  const fetchOrders = async (): Promise<void> => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${API_URL.ORDER}?date=${date}&page=${currentPage}&status=${currentStatus}`,
+        `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
       );
 
       if (response.data.error) {
         setIsLoading(false);
-        setHasMore(false);
+        // setHasMore(false);
         return;
       }
 
-      if (currentPage === 1) {
-        setOrderData(response.data.data);
-        setBaseOrderData(response.data.data);
-      } else {
-        setOrderData((prevOrders) => [...prevOrders, ...response.data.data]);
-        setBaseOrderData((prevOrders) => [
-          ...prevOrders,
-          ...response.data.data,
-        ]);
-      }
+      setOrderData(response.data.data);
+      setBaseOrderData(response.data.data);
       setIsLoading(false);
-
-      if (response.data.data.length === 0) {
-        setHasMore(false);
-      }
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
       setIsLoading(false);
-      setHasMore(false);
+      // setHasMore(false);
       return;
     }
   };
@@ -271,7 +261,7 @@ export default function Orders() {
         status: ORDER_STATUS.COMPLETED,
         updatedOrders: orderData,
       });
-      await fetchOrders(1);
+      await fetchOrders();
       setNotification({
         on: true,
         type: 'success',
@@ -295,17 +285,6 @@ export default function Orders() {
   const handleSinglePrint = useReactToPrint({
     content: () => singlePrint.current,
   });
-
-  const handleScroll = (): void => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop ===
-      document.documentElement.offsetHeight
-    ) {
-      if (hasMore) {
-        setPage((prevPage) => prevPage + 1);
-      }
-    }
-  };
 
   const handleUpdateDateUI = (orderId: number, updatedDate: string): void => {
     const newOrders = orderData.filter((order) => {
@@ -429,74 +408,9 @@ export default function Orders() {
   if (isLoading) {
     return (
       <Sidebar>
-        {orderData.length > 0 ? (
-          <>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Typography variant="h4" fontWeight="bold">
-                Orders
-              </Typography>
-              <FormControl>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="Date Filter"
-                    value={dayjs(date)}
-                    onChange={(e: any) => handleDateChange(e)}
-                    sx={{
-                      borderRadius: 2,
-                    }}
-                  />
-                </LocalizationProvider>
-              </FormControl>
-            </Box>
-            <Box
-              display="flex"
-              justifyContent="space-around"
-              alignItems="center"
-              mt={2}
-              gap={4}
-            >
-              <TextField
-                name="Search"
-                variant="filled"
-                // label="Search orders"
-                // placeholder="Search by client id, invoice id, or client name"
-                value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
-              />
-              <LoadingButton
-                loading={isLoading}
-                loadingIndicator="Refresh..."
-                variant="outlined"
-                onClick={() => window.location.reload()}
-              >
-                <RefreshIcon />
-              </LoadingButton>
-              {actionDropdown}
-            </Box>
-            {orderData.map((order: any, index: number) => {
-              return (
-                <OrderAccordion
-                  key={index}
-                  order={order}
-                  setNotification={setNotification}
-                  updateUI={handleMarkSingleCompletedUI}
-                  updateUIItem={handleUpdateUISingleOrder}
-                  handleUpdateDateUI={handleUpdateDateUI}
-                />
-              );
-            })}
-
-            <LoadingComponent color="blue" />
-          </>
-        ) : (
-          <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-            <LoadingComponent color="blue" />
-          </div>
-        )}
+        <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+          <LoadingComponent color="blue" />
+        </div>
       </Sidebar>
     );
   }
@@ -545,23 +459,15 @@ export default function Orders() {
           mt={2}
           gap={4}
         >
-          {/* <SearchInput
-            name="Search"
-            variant="filled"
-            label="Search orders"
-            placeholder="Search by client id, invoice id, or client name"
-            value={searchKeywords}
-            onChange={setSearchKeywords}
-          /> */}
           <TextField
             fullWidth
-                name="Search"
-                variant="filled"
-                // label="Search orders"
-                placeholder="Search by client id, invoice id, or client name"
-                value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
-              />
+            name="Search"
+            variant="filled"
+            // label="Search orders"
+            placeholder="Search by client id, invoice id, or client name"
+            value={searchKeywords}
+            onChange={(e) => setSearchKeywords(e.target.value)}
+          />
           <LoadingButton
             disabled={orderData.length === baseOrderData.length}
             loading={isLoading}
@@ -581,12 +487,26 @@ export default function Orders() {
             padding: 1,
             borderRadius: 2,
           }}
+          ref={totalPosition}
         >
           <Typography variant="h6">Total: {orderData.length} orders</Typography>
         </Box>
         {orderData.length > 0 ? (
-          orderData.map((order: any, index: number) => {
-            return (
+          // orderData.map((order: any, index: number) => {
+          //   return (
+          //     <OrderAccordion
+          //       key={index}
+          //       order={order}
+          //       setNotification={setNotification}
+          //       updateUI={handleMarkSingleCompletedUI}
+          //       updateUIItem={handleUpdateUISingleOrder}
+          //       handleUpdateDateUI={handleUpdateDateUI}
+          //     />
+          <Virtuoso
+            totalCount={orderData.length}
+            style={{ height: virtuosoHeight }}
+            data={orderData}
+            itemContent={(index, order) => (
               <OrderAccordion
                 key={index}
                 order={order}
@@ -595,8 +515,8 @@ export default function Orders() {
                 updateUIItem={handleUpdateUISingleOrder}
                 handleUpdateDateUI={handleUpdateDateUI}
               />
-            );
-          })
+            )}
+          />
         ) : (
           <ErrorComponent errorText="There is no orders" />
         )}

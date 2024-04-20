@@ -1680,7 +1680,7 @@ export const generateUsers = async () => {
     //   role: 'client',
     // },
     {
-        clientId: '00281',
+      clientId: '00281',
       clientName: 'GAON CUISINE',
       sheetName: '00281',
       deliveryAddress: '5599 Kingsway, Burnaby, BC V5H 2G3',
@@ -1688,7 +1688,7 @@ export const generateUsers = async () => {
       categoryId: 10,
       password,
       role: 'client',
-    }
+    },
   ];
   return users;
 };
