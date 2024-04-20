@@ -102,9 +102,7 @@ export default function Orders() {
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
-  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(
-    window.innerHeight,
-  );
+  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
