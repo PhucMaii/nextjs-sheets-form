@@ -80,6 +80,7 @@ export interface Order {
   note: string;
   status: ORDER_STATUS;
   OrderPreference?: OrderPreference[];
+  isReplacement?: boolean;
 }
 
 export default function Orders() {

@@ -2,6 +2,7 @@ import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { pusherServer } from '@/app/pusher';
 
 interface BodyProps {
   deliveryDate: string;
@@ -36,6 +37,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     let total = 0;
+    const itemList = [];
     for (const item of body.items) {
       // Update each item
       const newItem = await prisma.orderedItems.update({
@@ -49,10 +51,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Update new total price
       total += newItem.quantity * newItem.price;
+      itemList.push(newItem);
     }
 
     // Apply new total price on order and update note
-    await prisma.orders.update({
+    const newOrder = await prisma.orders.update({
       where: {
         id: userLastOrder.id,
       },
@@ -61,6 +64,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         note: body.note,
       },
     });
+
+    const userCategory = await prisma.category.findUnique({
+      where: {
+        id: existingUser?.categoryId
+      }
+    })
+
+    pusherServer.trigger('admin', 'incoming-order', {
+      items: itemList,
+      ...existingUser,
+      ...newOrder,
+      totalPrice: total,
+      category: userCategory,
+      isReplacement: true,
+    });
+
 
     return res.status(200).json({
       message: 'Override Order Successfully',
