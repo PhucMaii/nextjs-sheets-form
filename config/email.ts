@@ -41,14 +41,14 @@ export const generateOrderTemplate = (
             <div style="text-align: center;font-weight: 300;">
                 778 789 1060
                 <br/>
-                709 789 6000
+                709 989 6000
             </div>
         </div>
         <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
         <div style="width: 100%;">
-            <h3 style="text-align: left;font-weight: 300;">Order Id: #${orderId}</h3>
+            <h3 style="text-align: left;font-weight: 300;">Invoice: ${orderId}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
-            <h3 style="text-align: left;font-weight: 300;">Client Number: #${clientNumber}</h3>
+            <h3 style="text-align: left;font-weight: 300;">Client Number: ${clientNumber}</h3>
             <h3 style="text-align: left;font-weight: 300;">Order Time: ${
               orderDetails.orderTime
             }</h3>
