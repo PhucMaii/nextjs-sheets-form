@@ -86,13 +86,15 @@ export default function OverrideOrder({
                 return (
                   <Grid item container key={index}>
                     <Grid item xs={12}>
+                      <Typography variant="subtitle2">{item.name}</Typography>
                       <Typography variant="subtitle2">
-                        {item.name} - ${item.price}
+                        ${item.price} per bag
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="h6" fontWeight="bold">
-                        Order: {item.quantity}
+                        Order: {item.quantity} bags - $
+                        {(item.quantity * item.price).toFixed(2)}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -105,13 +107,13 @@ export default function OverrideOrder({
             </Grid>
           </Grid>
         </Box>
-        <Grid container alignItems="center" columnSpacing={2}>
-          <Grid item xs={6} onClick={onClose}>
+        <Grid container alignItems="center" spacing={2}>
+          <Grid item xs={12} md={6} onClick={onClose}>
             <Button fullWidth variant="outlined">
               Cancel
             </Button>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} md={6}>
             <LoadingButton
               fullWidth
               loading={isOverriding}

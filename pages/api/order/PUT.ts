@@ -51,7 +51,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Update new total price
       total += newItem.quantity * newItem.price;
-      itemList.push(newItem);
+      itemList.push({
+        ...newItem,
+        totalPrice: newItem.quantity * newItem.price,
+      });
     }
 
     // Apply new total price on order and update note
@@ -67,9 +70,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const userCategory = await prisma.category.findUnique({
       where: {
-        id: existingUser?.categoryId
-      }
-    })
+        id: existingUser?.categoryId,
+      },
+    });
 
     pusherServer.trigger('admin', 'incoming-order', {
       items: itemList,
@@ -79,7 +82,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       category: userCategory,
       isReplacement: true,
     });
-
 
     return res.status(200).json({
       message: 'Override Order Successfully',

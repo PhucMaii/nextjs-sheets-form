@@ -136,7 +136,8 @@ export default function Orders() {
       setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
-        incomingOrder.status === currentStatus
+        incomingOrder.status === currentStatus &&
+        !incomingOrder.isReplacement
       ) {
         setOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
         setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
