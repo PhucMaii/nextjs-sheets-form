@@ -99,10 +99,26 @@ export default function OrderForm() {
     }
   };
 
+  const handleCheckUserHasInput = () => {
+    return itemList.some((item: any) => {
+      return item.quantity > 0;
+    })
+  }
+
   const handleSubmit = async (e: MouseEvent) => {
     e.preventDefault();
-    setIsButtonLoading(true);
+    const checkUserHasInput = handleCheckUserHasInput();
+    if (!checkUserHasInput) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Please enter your order',
+      });
+      return;
+    }
+
     try {
+      setIsButtonLoading(true);
       const currentDate = new Date();
       const dateString = moment(currentDate).format('YYYY-MM-DD');
       const timeString = moment(currentDate).format('HH:mm:ss');
