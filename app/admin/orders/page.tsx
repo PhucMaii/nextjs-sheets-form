@@ -5,10 +5,12 @@ import {
   Box,
   Button,
   FormControl,
+  Grid,
   Menu,
   MenuItem,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
@@ -103,13 +105,14 @@ export default function Orders() {
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
-  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(1000);
+  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(1200);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
   const totalPosition: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   useEffect(() => {
     fetchAllClients();
@@ -304,7 +307,13 @@ export default function Orders() {
   };
 
   const actionDropdown = (
-    <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      gap={2}
+      width="100%"
+    >
       <Button
         aria-controls={openDropdown ? 'basic-menu' : undefined}
         aria-haspopup="true"
@@ -312,6 +321,7 @@ export default function Orders() {
         onClick={(e) => setActionButtonAnchor(e.currentTarget)}
         endIcon={<ArrowDownwardIcon />}
         variant="outlined"
+        fullWidth
       >
         Actions
       </Button>
@@ -452,56 +462,68 @@ export default function Orders() {
             </LocalizationProvider>
           </FormControl>
         </Box>
-        <Box
-          display="flex"
-          justifyContent="space-around"
-          alignItems="center"
-          mt={2}
-          gap={4}
-        >
-          <TextField
-            fullWidth
-            name="Search"
-            variant="filled"
-            // label="Search orders"
-            placeholder="Search by client id, invoice id, or client name"
-            value={searchKeywords}
-            onChange={(e) => setSearchKeywords(e.target.value)}
-          />
-          <LoadingButton
-            disabled={orderData.length === baseOrderData.length}
-            loading={isLoading}
-            loadingIndicator="Refresh..."
-            variant="outlined"
-            onClick={() => window.location.reload()}
+        <Grid container alignItems="center" mt={2} spacing={2}>
+          <Grid item xs={12} md={8}>
+            <TextField
+              fullWidth
+              name="Search"
+              variant="filled"
+              // label="Search orders"
+              placeholder="Search by client id, invoice id, or client name"
+              value={searchKeywords}
+              onChange={(e) => setSearchKeywords(e.target.value)}
+            />
+          </Grid>
+          {mdDown && (
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  backgroundColor: blueGrey[800],
+                  color: 'white',
+                  width: 'fit-content',
+                  padding: 1,
+                  borderRadius: 2,
+                }}
+                ref={totalPosition}
+              >
+                <Typography variant="h6">
+                  Total: {orderData.length} orders
+                </Typography>
+              </Box>
+            </Grid>
+          )}
+          <Grid item xs={2} md={1} textAlign="right">
+            <LoadingButton
+              disabled={orderData.length === baseOrderData.length}
+              loading={isLoading}
+              loadingIndicator="Refresh..."
+              variant="outlined"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshIcon />
+            </LoadingButton>
+          </Grid>
+          <Grid item xs={4} md={3}>
+            {actionDropdown}
+          </Grid>
+        </Grid>
+        {!mdDown && (
+          <Box
+            sx={{
+              backgroundColor: blueGrey[800],
+              color: 'white',
+              width: 'fit-content',
+              padding: 1,
+              borderRadius: 2,
+            }}
+            ref={totalPosition}
           >
-            <RefreshIcon />
-          </LoadingButton>
-          {actionDropdown}
-        </Box>
-        <Box
-          sx={{
-            backgroundColor: blueGrey[800],
-            color: 'white',
-            width: 'fit-content',
-            padding: 1,
-            borderRadius: 2,
-          }}
-          ref={totalPosition}
-        >
-          <Typography variant="h6">Total: {orderData.length} orders</Typography>
-        </Box>
+            <Typography variant="h6">
+              Total: {orderData.length} orders
+            </Typography>
+          </Box>
+        )}
         {orderData.length > 0 ? (
-          // orderData.map((order: any, index: number) => {
-          //   return (
-          //     <OrderAccordion
-          //       key={index}
-          //       order={order}
-          //       setNotification={setNotification}
-          //       updateUI={handleMarkSingleCompletedUI}
-          //       updateUIItem={handleUpdateUISingleOrder}
-          //       handleUpdateDateUI={handleUpdateDateUI}
-          //     />
           <Virtuoso
             totalCount={orderData.length}
             style={{ height: virtuosoHeight }}
