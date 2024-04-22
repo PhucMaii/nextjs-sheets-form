@@ -102,8 +102,8 @@ export default function OrderForm() {
   const handleCheckUserHasInput = () => {
     return itemList.some((item: any) => {
       return item.quantity > 0;
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e: MouseEvent) => {
     e.preventDefault();

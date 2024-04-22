@@ -121,6 +121,7 @@ export default function Orders() {
   // Subscribe admin whenever they logged in
   useEffect(() => {
     pusherClient.subscribe('admin');
+    pusherClient.subscribe('override-order');
 
     pusherClient.bind('incoming-order', (order: Order) => {
       setIncomingOrder(order);
@@ -144,7 +145,7 @@ export default function Orders() {
   useEffect(() => {
     if (incomingOrder) {
       handleSinglePrint();
-      console.log('Incoming order: ', incomingOrder)
+      console.log('Incoming order: ', incomingOrder);
       setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
