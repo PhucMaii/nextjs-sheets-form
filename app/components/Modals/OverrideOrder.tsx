@@ -72,7 +72,7 @@ export default function OverrideOrder({
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <Typography variant="h5">
           You have already ordered for {deliveryDate}!
