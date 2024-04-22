@@ -185,6 +185,26 @@ export default function AddOrder({
         submittedData,
       );
 
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        setIsButtonLoading(false);
+        return;
+      }
+
+      if (response.data.warning) {
+        setNotification({
+          on: true,
+          type: 'warning',
+          message: response.data.warning,
+        });
+        setIsButtonLoading(false);
+        return;
+      }
+
       setNotification({
         on: true,
         type: 'success',

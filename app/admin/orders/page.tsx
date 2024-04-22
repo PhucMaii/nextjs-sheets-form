@@ -144,6 +144,7 @@ export default function Orders() {
   useEffect(() => {
     if (incomingOrder) {
       handleSinglePrint();
+      console.log('Incoming order: ', incomingOrder)
       setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
