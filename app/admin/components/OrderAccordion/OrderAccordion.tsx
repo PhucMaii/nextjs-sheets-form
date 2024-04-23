@@ -29,7 +29,7 @@ import { grey } from '@mui/material/colors';
 import ClientDetailsModal from '../Modals/ClientDetailsModal';
 import { Item, Order } from '../../orders/page';
 import { useReactToPrint } from 'react-to-print';
-import { ComponentToPrint } from '../ComponentToPrint';
+import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
