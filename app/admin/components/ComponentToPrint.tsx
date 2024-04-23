@@ -36,6 +36,9 @@ export const ComponentToPrint = forwardRef(
       <div ref={ref}>
         <div className="flex gap-2 flex-col ml-6 mr-auto mb-24 mt-4">
           <div className="w-full">
+            <h2 className="text-center font-bold text-3xl">
+              {order.isReplacement && 'REPLACEMENT ORDER'}
+            </h2>
             <h2 className="text-center font-semibold text-2xl">
               SUPREME SPROUTS LTD
             </h2>
@@ -45,13 +48,13 @@ export const ComponentToPrint = forwardRef(
             <div className="text-center font-semibold text-2xl">
               778 789 1060
               <br />
-              709 789 6000
+              709 989 6000
             </div>
           </div>
           <div className="h-px bg-black w-full m-auto"></div>
           <div className="flex flex-col gap-2 w-full">
             <div className="flex flex-wrap gap-2 text-2xl items-center ">
-              <h3 className="text-left font-bold">Invoice Id: </h3>
+              <h3 className="text-left font-bold">Invoice: </h3>
               <h3 className="text-left text-2xl">{order.id}</h3>
             </div>
             <div className="flex flex-wrap gap-2 text-2xl mr-6">

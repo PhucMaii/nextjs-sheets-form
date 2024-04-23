@@ -19,6 +19,8 @@ import { grey } from '@mui/material/colors';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
 import { limitOrderHour } from '../admin/lib/constant';
+import OverrideOrder from '../components/Modals/OverrideOrder';
+import { Order } from '../admin/orders/page';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -33,10 +35,13 @@ export default function OrderForm() {
     const formattedDate = YYYYMMDDFormat(dateObj);
     return formattedDate;
   });
+  const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [note, setNote] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const [isOpenSecurityModal, setIsOpenSecurityModal] =
+    useState<boolean>(false);
+  const [isOverrideOrderOpen, setIsOverrideOrderOpen] =
     useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -55,6 +60,12 @@ export default function OrderForm() {
   useEffect(() => {
     fetchItems();
   }, []);
+
+  useEffect(() => {
+    if (lastOrder) {
+      setIsOverrideOrderOpen(true);
+    }
+  }, [lastOrder]);
 
   // Get list of items to render input field
   const fetchItems = async () => {
@@ -88,10 +99,26 @@ export default function OrderForm() {
     }
   };
 
+  const handleCheckUserHasInput = () => {
+    return itemList.some((item: any) => {
+      return item.quantity > 0;
+    });
+  };
+
   const handleSubmit = async (e: MouseEvent) => {
     e.preventDefault();
-    setIsButtonLoading(true);
+    const checkUserHasInput = handleCheckUserHasInput();
+    if (!checkUserHasInput) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Please enter your order',
+      });
+      return;
+    }
+
     try {
+      setIsButtonLoading(true);
       const currentDate = new Date();
       const dateString = moment(currentDate).format('YYYY-MM-DD');
       const timeString = moment(currentDate).format('HH:mm:ss');
@@ -108,6 +135,17 @@ export default function OrderForm() {
       }
 
       const response = await axios.post(API_URL.IMPORT_SHEETS, submittedData);
+
+      if (response.data.warning) {
+        setNotification({
+          on: true,
+          type: 'warning',
+          message: response.data.warning,
+        });
+        setLastOrder(response.data.data);
+        setIsButtonLoading(false);
+        return;
+      }
 
       setNotification({
         on: true,
@@ -162,6 +200,17 @@ export default function OrderForm() {
         isOpen={isOpenSecurityModal}
         onClose={() => setIsOpenSecurityModal(false)}
       />
+      {lastOrder && (
+        <OverrideOrder
+          open={isOverrideOrderOpen}
+          onClose={() => setIsOverrideOrderOpen(false)}
+          currentItems={itemList}
+          currentNote={note}
+          lastOrder={lastOrder}
+          deliveryDate={deliveryDate}
+          setNotification={setNotification}
+        />
+      )}
       <Navbar handleOpenSecurityModal={() => setIsOpenSecurityModal(true)} />
       <div className="max-w-2xl mx-auto py-16">
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">

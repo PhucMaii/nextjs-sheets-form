@@ -20,12 +20,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       date,
       startDate,
       endDate,
-      page = 1,
-      pageSize = 100,
+      // page = 1,
+      // pageSize = 100,
       status = ORDER_STATUS.INCOMPLETED,
     } = req.query as RequestQuery;
 
-    const skip = (page - 1) * pageSize;
+    // const skip = (page - 1) * pageSize;
 
     const fetchCondition: any = { status };
 
@@ -42,8 +42,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       orderBy: {
         id: 'desc',
       },
-      skip,
-      take: pageSize,
+      // skip,
+      // take: pageSize,
     });
 
     if (!orders || orders.length === 0) {
