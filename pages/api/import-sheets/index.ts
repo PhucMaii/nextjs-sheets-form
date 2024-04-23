@@ -175,7 +175,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    pusherServer.trigger('admin', 'incoming-order', {
+    await pusherServer.trigger('admin', 'incoming-order', {
       items: itemList,
       ...existingUser,
       ...newOrder,
