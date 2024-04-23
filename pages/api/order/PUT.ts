@@ -37,7 +37,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     let total = 0;
-    const itemList = [];
+    const itemList: any = [];
     for (const item of body.items) {
       // Update each item
       const newItem = await prisma.orderedItems.update({
