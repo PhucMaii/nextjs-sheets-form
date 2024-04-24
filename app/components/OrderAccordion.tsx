@@ -26,11 +26,9 @@ interface PropTypes {
 
 export default function OrderAccordion({ order }: PropTypes) {
     const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
-    const totalQuantity = order.items.reduce((acc: number, cV: Item) => {
+    const totalQuantity = order.items?.reduce((acc: number, cV: Item) => {
         return acc + cV.quantity
     }, 0);
-
-    console.log(order, 'order')
 
     const statusText = {
         text: order.status,
