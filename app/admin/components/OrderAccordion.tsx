@@ -26,19 +26,19 @@ import {
 } from '@mui/material';
 import Button from '@/app/components/Button';
 import { grey } from '@mui/material/colors';
-import ClientDetailsModal from '../Modals/ClientDetailsModal';
-import { Item, Order } from '../../orders/page';
+import ClientDetailsModal from './Modals/ClientDetailsModal';
+import { Item, Order } from '../orders/page';
 import { useReactToPrint } from 'react-to-print';
-import { ComponentToPrint } from '../ComponentToPrint';
+import { ComponentToPrint } from './ComponentToPrint';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Notification, OrderedItems } from '@/app/utils/type';
-import EditItemModal from '../Modals/EditItemModal';
+import EditItemModal from './Modals/EditItemModal';
 import EditIcon from '@mui/icons-material/Edit';
-import EditDeliveryDate from '../Modals/EditDeliveryDate';
-import EditPrice from '../Modals/EditPrice';
-import StatusText, { COLOR_TYPE } from '../StatusText';
+import EditDeliveryDate from './Modals/EditDeliveryDate';
+import EditPrice from './Modals/EditPrice';
+import StatusText, { COLOR_TYPE } from './StatusText';
 
 interface PropTypes {
   order: Order;

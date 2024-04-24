@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, memo } from 'react';
-import OrderAccordion from './OrderAccordion/OrderAccordion';
+import OrderAccordion from './OrderAccordion';
 import { Item, Order } from '../orders/page';
 import { Notification } from '@/app/utils/type';
 

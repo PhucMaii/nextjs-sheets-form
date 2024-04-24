@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: user.id + '',
             clientId: user.clientId,
-            sheetName: user.sheetName,
+            clientName: user.clientName,
             role: user.role,
           };
         } catch (error: any) {
