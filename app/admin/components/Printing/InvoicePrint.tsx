@@ -23,7 +23,7 @@ export const InvoicePrint = forwardRef(
   ({ client, orders }: PropTypes, ref: any) => {
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
-    const ordersPerPage = 20;
+    const ordersPerPage = 10;
     const totalPages = Math.ceil(orders.length / ordersPerPage);
 
     const totalPrices: number[] = [];
@@ -79,11 +79,6 @@ export const InvoicePrint = forwardRef(
                   </Typography>
                   <Typography>{todayString}</Typography>
                 </Grid>
-                <Grid item textAlign="right" xs={12}>
-                  <Typography>
-                    PLEASE RETURN THIS PORTION WITH YOUR PAYMENT
-                  </Typography>
-                </Grid>
                 <Grid item xs={12}>
                   <Typography fontWeight="bold" variant="h6">
                     To: {client?.clientName}
@@ -107,9 +102,6 @@ export const InvoicePrint = forwardRef(
                       Invoice No.
                     </TableCell>
                     <TableCell sx={{ backgroundColor: grey[200] }}>
-                      Order Time
-                    </TableCell>
-                    <TableCell sx={{ backgroundColor: grey[200] }}>
                       Delivery Date
                     </TableCell>
                     <TableCell sx={{ backgroundColor: grey[200] }}>
@@ -128,7 +120,6 @@ export const InvoicePrint = forwardRef(
                         return (
                           <TableRow sx={{ height: '20px !important' }}>
                             <TableCell>{order.id}</TableCell>
-                            <TableCell>{order.orderTime}</TableCell>
                             <TableCell>{order.deliveryDate}</TableCell>
                             <TableCell>
                               ${order.totalPrice.toFixed(2)}
@@ -168,16 +159,6 @@ export const InvoicePrint = forwardRef(
                           </Box>
                         </Grid>
                       </Grid>
-                    </TableCell>
-                    <TableCell>
-                      <Box display="flex" flexDirection="column" gap={1}>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          Total
-                        </Typography>
-                        <Typography variant="subtitle1">
-                          ${totalPrices[pageIndex]}
-                        </Typography>
-                      </Box>
                     </TableCell>
                   </TableRow>
                 </TableBody>
