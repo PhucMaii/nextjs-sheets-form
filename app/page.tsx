@@ -4,7 +4,6 @@ import AuthenGuard from './HOC/AuthenGuard';
 import Sidebar from './components/Sidebar/Sidebar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
 import { blue, blueGrey } from '@mui/material/colors';
-import { useSession } from 'next-auth/react';
 import OverviewCard from './admin/components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -20,24 +19,24 @@ import { YYYYMMDDFormat } from './utils/time';
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
   const [isTomorrow, setIsTomorrow] = useState<boolean>(() => {
-     // format initial date
-     const dateObj = new Date();
-     // if current hour is greater limit hour, then tomorrrow is more concern
-     if (dateObj.getHours() >= limitOrderHour) {
-       return true;
-     }
-     return false;
+    // format initial date
+    const dateObj = new Date();
+    // if current hour is greater limit hour, then tomorrrow is more concern
+    if (dateObj.getHours() >= limitOrderHour) {
+      return true;
+    }
+    return false;
   });
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
-    message: ''
+    message: '',
   });
   const [userOrder, setUserOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     handleFetchUserOrder();
-  }, [])
+  }, []);
 
   const handleFetchUserOrder = async () => {
     try {
@@ -47,37 +46,36 @@ export default function MainPage() {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
       }
 
       // format initial date
-    const dateObj = new Date();
-    // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
-      dateObj.setDate(dateObj.getDate() + 1);
-    }
-    const formattedDate = YYYYMMDDFormat(dateObj);
+      const dateObj = new Date();
+      // if current hour is greater limit hour, then recommend the next day
+      if (dateObj.getHours() >= limitOrderHour) {
+        dateObj.setDate(dateObj.getDate() + 1);
+      }
+      const formattedDate = YYYYMMDDFormat(dateObj);
 
-    const orderToday = response.data.data.userOrders.find((order: Order) => {
-      return order.deliveryDate === formattedDate;
-    })
-    console.log({orderToday, response: response.data.data.userOrders, formattedDate})
+      const orderToday = response.data.data.userOrders.find((order: Order) => {
+        return order.deliveryDate === formattedDate;
+      });
 
       setClient(response.data.data.user);
-      setUserOrder({...response.data.data.user, ...orderToday});
+      setUserOrder({ ...response.data.data.user, ...orderToday });
     } catch (error: any) {
       console.log('Fail to fetch user orders: ', error);
     }
-  }
+  };
 
   return (
     <Sidebar>
       <AuthenGuard>
-        <NotificationPopup 
+        <NotificationPopup
           notification={notification}
-          onClose={() => setNotification({...notification, on: false})}
+          onClose={() => setNotification({ ...notification, on: false })}
         />
         <Box
           sx={{
@@ -92,29 +90,31 @@ export default function MainPage() {
         </Box>
         <Grid container spacing={2} my={2}>
           <Grid item xs={12}>
-            <Typography variant="h6" fontWeight="bold">This month</Typography>
+            <Typography variant="h6" fontWeight="bold">
+              This month
+            </Typography>
           </Grid>
           <Grid item xs={12} md={6}>
-            <OverviewCard 
+            <OverviewCard
               icon={<ReceiptLongIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text='Total Orders'
+              text="Total Orders"
               value={30}
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <OverviewCard 
+            <OverviewCard
               icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text='Balance Due'
+              text="Balance Due"
               value={1000}
             />
           </Grid>
         </Grid>
         <Divider textAlign="left">
-          <Typography variant="h6" fontWeight="bold">Order</Typography>
+          <Typography variant="h6" fontWeight="bold">
+            Order
+          </Typography>
         </Divider>
-        {userOrder && <OrderAccordion 
-          order={userOrder}
-        />}
+        {userOrder && <OrderAccordion order={userOrder} />}
       </AuthenGuard>
     </Sidebar>
   );
