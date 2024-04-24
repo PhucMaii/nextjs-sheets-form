@@ -95,9 +95,7 @@ export default function Sidebar({ children }: PropTypes) {
   if (smDown) {
     return (
       <>
-      <Box sx={{p: 2}}>
-        {children}
-      </Box>
+        <Box sx={{ p: 2 }}>{children}</Box>
         <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
           <BottomNavigation
             sx={{ width: '100vw !important' }}

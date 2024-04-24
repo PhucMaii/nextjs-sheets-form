@@ -41,3 +41,12 @@ export const generateRecommendDate = () => {
   const formattedDate = YYYYMMDDFormat(dateObj);
   return formattedDate;
 };
+
+export const generateMonthRange = () => {
+  const today = new Date();
+  const month = today.getMonth();
+  const year = today.getFullYear();
+
+  const firstDayOfThisMonth = new Date(year, month, 1);
+  return [firstDayOfThisMonth, today];
+};

@@ -28,15 +28,7 @@ import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/ClientOrdersTable';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-
-const generateMonthRange = () => {
-  const today = new Date();
-  const month = today.getMonth();
-  const year = today.getFullYear();
-
-  const firstDayOfThisMonth = new Date(year, month, 1);
-  return [firstDayOfThisMonth, today];
-};
+import { generateMonthRange } from '@/app/utils/time';
 
 export default function ReportPage() {
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);

@@ -37,14 +37,16 @@ export default function ClientDetailsModal({
           </Grid>
         </Grid>
         <Divider />
-        {categoryName && <Grid container alignItems="center">
-          <Grid item xs={6}>
-            <Typography variant="h6">Category</Typography>
+        {categoryName && (
+          <Grid container alignItems="center">
+            <Grid item xs={6}>
+              <Typography variant="h6">Category</Typography>
+            </Grid>
+            <Grid item textAlign="right" xs={6}>
+              <Typography variant="h6">{categoryName}</Typography>
+            </Grid>
           </Grid>
-          <Grid item textAlign="right" xs={6}>
-            <Typography variant="h6">{categoryName}</Typography>
-          </Grid>
-        </Grid>}
+        )}
       </BoxModal>
     </Modal>
   );

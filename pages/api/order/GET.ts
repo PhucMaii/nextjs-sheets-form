@@ -1,11 +1,19 @@
-import { Item, OrderedItems, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { filterDateRangeOrders } from '../utils/date';
+
+interface QueryType {
+  startDate?: string;
+  endDate?: string;
+}
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
+
+    const { startDate, endDate } = req.query as QueryType;
 
     const session: any = await getServerSession(req, res, authOptions);
 
@@ -24,50 +32,63 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         userId: existingUser.id,
       },
       include: {
-        items: true
-      }
+        items: true,
+      },
     });
 
     const newOrders = await Promise.all(
-        userOrders.map(async (order: any) => {
-          const items = await prisma.orderedItems.findMany({
-            where: {
-              orderId: order.id,
-            },
-          });
-  
-          const newItems = items.map((item: any) => {
-            const totalPrice = item.quantity * item.price;
-            return { ...item, totalPrice, isAutoPrint: order.isAutoPrint };
-          });
-  
-          // get user
-          const user: any = await prisma.user.findUnique({
-            where: {
-              id: order.userId,
-            },
-          });
-  
-          const category = await prisma.category.findUnique({
-            where: {
-              id: user.categoryId,
-            },
-          });
-  
-          return {
-            ...order,
-            items: newItems,
-            ...user,
-            id: order.id,
-            category,
-          };
-        }),
-      );
+      userOrders.map(async (order: any) => {
+        const items = await prisma.orderedItems.findMany({
+          where: {
+            orderId: order.id,
+          },
+        });
+
+        const newItems = items.map((item: any) => {
+          const totalPrice = item.quantity * item.price;
+          return { ...item, totalPrice, isAutoPrint: order.isAutoPrint };
+        });
+
+        // get user
+        const user: any = await prisma.user.findUnique({
+          where: {
+            id: order.userId,
+          },
+        });
+
+        const category = await prisma.category.findUnique({
+          where: {
+            id: user.categoryId,
+          },
+        });
+
+        return {
+          ...order,
+          items: newItems,
+          ...user,
+          id: order.id,
+          category,
+        };
+      }),
+    );
+
+    if (!startDate || !endDate) {
+      return res.status(200).json({
+        data: newOrders,
+        message: 'Fetch User Orders Successfully',
+      });
+    }
+
+    const filteredDateRangeOrders = filterDateRangeOrders(
+      newOrders,
+      startDate,
+      endDate,
+    );
 
     return res.status(200).json({
       data: {
         user: existingUser,
-        userOrders: newOrders,
+        userOrders: filteredDateRangeOrders,
       },
       message: 'Fetch User Orders Successfully',
     });
