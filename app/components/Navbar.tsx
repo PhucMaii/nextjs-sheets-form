@@ -7,37 +7,17 @@ import { signOut } from 'next-auth/react';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { MdOutlineSecurity } from 'react-icons/md';
 
-interface PropTypes {
-  handleOpenSecurityModal?: () => void;
-}
-
-export default function Navbar({ handleOpenSecurityModal }: PropTypes) {
+export default function Navbar() {
   const url = process.env.NEXT_PUBLIC_WEB_URL;
   return (
     <div className="flex justify-between mx-2">
       <div className="flex gap-4 m-4 items-center cursor-pointer">
-        <Image width={30} height={30} src="/computer-icon.png" alt="computer" />
-        <h2 className="text-blue-500 font-bold text-xl">DataHabor Pro</h2>
-      </div>
-      <div className="m-4">
-        <Dropdown style={{ background: 'black' }} label="My Account">
-          <Dropdown.Item
-            icon={MdOutlineSecurity}
-            onClick={handleOpenSecurityModal}
-          >
-            Security
-          </Dropdown.Item>
-          <Dropdown.Item
-            icon={FaSignOutAlt}
-            onClick={() =>
-              signOut({
-                callbackUrl: `https://www.supremesprouts.com/auth/login`,
-              })
-            }
-          >
-            Sign out
-          </Dropdown.Item>
-        </Dropdown>
+        <Image
+          width={80}
+          height={80}
+          src="/supremesproutsIcon.png"
+          alt="Supreme Sprouts Logo"
+        />
       </div>
     </div>
   );

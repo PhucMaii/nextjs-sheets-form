@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { limitOrderHour } from '../admin/lib/constant';
+import { limitOrderHour } from '../lib/constant';
 
 export const YYYYMMDDFormat = (date: Date) => {
   const month = date.getUTCMonth() + 1;

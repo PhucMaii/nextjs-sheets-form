@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import {
+  BottomNavigation,
+  BottomNavigationAction,
   Box,
   Button,
   Drawer,
@@ -8,16 +10,17 @@ import {
   List,
   ListItemIcon,
   ListItemText,
+  Paper,
   Toolbar,
   useMediaQuery,
 } from '@mui/material';
 import React, { ReactNode, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-import { tabs } from '../../../lib/constant';
-import { ListItemButtonStyled } from './styled';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { blueGrey } from '@mui/material/colors';
+import { blue, blueGrey } from '@mui/material/colors';
+import { clientTabs } from '@/app/lib/constant';
+import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 
 interface PropTypes {
   children: ReactNode;
@@ -40,6 +43,7 @@ export default function Sidebar({ children }: PropTypes) {
   };
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const content = (
     <>
@@ -57,7 +61,7 @@ export default function Sidebar({ children }: PropTypes) {
         aria-labelledby="nested-list-subheader"
       >
         <Box display="flex" flexDirection="column" rowGap={2}>
-          {tabs.map((tab, index) => (
+          {clientTabs.map((tab, index) => (
             <ListItemButtonStyled
               $currentTab={currentTab === tab.path}
               key={index}
@@ -87,6 +91,44 @@ export default function Sidebar({ children }: PropTypes) {
       </Box>
     </>
   );
+
+  if (smDown) {
+    return (
+      <>
+        {children}
+        <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
+          <BottomNavigation
+            sx={{ width: '100vw !important' }}
+            value={currentTab}
+            onChange={(e, newValue) => {
+              console.log(newValue, 'new value');
+              setCurrentTab(newValue);
+            }}
+          >
+            {clientTabs.map((tab, index) => {
+              return (
+                <BottomNavigationAction
+                  key={index}
+                  label={tab.name}
+                  value={tab.path}
+                  onClick={() => handleChangeTab(tab.path)}
+                  icon={
+                    <tab.icon
+                      sx={{
+                        color: `${
+                          currentTab === tab.path ? blue[700] : blueGrey[800]
+                        }`,
+                      }}
+                    />
+                  }
+                />
+              );
+            })}
+          </BottomNavigation>
+        </Paper>
+      </>
+    );
+  }
 
   if (mdDown) {
     return (
