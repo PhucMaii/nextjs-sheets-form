@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { filterDateRangeOrders } from '../utils/date';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface QueryType {
   startDate?: string;
@@ -30,6 +31,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const userOrders: any = await prisma.orders.findMany({
       where: {
         userId: existingUser.id,
+        status: {
+          in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.INCOMPLETED]
+        }
       },
       include: {
         items: true,

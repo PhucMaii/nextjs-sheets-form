@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { Order } from '../orders/page';
+import { Order } from '../../orders/page';
 import {
   Table,
   TableBody,

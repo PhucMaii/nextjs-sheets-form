@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { generateUsers } from './userData';
+import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
 // import { items } from './itemData';
 // import { inputs } from './inputFieldData';
@@ -26,17 +27,17 @@ async function main() {
     ],
   });
 
-  // for (const user of users) {
-  //   const password = await hash(user.contactNumber, 12);
-  //   await prisma.user.update({
-  //     where: {
-  //       clientId: user.clientId,
-  //     },
-  //     data: {
-  //       password,
-  //     },
-  //   });
-  // }
+  for (const user of users) {
+    const password = await hash(user.contactNumber, 12);
+    await prisma.user.update({
+      where: {
+        clientId: user.clientId,
+      },
+      data: {
+        password,
+      },
+    });
+  }
 
   // await prisma.category.createMany({
   //   data: [

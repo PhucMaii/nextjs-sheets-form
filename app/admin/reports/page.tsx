@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Autocomplete,
@@ -29,6 +29,8 @@ import ClientOrdersTable from '../components/ClientOrdersTable';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import { generateMonthRange } from '@/app/utils/time';
+import { useReactToPrint } from 'react-to-print';
+import { InvoicePrint } from '../components/Printing/InvoicePrint';
 
 export default function ReportPage() {
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
@@ -46,6 +48,7 @@ export default function ReportPage() {
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const invoicePrint: any = useRef();
 
   useEffect(() => {
     fetchAllClients();
@@ -178,6 +181,10 @@ export default function ReportPage() {
     setClientOrders(newOrderList);
   };
 
+  const handleInvoicePrint = useReactToPrint({
+    content: () => invoicePrint.current,
+  });
+
   const handleUpdateOrderUI = (updatedOrder: Order) => {
     // update base order list
     const newBaseOrderList = baseClientOrders.map((order: Order) => {
@@ -208,6 +215,13 @@ export default function ReportPage() {
   return (
     <Sidebar>
       <AuthenGuard>
+        <div style={{ display: 'none' }}>
+          <InvoicePrint
+            client={clientValue}
+            orders={clientOrders}
+            ref={invoicePrint}
+          />
+        </div>
         <NotificationPopup
           notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
@@ -272,7 +286,11 @@ export default function ReportPage() {
                 />
               </Grid>
               <Grid item md={2} textAlign="right">
-                <Button variant="outlined">
+                <Button
+                  disabled={clientOrders.length === 0}
+                  variant="outlined"
+                  onClick={handleInvoicePrint}
+                >
                   <Box display="flex" gap={2}>
                     <LocalPrintshopIcon />
                     <Typography>Print</Typography>

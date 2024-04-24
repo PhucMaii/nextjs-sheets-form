@@ -64,8 +64,13 @@ export default function MainPage() {
     try {
       setIsFetching(true);
       const dateRange = generateMonthRange();
+
+      // set date to tomorrow
+      const today = new Date();
+      const endDate = dateRange[1];
+      endDate.setDate(today.getDate() + 1);
       const response = await axios.get(
-        `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+        `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${endDate}`,
       );
 
       if (response.data.error) {
@@ -84,7 +89,6 @@ export default function MainPage() {
       }
       const formattedDate = YYYYMMDDFormat(dateObj);
       const userOrderList = response.data.data.userOrders;
-
       const orderToday = userOrderList.find((order: Order) => {
         return order.deliveryDate === formattedDate;
       });

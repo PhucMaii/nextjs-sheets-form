@@ -16,7 +16,7 @@ import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { useReactToPrint } from 'react-to-print';
-import { AllPrint } from '../components/AllPrint';
+import { AllPrint } from '../components/Printing/AllPrint';
 import { Notification, UserType } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
 import { blueGrey } from '@mui/material/colors';
@@ -39,7 +39,7 @@ import {
   warningColor,
 } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
-import { ComponentToPrint } from '../components/ComponentToPrint';
+import { ComponentToPrint } from '../components/Printing/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
