@@ -266,6 +266,9 @@ const checkHasClientOrder = async (id: number, deliveryDate: string) => {
     where: {
       userId: id,
       deliveryDate,
+      status: {
+        in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.INCOMPLETED]
+      }
     },
     include: {
       items: true,
