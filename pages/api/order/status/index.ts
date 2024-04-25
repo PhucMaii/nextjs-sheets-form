@@ -1,7 +1,9 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import withAuthGuard from '../../utils/withAuthGuard';
+import { pusherServer } from '@/app/pusher';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]';
 
 interface BodyTypes {
   orderId: number;
@@ -19,10 +21,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prisma = new PrismaClient();
     const { orderId, updatedStatus }: BodyTypes = req.body;
 
+    const session: any = await getServerSession(req, res, authOptions);
+
+    if (!session) {
+      return res.status(401).json({ error: 'You are not authenticated' });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        id: Number(session.user.id),
+      },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User Not Found in DB' });
+    }
+
     const existingOrder = await prisma.orders.findUnique({
       where: {
         id: orderId,
       },
+      include: {
+        items: true
+      }
     });
 
     if (!existingOrder) {
@@ -40,6 +61,42 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    let total = 0;
+    const itemList: any = [];
+    for (const item of existingOrder.items) {
+      // Update each item
+      const newItem = await prisma.orderedItems.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          quantity: item.quantity,
+        },
+      });
+
+      // Update new total price
+      total += newItem.quantity * newItem.price;
+      itemList.push({
+        ...newItem,
+        totalPrice: newItem.quantity * newItem.price,
+      });
+    }
+
+    const userCategory = await prisma.category.findUnique({
+      where: {
+        id: existingUser?.categoryId,
+      },
+    });
+
+    await pusherServer.trigger('void-order', 'incoming-order', {
+      ...existingUser,
+      ...existingOrder,
+      items: itemList,
+      totalPrice: total,
+      category: userCategory,
+      isVoid: true,
+    })
+
     return res.status(200).json({
       data: updatedOrder,
       message: 'Order Updated Successfully',
@@ -52,4 +109,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default withAuthGuard(handler);
+export default handler;

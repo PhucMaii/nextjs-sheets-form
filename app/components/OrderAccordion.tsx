@@ -28,11 +28,12 @@ import { Notification } from '../utils/type';
 import DeleteModal from './Modals/DeleteModal';
 
 interface PropTypes {
+  handleDeleteOrder: (orderId: number) => void;
   order: Order;
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-export default function OrderAccordion({ order, setNotification }: PropTypes) {
+export default function OrderAccordion({ order, setNotification, handleDeleteOrder }: PropTypes) {
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
   const [isDeleteOrderOpen, setIsDeleteOrderOpen] = useState<boolean>(false);
@@ -64,7 +65,11 @@ export default function OrderAccordion({ order, setNotification }: PropTypes) {
         order={order}
         setNotification={setNotification}
       />
-      <DeleteModal isOpen={isDeleteOrderOpen} onClose={() => setIsDeleteOrderOpen(true)} />
+      <DeleteModal 
+        isOpen={isDeleteOrderOpen} 
+        onClose={() => setIsDeleteOrderOpen(false)} 
+        handleDelete={() => handleDeleteOrder(order.id)}
+        />
       <Accordion>
         <AccordionSummary>
           <Grid container alignItems="center">
@@ -83,6 +88,7 @@ export default function OrderAccordion({ order, setNotification }: PropTypes) {
                       borderRadius: '50%',
                       color: 'white',
                     }}
+                    onClick={() => setIsDeleteOrderOpen(true)}
                   >
                     <DeleteIcon />
                   </IconButton>

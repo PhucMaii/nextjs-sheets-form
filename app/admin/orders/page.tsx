@@ -84,6 +84,7 @@ export interface Order {
   status: ORDER_STATUS;
   OrderPreference?: OrderPreference[];
   isReplacement?: boolean;
+  isVoid?: boolean;
 }
 
 export default function Orders() {
@@ -122,6 +123,8 @@ export default function Orders() {
   useEffect(() => {
     pusherClient.subscribe('admin');
     pusherClient.subscribe('override-order');
+    pusherClient.subscribe('void-order');
+
 
     pusherClient.bind('incoming-order', (order: Order) => {
       setIncomingOrder(order);

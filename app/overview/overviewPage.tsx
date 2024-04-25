@@ -4,7 +4,7 @@ import { limitOrderHour } from '../lib/constant';
 import { Order } from '../admin/orders/page';
 import { Notification, UserType } from '../utils/type';
 import axios from 'axios';
-import { API_URL } from '../utils/enum';
+import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { YYYYMMDDFormat, generateMonthRange } from '../utils/time';
 import Sidebar from '../components/Sidebar/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
@@ -59,6 +59,40 @@ export default function MainPage() {
 
     setTotalBill(total);
   };
+  
+  const handleDeleteOrder = async (orderId: number) => {
+    try {
+      const response = await axios.put(`${API_URL.CLIENT_ORDER}/status`, {orderId, updatedStatus: ORDER_STATUS.VOID})
+      
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      }
+
+      const newThisMonthOrders = thisMonthOrders.filter((order: Order) => {
+        return order.id !== orderId
+      })
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      });
+      setUserOrder(null);
+      setThisMonthOrders(newThisMonthOrders);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to delete the order: ' + error
+      })
+    }
+  }
 
   const handleFetchUserOrder = async () => {
     try {
@@ -163,7 +197,11 @@ export default function MainPage() {
           </Typography>
         </Divider>
         {userOrder?.items ? (
-          <OrderAccordion order={userOrder} setNotification={setNotification} />
+          <OrderAccordion
+            handleDeleteOrder={handleDeleteOrder} 
+            order={userOrder} 
+            setNotification={setNotification} 
+          />
         ) : (
           <Box
             display="flex"

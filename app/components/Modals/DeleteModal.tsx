@@ -7,7 +7,7 @@ import { modalStyles } from './styles';
 interface PropTypes {
   isOpen: boolean;
   onClose: () => void;
-  handleDelete: () => void;
+  handleDelete: any;
 }
 
 export default function DeleteModal({
@@ -67,10 +67,10 @@ export default function DeleteModal({
             <h3 className="mb-5 text-lg font-normal text-gray-500">
               Are you sure you want to delete?
             </h3>
-            <div className="flex gap-2">
+            <div className="flex gap-2" style={{color: 'white !important'}}>
               <Button
                 label="Yes I'm sure"
-                color=""
+                color="white"
                 className="rounded-lg bg-red-500 hover:bg-red-700"
                 width="auto"
                 onClick={handleClick}

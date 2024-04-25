@@ -37,7 +37,7 @@ export const ComponentToPrint = forwardRef(
         <div className="flex gap-2 flex-col ml-6 mr-auto mb-24 mt-4">
           <div className="w-full">
             <h2 className="text-center font-bold text-3xl">
-              {order.isReplacement && 'REPLACEMENT ORDER'}
+              {order.isReplacement ? 'REPLACEMENT ORDER' : order.isVoid ? 'VOID ORDER' : ''}
             </h2>
             <h2 className="text-center font-semibold text-2xl">
               SUPREME SPROUTS LTD
