@@ -5,6 +5,7 @@ import {
   Box,
   Divider,
   Grid,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -12,20 +13,29 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import StatusText, { COLOR_TYPE } from '../admin/components/StatusText';
 import Button from './Button';
 import { Item, Order } from '../admin/orders/page';
 import ClientDetailsModal from '../admin/components/Modals/ClientDetailsModal';
 import { ORDER_STATUS } from '../utils/enum';
-import { grey } from '@mui/material/colors';
+import { blue, grey } from '@mui/material/colors';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { errorColor } from '../theme/color';
+import EditOrder from './Modals/EditOrder';
+import { Notification } from '../utils/type';
+import DeleteModal from './Modals/DeleteModal';
 
 interface PropTypes {
   order: Order;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-export default function OrderAccordion({ order }: PropTypes) {
+export default function OrderAccordion({ order, setNotification }: PropTypes) {
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
+  const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
+  const [isDeleteOrderOpen, setIsDeleteOrderOpen] = useState<boolean>(false);
   const totalQuantity = order.items?.reduce((acc: number, cV: Item) => {
     return acc + cV.quantity;
   }, 0);
@@ -48,6 +58,13 @@ export default function OrderAccordion({ order }: PropTypes) {
         deliveryAddress={order.deliveryAddress}
         contactNumber={order.contactNumber}
       />
+      <EditOrder
+        open={isEditOrderOpen}
+        onClose={() => setIsEditOrderOpen(false)}
+        order={order}
+        setNotification={setNotification}
+      />
+      <DeleteModal isOpen={isDeleteOrderOpen} onClose={() => setIsDeleteOrderOpen(true)} />
       <Accordion>
         <AccordionSummary>
           <Grid container alignItems="center">
@@ -58,6 +75,29 @@ export default function OrderAccordion({ order }: PropTypes) {
                 alignItems="center"
               >
                 <StatusText text={statusText.text} type={statusText.type} />
+                <Box display="flex" gap={1}>
+                  <IconButton
+                    sx={{
+                      p: 1,
+                      backgroundColor: `${errorColor} !important`,
+                      borderRadius: '50%',
+                      color: 'white',
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setIsEditOrderOpen(true)}
+                    sx={{
+                      p: 1,
+                      backgroundColor: `${blue[700]} !important`,
+                      borderRadius: '50%',
+                      color: 'white',
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={12} md={2} sx={{ mr: 2 }}>

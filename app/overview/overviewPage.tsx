@@ -163,7 +163,7 @@ export default function MainPage() {
           </Typography>
         </Divider>
         {userOrder?.items ? (
-          <OrderAccordion order={userOrder} />
+          <OrderAccordion order={userOrder} setNotification={setNotification} />
         ) : (
           <Box
             display="flex"

@@ -2,10 +2,6 @@
 'use client';
 import Image from 'next/image';
 import React from 'react';
-import { Dropdown } from 'flowbite-react';
-import { signOut } from 'next-auth/react';
-import { FaSignOutAlt } from 'react-icons/fa';
-import { MdOutlineSecurity } from 'react-icons/md';
 
 export default function Navbar() {
   const url = process.env.NEXT_PUBLIC_WEB_URL;

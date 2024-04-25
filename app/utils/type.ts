@@ -54,7 +54,7 @@ export interface UserType {
 }
 
 export interface Item {
-  id?: number;
+  id: number;
   name: string;
   categoryId?: number;
   price: number;
