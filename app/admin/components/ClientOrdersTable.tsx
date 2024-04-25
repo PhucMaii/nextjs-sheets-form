@@ -1,6 +1,7 @@
 'use clients';
 import {
   Box,
+  Checkbox,
   Table,
   TableBody,
   TableCell,
@@ -22,6 +23,9 @@ interface PropTypes {
   handleUpdateOrderUI?: (updatedOrder: Order) => void;
   handleDeleteOrderUI?: (deletedOrder: Order) => void;
   setNotification?: Dispatch<SetStateAction<Notification>>;
+  selectedOrders: Order[];
+  handleSelectOrder: (order: Order) => void;
+  handleSelectAll: () => void;
   isAdmin?: boolean;
 }
 
@@ -30,14 +34,24 @@ const ClientOrdersTable = ({
   handleUpdateOrderUI,
   handleDeleteOrderUI,
   setNotification,
+  selectedOrders,
+  handleSelectOrder,
+  handleSelectAll,
   isAdmin,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
+
   return (
     <TableContainer sx={{ maxHeight: windowDimensions.height - 300, mt: 2 }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
+            <TableCell padding="checkbox">
+              <Checkbox
+                checked={selectedOrders.length === clientOrders.length}
+                onClick={handleSelectAll}
+              />
+            </TableCell>
             <TableCell>Invoice Id</TableCell>
             <TableCell>Order Time</TableCell>
             <TableCell>Delivery Date</TableCell>
@@ -48,6 +62,8 @@ const ClientOrdersTable = ({
         </TableHead>
         <TableBody>
           {clientOrders.map((order: Order) => {
+            const isOrderSelected = selectedOrders.some((targetOrder: Order) => order.id === targetOrder.id)
+
             const statusText = {
               text: order.status,
               type:
@@ -58,7 +74,19 @@ const ClientOrdersTable = ({
                     : COLOR_TYPE.ERROR,
             };
             return (
-              <TableRow key={order.id}>
+              <TableRow 
+                key={order.id}
+                hover
+                onClick={() => handleSelectOrder(order)}
+                aria-checked={isOrderSelected}
+                selected={isOrderSelected}
+                sx={{ cursor: 'pointer' }}
+              >
+                <TableCell padding="checkbox">
+                  <Checkbox 
+                    checked={isOrderSelected}
+                  />
+                </TableCell>
                 <TableCell>{order.id}</TableCell>
                 <TableCell>{order.orderTime}</TableCell>
                 <TableCell>{order.deliveryDate}</TableCell>
@@ -72,7 +100,6 @@ const ClientOrdersTable = ({
                   handleUpdateOrderUI && (
                     <TableCell>
                       <Box display="flex" gap={1}>
-                        {/* <Button color="error">Delete</Button> */}
                         <DeleteOrder
                           order={order}
                           setNotification={setNotification}
