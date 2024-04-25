@@ -92,6 +92,7 @@ export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const [clientList, setClientList] = useState<UserType[]>([]);
+  const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
@@ -106,7 +107,6 @@ export default function Orders() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
-  const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const windowDimensions = useWindowDimensions();
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(windowDimensions.height - 250);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
