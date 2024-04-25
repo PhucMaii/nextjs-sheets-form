@@ -30,7 +30,7 @@ import { DropdownItemContainer } from '../admin/orders/styled';
 import { errorColor, successColor, warningColor } from '../theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
 import NotificationPopup from '../admin/components/Notification';
-import useWindowDimensions from '@/hooks/useWindowDimensions';
+import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -50,13 +50,17 @@ export default function HistoryPage() {
     message: '',
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  const windowDimensions = useWindowDimensions();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(windowDimensions.height - totalYPosition);
+  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const debouncedKeywords = useDebounce(searchKeywords, 800);
   const totalPositionRef: any = useRef(null);
-
+  
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  
+  useEffect(() => {
+      const windowDimensions = getWindowDimensions();
+    setVirtuosoHeight(windowDimensions.height - totalYPosition)
+  }, [])
 
   useEffect(() => {
     if (dateRange) {

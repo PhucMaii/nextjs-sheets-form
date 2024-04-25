@@ -48,7 +48,7 @@ import AddOrder from '../components/Modals/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
-import useWindowDimensions from '@/hooks/useWindowDimensions';
+import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface Category {
   id: number;
@@ -107,16 +107,20 @@ export default function Orders() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
-  const windowDimensions = useWindowDimensions();
-  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(windowDimensions.height - 250);
+  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
   const totalPosition: any = useRef();
-
+  
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-
+  
+  useEffect(() => {
+    const windowDimensions = getWindowDimensions();
+    setVirtuosoHeight(windowDimensions.height - 250)
+  }, [])
+  
   useEffect(() => {
     fetchAllClients();
   }, []);
