@@ -43,7 +43,7 @@ import { ComponentToPrint } from '../components/Printing/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
-import OrderAccordion from '../components/OrderAccordion/OrderAccordion';
+import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
@@ -84,6 +84,7 @@ export interface Order {
   status: ORDER_STATUS;
   OrderPreference?: OrderPreference[];
   isReplacement?: boolean;
+  isVoid?: boolean;
 }
 
 export default function Orders() {
@@ -122,6 +123,8 @@ export default function Orders() {
   useEffect(() => {
     pusherClient.subscribe('admin');
     pusherClient.subscribe('override-order');
+    pusherClient.subscribe('void-order');
+
 
     pusherClient.bind('incoming-order', (order: Order) => {
       setIncomingOrder(order);

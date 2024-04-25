@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react';
 import { Notification, SessionClientType } from '@/app/utils/type';
 import Button from '@/app/components/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import Navbar from '@/app/components/Navbar';
 import Snackbar from '@/app/components/Snackbar/Snackbar';
 import Input from '@/app/components/Input';
 import FadeIn from '@/app/HOC/FadeIn';
@@ -13,14 +12,17 @@ import { API_URL } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
-import { limitOrderHour } from '../admin/lib/constant';
+import { limitOrderHour } from '../lib/constant';
 import OverrideOrder from '../components/Modals/OverrideOrder';
 import { Order } from '../admin/orders/page';
+import Sidebar from '../components/Sidebar/Sidebar';
+import AuthenGuard from '../HOC/AuthenGuard';
+import Navbar from '../components/Navbar';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -49,6 +51,7 @@ export default function OrderForm() {
     message: '',
   });
   const { status }: SessionClientType = useSession() as SessionClientType;
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   let today: any = dayjs();
   if (today.$H >= limitOrderHour) {
@@ -182,92 +185,98 @@ export default function OrderForm() {
 
   if (isLoading || status === 'loading') {
     return (
-      <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-        <LoadingComponent color="blue" />
-      </div>
+      <Sidebar>
+        <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+          <LoadingComponent color="blue" />
+        </div>
+      </Sidebar>
     );
   }
 
   return (
     <FadeIn>
-      <Snackbar
-        open={notification.on}
-        onClose={() => setNotification({ ...notification, on: false })}
-        type={notification.type}
-        message={notification.message}
-      />
-      <ChangePasswordModal
-        isOpen={isOpenSecurityModal}
-        onClose={() => setIsOpenSecurityModal(false)}
-      />
-      {lastOrder && (
-        <OverrideOrder
-          open={isOverrideOrderOpen}
-          onClose={() => setIsOverrideOrderOpen(false)}
-          currentItems={itemList}
-          currentNote={note}
-          lastOrder={lastOrder}
-          deliveryDate={deliveryDate}
-          setNotification={setNotification}
-        />
-      )}
-      <Navbar handleOpenSecurityModal={() => setIsOpenSecurityModal(true)} />
-      <div className="max-w-2xl mx-auto py-16">
-        <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          <h4 className="text-center font-bold text-4xl px-8 mb-8">
-            {clientName}
-          </h4>
-          <Box mb={4}>
-            <label className="block text-red-700 text-sm font-bold mb-2">
-              DELIVERY DATE
-            </label>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                disablePast
-                minDate={minDate}
-                value={dayjs(deliveryDate)}
-                onChange={handleDateChange}
-                sx={{
-                  width: '100%',
-                  height: '0.1%',
-                  border: `1px solid ${grey[600]}`,
-                  borderRadius: 2,
-                }}
+      <Sidebar>
+        <AuthenGuard>
+          <Snackbar
+            open={notification.on}
+            onClose={() => setNotification({ ...notification, on: false })}
+            type={notification.type}
+            message={notification.message}
+          />
+          <ChangePasswordModal
+            isOpen={isOpenSecurityModal}
+            onClose={() => setIsOpenSecurityModal(false)}
+          />
+          {lastOrder && (
+            <OverrideOrder
+              open={isOverrideOrderOpen}
+              onClose={() => setIsOverrideOrderOpen(false)}
+              currentItems={itemList}
+              currentNote={note}
+              lastOrder={lastOrder}
+              deliveryDate={deliveryDate}
+              setNotification={setNotification}
+            />
+          )}
+          <div className="bg-white w-full mx-auto pb-6">
+            {smDown && <Navbar />}
+            <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+              <h4 className="text-center font-bold text-4xl px-8 mb-8">
+                {clientName}
+              </h4>
+              <Box mb={4}>
+                <label className="block text-red-700 text-sm font-bold mb-2">
+                  DELIVERY DATE
+                </label>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    disablePast
+                    minDate={minDate}
+                    value={dayjs(deliveryDate)}
+                    onChange={handleDateChange}
+                    sx={{
+                      width: '100%',
+                      height: '0.1%',
+                      border: `1px solid ${grey[600]}`,
+                      borderRadius: 2,
+                    }}
+                  />
+                </LocalizationProvider>
+              </Box>
+              {itemList.length > 0 &&
+                itemList.map((item: any, index: number) => {
+                  return (
+                    <Input<string | number>
+                      key={index}
+                      label={`${item.name} - $${item.price.toFixed(2)}`}
+                      type="number"
+                      value={item.quantity}
+                      className="border-neutral-400 h-full mb-4"
+                      onChange={(e) => handleChangeItem(e, item)}
+                      placeholder={`Enter ${item.name} here...`}
+                    />
+                  );
+                })}
+              <Input<string>
+                label="NOTE"
+                multiline
+                value={note}
+                className="border-neutral-400 h-full mb-4"
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Writing your note here..."
               />
-            </LocalizationProvider>
-          </Box>
-          {itemList.length > 0 &&
-            itemList.map((item: any, index: number) => {
-              return (
-                <Input<string | number>
-                  key={index}
-                  label={`${item.name} - $${item.price.toFixed(2)}`}
-                  type="number"
-                  value={item.quantity}
-                  className="border-neutral-400 h-full mb-4"
-                  onChange={(e) => handleChangeItem(e, item)}
-                  placeholder={`Enter ${item.name} here...`}
-                />
-              );
-            })}
-          <Input<string>
-            label="NOTE"
-            multiline
-            value={note}
-            className="border-neutral-400 h-full mb-4"
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Writing your note here..."
-          />
-          <Button
-            color="blue"
-            label="Submit"
-            onClick={handleSubmit}
-            width="full"
-            loadingButton
-            isLoading={isButtonLoading}
-          />
-        </form>
-      </div>
+              <Button
+                color="blue"
+                label="Submit"
+                onClick={handleSubmit}
+                width="full"
+                loadingButton
+                isLoading={isButtonLoading}
+              />
+            </form>
+          </div>
+        </AuthenGuard>
+      </Sidebar>
     </FadeIn>
   );
 }

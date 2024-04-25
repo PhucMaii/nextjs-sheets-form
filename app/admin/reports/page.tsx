@@ -28,17 +28,9 @@ import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/ClientOrdersTable';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import { InvoicePrint } from '../components/Printing/InvoicePrint';
+import { generateMonthRange } from '@/app/utils/time';
 import { useReactToPrint } from 'react-to-print';
-
-const generateMonthRange = () => {
-  const today = new Date();
-  const month = today.getMonth();
-  const year = today.getFullYear();
-
-  const firstDayOfThisMonth = new Date(year, month, 1);
-  return [firstDayOfThisMonth, today];
-};
+import { InvoicePrint } from '../components/Printing/InvoicePrint';
 
 export default function ReportPage() {
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);

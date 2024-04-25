@@ -1,12 +1,10 @@
-'use client';
 import React from 'react';
-import AuthenGuard from './HOC/AuthenGuard';
-import OrderForm from './form/orderForm';
+import MainPage from './overview/overviewPage';
 
-export default function MainPage() {
+export default function page() {
   return (
-    <AuthenGuard>
-      <OrderForm />
-    </AuthenGuard>
+    <>
+      <MainPage />
+    </>
   );
 }
