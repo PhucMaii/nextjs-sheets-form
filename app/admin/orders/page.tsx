@@ -48,6 +48,7 @@ import AddOrder from '../components/Modals/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
+import useWindowDimensions from '@/hooks/useWindowDimensions';
 
 interface Category {
   id: number;
@@ -106,7 +107,8 @@ export default function Orders() {
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
-  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(1200);
+  const windowDimensions = useWindowDimensions();
+  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(windowDimensions.height - 250);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const componentRef: any = useRef();
   const singlePrint: any = useRef();

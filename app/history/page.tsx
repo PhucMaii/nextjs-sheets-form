@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AuthenGuard, { SplashScreen } from '../HOC/AuthenGuard';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
@@ -30,7 +30,9 @@ import { DropdownItemContainer } from '../admin/orders/styled';
 import { errorColor, successColor, warningColor } from '../theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
 import NotificationPopup from '../admin/components/Notification';
+import useWindowDimensions from '@/hooks/useWindowDimensions';
 
+const totalYPosition = 250;
 export default function HistoryPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -48,7 +50,11 @@ export default function HistoryPage() {
     message: '',
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const windowDimensions = useWindowDimensions();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [virtuosoHeight, setVirtuosoHeight] = useState<number>(windowDimensions.height - totalYPosition);
   const debouncedKeywords = useDebounce(searchKeywords, 800);
+  const totalPositionRef: any = useRef(null);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -231,7 +237,7 @@ export default function HistoryPage() {
           notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
         />
-        <Grid container columnSpacing={2} alignItems="center" spacing={2}>
+        <Grid container columnSpacing={2} alignItems="center" spacing={2} sx={{position: 'sticky'}}>
           <Grid item xs={12} md={6}>
             <Typography variant="h4">History</Typography>
           </Grid>
@@ -253,7 +259,7 @@ export default function HistoryPage() {
           <Grid item xs={12} md={2} textAlign="right">
             {filterDropdown}
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} ref={totalPositionRef}>
             <Box
                 sx={{
                   backgroundColor: blueGrey[800],
@@ -272,7 +278,7 @@ export default function HistoryPage() {
             {clientOrders.length > 0 && (
               <Virtuoso
                 totalCount={clientOrders.length}
-                style={{ height: 1000 }}
+                style={{ height: virtuosoHeight }}
                 data={clientOrders}
                 itemContent={(index: number, order: Order) => (
                   <OrderAccordion key={index} order={order} />

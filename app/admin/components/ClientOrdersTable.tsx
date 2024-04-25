@@ -15,6 +15,7 @@ import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification } from '@/app/utils/type';
 import DeleteOrder from './Modals/DeleteOrder';
+import useWindowDimensions from '@/hooks/useWindowDimensions';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -31,8 +32,9 @@ const ClientOrdersTable = ({
   setNotification,
   isAdmin,
 }: PropTypes) => {
+  const windowDimensions = useWindowDimensions();
   return (
-    <TableContainer sx={{ maxHeight: 800, mt: 2 }}>
+    <TableContainer sx={{ maxHeight: windowDimensions.height - 300, mt: 2 }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
