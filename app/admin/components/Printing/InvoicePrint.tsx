@@ -24,7 +24,7 @@ export const InvoicePrint = forwardRef(
   ({ client, orders }: PropTypes, ref: any) => {
     const filteredOrders = orders.filter((order: Order) => {
       return order.status !== ORDER_STATUS.VOID;
-    })
+    });
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
     const ordersPerPage = 10;

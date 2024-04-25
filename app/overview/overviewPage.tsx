@@ -59,28 +59,31 @@ export default function MainPage() {
 
     setTotalBill(total);
   };
-  
+
   const handleDeleteOrder = async (orderId: number) => {
     try {
-      const response = await axios.put(`${API_URL.CLIENT_ORDER}/status`, {orderId, updatedStatus: ORDER_STATUS.VOID})
-      
+      const response = await axios.put(`${API_URL.CLIENT_ORDER}/status`, {
+        orderId,
+        updatedStatus: ORDER_STATUS.VOID,
+      });
+
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
       }
 
       const newThisMonthOrders = thisMonthOrders.filter((order: Order) => {
-        return order.id !== orderId
-      })
+        return order.id !== orderId;
+      });
 
       setNotification({
         on: true,
         type: 'success',
-        message: response.data.message
+        message: response.data.message,
       });
       setUserOrder(null);
       setThisMonthOrders(newThisMonthOrders);
@@ -89,10 +92,10 @@ export default function MainPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to delete the order: ' + error
-      })
+        message: 'Fail to delete the order: ' + error,
+      });
     }
-  }
+  };
 
   const handleFetchUserOrder = async () => {
     try {
@@ -198,9 +201,10 @@ export default function MainPage() {
         </Divider>
         {userOrder?.items ? (
           <OrderAccordion
-            handleDeleteOrder={handleDeleteOrder} 
-            order={userOrder} 
-            setNotification={setNotification} 
+            handleDeleteOrder={handleDeleteOrder}
+            order={userOrder}
+            setNotification={setNotification}
+            isEdit
           />
         ) : (
           <Box

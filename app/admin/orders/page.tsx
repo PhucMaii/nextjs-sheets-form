@@ -125,7 +125,6 @@ export default function Orders() {
     pusherClient.subscribe('override-order');
     pusherClient.subscribe('void-order');
 
-
     pusherClient.bind('incoming-order', (order: Order) => {
       setIncomingOrder(order);
     });

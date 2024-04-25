@@ -313,6 +313,7 @@ export default function ReportPage() {
                 handleUpdateOrderUI={handleUpdateOrderUI}
                 clientOrders={clientOrders}
                 setNotification={setNotification}
+                isAdmin
               />
             ) : (
               <ErrorComponent errorText="No Order Available" />

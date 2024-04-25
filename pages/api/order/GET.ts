@@ -38,6 +38,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         items: true,
       },
+      orderBy: {
+        id: 'desc',
+      },
     });
 
     const newOrders = await Promise.all(

@@ -67,7 +67,7 @@ export default function DeleteModal({
             <h3 className="mb-5 text-lg font-normal text-gray-500">
               Are you sure you want to delete?
             </h3>
-            <div className="flex gap-2" style={{color: 'white !important'}}>
+            <div className="flex gap-2" style={{ color: 'white !important' }}>
               <Button
                 label="Yes I'm sure"
                 color="white"

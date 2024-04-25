@@ -5,7 +5,7 @@ import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
 import { API_URL } from '../utils/enum';
 
-const SplashScreen: FC = () => (
+export const SplashScreen: FC = () => (
   <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
     <LoadingComponent color="blue" />
   </div>

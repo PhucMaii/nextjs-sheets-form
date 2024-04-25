@@ -18,9 +18,10 @@ import DeleteOrder from './Modals/DeleteOrder';
 
 interface PropTypes {
   clientOrders: Order[];
-  handleUpdateOrderUI: (updatedOrder: Order) => void;
-  handleDeleteOrderUI: (deletedOrder: Order) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  handleUpdateOrderUI?: (updatedOrder: Order) => void;
+  handleDeleteOrderUI?: (deletedOrder: Order) => void;
+  setNotification?: Dispatch<SetStateAction<Notification>>;
+  isAdmin?: boolean;
 }
 
 const ClientOrdersTable = ({
@@ -28,6 +29,7 @@ const ClientOrdersTable = ({
   handleUpdateOrderUI,
   handleDeleteOrderUI,
   setNotification,
+  isAdmin,
 }: PropTypes) => {
   return (
     <TableContainer sx={{ maxHeight: 800, mt: 2 }}>
@@ -62,21 +64,26 @@ const ClientOrdersTable = ({
                 <TableCell>
                   <StatusText text={statusText.text} type={statusText.type} />
                 </TableCell>
-                <TableCell>
-                  <Box display="flex" gap={1}>
-                    {/* <Button color="error">Delete</Button> */}
-                    <DeleteOrder
-                      order={order}
-                      setNotification={setNotification}
-                      handleDeleteOrderUI={handleDeleteOrderUI}
-                    />
-                    <EditReportOrder
-                      order={order}
-                      setNotification={setNotification}
-                      handleUpdateOrderUI={handleUpdateOrderUI}
-                    />
-                  </Box>
-                </TableCell>
+                {isAdmin &&
+                  setNotification &&
+                  handleDeleteOrderUI &&
+                  handleUpdateOrderUI && (
+                    <TableCell>
+                      <Box display="flex" gap={1}>
+                        {/* <Button color="error">Delete</Button> */}
+                        <DeleteOrder
+                          order={order}
+                          setNotification={setNotification}
+                          handleDeleteOrderUI={handleDeleteOrderUI}
+                        />
+                        <EditReportOrder
+                          order={order}
+                          setNotification={setNotification}
+                          handleUpdateOrderUI={handleUpdateOrderUI}
+                        />
+                      </Box>
+                    </TableCell>
+                  )}
               </TableRow>
             );
           })}

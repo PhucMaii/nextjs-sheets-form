@@ -42,8 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         id: orderId,
       },
       include: {
-        items: true
-      }
+        items: true,
+      },
     });
 
     if (!existingOrder) {
@@ -95,7 +95,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       totalPrice: total,
       category: userCategory,
       isVoid: true,
-    })
+    });
 
     return res.status(200).json({
       data: updatedOrder,

@@ -125,12 +125,14 @@ export default function Sidebar({ children }: PropTypes) {
                 />
               );
             })}
-            <BottomNavigationAction 
+            <BottomNavigationAction
               label="Sign out"
-              onClick={() => signOut({
-                callbackUrl: `https://www.supremesprouts.com/auth/login`,
-              })}
-              icon={<LogoutIcon sx={{color: blueGrey[800]}} />}
+              onClick={() =>
+                signOut({
+                  callbackUrl: `https://www.supremesprouts.com/auth/login`,
+                })
+              }
+              icon={<LogoutIcon sx={{ color: blueGrey[800] }} />}
             />
           </BottomNavigation>
         </Paper>

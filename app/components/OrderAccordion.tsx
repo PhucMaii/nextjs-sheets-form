@@ -28,12 +28,18 @@ import { Notification } from '../utils/type';
 import DeleteModal from './Modals/DeleteModal';
 
 interface PropTypes {
-  handleDeleteOrder: (orderId: number) => void;
+  handleDeleteOrder?: (orderId: number) => void;
   order: Order;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  setNotification?: Dispatch<SetStateAction<Notification>>;
+  isEdit?: boolean;
 }
 
-export default function OrderAccordion({ order, setNotification, handleDeleteOrder }: PropTypes) {
+export default function OrderAccordion({
+  order,
+  setNotification,
+  handleDeleteOrder,
+  isEdit,
+}: PropTypes) {
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
   const [isDeleteOrderOpen, setIsDeleteOrderOpen] = useState<boolean>(false);
@@ -59,17 +65,21 @@ export default function OrderAccordion({ order, setNotification, handleDeleteOrd
         deliveryAddress={order.deliveryAddress}
         contactNumber={order.contactNumber}
       />
-      <EditOrder
-        open={isEditOrderOpen}
-        onClose={() => setIsEditOrderOpen(false)}
-        order={order}
-        setNotification={setNotification}
-      />
-      <DeleteModal 
-        isOpen={isDeleteOrderOpen} 
-        onClose={() => setIsDeleteOrderOpen(false)} 
-        handleDelete={() => handleDeleteOrder(order.id)}
-        />
+      {isEdit && handleDeleteOrder && setNotification && (
+        <>
+          <EditOrder
+            open={isEditOrderOpen}
+            onClose={() => setIsEditOrderOpen(false)}
+            order={order}
+            setNotification={setNotification}
+          />
+          <DeleteModal
+            isOpen={isDeleteOrderOpen}
+            onClose={() => setIsDeleteOrderOpen(false)}
+            handleDelete={() => handleDeleteOrder(order.id)}
+          />
+        </>
+      )}
       <Accordion>
         <AccordionSummary>
           <Grid container alignItems="center">
@@ -80,30 +90,32 @@ export default function OrderAccordion({ order, setNotification, handleDeleteOrd
                 alignItems="center"
               >
                 <StatusText text={statusText.text} type={statusText.type} />
-                <Box display="flex" gap={1}>
-                  <IconButton
-                    sx={{
-                      p: 1,
-                      backgroundColor: `${errorColor} !important`,
-                      borderRadius: '50%',
-                      color: 'white',
-                    }}
-                    onClick={() => setIsDeleteOrderOpen(true)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => setIsEditOrderOpen(true)}
-                    sx={{
-                      p: 1,
-                      backgroundColor: `${blue[700]} !important`,
-                      borderRadius: '50%',
-                      color: 'white',
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Box>
+                {isEdit && (
+                  <Box display="flex" gap={1}>
+                    <IconButton
+                      sx={{
+                        p: 1,
+                        backgroundColor: `${errorColor} !important`,
+                        borderRadius: '50%',
+                        color: 'white',
+                      }}
+                      onClick={() => setIsDeleteOrderOpen(true)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => setIsEditOrderOpen(true)}
+                      sx={{
+                        p: 1,
+                        backgroundColor: `${blue[700]} !important`,
+                        borderRadius: '50%',
+                        color: 'white',
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Box>
+                )}
               </Box>
             </Grid>
             <Grid item xs={12} md={2} sx={{ mr: 2 }}>
