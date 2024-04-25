@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface PropTypes {
   client: UserType | null;
@@ -117,6 +118,9 @@ export const InvoicePrint = forwardRef(
                         (pageIndex + 1) * ordersPerPage,
                       )
                       .map((order: Order) => {
+                        if (order.status === ORDER_STATUS.VOID) {
+                          return null;
+                        }
                         return (
                           <TableRow sx={{ height: '20px !important' }}>
                             <TableCell>{order.id}</TableCell>
