@@ -191,7 +191,7 @@ export default function MainPage() {
             <OverviewCard
               icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
               text="Balance Due"
-              value={totalBill}
+              value={totalBill?.toFixed(2)}
               onClick={() => router.push('/history')}
             />
           </Grid>
