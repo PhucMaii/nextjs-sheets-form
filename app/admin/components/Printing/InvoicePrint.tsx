@@ -22,16 +22,19 @@ interface PropTypes {
 
 export const InvoicePrint = forwardRef(
   ({ client, orders }: PropTypes, ref: any) => {
+    const filteredOrders = orders.filter((order: Order) => {
+      return order.status !== ORDER_STATUS.VOID;
+    })
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
     const ordersPerPage = 10;
-    const totalPages = Math.ceil(orders.length / ordersPerPage);
+    const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
     const totalPrices: number[] = [];
 
     // Calculate total bill for each page
     for (let i = 0; i < totalPages; i++) {
-      const currentPageOrders = orders.slice(
+      const currentPageOrders = filteredOrders.slice(
         i * ordersPerPage,
         (i + 1) * ordersPerPage,
       );
@@ -111,16 +114,13 @@ export const InvoicePrint = forwardRef(
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {orders &&
-                    orders
+                  {filteredOrders &&
+                    filteredOrders
                       .slice(
                         pageIndex * ordersPerPage,
                         (pageIndex + 1) * ordersPerPage,
                       )
                       .map((order: Order) => {
-                        if (order.status === ORDER_STATUS.VOID) {
-                          return null;
-                        }
                         return (
                           <TableRow sx={{ height: '20px !important' }}>
                             <TableCell>{order.id}</TableCell>
