@@ -62,7 +62,9 @@ const ClientOrdersTable = ({
         </TableHead>
         <TableBody>
           {clientOrders.map((order: Order) => {
-            const isOrderSelected = selectedOrders.some((targetOrder: Order) => order.id === targetOrder.id)
+            const isOrderSelected = selectedOrders.some(
+              (targetOrder: Order) => order.id === targetOrder.id,
+            );
 
             const statusText = {
               text: order.status,
@@ -74,7 +76,7 @@ const ClientOrdersTable = ({
                     : COLOR_TYPE.ERROR,
             };
             return (
-              <TableRow 
+              <TableRow
                 key={order.id}
                 hover
                 onClick={() => handleSelectOrder(order)}
@@ -83,9 +85,7 @@ const ClientOrdersTable = ({
                 sx={{ cursor: 'pointer' }}
               >
                 <TableCell padding="checkbox">
-                  <Checkbox 
-                    checked={isOrderSelected}
-                  />
+                  <Checkbox checked={isOrderSelected} />
                 </TableCell>
                 <TableCell>{order.id}</TableCell>
                 <TableCell>{order.orderTime}</TableCell>

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import {
+  Alert,
   BottomNavigation,
   BottomNavigationAction,
   Box,
@@ -11,10 +12,13 @@ import {
   ListItemIcon,
   ListItemText,
   Paper,
+  Snackbar,
+  TextField,
   Toolbar,
+  Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -22,6 +26,8 @@ import { blue, blueGrey } from '@mui/material/colors';
 import { clientTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { UserContext } from '@/app/context/UserContextAPI';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface PropTypes {
   children: ReactNode;
@@ -31,8 +37,15 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
+
   const router = useRouter();
   const pathname: any = usePathname();
+
+  const userData = useContext(UserContext);
+  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(
+    !userData?.email,
+  );
+
   const url = process.env.NEXT_PUBLIC_WEB_URL;
 
   useEffect(() => {
@@ -45,6 +58,27 @@ export default function Sidebar({ children }: PropTypes) {
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
+  const alert = (
+    <Alert
+      severity="warning"
+      sx={{
+        width: '100%',
+        display: 'flex',
+        gap: 1,
+        alignItems: 'center',
+      }}
+      onClose={smDown ? () => setIsOpenSnackbar(false) : undefined}
+    >
+      <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
+        <Typography>
+          Subscribe your email to acknowledge whenever your order is placed:
+        </Typography>
+        <TextField placeholder="Enter your email" />
+        <Button>Submit</Button>
+      </Box>
+    </Alert>
+  );
 
   const content = (
     <>
@@ -97,6 +131,22 @@ export default function Sidebar({ children }: PropTypes) {
     return (
       <>
         <Box sx={{ p: 2, pb: 8 }}>{children}</Box>
+        <Snackbar
+          open={isOpenSnackbar}
+          onClose={() => setIsOpenSnackbar(false)}
+          action={
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={() => setIsOpenSnackbar(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          }
+        >
+          {alert}
+        </Snackbar>
         <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
           <BottomNavigation
             sx={{ width: '100vw !important' }}
@@ -164,8 +214,17 @@ export default function Sidebar({ children }: PropTypes) {
           >
             {content}
           </Drawer>
-          <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
-            {children}
+          <Box width="100%">
+            {!userData?.email && alert}
+            <Box
+              display="flex"
+              width="100%"
+              flexDirection="column"
+              m={2}
+              gap={2}
+            >
+              {children}
+            </Box>
           </Box>
         </Box>
       </>
@@ -191,8 +250,11 @@ export default function Sidebar({ children }: PropTypes) {
         >
           {content}
         </Drawer>
-        <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
-          {children}
+        <Box width="100%">
+          {!userData?.email && alert}
+          <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+            {children}
+          </Box>
         </Box>
       </Box>
     </>

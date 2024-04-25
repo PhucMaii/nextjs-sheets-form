@@ -10,7 +10,12 @@ interface PropTypes {
   onClick?: any;
 }
 
-export default function OverviewCard({ icon, text, value, onClick }: PropTypes) {
+export default function OverviewCard({
+  icon,
+  text,
+  value,
+  onClick,
+}: PropTypes) {
   return (
     <CardStyled onClick={onClick ? onClick : null}>
       <Grid container spacing={2} margin={'auto'}>

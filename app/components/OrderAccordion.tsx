@@ -119,11 +119,7 @@ export default function OrderAccordion({
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Button
-                label={order.clientName}
-                color="blue"
-                width="auto"
-              />
+              <Button label={order.clientName} color="blue" width="auto" />
             </Grid>
             <Grid item xs={12} md={3} textAlign="center">
               <Typography fontWeight="bold" variant="subtitle1">

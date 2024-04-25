@@ -49,6 +49,8 @@ export interface UserType {
   clientId: string;
   clientName: string;
   password?: string;
+  email?: string;
+  deliveryAddress: string;
   sheetName?: string;
   categoryId?: number;
 }

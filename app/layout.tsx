@@ -6,6 +6,7 @@ import SheetNamesContextAPI from './context/SheetNamesContext';
 import { ThemeProvider } from '@mui/material';
 import { theme } from './theme/theme';
 import '../styles/reactCalendar.css';
+import UserContextAPI from './context/UserContextAPI';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body id="root" className={inter.className}>
         <ThemeProvider theme={theme}>
           <SheetNamesContextAPI>
-            <Providers>{children}</Providers>
+            <Providers>
+              <UserContextAPI>{children}</UserContextAPI>
+            </Providers>
           </SheetNamesContextAPI>
         </ThemeProvider>
       </body>

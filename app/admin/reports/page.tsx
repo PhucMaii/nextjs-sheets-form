@@ -172,7 +172,7 @@ export default function ReportPage() {
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
-  }
+  };
 
   const handleDeleteOrderUI = (deletedOrder: Order) => {
     // update base order list
@@ -204,25 +204,25 @@ export default function ReportPage() {
   const handleSelectOrder = (targetOrder: Order) => {
     const selectedOrder = selectedOrders.find((order: Order) => {
       return order.id === targetOrder.id;
-    })
+    });
 
     if (selectedOrder) {
       const newSelectedOrders = selectedOrders.filter((order: Order) => {
         return order.id !== targetOrder.id;
-      })
+      });
       setSelectedOrders(newSelectedOrders);
     } else {
       setSelectedOrders([...selectedOrders, targetOrder]);
     }
-  }
+  };
 
   const handleSelectAll = () => {
     if (selectedOrders.length === clientOrders.length) {
       setSelectedOrders([]);
     } else {
-      setSelectedOrders(clientOrders)
+      setSelectedOrders(clientOrders);
     }
-  }
+  };
 
   const handleUpdateOrderUI = (updatedOrder: Order) => {
     // update base order list
@@ -315,10 +315,7 @@ export default function ReportPage() {
             handleCloseAnchor();
           }}
         >
-          <DropdownItemContainer
-            display="flex"
-            gap={2}
-          >
+          <DropdownItemContainer display="flex" gap={2}>
             <PendingIcon sx={{ color: warningColor }} />
             <Typography>Mark as incompleted</Typography>
           </DropdownItemContainer>
@@ -329,10 +326,7 @@ export default function ReportPage() {
             handleCloseAnchor();
           }}
         >
-          <DropdownItemContainer
-            display="flex"
-            gap={2}
-          >
+          <DropdownItemContainer display="flex" gap={2}>
             <BlockIcon sx={{ color: errorColor }} />
             <Typography>Mark as void</Typography>
           </DropdownItemContainer>
@@ -347,7 +341,7 @@ export default function ReportPage() {
         <div style={{ display: 'none' }}>
           <InvoicePrint
             client={clientValue}
-            orders={selectedOrders.length > 0 ? selectedOrders: clientOrders}
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
             ref={invoicePrint}
           />
         </div>

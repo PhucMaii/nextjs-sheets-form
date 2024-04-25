@@ -15,6 +15,7 @@ model User {
   clientId        String   @unique @db.VarChar(255)
   contactNumber   String   @db.VarChar(11)
   deliveryAddress String   @db.VarChar(255)
+  email           String?  @db.VarChar(255)
   password        String   @db.VarChar(255)
   sheetName       String   @db.VarChar(255)
   role            String   @db.VarChar(255)

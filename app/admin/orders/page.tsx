@@ -112,15 +112,15 @@ export default function Orders() {
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
   const totalPosition: any = useRef();
-  
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  
+
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
-    setVirtuosoHeight(windowDimensions.height - 250)
-  }, [])
-  
+    setVirtuosoHeight(windowDimensions.height - 250);
+  }, []);
+
   useEffect(() => {
     fetchAllClients();
   }, []);

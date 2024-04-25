@@ -54,13 +54,13 @@ export default function HistoryPage() {
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const debouncedKeywords = useDebounce(searchKeywords, 800);
   const totalPositionRef: any = useRef(null);
-  
+
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  
+
   useEffect(() => {
-      const windowDimensions = getWindowDimensions();
-    setVirtuosoHeight(windowDimensions.height - totalYPosition)
-  }, [])
+    const windowDimensions = getWindowDimensions();
+    setVirtuosoHeight(windowDimensions.height - totalYPosition);
+  }, []);
 
   useEffect(() => {
     if (dateRange) {
@@ -241,7 +241,13 @@ export default function HistoryPage() {
           notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
         />
-        <Grid container columnSpacing={2} alignItems="center" spacing={2} sx={{position: 'sticky'}}>
+        <Grid
+          container
+          columnSpacing={2}
+          alignItems="center"
+          spacing={2}
+          sx={{ position: 'sticky' }}
+        >
           <Grid item xs={12} md={6}>
             <Typography variant="h4">History</Typography>
           </Grid>
@@ -265,18 +271,18 @@ export default function HistoryPage() {
           </Grid>
           <Grid item xs={12} ref={totalPositionRef}>
             <Box
-                sx={{
-                  backgroundColor: blueGrey[800],
-                  color: 'white',
-                  width: 'fit-content',
-                  padding: 1,
-                  borderRadius: 2,
-                }}
+              sx={{
+                backgroundColor: blueGrey[800],
+                color: 'white',
+                width: 'fit-content',
+                padding: 1,
+                borderRadius: 2,
+              }}
             >
-                <Typography variant="h6">
-                  Total: {clientOrders.length} orders
-                </Typography>
-              </Box>
+              <Typography variant="h6">
+                Total: {clientOrders.length} orders
+              </Typography>
+            </Box>
           </Grid>
           <Grid item xs={12}>
             {clientOrders.length > 0 && (
