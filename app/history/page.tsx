@@ -28,7 +28,7 @@ import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
 import { DropdownItemContainer } from '../admin/orders/styled';
 import { errorColor, successColor, warningColor } from '../theme/color';
-import { blue } from '@mui/material/colors';
+import { blue, blueGrey } from '@mui/material/colors';
 import NotificationPopup from '../admin/components/Notification';
 
 export default function HistoryPage() {
@@ -89,6 +89,7 @@ export default function HistoryPage() {
   };
 
   const handleFetchClientOrders = async () => {
+    setIsFetching(true);
     try {
       const response = await axios.get(
         `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
@@ -251,6 +252,21 @@ export default function HistoryPage() {
           </Grid>
           <Grid item xs={12} md={2} textAlign="right">
             {filterDropdown}
+          </Grid>
+          <Grid item xs={12}>
+            <Box
+                sx={{
+                  backgroundColor: blueGrey[800],
+                  color: 'white',
+                  width: 'fit-content',
+                  padding: 1,
+                  borderRadius: 2,
+                }}
+            >
+                <Typography variant="h6">
+                  Total: {clientOrders.length} orders
+                </Typography>
+              </Box>
           </Grid>
           <Grid item xs={12}>
             {clientOrders.length > 0 && (

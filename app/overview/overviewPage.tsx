@@ -184,6 +184,7 @@ export default function MainPage() {
               icon={<ReceiptLongIcon sx={{ color: blue[700], fontSize: 50 }} />}
               text="Total Orders"
               value={thisMonthOrders.length}
+              onClick={() => router.push('/history')}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -191,6 +192,7 @@ export default function MainPage() {
               icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
               text="Balance Due"
               value={totalBill}
+              onClick={() => router.push('/history')}
             />
           </Grid>
         </Grid>

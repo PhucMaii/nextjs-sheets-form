@@ -17,7 +17,6 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import StatusText, { COLOR_TYPE } from '../admin/components/StatusText';
 import Button from './Button';
 import { Item, Order } from '../admin/orders/page';
-import ClientDetailsModal from '../admin/components/Modals/ClientDetailsModal';
 import { ORDER_STATUS } from '../utils/enum';
 import { blue, grey } from '@mui/material/colors';
 import EditIcon from '@mui/icons-material/Edit';
@@ -40,7 +39,6 @@ export default function OrderAccordion({
   handleDeleteOrder,
   isEdit,
 }: PropTypes) {
-  const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
   const [isDeleteOrderOpen, setIsDeleteOrderOpen] = useState<boolean>(false);
   const totalQuantity = order.items?.reduce((acc: number, cV: Item) => {
@@ -59,12 +57,6 @@ export default function OrderAccordion({
 
   return (
     <>
-      <ClientDetailsModal
-        open={isClientModalOpen}
-        onClose={() => setIsClientModalOpen(false)}
-        deliveryAddress={order.deliveryAddress}
-        contactNumber={order.contactNumber}
-      />
       {isEdit && handleDeleteOrder && setNotification && (
         <>
           <EditOrder
@@ -130,7 +122,6 @@ export default function OrderAccordion({
               <Button
                 label={order.clientName}
                 color="blue"
-                onClick={() => setIsClientModalOpen(true)}
                 width="auto"
               />
             </Grid>

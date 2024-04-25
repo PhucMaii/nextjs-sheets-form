@@ -7,11 +7,12 @@ interface PropTypes {
   icon: ReactNode;
   text: string;
   value: number | string;
+  onClick?: any;
 }
 
-export default function OverviewCard({ icon, text, value }: PropTypes) {
+export default function OverviewCard({ icon, text, value, onClick }: PropTypes) {
   return (
-    <CardStyled>
+    <CardStyled onClick={onClick ? onClick : null}>
       <Grid container spacing={2} margin={'auto'}>
         <Grid item xs={5}>
           <IconBackground>{icon}</IconBackground>
