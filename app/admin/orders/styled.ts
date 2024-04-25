@@ -10,4 +10,5 @@ export const DropdownItemContainer = styled(Box)<DropdownItemContainerProps>`
   padding: 8px;
   border-radius: 10px;
   background-color: ${(props) => props.isSelected && grey[200]};
+  width: 100%;
 `;

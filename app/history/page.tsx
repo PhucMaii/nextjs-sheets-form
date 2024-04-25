@@ -6,23 +6,41 @@ import {
   Box,
   Button,
   Grid,
+  Menu,
+  MenuItem,
   TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import PendingIcon from '@mui/icons-material/Pending';
 import SelectDateRange from '../admin/components/SelectDateRange';
 import { generateMonthRange } from '../utils/time';
 import { Order } from '../admin/orders/page';
 import axios from 'axios';
-import { API_URL } from '../utils/enum';
+import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { Notification } from '../utils/type';
-import ClientOrdersTable from '../admin/components/ClientOrdersTable';
 import OrderAccordion from '../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
+import useDebounce from '@/hooks/useDebounce';
+import { DropdownItemContainer } from '../admin/orders/styled';
+import { errorColor, successColor, warningColor } from '../theme/color';
+import { blue } from '@mui/material/colors';
+import NotificationPopup from '../admin/components/Notification';
 
 export default function HistoryPage() {
+  const [actionButtonAnchor, setActionButtonAnchor] =
+    useState<null | HTMLElement>(null);
+  const openDropdown = Boolean(actionButtonAnchor);
+  const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [filterOptions, setFilterOptions] = useState<ORDER_STATUS | string>(
+    'All',
+  );
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -30,6 +48,7 @@ export default function HistoryPage() {
     message: '',
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const debouncedKeywords = useDebounce(searchKeywords, 800);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -39,7 +58,36 @@ export default function HistoryPage() {
     }
   }, [dateRange]);
 
-  console.log(clientOrders, 'clientOrders');
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newOrderData = baseClientOrders.filter((order: Order) => {
+        if (
+          order.id.toString().includes(debouncedKeywords) ||
+          order.status.toLowerCase() === debouncedKeywords.toLowerCase()
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setClientOrders(newOrderData);
+    } else {
+      setClientOrders(baseClientOrders);
+    }
+  }, [debouncedKeywords, baseClientOrders]);
+
+  const filterOrder = (status: ORDER_STATUS) => {
+    const newClientOrders = baseClientOrders.filter((order: Order) => {
+      return order.status === status;
+    });
+
+    setFilterOptions(status);
+    setClientOrders(newClientOrders);
+  };
+
+  const handleCloseAnchor = () => {
+    setActionButtonAnchor(null);
+  };
+
   const handleFetchClientOrders = async () => {
     try {
       const response = await axios.get(
@@ -57,6 +105,7 @@ export default function HistoryPage() {
       }
 
       setClientOrders(response.data.data.userOrders);
+      setBaseClientOrders(response.data.data.userOrders);
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client orders: ', error);
@@ -69,13 +118,118 @@ export default function HistoryPage() {
     }
   };
 
+  const resetOrders = () => {
+    setClientOrders(baseClientOrders);
+    setFilterOptions('All');
+  };
+
+  const filterDropdown = (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      gap={2}
+      width="100%"
+    >
+      <Button
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+        endIcon={<ArrowDownwardIcon />}
+        variant="outlined"
+        fullWidth
+      >
+        Filter
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={actionButtonAnchor}
+        open={openDropdown}
+        onClose={handleCloseAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            resetOrders();
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={filterOptions === 'All'}
+          >
+            <ReceiptLongIcon sx={{ color: blue[700] }} />
+            <Typography>All orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrder(ORDER_STATUS.COMPLETED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={filterOptions === ORDER_STATUS.COMPLETED}
+          >
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Completed orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrder(ORDER_STATUS.INCOMPLETED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={filterOptions === ORDER_STATUS.INCOMPLETED}
+          >
+            <PendingIcon sx={{ color: warningColor }} />
+            <Typography>Incompleted orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrder(ORDER_STATUS.VOID);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={filterOptions === ORDER_STATUS.VOID}
+          >
+            <ErrorIcon sx={{ color: errorColor }} />
+            <Typography>Void orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
+
   if (isFetching) {
-    return <SplashScreen />;
+    return (
+      <Sidebar>
+        <SplashScreen />
+      </Sidebar>
+    );
   }
 
   return (
     <Sidebar>
       <AuthenGuard>
+        <NotificationPopup
+          notification={notification}
+          onClose={() => setNotification({ ...notification, on: false })}
+        />
         <Grid container columnSpacing={2} alignItems="center" spacing={2}>
           <Grid item xs={12} md={6}>
             <Typography variant="h4">History</Typography>
@@ -90,18 +244,16 @@ export default function HistoryPage() {
             <TextField
               fullWidth
               variant="filled"
-              // label="Search orders"
               placeholder="Search by invoice id or status"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          <Grid item md={2} textAlign="right"></Grid>
+          <Grid item xs={12} md={2} textAlign="right">
+            {filterDropdown}
+          </Grid>
           <Grid item xs={12}>
             {clientOrders.length > 0 && (
-              // <OrderAccordion
-              //     order={order}
-              // />
               <Virtuoso
                 totalCount={clientOrders.length}
                 style={{ height: 1000 }}
