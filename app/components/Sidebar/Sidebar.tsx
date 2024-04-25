@@ -21,6 +21,7 @@ import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
 import { clientTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 interface PropTypes {
   children: ReactNode;
@@ -124,6 +125,13 @@ export default function Sidebar({ children }: PropTypes) {
                 />
               );
             })}
+            <BottomNavigationAction 
+              label="Sign out"
+              onClick={() => signOut({
+                callbackUrl: `https://www.supremesprouts.com/auth/login`,
+              })}
+              icon={<LogoutIcon sx={{color: blueGrey[800]}} />}
+            />
           </BottomNavigation>
         </Paper>
       </>
