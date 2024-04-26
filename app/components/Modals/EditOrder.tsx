@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import LoadingButtonStyles from '../LoadingButtonStyles';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -141,21 +142,15 @@ export default function EditOrder({
             </Grid>
             {mdDown && (
               <Grid item xs={12}>
-                <LoadingButton
+                <LoadingButtonStyles
                   variant="contained"
                   fullWidth
                   disabled={itemList.length === 0}
                   loading={isOverriding}
                   onClick={handleOverrideOrder}
-                  sx={{
-                    backgroundColor: `${infoColor} !important`,
-                    '& .css-1yt7yx7-MuiLoadingButton-loadingIndicator': {
-                      color: 'white', // Change the color to white
-                    },
-                  }}
                 >
                   SAVE
-                </LoadingButton>
+                </LoadingButtonStyles>
               </Grid>
             )}
           </Grid>

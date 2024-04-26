@@ -1,5 +1,4 @@
 import { Notification, OrderedItems } from '@/app/utils/type';
-import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Divider,
@@ -19,6 +18,7 @@ import { API_URL } from '@/app/utils/enum';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { Order } from '../../orders/page';
 import { infoColor } from '@/app/theme/color';
+import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
@@ -99,15 +99,15 @@ export default function EditPrice({
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Edit Price</Typography>
-          <LoadingButton
+          <LoadingButtonStyles
             variant="contained"
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdatePrice}
-            sx={{ backgroundColor: `${infoColor} !important` }}
+            color={infoColor}
           >
             Save
-          </LoadingButton>
+          </LoadingButtonStyles>
         </Box>
         <RadioGroup
           row

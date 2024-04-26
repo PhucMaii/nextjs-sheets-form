@@ -9,7 +9,7 @@ import { grey } from '@mui/material/colors';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
-import { LoadingButton } from '@mui/lab';
+import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes {
   order: Order;
@@ -79,15 +79,14 @@ export default function DeleteOrder({
             >
               Cancel
             </Button>
-            <LoadingButton
-              color="error"
+            <LoadingButtonStyles
+              color={errorColor}
               loading={isDeleting}
               onClick={handleDeleteOrder}
               variant="contained"
-              sx={{ backgroundColor: `${errorColor} !important` }}
             >
               DELETE
-            </LoadingButton>
+            </LoadingButtonStyles>
           </Box>
         </BoxModal>
       </Modal>

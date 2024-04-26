@@ -30,7 +30,7 @@ export default function EmailAlert({
   const subscribeEmail = async () => {
     try {
       setIsSubmitting(true);
-      const response = await axios.put(`${API_URL.USER}`, { email });
+      const response = await axios.put(API_URL.USER, { email });
 
       if (response.data.error) {
         setNotification({

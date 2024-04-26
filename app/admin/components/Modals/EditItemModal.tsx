@@ -11,10 +11,10 @@ import { BoxModal } from './styled';
 import { Notification, OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import { LoadingButton } from '@mui/lab';
 import { Item, Order } from '../../orders/page';
 import { ModalProps } from './type';
 import { infoColor } from '@/app/theme/color';
+import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -89,15 +89,15 @@ export default function EditItemModal({
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">{item.name}</Typography>
-          <LoadingButton
+          <LoadingButtonStyles
             variant="contained"
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdateData}
-            sx={{ backgroundColor: `${infoColor} !important` }}
-          >
+            color={infoColor}
+            >
             Save
-          </LoadingButton>
+          </LoadingButtonStyles>
         </Box>
         <Divider />
         <Grid container alignItems="center" rowGap={4} mt={2}>

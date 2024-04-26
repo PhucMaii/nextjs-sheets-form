@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
 import { BoxModal } from './styled';
-import { LoadingButton } from '@mui/lab';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -23,6 +22,7 @@ import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
 import { Notification } from '@/app/utils/type';
 import { infoColor } from '@/app/theme/color';
+import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes {
   order: Order;
@@ -138,15 +138,15 @@ export default function EditReportOrder({
             alignItems="center"
           >
             <Typography variant="h4">Edit Order</Typography>
-            <LoadingButton
+            <LoadingButtonStyles
               variant="contained"
               disabled={itemList.length === 0}
               loading={isSubmitting}
               onClick={handleUpdateOrder}
-              sx={{ backgroundColor: `${infoColor} !important` }}
+              color={infoColor}
             >
               SAVE
-            </LoadingButton>
+            </LoadingButtonStyles>
           </Box>
           <Divider />
           <Box overflow="auto" maxHeight="70vh">

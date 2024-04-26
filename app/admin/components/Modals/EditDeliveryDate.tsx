@@ -2,7 +2,6 @@ import { Box, Divider, FormControl, Modal, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
-import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
@@ -12,6 +11,7 @@ import dayjs from 'dayjs';
 import { formatDateChanged } from '@/app/utils/time';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { infoColor } from '@/app/theme/color';
+import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -80,15 +80,15 @@ export default function EditDeliveryDate({
           gap={4}
         >
           <Typography variant="h4">Edit Delivery Date</Typography>
-          <LoadingButton
+          <LoadingButtonStyles
             variant="contained"
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdateDate}
-            sx={{ backgroundColor: `${infoColor} !important` }}
+            color={infoColor}
           >
             Save
-          </LoadingButton>
+          </LoadingButtonStyles>
         </Box>
         <Divider />
         <Box>
