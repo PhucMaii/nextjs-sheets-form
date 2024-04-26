@@ -95,7 +95,7 @@ export default function EditItemModal({
             loading={isLoading}
             onClick={handleUpdateData}
             color={infoColor}
-            >
+          >
             Save
           </LoadingButtonStyles>
         </Box>
