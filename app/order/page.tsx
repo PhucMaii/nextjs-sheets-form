@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { Notification, SessionClientType } from '@/app/utils/type';
 import Button from '@/app/components/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import Snackbar from '@/app/components/Snackbar/Snackbar';
+import Snackbar from '@/app/components/Snackbar/SnackbarPopup';
 import Input from '@/app/components/Input';
 import FadeIn from '@/app/HOC/FadeIn';
 import axios from 'axios';

@@ -3,7 +3,7 @@ import FadeIn from '@/app/HOC/FadeIn';
 import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
 import Button from '@/app/components/Button';
 import Input from '@/app/components/Input';
-import Snackbar from '@/app/components/Snackbar/Snackbar';
+import Snackbar from '@/app/components/Snackbar/SnackbarPopup';
 import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
 import axios from 'axios';

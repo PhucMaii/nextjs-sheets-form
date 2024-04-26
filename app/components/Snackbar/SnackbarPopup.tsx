@@ -15,7 +15,7 @@ const FadeIn = (para: Fadein) => (
   </Transition.Child>
 );
 
-export default function Snackbar(props: PropTypes) {
+export default function SnackbarPopup(props: PropTypes) {
   useEffect(() => {
     if (props.open) {
       const timeoutId = setTimeout(() => {

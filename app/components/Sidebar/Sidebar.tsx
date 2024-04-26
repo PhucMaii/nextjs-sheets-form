@@ -28,6 +28,9 @@ import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
 import CloseIcon from '@mui/icons-material/Close';
+import EmailAlert from '../EmailAlert';
+import SnackbarPopup from '../Snackbar/SnackbarPopup';
+import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
   children: ReactNode;
@@ -37,6 +40,11 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
+  const [notification, setNotification] = useState<Notification>({
+    on: false,
+    type: 'info',
+    message: '',
+  });
 
   const router = useRouter();
   const pathname: any = usePathname();
@@ -59,29 +67,14 @@ export default function Sidebar({ children }: PropTypes) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
-  const alert = (
-    <Alert
-      severity="warning"
-      sx={{
-        width: '100%',
-        display: 'flex',
-        gap: 1,
-        alignItems: 'center',
-      }}
-      onClose={smDown ? () => setIsOpenSnackbar(false) : undefined}
-    >
-      <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
-        <Typography>
-          Subscribe your email to acknowledge whenever your order is placed:
-        </Typography>
-        <TextField placeholder="Enter your email" />
-        <Button>Submit</Button>
-      </Box>
-    </Alert>
-  );
-
   const content = (
     <>
+      <SnackbarPopup
+        open={notification.on}
+        onClose={() => setNotification({ ...notification, on: false })}
+        type={notification.type}
+        message={notification.message}
+      />
       <Toolbar sx={{ mt: 4 }}>
         <img
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
@@ -131,22 +124,29 @@ export default function Sidebar({ children }: PropTypes) {
     return (
       <>
         <Box sx={{ p: 2, pb: 8 }}>{children}</Box>
-        <Snackbar
-          open={isOpenSnackbar}
-          onClose={() => setIsOpenSnackbar(false)}
-          action={
-            <IconButton
-              size="small"
-              aria-label="close"
-              color="inherit"
-              onClick={() => setIsOpenSnackbar(false)}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          }
-        >
-          {alert}
-        </Snackbar>
+        {isOpenSnackbar && (
+          <Snackbar
+            open={isOpenSnackbar}
+            onClose={() => setIsOpenSnackbar(false)}
+            action={
+              <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => setIsOpenSnackbar(false)}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            }
+          >
+            <div>
+              <EmailAlert
+                setIsOpenSnackbar={setIsOpenSnackbar}
+                setNotification={setNotification}
+              />
+            </div>
+          </Snackbar>
+        )}
         <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
           <BottomNavigation
             sx={{ width: '100vw !important' }}
@@ -215,7 +215,12 @@ export default function Sidebar({ children }: PropTypes) {
             {content}
           </Drawer>
           <Box width="100%">
-            {!userData?.email && alert}
+            {isOpenSnackbar && (
+              <EmailAlert
+                setIsOpenSnackbar={setIsOpenSnackbar}
+                setNotification={setNotification}
+              />
+            )}
             <Box
               display="flex"
               width="100%"
@@ -251,7 +256,12 @@ export default function Sidebar({ children }: PropTypes) {
           {content}
         </Drawer>
         <Box width="100%">
-          {!userData?.email && alert}
+          {isOpenSnackbar && (
+            <EmailAlert
+              setIsOpenSnackbar={setIsOpenSnackbar}
+              setNotification={setNotification}
+            />
+          )}
           <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
             {children}
           </Box>
