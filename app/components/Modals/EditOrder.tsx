@@ -148,6 +148,7 @@ export default function EditOrder({
                   disabled={itemList.length === 0}
                   loading={isOverriding}
                   onClick={handleOverrideOrder}
+                  color={infoColor}
                 >
                   SAVE
                 </LoadingButtonStyles>

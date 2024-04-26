@@ -27,7 +27,7 @@ export const InvoicePrint = forwardRef(
     });
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
-    const ordersPerPage = 10;
+    const ordersPerPage = 22;
     const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
     const totalPrices: number[] = [];
