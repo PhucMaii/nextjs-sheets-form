@@ -268,7 +268,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default handler;
 
-const checkHasClientOrder = async (id: number, deliveryDate: string) => {
+export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
   const prisma = new PrismaClient();
 
   const userOrders = await prisma.orders.findFirst({
