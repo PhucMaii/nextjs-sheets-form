@@ -129,7 +129,14 @@ export default function EditReportOrder({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>Edit</Button>
+      <Button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+      >
+        Edit
+      </Button>
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
         <BoxModal display="flex" flexDirection="column" gap={2}>
           <Box

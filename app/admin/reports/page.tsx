@@ -34,11 +34,19 @@ import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/ClientOrdersTable';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import { generateMonthRange } from '@/app/utils/time';
+import {
+  YYYYMMDDFormat,
+  formatDateChanged,
+  generateMonthRange,
+} from '@/app/utils/time';
 import { useReactToPrint } from 'react-to-print';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
 import { DropdownItemContainer } from '../orders/styled';
 import { errorColor, successColor, warningColor } from '@/app/theme/color';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import { limitOrderHour } from '@/app/lib/constant';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -48,8 +56,18 @@ export default function ReportPage() {
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
-  const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [datePicker, setDatePicker] = useState<string>(() => {
+    // format initial date
+    const dateObj = new Date();
+    // if current hour is greater limit hour, then recommend the next day
+    if (dateObj.getHours() >= limitOrderHour) {
+      dateObj.setDate(dateObj.getDate() + 1);
+    }
+    const formattedDate = YYYYMMDDFormat(dateObj);
+    return formattedDate;
+  });
+  const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -75,13 +93,13 @@ export default function ReportPage() {
   }, [clientOrders]);
 
   useEffect(() => {
-    if (clientValue && dateRange.length > 0) {
+    if (clientValue && (dateRange.length > 0 || datePicker)) {
       fetchClientOrders();
     } else {
       setClientOrders([]);
       setBaseClientOrders([]);
     }
-  }, [clientValue, dateRange]);
+  }, [clientValue, dateRange, datePicker]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -128,7 +146,13 @@ export default function ReportPage() {
         return;
       }
 
-      setClientList(response.data.data);
+      const allClients = {
+        clientId: '',
+        clientName: 'All Clients',
+        deliveryAddress: '',
+      };
+
+      setClientList([allClients, ...response.data.data]);
     } catch (error: any) {
       console.log('Fail to fetch all clients: ' + error);
     }
@@ -137,9 +161,16 @@ export default function ReportPage() {
   const fetchClientOrders = async () => {
     try {
       setIsFetching(true);
-      const response = await axios.get(
-        `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-      );
+      let response;
+      if (clientValue?.clientName === 'All Clients') {
+        response = await axios.get(
+          `${API_URL.CLIENTS}/orders?deliveryDate=${datePicker}`,
+        );
+      } else {
+        response = await axios.get(
+          `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+        );
+      }
 
       if (response.data.error) {
         setNotification({
@@ -174,6 +205,11 @@ export default function ReportPage() {
     setActionButtonAnchor(null);
   };
 
+  const handleDateChange = (e: any) => {
+    const formattedDate = formatDateChanged(e);
+    setDatePicker(formattedDate);
+  };
+
   const handleDeleteOrderUI = (deletedOrder: Order) => {
     // update base order list
     const newBaseOrderList = baseClientOrders.filter((order: Order) => {
@@ -201,7 +237,8 @@ export default function ReportPage() {
     content: () => invoicePrint.current,
   });
 
-  const handleSelectOrder = (targetOrder: Order) => {
+  const handleSelectOrder = (e: any, targetOrder: Order) => {
+    e.preventDefault();
     const selectedOrder = selectedOrders.find((order: Order) => {
       return order.id === targetOrder.id;
     });
@@ -351,15 +388,33 @@ export default function ReportPage() {
         />
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Reports</Typography>
-          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+          {clientValue?.clientName === 'All Clients' ? (
+            <>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={dayjs(datePicker)}
+                  onChange={handleDateChange}
+                />
+              </LocalizationProvider>
+            </>
+          ) : (
+            <SelectDateRange
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+            />
+          )}
         </Box>
         <ShadowSection display="flex" flexDirection="column" gap={1}>
           <Typography variant="h6">Clients</Typography>
           <Autocomplete
             options={clientList as UserType[]}
-            getOptionLabel={(option) =>
-              `${option.clientName} - ${option.clientId}`
-            }
+            getOptionLabel={(option) => {
+              if (option.clientName === 'All Clients') {
+                return option.clientName;
+              }
+
+              return `${option.clientName} - ${option.clientId}`;
+            }}
             renderInput={(params) => <TextField {...params} label="Client" />}
             value={clientValue}
             onChange={(e, newValue) => setClientValue(newValue)}

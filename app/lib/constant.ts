@@ -38,7 +38,7 @@ export const clientTabs = [
     name: 'Account',
     icon: AccountCircleIcon,
     path: '/account',
-  }
+  },
 ];
 
 export const limitOrderHour = 9;

@@ -56,7 +56,10 @@ export default function DeleteOrder({
   };
   return (
     <>
-      <Button color="error" onClick={() => setIsOpen(true)}>
+      <Button color="error" onClick={(e: any) => {
+        e.stopPropagation();
+        setIsOpen(true)
+        }}>
         DELETE
       </Button>
       <Modal open={isOpen}>

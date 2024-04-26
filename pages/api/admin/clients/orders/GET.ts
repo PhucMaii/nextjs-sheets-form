@@ -6,24 +6,42 @@ interface RequestQuery {
   userId?: string;
   startDate?: string;
   endDate?: string;
+  deliveryDate?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { userId, startDate, endDate } = req.query as RequestQuery;
+    const { userId, startDate, endDate, deliveryDate } =
+      req.query as RequestQuery;
 
-    const userOrders = await prisma.orders.findMany({
-      where: {
-        userId: Number(userId),
-      },
-      include: {
-        items: true,
-      },
-      orderBy: {
-        id: 'desc',
-      },
-    });
+    // Check if there is no userId, then fetch all orders with specific delivery date
+    let userOrders: any = [];
+    if (userId && !isNaN(Number(userId))) {
+      userOrders = await prisma.orders.findMany({
+        where: {
+          userId: Number(userId),
+        },
+        include: {
+          items: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+      });
+    } else {
+      userOrders = await prisma.orders.findMany({
+        where: {
+          deliveryDate,
+        },
+        include: {
+          items: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+      });
+    }
 
     if (!startDate || !endDate) {
       return res.status(200).json({
