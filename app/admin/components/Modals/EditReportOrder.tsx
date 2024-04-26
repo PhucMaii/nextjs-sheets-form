@@ -47,6 +47,7 @@ export default function EditReportOrder({
   };
 
   const handleChangeItem = (e: any, targetItem: Item, keyChange: string) => {
+    e.preventDefault();
     const newItemList = itemList.map((item: Item) => {
       if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {

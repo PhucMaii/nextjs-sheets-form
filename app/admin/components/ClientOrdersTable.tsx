@@ -79,6 +79,7 @@ const ClientOrdersTable = ({
       <>
         <TableCell padding="checkbox">
           <Checkbox
+            onClick={(e) => handleSelectOrder(e, order)}
             checked={isOrderSelected}
           />
         </TableCell>
@@ -127,8 +128,6 @@ const ClientOrdersTable = ({
       );
       return (
         <TableRow
-          onClick={(e) => handleSelectOrder(e, item)}
-          hover
           aria-checked={isOrderSelected}
           selected={isOrderSelected}
           sx={{ cursor: 'pointer' }}
