@@ -183,6 +183,45 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       category: userCategory,
     });
 
+    // Generate object of quantity, price, and totalPrice
+    const orderDetails = body;
+    for (const item of items) {
+      if (Object.prototype.hasOwnProperty.call(body, item.name)) {
+        orderDetails[item.name] = {
+          quantity: orderDetails[item.name],
+          price: item.price,
+          totalPrice: orderDetails[item.name] * item.price,
+        };
+      }
+    }
+
+    // Notify Email for admin
+    const emailSendTo: any = process.env.NODEMAILER_EMAIL;
+    const htmlTemplate: string = generateOrderTemplate(
+      existingUser.clientName,
+      existingUser.clientId,
+      orderDetails,
+      existingUser.contactNumber,
+      existingUser.deliveryAddress,
+      newOrder.id,
+    );
+
+    await emailHandler(
+      emailSendTo,
+      'Order Supreme Sprouts',
+      'Supreme Sprouts LTD',
+      htmlTemplate,
+    );
+
+    if (existingUser.email) {
+      await emailHandler(
+        existingUser.email,
+        'Order Supreme Sprouts',
+        'Supreme Sprouts LTD',
+        htmlTemplate,
+      );
+    }
+
     // Append to Client Sheet
     const appendResponse = await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
@@ -214,36 +253,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         values: [overviewFormattedData],
       },
     });
-
-    // Generate object of quantity, price, and totalPrice
-    const orderDetails = body;
-    for (const item of items) {
-      if (Object.prototype.hasOwnProperty.call(body, item.name)) {
-        orderDetails[item.name] = {
-          quantity: orderDetails[item.name],
-          price: item.price,
-          totalPrice: orderDetails[item.name] * item.price,
-        };
-      }
-    }
-
-    // Notify Email
-    const emailSendTo: any = process.env.NODEMAILER_EMAIL;
-    const htmlTemplate: string = generateOrderTemplate(
-      existingUser.clientName,
-      existingUser.clientId,
-      orderDetails,
-      existingUser.contactNumber,
-      existingUser.deliveryAddress,
-      newOrder.id,
-    );
-
-    await emailHandler(
-      emailSendTo,
-      'Order Supreme Sprouts',
-      'Supreme Sprouts LTD',
-      htmlTemplate,
-    );
 
     return res.status(200).json({
       overviewFormattedData,

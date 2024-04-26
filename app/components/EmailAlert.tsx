@@ -47,6 +47,7 @@ export default function EmailAlert({
         type: 'success',
         message: response.data.message,
       });
+      window.location.reload();
     } catch (error: any) {
       console.log('Fail to subscribe email: ', error);
       setNotification({

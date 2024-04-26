@@ -58,6 +58,7 @@ export default function Sidebar({ children }: PropTypes) {
 
   useEffect(() => {
     setCurrentTab(pathname);
+    console.log(userData, 'user data');
   }, [pathname]);
 
   const handleChangeTab = (path: string) => {
