@@ -6,7 +6,7 @@ import { API_URL } from '../utils/enum';
 import { useSession } from 'next-auth/react';
 import { SplashScreen } from '../HOC/AuthenGuard';
 
-export const UserContext = createContext<UserType | null>(null);
+export const UserContext = createContext<any>([]);
 
 const UserContextAPI = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<UserType | null>(null);
@@ -45,7 +45,9 @@ const UserContextAPI = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <UserContext.Provider value={userData}>{children}</UserContext.Provider>
+    <UserContext.Provider value={[userData, setUserData]}>
+      {children}
+    </UserContext.Provider>
   );
 };
 

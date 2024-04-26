@@ -49,7 +49,7 @@ export default function Sidebar({ children }: PropTypes) {
   const router = useRouter();
   const pathname: any = usePathname();
 
-  const userData = useContext(UserContext);
+  const [userData] = useContext(UserContext);
   const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(
     !userData?.email,
   );
@@ -58,7 +58,6 @@ export default function Sidebar({ children }: PropTypes) {
 
   useEffect(() => {
     setCurrentTab(pathname);
-    console.log(userData, 'user data');
   }, [pathname]);
 
   const handleChangeTab = (path: string) => {

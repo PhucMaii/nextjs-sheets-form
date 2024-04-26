@@ -6,10 +6,11 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import axios from 'axios';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { API_URL } from '../utils/enum';
 import { Notification } from '../utils/type';
 import { LoadingButton } from '@mui/lab';
+import { UserContext } from '../context/UserContextAPI';
 
 interface PropTypes {
   setIsOpenSnackbar: (bool: boolean) => void;
@@ -22,6 +23,7 @@ export default function EmailAlert({
 }: PropTypes) {
   const [email, setEmail] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [userData, setUserData] = useContext(UserContext);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
@@ -42,12 +44,12 @@ export default function EmailAlert({
 
       setIsSubmitting(false);
       setIsOpenSnackbar(false);
+      setUserData({ ...userData, email });
       setNotification({
         on: true,
         type: 'success',
         message: response.data.message,
       });
-      window.location.reload();
     } catch (error: any) {
       console.log('Fail to subscribe email: ', error);
       setNotification({
