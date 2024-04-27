@@ -1,5 +1,6 @@
 import { AlertColor } from '@mui/material';
 import { Session } from 'next-auth';
+import { ORDER_TYPE, PAYMENT_TYPE } from './enum';
 
 export interface Notification {
   on: boolean;
@@ -48,11 +49,15 @@ export interface UserType {
   id?: string;
   clientId: string;
   clientName: string;
+  contactNumber?: string;
   password?: string;
   email?: string;
   deliveryAddress: string;
   sheetName?: string;
   categoryId?: number;
+  category?: any;
+  paymentType?: PAYMENT_TYPE;
+  orderType?: ORDER_TYPE;
 }
 
 export interface Item {

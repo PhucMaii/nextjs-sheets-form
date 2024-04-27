@@ -4,6 +4,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PeopleIcon from '@mui/icons-material/People';
 
 export const tabs = [
   {
@@ -15,6 +16,11 @@ export const tabs = [
     name: 'Reports',
     icon: ArticleIcon,
     path: '/admin/reports',
+  },
+  {
+    name: 'Clients',
+    icon: PeopleIcon,
+    path: '/admin/clients',
   },
 ];
 
