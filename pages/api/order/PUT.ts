@@ -85,6 +85,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     return res.status(200).json({
       message: 'Override Order Successfully',
+      data: {
+        items: itemList,
+        ...existingUser,
+        ...newOrder,
+        totalPrice: total,
+        category: userCategory,
+      },
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

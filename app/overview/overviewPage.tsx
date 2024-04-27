@@ -145,6 +145,18 @@ export default function MainPage() {
     }
   };
 
+  const handleUpdateOrderUI = (updatedOrder: Order) => {
+    setUserOrder(updatedOrder);
+    const newOrders = thisMonthOrders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
+
+    setThisMonthOrders(newOrders);
+  };
+
   if (isFetching) {
     return (
       <Sidebar>
@@ -206,6 +218,7 @@ export default function MainPage() {
             handleDeleteOrder={handleDeleteOrder}
             order={userOrder}
             setNotification={setNotification}
+            handleUpdateOrderUI={handleUpdateOrderUI}
             isEdit
           />
         ) : (

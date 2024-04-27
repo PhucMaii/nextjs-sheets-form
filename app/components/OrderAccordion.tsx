@@ -28,6 +28,7 @@ import DeleteModal from './Modals/DeleteModal';
 
 interface PropTypes {
   handleDeleteOrder?: (orderId: number) => void;
+  handleUpdateOrderUI?: (updatedOrder: Order) => void;
   order: Order;
   setNotification?: Dispatch<SetStateAction<Notification>>;
   isEdit?: boolean;
@@ -37,6 +38,7 @@ export default function OrderAccordion({
   order,
   setNotification,
   handleDeleteOrder,
+  handleUpdateOrderUI,
   isEdit,
 }: PropTypes) {
   const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
@@ -57,21 +59,25 @@ export default function OrderAccordion({
 
   return (
     <>
-      {isEdit && handleDeleteOrder && setNotification && (
-        <>
-          <EditOrder
-            open={isEditOrderOpen}
-            onClose={() => setIsEditOrderOpen(false)}
-            order={order}
-            setNotification={setNotification}
-          />
-          <DeleteModal
-            isOpen={isDeleteOrderOpen}
-            onClose={() => setIsDeleteOrderOpen(false)}
-            handleDelete={() => handleDeleteOrder(order.id)}
-          />
-        </>
-      )}
+      {isEdit &&
+        handleUpdateOrderUI &&
+        handleDeleteOrder &&
+        setNotification && (
+          <>
+            <EditOrder
+              open={isEditOrderOpen}
+              onClose={() => setIsEditOrderOpen(false)}
+              order={order}
+              setNotification={setNotification}
+              handleUpdateOrderUI={handleUpdateOrderUI}
+            />
+            <DeleteModal
+              isOpen={isDeleteOrderOpen}
+              onClose={() => setIsDeleteOrderOpen(false)}
+              handleDelete={() => handleDeleteOrder(order.id)}
+            />
+          </>
+        )}
       <Accordion>
         <AccordionSummary>
           <Grid container alignItems="center">

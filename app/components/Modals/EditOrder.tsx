@@ -21,6 +21,7 @@ import LoadingButtonStyles from '../LoadingButtonStyles';
 interface PropTypes extends ModalProps {
   order: Order;
   setNotification: Dispatch<SetStateAction<Notification>>;
+  handleUpdateOrderUI: (updatedOrder: Order) => void;
 }
 
 export default function EditOrder({
@@ -28,6 +29,7 @@ export default function EditOrder({
   onClose,
   order,
   setNotification,
+  handleUpdateOrderUI,
 }: PropTypes) {
   const [itemList, setItemList] = useState<Item[]>(order.items || []);
   const [isOverriding, setIsOverriding] = useState<boolean>(false);
@@ -65,6 +67,7 @@ export default function EditOrder({
         setIsOverriding(false);
       }
 
+      handleUpdateOrderUI(response.data.data);
       setNotification({
         on: true,
         type: 'success',
