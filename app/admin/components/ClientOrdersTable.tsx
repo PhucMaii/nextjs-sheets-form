@@ -45,18 +45,18 @@ const ClientOrdersTable = ({
   function fixedHeaderContent() {
     return (
       <TableRow>
-        <TableCell padding="checkbox">
+        <TableCell padding="checkbox" variant="head">
           <Checkbox
             checked={selectedOrders.length === clientOrders.length}
             onClick={handleSelectAll}
           />
         </TableCell>
-        <TableCell>Invoice Id</TableCell>
-        <TableCell>Order Time</TableCell>
-        <TableCell>Delivery Date</TableCell>
-        <TableCell>Total Bill</TableCell>
-        <TableCell>Status</TableCell>
-        <TableCell></TableCell>
+        <TableCell variant="head" style={{width: 120}}>Invoice Id</TableCell>
+        <TableCell variant="head" style={{width: 120}}>Order Time</TableCell>
+        <TableCell variant="head" style={{width: 120}}>Delivery Date</TableCell>
+        <TableCell variant="head"style={{width: 120}}>Total Bill</TableCell>
+        <TableCell variant="head" style={{width: 120}}>Status</TableCell>
+        <TableCell variant="head" style={{width: 120}}></TableCell>
       </TableRow>
     );
   }
