@@ -53,6 +53,17 @@ export default function ClientsPage() {
     }
   }
 
+  const handleChangeClients = (clientId: number, key: string, value: string) => {
+    const newClientList = clientList.map((client: UserType) => {
+      if (client.id === clientId) {
+        return {...client, [key]: value}
+      }
+      return client;
+    })
+
+    setClientList(newClientList);
+  }
+
   if (isFetching) {
     return (
       <Sidebar>

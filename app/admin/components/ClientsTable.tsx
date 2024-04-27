@@ -20,6 +20,7 @@ import { Notification, UserType } from '@/app/utils/type';
 import DeleteOrder from './Modals/DeleteOrder';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
+import { orderTypes, paymentTypes } from '@/app/lib/constant';
 
 interface PropTypes {
   clients: UserType[];
@@ -92,17 +93,29 @@ const ClientsTable = ({
         <TableCell>
             <Select value={client.preference?.orderType || 'N/A'}>
                 <MenuItem value={'N/A'}>N/A</MenuItem>
-                <MenuItem value={ORDER_TYPE.FIXED}>FIXED</MenuItem>
-                <MenuItem value={ORDER_TYPE.CALL}>CALL</MenuItem>
-                <MenuItem value={ORDER_TYPE.ON_CALL}>ON CALL</MenuItem>
-                <MenuItem value={ORDER_TYPE.QR_CODE}>QR CODE</MenuItem>
+                {
+                    orderTypes.map((type, index) => {
+                        return (
+                            <MenuItem key={index} value={type}>
+                                {type.toUpperCase()}
+                            </MenuItem>
+                        )
+                    })
+                }
             </Select>
         </TableCell>
         <TableCell>
             <Select value={client.preference?.paymentType || 'N/A'}>
                 <MenuItem value={'N/A'}>N/A</MenuItem>
-                <MenuItem value={PAYMENT_TYPE.MONTHLY}>MONTHLY</MenuItem>
-                <MenuItem value={PAYMENT_TYPE.COD}>COD</MenuItem>
+                {
+                    paymentTypes.map((type, index) => {
+                        return (
+                            <MenuItem value={type} key={index}>
+                                {type.toUpperCase()}
+                            </MenuItem>
+                        )
+                    })
+                }
             </Select>
         </TableCell>
         <TableCell>{client.clientId}</TableCell>
