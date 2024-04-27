@@ -1,6 +1,5 @@
 import { AlertColor } from '@mui/material';
 import { Session } from 'next-auth';
-import { ORDER_TYPE, PAYMENT_TYPE } from './enum';
 
 export interface Notification {
   on: boolean;
@@ -56,8 +55,7 @@ export interface UserType {
   sheetName?: string;
   categoryId?: number;
   category?: any;
-  paymentType?: PAYMENT_TYPE;
-  orderType?: ORDER_TYPE;
+  preference?: any;
 }
 
 export interface Item {

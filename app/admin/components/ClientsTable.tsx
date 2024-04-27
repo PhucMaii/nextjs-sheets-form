@@ -2,7 +2,9 @@
 import {
   Box,
   Checkbox,
+  MenuItem,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -11,7 +13,7 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, memo } from 'react';
 import StatusText, { COLOR_TYPE } from './StatusText';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification, UserType } from '@/app/utils/type';
@@ -52,13 +54,13 @@ const ClientsTable = ({
             // onClick={handleSelectAll}
           />
         </TableCell>
+        <TableCell variant="head" style={{width: 150}}>Order Type</TableCell>
+        <TableCell variant="head" style={{width: 150}}>Payment Type</TableCell>
         <TableCell variant="head" style={{width: 100}}>Client Id</TableCell>
         <TableCell variant="head" style={{width: 200}}>Name</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Order Type</TableCell>
         <TableCell variant="head" style={{width: 120}}>Category</TableCell>
         <TableCell variant="head" style={{width: 120}}>Contact Number</TableCell>
         <TableCell variant="head" style={{width: 200}}>Delivery Address</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Payment Type</TableCell>
         <TableCell variant="head" style={{width: 120}}></TableCell>
         <TableCell></TableCell>
       </TableRow>
@@ -87,13 +89,27 @@ const ClientsTable = ({
             // checked={isOrderSelected}
           />
         </TableCell>
+        <TableCell>
+            <Select value={client.preference?.orderType || 'N/A'}>
+                <MenuItem value={'N/A'}>N/A</MenuItem>
+                <MenuItem value={ORDER_TYPE.FIXED}>FIXED</MenuItem>
+                <MenuItem value={ORDER_TYPE.CALL}>CALL</MenuItem>
+                <MenuItem value={ORDER_TYPE.ON_CALL}>ON CALL</MenuItem>
+                <MenuItem value={ORDER_TYPE.QR_CODE}>QR CODE</MenuItem>
+            </Select>
+        </TableCell>
+        <TableCell>
+            <Select value={client.preference?.paymentType || 'N/A'}>
+                <MenuItem value={'N/A'}>N/A</MenuItem>
+                <MenuItem value={PAYMENT_TYPE.MONTHLY}>MONTHLY</MenuItem>
+                <MenuItem value={PAYMENT_TYPE.COD}>COD</MenuItem>
+            </Select>
+        </TableCell>
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
-        <TableCell>{client.orderType}</TableCell>
         <TableCell>{client.category.name}</TableCell>
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
-        <TableCell>{client.paymentType}</TableCell>
         {/* {isAdmin &&
           setNotification &&
           handleDeleteOrderUI &&
