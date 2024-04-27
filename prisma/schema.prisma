@@ -9,17 +9,20 @@ datasource db {
 }
 
 model User {
-  id              Int      @id @default(autoincrement())
-  categoryId      Int
-  clientName      String   @db.VarChar(255)
-  clientId        String   @unique @db.VarChar(255)
-  contactNumber   String   @db.VarChar(11)
-  deliveryAddress String   @db.VarChar(255)
-  email           String?  @db.VarChar(255)
-  password        String   @db.VarChar(255)
-  sheetName       String   @db.VarChar(255)
-  role            String   @db.VarChar(255)
-  category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id               Int     @id @default(autoincrement())
+  categoryId       Int
+  userPreferenceId Int?    // will change back to force user to have it
+  clientName       String  @db.VarChar(255)
+  clientId         String  @unique @db.VarChar(255)
+  contactNumber    String  @db.VarChar(11)
+  deliveryAddress  String  @db.VarChar(255)
+  email            String? @db.VarChar(255)
+  password         String  @db.VarChar(255)
+  sheetName        String  @db.VarChar(255)
+  role             String  @db.VarChar(255)
+
+  category   Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  preference UserPreference? @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -61,13 +64,15 @@ model Input {
 }
 
 model OrderedItems {
-  id       Int    @id @default(autoincrement())
-  name     String @db.VarChar(255)
-  price    Float
-  orderId  Int
-  quantity Int
+  id               Int    @id @default(autoincrement())
+  name             String @db.VarChar(255)
+  price            Float
+  orderId          Int?
+  scheduledOrderId Int?
+  quantity         Int
 
-  Orders Orders? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  Orders         Orders?        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
 }
 
 model Orders {
@@ -88,4 +93,19 @@ model OrderPreference {
   orderId     Int
 
   order Orders @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model UserPreference {
+  id          Int     @id @default(autoincrement())
+  orderType   String?
+  paymentType String?
+  userId      Int
+  User        User[]
+}
+
+model ScheduleOrders {
+  id               Int            @id @default(autoincrement())
+  userPreferenceId Int
+  totalPrice       Float
+  items            OrderedItems[]
 }

@@ -17,3 +17,15 @@ export enum ORDER_STATUS {
   INCOMPLETED = 'Incompleted',
   VOID = 'Void',
 }
+
+export enum ORDER_TYPE {
+  FIXED = 'fixed',
+  CALL = 'call',
+  ON_CALL = 'on-call',
+  QR_CODE = 'qr-code'
+}
+
+export enum PAYMENT_TYPE {
+  MONTHLY = 'monthly',
+  COD = 'cod'
+}
