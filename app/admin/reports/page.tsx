@@ -106,6 +106,10 @@ export default function ReportPage() {
       const newOrderData = baseClientOrders.filter((order: Order) => {
         if (
           order.id.toString().includes(debouncedKeywords) ||
+          order.user.clientId === debouncedKeywords ||
+          order.user.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
           order.status.toLowerCase() === debouncedKeywords.toLowerCase()
         ) {
           return true;
@@ -461,7 +465,7 @@ export default function ReportPage() {
                   fullWidth
                   variant="filled"
                   // label="Search orders"
-                  placeholder="Search by invoice id or status"
+                  placeholder="Search by invoice id, client id, client name or status"
                   value={searchKeywords}
                   onChange={(e) => setSearchKeywords(e.target.value)}
                 />

@@ -71,6 +71,7 @@ interface OrderPreference {
 
 export interface Order {
   id: number;
+  user?: any;
   category: Category;
   orderTime: string;
   deliveryDate: string;

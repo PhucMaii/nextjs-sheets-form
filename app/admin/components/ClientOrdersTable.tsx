@@ -51,12 +51,25 @@ const ClientOrdersTable = ({
             onClick={handleSelectAll}
           />
         </TableCell>
-        <TableCell variant="head" style={{width: 120}}>Invoice Id</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Order Time</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Delivery Date</TableCell>
-        <TableCell variant="head"style={{width: 120}}>Total Bill</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Status</TableCell>
-        <TableCell variant="head" style={{width: 120}}></TableCell>
+        <TableCell variant="head" style={{ width: 100 }}>
+          Invoice Id
+        </TableCell>
+        <TableCell variant="head" style={{ width: 100 }}>
+          Client Id
+        </TableCell>
+        <TableCell variant="head" style={{ width: 150 }}>
+          Client Name
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Delivery Date
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Total Bill
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Status
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}></TableCell>
       </TableRow>
     );
   }
@@ -84,7 +97,8 @@ const ClientOrdersTable = ({
           />
         </TableCell>
         <TableCell>{order.id}</TableCell>
-        <TableCell>{order.orderTime}</TableCell>
+        <TableCell>{order.user.clientId}</TableCell>
+        <TableCell>{order.user.clientName}</TableCell>
         <TableCell>{order.deliveryDate}</TableCell>
         <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
         <TableCell>

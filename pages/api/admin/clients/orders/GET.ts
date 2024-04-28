@@ -24,6 +24,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           items: true,
+          user: true,
         },
         orderBy: {
           id: 'desc',
@@ -36,6 +37,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           items: true,
+          user: true,
         },
         orderBy: {
           id: 'desc',
