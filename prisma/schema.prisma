@@ -11,7 +11,7 @@ datasource db {
 model User {
   id               Int     @id @default(autoincrement())
   categoryId       Int
-  userPreferenceId Int?    // will change back to force user to have it
+  userPreferenceId Int? // will change back to force user to have it
   clientName       String  @db.VarChar(255)
   clientId         String  @unique @db.VarChar(255)
   contactNumber    String  @db.VarChar(11)
@@ -21,8 +21,9 @@ model User {
   sheetName        String  @db.VarChar(255)
   role             String  @db.VarChar(255)
 
-  category   Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category   Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   preference UserPreference? @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
+  Orders     Orders[]
 }
 
 model Category {
@@ -71,18 +72,20 @@ model OrderedItems {
   scheduledOrderId Int?
   quantity         Int
 
-  Orders         Orders?        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
 }
 
 model Orders {
-  id              Int               @id @default(autoincrement())
-  orderTime       String
-  deliveryDate    String
-  note            String
-  status          String
-  userId          Int
-  totalPrice      Float
+  id           Int    @id @default(autoincrement())
+  orderTime    String
+  deliveryDate String
+  note         String
+  status       String
+  userId       Int
+  totalPrice   Float
+
+  user            User?             @relation(fields: [userId], references: [id])
   items           OrderedItems[]
   OrderPreference OrderPreference[] // Should remove
 }
