@@ -45,7 +45,7 @@ export interface SessionClientType {
 }
 
 export interface UserType {
-  id?: number;
+  id: number;
   clientId: string;
   clientName: string;
   contactNumber?: string;

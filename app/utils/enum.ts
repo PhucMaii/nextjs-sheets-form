@@ -19,6 +19,7 @@ export enum ORDER_STATUS {
 }
 
 export enum ORDER_TYPE {
+  NA = 'N/A',
   FIXED = 'fixed',
   CALL = 'call',
   ON_CALL = 'on-call',
@@ -26,6 +27,7 @@ export enum ORDER_TYPE {
 }
 
 export enum PAYMENT_TYPE {
+  NA = 'N/A',
   MONTHLY = 'monthly',
   COD = 'cod'
 }

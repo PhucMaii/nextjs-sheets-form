@@ -2,6 +2,7 @@
 import {
   Box,
   Checkbox,
+  IconButton,
   MenuItem,
   Paper,
   Select,
@@ -11,19 +12,21 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, memo } from 'react';
+import React, { Dispatch, SetStateAction, memo, useState } from 'react';
 import StatusText, { COLOR_TYPE } from './StatusText';
 import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification, UserType } from '@/app/utils/type';
 import DeleteOrder from './Modals/DeleteOrder';
+import FindInPageIcon from '@mui/icons-material/FindInPage';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
 
 interface PropTypes {
   clients: UserType[];
+  handleUpdateClient: (userId: number, updatedData: any) => void;
 //   handleUpdateOrderUI?: (updatedOrder: Order) => void;
 //   handleDeleteOrderUI?: (deletedOrder: Order) => void;
 //   setNotification?: Dispatch<SetStateAction<Notification>>;
@@ -35,6 +38,7 @@ interface PropTypes {
 
 const ClientsTable = ({
   clients,
+  handleUpdateClient,
 //   handleUpdateOrderUI,
 //   handleDeleteOrderUI,
 //   setNotification,
@@ -44,11 +48,12 @@ const ClientsTable = ({
 //   isAdmin,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
-  console.log(clients, 'clients')
+
 
   function fixedHeaderContent() {
     return (
       <TableRow>
+        <TableCell variant="head" style={{width: 50}}></TableCell>
         <TableCell padding="checkbox" variant="head">
           <Checkbox
             // checked={selectedOrders.length === clientOrders.length}
@@ -72,18 +77,13 @@ const ClientsTable = ({
     // const isOrderSelected = selectedOrders.some(
     //   (targetOrder: Order) => order.id === targetOrder.id,
     // );
-
-    // const statusText = {
-    //   text: order.status,
-    //   type:
-    //     order.status === ORDER_STATUS.COMPLETED
-    //       ? COLOR_TYPE.SUCCESS
-    //       : order.status === ORDER_STATUS.INCOMPLETED
-    //         ? COLOR_TYPE.WARNING
-    //         : COLOR_TYPE.ERROR,
-    // };
     return (
       <>
+        <TableCell>
+            {client?.preference?.orderType && <IconButton color="primary">
+                <FindInPageIcon />
+            </IconButton>}
+        </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
             // onClick={(e) => handleSelectOrder(e, order)}
@@ -91,7 +91,10 @@ const ClientsTable = ({
           />
         </TableCell>
         <TableCell>
-            <Select value={client.preference?.orderType || 'N/A'}>
+            <Select 
+                value={client.preference?.orderType || 'N/A'}
+                onChange={(e) => handleUpdateClient(client.id, {orderType: e.target.value})}
+            >
                 <MenuItem value={'N/A'}>N/A</MenuItem>
                 {
                     orderTypes.map((type, index) => {
@@ -105,7 +108,10 @@ const ClientsTable = ({
             </Select>
         </TableCell>
         <TableCell>
-            <Select value={client.preference?.paymentType || 'N/A'}>
+            <Select 
+                value={client.preference?.paymentType || 'N/A'}
+                onChange={(e) => handleUpdateClient(client.id, {paymentType: e.target.value})}
+            >
                 <MenuItem value={'N/A'}>N/A</MenuItem>
                 {
                     paymentTypes.map((type, index) => {
@@ -182,4 +188,4 @@ const ClientsTable = ({
   );
 };
 
-export default memo(ClientsTable);
+export default ClientsTable;

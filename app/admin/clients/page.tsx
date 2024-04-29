@@ -11,12 +11,14 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import NotificationPopup from '../components/Notification';
 import ClientsTable from '../components/ClientsTable';
+import LoadingModal from '../components/Modals/LoadingModal';
 
 export default function ClientsPage() {
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
-    on: true,
+    on: false,
     type: 'info',
     message: ''
   });
@@ -53,15 +55,56 @@ export default function ClientsPage() {
     }
   }
 
-  const handleChangeClients = (clientId: number, key: string, value: string) => {
+  const handleChangeClients = (clientId: number, updatedData: any) => {
     const newClientList = clientList.map((client: UserType) => {
       if (client.id === clientId) {
-        return {...client, [key]: value}
+        return {...client, ...updatedData}
       }
       return client;
     })
-
+    console.log({newClientList, clientList})
     setClientList(newClientList);
+  }
+
+  const handleUpdateClient = async (userId: number, updatedData: object) => {
+    if (Object.keys(updatedData).length === 0) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Please provide at least 1 updated data'
+      });
+      return;
+    }
+    try {
+      setIsUpdating(true);
+      const response = await axios.put(API_URL.CLIENTS, {userId, ...updatedData});
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        setIsUpdating(false);
+        return;
+      }
+      
+      handleChangeClients(userId, response.data.data);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      });
+      setIsUpdating(false);
+    } catch (error: any) {
+      console.log('Fail to update client preference: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update client preference: ' + error
+      });
+      setIsUpdating(false);
+    }
   }
 
   if (isFetching) {
@@ -75,6 +118,7 @@ export default function ClientsPage() {
   return (
     <Sidebar>
       <AuthenGuard>
+        <LoadingModal  open={isUpdating}/>
         <NotificationPopup 
           notification={notification}
           onClose={() => setNotification({...notification, on: false})}        
@@ -102,7 +146,7 @@ export default function ClientsPage() {
             />  
           </Grid>         
         </Grid>
-        <ClientsTable clients={clientList} />
+        <ClientsTable clients={clientList} handleUpdateClient={handleUpdateClient} />
       </AuthenGuard>
     </Sidebar>
   )
