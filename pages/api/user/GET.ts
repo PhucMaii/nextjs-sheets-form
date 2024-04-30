@@ -12,6 +12,9 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         id: parseInt(userId),
       },
+      include: {
+        Orders: true
+      }
     });
 
     if (!existingUser) {

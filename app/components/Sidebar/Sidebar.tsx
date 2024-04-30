@@ -31,6 +31,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import EmailAlert from '../EmailAlert';
 import SnackbarPopup from '../Snackbar/SnackbarPopup';
 import { Notification } from '@/app/utils/type';
+import { generateRecommendDate } from '@/app/utils/time';
+import { Order } from '@/app/admin/orders/page';
 
 interface PropTypes {
   children: ReactNode;
@@ -50,6 +52,7 @@ export default function Sidebar({ children }: PropTypes) {
   const pathname: any = usePathname();
 
   const [userData] = useContext(UserContext);
+  const orderDate = generateRecommendDate();
   const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(
     !userData?.email,
   );
@@ -157,6 +160,26 @@ export default function Sidebar({ children }: PropTypes) {
             }}
           >
             {clientTabs.map((tab, index) => {
+              if (tab.name === 'Order') {
+                console.log(userData);
+                return (
+                  <BottomNavigationAction
+                  disabled={userData?.Order?.some((order: Order) => order.deliveryDate === orderDate)}
+                  label={tab.name}
+                  value={tab.path}
+                  onClick={() => handleChangeTab(tab.path)}
+                  icon={
+                    <tab.icon
+                      sx={{
+                        color: `${
+                          currentTab === tab.path ? blue[700] : blueGrey[800]
+                        }`,
+                      }}
+                    />
+                  }
+                />
+                )
+              }
               return (
                 <BottomNavigationAction
                   key={index}
