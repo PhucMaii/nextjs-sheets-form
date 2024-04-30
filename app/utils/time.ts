@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { limitOrderHour } from '../lib/constant';
 
 export const YYYYMMDDFormat = (date: Date) => {
-  const month = date.getUTCMonth() + 1;
+  const month = date.getMonth() + 1;
   const day = date.getDate();
   const year = date.getUTCFullYear();
 
@@ -38,6 +38,8 @@ export const generateRecommendDate = () => {
   if (dateObj.getHours() >= limitOrderHour) {
     dateObj.setDate(dateObj.getDate() + 1);
   }
+
+  console.log(dateObj, 'dateObj');
   const formattedDate = YYYYMMDDFormat(dateObj);
   return formattedDate;
 };
