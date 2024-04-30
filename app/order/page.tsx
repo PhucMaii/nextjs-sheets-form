@@ -23,7 +23,6 @@ import { Order } from '../admin/orders/page';
 import Sidebar from '../components/Sidebar/Sidebar';
 import AuthenGuard from '../HOC/AuthenGuard';
 import Navbar from '../components/Navbar';
-import OrderGuard from '../HOC/OrderGuard';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -198,7 +197,6 @@ export default function OrderForm() {
     <FadeIn>
       <Sidebar>
         <AuthenGuard>
-          <OrderGuard>
           <Snackbar
             open={notification.on}
             onClose={() => setNotification({ ...notification, on: false })}
@@ -277,7 +275,6 @@ export default function OrderForm() {
               />
             </form>
           </div>
-          </OrderGuard>
         </AuthenGuard>
       </Sidebar>
     </FadeIn>

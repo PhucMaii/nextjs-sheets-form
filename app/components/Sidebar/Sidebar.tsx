@@ -160,26 +160,6 @@ export default function Sidebar({ children }: PropTypes) {
             }}
           >
             {clientTabs.map((tab, index) => {
-              if (tab.name === 'Order') {
-                console.log(userData);
-                return (
-                  <BottomNavigationAction
-                  disabled={userData?.Order?.some((order: Order) => order.deliveryDate === orderDate)}
-                  label={tab.name}
-                  value={tab.path}
-                  onClick={() => handleChangeTab(tab.path)}
-                  icon={
-                    <tab.icon
-                      sx={{
-                        color: `${
-                          currentTab === tab.path ? blue[700] : blueGrey[800]
-                        }`,
-                      }}
-                    />
-                  }
-                />
-                )
-              }
               return (
                 <BottomNavigationAction
                   key={index}
