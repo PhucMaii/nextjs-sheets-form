@@ -77,13 +77,16 @@ model OrderedItems {
 }
 
 model Orders {
-  id           Int    @id @default(autoincrement())
-  orderTime    String
-  deliveryDate String
-  note         String
-  status       String
-  userId       Int
-  totalPrice   Float
+  id            Int       @id @default(autoincrement())
+  orderTime     String
+  deliveryDate  String
+  note          String
+  status        String
+  userId        Int
+  totalPrice    Float
+  updateTime    DateTime?
+  isReplacement Boolean?
+  isVoid        Boolean?
 
   user            User?             @relation(fields: [userId], references: [id])
   items           OrderedItems[]
