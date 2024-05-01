@@ -5,9 +5,13 @@ export const generateOrderTemplate = (
   phoneNumber: string,
   deliveryAddress: string,
   orderId: number,
+  flag?: string,
 ) => {
   let orderDetailsTemplate = '';
   let total = 0;
+
+  const flagText = flag ?
+  `<h2 style="text-align: center; font-weight: 300">${flag}</h2>` : ''
 
   for (const key of Object.keys(orderDetails)) {
     if (
@@ -36,6 +40,7 @@ export const generateOrderTemplate = (
   return `
     <div style="margin: auto; width: 500px">
         <div style="width: 100%;">
+        ${flagText}
             <h2 style="text-align: center; font-weight: 300">Supreme Sprouts LTD</h2>
             <h4 style="text-align: center;font-weight: 300;">1-6420 Beresford Street, Burnaby, BC, V5E 1B3</h4>
             <div style="text-align: center;font-weight: 300;">

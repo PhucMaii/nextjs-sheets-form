@@ -268,7 +268,7 @@ export default function AddOrder({
                 value={clientValue}
                 onChange={(e, newValue) => {
                   e.stopPropagation();
-                  setClientValue(newValue)
+                  setClientValue(newValue);
                 }}
                 onMouseDown={(e) => {
                   e.preventDefault();

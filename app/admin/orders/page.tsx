@@ -154,7 +154,6 @@ export default function Orders() {
   useEffect(() => {
     if (incomingOrder) {
       handleSinglePrint();
-      console.log('Incoming order: ', incomingOrder);
       setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
@@ -163,6 +162,13 @@ export default function Orders() {
       ) {
         setOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
         setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
+      } else if (incomingOrder.isReplacement || incomingOrder.isVoid) {
+        const newOrderData = orderData.filter((order: Order) => {
+          return order.id !== incomingOrder.id;
+        });
+
+        setBaseOrderData([...newOrderData, incomingOrder]);
+        setOrderData([...newOrderData, incomingOrder]);
       }
     }
   }, [incomingOrder]);
@@ -222,7 +228,6 @@ export default function Orders() {
         // setHasMore(false);
         return;
       }
-
       setOrderData(response.data.data);
       setBaseOrderData(response.data.data);
       setIsLoading(false);

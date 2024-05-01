@@ -45,6 +45,7 @@ const ClientOrdersTable = ({
   function fixedHeaderContent() {
     return (
       <TableRow>
+        <TableCell style={{ width: 100 }}></TableCell>
         <TableCell padding="checkbox" variant="head">
           <Checkbox
             checked={selectedOrders.length === clientOrders.length}
@@ -90,6 +91,15 @@ const ClientOrdersTable = ({
     };
     return (
       <>
+        <TableCell>
+          {order.isReplacement ? (
+            <StatusText text="Replaced" type="error" />
+          ) : order.isVoid ? (
+            <StatusText text="Voided" type="error" />
+          ) : (
+            ''
+          )}
+        </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
             onClick={(e) => handleSelectOrder(e, order)}

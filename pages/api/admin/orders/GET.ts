@@ -39,9 +39,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         OrderPreference: true,
       },
-      orderBy: {
-        id: 'desc',
-      },
+      orderBy: [
+        {
+          updateTime: 'desc' // Sort by updateTime in descending order
+        },
+        {
+          id: 'desc' // If updateTime is the same, sort by id in ascending order
+        }
+      ]
       // skip,
       // take: pageSize,
     });

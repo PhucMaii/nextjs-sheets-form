@@ -179,6 +179,16 @@ const OrderAccordion = ({
       >
         <AccordionSummary>
           <Grid container alignItems="center">
+            {order.isReplacement && (
+              <Grid item xs={12}>
+                <StatusText text={`Replacement by client `} type={'error'} />
+              </Grid>
+            )}
+            {order.isVoid && (
+              <Grid item xs={12}>
+                <StatusText text={`Void by client `} type={'error'} />
+              </Grid>
+            )}
             <Grid item xs={12}>
               <Box
                 display="flex"
