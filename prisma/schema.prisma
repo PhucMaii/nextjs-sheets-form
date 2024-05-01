@@ -8,6 +8,12 @@ datasource db {
   relationMode = "prisma"
 }
 
+model Driver {
+  id     Int     @id @default(autoincrement())
+  name   String
+  routes Route[]
+}
+
 model User {
   id               Int     @id @default(autoincrement())
   categoryId       Int
@@ -23,7 +29,8 @@ model User {
 
   category   Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   preference UserPreference? @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
-  Orders     Orders[]
+  orders     Orders[]
+  routes     Route[]
 }
 
 model Category {
@@ -88,6 +95,7 @@ model Orders {
   user            User?             @relation(fields: [userId], references: [id])
   items           OrderedItems[]
   OrderPreference OrderPreference[] // Should remove
+  routeId         Int?
 }
 
 model OrderPreference {
@@ -111,4 +119,13 @@ model ScheduleOrders {
   userPreferenceId Int
   totalPrice       Float
   items            OrderedItems[]
+}
+
+model Route {
+  id       Int      @id @default(autoincrement())
+  day      String
+  driverId Int
+  clients  User[]
+
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
 }
