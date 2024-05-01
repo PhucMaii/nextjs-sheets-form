@@ -266,7 +266,13 @@ export default function AddOrder({
                   <TextField {...params} label="Client" />
                 )}
                 value={clientValue}
-                onChange={(e, newValue) => setClientValue(newValue)}
+                onChange={(e, newValue) => {
+                  e.stopPropagation();
+                  setClientValue(newValue)
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                }}
               />
             </Grid>
             <Grid item xs={12}>

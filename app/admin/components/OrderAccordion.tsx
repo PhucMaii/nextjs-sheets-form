@@ -47,6 +47,11 @@ interface PropTypes {
   setNotification: Dispatch<SetStateAction<Notification>>;
   updateUI: (orderId: number) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
+  handleUpdatePriceUI: (
+    targetOrder: Order,
+    newItems: any[],
+    newTotalPrice: number,
+  ) => void;
 }
 
 const OrderAccordion = ({
@@ -55,6 +60,7 @@ const OrderAccordion = ({
   setNotification,
   updateUI,
   handleUpdateDateUI,
+  handleUpdatePriceUI,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -166,6 +172,7 @@ const OrderAccordion = ({
         items={order.items}
         setNotification={setNotification}
         order={order}
+        handleUpdatePriceUI={handleUpdatePriceUI}
       />
       <Accordion
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}

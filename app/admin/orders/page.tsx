@@ -259,6 +259,22 @@ export default function Orders() {
     setBaseOrderData(newOrderData);
   };
 
+  const handleUpdatePriceUI = (
+    targetOrder: Order,
+    newItems: any[],
+    newTotalPrice: number,
+  ) => {
+    const newOrderList = baseOrderData.map((order: Order) => {
+      if (order.id === targetOrder.id) {
+        return { ...order, totalPrice: newTotalPrice, items: newItems };
+      }
+      return order;
+    });
+
+    setOrderData(newOrderList);
+    setBaseOrderData(newOrderList);
+  };
+
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
   };
@@ -547,6 +563,7 @@ export default function Orders() {
                 updateUI={handleMarkSingleCompletedUI}
                 updateUIItem={handleUpdateUISingleOrder}
                 handleUpdateDateUI={handleUpdateDateUI}
+                handleUpdatePriceUI={handleUpdatePriceUI}
               />
             )}
           />
