@@ -92,12 +92,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    const orderDetails: any = {};
+    for (const item of existingOrder.items) {
+        orderDetails[item.name] = {
+          quantity: item.quantity,
+          price: item.price,
+          totalPrice: item.quantity * item.price,
+        };
+    }
+
     // Notify Email for admin
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;
     const htmlTemplate: string = generateOrderTemplate(
       existingUser.clientName,
       existingUser.clientId,
-      existingOrder.items,
+      {...orderDetails, 'DELIVERY DATE': existingOrder.deliveryDate, NOTE: existingOrder.note, orderTime: existingOrder.orderTime},
       existingUser.contactNumber,
       existingUser.deliveryAddress,
       existingOrder.id,

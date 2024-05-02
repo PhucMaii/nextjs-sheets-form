@@ -84,12 +84,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    const orderDetails: any = {};
+    for (const item of body.items) {
+        orderDetails[item.name] = {
+          quantity: item.quantity,
+          price: item.price,
+          totalPrice: item.quantity * item.price,
+        };
+    }
+
     // Notify Email for admin
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;
     const htmlTemplate: string = generateOrderTemplate(
       existingUser.clientName,
       existingUser.clientId,
-      body.items,
+      {...orderDetails, 'DELIVERY DATE': userLastOrder.deliveryDate, NOTE: userLastOrder.note, orderTime: userLastOrder.orderTime},
       existingUser.contactNumber,
       existingUser.deliveryAddress,
       newOrder.id,

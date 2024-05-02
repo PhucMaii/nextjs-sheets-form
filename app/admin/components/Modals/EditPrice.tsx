@@ -40,7 +40,7 @@ export default function EditPrice({
   handleUpdatePriceUI,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [itemList, setItemList] = useState<OrderedItems[]>([...items]);
+  const [itemList, setItemList] = useState<OrderedItems[]>(items);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );

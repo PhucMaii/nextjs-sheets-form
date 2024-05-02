@@ -407,6 +407,4 @@ const OrderAccordion = ({
 };
 
 // only re renders if th order data change
-export default memo(OrderAccordion, (prev, next) => {
-  return prev.order === next.order;
-});
+export default memo(OrderAccordion)
