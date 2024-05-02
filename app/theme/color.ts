@@ -13,3 +13,5 @@ export const errorBackground = red[50];
 
 export const warningText = yellow[900];
 export const warningBackground = yellow[50];
+
+export const infoBackground = blue[50];

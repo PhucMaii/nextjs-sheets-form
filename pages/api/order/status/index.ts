@@ -4,6 +4,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/app/pusher';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
+import { generateOrderTemplate } from '@/config/email';
+import emailHandler from '../../utils/email';
 
 interface BodyTypes {
   orderId: number;
@@ -58,6 +60,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       data: {
         status: updatedStatus,
+        isVoid: true,
+        updateTime: new Date(),
       },
     });
 
@@ -87,6 +91,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         id: existingUser?.categoryId,
       },
     });
+
+    const orderDetails: any = {};
+    for (const item of existingOrder.items) {
+      orderDetails[item.name] = {
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.quantity * item.price,
+      };
+    }
+
+    // Notify Email for admin
+    const emailSendTo: any = process.env.NODEMAILER_EMAIL;
+    const htmlTemplate: string = generateOrderTemplate(
+      existingUser.clientName,
+      existingUser.clientId,
+      {
+        ...orderDetails,
+        'DELIVERY DATE': existingOrder.deliveryDate,
+        NOTE: existingOrder.note,
+        orderTime: existingOrder.orderTime,
+      },
+      existingUser.contactNumber,
+      existingUser.deliveryAddress,
+      existingOrder.id,
+      'VOID ORDER',
+    );
+
+    await emailHandler(
+      emailSendTo,
+      'Order Supreme Sprouts',
+      'Supreme Sprouts LTD',
+      htmlTemplate,
+    );
 
     await pusherServer.trigger('void-order', 'incoming-order', {
       ...existingUser,

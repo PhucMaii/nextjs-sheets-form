@@ -47,6 +47,11 @@ interface PropTypes {
   setNotification: Dispatch<SetStateAction<Notification>>;
   updateUI: (orderId: number) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
+  handleUpdatePriceUI: (
+    targetOrder: Order,
+    newItems: any[],
+    newTotalPrice: number,
+  ) => void;
 }
 
 const OrderAccordion = ({
@@ -55,6 +60,7 @@ const OrderAccordion = ({
   setNotification,
   updateUI,
   handleUpdateDateUI,
+  handleUpdatePriceUI,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -76,9 +82,11 @@ const OrderAccordion = ({
     type:
       order.status === ORDER_STATUS.COMPLETED
         ? COLOR_TYPE.SUCCESS
-        : order.status === ORDER_STATUS.INCOMPLETED
-          ? COLOR_TYPE.WARNING
-          : COLOR_TYPE.ERROR,
+        : order.status === ORDER_STATUS.DELIVERED
+          ? COLOR_TYPE.INFO
+          : order.status === ORDER_STATUS.INCOMPLETED
+            ? COLOR_TYPE.WARNING
+            : COLOR_TYPE.ERROR,
   };
 
   useEffect(() => {
@@ -166,12 +174,23 @@ const OrderAccordion = ({
         items={order.items}
         setNotification={setNotification}
         order={order}
+        handleUpdatePriceUI={handleUpdatePriceUI}
       />
       <Accordion
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
       >
         <AccordionSummary>
           <Grid container alignItems="center">
+            {order.isReplacement && (
+              <Grid item xs={12}>
+                <StatusText text={`Replacement by client `} type={'error'} />
+              </Grid>
+            )}
+            {order.isVoid && (
+              <Grid item xs={12}>
+                <StatusText text={`Void by client `} type={'error'} />
+              </Grid>
+            )}
             <Grid item xs={12}>
               <Box
                 display="flex"
@@ -241,6 +260,17 @@ const OrderAccordion = ({
                     }
                   >
                     Mark as completed
+                  </MenuItem>
+                  <MenuItem
+                    disabled={
+                      isMarkButtonDisabled ||
+                      order.status === ORDER_STATUS.COMPLETED
+                    }
+                    onClick={(e) =>
+                      handleChangeStatus(e, ORDER_STATUS.DELIVERED)
+                    }
+                  >
+                    Mark as delivered
                   </MenuItem>
                   <MenuItem
                     disabled={
@@ -390,6 +420,4 @@ const OrderAccordion = ({
 };
 
 // only re renders if th order data change
-export default memo(OrderAccordion, (prev, next) => {
-  return prev.order === next.order;
-});
+export default memo(OrderAccordion);

@@ -42,11 +42,17 @@ import {
 import { useReactToPrint } from 'react-to-print';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
 import { DropdownItemContainer } from '../orders/styled';
-import { errorColor, successColor, warningColor } from '@/app/theme/color';
+import {
+  errorColor,
+  infoColor,
+  successColor,
+  warningColor,
+} from '@/app/theme/color';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { limitOrderHour } from '@/app/lib/constant';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -67,7 +73,7 @@ export default function ReportPage() {
     const formattedDate = YYYYMMDDFormat(dateObj);
     return formattedDate;
   });
-  const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
+  const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -106,6 +112,10 @@ export default function ReportPage() {
       const newOrderData = baseClientOrders.filter((order: Order) => {
         if (
           order.id.toString().includes(debouncedKeywords) ||
+          order.user.clientId === debouncedKeywords ||
+          order.user.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
           order.status.toLowerCase() === debouncedKeywords.toLowerCase()
         ) {
           return true;
@@ -122,7 +132,7 @@ export default function ReportPage() {
     const bill = clientOrders.reduce((acc: number, cV: Order) => {
       // Only calculate total incompleted and completed orders
       if (
-        cV.status === ORDER_STATUS.COMPLETED ||
+        cV.status === ORDER_STATUS.DELIVERED ||
         cV.status === ORDER_STATUS.INCOMPLETED
       ) {
         return acc + cV.totalPrice;
@@ -182,11 +192,14 @@ export default function ReportPage() {
         return;
       }
 
-      const newCompletedOrders = response.data.data.filter((order: Order) => {
-        return order.status === ORDER_STATUS.COMPLETED;
+      const newUnpaidOrders = response.data.data.filter((order: Order) => {
+        return (
+          order.status === ORDER_STATUS.DELIVERED ||
+          order.status === ORDER_STATUS.INCOMPLETED
+        );
       });
 
-      setCompletedOrders(newCompletedOrders);
+      setUnpaidOrders(newUnpaidOrders);
       setClientOrders(response.data.data);
       setBaseClientOrders(response.data.data);
       setIsFetching(false);
@@ -223,10 +236,10 @@ export default function ReportPage() {
 
     // update completed order list
     if (deletedOrder.status === ORDER_STATUS.COMPLETED) {
-      const newCompletedOrders = newBaseOrderList.filter((order: Order) => {
+      const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
         return order.status === ORDER_STATUS.COMPLETED;
       });
-      setCompletedOrders(newCompletedOrders);
+      setUnpaidOrders(newUnpaidOrders);
     }
 
     setBaseClientOrders(newBaseOrderList);
@@ -279,13 +292,13 @@ export default function ReportPage() {
     });
 
     // update completed order list
-    const newCompletedOrders = newBaseOrderList.filter((order: Order) => {
+    const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
       return order.status === ORDER_STATUS.COMPLETED;
     });
 
     setBaseClientOrders(newBaseOrderList);
     setClientOrders(newOrderList);
-    setCompletedOrders(newCompletedOrders);
+    setUnpaidOrders(newUnpaidOrders);
   };
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
@@ -344,6 +357,17 @@ export default function ReportPage() {
           <DropdownItemContainer display="flex" gap={2}>
             <CheckCircleIcon sx={{ color: successColor }} />
             <Typography>Mark as completed</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(ORDER_STATUS.DELIVERED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <LocalShippingIcon sx={{ color: infoColor }} />
+            <Typography>Mark as delivered</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -447,8 +471,8 @@ export default function ReportPage() {
                       sx={{ color: blue[700], fontSize: 50 }}
                     />
                   }
-                  text="Completed orders"
-                  value={completedOrders.length}
+                  text="Unpaid orders"
+                  value={unpaidOrders.length}
                 />
               </Grid>
             </Grid>
@@ -461,7 +485,7 @@ export default function ReportPage() {
                   fullWidth
                   variant="filled"
                   // label="Search orders"
-                  placeholder="Search by invoice id or status"
+                  placeholder="Search by invoice id, client id, client name or status"
                   value={searchKeywords}
                   onChange={(e) => setSearchKeywords(e.target.value)}
                 />

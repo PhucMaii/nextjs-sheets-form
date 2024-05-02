@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+// import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
 import emailHandler from '../utils/email';
 import { generateOrderTemplate } from '@/config/email';
@@ -6,7 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { sheetStructure } from '@/config/sheetStructure';
+// import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
 
 interface RequestQuery {
@@ -132,48 +132,48 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.GOOGLE_CLIENT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      },
-      scopes: [
-        'https://www.googleapis.com/auth/drive',
-        'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/spreadsheets',
-      ],
-    });
-    const sheets = google.sheets({
-      auth,
-      version: 'v4',
-    });
+    // const auth = new google.auth.GoogleAuth({
+    //   credentials: {
+    //     client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    //     private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    //   },
+    //   scopes: [
+    //     'https://www.googleapis.com/auth/drive',
+    //     'https://www.googleapis.com/auth/drive.file',
+    //     'https://www.googleapis.com/auth/spreadsheets',
+    //   ],
+    // });
+    // const sheets = google.sheets({
+    //   auth,
+    //   version: 'v4',
+    // });
 
-    const data = [];
-    // format data to append into client sheet
-    // make a copy of sheet structure to avoid changed on formatted values affect sheet structure
-    const formattedValues: any[] = [...sheetStructure];
-    Object.keys(body).forEach((key) => {
-      const keyStructureIndex = sheetStructure.indexOf(key);
-      if (keyStructureIndex === -1) {
-        return;
-      }
+    // const data = [];
+    // // format data to append into client sheet
+    // // make a copy of sheet structure to avoid changed on formatted values affect sheet structure
+    // const formattedValues: any[] = [...sheetStructure];
+    // Object.keys(body).forEach((key) => {
+    //   const keyStructureIndex = sheetStructure.indexOf(key);
+    //   if (keyStructureIndex === -1) {
+    //     return;
+    //   }
 
-      let validValue = body[key];
-      if (key === 'DELIVERY DATE') {
-        formattedValues[keyStructureIndex] = validValue;
-        return;
-      }
+    //   let validValue = body[key];
+    //   if (key === 'DELIVERY DATE') {
+    //     formattedValues[keyStructureIndex] = validValue;
+    //     return;
+    //   }
 
-      validValue = parseInt(validValue);
-      formattedValues[keyStructureIndex] = validValue;
-    });
+    //   validValue = parseInt(validValue);
+    //   formattedValues[keyStructureIndex] = validValue;
+    // });
 
-    // Turn all non-value field into 0
-    for (let i = 1; i < formattedValues.length; i++) {
-      if (typeof formattedValues[i] === 'string') {
-        formattedValues[i] = 0;
-      }
-    }
+    // // Turn all non-value field into 0
+    // for (let i = 1; i < formattedValues.length; i++) {
+    //   if (typeof formattedValues[i] === 'string') {
+    //     formattedValues[i] = 0;
+    //   }
+    // }
 
     await pusherServer.trigger('admin', 'incoming-order', {
       items: itemList,
@@ -223,39 +223,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Append to Client Sheet
-    const appendResponse = await sheets.spreadsheets.values.append({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `${existingUser.sheetName}!A1:I1`,
-      valueInputOption: 'USER_ENTERED',
-      requestBody: {
-        values: [formattedValues],
-      },
-    });
-    const appendData = appendResponse.data.updates;
-    data.push(appendData);
+    // const appendResponse = await sheets.spreadsheets.values.append({
+    //   spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    //   range: `${existingUser.sheetName}!A1:I1`,
+    //   valueInputOption: 'USER_ENTERED',
+    //   requestBody: {
+    //     values: [formattedValues],
+    //   },
+    // });
+    // const appendData = appendResponse.data.updates;
+    // data.push(appendData);
 
-    // format data to append into overview sheet
-    const [date, ...restValues] = formattedValues;
-    const overviewFormattedData = [
-      date,
-      newOrder.id,
-      existingUser.clientId.toString(),
-      existingUser.clientName,
-      ...restValues,
-    ];
+    // // format data to append into overview sheet
+    // const [date, ...restValues] = formattedValues;
+    // const overviewFormattedData = [
+    //   date,
+    //   newOrder.id,
+    //   existingUser.clientId.toString(),
+    //   existingUser.clientName,
+    //   ...restValues,
+    // ];
 
-    // Append to Overview Sheet
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Overview!A1:L1`,
-      valueInputOption: 'USER_ENTERED',
-      requestBody: {
-        values: [overviewFormattedData],
-      },
-    });
+    // // Append to Overview Sheet
+    // await sheets.spreadsheets.values.append({
+    //   spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    //   range: `Overview!A1:L1`,
+    //   valueInputOption: 'USER_ENTERED',
+    //   requestBody: {
+    //     values: [overviewFormattedData],
+    //   },
+    // });
 
     return res.status(200).json({
-      overviewFormattedData,
+      // overviewFormattedData,
       message: 'Data Added Successfully',
     });
   } catch (error) {
@@ -276,7 +276,11 @@ export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
       userId: id,
       deliveryDate,
       status: {
-        in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.INCOMPLETED],
+        in: [
+          ORDER_STATUS.COMPLETED,
+          ORDER_STATUS.INCOMPLETED,
+          ORDER_STATUS.DELIVERED,
+        ],
       },
     },
     include: {

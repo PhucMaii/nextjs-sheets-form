@@ -31,6 +31,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import EmailAlert from '../EmailAlert';
 import SnackbarPopup from '../Snackbar/SnackbarPopup';
 import { Notification } from '@/app/utils/type';
+import { generateRecommendDate } from '@/app/utils/time';
+import { Order } from '@/app/admin/orders/page';
 
 interface PropTypes {
   children: ReactNode;
@@ -50,6 +52,7 @@ export default function Sidebar({ children }: PropTypes) {
   const pathname: any = usePathname();
 
   const [userData] = useContext(UserContext);
+  const orderDate = generateRecommendDate();
   const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(
     !userData?.email,
   );

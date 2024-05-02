@@ -14,6 +14,7 @@ export enum API_URL {
 
 export enum ORDER_STATUS {
   COMPLETED = 'Completed',
+  DELIVERED = 'Delivered',
   INCOMPLETED = 'Incompleted',
   VOID = 'Void',
 }

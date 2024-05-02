@@ -2,22 +2,26 @@
 import {
   Box,
   Checkbox,
+  MenuItem,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, memo } from 'react';
-import StatusText, { COLOR_TYPE } from './StatusText';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import React, { Dispatch, SetStateAction, memo, useState } from 'react';
+import StatusText from './StatusText';
+import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification } from '@/app/utils/type';
 import DeleteOrder from './Modals/DeleteOrder';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
+import axios from 'axios';
+import LoadingModal from './Modals/LoadingModal';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -40,23 +44,77 @@ const ClientOrdersTable = ({
   handleSelectAll,
   isAdmin,
 }: PropTypes) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const windowDimensions = useWindowDimensions();
+
+  const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
+    if (!handleUpdateOrderUI || !setNotification) {
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const response = await axios.put(`${API_URL.ORDER}/status`, {
+        id: order.id,
+        status: updatedStatus,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      handleUpdateOrderUI({ ...order, status: updatedStatus });
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('Fail to update status: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update status: ' + error,
+      });
+      setIsLoading(false);
+    }
+  };
 
   function fixedHeaderContent() {
     return (
       <TableRow>
+        <TableCell style={{ width: 100 }}></TableCell>
         <TableCell padding="checkbox" variant="head">
           <Checkbox
             checked={selectedOrders.length === clientOrders.length}
             onClick={handleSelectAll}
           />
         </TableCell>
-        <TableCell variant="head" style={{width: 120}}>Invoice Id</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Order Time</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Delivery Date</TableCell>
-        <TableCell variant="head"style={{width: 120}}>Total Bill</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Status</TableCell>
-        <TableCell variant="head" style={{width: 120}}></TableCell>
+        <TableCell variant="head" style={{ width: 100 }}>
+          Invoice Id
+        </TableCell>
+        <TableCell variant="head" style={{ width: 100 }}>
+          Client Id
+        </TableCell>
+        <TableCell variant="head" style={{ width: 150 }}>
+          Client Name
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Delivery Date
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Total Bill
+        </TableCell>
+        <TableCell variant="head" style={{ width: 180 }}>
+          Status
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}></TableCell>
       </TableRow>
     );
   }
@@ -65,18 +123,17 @@ const ClientOrdersTable = ({
     const isOrderSelected = selectedOrders.some(
       (targetOrder: Order) => order.id === targetOrder.id,
     );
-
-    const statusText = {
-      text: order.status,
-      type:
-        order.status === ORDER_STATUS.COMPLETED
-          ? COLOR_TYPE.SUCCESS
-          : order.status === ORDER_STATUS.INCOMPLETED
-            ? COLOR_TYPE.WARNING
-            : COLOR_TYPE.ERROR,
-    };
     return (
       <>
+        <TableCell>
+          {order.isReplacement ? (
+            <StatusText text="Replaced" type="error" />
+          ) : order.isVoid ? (
+            <StatusText text="Voided" type="error" />
+          ) : (
+            ''
+          )}
+        </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
             onClick={(e) => handleSelectOrder(e, order)}
@@ -84,11 +141,30 @@ const ClientOrdersTable = ({
           />
         </TableCell>
         <TableCell>{order.id}</TableCell>
-        <TableCell>{order.orderTime}</TableCell>
+        <TableCell>{order.user.clientId}</TableCell>
+        <TableCell>{order.user.clientName}</TableCell>
         <TableCell>{order.deliveryDate}</TableCell>
         <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
         <TableCell>
-          <StatusText text={statusText.text} type={statusText.type} />
+          <Select
+            value={order.status}
+            onChange={(e) =>
+              updateStatus(order, e.target.value as ORDER_STATUS)
+            }
+          >
+            <MenuItem value={ORDER_STATUS.COMPLETED}>
+              <StatusText text="Completed" type="success" />
+            </MenuItem>
+            <MenuItem value={ORDER_STATUS.DELIVERED}>
+              <StatusText text="Delivered" type="info" />
+            </MenuItem>
+            <MenuItem value={ORDER_STATUS.INCOMPLETED}>
+              <StatusText text="Incompleted" type="warning" />
+            </MenuItem>
+            <MenuItem value={ORDER_STATUS.VOID}>
+              <StatusText text="Void" type="error" />
+            </MenuItem>
+          </Select>
         </TableCell>
         {isAdmin &&
           setNotification &&
@@ -141,14 +217,17 @@ const ClientOrdersTable = ({
   };
 
   return (
-    <Paper style={{ height: windowDimensions.height - 250, width: '100%' }}>
-      <TableVirtuoso
-        data={clientOrders}
-        components={VirtuosoTableComponents}
-        fixedHeaderContent={fixedHeaderContent}
-        itemContent={rowContent}
-      />
-    </Paper>
+    <>
+      <LoadingModal open={isLoading} />
+      <Paper style={{ height: windowDimensions.height - 250, width: '100%' }}>
+        <TableVirtuoso
+          data={clientOrders}
+          components={VirtuosoTableComponents}
+          fixedHeaderContent={fixedHeaderContent}
+          itemContent={rowContent}
+        />
+      </Paper>
+    </>
   );
 };
 

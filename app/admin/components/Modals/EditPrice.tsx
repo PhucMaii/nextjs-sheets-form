@@ -24,6 +24,11 @@ interface PropTypes extends ModalProps {
   items: OrderedItems[];
   setNotification: Dispatch<SetStateAction<Notification>>;
   order: Order;
+  handleUpdatePriceUI: (
+    targetOrder: Order,
+    newItems: any[],
+    newTotalPrice: number,
+  ) => void;
 }
 
 export default function EditPrice({
@@ -32,9 +37,10 @@ export default function EditPrice({
   items,
   setNotification,
   order,
+  handleUpdatePriceUI,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [itemList, setItemList] = useState<OrderedItems[]>([...items]);
+  const [itemList, setItemList] = useState<OrderedItems[]>(items);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );
@@ -70,6 +76,8 @@ export default function EditPrice({
         });
         return;
       }
+
+      handleUpdatePriceUI(order, itemList, totalPrice);
 
       setNotification({
         on: true,

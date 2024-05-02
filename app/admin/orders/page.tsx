@@ -49,6 +49,7 @@ import ErrorComponent from '../components/ErrorComponent';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 interface Category {
   id: number;
@@ -71,6 +72,7 @@ interface OrderPreference {
 
 export interface Order {
   id: number;
+  user?: any;
   category: Category;
   orderTime: string;
   deliveryDate: string;
@@ -153,7 +155,6 @@ export default function Orders() {
   useEffect(() => {
     if (incomingOrder) {
       handleSinglePrint();
-      console.log('Incoming order: ', incomingOrder);
       setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
@@ -162,6 +163,13 @@ export default function Orders() {
       ) {
         setOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
         setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
+      } else if (incomingOrder.isReplacement || incomingOrder.isVoid) {
+        const newOrderData = orderData.filter((order: Order) => {
+          return order.id !== incomingOrder.id;
+        });
+
+        setBaseOrderData([...newOrderData, incomingOrder]);
+        setOrderData([...newOrderData, incomingOrder]);
       }
     }
   }, [incomingOrder]);
@@ -221,7 +229,6 @@ export default function Orders() {
         // setHasMore(false);
         return;
       }
-
       setOrderData(response.data.data);
       setBaseOrderData(response.data.data);
       setIsLoading(false);
@@ -256,6 +263,22 @@ export default function Orders() {
 
     setOrderData(newOrderData);
     setBaseOrderData(newOrderData);
+  };
+
+  const handleUpdatePriceUI = (
+    targetOrder: Order,
+    newItems: any[],
+    newTotalPrice: number,
+  ) => {
+    const newOrderList = baseOrderData.map((order: Order) => {
+      if (order.id === targetOrder.id) {
+        return { ...order, totalPrice: newTotalPrice, items: newItems };
+      }
+      return order;
+    });
+
+    setOrderData(newOrderList);
+    setBaseOrderData(newOrderList);
   };
 
   const handleCloseAnchor = () => {
@@ -389,6 +412,21 @@ export default function Orders() {
           >
             <DoneIcon sx={{ color: successColor }} />
             <Typography>Filter: Completed Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.DELIVERED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.DELIVERED}
+          >
+            <LocalShippingIcon sx={{ color: infoColor }} />
+            <Typography>Filter: Delivered Orders</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -546,6 +584,7 @@ export default function Orders() {
                 updateUI={handleMarkSingleCompletedUI}
                 updateUIItem={handleUpdateUISingleOrder}
                 handleUpdateDateUI={handleUpdateDateUI}
+                handleUpdatePriceUI={handleUpdatePriceUI}
               />
             )}
           />
