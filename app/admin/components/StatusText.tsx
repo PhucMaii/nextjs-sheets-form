@@ -1,6 +1,8 @@
 import {
   errorBackground,
   errorText,
+  infoBackground,
+  infoColor,
   successBackground,
   successText,
   warningBackground,
@@ -13,6 +15,7 @@ export enum COLOR_TYPE {
   SUCCESS = 'success',
   WARNING = 'warning',
   ERROR = 'error',
+  INFO = 'info'
 }
 
 interface PropTypes {
@@ -41,6 +44,12 @@ export default function StatusText({ text, type }: PropTypes) {
         backgroundColor: successBackground,
         color: successText,
       });
+    }
+    if (type === 'info') {
+      setTextColor({
+        backgroundColor: infoBackground,
+        color: infoColor
+      })
     }
     if (type === 'warning') {
       setTextColor({

@@ -49,6 +49,7 @@ import ErrorComponent from '../components/ErrorComponent';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 interface Category {
   id: number;
@@ -411,6 +412,21 @@ export default function Orders() {
           >
             <DoneIcon sx={{ color: successColor }} />
             <Typography>Filter: Completed Orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setCurrentStatus(ORDER_STATUS.DELIVERED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={currentStatus === ORDER_STATUS.DELIVERED}
+          >
+            <LocalShippingIcon sx={{ color: infoColor }} />
+            <Typography>Filter: Delivered Orders</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem

@@ -276,7 +276,7 @@ export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
       userId: id,
       deliveryDate,
       status: {
-        in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.INCOMPLETED],
+        in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
       },
     },
     include: {

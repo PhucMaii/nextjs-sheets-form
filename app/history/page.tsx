@@ -27,10 +27,11 @@ import OrderAccordion from '../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
 import { DropdownItemContainer } from '../admin/orders/styled';
-import { errorColor, successColor, warningColor } from '../theme/color';
+import { errorColor, infoColor, successColor, warningColor } from '../theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
 import NotificationPopup from '../admin/components/Notification';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -190,6 +191,21 @@ export default function HistoryPage() {
           >
             <CheckCircleIcon sx={{ color: successColor }} />
             <Typography>Completed orders</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrder(ORDER_STATUS.DELIVERED);
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer
+            display="flex"
+            gap={2}
+            isSelected={filterOptions === ORDER_STATUS.DELIVERED}
+          >
+            <LocalShippingIcon sx={{ color: infoColor }} />
+            <Typography>Delivered orders</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem

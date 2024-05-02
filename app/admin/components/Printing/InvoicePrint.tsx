@@ -23,7 +23,7 @@ interface PropTypes {
 export const InvoicePrint = forwardRef(
   ({ client, orders }: PropTypes, ref: any) => {
     const filteredOrders = orders.filter((order: Order) => {
-      return order.status !== ORDER_STATUS.VOID;
+      return order.status !== ORDER_STATUS.VOID && order.status !== ORDER_STATUS.COMPLETED;
     });
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);

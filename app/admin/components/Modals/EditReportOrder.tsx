@@ -193,6 +193,9 @@ export default function EditReportOrder({
                     <MenuItem value={ORDER_STATUS.COMPLETED}>
                       Completed
                     </MenuItem>
+                    <MenuItem value={ORDER_STATUS.DELIVERED}>
+                      Delivered
+                    </MenuItem>
                     <MenuItem value={ORDER_STATUS.INCOMPLETED}>
                       Incompleted
                     </MenuItem>

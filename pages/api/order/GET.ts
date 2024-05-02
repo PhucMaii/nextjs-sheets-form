@@ -32,7 +32,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         userId: existingUser.id,
         status: {
-          in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.INCOMPLETED],
+          in: [ORDER_STATUS.COMPLETED, ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
         },
       },
       include: {

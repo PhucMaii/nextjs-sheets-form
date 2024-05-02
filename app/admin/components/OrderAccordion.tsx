@@ -82,6 +82,7 @@ const OrderAccordion = ({
     type:
       order.status === ORDER_STATUS.COMPLETED
         ? COLOR_TYPE.SUCCESS
+        : order.status === ORDER_STATUS.DELIVERED ? COLOR_TYPE.INFO 
         : order.status === ORDER_STATUS.INCOMPLETED
           ? COLOR_TYPE.WARNING
           : COLOR_TYPE.ERROR,
@@ -258,6 +259,17 @@ const OrderAccordion = ({
                     }
                   >
                     Mark as completed
+                  </MenuItem>
+                  <MenuItem
+                    disabled={
+                      isMarkButtonDisabled ||
+                      order.status === ORDER_STATUS.COMPLETED
+                    }
+                    onClick={(e) =>
+                      handleChangeStatus(e, ORDER_STATUS.DELIVERED)
+                    }
+                  >
+                    Mark as delivered
                   </MenuItem>
                   <MenuItem
                     disabled={
