@@ -42,7 +42,12 @@ import {
 import { useReactToPrint } from 'react-to-print';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
 import { DropdownItemContainer } from '../orders/styled';
-import { errorColor, infoColor, successColor, warningColor } from '@/app/theme/color';
+import {
+  errorColor,
+  infoColor,
+  successColor,
+  warningColor,
+} from '@/app/theme/color';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -188,7 +193,10 @@ export default function ReportPage() {
       }
 
       const newUnpaidOrders = response.data.data.filter((order: Order) => {
-        return order.status === ORDER_STATUS.DELIVERED || order.status === ORDER_STATUS.INCOMPLETED;
+        return (
+          order.status === ORDER_STATUS.DELIVERED ||
+          order.status === ORDER_STATUS.INCOMPLETED
+        );
       });
 
       setUnpaidOrders(newUnpaidOrders);

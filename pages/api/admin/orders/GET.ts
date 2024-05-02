@@ -41,12 +41,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       orderBy: [
         {
-          updateTime: 'desc' // Sort by updateTime in descending order
+          updateTime: 'desc', // Sort by updateTime in descending order
         },
         {
-          id: 'desc' // If updateTime is the same, sort by id in ascending order
-        }
-      ]
+          id: 'desc', // If updateTime is the same, sort by id in ascending order
+        },
+      ],
       // skip,
       // take: pageSize,
     });

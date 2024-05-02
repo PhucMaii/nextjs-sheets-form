@@ -82,10 +82,11 @@ const OrderAccordion = ({
     type:
       order.status === ORDER_STATUS.COMPLETED
         ? COLOR_TYPE.SUCCESS
-        : order.status === ORDER_STATUS.DELIVERED ? COLOR_TYPE.INFO 
-        : order.status === ORDER_STATUS.INCOMPLETED
-          ? COLOR_TYPE.WARNING
-          : COLOR_TYPE.ERROR,
+        : order.status === ORDER_STATUS.DELIVERED
+          ? COLOR_TYPE.INFO
+          : order.status === ORDER_STATUS.INCOMPLETED
+            ? COLOR_TYPE.WARNING
+            : COLOR_TYPE.ERROR,
   };
 
   useEffect(() => {
@@ -419,4 +420,4 @@ const OrderAccordion = ({
 };
 
 // only re renders if th order data change
-export default memo(OrderAccordion)
+export default memo(OrderAccordion);

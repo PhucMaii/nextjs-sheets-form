@@ -10,8 +10,9 @@ export const generateOrderTemplate = (
   let orderDetailsTemplate = '';
   let total = 0;
 
-  const flagText = flag ?
-  `<h2 style="text-align: center; font-weight: 300">${flag}</h2>` : ''
+  const flagText = flag
+    ? `<h2 style="text-align: center; font-weight: 300">${flag}</h2>`
+    : '';
 
   for (const key of Object.keys(orderDetails)) {
     if (

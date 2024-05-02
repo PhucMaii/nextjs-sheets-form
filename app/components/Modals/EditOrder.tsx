@@ -56,7 +56,7 @@ export default function EditOrder({
         deliveryDate: order.deliveryDate,
         note,
         items: [...itemList],
-        orderId: order.id
+        orderId: order.id,
       });
 
       if (response.data.error) {
