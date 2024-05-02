@@ -12,8 +12,10 @@ import { API_URL } from '@/app/utils/enum';
 import NotificationPopup from '../components/Notification';
 import ClientsTable from '../components/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
+import { Category } from '@prisma/client';
 
 export default function ClientsPage() {
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -25,7 +27,35 @@ export default function ClientsPage() {
 
   useEffect(() => {
     handleFetchAllUsers();
+    handleFetchAllCategories();
   }, [])
+
+  const handleFetchAllCategories = async () => {
+    try {
+      const response = await axios.get(API_URL.CATEGORIES);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        setIsFetching(false);
+        return;
+      }
+
+      setCategoryList(response.data.data);
+      setIsFetching(false);
+    } catch (error: any) {
+      console.log('Fail to fetch all categories: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to fetch all categories: ' + error
+      });
+      setIsFetching(true);
+    }
+  }
 
   const handleFetchAllUsers = async () => {
     setIsFetching(true);
@@ -38,12 +68,11 @@ export default function ClientsPage() {
           type: 'error',
           message: response.data.error
         });
-        setIsFetching(true);
+        setIsFetching(false);
         return;
       }
 
       setClientList(response.data.data);
-      setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch all users: ', error);
       setNotification({
@@ -62,7 +91,14 @@ export default function ClientsPage() {
       }
       return client;
     })
-    console.log({newClientList, clientList})
+    setClientList(newClientList);
+  }
+
+  const handleDeleteClientUI = (clientId: number) => {
+    const newClientList = clientList.filter((client: UserType) => {
+      return client.id !== clientId;
+    });
+
     setClientList(newClientList);
   }
 
@@ -146,7 +182,13 @@ export default function ClientsPage() {
             />  
           </Grid>         
         </Grid>
-        <ClientsTable clients={clientList} handleUpdateClient={handleUpdateClient} />
+        <ClientsTable 
+          categories={categoryList} 
+          clients={clientList} 
+          handleUpdateClient={handleUpdateClient}
+          handleDeleteClientUI={handleDeleteClientUI} 
+          setNotification={setNotification}
+          />
       </AuthenGuard>
     </Sidebar>
   )

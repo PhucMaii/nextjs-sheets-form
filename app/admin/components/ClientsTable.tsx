@@ -14,22 +14,27 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, memo, useState } from 'react';
 import StatusText, { COLOR_TYPE } from './StatusText';
-import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification, UserType } from '@/app/utils/type';
-import DeleteOrder from './Modals/DeleteOrder';
+import DeleteOrder from './Modals/DeleteModal';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
+import order from '@/pages/api/order';
+import { Category } from '@prisma/client';
+import axios from 'axios';
+import DeleteModal from './Modals/DeleteModal';
 
 interface PropTypes {
+  categories: Category[];
   clients: UserType[];
   handleUpdateClient: (userId: number, updatedData: any) => void;
 //   handleUpdateOrderUI?: (updatedOrder: Order) => void;
-//   handleDeleteOrderUI?: (deletedOrder: Order) => void;
-//   setNotification?: Dispatch<SetStateAction<Notification>>;
+  handleDeleteClientUI: (clientId: number) => void;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 //   selectedOrders: UserType[];
 //   handleSelectOrder: (e: any, order: Order) => void;
 //   handleSelectAll: () => void;
@@ -37,11 +42,12 @@ interface PropTypes {
 }
 
 const ClientsTable = ({
+  categories,
   clients,
   handleUpdateClient,
 //   handleUpdateOrderUI,
-//   handleDeleteOrderUI,
-//   setNotification,
+  handleDeleteClientUI,
+  setNotification,
 //   selectedOrders,
 //   handleSelectOrder,
 //   handleSelectAll,
@@ -49,6 +55,36 @@ const ClientsTable = ({
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
 
+  const handleDeleteClient = async (client: UserType) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL.CLIENTS}?userId=${client.id}`,
+      );
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleDeleteClientUI(client.id);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('Fail to delete order: ' + error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to delete order: ' + error,
+      });
+    }
+  };
 
   function fixedHeaderContent() {
     return (
@@ -97,10 +133,10 @@ const ClientsTable = ({
             >
                 <MenuItem value={'N/A'}>N/A</MenuItem>
                 {
-                    orderTypes.map((type, index) => {
+                    orderTypes.map((orderType, index) => {
                         return (
-                            <MenuItem key={index} value={type}>
-                                {type.toUpperCase()}
+                            <MenuItem key={index} value={orderType.text}>
+                                <StatusText text={orderType.text.toUpperCase()} type={orderType.type} />
                             </MenuItem>
                         )
                     })
@@ -129,6 +165,19 @@ const ClientsTable = ({
         <TableCell>{client.category.name}</TableCell>
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
+        <TableCell>
+              <Box display="flex" gap={1}>
+                <DeleteModal
+                  targetObj={client}
+                  handleDelete={handleDeleteClient}
+                />
+                {/* <EditReportOrder
+                  order={order}
+                  setNotification={setNotification}
+                  handleUpdateOrderUI={handleUpdateOrderUI}
+                /> */}
+              </Box>
+        </TableCell>
         {/* {isAdmin &&
           setNotification &&
           handleDeleteOrderUI &&

@@ -521,7 +521,6 @@ export default function ReportPage() {
                 selectedOrders={selectedOrders}
                 handleSelectOrder={handleSelectOrder}
                 handleSelectAll={handleSelectAll}
-                isAdmin
               />
             ) : (
               <ErrorComponent errorText="No Order Available" />

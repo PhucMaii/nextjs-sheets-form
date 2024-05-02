@@ -17,21 +17,20 @@ import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification } from '@/app/utils/type';
-import DeleteOrder from './Modals/DeleteOrder';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import axios from 'axios';
 import LoadingModal from './Modals/LoadingModal';
+import DeleteModal from './Modals/DeleteModal';
 
 interface PropTypes {
   clientOrders: Order[];
-  handleUpdateOrderUI?: (updatedOrder: Order) => void;
-  handleDeleteOrderUI?: (deletedOrder: Order) => void;
-  setNotification?: Dispatch<SetStateAction<Notification>>;
+  handleUpdateOrderUI: (updatedOrder: Order) => void;
+  handleDeleteOrderUI: (deletedOrder: Order) => void;
+  setNotification: Dispatch<SetStateAction<Notification>>;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, order: Order) => void;
   handleSelectAll: () => void;
-  isAdmin?: boolean;
 }
 
 const ClientOrdersTable = ({
@@ -42,15 +41,11 @@ const ClientOrdersTable = ({
   selectedOrders,
   handleSelectOrder,
   handleSelectAll,
-  isAdmin,
 }: PropTypes) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const windowDimensions = useWindowDimensions();
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
-    if (!handleUpdateOrderUI || !setNotification) {
-      return;
-    }
     try {
       setIsLoading(true);
       const response = await axios.put(`${API_URL.ORDER}/status`, {
@@ -83,6 +78,37 @@ const ClientOrdersTable = ({
         message: 'Fail to update status: ' + error,
       });
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteOrder = async (order: Order) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL.CLIENTS}/orders?orderId=${order.id}`,
+      );
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleDeleteOrderUI(order);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('Fail to delete order: ' + error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to delete order: ' + error,
+      });
     }
   };
 
@@ -166,16 +192,11 @@ const ClientOrdersTable = ({
             </MenuItem>
           </Select>
         </TableCell>
-        {isAdmin &&
-          setNotification &&
-          handleDeleteOrderUI &&
-          handleUpdateOrderUI && (
             <TableCell>
               <Box display="flex" gap={1}>
-                <DeleteOrder
-                  order={order}
-                  setNotification={setNotification}
-                  handleDeleteOrderUI={handleDeleteOrderUI}
+                <DeleteModal
+                  targetObj={order}
+                  handleDelete={handleDeleteOrder}
                 />
                 <EditReportOrder
                   order={order}
@@ -184,7 +205,6 @@ const ClientOrdersTable = ({
                 />
               </Box>
             </TableCell>
-          )}
       </>
     );
   }

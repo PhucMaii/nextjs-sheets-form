@@ -10,6 +10,7 @@ export enum API_URL {
   ORDERED_ITEMS = '/api/admin/orderedItems',
   CLIENTS = '/api/admin/clients',
   CLIENT_ORDER = '/api/order',
+  CATEGORIES = '/api/admin/categories'
 }
 
 export enum ORDER_STATUS {

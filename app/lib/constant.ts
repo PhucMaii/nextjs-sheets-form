@@ -6,6 +6,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PeopleIcon from '@mui/icons-material/People';
 import { ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
+import { COLOR_TYPE } from '../admin/components/StatusText';
 
 export const limitOrderHour = 9;
 
@@ -51,10 +52,10 @@ export const clientTabs = [
 ];
 
 export const orderTypes = [
-  ORDER_TYPE.FIXED,
-  ORDER_TYPE.CALL,
-  ORDER_TYPE.ON_CALL,
-  ORDER_TYPE.QR_CODE,
+  {text: ORDER_TYPE.FIXED, type: COLOR_TYPE.SUCCESS},
+  {text: ORDER_TYPE.CALL, type: COLOR_TYPE.ERROR},
+  {text: ORDER_TYPE.ON_CALL, type: COLOR_TYPE.WARNING},
+  {text: ORDER_TYPE.QR_CODE, type: COLOR_TYPE.INFO},
 ];
 
 export const paymentTypes = [
