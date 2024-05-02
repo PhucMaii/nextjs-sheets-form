@@ -192,19 +192,16 @@ const ClientOrdersTable = ({
             </MenuItem>
           </Select>
         </TableCell>
-            <TableCell>
-              <Box display="flex" gap={1}>
-                <DeleteModal
-                  targetObj={order}
-                  handleDelete={handleDeleteOrder}
-                />
-                <EditReportOrder
-                  order={order}
-                  setNotification={setNotification}
-                  handleUpdateOrderUI={handleUpdateOrderUI}
-                />
-              </Box>
-            </TableCell>
+        <TableCell>
+          <Box display="flex" gap={1}>
+            <DeleteModal targetObj={order} handleDelete={handleDeleteOrder} />
+            <EditReportOrder
+              order={order}
+              setNotification={setNotification}
+              handleUpdateOrderUI={handleUpdateOrderUI}
+            />
+          </Box>
+        </TableCell>
       </>
     );
   }

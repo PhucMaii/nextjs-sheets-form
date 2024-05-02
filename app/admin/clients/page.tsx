@@ -1,6 +1,6 @@
 'use client';
-import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard'
-import React, { useEffect, useState } from 'react'
+import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { Grid } from '@mui/material';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
@@ -22,13 +22,13 @@ export default function ClientsPage() {
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
-    message: ''
+    message: '',
   });
 
   useEffect(() => {
     handleFetchAllUsers();
     handleFetchAllCategories();
-  }, [])
+  }, []);
 
   const handleFetchAllCategories = async () => {
     try {
@@ -38,7 +38,7 @@ export default function ClientsPage() {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         setIsFetching(false);
         return;
@@ -51,11 +51,11 @@ export default function ClientsPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to fetch all categories: ' + error
+        message: 'Fail to fetch all categories: ' + error,
       });
       setIsFetching(true);
     }
-  }
+  };
 
   const handleFetchAllUsers = async () => {
     setIsFetching(true);
@@ -66,7 +66,7 @@ export default function ClientsPage() {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         setIsFetching(false);
         return;
@@ -78,21 +78,21 @@ export default function ClientsPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to fetch all users: ' + error
+        message: 'Fail to fetch all users: ' + error,
       });
       setIsFetching(true);
     }
-  }
+  };
 
   const handleChangeClients = (clientId: number, updatedData: any) => {
     const newClientList = clientList.map((client: UserType) => {
       if (client.id === clientId) {
-        return {...client, ...updatedData}
+        return { ...client, ...updatedData };
       }
       return client;
-    })
+    });
     setClientList(newClientList);
-  }
+  };
 
   const handleDeleteClientUI = (clientId: number) => {
     const newClientList = clientList.filter((client: UserType) => {
@@ -100,36 +100,39 @@ export default function ClientsPage() {
     });
 
     setClientList(newClientList);
-  }
+  };
 
   const handleUpdateClient = async (userId: number, updatedData: object) => {
     if (Object.keys(updatedData).length === 0) {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Please provide at least 1 updated data'
+        message: 'Please provide at least 1 updated data',
       });
       return;
     }
     try {
       setIsUpdating(true);
-      const response = await axios.put(API_URL.CLIENTS, {userId, ...updatedData});
+      const response = await axios.put(API_URL.CLIENTS, {
+        userId,
+        ...updatedData,
+      });
 
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         setIsUpdating(false);
         return;
       }
-      
+
       handleChangeClients(userId, response.data.data);
       setNotification({
         on: true,
         type: 'success',
-        message: response.data.message
+        message: response.data.message,
       });
       setIsUpdating(false);
     } catch (error: any) {
@@ -137,59 +140,65 @@ export default function ClientsPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to update client preference: ' + error
+        message: 'Fail to update client preference: ' + error,
       });
       setIsUpdating(false);
     }
-  }
+  };
 
   if (isFetching) {
     return (
       <Sidebar>
         <SplashScreen />
       </Sidebar>
-    )
+    );
   }
 
   return (
     <Sidebar>
       <AuthenGuard>
-        <LoadingModal  open={isUpdating}/>
-        <NotificationPopup 
+        <LoadingModal open={isUpdating} />
+        <NotificationPopup
           notification={notification}
-          onClose={() => setNotification({...notification, on: false})}        
+          onClose={() => setNotification({ ...notification, on: false })}
         />
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
-            <OverviewCard 
-              icon={<PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }}/>}
+            <OverviewCard
+              icon={
+                <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
+              }
               text="Total Clients"
               value={200}
-            />  
+            />
           </Grid>
           <Grid item xs={12} md={4}>
-            <OverviewCard 
-              icon={<PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }}/>}
+            <OverviewCard
+              icon={
+                <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
+              }
               text="Total Clients"
               value={200}
-            />  
-          </Grid> 
+            />
+          </Grid>
           <Grid item xs={12} md={4}>
-            <OverviewCard 
-              icon={<PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }}/>}
+            <OverviewCard
+              icon={
+                <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
+              }
               text="Total Clients"
               value={200}
-            />  
-          </Grid>         
+            />
+          </Grid>
         </Grid>
-        <ClientsTable 
-          categories={categoryList} 
-          clients={clientList} 
+        <ClientsTable
+          categories={categoryList}
+          clients={clientList}
           handleUpdateClient={handleUpdateClient}
-          handleDeleteClientUI={handleDeleteClientUI} 
+          handleDeleteClientUI={handleDeleteClientUI}
           setNotification={setNotification}
-          />
+        />
       </AuthenGuard>
     </Sidebar>
-  )
+  );
 }

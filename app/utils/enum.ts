@@ -10,7 +10,7 @@ export enum API_URL {
   ORDERED_ITEMS = '/api/admin/orderedItems',
   CLIENTS = '/api/admin/clients',
   CLIENT_ORDER = '/api/order',
-  CATEGORIES = '/api/admin/categories'
+  CATEGORIES = '/api/admin/categories',
 }
 
 export enum ORDER_STATUS {
@@ -25,11 +25,11 @@ export enum ORDER_TYPE {
   FIXED = 'fixed',
   CALL = 'call',
   ON_CALL = 'on-call',
-  QR_CODE = 'qr-code'
+  QR_CODE = 'qr-code',
 }
 
 export enum PAYMENT_TYPE {
   NA = 'N/A',
   MONTHLY = 'monthly',
-  COD = 'cod'
+  COD = 'cod',
 }

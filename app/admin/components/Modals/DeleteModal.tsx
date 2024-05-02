@@ -13,10 +13,7 @@ interface PropTypes {
   handleDelete: (deletedOrder: Order) => Promise<void>;
 }
 
-export default function DeleteModal({
-  targetObj,
-  handleDelete,
-}: PropTypes) {
+export default function DeleteModal({ targetObj, handleDelete }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 

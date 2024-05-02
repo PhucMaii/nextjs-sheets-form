@@ -52,13 +52,10 @@ export const clientTabs = [
 ];
 
 export const orderTypes = [
-  {text: ORDER_TYPE.FIXED, type: COLOR_TYPE.SUCCESS},
-  {text: ORDER_TYPE.CALL, type: COLOR_TYPE.ERROR},
-  {text: ORDER_TYPE.ON_CALL, type: COLOR_TYPE.WARNING},
-  {text: ORDER_TYPE.QR_CODE, type: COLOR_TYPE.INFO},
+  { text: ORDER_TYPE.FIXED, type: COLOR_TYPE.SUCCESS },
+  { text: ORDER_TYPE.CALL, type: COLOR_TYPE.ERROR },
+  { text: ORDER_TYPE.ON_CALL, type: COLOR_TYPE.WARNING },
+  { text: ORDER_TYPE.QR_CODE, type: COLOR_TYPE.INFO },
 ];
 
-export const paymentTypes = [
-  PAYMENT_TYPE.COD,
-  PAYMENT_TYPE.MONTHLY
-];
+export const paymentTypes = [PAYMENT_TYPE.COD, PAYMENT_TYPE.MONTHLY];

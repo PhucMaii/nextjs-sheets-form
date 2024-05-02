@@ -14,7 +14,12 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, memo, useState } from 'react';
 import StatusText, { COLOR_TYPE } from './StatusText';
-import { API_URL, ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
+import {
+  API_URL,
+  ORDER_STATUS,
+  ORDER_TYPE,
+  PAYMENT_TYPE,
+} from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import EditReportOrder from './Modals/EditReportOrder';
 import { Notification, UserType } from '@/app/utils/type';
@@ -27,33 +32,34 @@ import order from '@/pages/api/order';
 import { Category } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from './Modals/DeleteModal';
+import EditClient from './Modals/EditClient';
 
 interface PropTypes {
   categories: Category[];
   clients: UserType[];
   handleUpdateClient: (userId: number, updatedData: any) => void;
-//   handleUpdateOrderUI?: (updatedOrder: Order) => void;
+  //   handleUpdateOrderUI?: (updatedOrder: Order) => void;
   handleDeleteClientUI: (clientId: number) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
-//   selectedOrders: UserType[];
-//   handleSelectOrder: (e: any, order: Order) => void;
-//   handleSelectAll: () => void;
-//   isAdmin?: boolean;
+  //   selectedOrders: UserType[];
+  //   handleSelectOrder: (e: any, order: Order) => void;
+  //   handleSelectAll: () => void;
+  //   isAdmin?: boolean;
 }
 
 const ClientsTable = ({
   categories,
   clients,
   handleUpdateClient,
-//   handleUpdateOrderUI,
+  //   handleUpdateOrderUI,
   handleDeleteClientUI,
-  setNotification,
-//   selectedOrders,
-//   handleSelectOrder,
-//   handleSelectAll,
+  setNotification, //   selectedOrders,
+  //   handleSelectOrder,
+} //   handleSelectAll,
 //   isAdmin,
-}: PropTypes) => {
+: PropTypes) => {
   const windowDimensions = useWindowDimensions();
+  const [isUpdating, setIsUpdating] = useState<boolean>();
 
   const handleDeleteClient = async (client: UserType) => {
     try {
@@ -83,27 +89,42 @@ const ClientsTable = ({
         type: 'error',
         message: 'Fail to delete order: ' + error,
       });
+      return;
     }
   };
 
   function fixedHeaderContent() {
     return (
       <TableRow>
-        <TableCell variant="head" style={{width: 50}}></TableCell>
+        <TableCell variant="head" style={{ width: 50 }}></TableCell>
         <TableCell padding="checkbox" variant="head">
           <Checkbox
-            // checked={selectedOrders.length === clientOrders.length}
-            // onClick={handleSelectAll}
+          // checked={selectedOrders.length === clientOrders.length}
+          // onClick={handleSelectAll}
           />
         </TableCell>
-        <TableCell variant="head" style={{width: 150}}>Order Type</TableCell>
-        <TableCell variant="head" style={{width: 150}}>Payment Type</TableCell>
-        <TableCell variant="head" style={{width: 100}}>Client Id</TableCell>
-        <TableCell variant="head" style={{width: 200}}>Name</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Category</TableCell>
-        <TableCell variant="head" style={{width: 120}}>Contact Number</TableCell>
-        <TableCell variant="head" style={{width: 200}}>Delivery Address</TableCell>
-        <TableCell variant="head" style={{width: 120}}></TableCell>
+        <TableCell variant="head" style={{ width: 150 }}>
+          Order Type
+        </TableCell>
+        <TableCell variant="head" style={{ width: 150 }}>
+          Payment Type
+        </TableCell>
+        <TableCell variant="head" style={{ width: 100 }}>
+          Client Id
+        </TableCell>
+        <TableCell variant="head" style={{ width: 200 }}>
+          Name
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Category
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Contact Number
+        </TableCell>
+        <TableCell variant="head" style={{ width: 200 }}>
+          Delivery Address
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}></TableCell>
         <TableCell></TableCell>
       </TableRow>
     );
@@ -116,49 +137,54 @@ const ClientsTable = ({
     return (
       <>
         <TableCell>
-            {client?.preference?.orderType && <IconButton color="primary">
-                <FindInPageIcon />
-            </IconButton>}
+          {client?.preference?.orderType && (
+            <IconButton color="primary">
+              <FindInPageIcon />
+            </IconButton>
+          )}
         </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
-            // onClick={(e) => handleSelectOrder(e, order)}
-            // checked={isOrderSelected}
+          // onClick={(e) => handleSelectOrder(e, order)}
+          // checked={isOrderSelected}
           />
         </TableCell>
         <TableCell>
-            <Select 
-                value={client.preference?.orderType || 'N/A'}
-                onChange={(e) => handleUpdateClient(client.id, {orderType: e.target.value})}
-            >
-                <MenuItem value={'N/A'}>N/A</MenuItem>
-                {
-                    orderTypes.map((orderType, index) => {
-                        return (
-                            <MenuItem key={index} value={orderType.text}>
-                                <StatusText text={orderType.text.toUpperCase()} type={orderType.type} />
-                            </MenuItem>
-                        )
-                    })
-                }
-            </Select>
+          <Select
+            value={client.preference?.orderType || 'N/A'}
+            onChange={(e) =>
+              handleUpdateClient(client.id, { orderType: e.target.value })
+            }
+          >
+            <MenuItem value={'N/A'}>N/A</MenuItem>
+            {orderTypes.map((orderType, index) => {
+              return (
+                <MenuItem key={index} value={orderType.text}>
+                  <StatusText
+                    text={orderType.text.toUpperCase()}
+                    type={orderType.type}
+                  />
+                </MenuItem>
+              );
+            })}
+          </Select>
         </TableCell>
         <TableCell>
-            <Select 
-                value={client.preference?.paymentType || 'N/A'}
-                onChange={(e) => handleUpdateClient(client.id, {paymentType: e.target.value})}
-            >
-                <MenuItem value={'N/A'}>N/A</MenuItem>
-                {
-                    paymentTypes.map((type, index) => {
-                        return (
-                            <MenuItem value={type} key={index}>
-                                {type.toUpperCase()}
-                            </MenuItem>
-                        )
-                    })
-                }
-            </Select>
+          <Select
+            value={client.preference?.paymentType || 'N/A'}
+            onChange={(e) =>
+              handleUpdateClient(client.id, { paymentType: e.target.value })
+            }
+          >
+            <MenuItem value={'N/A'}>N/A</MenuItem>
+            {paymentTypes.map((type, index) => {
+              return (
+                <MenuItem value={type} key={index}>
+                  {type.toUpperCase()}
+                </MenuItem>
+              );
+            })}
+          </Select>
         </TableCell>
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
@@ -166,17 +192,15 @@ const ClientsTable = ({
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
         <TableCell>
-              <Box display="flex" gap={1}>
-                <DeleteModal
-                  targetObj={client}
-                  handleDelete={handleDeleteClient}
-                />
-                {/* <EditReportOrder
-                  order={order}
-                  setNotification={setNotification}
-                  handleUpdateOrderUI={handleUpdateOrderUI}
-                /> */}
-              </Box>
+          <Box display="flex" gap={1}>
+            <DeleteModal targetObj={client} handleDelete={handleDeleteClient} />
+            <EditClient
+              client={client}
+              // setNotification={setNotification}
+              categories={categories}
+              handleUpdateClient={handleUpdateClient}
+            />
+          </Box>
         </TableCell>
         {/* {isAdmin &&
           setNotification &&
@@ -213,8 +237,8 @@ const ClientsTable = ({
     TableRow: ({ item: item, ...props }) => {
       return (
         <TableRow
-        //   aria-checked={isOrderSelected}
-        //   selected={isOrderSelected}
+          //   aria-checked={isOrderSelected}
+          //   selected={isOrderSelected}
           sx={{ cursor: 'pointer' }}
           {...props}
         />
@@ -227,12 +251,12 @@ const ClientsTable = ({
 
   return (
     <Paper style={{ height: windowDimensions.height - 250, overflowX: 'auto' }}>
-        <TableVirtuoso
-            data={clients}
-            components={VirtuosoTableComponents}
-            fixedHeaderContent={fixedHeaderContent}
-            itemContent={rowContent}
-        />
+      <TableVirtuoso
+        data={clients}
+        components={VirtuosoTableComponents}
+        fixedHeaderContent={fixedHeaderContent}
+        itemContent={rowContent}
+      />
     </Paper>
   );
 };
