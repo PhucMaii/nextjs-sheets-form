@@ -2,7 +2,6 @@
 import {
   Box,
   Checkbox,
-  IconButton,
   MenuItem,
   Paper,
   Select,
@@ -15,9 +14,7 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction } from 'react';
 import StatusText from './StatusText';
-import {
-  API_URL,
-} from '@/app/utils/enum';
+import { API_URL } from '@/app/utils/enum';
 import { Notification, UserType } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
@@ -36,7 +33,6 @@ interface PropTypes {
   selectedClients: UserType[];
   handleSelectClient: (e: any, targetClient: UserType) => void;
   handleSelectAll: () => void;
-
 }
 
 const ClientsTable = ({
@@ -47,9 +43,8 @@ const ClientsTable = ({
   setNotification,
   selectedClients,
   handleSelectClient,
-  handleSelectAll
-}
-: PropTypes) => {
+  handleSelectAll,
+}: PropTypes) => {
   const windowDimensions = useWindowDimensions();
 
   const handleDeleteClient = async (client: UserType) => {
@@ -90,8 +85,8 @@ const ClientsTable = ({
         <TableCell variant="head" style={{ width: 50 }}></TableCell>
         <TableCell padding="checkbox" variant="head">
           <Checkbox
-          checked={selectedClients.length === clients.length}
-          onClick={handleSelectAll}
+            checked={selectedClients.length === clients.length}
+            onClick={handleSelectAll}
           />
         </TableCell>
         <TableCell variant="head" style={{ width: 150 }}>
@@ -127,16 +122,11 @@ const ClientsTable = ({
     return (
       <>
         <TableCell>
-          {/* {client?.preference?.orderType === ORDER_TYPE.FIXED && (
-            <IconButton color="primary">
-              <FindInPageIcon />
-            </IconButton>
-          )} */}
         </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
-          onClick={(e) => handleSelectClient(e, client)}
-          checked={isClientSelected}
+            onClick={(e) => handleSelectClient(e, client)}
+            checked={isClientSelected}
           />
         </TableCell>
         <TableCell>
@@ -211,8 +201,8 @@ const ClientsTable = ({
       );
       return (
         <TableRow
-            aria-checked={isClientSelected}
-            selected={isClientSelected}
+          aria-checked={isClientSelected}
+          selected={isClientSelected}
           sx={{ cursor: 'pointer' }}
           {...props}
         />

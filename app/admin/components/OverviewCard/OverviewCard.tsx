@@ -8,6 +8,7 @@ interface PropTypes {
   text: string;
   value: number | string;
   onClick?: any;
+  helperText?: string;
 }
 
 export default function OverviewCard({
@@ -15,6 +16,7 @@ export default function OverviewCard({
   text,
   value,
   onClick,
+  helperText,
 }: PropTypes) {
   return (
     <CardStyled onClick={onClick ? onClick : null}>
@@ -26,8 +28,17 @@ export default function OverviewCard({
           <Typography fontWeight="bold" variant="h4">
             {value}
           </Typography>
+          {helperText && (
+            <Typography
+              fontWeight="bold"
+              sx={{ color: grey[500] }}
+              variant="subtitle1"
+            >
+              {helperText}
+            </Typography>
+          )}
           <Typography
-            marginTop={'8px'}
+            marginTop={helperText ? '0px' : '8px'}
             fontWeight="bold"
             sx={{ color: grey[500] }}
           >

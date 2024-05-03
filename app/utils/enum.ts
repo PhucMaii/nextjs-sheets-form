@@ -34,3 +34,8 @@ export enum PAYMENT_TYPE {
   COD = 'COD',
   WCOD = 'WCOD',
 }
+
+export enum USER_ROLE {
+  CLIENT = 'client',
+  ADMIN = 'admin',
+}
