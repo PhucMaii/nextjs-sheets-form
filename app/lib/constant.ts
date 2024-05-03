@@ -58,4 +58,4 @@ export const orderTypes = [
   { text: ORDER_TYPE.QR_CODE, type: COLOR_TYPE.INFO },
 ];
 
-export const paymentTypes = [PAYMENT_TYPE.COD, PAYMENT_TYPE.MONTHLY];
+export const paymentTypes = [PAYMENT_TYPE.COD, PAYMENT_TYPE.MONTHLY, PAYMENT_TYPE.WCOD];

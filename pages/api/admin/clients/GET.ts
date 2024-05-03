@@ -7,6 +7,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     // Get all clients
     const clientList = await prisma.user.findMany({
+      where: {
+        role: 'client'
+      },
       include: {
         category: true,
         preference: true,

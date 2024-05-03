@@ -11,24 +11,17 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, memo, useState } from 'react';
-import StatusText, { COLOR_TYPE } from './StatusText';
+import React, { Dispatch, SetStateAction } from 'react';
+import StatusText from './StatusText';
 import {
   API_URL,
-  ORDER_STATUS,
-  ORDER_TYPE,
-  PAYMENT_TYPE,
 } from '@/app/utils/enum';
-import { Order } from '../orders/page';
-import EditReportOrder from './Modals/EditReportOrder';
 import { Notification, UserType } from '@/app/utils/type';
-import DeleteOrder from './Modals/DeleteModal';
-import FindInPageIcon from '@mui/icons-material/FindInPage';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
-import order from '@/pages/api/order';
 import { Category } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from './Modals/DeleteModal';
@@ -38,28 +31,26 @@ interface PropTypes {
   categories: Category[];
   clients: UserType[];
   handleUpdateClient: (userId: number, updatedData: any) => void;
-  //   handleUpdateOrderUI?: (updatedOrder: Order) => void;
   handleDeleteClientUI: (clientId: number) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  //   selectedOrders: UserType[];
-  //   handleSelectOrder: (e: any, order: Order) => void;
-  //   handleSelectAll: () => void;
-  //   isAdmin?: boolean;
+  selectedClients: UserType[];
+  handleSelectClient: (e: any, targetClient: UserType) => void;
+  handleSelectAll: () => void;
+
 }
 
 const ClientsTable = ({
   categories,
   clients,
   handleUpdateClient,
-  //   handleUpdateOrderUI,
   handleDeleteClientUI,
-  setNotification, //   selectedOrders,
-  //   handleSelectOrder,
-} //   handleSelectAll,
-//   isAdmin,
+  setNotification,
+  selectedClients,
+  handleSelectClient,
+  handleSelectAll
+}
 : PropTypes) => {
   const windowDimensions = useWindowDimensions();
-  const [isUpdating, setIsUpdating] = useState<boolean>();
 
   const handleDeleteClient = async (client: UserType) => {
     try {
@@ -99,54 +90,53 @@ const ClientsTable = ({
         <TableCell variant="head" style={{ width: 50 }}></TableCell>
         <TableCell padding="checkbox" variant="head">
           <Checkbox
-          // checked={selectedOrders.length === clientOrders.length}
-          // onClick={handleSelectAll}
+          checked={selectedClients.length === clients.length}
+          onClick={handleSelectAll}
           />
         </TableCell>
         <TableCell variant="head" style={{ width: 150 }}>
-          Order Type
+          <Typography fontWeight="bold">Order Type</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 150 }}>
-          Payment Type
+          <Typography fontWeight="bold">Payment Type</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 100 }}>
-          Client Id
+          <Typography fontWeight="bold">Client Id</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 200 }}>
-          Name
+          <Typography fontWeight="bold">Name</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}>
-          Category
+          <Typography fontWeight="bold">Category</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}>
-          Contact Number
+          <Typography fontWeight="bold">Contact Number</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 200 }}>
-          Delivery Address
+          <Typography fontWeight="bold">Delivery Address</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}></TableCell>
-        <TableCell></TableCell>
       </TableRow>
     );
   }
 
   function rowContent(_index: number, client: UserType) {
-    // const isOrderSelected = selectedOrders.some(
-    //   (targetOrder: Order) => order.id === targetOrder.id,
-    // );
+    const isClientSelected = selectedClients.some(
+      (targetClient: UserType) => client.id === targetClient.id,
+    );
     return (
       <>
         <TableCell>
-          {client?.preference?.orderType && (
+          {/* {client?.preference?.orderType === ORDER_TYPE.FIXED && (
             <IconButton color="primary">
               <FindInPageIcon />
             </IconButton>
-          )}
+          )} */}
         </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
-          // onClick={(e) => handleSelectOrder(e, order)}
-          // checked={isOrderSelected}
+          onClick={(e) => handleSelectClient(e, client)}
+          checked={isClientSelected}
           />
         </TableCell>
         <TableCell>
@@ -202,25 +192,6 @@ const ClientsTable = ({
             />
           </Box>
         </TableCell>
-        {/* {isAdmin &&
-          setNotification &&
-          handleDeleteOrderUI &&
-          handleUpdateOrderUI && (
-            <TableCell>
-              <Box display="flex" gap={1}>
-                <DeleteOrder
-                  order={order}
-                  setNotification={setNotification}
-                  handleDeleteOrderUI={handleDeleteOrderUI}
-                />
-                <EditReportOrder
-                  order={order}
-                  setNotification={setNotification}
-                  handleUpdateOrderUI={handleUpdateOrderUI}
-                />
-              </Box>
-            </TableCell>
-          )} */}
       </>
     );
   }
@@ -235,10 +206,13 @@ const ClientsTable = ({
     TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     TableRow: ({ item: item, ...props }) => {
+      const isClientSelected = selectedClients.some(
+        (targetClient: UserType) => item.id === targetClient.id,
+      );
       return (
         <TableRow
-          //   aria-checked={isOrderSelected}
-          //   selected={isOrderSelected}
+            aria-checked={isClientSelected}
+            selected={isClientSelected}
           sx={{ cursor: 'pointer' }}
           {...props}
         />

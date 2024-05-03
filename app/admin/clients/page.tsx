@@ -2,21 +2,38 @@
 import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { Grid } from '@mui/material';
+import { Box, Button, Grid, Menu, MenuItem, TextField, Typography } from '@mui/material';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import { blue } from '@mui/material/colors';
 import { Notification, UserType } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import NotificationPopup from '../components/Notification';
 import ClientsTable from '../components/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { Category } from '@prisma/client';
+import { ShadowSection } from '../reports/styled';
+import useDebounce from '@/hooks/useDebounce';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ErrorComponent from '../components/ErrorComponent';
+import { DropdownItemContainer } from '../orders/styled';
+import SingleFieldUpdate, { SingleFieldUpdateProps } from '../components/Modals/SingleFieldUpdate';
 
 export default function ClientsPage() {
+    const [actionButtonAnchor, setActionButtonAnchor] =
+    useState<null | HTMLElement>(null);
+  const openDropdown = Boolean(actionButtonAnchor);
   const [categoryList, setCategoryList] = useState<Category[]>([]);
+  const [baseClientList, setBaseClientList] = useState<UserType[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
+  const [singleFieldUpdateProps, setSingleFieldUpdateProps] = useState<SingleFieldUpdateProps>({
+    open: false,
+    title: '',
+    menuList: [],
+    label: '',
+    updatedField: 'orderType'
+  });
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
@@ -24,11 +41,31 @@ export default function ClientsPage() {
     type: 'info',
     message: '',
   });
+  const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
     handleFetchAllUsers();
     handleFetchAllCategories();
   }, []);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newClientList = baseClientList.filter((client: UserType) => {
+        if (
+          client.clientId.includes(debouncedKeywords) ||
+          client.clientName.toLowerCase().includes(debouncedKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setClientList(newClientList);
+    } else {
+      setClientList(baseClientList);
+    }
+  }, [debouncedKeywords, baseClientList]);
 
   const handleFetchAllCategories = async () => {
     try {
@@ -57,6 +94,10 @@ export default function ClientsPage() {
     }
   };
 
+  const handleCloseAnchor = () => {
+    setActionButtonAnchor(null);
+  };
+
   const handleFetchAllUsers = async () => {
     setIsFetching(true);
     try {
@@ -73,6 +114,7 @@ export default function ClientsPage() {
       }
 
       setClientList(response.data.data);
+      setBaseClientList(response.data.data);
     } catch (error: any) {
       console.log('Fail to fetch all users: ', error);
       setNotification({
@@ -85,13 +127,14 @@ export default function ClientsPage() {
   };
 
   const handleChangeClients = (clientId: number, updatedData: any) => {
-    const newClientList = clientList.map((client: UserType) => {
+    const newClientList = baseClientList.map((client: UserType) => {
       if (client.id === clientId) {
         return { ...client, ...updatedData };
       }
       return client;
     });
     setClientList(newClientList);
+    setBaseClientList(newClientList);
   };
 
   const handleDeleteClientUI = (clientId: number) => {
@@ -100,7 +143,51 @@ export default function ClientsPage() {
     });
 
     setClientList(newClientList);
+    setBaseClientList(newClientList);
   };
+
+  const handleBulkUpdate = async (key: string, value: any) => {
+    if (!selectedClients) {
+        return;
+    }
+    try {
+      const response = await axios.put(API_URL.CLIENTS, {clientList: selectedClients, [key]: value});
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      }
+
+      const newClientList = baseClientList.map((client: UserType) => {
+        const targetClient = response.data.data.find((findClient: UserType) => findClient.id === client.id);
+
+        if (targetClient) {
+          return targetClient;
+        }
+        return client;
+      });
+
+      setClientList(newClientList);
+      setBaseClientList(newClientList);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      });
+    } catch (error: any) {
+      console.log('Fail to update client: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update client: ' + error
+      });
+      return;
+    }
+  }
 
   const handleUpdateClient = async (userId: number, updatedData: object) => {
     if (Object.keys(updatedData).length === 0) {
@@ -146,6 +233,103 @@ export default function ClientsPage() {
     }
   };
 
+  const handleSelectClient = (e: any, targetClient: UserType) => {
+    e.preventDefault();
+    const selectedClient = selectedClients.find((client: UserType) => {
+      return client.id === targetClient.id;
+    });
+
+    if (selectedClient) {
+      const newSelectedClients = selectedClients.filter((client: UserType) => {
+        return client.id !== targetClient.id;
+      });
+      setSelectedClients(newSelectedClients);
+    } else {
+      setSelectedClients([...selectedClients, targetClient]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedClients.length === clientList.length) {
+      setSelectedClients([]);
+    } else {
+      setSelectedClients(clientList);
+    }
+  };
+
+  const generalUpdate = (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      gap={2}
+      width="100%"
+    >
+      <Button
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        disabled={selectedClients.length === 0}
+        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+        endIcon={<ArrowDownwardIcon />}
+        variant="outlined"
+        fullWidth
+      >
+        General Update
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={actionButtonAnchor}
+        open={openDropdown}
+        onClose={handleCloseAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            setSingleFieldUpdateProps({
+              open: true,
+              title: 'Edit Order Type',
+              menuList: [
+                ORDER_TYPE.FIXED,
+                ORDER_TYPE.CALL,
+                ORDER_TYPE.ON_CALL,
+                ORDER_TYPE.QR_CODE,
+              ],
+              label: 'Order type',
+              updatedField: 'orderType'
+            })
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <Typography>Update Order Type</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setSingleFieldUpdateProps({
+              open: true,
+              title: 'Edit Payment Type',
+              menuList: [
+                PAYMENT_TYPE.MONTHLY,
+                PAYMENT_TYPE.COD,
+                PAYMENT_TYPE.WCOD
+              ],
+              label: 'Payment type', 
+              updatedField: 'paymentType'
+            })
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <Typography>Update Payment Type</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
+
+
   if (isFetching) {
     return (
       <Sidebar>
@@ -157,6 +341,15 @@ export default function ClientsPage() {
   return (
     <Sidebar>
       <AuthenGuard>
+        <SingleFieldUpdate 
+          open={singleFieldUpdateProps.open}
+          onClose={() => setSingleFieldUpdateProps({...singleFieldUpdateProps, open: false})}
+          title={singleFieldUpdateProps.title}
+          menuList={singleFieldUpdateProps.menuList}
+          label={singleFieldUpdateProps.label}
+          handleUpdate={handleBulkUpdate}
+          updatedField={singleFieldUpdateProps.updatedField}
+        />
         <LoadingModal open={isUpdating} />
         <NotificationPopup
           notification={notification}
@@ -169,7 +362,7 @@ export default function ClientsPage() {
                 <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
               }
               text="Total Clients"
-              value={200}
+              value={clientList.length}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -191,13 +384,34 @@ export default function ClientsPage() {
             />
           </Grid>
         </Grid>
-        <ClientsTable
-          categories={categoryList}
-          clients={clientList}
-          handleUpdateClient={handleUpdateClient}
-          handleDeleteClientUI={handleDeleteClientUI}
-          setNotification={setNotification}
-        />
+        <ShadowSection>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={3}>
+              {generalUpdate}
+            </Grid>
+            <Grid item xs={12} md={9}>
+              <TextField
+                fullWidth
+                placeholder="Search by client id or client name"
+                sx={{mb:2}}
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
+              />
+            </Grid>
+          </Grid>
+          {clientList.length > 0 ? <ClientsTable
+            categories={categoryList}
+            clients={clientList}
+            handleUpdateClient={handleUpdateClient}
+            handleDeleteClientUI={handleDeleteClientUI}
+            setNotification={setNotification}
+            selectedClients={selectedClients}
+            handleSelectClient={handleSelectClient}
+            handleSelectAll={handleSelectAll}
+          />: (
+              <ErrorComponent errorText="No User Found" />
+          )}
+        </ShadowSection>
       </AuthenGuard>
     </Sidebar>
   );

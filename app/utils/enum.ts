@@ -22,14 +22,15 @@ export enum ORDER_STATUS {
 
 export enum ORDER_TYPE {
   NA = 'N/A',
-  FIXED = 'fixed',
-  CALL = 'call',
-  ON_CALL = 'on-call',
-  QR_CODE = 'qr-code',
+  FIXED = 'FIXED',
+  CALL = 'CALL',
+  ON_CALL = 'ON CALL',
+  QR_CODE = 'QR CODE',
 }
 
 export enum PAYMENT_TYPE {
   NA = 'N/A',
-  MONTHLY = 'monthly',
-  COD = 'cod',
+  MONTHLY = 'MONTHLY',
+  COD = 'COD',
+  WCOD = 'WCOD',
 }
