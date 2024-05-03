@@ -2,7 +2,6 @@
 import {
   Box,
   Checkbox,
-  IconButton,
   MenuItem,
   Paper,
   Select,
@@ -13,7 +12,6 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import FindInPageIcon from '@mui/icons-material/FindInPage';
 import React, { Dispatch, SetStateAction } from 'react';
 import StatusText from './StatusText';
 import { API_URL, ORDER_TYPE } from '@/app/utils/enum';
@@ -25,7 +23,7 @@ import { Category } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from './Modals/DeleteModal';
 import EditClient from './Modals/EditClient';
-import { infoColor } from '@/app/theme/color';
+import ScheduledOrdersView from './Modals/ScheduledOrdersView';
 
 interface PropTypes {
   categories: Category[];
@@ -126,9 +124,10 @@ const ClientsTable = ({
       <>
         <TableCell>
           {client?.preference?.orderType === ORDER_TYPE.FIXED && (
-            <IconButton>
-              <FindInPageIcon sx={{ color: infoColor }} />
-            </IconButton>
+            <ScheduledOrdersView
+              client={client}
+              setNotification={setNotification}
+            />
           )}
         </TableCell>
         <TableCell padding="checkbox">

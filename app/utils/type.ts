@@ -74,3 +74,10 @@ export interface OrderedItems {
   totalPrice: number;
   orderId?: number;
 }
+
+export interface ScheduledOrder {
+  id?: number;
+  userId: number;
+  totalPrice: number;
+  items: OrderedItems[];
+}

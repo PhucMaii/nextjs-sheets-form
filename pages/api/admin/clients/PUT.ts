@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
+import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
+import {
+  Item,
+  OrderedItems,
+  PrismaClient,
+  User,
+  UserPreference,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {
@@ -100,7 +106,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      await prisma.user.update({
+      const newUser = await prisma.user.update({
         where: {
           id: userId,
         },
@@ -108,13 +114,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           userPreferenceId: newPref.id,
         },
       });
+
+      if (orderType === ORDER_TYPE.FIXED) {
+        await initializeSheduleOrder(newUser);
+      }
     } else {
-      await prisma.userPreference.update({
+      const updatedPreference = await prisma.userPreference.update({
         where: {
           id: existingUser.userPreferenceId,
         },
         data: updatePrefFields,
       });
+
+      if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
+        await initializeSheduleOrder(existingUser);
+      }
     }
 
     const returnData = await prisma.user.findUnique({
@@ -138,3 +152,103 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+export const initializeSheduleOrder = async (user: User) => {
+  try {
+    const prisma = new PrismaClient();
+    const userOrders = await prisma.orders.findMany({
+      where: {
+        userId: user.id,
+        status: {
+          in: [
+            ORDER_STATUS.INCOMPLETED,
+            ORDER_STATUS.COMPLETED,
+            ORDER_STATUS.DELIVERED,
+          ],
+        },
+      },
+      include: {
+        items: true,
+      },
+      orderBy: {
+        id: 'desc',
+      },
+    });
+
+    // If user do not have any previous order
+    if (userOrders.length === 0) {
+      const newScheduleOrder = await prisma.scheduleOrders.create({
+        data: {
+          totalPrice: 0,
+          userId: user.id,
+        },
+      });
+
+      const itemsSameCategory = await prisma.item.findMany({
+        where: {
+          categoryId: user.categoryId,
+        },
+      });
+
+      const newItems = itemsSameCategory.map((item: Item) => {
+        return {
+          quantity: 0,
+          scheduledOrderId: newScheduleOrder.id,
+          price: item.price,
+          name: item.name,
+        };
+      });
+
+      const newScheduleOrderItems = await prisma.orderedItems.createMany({
+        data: newItems,
+      });
+
+      // update user
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          scheduleOrdersId: newScheduleOrder.id,
+        },
+      });
+
+      return { ...newScheduleOrder, items: newScheduleOrderItems };
+    }
+
+    const userLastOrder = userOrders[0];
+
+    const newScheduleOrder = await prisma.scheduleOrders.create({
+      data: {
+        totalPrice: userLastOrder.totalPrice,
+        userId: user.id,
+      },
+    });
+
+    // Copy items from last order and apply to new schedule order
+    const newItems = userLastOrder.items.map((item: OrderedItems) => {
+      const { id, orderId, ...restFields } = item;
+      return { ...restFields, scheduledOrderId: newScheduleOrder.id };
+    });
+
+    const newScheduleOrderItems = await prisma.orderedItems.createMany({
+      data: newItems,
+    });
+
+    // update user
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        scheduleOrdersId: newScheduleOrder.id,
+      },
+    });
+
+    return { ...newScheduleOrder, items: newScheduleOrderItems };
+  } catch (error: any) {
+    console.log(
+      'Internal Server Error, fail to initialize schedule order: ' + error,
+    );
+  }
+};
