@@ -227,6 +227,7 @@ export default function ClientsPage() {
         return client;
       });
 
+      // reset after update successfully
       setClientList(newClientList);
       setBaseClientList(newClientList);
       setSelectedClients([]);
