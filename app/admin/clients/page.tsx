@@ -229,6 +229,8 @@ export default function ClientsPage() {
 
       setClientList(newClientList);
       setBaseClientList(newClientList);
+      setSelectedClients([]);
+      handleCloseAnchor();
       setNotification({
         on: true,
         type: 'success',
@@ -331,7 +333,7 @@ export default function ClientsPage() {
         variant="outlined"
         fullWidth
       >
-        General Update
+        Bulk Update
       </Button>
       <Menu
         id="basic-menu"

@@ -40,6 +40,7 @@ const SingleFieldUpdate = ({
     try {
       setIsLoading(true);
       await handleUpdate(updatedField, value);
+      onClose();
       setIsLoading(false);
     } catch (error: any) {
       console.log('Fail to save update: ', error);
