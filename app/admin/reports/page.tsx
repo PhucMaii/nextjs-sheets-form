@@ -304,9 +304,9 @@ export default function ReportPage() {
 
   const handleDeleteSelectedOrders = async () => {
     try {
-      const response = await axios.delete(
-        `${API_URL.CLIENTS}/orders`, {data: {orderList: selectedOrders}}
-      );
+      const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
+        data: { orderList: selectedOrders },
+      });
       await fetchClientOrders();
 
       setNotification({
@@ -317,7 +317,7 @@ export default function ReportPage() {
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
     }
-  }
+  };
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     try {

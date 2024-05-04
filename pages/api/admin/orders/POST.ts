@@ -1,58 +1,86 @@
 import { ORDER_STATUS, ORDER_TYPE } from '@/app/utils/enum';
 import { generateCurrentTime } from '@/app/utils/time';
-import { OrderedItems, PrismaClient, User } from '@prisma/client';
+import {
+  OrderedItems,
+  PrismaClient,
+  ScheduleOrders,
+  User,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { checkHasClientOrder } from '../../import-sheets';
+import { UserType } from '@/app/utils/type';
+
+interface BodyTypes {
+  deliveryDate: string;
+  clientList?: UserType[];
+}
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { deliveryDate } =  req.body;
+    const { deliveryDate, clientList } = req.body as BodyTypes;
 
-    const fixedOrderTypeUser = await prisma.user.findMany({
-      where: {
-        preference: {
-          orderType: ORDER_TYPE.FIXED
-        }
-      }
-    });
+    let clients: any = [];
+
+    // Check if request provide client list
+    if (clientList) {
+      clients = [...clientList];
+    } else {
+      clients = await prisma.user.findMany({
+        where: {
+          preference: {
+            orderType: ORDER_TYPE.FIXED,
+          },
+        },
+      });
+    }
 
     const updatedOrderList: any = [];
 
-    for (const user of fixedOrderTypeUser) {
+    for (const user of clients) {
       if (!user.scheduleOrdersId) {
         return res.status(500).json({
-          error: `Pre order stop at user ${user.clientId} because they do not have schedule order id `
-        })
+          error: `Pre order stop at user ${user.clientId} because they do not have schedule order id `,
+        });
+      }
+
+      // Check has user order for today, if yes then skip that client
+      const hasClientOrder = await checkHasClientOrder(user.id, deliveryDate);
+      if (hasClientOrder) {
+        continue;
       }
 
       // get user schedule order
       const scheduleOrder = await prisma.scheduleOrders.findFirst({
         where: {
-          userId: user.id
+          userId: user.id,
         },
         include: {
           items: true,
-        }
-      })
+        },
+      });
 
       // Need to handle the miss schedule order
       if (!scheduleOrder) {
         return res.status(500).json({
-          error: `Pre order stop at user ${user.clientId} because they do not have scheduled order `
-        })
+          error: `Pre order stop at user ${user.clientId} because they do not have scheduled order `,
+        });
       }
 
-      const updatedOrder = await createOrder(user, scheduleOrder.items, scheduleOrder.totalPrice, deliveryDate);
+      const updatedOrder = await createOrder(
+        user,
+        scheduleOrder.items,
+        scheduleOrder.totalPrice,
+        deliveryDate,
+      );
       updatedOrderList.push(updatedOrder);
     }
 
     return res.status(201).json({
       data: updatedOrderList,
-      message: 'Pre Order Successfully'
-    })
-
-
+      message: 'Pre Order Successfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
@@ -61,7 +89,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const createOrder = async (user: User, items: OrderedItems[], totalPrice: number, deliveryDate: string) => {
+const createOrder = async (
+  user: User,
+  items: OrderedItems[],
+  totalPrice: number,
+  deliveryDate: string,
+) => {
   try {
     const prisma = new PrismaClient();
 
@@ -74,9 +107,9 @@ const createOrder = async (user: User, items: OrderedItems[], totalPrice: number
         status: ORDER_STATUS.INCOMPLETED,
         userId: user.id,
         totalPrice,
-        orderTime
-      }
-    })
+        orderTime,
+      },
+    });
 
     for (const item of items) {
       await prisma.orderedItems.create({
@@ -84,19 +117,19 @@ const createOrder = async (user: User, items: OrderedItems[], totalPrice: number
           name: item.name,
           price: item.price,
           quantity: item.quantity,
-          orderId: newOrder.id
-        }
-      })
+          orderId: newOrder.id,
+        },
+      });
     }
 
     const updatedOrder = await prisma.orders.findUnique({
       where: {
         id: newOrder.id,
-      }
+      },
     });
 
-    return updatedOrder
+    return updatedOrder;
   } catch (error: any) {
     console.log('Internal Server Error - Fail to create order: ', error);
   }
-}
+};

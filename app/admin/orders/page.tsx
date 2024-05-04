@@ -286,8 +286,8 @@ export default function Orders() {
 
   const handleUpdatePreOrderUI = (orderList: Order[]) => {
     setBaseOrderData([...baseOrderData, ...orderList]);
-    setOrderData([...orderData, ...orderList])
-  }
+    setOrderData([...orderData, ...orderList]);
+  };
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -498,12 +498,12 @@ export default function Orders() {
         {/* For pre order */}
         <EditDeliveryDate
           open={isPreOrderOpen}
-          onClose={() => setIsPreOrderOpen(false)} 
-          isPreOrder 
-          setNotification={setNotification} 
+          onClose={() => setIsPreOrderOpen(false)}
+          isPreOrder
+          setNotification={setNotification}
           currentDate={date}
           handleUpdatePreOrderUI={handleUpdatePreOrderUI}
-        /> 
+        />
         <div style={{ display: 'none' }}>
           <AllPrint orders={orderData} ref={componentRef} />
         </div>

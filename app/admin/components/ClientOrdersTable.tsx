@@ -83,9 +83,9 @@ const ClientOrdersTable = ({
 
   const handleDeleteOrder = async (order: Order) => {
     try {
-      const response = await axios.delete(
-        `${API_URL.CLIENTS}/orders`, {data: {orderId: order.id}}
-      );
+      const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
+        data: { orderId: order.id },
+      });
 
       if (response.data.error) {
         setNotification({

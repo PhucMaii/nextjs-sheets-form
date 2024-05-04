@@ -35,6 +35,7 @@ import SingleFieldUpdate, {
 } from '../components/Modals/SingleFieldUpdate';
 import { infoColor } from '@/app/theme/color';
 import AddClient from '../components/Modals/AddClient';
+import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -54,6 +55,7 @@ export default function ClientsPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isAddClientOpen, setIsAddClientOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -400,6 +402,14 @@ export default function ClientsPage() {
     <Sidebar>
       <AuthenGuard>
         <LoadingModal open={isUpdating} />
+        {/* For pre order */}
+        <EditDeliveryDate
+          open={isPreOrderOpen}
+          onClose={() => setIsPreOrderOpen(false)}
+          isPreOrder
+          setNotification={setNotification}
+          selectedClients={selectedClients}
+        />
         <AddClient
           open={isAddClientOpen}
           onClose={() => setIsAddClientOpen(false)}
@@ -456,7 +466,15 @@ export default function ClientsPage() {
         </Grid>
         <ShadowSection>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={6} md={1.5}>
+              <Button
+                variant="outlined"
+                onClick={() => setIsPreOrderOpen(true)}
+              >
+                Bulk order
+              </Button>
+            </Grid>
+            <Grid item xs={12} md={1.5}>
               {generalUpdate}
             </Grid>
             <Grid item xs={11} md={8}>

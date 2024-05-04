@@ -86,7 +86,7 @@ export default async function MultipleUpdate(
             category: true,
           },
         });
-        
+
         if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
           await initializeSheduleOrder(existingUser);
         }

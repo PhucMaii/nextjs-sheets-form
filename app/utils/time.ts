@@ -27,8 +27,8 @@ export const generateCurrentTime = () => {
   const dateString = moment(currentDate).format('YYYY-MM-DD');
   const timeString = moment(currentDate).format('HH:mm:ss');
 
-  return `${timeString} ${dateString}`
-}
+  return `${timeString} ${dateString}`;
+};
 
 export const generateMinDate = () => {
   let today: any = dayjs();

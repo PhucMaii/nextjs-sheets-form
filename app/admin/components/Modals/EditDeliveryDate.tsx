@@ -5,7 +5,7 @@ import { BoxModal } from './styled';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
-import { Notification } from '@/app/utils/type';
+import { Notification, UserType } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
@@ -20,6 +20,7 @@ interface PropTypes extends ModalProps {
   handleUpdatePreOrderUI?: (orderList: Order[]) => void;
   isPreOrder?: boolean;
   currentDate?: string;
+  selectedClients?: UserType[];
 }
 
 export default function EditDeliveryDate({
@@ -30,7 +31,8 @@ export default function EditDeliveryDate({
   handleUpdateDateUI,
   handleUpdatePreOrderUI,
   isPreOrder,
-  currentDate
+  currentDate,
+  selectedClients,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
@@ -43,9 +45,14 @@ export default function EditDeliveryDate({
   });
 
   const handlePreOrder = async () => {
-      setIsLoading(true);
-      try {
-      const response = await axios.post(API_URL.ORDER, {deliveryDate: updatedDate});
+    setIsLoading(true);
+    try {
+      const submittedData: any = { deliveryDate: updatedDate };
+
+      if (selectedClients) {
+        submittedData.clientList = [...selectedClients];
+      }
+      const response = await axios.post(API_URL.ORDER, submittedData);
 
       if (response.data.error) {
         setIsLoading(false);
@@ -77,7 +84,7 @@ export default function EditDeliveryDate({
         message: 'Fail to update date: ' + error,
       });
     }
-  }
+  };
 
   const handleUpdateDate = async () => {
     if (!order || !handleUpdateDateUI) {
@@ -133,7 +140,9 @@ export default function EditDeliveryDate({
           alignItems="center"
           gap={4}
         >
-          <Typography variant="h4">{isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}</Typography>
+          <Typography variant="h4">
+            {isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}
+          </Typography>
           <LoadingButtonStyles
             variant="contained"
             loadingIndicator="Saving..."
@@ -147,7 +156,7 @@ export default function EditDeliveryDate({
             }}
             color={infoColor}
           >
-            {isPreOrder? 'Order' : 'Save'}
+            {isPreOrder ? 'Order' : 'Save'}
           </LoadingButtonStyles>
         </Box>
         <Divider />

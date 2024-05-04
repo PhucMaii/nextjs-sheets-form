@@ -248,7 +248,11 @@ export default function OrderForm() {
                   return (
                     <Input<string | number>
                       key={index}
-                      label={`${item.name} - $${item.price === 0 ? ' Variable price' : item.price.toFixed(2)}`}
+                      label={`${item.name} - $${
+                        item.price === 0
+                          ? ' Variable price'
+                          : item.price.toFixed(2)
+                      }`}
                       type="number"
                       value={item.quantity}
                       className="border-neutral-400 h-full mb-4"

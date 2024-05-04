@@ -23,13 +23,13 @@ export default async function DELETE(
             id: Number(order.id),
           },
         });
-    
+
         if (!existingOrder) {
           return res.status(404).json({
             error: 'Order Not Found',
           });
         }
-    
+
         await prisma.orders.delete({
           where: {
             id: Number(order.id),
@@ -42,13 +42,13 @@ export default async function DELETE(
           id: Number(orderId),
         },
       });
-  
+
       if (!existingOrder) {
         return res.status(404).json({
           error: 'Order Not Found',
         });
       }
-  
+
       await prisma.orders.delete({
         where: {
           id: Number(orderId),
@@ -56,10 +56,9 @@ export default async function DELETE(
       });
     } else {
       return res.status(500).json({
-        error: "Please provide either order list or order id to be deleted"
-      })
+        error: 'Please provide either order list or order id to be deleted',
+      });
     }
- 
 
     return res.status(200).json({
       message: 'Order Deleted Successfully',
