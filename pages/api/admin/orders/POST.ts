@@ -3,7 +3,6 @@ import { generateCurrentTime } from '@/app/utils/time';
 import {
   OrderedItems,
   PrismaClient,
-  ScheduleOrders,
   User,
 } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

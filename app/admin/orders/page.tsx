@@ -4,7 +4,9 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   Grid,
   Menu,
   MenuItem,
@@ -114,6 +116,7 @@ export default function Orders() {
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
+  const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const componentRef: any = useRef();
   const singlePrint: any = useRef();
   const totalPosition: any = useRef();
@@ -288,6 +291,33 @@ export default function Orders() {
     setBaseOrderData([...baseOrderData, ...orderList]);
     setOrderData([...orderData, ...orderList]);
   };
+
+  const handleSelectOrder = (e: any, targetOrder: Order) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const selectedOrder = selectedOrders.find((order: Order) => {
+      return order.id === targetOrder.id;
+    });
+
+    if (selectedOrder) {
+      const newSelectedOrders = selectedOrders.filter((order: Order) => {
+        return order.id !== targetOrder.id;
+      });
+      setSelectedOrders(newSelectedOrders);
+    } else {
+      setSelectedOrders([...selectedOrders, targetOrder]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedOrders.length === orderData.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(orderData);
+    }
+  };
+
+  console.log(selectedOrders, 'selectedOrders')
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -595,22 +625,40 @@ export default function Orders() {
             </Typography>
           </Box>
         )}
+        <Box>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={orderData.length === selectedOrders.length}
+                onClick={handleSelectAll}
+              />
+            }
+            label="Select All"
+          />
+        </Box>
         {orderData.length > 0 ? (
           <Virtuoso
             totalCount={orderData.length}
             style={{ height: virtuosoHeight }}
             data={orderData}
-            itemContent={(index, order) => (
-              <OrderAccordion
-                key={index}
-                order={order}
-                setNotification={setNotification}
-                updateUI={handleMarkSingleCompletedUI}
-                updateUIItem={handleUpdateUISingleOrder}
-                handleUpdateDateUI={handleUpdateDateUI}
-                handleUpdatePriceUI={handleUpdatePriceUI}
-              />
-            )}
+            itemContent={(index, order) => {
+              const isSelected = selectedOrders.some(
+                (selectedOrder: Order) => order.id === selectedOrder.id,
+              );
+              return (
+                <OrderAccordion
+                  key={index}
+                  order={order}
+                  setNotification={setNotification}
+                  updateUI={handleMarkSingleCompletedUI}
+                  updateUIItem={handleUpdateUISingleOrder}
+                  handleUpdateDateUI={handleUpdateDateUI}
+                  handleUpdatePriceUI={handleUpdatePriceUI}
+                  isSelected={isSelected}
+                  handleSelectOrder={handleSelectOrder}
+                />
+              );
+            }}
           />
         ) : (
           <ErrorComponent errorText="There is no orders" />
