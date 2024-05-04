@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { limitOrderHour } from '../lib/constant';
+import moment from 'moment';
 
 export const YYYYMMDDFormat = (date: Date) => {
   const month = date.getMonth() + 1;
@@ -21,6 +22,14 @@ export const formatDateChanged = (e: any): string => {
   return formattedDate;
 };
 
+export const generateCurrentTime = () => {
+  const currentDate = new Date();
+  const dateString = moment(currentDate).format('YYYY-MM-DD');
+  const timeString = moment(currentDate).format('HH:mm:ss');
+
+  return `${timeString} ${dateString}`
+}
+
 export const generateMinDate = () => {
   let today: any = dayjs();
   if (today.$H >= limitOrderHour) {
@@ -39,7 +48,6 @@ export const generateRecommendDate = () => {
     dateObj.setDate(dateObj.getDate() + 1);
   }
 
-  console.log(dateObj, 'dateObj');
   const formattedDate = YYYYMMDDFormat(dateObj);
   return formattedDate;
 };

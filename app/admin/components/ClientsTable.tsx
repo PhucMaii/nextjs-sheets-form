@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction } from 'react';
 import StatusText from './StatusText';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, ORDER_TYPE } from '@/app/utils/enum';
 import { Notification, UserType } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
@@ -23,6 +23,7 @@ import { Category } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from './Modals/DeleteModal';
 import EditClient from './Modals/EditClient';
+import ScheduledOrdersView from './Modals/ScheduledOrdersView';
 
 interface PropTypes {
   categories: Category[];
@@ -122,6 +123,12 @@ const ClientsTable = ({
     return (
       <>
         <TableCell>
+          {client?.preference?.orderType === ORDER_TYPE.FIXED && (
+            <ScheduledOrdersView
+              client={client}
+              setNotification={setNotification}
+            />
+          )}
         </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
