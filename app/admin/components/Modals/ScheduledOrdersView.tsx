@@ -197,50 +197,52 @@ export default function ScheduledOrdersView({
                 </LoadingButtonStyles>
               </Box>
               <Divider />
-              <Grid container spacing={3}>
-                {order.items.length > 0 ? (
-                  order.items.map((item: OrderedItems, index: number) => {
-                    return (
-                      <Grid item xs={12} key={index}>
-                        <Box display="flex" flexDirection="column" gap={1}>
-                          <Typography variant="h6">{item.name}</Typography>
-                          <TextField
-                            fullWidth
-                            label="Quantity"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              handleOnChangeItem(item, +e.target.value)
-                            }
-                            type="number"
-                          />
-                        </Box>
-                      </Grid>
-                    );
-                  })
-                ) : (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                    gap={1}
-                    sx={{ width: '100%', height: '100%' }}
-                  >
-                    <ErrorComponent errorText="No Schedule Order Yet" />
-                    <LoadingButton
-                      loading={isButtonLoading}
-                      onClick={setUpScheduleOrder}
+              <Box overflow="auto" maxHeight="70vh">
+                <Grid container spacing={3}>
+                    {order.items.length > 0 ? (
+                    order.items.map((item: OrderedItems, index: number) => {
+                        return (
+                        <Grid item xs={12} key={index}>
+                            <Box display="flex" flexDirection="column" gap={1}>
+                            <Typography variant="h6">{item.name}</Typography>
+                            <TextField
+                                fullWidth
+                                label="Quantity"
+                                value={item.quantity}
+                                onChange={(e) =>
+                                handleOnChangeItem(item, +e.target.value)
+                                }
+                                type="number"
+                            />
+                            </Box>
+                        </Grid>
+                        );
+                    })
+                    ) : (
+                    <Box
+                        display="flex"
+                        flexDirection="column"
+                        justifyContent="center"
+                        alignItems="center"
+                        gap={1}
+                        sx={{ width: '100%', height: '100%' }}
                     >
-                      Set up schedule order
-                    </LoadingButton>
-                  </Box>
-                )}
-                <Grid item xs={12} textAlign="right">
-                  <Typography variant="h6">
-                    Total : ${order.totalPrice.toFixed(2)}
-                  </Typography>
+                        <ErrorComponent errorText="No Schedule Order Yet" />
+                        <LoadingButton
+                        loading={isButtonLoading}
+                        onClick={setUpScheduleOrder}
+                        >
+                        Set up schedule order
+                        </LoadingButton>
+                    </Box>
+                    )}
+                    <Grid item xs={12} textAlign="right">
+                    <Typography variant="h6">
+                        Total : ${order.totalPrice.toFixed(2)}
+                    </Typography>
+                    </Grid>
                 </Grid>
-              </Grid>
+              </Box>
             </>
           )}
         </BoxModal>
