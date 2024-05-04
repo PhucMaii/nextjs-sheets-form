@@ -20,7 +20,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (!existingUser.scheduleOrdersId) {
-      return res.status(404).json({
+      return res.status(200).json({
         error: 'No Schedule Order Id Yet',
       });
     }

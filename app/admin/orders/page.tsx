@@ -31,6 +31,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { DropdownItemContainer } from './styled';
 import {
   errorColor,
@@ -50,6 +51,7 @@ import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 
 interface Category {
   id: number;
@@ -102,6 +104,7 @@ export default function Orders() {
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
+  const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -281,6 +284,11 @@ export default function Orders() {
     setBaseOrderData(newOrderList);
   };
 
+  const handleUpdatePreOrderUI = (orderList: Order[]) => {
+    setBaseOrderData([...baseOrderData, ...orderList]);
+    setOrderData([...orderData, ...orderList])
+  }
+
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
   };
@@ -377,6 +385,12 @@ export default function Orders() {
           <DropdownItemContainer display="flex" gap={2}>
             <PrintIcon sx={{ color: infoColor }} />
             <Typography>Print all</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem onClick={() => setIsPreOrderOpen(true)}>
+          <DropdownItemContainer display="flex" gap={2}>
+            <AppRegistrationIcon sx={{ color: infoColor }} />
+            <Typography>Pre Order</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem onClick={() => setIsAddOrderOpen(true)}>
@@ -480,6 +494,16 @@ export default function Orders() {
           notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
         />
+
+        {/* For pre order */}
+        <EditDeliveryDate
+          open={isPreOrderOpen}
+          onClose={() => setIsPreOrderOpen(false)} 
+          isPreOrder 
+          setNotification={setNotification} 
+          currentDate={date}
+          handleUpdatePreOrderUI={handleUpdatePreOrderUI}
+        /> 
         <div style={{ display: 'none' }}>
           <AllPrint orders={orderData} ref={componentRef} />
         </div>

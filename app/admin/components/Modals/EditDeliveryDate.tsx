@@ -8,15 +8,18 @@ import { Order } from '../../orders/page';
 import { Notification } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { formatDateChanged } from '@/app/utils/time';
+import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { infoColor } from '@/app/theme/color';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes extends ModalProps {
-  order: Order;
+  order?: Order;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
+  handleUpdateDateUI?: (orderId: number, updatedDate: string) => void;
+  handleUpdatePreOrderUI?: (orderList: Order[]) => void;
+  isPreOrder?: boolean;
+  currentDate?: string;
 }
 
 export default function EditDeliveryDate({
@@ -25,11 +28,61 @@ export default function EditDeliveryDate({
   order,
   setNotification,
   handleUpdateDateUI,
+  handleUpdatePreOrderUI,
+  isPreOrder,
+  currentDate
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
+  const [updatedDate, setUpdatedDate] = useState<string>(() => {
+    if (order) {
+      return order.deliveryDate;
+    }
+
+    const deliveryDate = generateRecommendDate();
+    return deliveryDate;
+  });
+
+  const handlePreOrder = async () => {
+      setIsLoading(true);
+      try {
+      const response = await axios.post(API_URL.ORDER, {deliveryDate: updatedDate});
+
+      if (response.data.error) {
+        setIsLoading(false);
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      if (currentDate === updatedDate && handleUpdatePreOrderUI) {
+        handleUpdatePreOrderUI(response.data.data);
+      }
+
+      setIsLoading(false);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      onClose();
+    } catch (error: any) {
+      console.log('Fail to update date: ', error);
+      setIsLoading(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update date: ' + error,
+      });
+    }
+  }
 
   const handleUpdateDate = async () => {
+    if (!order || !handleUpdateDateUI) {
+      return;
+    }
     try {
       setIsLoading(true);
       const response = await axios.put(API_URL.ORDER, {
@@ -44,6 +97,7 @@ export default function EditDeliveryDate({
           type: 'error',
           message: response.data.error,
         });
+        return;
       }
 
       handleUpdateDateUI(order.id, updatedDate);
@@ -79,15 +133,21 @@ export default function EditDeliveryDate({
           alignItems="center"
           gap={4}
         >
-          <Typography variant="h4">Edit Delivery Date</Typography>
+          <Typography variant="h4">{isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}</Typography>
           <LoadingButtonStyles
             variant="contained"
             loadingIndicator="Saving..."
             loading={isLoading}
-            onClick={handleUpdateDate}
+            onClick={() => {
+              if (isPreOrder) {
+                handlePreOrder();
+              } else {
+                handleUpdateDate();
+              }
+            }}
             color={infoColor}
           >
-            Save
+            {isPreOrder? 'Order' : 'Save'}
           </LoadingButtonStyles>
         </Box>
         <Divider />

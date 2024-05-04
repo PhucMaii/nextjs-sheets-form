@@ -23,6 +23,7 @@ import { API_URL } from '@/app/utils/enum';
 import ErrorComponent from '../ErrorComponent';
 import { LoadingButton } from '@mui/lab';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import { grey } from '@mui/material/colors';
 
 interface PropTypes {
   client: UserType;
@@ -56,11 +57,6 @@ export default function ScheduledOrdersView({
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'warning',
-          message: response.data.error,
-        });
         setIsFetching(false);
         return;
       }
@@ -186,7 +182,10 @@ export default function ScheduledOrdersView({
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Typography variant="h4">Edit Scheduled Order</Typography>
+                <Box display="flex" flexDirection="column" gap={1}>
+                    <Typography variant="h4">Edit Scheduled Order</Typography>
+                    <Typography variant="h6" sx={{color: grey[600]}}>{client.clientName}</Typography>
+                </Box>
                 <LoadingButtonStyles
                   variant="contained"
                   disabled={order.items.length === 0}

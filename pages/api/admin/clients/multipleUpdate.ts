@@ -2,6 +2,7 @@ import { ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import { UserType } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { initializeSheduleOrder } from './PUT';
 
 interface BodyType {
   clientList: UserType[];
@@ -64,6 +65,9 @@ export default async function MultipleUpdate(
             category: true,
           },
         });
+        if (orderType === ORDER_TYPE.FIXED) {
+          await initializeSheduleOrder(updatedUser);
+        }
         updatedClientList.push(updatedUser);
       } else {
         await prisma.userPreference.update({
@@ -82,6 +86,10 @@ export default async function MultipleUpdate(
             category: true,
           },
         });
+        
+        if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
+          await initializeSheduleOrder(existingUser);
+        }
         updatedClientList.push(updatedUser);
       }
     }

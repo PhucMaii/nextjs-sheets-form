@@ -53,6 +53,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { limitOrderHour } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -301,6 +302,23 @@ export default function ReportPage() {
     setUnpaidOrders(newUnpaidOrders);
   };
 
+  const handleDeleteSelectedOrders = async () => {
+    try {
+      const response = await axios.delete(
+        `${API_URL.CLIENTS}/orders`, {data: {orderList: selectedOrders}}
+      );
+      await fetchClientOrders();
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('Fail to mark all as completed: ', error);
+    }
+  }
+
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
@@ -337,7 +355,7 @@ export default function ReportPage() {
         variant="outlined"
         fullWidth
       >
-        Update Status
+        Actions
       </Button>
       <Menu
         id="basic-menu"
@@ -390,6 +408,17 @@ export default function ReportPage() {
           <DropdownItemContainer display="flex" gap={2}>
             <BlockIcon sx={{ color: errorColor }} />
             <Typography>Mark as void</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleDeleteSelectedOrders();
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <DeleteIcon sx={{ color: errorColor }} />
+            <Typography>Delete</Typography>
           </DropdownItemContainer>
         </MenuItem>
       </Menu>

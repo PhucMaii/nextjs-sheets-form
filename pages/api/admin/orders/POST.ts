@@ -1,38 +1,102 @@
+import { ORDER_STATUS, ORDER_TYPE } from '@/app/utils/enum';
+import { generateCurrentTime } from '@/app/utils/time';
+import { OrderedItems, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import axios from 'axios';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const body = req.body as any;
-    const requests = body.orders.map(async (order: any) => {
-      const response = await axios.post(
-        'https://www.supremesprouts.com/api/import-sheets',
-        order,
-      );
-      if (response.data.error) {
-        return { success: false, error: response.data.error };
+    const prisma = new PrismaClient();
+
+    const { deliveryDate } =  req.body;
+
+    const fixedOrderTypeUser = await prisma.user.findMany({
+      where: {
+        preference: {
+          orderType: ORDER_TYPE.FIXED
+        }
       }
-      return { success: true };
     });
 
-    const responses = await Promise.all(requests);
-    const failedRequests = responses.filter((response) => !response.success);
+    const updatedOrderList: any = [];
 
-    if (failedRequests.length > 0) {
-      console.log('Some requests failed: ', failedRequests);
-      return res.status(500).json({
-        error: 'Some requests failed',
-        failedRequests,
-      });
+    for (const user of fixedOrderTypeUser) {
+      if (!user.scheduleOrdersId) {
+        return res.status(500).json({
+          error: `Pre order stop at user ${user.clientId} because they do not have schedule order id `
+        })
+      }
+
+      // get user schedule order
+      const scheduleOrder = await prisma.scheduleOrders.findFirst({
+        where: {
+          userId: user.id
+        },
+        include: {
+          items: true,
+        }
+      })
+
+      // Need to handle the miss schedule order
+      if (!scheduleOrder) {
+        return res.status(500).json({
+          error: `Pre order stop at user ${user.clientId} because they do not have scheduled order `
+        })
+      }
+
+      const updatedOrder = await createOrder(user, scheduleOrder.items, scheduleOrder.totalPrice, deliveryDate);
+      updatedOrderList.push(updatedOrder);
     }
 
-    return res.status(200).json({
-      message: 'Create Multiple Orders Successfully',
-    });
+    return res.status(201).json({
+      data: updatedOrderList,
+      message: 'Pre Order Successfully'
+    })
+
+
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
       error: 'Internal Server Error: ' + error.message,
     });
+  }
+}
+
+const createOrder = async (user: User, items: OrderedItems[], totalPrice: number, deliveryDate: string) => {
+  try {
+    const prisma = new PrismaClient();
+
+    const orderTime = generateCurrentTime();
+    // initialize order
+    const newOrder = await prisma.orders.create({
+      data: {
+        deliveryDate,
+        note: '',
+        status: ORDER_STATUS.INCOMPLETED,
+        userId: user.id,
+        totalPrice,
+        orderTime
+      }
+    })
+
+    for (const item of items) {
+      await prisma.orderedItems.create({
+        data: {
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          orderId: newOrder.id
+        }
+      })
+    }
+
+    const updatedOrder = await prisma.orders.findUnique({
+      where: {
+        id: newOrder.id,
+      }
+    });
+
+    return updatedOrder
+  } catch (error: any) {
+    console.log('Internal Server Error - Fail to create order: ', error);
   }
 }
