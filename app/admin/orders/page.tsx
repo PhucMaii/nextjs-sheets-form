@@ -31,7 +31,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DoneIcon from '@mui/icons-material/Done';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+// import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { DropdownItemContainer } from './styled';
 import {
   errorColor,
@@ -387,12 +387,12 @@ export default function Orders() {
             <Typography>Print all</Typography>
           </DropdownItemContainer>
         </MenuItem>
-        <MenuItem onClick={() => setIsPreOrderOpen(true)}>
+        {/* <MenuItem onClick={() => setIsPreOrderOpen(true)}>
           <DropdownItemContainer display="flex" gap={2}>
             <AppRegistrationIcon sx={{ color: infoColor }} />
             <Typography>Pre Order</Typography>
           </DropdownItemContainer>
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem onClick={() => setIsAddOrderOpen(true)}>
           <DropdownItemContainer display="flex" gap={2}>
             <PostAddIcon sx={{ color: infoColor }} />
