@@ -309,15 +309,14 @@ export default function Orders() {
     }
   };
 
-  const handleSelectAll = () => {
+  const handleSelectAll = (e: any) => {
+    e.preventDefault();
     if (selectedOrders.length === orderData.length) {
       setSelectedOrders([]);
     } else {
       setSelectedOrders(orderData);
     }
   };
-
-  console.log(selectedOrders, 'selectedOrders')
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -333,7 +332,7 @@ export default function Orders() {
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status: ORDER_STATUS.COMPLETED,
-        updatedOrders: orderData,
+        updatedOrders: selectedOrders.length > 0 ? selectedOrders : orderData,
       });
       await fetchOrders();
       setNotification({
@@ -414,7 +413,7 @@ export default function Orders() {
         >
           <DropdownItemContainer display="flex" gap={2}>
             <PrintIcon sx={{ color: infoColor }} />
-            <Typography>Print all</Typography>
+            <Typography>Print bills</Typography>
           </DropdownItemContainer>
         </MenuItem>
         {/* <MenuItem onClick={() => setIsPreOrderOpen(true)}>
@@ -535,7 +534,10 @@ export default function Orders() {
           handleUpdatePreOrderUI={handleUpdatePreOrderUI}
         />
         <div style={{ display: 'none' }}>
-          <AllPrint orders={orderData} ref={componentRef} />
+          <AllPrint
+            orders={selectedOrders.length > 0 ? selectedOrders : orderData}
+            ref={componentRef}
+          />
         </div>
         <div style={{ display: 'none' }}>
           <ComponentToPrint order={incomingOrder} ref={singlePrint} />
@@ -642,9 +644,6 @@ export default function Orders() {
             style={{ height: virtuosoHeight }}
             data={orderData}
             itemContent={(index, order) => {
-              const isSelected = selectedOrders.some(
-                (selectedOrder: Order) => order.id === selectedOrder.id,
-              );
               return (
                 <OrderAccordion
                   key={index}
@@ -654,7 +653,7 @@ export default function Orders() {
                   updateUIItem={handleUpdateUISingleOrder}
                   handleUpdateDateUI={handleUpdateDateUI}
                   handleUpdatePriceUI={handleUpdatePriceUI}
-                  isSelected={isSelected}
+                  selectedOrders={selectedOrders}
                   handleSelectOrder={handleSelectOrder}
                 />
               );

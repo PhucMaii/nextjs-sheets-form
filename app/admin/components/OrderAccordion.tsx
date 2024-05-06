@@ -53,7 +53,7 @@ interface PropTypes {
     newItems: any[],
     newTotalPrice: number,
   ) => void;
-  isSelected?: boolean;
+  selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
 }
 
@@ -64,8 +64,8 @@ const OrderAccordion = ({
   updateUI,
   handleUpdateDateUI,
   handleUpdatePriceUI,
-  isSelected,
-  handleSelectOrder
+  handleSelectOrder,
+  selectedOrders,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -93,6 +93,10 @@ const OrderAccordion = ({
             ? COLOR_TYPE.WARNING
             : COLOR_TYPE.ERROR,
   };
+
+  const isOrderSelected = selectedOrders.some(
+    (targetOrder: Order) => order.id === targetOrder.id,
+  );
 
   useEffect(() => {
     calculateTotalQuantity();
@@ -187,7 +191,7 @@ const OrderAccordion = ({
         <AccordionSummary>
           <Grid container alignItems="center">
             <Grid item xs={0.5}>
-              <Checkbox checked={isSelected} onClick={(e: any) => handleSelectOrder(e, order)}/>
+              <Checkbox checked={isOrderSelected} onClick={(e: any) => handleSelectOrder(e, order)}/>
             </Grid>
             {order.isReplacement && (
               <Grid item xs={11.5}>
