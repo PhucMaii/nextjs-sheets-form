@@ -54,6 +54,7 @@ import dayjs from 'dayjs';
 import { limitOrderHour } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { AllPrint } from '../components/Printing/AllPrint';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -86,6 +87,7 @@ export default function ReportPage() {
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const invoicePrint: any = useRef();
+  const billPrint: any = useRef();
 
   useEffect(() => {
     fetchAllClients();
@@ -249,6 +251,10 @@ export default function ReportPage() {
 
   const handleInvoicePrint = useReactToPrint({
     content: () => invoicePrint.current,
+  });
+
+  const handleBillPrint = useReactToPrint({
+    content: () => billPrint.current,
   });
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
@@ -435,6 +441,12 @@ export default function ReportPage() {
             ref={invoicePrint}
           />
         </div>
+        <div style={{ display: 'none' }}>
+          <AllPrint
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            ref={billPrint}
+          />
+        </div>
         <NotificationPopup
           notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
@@ -509,7 +521,7 @@ export default function ReportPage() {
               <Grid item md={2}>
                 {statusDropdown}
               </Grid>
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   variant="filled"
@@ -523,11 +535,25 @@ export default function ReportPage() {
                 <Button
                   disabled={clientOrders.length === 0}
                   variant="outlined"
-                  onClick={handleInvoicePrint}
+                  onClick={handleBillPrint}
+                  fullWidth
                 >
                   <Box display="flex" gap={2}>
                     <LocalPrintshopIcon />
-                    <Typography>Print</Typography>
+                    <Typography>Bill</Typography>
+                  </Box>
+                </Button>
+              </Grid>
+              <Grid item md={2} textAlign="right">
+                <Button
+                  disabled={clientOrders.length === 0}
+                  variant="outlined"
+                  onClick={handleInvoicePrint}
+                  fullWidth
+                >
+                  <Box display="flex" gap={2}>
+                    <LocalPrintshopIcon />
+                    <Typography>Statement</Typography>
                   </Box>
                 </Button>
               </Grid>

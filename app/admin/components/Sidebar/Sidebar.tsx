@@ -11,13 +11,18 @@ import {
   Toolbar,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { tabs } from '../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blueGrey } from '@mui/material/colors';
+import { ComponentToPrint } from '../Printing/ComponentToPrint';
+import { AllPrint } from '../Printing/AllPrint';
+import { useReactToPrint } from 'react-to-print';
+import { Order } from '../../orders/page';
+import { pusherClient } from '@/app/pusher';
 
 interface PropTypes {
   children: ReactNode;
@@ -27,9 +32,41 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
   const url = process.env.NEXT_PUBLIC_WEB_URL;
+
+  const singlePrintRef: any = useRef();
+  const allPrintRef: any = useRef();
+
+  // Subscribe admin whenever they logged in
+  useEffect(() => {
+    pusherClient.subscribe('admin');
+    pusherClient.subscribe('override-order');
+    pusherClient.subscribe('void-order');
+
+    pusherClient.bind('incoming-order', (order: Order) => {
+      setSingleOrder(order);
+    });
+
+    return () => {
+      pusherClient.unsubscribe('admin');
+    };
+  }, []);
+
+  useEffect(() => {
+    handleSinglePrint();
+  }, [singleOrder]);
+
+  const handleSinglePrint = useReactToPrint({
+    content: () => singlePrintRef.current,
+  });
+
+  const handleAllPrint = useReactToPrint({
+    content: () => allPrintRef.current,
+  });
 
   useEffect(() => {
     setCurrentTab(pathname);
@@ -40,6 +77,14 @@ export default function Sidebar({ children }: PropTypes) {
   };
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  const handleOnDataReceived = (data: any) => {
+    if (data.length > 1) {
+      setOrders(data);
+    } else {
+      setSingleOrder(data);
+    }
+  };
 
   const content = (
     <>
@@ -88,6 +133,14 @@ export default function Sidebar({ children }: PropTypes) {
     </>
   );
 
+  const printComponents = (
+    <>
+      <div style={{ display: 'none' }}>
+        <ComponentToPrint order={singleOrder} ref={singlePrintRef} />
+      </div>
+    </>
+  );
+
   if (mdDown) {
     return (
       <>
@@ -113,6 +166,7 @@ export default function Sidebar({ children }: PropTypes) {
             {content}
           </Drawer>
           <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+            {printComponents}
             {children}
           </Box>
         </Box>
@@ -140,6 +194,7 @@ export default function Sidebar({ children }: PropTypes) {
           {content}
         </Drawer>
         <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+          {printComponents}
           {children}
         </Box>
       </Box>

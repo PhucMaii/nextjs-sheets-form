@@ -191,7 +191,10 @@ const OrderAccordion = ({
         <AccordionSummary>
           <Grid container alignItems="center">
             <Grid item xs={0.5}>
-              <Checkbox checked={isOrderSelected} onClick={(e: any) => handleSelectOrder(e, order)}/>
+              <Checkbox
+                checked={isOrderSelected}
+                onClick={(e: any) => handleSelectOrder(e, order)}
+              />
             </Grid>
             {order.isReplacement && (
               <Grid item xs={11.5}>

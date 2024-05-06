@@ -468,6 +468,7 @@ export default function ClientsPage() {
           <Grid container spacing={2}>
             <Grid item xs={6} md={1.5}>
               <Button
+                fullWidth
                 variant="outlined"
                 onClick={() => setIsPreOrderOpen(true)}
               >

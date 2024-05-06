@@ -42,7 +42,6 @@ import {
   warningColor,
 } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
-import { ComponentToPrint } from '../components/Printing/ComponentToPrint';
 import useDebounce from '@/hooks/useDebounce';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
@@ -118,7 +117,6 @@ export default function Orders() {
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const componentRef: any = useRef();
-  const singlePrint: any = useRef();
   const totalPosition: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -160,7 +158,6 @@ export default function Orders() {
 
   useEffect(() => {
     if (incomingOrder) {
-      handleSinglePrint();
       setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
@@ -232,7 +229,6 @@ export default function Orders() {
 
       if (response.data.error) {
         setIsLoading(false);
-        // setHasMore(false);
         return;
       }
       setOrderData(response.data.data);
@@ -241,7 +237,6 @@ export default function Orders() {
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
       setIsLoading(false);
-      // setHasMore(false);
       return;
     }
   };
@@ -351,12 +346,8 @@ export default function Orders() {
     setBaseOrderData(newOrders);
   };
 
-  const handlePrinting = useReactToPrint({
+  const handlePrintAll = useReactToPrint({
     content: () => componentRef.current,
-  });
-
-  const handleSinglePrint = useReactToPrint({
-    content: () => singlePrint.current,
   });
 
   const handleUpdateDateUI = (orderId: number, updatedDate: string): void => {
@@ -406,7 +397,7 @@ export default function Orders() {
       >
         <MenuItem
           onClick={() => {
-            handlePrinting();
+            handlePrintAll();
             handleCloseAnchor();
           }}
           disabled={orderData.length === 0}
@@ -416,12 +407,6 @@ export default function Orders() {
             <Typography>Print bills</Typography>
           </DropdownItemContainer>
         </MenuItem>
-        {/* <MenuItem onClick={() => setIsPreOrderOpen(true)}>
-          <DropdownItemContainer display="flex" gap={2}>
-            <AppRegistrationIcon sx={{ color: infoColor }} />
-            <Typography>Pre Order</Typography>
-          </DropdownItemContainer>
-        </MenuItem> */}
         <MenuItem onClick={() => setIsAddOrderOpen(true)}>
           <DropdownItemContainer display="flex" gap={2}>
             <PostAddIcon sx={{ color: infoColor }} />
@@ -538,9 +523,6 @@ export default function Orders() {
             orders={selectedOrders.length > 0 ? selectedOrders : orderData}
             ref={componentRef}
           />
-        </div>
-        <div style={{ display: 'none' }}>
-          <ComponentToPrint order={incomingOrder} ref={singlePrint} />
         </div>
         <AddOrder
           open={isAddOrderOpen}
