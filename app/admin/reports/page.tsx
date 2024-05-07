@@ -171,6 +171,8 @@ export default function ReportPage() {
     }
   };
 
+  console.log(selectedOrders, 'selected ordders');
+
   const fetchClientOrders = async () => {
     try {
       setIsFetching(true);

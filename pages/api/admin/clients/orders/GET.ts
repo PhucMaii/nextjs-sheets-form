@@ -1,5 +1,5 @@
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
+import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
@@ -45,15 +45,27 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const formatUserOrders = userOrders.map((order: any) => {
+      const formatItems = order.items.map((item: OrderedItems) => {
+        const totalPrice = item.price * item.quantity;
+        return {...item, totalPrice}
+      })
+
+
+      // ...user for printing, regular user for displaying in table
+      const { user, ...restOfData } = order;
+      return { ...restOfData, user, ...user, items: formatItems }
+    })
+
     if (!startDate || !endDate) {
       return res.status(200).json({
-        data: userOrders,
+        data: formatUserOrders,
         message: 'Fetch User Orders Successfully',
       });
     }
 
     const filteredDateRangeOrders = filterDateRangeOrders(
-      userOrders,
+      formatUserOrders,
       startDate,
       endDate,
     );
