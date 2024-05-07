@@ -4,6 +4,7 @@ import { OrderedItems, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkHasClientOrder } from '../../import-sheets';
 import { UserType } from '@/app/utils/type';
+import { sendEmail } from '../../utils/email';
 
 interface BodyTypes {
   deliveryDate: string;
@@ -63,12 +64,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const updatedOrder = await createOrder(
+      const updatedOrder: any = await createOrder(
         user,
         scheduleOrder.items,
         scheduleOrder.totalPrice,
         deliveryDate,
       );
+
+      await sendEmail(user, scheduleOrder.items, updatedOrder.id, deliveryDate, false);
       updatedOrderList.push(updatedOrder);
     }
 
