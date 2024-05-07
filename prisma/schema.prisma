@@ -89,7 +89,7 @@ model Orders {
   isReplacement Boolean?
   isVoid        Boolean?
 
-  user            User?             @relation(fields: [userId], references: [id])
+  user            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   items           OrderedItems[]
   OrderPreference OrderPreference[] // Should remove
 }

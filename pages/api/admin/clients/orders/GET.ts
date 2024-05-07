@@ -54,7 +54,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       // ...user for printing, regular user for displaying in table
       const { user, ...restOfData } = order;
-      return { ...restOfData, user, ...user, items: formatItems }
+      return { ...user, ...restOfData, user, items: formatItems }
     })
 
     if (!startDate || !endDate) {

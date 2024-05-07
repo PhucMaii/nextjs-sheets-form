@@ -37,6 +37,7 @@ import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 interface PropTypes extends ModalProps {
   clientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
+  currentDate: string;
 }
 
 export default function AddOrder({
@@ -44,18 +45,10 @@ export default function AddOrder({
   onClose,
   clientList,
   setNotification,
+  currentDate
 }: PropTypes) {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
-  const [deliveryDate, setDeliveryDate] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
-      dateObj.setDate(dateObj.getDate() + 1);
-    }
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
+  const [deliveryDate, setDeliveryDate] = useState<string>(currentDate);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);

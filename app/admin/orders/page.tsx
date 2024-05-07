@@ -529,6 +529,7 @@ export default function Orders() {
           onClose={() => setIsAddOrderOpen(false)}
           clientList={clientList}
           setNotification={setNotification}
+          currentDate={date}
         />
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
