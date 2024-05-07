@@ -62,6 +62,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Second case: if user want to create new category
     if (updateOption === UpdateOption.CREATE) {
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          name: categoryName
+        }
+      });
+
+      if (existingCategory) {
+        return res.status(500).json({
+          error: 'Category Name Existed Already'
+        })
+      }
+
       const newCategory = await prisma.category.create({
         data: {
           name: categoryName ? categoryName : '',
