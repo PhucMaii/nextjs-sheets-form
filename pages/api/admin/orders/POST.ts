@@ -47,9 +47,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // get user schedule order
-      const scheduleOrder = await prisma.scheduleOrders.findFirst({
+      const scheduleOrder = await prisma.scheduleOrders.findUnique({
         where: {
-          userId: user.id,
+          id: user.scheduleOrdersId,
         },
         include: {
           items: true,
