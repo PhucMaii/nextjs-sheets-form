@@ -466,7 +466,7 @@ export default function ClientsPage() {
         </Grid>
         <ShadowSection>
           <Grid container spacing={2}>
-            <Grid item xs={6} md={1.5}>
+            {/* <Grid item xs={6} md={1.5}>
               <Button
                 fullWidth
                 variant="outlined"
@@ -474,7 +474,7 @@ export default function ClientsPage() {
               >
                 Bulk order
               </Button>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} md={1.5}>
               {generalUpdate}
             </Grid>

@@ -67,12 +67,6 @@ export interface Item {
   totalPrice: number;
 }
 
-interface OrderPreference {
-  id: number;
-  isAutoPrint: boolean;
-  orderId: number;
-}
-
 export interface Order {
   id: number;
   user?: any;
@@ -89,7 +83,6 @@ export interface Order {
   items: Item[];
   note: string;
   status: ORDER_STATUS;
-  OrderPreference?: OrderPreference[];
   isReplacement?: boolean;
   isVoid?: boolean;
 }

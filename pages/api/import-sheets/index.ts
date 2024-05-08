@@ -82,13 +82,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    await prisma.orderPreference.create({
-      data: {
-        orderId: newOrder.id,
-        isAutoPrint: true,
-      },
-    });
-
     let totalPrice = 0;
     const itemList: any = [];
     // Loop through each item from request and save it to order

@@ -11,7 +11,7 @@ export enum API_URL {
   CLIENTS = '/api/admin/clients',
   CLIENT_ORDER = '/api/order',
   CATEGORIES = '/api/admin/categories',
-  SCHEDULED_ORDER = '/api/admin/scheduledOrders',
+  // SCHEDULED_ORDER = '/api/admin/scheduledOrders',
 }
 
 export enum ORDER_STATUS {

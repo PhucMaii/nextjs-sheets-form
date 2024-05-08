@@ -1,15 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import GET from './GET';
+// import GET from './GET';
 import POST from './POST';
 import PUT from './PUT';
 import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    if (req.method === 'GET') {
-      const response = await GET(req, res);
-      return response;
-    }
+    // if (req.method === 'GET') {
+    //   const response = await GET(req, res);
+    //   return response;
+    // }
 
     if (req.method === 'POST') {
       const response = await POST(req, res);

@@ -126,9 +126,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         data: updatePrefFields,
       });
 
-      if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
-        await initializeSheduleOrder(existingUser);
-      }
+      // if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
+      //   await initializeSheduleOrder(existingUser);
+      // }
     }
 
     const returnData = await prisma.user.findUnique({
@@ -181,6 +181,7 @@ export const initializeSheduleOrder = async (user: User) => {
         data: {
           totalPrice: 0,
           userId: user.id,
+          day: ''
         },
       });
 
@@ -204,14 +205,14 @@ export const initializeSheduleOrder = async (user: User) => {
       });
 
       // update user
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          scheduleOrdersId: newScheduleOrder.id,
-        },
-      });
+      // await prisma.user.update({
+      //   where: {
+      //     id: user.id,
+      //   },
+      //   data: {
+      //     scheduleOrdersId: newScheduleOrder.id,
+      //   },
+      // });
 
       return { ...newScheduleOrder, items: newScheduleOrderItems };
     }
@@ -222,6 +223,7 @@ export const initializeSheduleOrder = async (user: User) => {
       data: {
         totalPrice: userLastOrder.totalPrice,
         userId: user.id,
+        day: ''
       },
     });
 
@@ -235,15 +237,15 @@ export const initializeSheduleOrder = async (user: User) => {
       data: newItems,
     });
 
-    // update user
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        scheduleOrdersId: newScheduleOrder.id,
-      },
-    });
+    // // update user
+    // await prisma.user.update({
+    //   where: {
+    //     id: user.id,
+    //   },
+    //   data: {
+    //     scheduleOrdersId: newScheduleOrder.id,
+    //   },
+    // });
 
     return { ...newScheduleOrder, items: newScheduleOrderItems };
   } catch (error: any) {

@@ -87,9 +87,9 @@ export default async function MultipleUpdate(
           },
         });
 
-        if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
-          await initializeSheduleOrder(existingUser);
-        }
+        // if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
+        //   await initializeSheduleOrder(existingUser);
+        // }
         updatedClientList.push(updatedUser);
       }
     }
