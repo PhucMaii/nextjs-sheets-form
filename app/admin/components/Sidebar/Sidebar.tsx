@@ -19,7 +19,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blueGrey } from '@mui/material/colors';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
-import { AllPrint } from '../Printing/AllPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';

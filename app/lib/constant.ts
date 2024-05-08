@@ -4,9 +4,20 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
 import { ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
+
+export const days = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+]
 
 export const limitOrderHour = 9;
 
@@ -26,6 +37,11 @@ export const tabs = [
     icon: PeopleIcon,
     path: '/admin/clients',
   },
+  {
+    name: 'Pre Orders',
+    icon: PendingActionsIcon,
+    path: '/admin/pre-orders'
+  }
 ];
 
 export const clientTabs = [

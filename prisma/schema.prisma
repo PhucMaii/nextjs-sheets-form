@@ -20,11 +20,11 @@ model User {
   password         String  @db.VarChar(255)
   sheetName        String  @db.VarChar(255)
   role             String  @db.VarChar(255)
-  scheduleOrdersId Int?
 
-  category   Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  preference UserPreference? @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
-  Orders     Orders[]
+  category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  preference     UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
+  Orders         Orders[]
+  scheduleOrders ScheduleOrders[]
 }
 
 model Category {
@@ -91,16 +91,16 @@ model Orders {
 
   user            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   items           OrderedItems[]
-  OrderPreference OrderPreference[] // Should remove
+  // OrderPreference OrderPreference[] // Should remove
 }
 
-model OrderPreference {
-  id          Int     @id @default(autoincrement())
-  isAutoPrint Boolean
-  orderId     Int
+// model OrderPreference {
+//   id          Int     @id @default(autoincrement())
+//   isAutoPrint Boolean
+//   orderId     Int
 
-  order Orders @relation(fields: [orderId], references: [id], onDelete: Cascade)
-}
+//   order Orders @relation(fields: [orderId], references: [id], onDelete: Cascade)
+// }
 
 model UserPreference {
   id          Int     @id @default(autoincrement())
@@ -111,8 +111,10 @@ model UserPreference {
 }
 
 model ScheduleOrders {
-  id               Int            @id @default(autoincrement())
-  userId           Int
-  totalPrice       Float
-  items            OrderedItems[]
+  id         Int            @id @default(autoincrement())
+  userId     Int
+  totalPrice Float
+  day        String
+  items      OrderedItems[]
+  User       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
