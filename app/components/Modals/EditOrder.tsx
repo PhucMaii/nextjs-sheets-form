@@ -31,7 +31,7 @@ export default function EditOrder({
   setNotification,
   handleUpdateOrderUI,
 }: PropTypes) {
-  const [itemList, setItemList] = useState<Item[]>(order.items || []);
+  const [itemList, setItemList] = useState<Item[]>(order.items as Item[] || []);
   const [isOverriding, setIsOverriding] = useState<boolean>(false);
   const [note, setNote] = useState<string>(order.note || '');
 
