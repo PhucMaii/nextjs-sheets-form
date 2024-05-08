@@ -115,9 +115,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      if (orderType === ORDER_TYPE.FIXED) {
-        await initializeSheduleOrder(newUser);
-      }
     } else {
       const updatedPreference = await prisma.userPreference.update({
         where: {
@@ -125,10 +122,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: updatePrefFields,
       });
-
-      if (!existingUser.scheduleOrdersId || orderType === ORDER_TYPE.FIXED) {
-        await initializeSheduleOrder(existingUser);
-      }
     }
 
     const returnData = await prisma.user.findUnique({
@@ -153,102 +146,102 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export const initializeSheduleOrder = async (user: User) => {
-  try {
-    const prisma = new PrismaClient();
-    const userOrders = await prisma.orders.findMany({
-      where: {
-        userId: user.id,
-        status: {
-          in: [
-            ORDER_STATUS.INCOMPLETED,
-            ORDER_STATUS.COMPLETED,
-            ORDER_STATUS.DELIVERED,
-          ],
-        },
-      },
-      include: {
-        items: true,
-      },
-      orderBy: {
-        id: 'desc',
-      },
-    });
+// export const initializeSheduleOrder = async (user: User) => {
+//   try {
+//     const prisma = new PrismaClient();
+//     const userOrders = await prisma.orders.findMany({
+//       where: {
+//         userId: user.id,
+//         status: {
+//           in: [
+//             ORDER_STATUS.INCOMPLETED,
+//             ORDER_STATUS.COMPLETED,
+//             ORDER_STATUS.DELIVERED,
+//           ],
+//         },
+//       },
+//       include: {
+//         items: true,
+//       },
+//       orderBy: {
+//         id: 'desc',
+//       },
+//     });
 
-    // If user do not have any previous order
-    if (userOrders.length === 0) {
-      const newScheduleOrder = await prisma.scheduleOrders.create({
-        data: {
-          totalPrice: 0,
-          userId: user.id,
-        },
-      });
+//     // If user do not have any previous order
+//     if (userOrders.length === 0) {
+//       // const newScheduleOrder = await prisma.scheduleOrders.create({
+//       //   data: {
+//       //     totalPrice: 0,
+//       //     userId: user.id,
+//       //   },
+//       // });
 
-      const itemsSameCategory = await prisma.item.findMany({
-        where: {
-          categoryId: user.categoryId,
-        },
-      });
+//       const itemsSameCategory = await prisma.item.findMany({
+//         where: {
+//           categoryId: user.categoryId,
+//         },
+//       });
 
-      const newItems = itemsSameCategory.map((item: Item) => {
-        return {
-          quantity: 0,
-          scheduledOrderId: newScheduleOrder.id,
-          price: item.price,
-          name: item.name,
-        };
-      });
+//       const newItems = itemsSameCategory.map((item: Item) => {
+//         return {
+//           quantity: 0,
+//           scheduledOrderId: newScheduleOrder.id,
+//           price: item.price,
+//           name: item.name,
+//         };
+//       });
 
-      const newScheduleOrderItems = await prisma.orderedItems.createMany({
-        data: newItems,
-      });
+//       const newScheduleOrderItems = await prisma.orderedItems.createMany({
+//         data: newItems,
+//       });
 
-      // update user
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          scheduleOrdersId: newScheduleOrder.id,
-        },
-      });
+//       // update user
+//       // await prisma.user.update({
+//       //   where: {
+//       //     id: user.id,
+//       //   },
+//       //   data: {
+//       //     scheduleOrdersId: newScheduleOrder.id,
+//       //   },
+//       // });
 
-      return { ...newScheduleOrder, items: newScheduleOrderItems };
-    }
+//       return { items: newScheduleOrderItems };
+//     }
 
-    const userLastOrder = userOrders[0];
+//     const userLastOrder = userOrders[0];
 
-    const newScheduleOrder = await prisma.scheduleOrders.create({
-      data: {
-        totalPrice: userLastOrder.totalPrice,
-        userId: user.id,
-      },
-    });
+//     // const newScheduleOrder = await prisma.scheduleOrders.create({
+//     //   data: {
+//     //     totalPrice: userLastOrder.totalPrice,
+//     //     userId: user.id,
+//     //   },
+//     // });
 
-    // Copy items from last order and apply to new schedule order
-    const newItems = userLastOrder.items.map((item: OrderedItems) => {
-      const { id, orderId, ...restFields } = item;
-      return { ...restFields, scheduledOrderId: newScheduleOrder.id };
-    });
+//     // Copy items from last order and apply to new schedule order
+//     // const newItems = userLastOrder.items.map((item: OrderedItems) => {
+//     //   const { id, orderId, ...restFields } = item;
+//     //   return { ...restFields, scheduledOrderId: newScheduleOrder.id };
+//     // });
 
-    const newScheduleOrderItems = await prisma.orderedItems.createMany({
-      data: newItems,
-    });
+//     const newScheduleOrderItems = await prisma.orderedItems.createMany({
+//       data: newItems,
+//     });
 
-    // update user
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        scheduleOrdersId: newScheduleOrder.id,
-      },
-    });
+//     // update user
+//     await prisma.user.update({
+//       where: {
+//         id: user.id,
+//       },
+//       data: {
+//         scheduleOrdersId: newScheduleOrder.id,
+//       },
+//     });
 
-    return { ...newScheduleOrder, items: newScheduleOrderItems };
-  } catch (error: any) {
-    console.log(
-      'Internal Server Error, fail to initialize schedule order: ' + error,
-    );
-  }
-};
+//     return { ...newScheduleOrder, items: newScheduleOrderItems };
+//   } catch (error: any) {
+//     console.log(
+//       'Internal Server Error, fail to initialize schedule order: ' + error,
+//     );
+//   }
+// };

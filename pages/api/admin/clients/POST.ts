@@ -1,8 +1,7 @@
-import { ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
+import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { initializeSheduleOrder } from './PUT';
 
 interface BodyTypes {
   clientId: string;
@@ -71,10 +70,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         category: true,
       },
     });
-
-    if (preference.orderType === ORDER_TYPE.FIXED) {
-      await initializeSheduleOrder(updatedClient);
-    }
 
     return res.status(201).json({
       data: updatedClient,

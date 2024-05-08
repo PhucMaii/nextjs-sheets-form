@@ -53,6 +53,7 @@ import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
+import moment from 'moment';
 
 interface Category {
   id: number;
@@ -201,6 +202,67 @@ export default function Orders() {
       setOrderData(baseOrderData);
     }
   }, [debouncedKeywords, baseOrderData]);
+
+  const addOrder = async (
+    clientValue: UserType | null,
+    deliveryDate: string,
+    note: string,
+    itemList: any,
+  ) => {
+    try {
+      const currentDate = new Date();
+      const dateString = moment(currentDate).format('YYYY-MM-DD');
+      const timeString = moment(currentDate).format('HH:mm:ss');
+
+      // Format data to have the same structure as backend
+      let submittedData: any = {
+        ['DELIVERY DATE']: deliveryDate,
+        ['NOTE']: note,
+        orderTime: `${timeString} ${dateString}`,
+      };
+
+      for (const item of itemList) {
+        submittedData = { ...submittedData, [item.name]: item.quantity };
+      }
+
+      const response = await axios.post(
+        `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
+        submittedData,
+      );
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      if (response.data.warning) {
+        setNotification({
+          on: true,
+          type: 'warning',
+          message: response.data.warning,
+        });
+        return;
+      }
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log(error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+      return;
+    }
+  };
 
   const fetchAllClients = async () => {
     try {
@@ -531,6 +593,7 @@ export default function Orders() {
           clientList={clientList}
           setNotification={setNotification}
           currentDate={date}
+          createOrder={addOrder}
         />
 
         <Box display="flex" alignItems="center" justifyContent="space-between">

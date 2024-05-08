@@ -1,9 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import AuthenGuard from '@/app/HOC/AuthenGuard';
+import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
-import { Grid, Tab, Tabs } from '@mui/material';
+import { Box, Grid, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { days } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
@@ -12,10 +12,17 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import ClientOrdersTable from '../components/ClientOrdersTable';
 import { Order } from '../orders/page';
-import { Notification } from '@/app/utils/type';
+import { Notification, OrderedItems, UserType } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
+import AddOrder from '../components/Modals/AddOrder';
 
 export default function ScheduledOrderPage() {
+  const [clientList, setClientList] = useState<UserType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: true,
     type: 'info',
@@ -25,6 +32,109 @@ export default function ScheduledOrderPage() {
   const [orderList, setOrderList] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    fetchAllClients();
+  }, [])
+
+  useEffect(() => {
+    fetchOrders();
+  }, [tabIndex]);
+
+  const calculateTotalBill = (items: OrderedItems[]) => {
+    const totalPrice = items.reduce((acc: number, item: OrderedItems) => {
+      return acc + item.totalPrice
+    }, 0);
+
+    return totalPrice;
+  };
+
+  const createScheduledOrder =  async (userId: number, items: any, ) => {
+    try {
+      const totalPrice = calculateTotalBill(items);
+      const response = await axios.post(API_URL.SCHEDULED_ORDER, {
+        userId,
+        items,
+        day: days[tabIndex],
+        newTotalPrice: totalPrice
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      }
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      })
+    } catch (error: any) {
+      console.log('Fail to create scheduled order: ' + error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to fetch create scheduled order: ' + error,
+      });
+      return;
+    }
+  }
+
+  const fetchAllClients = async () => {
+    try {
+      const response = await axios.get(API_URL.CLIENTS);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      setClientList(response.data.data);
+    } catch (error: any) {
+      console.log('Fail to fetch all clients: ' + error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to fetch all clients: ' + error,
+      });
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`${API_URL.SCHEDULED_ORDER}?day=${days[tabIndex]}`);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      }
+
+      setBaseOrderList(response.data.data);
+      setOrderList(response.data.data);
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('Fail to fetch orders: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to fetch orders: ' + error
+      })
+      setIsLoading(false);
+    }
+  }
 
   const handleDeleteOrderUI = (deletedOrder: Order) => {
     // update base order list
@@ -86,10 +196,17 @@ export default function ScheduledOrderPage() {
     setOrderList(newOrderList);
   };
 
-
   return (
     <Sidebar>
       <AuthenGuard>
+        <AddOrder 
+          open={isAddOrderOpen} 
+          onClose={() => setIsAddOrderOpen(false)}
+          clientList={clientList}
+          setNotification={setNotification}
+          createScheduledOrder={createScheduledOrder}
+
+        />
         <NotificationPopup 
           notification={notification}
           onClose={() => setNotification({...notification, on: false})}
@@ -139,22 +256,45 @@ export default function ScheduledOrderPage() {
               days.map((day: string, index: number) => {
                 return (
                   <Tab
+                    key={index}
                     id={`simple-tab-${index}`}
                     label={day}
                     aria-controls={`tabpanel-${index}`}
+                    value={index}
                   />
                 );
               })}
           </Tabs>
-          <ClientOrdersTable 
-            handleDeleteOrderUI={handleDeleteOrderUI}
-            handleUpdateOrderUI={handleUpdateOrderUI}
-            clientOrders={orderList}
-            setNotification={setNotification}
-            selectedOrders={selectedOrders}
-            handleSelectOrder={handleSelectOrder}
-            handleSelectAll={handleSelectAll}
-          />
+          {
+            isLoading ? (
+              <SplashScreen />
+            ) : orderList.length > 0 ? (
+              <ClientOrdersTable 
+                handleDeleteOrderUI={handleDeleteOrderUI}
+                handleUpdateOrderUI={handleUpdateOrderUI}
+                clientOrders={orderList}
+                setNotification={setNotification}
+                selectedOrders={selectedOrders}
+                handleSelectOrder={handleSelectOrder}
+                handleSelectAll={handleSelectAll}
+              />
+            ) : (
+              <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            mt={2}
+          >
+            <Typography variant="h6" fontWeight="bold">
+              Add schedule order
+            </Typography>
+            <IconButton onClick={() => setIsAddOrderOpen(true)}>
+              <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+            </IconButton>
+          </Box>
+            )
+          }
         </ShadowSection>
       </AuthenGuard>
     </Sidebar>

@@ -1,16 +1,18 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ScheduleOrders } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { initializeSheduleOrder } from '../clients/PUT';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId } = req.body;
+    const { userId, items, day, newTotalPrice } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: {
         id: userId,
+      },
+      include: {
+        scheduleOrders: true,
       },
     });
 
@@ -20,10 +22,94 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const newScheduleOrder = await initializeSheduleOrder(existingUser);
+    const sameDayOrder = existingUser.scheduleOrders.find(
+      (order: ScheduleOrders) => {
+        return order.day === day;
+      },
+    );
+
+    // Override same day schedule order if it existed
+    if (sameDayOrder) {
+      // update items
+      for (const item of items) {
+        await prisma.orderedItems.updateMany({
+          where: {
+            scheduledOrderId: sameDayOrder.id,
+            name: item.name,
+          },
+          data: {
+            price: item.price,
+            quantity: item.quantity,
+          },
+        });
+      }
+
+      // update schedule order
+      const updatedScheduleOrder = await prisma.scheduleOrders.update({
+        where: {
+          id: sameDayOrder.id,
+        },
+        data: {
+          totalPrice: newTotalPrice,
+        },
+        include: {
+          items: true,
+          user: true,
+        },
+      });
+
+      return res.status(200).json({
+        data: updatedScheduleOrder,
+        message: 'Override Schedule Order Successfully',
+      });
+    }
+
+    // Create schedule order for that day
+    const newScheduleOrder = await prisma.scheduleOrders.create({
+      data: {
+        userId,
+        totalPrice: newTotalPrice,
+        day,
+      },
+    });
+
+    // Create items for the schedule order
+    for (const item of items) {
+      const existedItem = await prisma.orderedItems.findMany({
+        where: {
+          name: item.name,
+          scheduledOrderId: newScheduleOrder.id,
+        },
+      });
+
+      if (existedItem) {
+        return res.status(500).json({
+          error: `Item ${item.name} already existed in schedule order ${newScheduleOrder.id}`,
+        });
+      }
+
+      await prisma.orderedItems.create({
+        data: {
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          scheduledOrderId: newScheduleOrder.id,
+        },
+      });
+    }
+
+    const updatedScheduledOrder = await prisma.scheduleOrders.findUnique({
+      where: {
+        id: newScheduleOrder.id,
+      },
+      include: {
+        items: true,
+        user: true,
+      }
+    });
 
     return res.status(201).json({
-      data: newScheduleOrder,
+      data: updatedScheduledOrder,
       message: 'New Schedule Order Created',
     });
   } catch (error: any) {

@@ -19,7 +19,7 @@ export const days = [
   'Saturday'
 ]
 
-export const limitOrderHour = 9;
+export const limitOrderHour = 8;
 
 export const tabs = [
   {

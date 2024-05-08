@@ -116,5 +116,5 @@ model ScheduleOrders {
   totalPrice Float
   day        String
   items      OrderedItems[]
-  User       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

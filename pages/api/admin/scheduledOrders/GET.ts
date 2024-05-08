@@ -1,33 +1,20 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+interface QueryTypes {
+    userId?: string;
+    day?: string;
+}
+
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId } = req.query;
+    const { day }: QueryTypes = req.query;
 
-    const existingUser = await prisma.user.findUnique({
+    const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
-        id: Number(userId),
-      },
-    });
-
-    if (!existingUser) {
-      return res.status(404).json({
-        error: 'User Not Found',
-      });
-    }
-
-    if (!existingUser.scheduleOrdersId) {
-      return res.status(200).json({
-        error: 'No Schedule Order Id Yet',
-      });
-    }
-
-    const scheduleOrder = await prisma.scheduleOrders.findUnique({
-      where: {
-        id: existingUser.scheduleOrdersId,
+        day
       },
       include: {
         items: true,
@@ -35,7 +22,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     return res.status(200).json({
-      data: scheduleOrder,
+      data: scheduleOrders,
       message: 'Fetch Schedule Order Successfully',
     });
   } catch (error: any) {

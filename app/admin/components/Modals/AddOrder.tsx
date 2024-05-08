@@ -29,7 +29,7 @@ import { OrderedItems } from '@prisma/client';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { YYYYMMDDFormat, formatDateChanged, generateCurrentTime, generateRecommendDate } from '@/app/utils/time';
 import { limitOrderHour } from '../../../lib/constant';
 import moment from 'moment';
 import { infoColor } from '@/app/theme/color';
@@ -38,7 +38,9 @@ import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 interface PropTypes extends ModalProps {
   clientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
-  currentDate: string;
+  currentDate?: string;
+  createOrder?: (clientValue: UserType | null, deliveryDate: string, note: string, itemList: Item[]) => Promise<void>;
+  createScheduledOrder?: (userId: number, items: Item[]) => Promise<void>;
 }
 
 export default function AddOrder({
@@ -47,9 +49,11 @@ export default function AddOrder({
   clientList,
   setNotification,
   currentDate,
+  createOrder,
+  createScheduledOrder
 }: PropTypes) {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
-  const [deliveryDate, setDeliveryDate] = useState<string>(currentDate);
+  const [deliveryDate, setDeliveryDate] = useState<string>(currentDate || generateRecommendDate());
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
@@ -88,7 +92,7 @@ export default function AddOrder({
         });
 
         if (targetItem) {
-          return { ...item, quantity: targetItem.quantity };
+          return { ...item, quantity: targetItem.quantity, totalPrice: targetItem.totalPrice };
         }
         return item;
       });
@@ -124,7 +128,7 @@ export default function AddOrder({
       }
 
       const quantitySetUp = response.data.data.map((item: Item) => {
-        return { ...item, quantity: 0 };
+        return { ...item, quantity: 0, totalPrice: 0  };
       });
 
       setItemList(quantitySetUp);
@@ -143,7 +147,8 @@ export default function AddOrder({
   const handleChangeItem = (e: any, targetItem: any) => {
     const newItems = itemList.map((item: any) => {
       if (item.id === targetItem.id) {
-        return { ...targetItem, quantity: +e.target.value };
+        const totalPrice = item.price * +e.target.value;
+        return { ...targetItem, quantity: +e.target.value, totalPrice };
       }
       return item;
     });
@@ -160,51 +165,13 @@ export default function AddOrder({
     e.preventDefault();
     setIsButtonLoading(true);
     try {
-      const currentDate = new Date();
-      const dateString = moment(currentDate).format('YYYY-MM-DD');
-      const timeString = moment(currentDate).format('HH:mm:ss');
-
-      // Format data to have the same structure as backend
-      let submittedData: any = {
-        ['DELIVERY DATE']: deliveryDate,
-        ['NOTE']: note,
-        orderTime: `${timeString} ${dateString}`,
-      };
-
-      for (const item of itemList) {
-        submittedData = { ...submittedData, [item.name]: item.quantity };
+      if (createOrder) {
+        await createOrder(clientValue, deliveryDate, note, itemList);
       }
 
-      const response = await axios.post(
-        `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
-        submittedData,
-      );
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsButtonLoading(false);
-        return;
+      if (createScheduledOrder && clientValue) {
+        await createScheduledOrder(clientValue.id, itemList);
       }
-
-      if (response.data.warning) {
-        setNotification({
-          on: true,
-          type: 'warning',
-          message: response.data.warning,
-        });
-        setIsButtonLoading(false);
-        return;
-      }
-
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
       setIsButtonLoading(false);
     } catch (error: any) {
       console.log(error);
@@ -284,6 +251,8 @@ export default function AddOrder({
                 </Box>
               </LoadingButton>
             </Grid>
+            {createOrder && (
+            <>
             <Grid item xs={6}>
               DELIVERY DATE
             </Grid>
@@ -310,6 +279,8 @@ export default function AddOrder({
                 inputProps={{ min: 0 }}
               />
             </Grid>
+            </>
+            )}
             {isFetching ? (
               <Box
                 display="flex"

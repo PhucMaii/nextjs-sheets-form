@@ -36,9 +36,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Fetch today's order and status Incompleted only
     const orders = await prisma.orders.findMany({
       where: fetchCondition,
-      include: {
-        OrderPreference: true,
-      },
       orderBy: [
         {
           updateTime: 'desc', // Sort by updateTime in descending order
