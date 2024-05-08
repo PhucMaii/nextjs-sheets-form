@@ -2,9 +2,13 @@ import { Notification, OrderedItems } from '@/app/utils/type';
 import {
   Box,
   Divider,
+  FormControl,
   FormControlLabel,
   Grid,
+  IconButton,
+  InputLabel,
   Modal,
+  OutlinedInput,
   Radio,
   RadioGroup,
   TextField,
@@ -17,8 +21,9 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { Order } from '../../orders/page';
-import { infoColor } from '@/app/theme/color';
+import { errorColor, infoColor } from '@/app/theme/color';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
@@ -45,12 +50,57 @@ export default function EditPrice({
     UpdateOption.NONE,
   );
   const [newCategoryName, setNewCategoryName] = useState<string>('');
+  const [newItem, setNewItem] = useState<OrderedItems>({
+    name: '',
+    price: 0,
+    quantity: 0,
+    totalPrice: 0,
+  });
+
+  const addNewItem = () => {
+    const newItemName = newItem.name.toUpperCase();
+    const hasNameExisted = itemList.some(
+      (item: OrderedItems) => item.name === newItemName,
+    );
+
+    if (newItem.name.trim() === '') {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Item Name Is Missing',
+      });
+      return;
+    }
+
+    if (hasNameExisted) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Item Name Existed Already',
+      });
+    } else {
+      const totalPrice = newItem.quantity * newItem.price;
+      setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
+      setNewItem({
+        name: '',
+        price: 0,
+        quantity: 0,
+        totalPrice: 0,
+      });
+    }
+  };
 
   const calculateNewTotalPrice = () => {
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
       return acc + cV.totalPrice;
     }, 0);
+    console.log({itemList, totalPrice});
     return totalPrice;
+
+  };
+
+  const handleNewItemOnChange = (key: string, value: any) => {
+    setNewItem({ ...newItem, [key]: value });
   };
 
   const handleUpdatePrice = async () => {
@@ -102,6 +152,14 @@ export default function EditPrice({
     setItemList(newItemList);
   };
 
+  const removeItem = (itemId: number) => {
+    const newItemList = itemList.filter((item: OrderedItems) => {
+      return item.id !== itemId;
+    });
+
+    setItemList(newItemList);
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
@@ -138,8 +196,61 @@ export default function EditPrice({
             label="Update the category"
           />
         </RadioGroup>
-        <Divider />
-        <Box overflow="auto" maxHeight="70vh" mt={2}>
+        <Box overflow="auto" maxHeight="70vh" mt={1}>
+          <Divider>Add items</Divider>
+          <Grid container spacing={3} mb={1}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="item-name-label">Item name</InputLabel>
+                <OutlinedInput
+                  fullWidth
+                  label="Item name"
+                  value={newItem.name}
+                  onChange={(e) =>
+                    handleNewItemOnChange('name', e.target.value)
+                  }
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel id="item-price-label">Unit price ($)</InputLabel>
+                <OutlinedInput
+                  fullWidth
+                  label="Unit price"
+                  type="number"
+                  value={newItem.price}
+                  onChange={(e) =>
+                    handleNewItemOnChange('price', +e.target.value)
+                  }
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel id="item-quantity-label">Quantity</InputLabel>
+                <OutlinedInput
+                  fullWidth
+                  label="Quantity"
+                  type="number"
+                  value={newItem.quantity}
+                  onChange={(e) =>
+                    handleNewItemOnChange('quantity', +e.target.value)
+                  }
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <LoadingButtonStyles
+                fullWidth
+                color={infoColor}
+                onClick={addNewItem}
+              >
+                Add
+              </LoadingButtonStyles>
+            </Grid>
+          </Grid>
+          <Divider>Items</Divider>
           <Grid
             container
             alignItems="center"
@@ -167,9 +278,9 @@ export default function EditPrice({
                 return (
                   <Fragment key={index}>
                     <Grid item xs={6}>
-                      {item.name} (Unit Price $)
+                      {item.name}:
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={5}>
                       <TextField
                         fullWidth
                         label="Unit Price ($)"
@@ -178,6 +289,11 @@ export default function EditPrice({
                         type="number"
                         inputProps={{ min: 0 }}
                       />
+                    </Grid>
+                    <Grid item xs={1}>
+                      <IconButton onClick={() => removeItem(item.id)}>
+                        <RemoveCircleIcon sx={{ color: errorColor }} />
+                      </IconButton>
                     </Grid>
                   </Fragment>
                 );

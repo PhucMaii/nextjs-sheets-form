@@ -216,6 +216,16 @@ export default function EditReportOrder({
                         {item.name}
                       </Grid>
                       <Grid item container columnSpacing={2}>
+                        <Grid item xs={6} textAlign="right">
+                          <TextField
+                            fullWidth
+                            label="Unit Price ($)"
+                            value={item.price}
+                            onChange={(e) => handleChangeItem(e, item, 'price')}
+                            type="number"
+                            inputProps={{ min: 0 }}
+                          />
+                        </Grid>
                         <Grid item xs={6}>
                           <TextField
                             fullWidth
@@ -224,16 +234,6 @@ export default function EditReportOrder({
                             onChange={(e) =>
                               handleChangeItem(e, item, 'quantity')
                             }
-                            type="number"
-                            inputProps={{ min: 0 }}
-                          />
-                        </Grid>
-                        <Grid item xs={6} textAlign="right">
-                          <TextField
-                            fullWidth
-                            label="Unit Price ($)"
-                            value={item.price}
-                            onChange={(e) => handleChangeItem(e, item, 'price')}
                             type="number"
                             inputProps={{ min: 0 }}
                           />

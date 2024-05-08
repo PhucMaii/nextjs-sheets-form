@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface UpdatedItem {
@@ -39,16 +39,79 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userCategoryId,
     } = updatedData as BodyType;
 
+    // Track order items
+    let orderedItemList = await prisma.orderedItems.findMany({
+      where: {
+        orderId,
+      },
+    });
+
     for (const item of updatedItems) {
-      await prisma.orderedItems.update({
-        where: {
-          id: item.id,
-        },
-        data: {
-          price: item.price,
-          quantity: item.quantity,
-        },
-      });
+      // Check does system has that item
+      if (item.id) {
+        const existingItem = await prisma.orderedItems.findUnique({
+          where: {
+            id: item.id,
+          },
+        });
+
+        if (!existingItem) {
+          return res.status(404).json({
+            error: 'Item Not Found',
+          });
+        }
+
+        const updatedItem = await prisma.orderedItems.update({
+          where: {
+            id: item.id,
+          },
+          data: {
+            price: item.price,
+            quantity: item.quantity,
+          },
+        });
+
+        // Pop the item off the base list in order to track the item
+        const newList = orderedItemList.filter((item: OrderedItems) => {
+          return item.id !== updatedItem.id;
+        });
+        orderedItemList = newList;
+      } else {
+        // Check does item name exist already in that order
+        const foundItem = await prisma.orderedItems.findFirst({
+          where: {
+            name: item.name,
+            orderId,
+          },
+        });
+
+        if (foundItem) {
+          return res.status(500).json({
+            error: 'Item Name Exist Already',
+          });
+        }
+
+        // if not, create it in the same order id
+        await prisma.orderedItems.create({
+          data: {
+            name: item.name,
+            orderId: orderId,
+            price: item.price,
+            quantity: item.quantity,
+          },
+        });
+      }
+    }
+
+    // Delete the rest of item that admin wants to delete it
+    if (orderedItemList.length > 0) {
+      for (const item of orderedItemList) {
+        await prisma.orderedItems.delete({
+          where: {
+            id: item.id,
+          },
+        });
+      }
     }
 
     await updateOrderTotalPrice(orderId, orderTotalPrice);
@@ -64,14 +127,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (updateOption === UpdateOption.CREATE) {
       const existingCategory = await prisma.category.findUnique({
         where: {
-          name: categoryName
-        }
+          name: categoryName,
+        },
       });
 
       if (existingCategory) {
         return res.status(500).json({
-          error: 'Category Name Existed Already'
-        })
+          error: 'Category Name Existed Already',
+        });
       }
 
       const newCategory = await prisma.category.create({
@@ -108,16 +171,61 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // last case: if user want to update category price
     if (updateOption === UpdateOption.UPDATE) {
+      if (!userCategoryId) {
+        return res.status(404).json({
+          error: 'Request is missing user category id',
+        });
+      }
+
+      let baseItemList = await prisma.item.findMany({
+        where: {
+          categoryId: userCategoryId,
+        },
+      });
+
       for (const item of updatedItems) {
-        await prisma.item.updateMany({
+        const existingItem = await prisma.item.findFirst({
           where: {
             name: item.name,
             categoryId: userCategoryId,
           },
-          data: {
-            price: item.price,
-          },
         });
+
+        if (existingItem) {
+          const updatedItem = await prisma.item.update({
+            where: {
+              id: existingItem.id,
+            },
+            data: {
+              price: item.price,
+            },
+          });
+
+          // Pop item off the category
+          const newBaseItemList = baseItemList.filter((item: Item) => {
+            return item.id !== updatedItem.id;
+          });
+          baseItemList = newBaseItemList;
+        } else {
+          await prisma.item.create({
+            data: {
+              name: item.name,
+              categoryId: userCategoryId,
+              price: item.price,
+            },
+          });
+        }
+      }
+
+      // Delete the rest of item that admin wants to delete it
+      if (baseItemList.length > 0) {
+        for (const item of baseItemList) {
+          await prisma.item.delete({
+            where: {
+              id: item.id,
+            },
+          });
+        }
       }
 
       return res.status(200).json({
