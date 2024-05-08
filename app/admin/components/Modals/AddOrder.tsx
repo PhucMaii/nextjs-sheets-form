@@ -11,6 +11,7 @@ import {
   Autocomplete,
   Box,
   Divider,
+  FormControl,
   Grid,
   Modal,
   TextField,
@@ -45,7 +46,7 @@ export default function AddOrder({
   onClose,
   clientList,
   setNotification,
-  currentDate
+  currentDate,
 }: PropTypes) {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [deliveryDate, setDeliveryDate] = useState<string>(currentDate);
@@ -287,12 +288,14 @@ export default function AddOrder({
               DELIVERY DATE
             </Grid>
             <Grid item xs={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={dayjs(deliveryDate)}
-                  onChange={handleDateChange}
-                />
-              </LocalizationProvider>
+              <FormControl fullWidth>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={dayjs(deliveryDate)}
+                    onChange={handleDateChange}
+                  />
+                </LocalizationProvider>
+              </FormControl>
             </Grid>
             <Grid item xs={6}>
               NOTE

@@ -48,14 +48,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const formatUserOrders = userOrders.map((order: any) => {
       const formatItems = order.items.map((item: OrderedItems) => {
         const totalPrice = item.price * item.quantity;
-        return {...item, totalPrice}
-      })
-
+        return { ...item, totalPrice };
+      });
 
       // ...user for printing, regular user for displaying in table
       const { user, ...restOfData } = order;
-      return { ...user, ...restOfData, user, items: formatItems }
-    })
+      return { ...user, ...restOfData, user, items: formatItems };
+    });
 
     if (!startDate || !endDate) {
       return res.status(200).json({

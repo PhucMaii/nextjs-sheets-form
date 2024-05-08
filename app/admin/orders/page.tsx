@@ -60,7 +60,7 @@ interface Category {
 }
 
 export interface Item {
-  id: number;
+  id?: number;
   name: string;
   price: number;
   quantity: number;
@@ -76,6 +76,7 @@ interface OrderPreference {
 export interface Order {
   id: number;
   user?: any;
+  categoryId?: number;
   category: Category;
   orderTime: string;
   deliveryDate: string;

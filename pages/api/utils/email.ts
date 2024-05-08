@@ -24,7 +24,13 @@ const emailHandler = async (
 
 export default emailHandler;
 
-export const sendEmail = async (user: User, items: OrderedItems[], invoiceId: number, deliveryDate: string, sendToAdmin: boolean) => {
+export const sendEmail = async (
+  user: User,
+  items: OrderedItems[],
+  invoiceId: number,
+  deliveryDate: string,
+  sendToAdmin: boolean,
+) => {
   const orderDetails: any = {};
   for (const item of items) {
     orderDetails[item.name] = {
@@ -37,7 +43,7 @@ export const sendEmail = async (user: User, items: OrderedItems[], invoiceId: nu
   const orderTime = generateCurrentTime();
 
   orderDetails['DELIVERY DATE'] = deliveryDate;
-  orderDetails.orderTime = orderTime;  
+  orderDetails.orderTime = orderTime;
 
   const htmlTemplate: string = generateOrderTemplate(
     user.clientName,

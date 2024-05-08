@@ -71,7 +71,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         deliveryDate,
       );
 
-      await sendEmail(user, scheduleOrder.items, updatedOrder.id, deliveryDate, false);
+      await sendEmail(
+        user,
+        scheduleOrder.items,
+        updatedOrder.id,
+        deliveryDate,
+        false,
+      );
       updatedOrderList.push(updatedOrder);
     }
 

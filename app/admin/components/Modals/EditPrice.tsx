@@ -3,14 +3,11 @@ import {
   Box,
   Divider,
   FormControl,
-  FormControlLabel,
   Grid,
   IconButton,
   InputLabel,
   Modal,
   OutlinedInput,
-  Radio,
-  RadioGroup,
   TextField,
   Typography,
 } from '@mui/material';
@@ -24,6 +21,7 @@ import { Order } from '../../orders/page';
 import { errorColor, infoColor } from '@/app/theme/color';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import UpdateChoiceSelection from '../UpdateChoiceSelection';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
@@ -94,9 +92,8 @@ export default function EditPrice({
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
       return acc + cV.totalPrice;
     }, 0);
-    console.log({itemList, totalPrice});
-    return totalPrice;
 
+    return totalPrice;
   };
 
   const handleNewItemOnChange = (key: string, value: any) => {
@@ -137,6 +134,12 @@ export default function EditPrice({
       setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update price: ' + error,
+      });
+      setIsLoading(false);
     }
   };
 
@@ -152,9 +155,9 @@ export default function EditPrice({
     setItemList(newItemList);
   };
 
-  const removeItem = (itemId: number) => {
+  const removeItem = (itemName: string) => {
     const newItemList = itemList.filter((item: OrderedItems) => {
-      return item.id !== itemId;
+      return item.name !== itemName;
     });
 
     setItemList(newItemList);
@@ -175,27 +178,10 @@ export default function EditPrice({
             Save
           </LoadingButtonStyles>
         </Box>
-        <RadioGroup
-          row
-          value={updateOption}
-          onChange={(e) => setUpdateOption(e.target.value as UpdateOption)}
-        >
-          <FormControlLabel
-            value={UpdateOption.NONE}
-            control={<Radio />}
-            label="Only for this time"
-          />
-          <FormControlLabel
-            value={UpdateOption.CREATE}
-            control={<Radio />}
-            label="Create new category"
-          />
-          <FormControlLabel
-            value={UpdateOption.UPDATE}
-            control={<Radio />}
-            label="Update the category"
-          />
-        </RadioGroup>
+        <UpdateChoiceSelection
+          updateOption={updateOption}
+          setUpdateOption={setUpdateOption}
+        />
         <Box overflow="auto" maxHeight="70vh" mt={1}>
           <Divider>Add items</Divider>
           <Grid container spacing={3} mb={1}>
@@ -291,7 +277,7 @@ export default function EditPrice({
                       />
                     </Grid>
                     <Grid item xs={1}>
-                      <IconButton onClick={() => removeItem(item.id)}>
+                      <IconButton onClick={() => removeItem(item.name)}>
                         <RemoveCircleIcon sx={{ color: errorColor }} />
                       </IconButton>
                     </Grid>

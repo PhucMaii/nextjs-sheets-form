@@ -85,21 +85,29 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
+        // if yes, override the price and quantity
         if (foundItem) {
-          return res.status(500).json({
-            error: 'Item Name Exist Already',
+          await prisma.orderedItems.updateMany({
+            where: {
+              name: item.name,
+              orderId,
+            },
+            data: {
+              price: item.price,
+              quantity: item.quantity,
+            },
+          });
+        } else {
+          // if not, create it in the same order id
+          await prisma.orderedItems.create({
+            data: {
+              name: item.name,
+              orderId: orderId,
+              price: item.price,
+              quantity: item.quantity,
+            },
           });
         }
-
-        // if not, create it in the same order id
-        await prisma.orderedItems.create({
-          data: {
-            name: item.name,
-            orderId: orderId,
-            price: item.price,
-            quantity: item.quantity,
-          },
-        });
       }
     }
 

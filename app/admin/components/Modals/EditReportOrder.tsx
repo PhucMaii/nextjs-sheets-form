@@ -4,9 +4,11 @@ import {
   Divider,
   FormControl,
   Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   Modal,
+  OutlinedInput,
   Select,
   TextField,
   Typography,
@@ -20,9 +22,12 @@ import { Item, Order } from '../../orders/page';
 import { formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
-import { Notification } from '@/app/utils/type';
-import { infoColor } from '@/app/theme/color';
+import { Notification, OrderedItems } from '@/app/utils/type';
+import { errorColor, infoColor } from '@/app/theme/color';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import UpdateChoiceSelection from '../UpdateChoiceSelection';
 
 interface PropTypes {
   order: Order;
@@ -38,8 +43,51 @@ export default function EditReportOrder({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([...order.items]);
+  const [newCategoryName, setNewCategoryName] = useState<string>('');
+  const [newItem, setNewItem] = useState<Item>({
+    name: '',
+    price: 0,
+    quantity: 0,
+    totalPrice: 0,
+  });
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
+  const [updateOption, setUpdateOption] = useState<UpdateOption>(
+    UpdateOption.NONE,
+  );
   const [status, setStatus] = useState<ORDER_STATUS>(order.status);
+
+  const addNewItem = () => {
+    const newItemName = newItem.name.toUpperCase();
+    const hasNameExisted = itemList.some(
+      (item: OrderedItems) => item.name === newItemName,
+    );
+
+    if (newItem.name.trim() === '') {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Item Name Is Missing',
+      });
+      return;
+    }
+
+    if (hasNameExisted) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Item Name Existed Already',
+      });
+    } else {
+      const totalPrice = newItem.quantity * newItem.price;
+      setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
+      setNewItem({
+        name: '',
+        price: 0,
+        quantity: 0,
+        totalPrice: 0,
+      });
+    }
+  };
 
   const handleDateChange = (e: any) => {
     const formattedDate: string = formatDateChanged(e);
@@ -51,10 +99,12 @@ export default function EditReportOrder({
     const newItemList = itemList.map((item: Item) => {
       if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {
-          return { ...item, quantity: +e.target.value };
+          const totalPrice = item.price * +e.target.value;
+          return { ...item, quantity: +e.target.value, totalPrice };
         }
         if (keyChange === 'price') {
-          return { ...item, price: +e.target.value };
+          const totalPrice = item.quantity * +e.target.value;
+          return { ...item, price: +e.target.value, totalPrice };
         }
         return item;
       }
@@ -63,6 +113,67 @@ export default function EditReportOrder({
     });
 
     setItemList(newItemList);
+  };
+
+  const handleNewItemOnChange = (key: string, value: any) => {
+    setNewItem({ ...newItem, [key]: value });
+  };
+
+  const calculateNewTotalPrice = () => {
+    const totalPrice = itemList.reduce((acc: number, cV: any) => {
+      return acc + cV.totalPrice;
+    }, 0);
+
+    return totalPrice;
+  };
+
+  const handleUpdateItems = async () => {
+    try {
+      console.log('Function trigger', order);
+      setIsSubmitting(true);
+      const totalPrice = calculateNewTotalPrice();
+      console.log(totalPrice, 'total PRICE');
+      const response = await axios.put(API_URL.ORDERED_ITEMS, {
+        updatedItems: [...itemList],
+        orderTotalPrice: totalPrice,
+        orderId: order.id,
+        updateOption,
+        categoryName: newCategoryName,
+        userId: order.userId,
+        userCategoryId: order.categoryId,
+      });
+
+      if (response.data.error) {
+        setIsSubmitting(false);
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleUpdateOrderUI({
+        ...order,
+        items: itemList,
+        totalPrice,
+      });
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsSubmitting(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setIsSubmitting(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update item: ' + error,
+      });
+    }
   };
 
   const handleUpdateOrder = async () => {
@@ -86,35 +197,39 @@ export default function EditReportOrder({
           setIsSubmitting(false);
           return;
         }
-      }
-
-      const newOrderTotalPrice = itemList.reduce((acc: number, cV: Item) => {
-        return acc + cV.price * cV.quantity;
-      }, 0);
-
-      const itemUpdateResponse = await axios.put(API_URL.ORDERED_ITEMS, {
-        orderId: order.id,
-        updatedItems: itemList,
-        orderTotalPrice: newOrderTotalPrice,
-      });
-
-      if (itemUpdateResponse.data.error) {
+      } else {
         setNotification({
           on: true,
-          type: 'error',
-          message:
-            'Fail to update date and status: ' + itemUpdateResponse.data.error,
+          type: 'warning',
+          message: 'None of fields has updated yet',
         });
-        setIsSubmitting(false);
-        return;
       }
+
+      // const newOrderTotalPrice = itemList.reduce((acc: number, cV: Item) => {
+      //   return acc + cV.price * cV.quantity;
+      // }, 0);
+
+      // const itemUpdateResponse = await axios.put(API_URL.ORDERED_ITEMS, {
+      //   orderId: order.id,
+      //   updatedItems: itemList,
+      //   orderTotalPrice: newOrderTotalPrice,
+      // });
+
+      // if (itemUpdateResponse.data.error) {
+      //   setNotification({
+      //     on: true,
+      //     type: 'error',
+      //     message:
+      //       'Fail to update date and status: ' + itemUpdateResponse.data.error,
+      //   });
+      //   setIsSubmitting(false);
+      //   return;
+      // }
 
       handleUpdateOrderUI({
         ...order,
         deliveryDate: updatedDate,
         status,
-        items: itemList,
-        totalPrice: newOrderTotalPrice,
       });
       setNotification({
         on: true,
@@ -125,7 +240,20 @@ export default function EditReportOrder({
     } catch (error: any) {
       console.log('Fail to update order: ', error);
       setIsSubmitting(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update order: ' + error,
+      });
     }
+  };
+
+  const removeItem = (itemName: string) => {
+    const newItemList = itemList.filter((item: OrderedItems) => {
+      return item.name !== itemName;
+    });
+
+    setItemList(newItemList);
   };
 
   return (
@@ -146,27 +274,17 @@ export default function EditReportOrder({
             alignItems="center"
           >
             <Typography variant="h4">Edit Order</Typography>
-            <LoadingButtonStyles
-              variant="contained"
-              disabled={itemList.length === 0}
-              loading={isSubmitting}
-              onClick={handleUpdateOrder}
-              color={infoColor}
-            >
-              SAVE
-            </LoadingButtonStyles>
           </Box>
           <Divider />
           <Box overflow="auto" maxHeight="70vh">
             <Grid container rowGap={2}>
-              <Grid item xs={12}>
+              <Grid item xs={12} md={6}>
                 <Typography variant="h6">Delivery Date</Typography>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
-                      label="Edit Date"
                       value={dayjs(updatedDate)}
                       onChange={(e: any) => handleDateChange(e)}
                       sx={{
@@ -178,10 +296,10 @@ export default function EditReportOrder({
                   </LocalizationProvider>
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
-                Status
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6">Status</Typography>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
                   <InputLabel id="select-status">Status</InputLabel>
                   <Select
@@ -203,17 +321,105 @@ export default function EditReportOrder({
                   </Select>
                 </FormControl>
               </Grid>
+              <Grid item xs={12} textAlign="right">
+                <LoadingButtonStyles
+                  variant="contained"
+                  disabled={itemList.length === 0}
+                  loading={isSubmitting}
+                  onClick={handleUpdateOrder}
+                  color={infoColor}
+                >
+                  SAVE
+                </LoadingButtonStyles>
+              </Grid>
             </Grid>
-            <Divider textAlign="center" sx={{ my: 2 }}>
-              Items
+            <Divider textAlign="center" sx={{ my: 3 }}>
+              Add items
             </Divider>
-            <Grid container rowGap={3}>
+            <Grid container spacing={3} mb={2}>
+              <Grid item xs={12}>
+                <UpdateChoiceSelection
+                  updateOption={updateOption}
+                  setUpdateOption={setUpdateOption}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="item-name-label">Item name</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    label="Item name"
+                    value={newItem.name}
+                    onChange={(e) =>
+                      handleNewItemOnChange('name', e.target.value)
+                    }
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="item-price-label">Unit price ($)</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    label="Unit price"
+                    type="number"
+                    value={newItem.price}
+                    onChange={(e) =>
+                      handleNewItemOnChange('price', +e.target.value)
+                    }
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="item-quantity-label">Quantity</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    label="Quantity"
+                    type="number"
+                    value={newItem.quantity}
+                    onChange={(e) =>
+                      handleNewItemOnChange('quantity', +e.target.value)
+                    }
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <Button fullWidth variant="outlined" onClick={addNewItem}>
+                  + Add
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider>Items</Divider>
+              </Grid>
+              {updateOption === UpdateOption.CREATE && (
+                <>
+                  <Grid container item xs={12} rowGap={1}>
+                    <Typography variant="h6" fontWeight="bold">
+                      New Category Name
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      label="New category name"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                    />
+                  </Grid>
+                </>
+              )}
               {itemList.length > 0 &&
                 itemList.map((item: Item, index) => {
                   return (
                     <Fragment key={index}>
                       <Grid item xs={12} fontWeight="bold">
-                        {item.name}
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Typography variant="h6" fontWeight="bold">
+                            {item.name}
+                          </Typography>
+                          <IconButton onClick={() => removeItem(item.name)}>
+                            <RemoveCircleIcon sx={{ color: errorColor }} />
+                          </IconButton>
+                        </Box>
                       </Grid>
                       <Grid item container columnSpacing={2}>
                         <Grid item xs={6} textAlign="right">
@@ -242,6 +448,16 @@ export default function EditReportOrder({
                     </Fragment>
                   );
                 })}
+              <Grid item xs={12} textAlign="right">
+                <LoadingButtonStyles
+                  variant="contained"
+                  color={infoColor}
+                  onClick={handleUpdateItems}
+                  loading={isSubmitting}
+                >
+                  Save
+                </LoadingButtonStyles>
+              </Grid>
             </Grid>
           </Box>
         </BoxModal>
