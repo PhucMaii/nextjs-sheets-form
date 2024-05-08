@@ -18,6 +18,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         items: true,
+        user: true,
       },
     });
 

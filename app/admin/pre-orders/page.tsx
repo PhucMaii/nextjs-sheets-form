@@ -24,7 +24,7 @@ export default function ScheduledOrderPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
-    on: true,
+    on: false,
     type: 'info',
     message: ''
   });
@@ -41,6 +41,7 @@ export default function ScheduledOrderPage() {
     fetchOrders();
   }, [tabIndex]);
 
+  console.log(orderList);
   const calculateTotalBill = (items: OrderedItems[]) => {
     const totalPrice = items.reduce((acc: number, item: OrderedItems) => {
       return acc + item.totalPrice
@@ -74,11 +75,11 @@ export default function ScheduledOrderPage() {
         message: response.data.message
       })
     } catch (error: any) {
-      console.log('Fail to create scheduled order: ' + error);
+      console.log('Fail to create scheduled order: ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to fetch create scheduled order: ' + error,
+        message: 'Fail to create scheduled order: ' + error,
       });
       return;
     }
@@ -269,6 +270,7 @@ export default function ScheduledOrderPage() {
             isLoading ? (
               <SplashScreen />
             ) : orderList.length > 0 ? (
+              <>
               <ClientOrdersTable 
                 handleDeleteOrderUI={handleDeleteOrderUI}
                 handleUpdateOrderUI={handleUpdateOrderUI}
@@ -278,6 +280,21 @@ export default function ScheduledOrderPage() {
                 handleSelectOrder={handleSelectOrder}
                 handleSelectAll={handleSelectAll}
               />
+              <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              mt={2}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                Add schedule order
+              </Typography>
+              <IconButton onClick={() => setIsAddOrderOpen(true)}>
+                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+              </IconButton>
+            </Box>
+            </>
             ) : (
               <Box
             display="flex"
