@@ -265,7 +265,14 @@ export default function Orders() {
     newItems: any[],
     newTotalPrice: number,
   ) => {
-    const newOrderList = baseOrderData.map((order: Order) => {
+    const newBaseOrderList = baseOrderData.map((order: Order) => {
+      if (order.id === targetOrder.id) {
+        return { ...order, totalPrice: newTotalPrice, items: newItems };
+      }
+      return order;
+    });
+
+    const newOrderList = orderData.map((order: Order) => {
       if (order.id === targetOrder.id) {
         return { ...order, totalPrice: newTotalPrice, items: newItems };
       }
@@ -273,7 +280,7 @@ export default function Orders() {
     });
 
     setOrderData(newOrderList);
-    setBaseOrderData(newOrderList);
+    setBaseOrderData(newBaseOrderList);
   };
 
   const handleUpdatePreOrderUI = (orderList: Order[]) => {
