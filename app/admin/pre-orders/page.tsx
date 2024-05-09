@@ -8,8 +8,6 @@ import {
   Button,
   Grid,
   IconButton,
-  Menu,
-  MenuItem,
   Tab,
   Tabs,
   TextField,
@@ -19,6 +17,7 @@ import { days } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import {
@@ -33,21 +32,17 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/AddOrder';
 import ScheduleOrdersTable from '../components/ScheduleOrdersTable';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
-import { DropdownItemContainer } from '../orders/styled';
- import { errorColor, infoColor } from '@/app/theme/color';
+ import { errorColor } from '@/app/theme/color';
+import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 
 export default function ScheduledOrderPage() {
-  const [actionButtonAnchor, setActionButtonAnchor] =
-    useState<null | HTMLElement>(null);
-  const openDropdown = Boolean(actionButtonAnchor);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
+  const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -243,10 +238,6 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const handleCloseAnchor = () => {
-    setActionButtonAnchor(null);
-  };
-
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
     // update base order list
     const newBaseOrderList = baseOrderList.filter((order: ScheduledOrder) => {
@@ -309,60 +300,6 @@ export default function ScheduledOrderPage() {
     setOrderList(newOrderList);
   };
 
-  const actionDropdown = (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      gap={2}
-      width="100%"
-    >
-      <Button
-        aria-controls={openDropdown ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={openDropdown ? 'true' : undefined}
-        disabled={selectedOrders.length === 0}
-        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-        endIcon={<ArrowDownwardIcon />}
-        variant="outlined"
-        fullWidth
-      >
-        Actions
-      </Button>
-      <Menu
-        id="basic-menu"
-        anchorEl={actionButtonAnchor}
-        open={openDropdown}
-        onClose={handleCloseAnchor}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            deleteSelectedOrders();
-            handleCloseAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <DeleteIcon sx={{ color: errorColor }} />
-            <Typography sx={{ color: errorColor }}>Delete</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleCloseAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <PendingActionsIcon sx={{ color: infoColor }} />
-            <Typography sx={{ color: infoColor }}>Pre order</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
-
   return (
     <Sidebar>
       <AuthenGuard>
@@ -372,6 +309,14 @@ export default function ScheduledOrderPage() {
           clientList={clientList}
           setNotification={setNotification}
           createScheduledOrder={createScheduledOrder}
+
+        />
+        <EditDeliveryDate
+          open={isPreOrderOpen}
+          onClose={() => setIsPreOrderOpen(false)}
+          isPreOrder
+          setNotification={setNotification}
+          scheduleOrderList={selectedOrders}
         />
         <NotificationPopup
           notification={notification}
@@ -427,12 +372,20 @@ export default function ScheduledOrderPage() {
           </Box>
           <Grid container alignItems="center" spacing={2}>
             <Grid item xs={2}>
-              <Button fullWidth variant="outlined">Pre order</Button>
-              {/* {actionDropdown} */}
+              <Button 
+                fullWidth
+                onClick={() => setIsPreOrderOpen(true)}
+                variant="outlined"
+                disabled={selectedOrders.length === 0}
+              >
+                <Box display="flex" gap={1} alignItems="center">
+                  <Typography>Pre Order</Typography>
+                  <PendingActionsIcon />
+                </Box>
+              </Button>
             </Grid>
             <Grid item xs={8}>
               <TextField
-                // variant="standard"
                 fullWidth
                 placeholder="Search by client name or client id"
                 value={searchKeywords}
@@ -444,7 +397,7 @@ export default function ScheduledOrderPage() {
                 <IconButton onClick={() => setIsAddOrderOpen(true)}>
                   <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
                 </IconButton>
-                <IconButton onClick={() => setIsAddOrderOpen(true)}>
+                <IconButton disabled={selectedOrders.length === 0} onClick={() => deleteSelectedOrders()}>
                   <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
                 </IconButton>
               </Box>

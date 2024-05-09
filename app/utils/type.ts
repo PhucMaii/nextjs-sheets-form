@@ -48,7 +48,7 @@ export interface UserType {
   id: number;
   clientId: string;
   clientName: string;
-  contactNumber?: string;
+  contactNumber: string;
   password?: string;
   email?: string;
   deliveryAddress: string;

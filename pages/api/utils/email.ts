@@ -1,7 +1,8 @@
 import { transporter } from './transporter';
-import { OrderedItems, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
 import { generateCurrentTime } from '@/app/utils/time';
+import { OrderedItems, UserType } from '@/app/utils/type';
 
 const emailHandler = async (
   email: string,
@@ -25,7 +26,7 @@ const emailHandler = async (
 export default emailHandler;
 
 export const sendEmail = async (
-  user: User,
+  user: User | UserType,
   items: OrderedItems[],
   invoiceId: number,
   deliveryDate: string,

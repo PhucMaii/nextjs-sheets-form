@@ -5,7 +5,7 @@ import { BoxModal } from './styled';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
-import { Notification, UserType } from '@/app/utils/type';
+import { Notification, ScheduledOrder } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
@@ -20,7 +20,7 @@ interface PropTypes extends ModalProps {
   handleUpdatePreOrderUI?: (orderList: Order[]) => void;
   isPreOrder?: boolean;
   currentDate?: string;
-  selectedClients?: UserType[];
+  scheduleOrderList?: ScheduledOrder[];
 }
 
 export default function EditDeliveryDate({
@@ -32,7 +32,7 @@ export default function EditDeliveryDate({
   handleUpdatePreOrderUI,
   isPreOrder,
   currentDate,
-  selectedClients,
+  scheduleOrderList,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
@@ -49,9 +49,10 @@ export default function EditDeliveryDate({
     try {
       const submittedData: any = { deliveryDate: updatedDate };
 
-      if (selectedClients) {
-        submittedData.clientList = [...selectedClients];
+      if (scheduleOrderList) {
+        submittedData.scheduleOrderList = scheduleOrderList
       }
+
       const response = await axios.post(API_URL.ORDER, submittedData);
 
       if (response.data.error) {

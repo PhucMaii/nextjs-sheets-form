@@ -1,78 +1,38 @@
-import { ORDER_STATUS, ORDER_TYPE } from '@/app/utils/enum';
+import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateCurrentTime } from '@/app/utils/time';
-import { OrderedItems, PrismaClient, User } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkHasClientOrder } from '../../import-sheets';
-import { UserType } from '@/app/utils/type';
+import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 
 interface BodyTypes {
   deliveryDate: string;
-  clientList?: UserType[];
+  scheduleOrderList: ScheduledOrder[];
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
-    const { deliveryDate, clientList } = req.body as BodyTypes;
-
-    let clients: any = [];
-
-    // Check if request provide client list
-    if (clientList) {
-      clients = [...clientList];
-    } else {
-      clients = await prisma.user.findMany({
-        where: {
-          preference: {
-            orderType: ORDER_TYPE.FIXED,
-          },
-        },
-      });
-    }
+    const { deliveryDate, scheduleOrderList } = req.body as BodyTypes;
 
     const updatedOrderList: any = [];
 
-    for (const user of clients) {
-      if (!user.scheduleOrdersId) {
-        return res.status(500).json({
-          error: `Pre order stop at user ${user.clientId} because they do not have schedule order id `,
-        });
-      }
-
+    for (const scheduleOrder of scheduleOrderList) {
       // Check has user order for today, if yes then skip that client
-      const hasClientOrder = await checkHasClientOrder(user.id, deliveryDate);
+      const hasClientOrder = await checkHasClientOrder(scheduleOrder.user.id, deliveryDate);
       if (hasClientOrder) {
         continue;
       }
 
-      // get user schedule order
-      const scheduleOrder = await prisma.scheduleOrders.findUnique({
-        where: {
-          id: user.scheduleOrdersId,
-        },
-        include: {
-          items: true,
-        },
-      });
-
-      // Need to handle the miss schedule order
-      if (!scheduleOrder) {
-        return res.status(500).json({
-          error: `Pre order stop at user ${user.clientId} because they do not have scheduled order `,
-        });
-      }
-
       const updatedOrder: any = await createOrder(
-        user,
+        scheduleOrder.user,
         scheduleOrder.items,
         scheduleOrder.totalPrice,
         deliveryDate,
       );
 
       await sendEmail(
-        user,
+        scheduleOrder.user,
         scheduleOrder.items,
         updatedOrder.id,
         deliveryDate,
@@ -94,7 +54,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const createOrder = async (
-  user: User,
+  user: User | UserType,
   items: OrderedItems[],
   totalPrice: number,
   deliveryDate: string,
@@ -130,6 +90,9 @@ const createOrder = async (
       where: {
         id: newOrder.id,
       },
+      include: {
+        items: true,
+      }
     });
 
     return updatedOrder;
