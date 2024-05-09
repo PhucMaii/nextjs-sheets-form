@@ -1,16 +1,32 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tab, Tabs, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { days } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
-import { Notification, OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
+import {
+  Notification,
+  OrderedItems,
+  ScheduledOrder,
+  UserType,
+} from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from 'axios';
@@ -21,12 +37,13 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import { DropdownItemContainer } from '../orders/styled';
-import { errorColor } from '@/app/theme/color';
+ import { errorColor, infoColor } from '@/app/theme/color';
 
 export default function ScheduledOrderPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
-  useState<null | HTMLElement>(null);
+    useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -71,15 +88,47 @@ export default function ScheduledOrderPage() {
   }, [debouncedKeywords, baseOrderList]);
 
   const addOrderUI = (newOrder: ScheduledOrder) => {
-    const hasOrderExisted = baseOrderList.some((order: ScheduledOrder) => order.id === newOrder.id);
+    const hasOrderExisted = baseOrderList.some(
+      (order: ScheduledOrder) => order.id === newOrder.id,
+    );
 
     if (!hasOrderExisted) {
       setOrderList([...orderList, newOrder]);
-      setBaseOrderList([...baseOrderList, newOrder ]);
+      setBaseOrderList([...baseOrderList, newOrder]);
     }
-  }
+  };
 
-  const calculateTotalBill = (items: OrderedItems[]) => {
+  const calculateTotalBill = useCallback((): number => {
+    const totalPrice = orderList.reduce(
+      (acc: number, order: ScheduledOrder) => {
+        return acc + order.totalPrice;
+      },
+      0,
+    );
+
+    return totalPrice;
+  }, [orderList]);
+
+  const calculateTotalClient = useCallback((): number => {
+    const trackClients: ScheduledOrder[] = [];
+    const clients = orderList.filter((order: ScheduledOrder) => {
+      const isExistedClient = trackClients.find(
+        (foundOrder: ScheduledOrder) =>
+          order.user.clientId === foundOrder.user.clientId,
+      );
+
+      if (!isExistedClient) {
+        trackClients.push(order);
+        return true;
+      } else {
+        return false;
+      }
+    }, 0);
+
+    return clients.length;
+  }, [orderList]);
+
+  const calculateTotalBillOneOrder = (items: OrderedItems[]) => {
     const totalPrice = items.reduce((acc: number, item: OrderedItems) => {
       return acc + item.totalPrice;
     }, 0);
@@ -89,7 +138,7 @@ export default function ScheduledOrderPage() {
 
   const createScheduledOrder = async (userId: number, items: any) => {
     try {
-      const totalPrice = calculateTotalBill(items);
+      const totalPrice = calculateTotalBillOneOrder(items);
       const response = await axios.post(API_URL.SCHEDULED_ORDER, {
         userId,
         items,
@@ -220,9 +269,11 @@ export default function ScheduledOrderPage() {
     });
 
     if (selectedOrder) {
-      const newSelectedOrders = selectedOrders.filter((order: ScheduledOrder) => {
-        return order.id !== targetOrder.id;
-      });
+      const newSelectedOrders = selectedOrders.filter(
+        (order: ScheduledOrder) => {
+          return order.id !== targetOrder.id;
+        },
+      );
       setSelectedOrders(newSelectedOrders);
     } else {
       setSelectedOrders([...selectedOrders, targetOrder]);
@@ -295,7 +346,17 @@ export default function ScheduledOrderPage() {
         >
           <DropdownItemContainer display="flex" gap={2}>
             <DeleteIcon sx={{ color: errorColor }} />
-            <Typography sx={{color: errorColor}}>Delete</Typography>
+            <Typography sx={{ color: errorColor }}>Delete</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <PendingActionsIcon sx={{ color: infoColor }} />
+            <Typography sx={{ color: infoColor }}>Pre order</Typography>
           </DropdownItemContainer>
         </MenuItem>
       </Menu>
@@ -320,18 +381,15 @@ export default function ScheduledOrderPage() {
           <Grid item xs={12} md={4}>
             <OverviewCard
               icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text="Total Clients"
-              // value={baseClientList.length}
-              value={200}
+              text="Total Orders"
+              value={orderList.length}
             />
           </Grid>
           <Grid item xs={12} md={4}>
             <OverviewCard
               icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text="No. clients use the app"
-              value={200}
-              // value={numberOfUserUsingApp().numberOfUsers as number}
-              // helperText={`${numberOfUserUsingApp().percentage}% of total`}
+              text="Total Bill"
+              value={calculateTotalBill() as number}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -339,41 +397,40 @@ export default function ScheduledOrderPage() {
               icon={
                 <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
               }
-              text="No. clients pay monthly"
+              text="Total Clients"
               // helperText={`${numberOfUserPayMonthly().percentage}% of total`}
-              // value={numberOfUserPayMonthly().numberOfUsers as number}
-              value={200}
+              value={calculateTotalClient() as number}
             />
           </Grid>
         </Grid>
         <ShadowSection>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs
-            aria-label="basic tabs"
-            value={tabIndex}
-            onChange={(e, newValue) => setTabIndex(newValue)}
-            variant="fullWidth"
-          >
-            {days &&
-              days.map((day: string, index: number) => {
-                return (
-                  <Tab
-                    key={index}
-                    id={`simple-tab-${index}`}
-                    label={day}
-                    aria-controls={`tabpanel-${index}`}
-                    value={index}
-                  />
-                );
-              })}
-          </Tabs>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs
+              aria-label="basic tabs"
+              value={tabIndex}
+              onChange={(e, newValue) => setTabIndex(newValue)}
+              variant="fullWidth"
+            >
+              {days &&
+                days.map((day: string, index: number) => {
+                  return (
+                    <Tab
+                      key={index}
+                      id={`simple-tab-${index}`}
+                      label={day}
+                      aria-controls={`tabpanel-${index}`}
+                      value={index}
+                    />
+                  );
+                })}
+            </Tabs>
           </Box>
           <Grid container alignItems="center" spacing={2}>
             <Grid item xs={2}>
-              {/* <Button fullWidth variant="outlined">Actions</Button> */}
-              {actionDropdown}
+              <Button fullWidth variant="outlined">Pre order</Button>
+              {/* {actionDropdown} */}
             </Grid>
-            <Grid item xs={9}>
+            <Grid item xs={8}>
               <TextField
                 // variant="standard"
                 fullWidth
@@ -382,10 +439,15 @@ export default function ScheduledOrderPage() {
                 onChange={(e) => setSearchKeywords(e.target.value)}
               />
             </Grid>
-            <Grid item xs={1}>
-            <IconButton onClick={() => setIsAddOrderOpen(true)}>
-                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-              </IconButton>
+            <Grid item xs={2}>
+              <Box display="flex" alignItems="center">
+                <IconButton onClick={() => setIsAddOrderOpen(true)}>
+                  <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+                </IconButton>
+                <IconButton onClick={() => setIsAddOrderOpen(true)}>
+                  <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
+                </IconButton>
+              </Box>
             </Grid>
           </Grid>
           {isLoading ? (
@@ -410,7 +472,7 @@ export default function ScheduledOrderPage() {
               alignItems="center"
               mt={2}
             >
-              <ErrorComponent errorText='No Scheduled Order Found' />
+              <ErrorComponent errorText="No Scheduled Order Found" />
             </Box>
           )}
         </ShadowSection>
