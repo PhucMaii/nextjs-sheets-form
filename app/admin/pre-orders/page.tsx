@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
-import { Box, Button, Grid, IconButton, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid, IconButton, Menu, MenuItem, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { days } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
@@ -17,8 +17,17 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/AddOrder';
 import ScheduleOrdersTable from '../components/ScheduleOrdersTable';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import useDebounce from '@/hooks/useDebounce';
+import ErrorComponent from '../components/ErrorComponent';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { DropdownItemContainer } from '../orders/styled';
+import { errorColor } from '@/app/theme/color';
 
 export default function ScheduledOrderPage() {
+  const [actionButtonAnchor, setActionButtonAnchor] =
+  useState<null | HTMLElement>(null);
+  const openDropdown = Boolean(actionButtonAnchor);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
@@ -31,6 +40,8 @@ export default function ScheduledOrderPage() {
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
     fetchAllClients();
@@ -39,6 +50,25 @@ export default function ScheduledOrderPage() {
   useEffect(() => {
     fetchOrders();
   }, [tabIndex]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newOrderList = orderList.filter((order: ScheduledOrder) => {
+        if (
+          order.user.clientId.includes(debouncedKeywords) ||
+          order.user.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setOrderList(newOrderList);
+    } else {
+      setOrderList(baseOrderList);
+    }
+  }, [debouncedKeywords, baseOrderList]);
 
   const addOrderUI = (newOrder: ScheduledOrder) => {
     const hasOrderExisted = baseOrderList.some((order: ScheduledOrder) => order.id === newOrder.id);
@@ -90,6 +120,23 @@ export default function ScheduledOrderPage() {
         message: 'Fail to create scheduled order: ' + error,
       });
       return;
+    }
+  };
+
+  const deleteSelectedOrders = async () => {
+    try {
+      const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
+        data: { scheduleOrderList: selectedOrders },
+      });
+      await fetchOrders();
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('Fail to mark all as completed: ', error);
     }
   };
 
@@ -145,6 +192,10 @@ export default function ScheduledOrderPage() {
       });
       setIsLoading(false);
     }
+  };
+
+  const handleCloseAnchor = () => {
+    setActionButtonAnchor(null);
   };
 
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
@@ -206,6 +257,50 @@ export default function ScheduledOrderPage() {
     setBaseOrderList(newBaseOrderList);
     setOrderList(newOrderList);
   };
+
+  const actionDropdown = (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      gap={2}
+      width="100%"
+    >
+      <Button
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        disabled={selectedOrders.length === 0}
+        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+        endIcon={<ArrowDownwardIcon />}
+        variant="outlined"
+        fullWidth
+      >
+        Actions
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={actionButtonAnchor}
+        open={openDropdown}
+        onClose={handleCloseAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            deleteSelectedOrders();
+            handleCloseAnchor();
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <DeleteIcon sx={{ color: errorColor }} />
+            <Typography sx={{color: errorColor}}>Delete</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
 
   return (
     <Sidebar>
@@ -275,13 +370,16 @@ export default function ScheduledOrderPage() {
           </Box>
           <Grid container alignItems="center" spacing={2}>
             <Grid item xs={2}>
-              <Button fullWidth variant="outlined">Actions</Button>
+              {/* <Button fullWidth variant="outlined">Actions</Button> */}
+              {actionDropdown}
             </Grid>
             <Grid item xs={9}>
               <TextField
                 // variant="standard"
                 fullWidth
                 placeholder="Search by client name or client id"
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
               />
             </Grid>
             <Grid item xs={1}>
@@ -312,12 +410,7 @@ export default function ScheduledOrderPage() {
               alignItems="center"
               mt={2}
             >
-              <Typography variant="h6" fontWeight="bold">
-                Add schedule order
-              </Typography>
-              <IconButton onClick={() => setIsAddOrderOpen(true)}>
-                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-              </IconButton>
+              <ErrorComponent errorText='No Scheduled Order Found' />
             </Box>
           )}
         </ShadowSection>
