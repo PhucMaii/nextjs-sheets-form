@@ -105,7 +105,7 @@ export default function MainPage() {
       // set date to tomorrow
       const today = new Date();
       const endDate = dateRange[1];
-      endDate.setDate(today.getDate() + 1);
+      endDate.setDate(today.getDate() + 2);
       const response = await axios.get(
         `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${endDate}`,
       );
