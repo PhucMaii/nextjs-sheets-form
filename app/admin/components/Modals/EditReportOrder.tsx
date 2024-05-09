@@ -129,10 +129,8 @@ export default function EditReportOrder({
 
   const handleUpdateItems = async () => {
     try {
-      console.log('Function trigger', order);
       setIsSubmitting(true);
       const totalPrice = calculateNewTotalPrice();
-      console.log(totalPrice, 'total PRICE');
       const response = await axios.put(API_URL.ORDERED_ITEMS, {
         updatedItems: [...itemList],
         orderTotalPrice: totalPrice,
@@ -204,27 +202,6 @@ export default function EditReportOrder({
           message: 'None of fields has updated yet',
         });
       }
-
-      // const newOrderTotalPrice = itemList.reduce((acc: number, cV: Item) => {
-      //   return acc + cV.price * cV.quantity;
-      // }, 0);
-
-      // const itemUpdateResponse = await axios.put(API_URL.ORDERED_ITEMS, {
-      //   orderId: order.id,
-      //   updatedItems: itemList,
-      //   orderTotalPrice: newOrderTotalPrice,
-      // });
-
-      // if (itemUpdateResponse.data.error) {
-      //   setNotification({
-      //     on: true,
-      //     type: 'error',
-      //     message:
-      //       'Fail to update date and status: ' + itemUpdateResponse.data.error,
-      //   });
-      //   setIsSubmitting(false);
-      //   return;
-      // }
 
       handleUpdateOrderUI({
         ...order,

@@ -4,13 +4,12 @@ import React, { useState } from 'react';
 import { BoxModal } from './styled';
 import ErrorIcon from '@mui/icons-material/Error';
 import { errorColor } from '@/app/theme/color';
-import { Order } from '../../orders/page';
 import { grey } from '@mui/material/colors';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes {
   targetObj: any;
-  handleDelete: (deletedOrder: Order) => Promise<void>;
+  handleDelete: (deletedOrder: any) => Promise<void>;
 }
 
 export default function DeleteModal({ targetObj, handleDelete }: PropTypes) {

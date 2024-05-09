@@ -80,4 +80,5 @@ export interface ScheduledOrder {
   userId: number;
   totalPrice: number;
   items: OrderedItems[];
+  user: UserType;
 }

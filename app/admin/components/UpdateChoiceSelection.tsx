@@ -5,11 +5,13 @@ import React, { Dispatch, SetStateAction } from 'react';
 interface PropTypes {
   updateOption: UpdateOption;
   setUpdateOption: Dispatch<SetStateAction<UpdateOption>>;
+  noCreate?: boolean;
 }
 
 export default function UpdateChoiceSelection({
   updateOption,
   setUpdateOption,
+  noCreate
 }: PropTypes) {
   return (
     <RadioGroup
@@ -22,11 +24,11 @@ export default function UpdateChoiceSelection({
         control={<Radio />}
         label="Only for this time"
       />
-      <FormControlLabel
+      {!noCreate && <FormControlLabel
         value={UpdateOption.CREATE}
         control={<Radio />}
         label="Create new category"
-      />
+      />}
       <FormControlLabel
         value={UpdateOption.UPDATE}
         control={<Radio />}

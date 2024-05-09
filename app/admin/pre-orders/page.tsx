@@ -3,21 +3,20 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
-import { Box, Grid, IconButton, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Button, Grid, IconButton, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { days } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
-import ClientOrdersTable from '../components/ClientOrdersTable';
-import { Order } from '../orders/page';
-import { Notification, OrderedItems, UserType } from '@/app/utils/type';
+import { Notification, OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/AddOrder';
+import ScheduleOrdersTable from '../components/ScheduleOrdersTable';
 
 export default function ScheduledOrderPage() {
   const [clientList, setClientList] = useState<UserType[]>([]);
@@ -26,54 +25,63 @@ export default function ScheduledOrderPage() {
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
-    message: ''
+    message: '',
   });
-  const [baseOrderList, setBaseOrderList] = useState<Order[]>([]);
-  const [orderList, setOrderList] = useState<Order[]>([]);
+  const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
+  const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
-  const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+  const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
 
   useEffect(() => {
     fetchAllClients();
-  }, [])
+  }, []);
 
   useEffect(() => {
     fetchOrders();
   }, [tabIndex]);
 
-  console.log(orderList);
+  const addOrderUI = (newOrder: ScheduledOrder) => {
+    const hasOrderExisted = baseOrderList.some((order: ScheduledOrder) => order.id === newOrder.id);
+
+    if (!hasOrderExisted) {
+      setOrderList([...orderList, newOrder]);
+      setBaseOrderList([...baseOrderList, newOrder ]);
+    }
+  }
+
   const calculateTotalBill = (items: OrderedItems[]) => {
     const totalPrice = items.reduce((acc: number, item: OrderedItems) => {
-      return acc + item.totalPrice
+      return acc + item.totalPrice;
     }, 0);
 
     return totalPrice;
   };
 
-  const createScheduledOrder =  async (userId: number, items: any, ) => {
+  const createScheduledOrder = async (userId: number, items: any) => {
     try {
       const totalPrice = calculateTotalBill(items);
       const response = await axios.post(API_URL.SCHEDULED_ORDER, {
         userId,
         items,
         day: days[tabIndex],
-        newTotalPrice: totalPrice
+        newTotalPrice: totalPrice,
       });
 
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
       }
 
+      addOrderUI(response.data.data);
       setNotification({
         on: true,
         type: 'success',
-        message: response.data.message
-      })
+        message: response.data.message,
+      });
     } catch (error: any) {
       console.log('Fail to create scheduled order: ', error);
       setNotification({
@@ -83,7 +91,7 @@ export default function ScheduledOrderPage() {
       });
       return;
     }
-  }
+  };
 
   const fetchAllClients = async () => {
     try {
@@ -112,13 +120,15 @@ export default function ScheduledOrderPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${API_URL.SCHEDULED_ORDER}?day=${days[tabIndex]}`);
+      const response = await axios.get(
+        `${API_URL.SCHEDULED_ORDER}?day=${days[tabIndex]}`,
+      );
 
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
       }
@@ -131,20 +141,20 @@ export default function ScheduledOrderPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to fetch orders: ' + error
-      })
+        message: 'Fail to fetch orders: ' + error,
+      });
       setIsLoading(false);
     }
-  }
+  };
 
-  const handleDeleteOrderUI = (deletedOrder: Order) => {
+  const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
     // update base order list
-    const newBaseOrderList = baseOrderList.filter((order: Order) => {
+    const newBaseOrderList = baseOrderList.filter((order: ScheduledOrder) => {
       return order.id !== deletedOrder.id;
     });
 
     // update current displaying list
-    const newOrderList = orderList.filter((order: Order) => {
+    const newOrderList = orderList.filter((order: ScheduledOrder) => {
       return order.id !== deletedOrder.id;
     });
 
@@ -152,14 +162,14 @@ export default function ScheduledOrderPage() {
     setOrderList(newOrderList);
   };
 
-  const handleSelectOrder = (e: any, targetOrder: Order) => {
+  const handleSelectOrder = (e: any, targetOrder: ScheduledOrder) => {
     e.preventDefault();
-    const selectedOrder = selectedOrders.find((order: Order) => {
+    const selectedOrder = selectedOrders.find((order: ScheduledOrder) => {
       return order.id === targetOrder.id;
     });
 
     if (selectedOrder) {
-      const newSelectedOrders = selectedOrders.filter((order: Order) => {
+      const newSelectedOrders = selectedOrders.filter((order: ScheduledOrder) => {
         return order.id !== targetOrder.id;
       });
       setSelectedOrders(newSelectedOrders);
@@ -176,9 +186,9 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const handleUpdateOrderUI = (updatedOrder: Order) => {
+  const handleUpdateOrderUI = (updatedOrder: ScheduledOrder) => {
     // update base order list
-    const newBaseOrderList = baseOrderList.map((order: Order) => {
+    const newBaseOrderList = baseOrderList.map((order: ScheduledOrder) => {
       if (order.id === updatedOrder.id) {
         return updatedOrder;
       }
@@ -186,7 +196,7 @@ export default function ScheduledOrderPage() {
     });
 
     // update current displaying order list
-    const newOrderList = orderList.map((order: Order) => {
+    const newOrderList = orderList.map((order: ScheduledOrder) => {
       if (order.id === updatedOrder.id) {
         return updatedOrder;
       }
@@ -200,28 +210,24 @@ export default function ScheduledOrderPage() {
   return (
     <Sidebar>
       <AuthenGuard>
-        <AddOrder 
-          open={isAddOrderOpen} 
+        <AddOrder
+          open={isAddOrderOpen}
           onClose={() => setIsAddOrderOpen(false)}
           clientList={clientList}
           setNotification={setNotification}
           createScheduledOrder={createScheduledOrder}
-
         />
-        <NotificationPopup 
+        <NotificationPopup
           notification={notification}
-          onClose={() => setNotification({...notification, on: false})}
+          onClose={() => setNotification({ ...notification, on: false })}
         />
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={4}>
             <OverviewCard
-              icon={
-                <ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />
-              }
+              icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
               text="Total Clients"
               // value={baseClientList.length}
               value={200}
-
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -242,11 +248,11 @@ export default function ScheduledOrderPage() {
               // helperText={`${numberOfUserPayMonthly().percentage}% of total`}
               // value={numberOfUserPayMonthly().numberOfUsers as number}
               value={200}
-
             />
           </Grid>
         </Grid>
         <ShadowSection>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
             aria-label="basic tabs"
             value={tabIndex}
@@ -266,12 +272,29 @@ export default function ScheduledOrderPage() {
                 );
               })}
           </Tabs>
-          {
-            isLoading ? (
-              <SplashScreen />
-            ) : orderList.length > 0 ? (
-              <>
-              <ClientOrdersTable 
+          </Box>
+          <Grid container alignItems="center" spacing={2}>
+            <Grid item xs={2}>
+              <Button fullWidth variant="outlined">Actions</Button>
+            </Grid>
+            <Grid item xs={9}>
+              <TextField
+                // variant="standard"
+                fullWidth
+                placeholder="Search by client name or client id"
+              />
+            </Grid>
+            <Grid item xs={1}>
+            <IconButton onClick={() => setIsAddOrderOpen(true)}>
+                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+              </IconButton>
+            </Grid>
+          </Grid>
+          {isLoading ? (
+            <SplashScreen />
+          ) : orderList.length > 0 ? (
+            <>
+              <ScheduleOrdersTable
                 handleDeleteOrderUI={handleDeleteOrderUI}
                 handleUpdateOrderUI={handleUpdateOrderUI}
                 clientOrders={orderList}
@@ -280,7 +303,9 @@ export default function ScheduledOrderPage() {
                 handleSelectOrder={handleSelectOrder}
                 handleSelectAll={handleSelectAll}
               />
-              <Box
+            </>
+          ) : (
+            <Box
               display="flex"
               flexDirection="column"
               justifyContent="center"
@@ -294,24 +319,7 @@ export default function ScheduledOrderPage() {
                 <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
               </IconButton>
             </Box>
-            </>
-            ) : (
-              <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            mt={2}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              Add schedule order
-            </Typography>
-            <IconButton onClick={() => setIsAddOrderOpen(true)}>
-              <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-            </IconButton>
-          </Box>
-            )
-          }
+          )}
         </ShadowSection>
       </AuthenGuard>
     </Sidebar>
