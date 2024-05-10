@@ -117,8 +117,4 @@ model ScheduleOrders {
   day        String
   items      OrderedItems[]
   user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 68c89280db1da16c2cfb574bc2106c0679ee038a
