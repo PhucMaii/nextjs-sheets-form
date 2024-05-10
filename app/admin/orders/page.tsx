@@ -10,6 +10,7 @@ import {
   Grid,
   Menu,
   MenuItem,
+  Pagination,
   TextField,
   Typography,
   useMediaQuery,
@@ -87,6 +88,8 @@ export interface Order {
   isVoid?: boolean;
 }
 
+const orderPerPage = 10;
+
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -106,6 +109,8 @@ export default function Orders() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [pages, setPages] = useState<number>(0);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
@@ -123,6 +128,12 @@ export default function Orders() {
   useEffect(() => {
     fetchAllClients();
   }, []);
+
+  useEffect(() => {
+    if (baseOrderData.length > 0) {
+      generateOrderData();
+    }
+  }, [baseOrderData]);
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
@@ -142,6 +153,18 @@ export default function Orders() {
   }, [date]);
 
   useEffect(() => {
+    // To avoid it re render new order data in search
+    if (currentPage > 1) {
+      setOrderData(
+        baseOrderData.slice(
+          orderPerPage * currentPage - orderPerPage,
+          orderPerPage * currentPage,
+        ),
+      );
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
     if (totalPosition.current) {
       const currentOffSetHeight = window.innerHeight;
       setVirtuosoHeight(
@@ -159,15 +182,12 @@ export default function Orders() {
         incomingOrder.status === currentStatus &&
         !incomingOrder.isReplacement
       ) {
-        setOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
         setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
       } else if (incomingOrder.isReplacement || incomingOrder.isVoid) {
         const newOrderData = orderData.filter((order: Order) => {
           return order.id !== incomingOrder.id;
         });
-
-        setBaseOrderData([...newOrderData, incomingOrder]);
-        setOrderData([...newOrderData, incomingOrder]);
+        setBaseOrderData([incomingOrder, ...newOrderData]);
       }
     }
   }, [incomingOrder]);
@@ -190,9 +210,12 @@ export default function Orders() {
         }
         return false;
       });
-      setOrderData(newOrderData);
+      generateOrderData(newOrderData);
+      setCurrentPage(1);
     } else {
-      setOrderData(baseOrderData);
+      if (baseOrderData.length > 0) {
+        generateOrderData();
+      }
     }
   }, [debouncedKeywords, baseOrderData]);
 
@@ -287,15 +310,29 @@ export default function Orders() {
         setIsLoading(false);
         return;
       }
-      setOrderData(response.data.data);
+
+      setPages(Math.ceil(response.data.data.length / orderPerPage));
+      // setOrderData(response.data.data);
       setBaseOrderData(response.data.data);
       setIsLoading(false);
+      setCurrentPage(1);
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
       setIsLoading(false);
       return;
     }
   };
+
+  const generateOrderData = (orderList = baseOrderData) => {
+    const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
+    setPages(newNumberOfPages);
+    setOrderData(
+      orderList.slice(
+        orderPerPage * currentPage - orderPerPage,
+        orderPerPage * currentPage,
+      ),
+    );
+  }
 
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = orderData.map((order: Order) => {
@@ -318,7 +355,7 @@ export default function Orders() {
       return order;
     });
 
-    setOrderData(newOrderData);
+    // setOrderData(newOrderData);
     setBaseOrderData(newOrderData);
   };
 
@@ -333,15 +370,6 @@ export default function Orders() {
       }
       return order;
     });
-
-    const newOrderList = orderData.map((order: Order) => {
-      if (order.id === targetOrder.id) {
-        return { ...order, totalPrice: newTotalPrice, items: newItems };
-      }
-      return order;
-    });
-
-    setOrderData(newOrderList);
     setBaseOrderData(newBaseOrderList);
   };
 
@@ -623,7 +651,7 @@ export default function Orders() {
                 ref={totalPosition}
               >
                 <Typography variant="h6">
-                  Total: {orderData.length} orders
+                  Total: {baseOrderData.length} orders
                 </Typography>
               </Box>
             </Grid>
@@ -655,7 +683,7 @@ export default function Orders() {
             ref={totalPosition}
           >
             <Typography variant="h6">
-              Total: {orderData.length} orders
+              Total: {baseOrderData.length} orders
             </Typography>
           </Box>
         )}
@@ -671,26 +699,36 @@ export default function Orders() {
           />
         </Box>
         {orderData.length > 0 ? (
-          <Virtuoso
-            totalCount={orderData.length}
-            style={{ height: virtuosoHeight }}
-            data={orderData}
-            itemContent={(index, order) => {
-              return (
-                <OrderAccordion
-                  key={index}
-                  order={order}
-                  setNotification={setNotification}
-                  updateUI={handleMarkSingleCompletedUI}
-                  updateUIItem={handleUpdateUISingleOrder}
-                  handleUpdateDateUI={handleUpdateDateUI}
-                  handleUpdatePriceUI={handleUpdatePriceUI}
-                  selectedOrders={selectedOrders}
-                  handleSelectOrder={handleSelectOrder}
-                />
-              );
-            }}
-          />
+          <>
+            <Virtuoso
+              totalCount={orderData.length}
+              style={{ height: virtuosoHeight }}
+              data={orderData}
+              itemContent={(index, order) => {
+                return (
+                  <OrderAccordion
+                    key={index}
+                    order={order}
+                    setNotification={setNotification}
+                    updateUI={handleMarkSingleCompletedUI}
+                    updateUIItem={handleUpdateUISingleOrder}
+                    handleUpdateDateUI={handleUpdateDateUI}
+                    handleUpdatePriceUI={handleUpdatePriceUI}
+                    selectedOrders={selectedOrders}
+                    handleSelectOrder={handleSelectOrder}
+                  />
+                );
+              }}
+            />
+            <div style={{ width: '100%' }}>
+              <Pagination
+                count={pages}
+                shape="rounded"
+                size="large"
+                onChange={(e: any, value: number) => setCurrentPage(value)}
+              />
+            </div>
+          </>
         ) : (
           <ErrorComponent errorText="There is no orders" />
         )}
