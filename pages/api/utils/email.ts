@@ -3,6 +3,7 @@ import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
 import { generateCurrentTime } from '@/app/utils/time';
 import { OrderedItems, UserType } from '@/app/utils/type';
+import { OrderedItems as PrismaOrderdItems } from '@prisma/client';
 
 const emailHandler = async (
   email: string,
@@ -27,10 +28,11 @@ export default emailHandler;
 
 export const sendEmail = async (
   user: User | UserType,
-  items: OrderedItems[],
+  items: OrderedItems[] | PrismaOrderdItems[],
   invoiceId: number,
   deliveryDate: string,
   sendToAdmin: boolean,
+  note = '',
 ) => {
   const orderDetails: any = {};
   for (const item of items) {
@@ -44,6 +46,7 @@ export const sendEmail = async (
   const orderTime = generateCurrentTime();
 
   orderDetails['DELIVERY DATE'] = deliveryDate;
+  orderDetails['NOTE'] = note;
   orderDetails.orderTime = orderTime;
 
   const htmlTemplate: string = generateOrderTemplate(
