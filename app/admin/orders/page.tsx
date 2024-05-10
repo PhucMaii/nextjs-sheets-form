@@ -93,8 +93,9 @@ const orderPerPage = 10;
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
+    const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
-  const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
@@ -110,7 +111,6 @@ export default function Orders() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(0);
   const [pages, setPages] = useState<number>(0);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
@@ -154,10 +154,17 @@ export default function Orders() {
   }, [date]);
 
   useEffect(() => {
-    if (currentPage > 0 && !isSearching) {
+    if (!isSearching) {
       generateOrderData();
     }
-  }, [currentPage]);
+  }, [currentPage, isSearching]);
+
+  // Pre set current page to 1 whenever there is search key words
+  useEffect(() => {
+    if (searchKeywords) {
+      setCurrentPage(1);
+    }
+  }, [searchKeywords])
 
   useEffect(() => {
     if (totalPosition.current) {
@@ -194,9 +201,7 @@ export default function Orders() {
   useEffect(() => {
     if (debouncedKeywords) {
       setIsSearching(true);
-      // console.log(baseOrderData, 'in debounce keywords');
       const newOrderData = baseOrderData.filter((order: Order) => {
-        // console.log(order, 'map through base orderData in debounce')
         if (
           order.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
@@ -209,7 +214,6 @@ export default function Orders() {
         return false;
       });
       generateOrderData(newOrderData);
-      setCurrentPage(1);
     } else {
       setIsSearching(false);
       if (baseOrderData.length > 0) {
@@ -311,7 +315,6 @@ export default function Orders() {
       }
 
       setPages(Math.ceil(response.data.data.length / orderPerPage));
-      // setOrderData(response.data.data);
       setBaseOrderData(response.data.data);
       setIsLoading(false);
       setCurrentPage(1);
@@ -325,7 +328,6 @@ export default function Orders() {
   const generateOrderData = (orderList = baseOrderData) => {
     const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
     setPages(newNumberOfPages);
-    console.log({orderList, currentPage, pages} ,'orderList');
     setOrderData(
       orderList.slice(
         (orderPerPage * currentPage) - orderPerPage,
@@ -333,6 +335,8 @@ export default function Orders() {
       ),
     );
   }
+
+  console.log(currentPage, 'current page')
 
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = orderData.map((order: Order) => {
