@@ -129,7 +129,7 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const calculateTotalBill = useCallback((): number => {
+  const calculateTotalBill = useCallback((): string => {
     const totalPrice = orderList.reduce(
       (acc: number, order: ScheduledOrder) => {
         return acc + order.totalPrice;
@@ -137,7 +137,7 @@ export default function ScheduledOrderPage() {
       0,
     );
 
-    return totalPrice;
+    return totalPrice.toFixed(2);
   }, [orderList]);
 
   const calculateTotalClient = useCallback((): number => {
@@ -371,7 +371,7 @@ export default function ScheduledOrderPage() {
             <OverviewCard
               icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
               text="Total Bill"
-              value={calculateTotalBill() as number}
+              value={calculateTotalBill()}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -380,7 +380,6 @@ export default function ScheduledOrderPage() {
                 <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
               }
               text="Total Clients"
-              // helperText={`${numberOfUserPayMonthly().percentage}% of total`}
               value={calculateTotalClient() as number}
             />
           </Grid>

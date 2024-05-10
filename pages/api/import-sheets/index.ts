@@ -1,7 +1,6 @@
 // import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
-import emailHandler from '../utils/email';
-import { generateOrderTemplate } from '@/config/email';
+import { sendEmail } from '../utils/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
@@ -116,57 +115,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Update the order with the totalPrice
-    await prisma.orders.update({
+    const updatedNewOrder = await prisma.orders.update({
       where: {
         id: newOrder.id,
       },
       data: {
         totalPrice,
       },
+      include: {
+        items: true
+      }
     });
-
-    // const auth = new google.auth.GoogleAuth({
-    //   credentials: {
-    //     client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    //     private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    //   },
-    //   scopes: [
-    //     'https://www.googleapis.com/auth/drive',
-    //     'https://www.googleapis.com/auth/drive.file',
-    //     'https://www.googleapis.com/auth/spreadsheets',
-    //   ],
-    // });
-    // const sheets = google.sheets({
-    //   auth,
-    //   version: 'v4',
-    // });
-
-    // const data = [];
-    // // format data to append into client sheet
-    // // make a copy of sheet structure to avoid changed on formatted values affect sheet structure
-    // const formattedValues: any[] = [...sheetStructure];
-    // Object.keys(body).forEach((key) => {
-    //   const keyStructureIndex = sheetStructure.indexOf(key);
-    //   if (keyStructureIndex === -1) {
-    //     return;
-    //   }
-
-    //   let validValue = body[key];
-    //   if (key === 'DELIVERY DATE') {
-    //     formattedValues[keyStructureIndex] = validValue;
-    //     return;
-    //   }
-
-    //   validValue = parseInt(validValue);
-    //   formattedValues[keyStructureIndex] = validValue;
-    // });
-
-    // // Turn all non-value field into 0
-    // for (let i = 1; i < formattedValues.length; i++) {
-    //   if (typeof formattedValues[i] === 'string') {
-    //     formattedValues[i] = 0;
-    //   }
-    // }
 
     await pusherServer.trigger('admin', 'incoming-order', {
       items: itemList,
@@ -189,63 +148,40 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Notify Email for admin
-    const emailSendTo: any = process.env.NODEMAILER_EMAIL;
-    const htmlTemplate: string = generateOrderTemplate(
-      existingUser.clientName,
-      existingUser.clientId,
-      orderDetails,
-      existingUser.contactNumber,
-      existingUser.deliveryAddress,
-      newOrder.id,
-    );
-
-    await emailHandler(
-      emailSendTo,
-      'Order Supreme Sprouts',
-      'Supreme Sprouts LTD',
-      htmlTemplate,
-    );
-
-    if (existingUser.email) {
-      await emailHandler(
-        existingUser.email,
-        'Order Supreme Sprouts',
-        'Supreme Sprouts LTD',
-        htmlTemplate,
-      );
-    }
-
-    // Append to Client Sheet
-    // const appendResponse = await sheets.spreadsheets.values.append({
-    //   spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    //   range: `${existingUser.sheetName}!A1:I1`,
-    //   valueInputOption: 'USER_ENTERED',
-    //   requestBody: {
-    //     values: [formattedValues],
-    //   },
-    // });
-    // const appendData = appendResponse.data.updates;
-    // data.push(appendData);
-
-    // // format data to append into overview sheet
-    // const [date, ...restValues] = formattedValues;
-    // const overviewFormattedData = [
-    //   date,
-    //   newOrder.id,
-    //   existingUser.clientId.toString(),
+    // const emailSendTo: any = process.env.NODEMAILER_EMAIL;
+    // const htmlTemplate: string = generateOrderTemplate(
     //   existingUser.clientName,
-    //   ...restValues,
-    // ];
+    //   existingUser.clientId,
+    //   orderDetails,
+    //   existingUser.contactNumber,
+    //   existingUser.deliveryAddress,
+    //   newOrder.id,
+    // );
 
-    // // Append to Overview Sheet
-    // await sheets.spreadsheets.values.append({
-    //   spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    //   range: `Overview!A1:L1`,
-    //   valueInputOption: 'USER_ENTERED',
-    //   requestBody: {
-    //     values: [overviewFormattedData],
-    //   },
-    // });
+    // await emailHandler(
+    //   emailSendTo,
+    //   'Order Supreme Sprouts',
+    //   'Supreme Sprouts LTD',
+    //   htmlTemplate,
+    // );
+
+    // if (existingUser.email) {
+    //   await emailHandler(
+    //     existingUser.email,
+    //     'Order Supreme Sprouts',
+    //     'Supreme Sprouts LTD',
+    //     htmlTemplate,
+    //   );
+    // }
+    const isSendToAdmin = true;
+    await sendEmail(
+      existingUser,
+      updatedNewOrder.items,
+      newOrder.id,
+      body['DELIVERY DATE'],
+      isSendToAdmin,
+      body['NOTE']
+    );
 
     return res.status(200).json({
       // overviewFormattedData,
