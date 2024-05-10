@@ -5,6 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { checkHasClientOrder } from '../../import-sheets';
 import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
+import { pusherServer } from '@/app/pusher';
 
 interface BodyTypes {
   deliveryDate: string;
@@ -24,7 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         continue;
       }
 
-      const updatedOrder: any = await createOrder(
+      const newOrder: any = await createOrder(
         scheduleOrder.user,
         scheduleOrder.items,
         scheduleOrder.totalPrice,
@@ -34,11 +35,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       await sendEmail(
         scheduleOrder.user,
         scheduleOrder.items,
-        updatedOrder.id,
+        newOrder.id,
         deliveryDate,
         false,
       );
-      updatedOrderList.push(updatedOrder);
+      updatedOrderList.push(newOrder);
+      
+      await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
     }
 
     return res.status(201).json({

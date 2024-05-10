@@ -52,6 +52,8 @@ export default function Sidebar({ children }: PropTypes) {
 
     return () => {
       pusherClient.unsubscribe('admin');
+      pusherClient.unsubscribe('override-order');
+      pusherClient.unsubscribe('void-order');
     };
   }, []);
 

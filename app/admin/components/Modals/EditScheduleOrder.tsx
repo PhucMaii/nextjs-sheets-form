@@ -39,8 +39,6 @@ export default function EditScheduleOrder({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(UpdateOption.NONE);
 
-  console.log(itemList, 'itemList');
-  
   const addNewItem = (e: any) => {
     e.preventDefault();
     e.stopPropagation();

@@ -52,7 +52,6 @@ import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 import moment from 'moment';
 
 interface Category {
@@ -107,7 +106,6 @@ export default function Orders() {
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
-  const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -145,6 +143,8 @@ export default function Orders() {
 
     return () => {
       pusherClient.unsubscribe('admin');
+      pusherClient.unsubscribe('override-order');
+      pusherClient.unsubscribe('void-order');
     };
   }, [date]);
 
@@ -343,11 +343,6 @@ export default function Orders() {
 
     setOrderData(newOrderList);
     setBaseOrderData(newOrderList);
-  };
-
-  const handleUpdatePreOrderUI = (orderList: Order[]) => {
-    setBaseOrderData([...baseOrderData, ...orderList]);
-    setOrderData([...orderData, ...orderList]);
   };
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
@@ -570,16 +565,6 @@ export default function Orders() {
         <NotificationPopup
           notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
-        />
-
-        {/* For pre order */}
-        <EditDeliveryDate
-          open={isPreOrderOpen}
-          onClose={() => setIsPreOrderOpen(false)}
-          isPreOrder
-          setNotification={setNotification}
-          currentDate={date}
-          handleUpdatePreOrderUI={handleUpdatePreOrderUI}
         />
         <div style={{ display: 'none' }}>
           <AllPrint

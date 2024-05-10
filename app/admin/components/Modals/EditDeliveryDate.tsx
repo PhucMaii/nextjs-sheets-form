@@ -1,5 +1,5 @@
-import { Box, Divider, FormControl, Modal, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { Box, Divider, FormControl, LinearProgress, Modal, Typography } from '@mui/material';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import axios from 'axios';
@@ -17,10 +17,10 @@ interface PropTypes extends ModalProps {
   order?: Order;
   setNotification: Dispatch<SetStateAction<Notification>>;
   handleUpdateDateUI?: (orderId: number, updatedDate: string) => void;
-  handleUpdatePreOrderUI?: (orderList: Order[]) => void;
+  // handlePreOrder?: (deliveryDate: string) => void;
   isPreOrder?: boolean;
-  currentDate?: string;
-  scheduleOrderList?: ScheduledOrder[];
+  scheduleOrderList: ScheduledOrder[];
+  progress?: number;
 }
 
 export default function EditDeliveryDate({
@@ -29,10 +29,10 @@ export default function EditDeliveryDate({
   order,
   setNotification,
   handleUpdateDateUI,
-  handleUpdatePreOrderUI,
+  // handlePreOrder,
   isPreOrder,
-  currentDate,
   scheduleOrderList,
+  progress
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
@@ -43,6 +43,12 @@ export default function EditDeliveryDate({
     const deliveryDate = generateRecommendDate();
     return deliveryDate;
   });
+
+  useEffect(() => {
+    if (progress && progress === 100) {
+      onClose();
+    }
+  }, [progress])
 
   const handlePreOrder = async () => {
     setIsLoading(true);
@@ -65,17 +71,12 @@ export default function EditDeliveryDate({
         return;
       }
 
-      if (currentDate === updatedDate && handleUpdatePreOrderUI) {
-        handleUpdatePreOrderUI(response.data.data);
-      }
-
       setIsLoading(false);
       setNotification({
         on: true,
         type: 'success',
         message: response.data.message,
       });
-      onClose();
     } catch (error: any) {
       console.log('Fail to update date: ', error);
       setIsLoading(false);
@@ -133,51 +134,52 @@ export default function EditDeliveryDate({
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <BoxModal display="flex" flexDirection="column" gap={2}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          gap={4}
-        >
-          <Typography variant="h4">
-            {isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}
-          </Typography>
-          <LoadingButtonStyles
-            variant="contained"
-            loadingIndicator="Saving..."
-            loading={isLoading}
-            onClick={() => {
-              if (isPreOrder) {
-                handlePreOrder();
-              } else {
-                handleUpdateDate();
-              }
-            }}
-            color={infoColor}
+      <Modal open={open} onClose={onClose}>
+        <BoxModal display="flex" flexDirection="column" gap={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            gap={4}
           >
-            {isPreOrder ? 'Order' : 'Save'}
-          </LoadingButtonStyles>
-        </Box>
-        <Divider />
-        <Box>
-          <FormControl fullWidth>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Edit Date"
-                value={dayjs(updatedDate)}
-                onChange={(e: any) => handleDateChange(e)}
-                sx={{
-                  width: '100%',
-                  height: '0.1%',
-                  borderRadius: 2,
-                }}
-              />
-            </LocalizationProvider>
-          </FormControl>
-        </Box>
-      </BoxModal>
-    </Modal>
+            <Typography variant="h4">
+              {isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}
+            </Typography>
+            <LoadingButtonStyles
+              loading={isLoading}
+              variant="contained"
+              onClick={() => {
+                if (isPreOrder) {
+                  handlePreOrder();
+                } else {
+                  handleUpdateDate();
+                }
+              }}
+              color={infoColor}
+            >
+              {isPreOrder ? 'Order' : 'Save'}
+            </LoadingButtonStyles>
+          </Box>
+          <Divider />
+          <Box display="flex" flexDirection="column" gap={1}>
+            <FormControl fullWidth>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="Edit Date"
+                  value={dayjs(updatedDate)}
+                  onChange={(e: any) => handleDateChange(e)}
+                  sx={{
+                    width: '100%',
+                    height: '0.1%',
+                    borderRadius: 2,
+                  }}
+                />
+              </LocalizationProvider>
+            </FormControl>
+            {progress !== undefined ? <LinearProgress variant="determinate" value={progress} /> : ''}
+          </Box>
+          
+        </BoxModal>
+      </Modal>
   );
 }

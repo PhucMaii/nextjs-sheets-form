@@ -35,11 +35,16 @@ import ScheduleOrdersTable from '../components/ScheduleOrdersTable';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
- import { errorColor } from '@/app/theme/color';
+import { errorColor } from '@/app/theme/color';
 import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
+import { pusherClient } from '@/app/pusher';
+import { Order } from '../orders/page';
 
 export default function ScheduledOrderPage() {
+  const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
+  const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
+  const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
@@ -48,7 +53,6 @@ export default function ScheduledOrderPage() {
     type: 'info',
     message: '',
   });
-  const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
@@ -57,7 +61,39 @@ export default function ScheduledOrderPage() {
 
   useEffect(() => {
     fetchAllClients();
+    pusherClient.subscribe('admin-schedule-order');
+
+    const handleReceiveOrder = (incomingOrder: Order) => {
+      const sameIdOrder = createdOrders.some((order: Order) => order.id === incomingOrder.id);
+
+      if (!sameIdOrder) {
+        setCreatedOrders((prevOrders) => [...prevOrders, incomingOrder]);
+      }
+    };
+    pusherClient.bind('pre-order', handleReceiveOrder);
+
+    return () => {
+      pusherClient.unsubscribe('admin-schedule-order');
+    };
   }, []);
+
+  useEffect(() => {
+    if (selectedOrders.length > 0) {
+      // Filter out item has same id
+      const filteredOrderLength = createdOrders.reduce((accumulator: any, currentOrder: Order) => {
+        const foundItem = accumulator.find((order: Order) => {
+          return order.id === currentOrder.id;
+        });
+
+        if (!foundItem) {
+          accumulator = accumulator.concat(currentOrder);
+        };
+
+        return accumulator;
+      }, []) 
+      setPreOrderProgress((filteredOrderLength.length / selectedOrders.length) * 100);
+    }
+  }, [createdOrders]);
 
   useEffect(() => {
     fetchOrders();
@@ -309,13 +345,14 @@ export default function ScheduledOrderPage() {
           clientList={clientList}
           setNotification={setNotification}
           createScheduledOrder={createScheduledOrder}
-
         />
         <EditDeliveryDate
           open={isPreOrderOpen}
           onClose={() => setIsPreOrderOpen(false)}
           isPreOrder
           setNotification={setNotification}
+          // handlePreOrder={handlePreOrder}
+          progress={preOrderProgress}
           scheduleOrderList={selectedOrders}
         />
         <NotificationPopup
@@ -372,7 +409,7 @@ export default function ScheduledOrderPage() {
           </Box>
           <Grid container alignItems="center" spacing={2}>
             <Grid item xs={2}>
-              <Button 
+              <Button
                 fullWidth
                 onClick={() => setIsPreOrderOpen(true)}
                 variant="outlined"
@@ -397,7 +434,10 @@ export default function ScheduledOrderPage() {
                 <IconButton onClick={() => setIsAddOrderOpen(true)}>
                   <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
                 </IconButton>
-                <IconButton disabled={selectedOrders.length === 0} onClick={() => deleteSelectedOrders()}>
+                <IconButton
+                  disabled={selectedOrders.length === 0}
+                  onClick={() => deleteSelectedOrders()}
+                >
                   <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
                 </IconButton>
               </Box>
