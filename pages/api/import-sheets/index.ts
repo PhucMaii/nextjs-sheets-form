@@ -82,7 +82,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-
     let totalPrice = 0;
     const itemList: any = [];
     // Loop through each item from request and save it to order

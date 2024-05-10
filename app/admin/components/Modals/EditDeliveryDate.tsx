@@ -19,7 +19,7 @@ interface PropTypes extends ModalProps {
   handleUpdateDateUI?: (orderId: number, updatedDate: string) => void;
   // handlePreOrder?: (deliveryDate: string) => void;
   isPreOrder?: boolean;
-  scheduleOrderList: ScheduledOrder[];
+  scheduleOrderList?: ScheduledOrder[];
   progress?: number;
 }
 
@@ -45,7 +45,7 @@ export default function EditDeliveryDate({
   });
 
   useEffect(() => {
-    if (progress && progress === 100) {
+    if (progress !== undefined && progress === 100) {
       onClose();
     }
   }, [progress])

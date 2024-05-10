@@ -237,10 +237,16 @@ export default function ReportPage() {
       return order.id !== deletedOrder.id;
     });
 
-    // update completed order list
-    if (deletedOrder.status === ORDER_STATUS.COMPLETED) {
+    // update unpaid order list
+    if (
+      deletedOrder.status === ORDER_STATUS.INCOMPLETED ||
+      deletedOrder.status === ORDER_STATUS.DELIVERED
+    ) {
       const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-        return order.status === ORDER_STATUS.COMPLETED;
+        return (
+          order.status === ORDER_STATUS.INCOMPLETED ||
+          order.status === ORDER_STATUS.DELIVERED
+        );
       });
       setUnpaidOrders(newUnpaidOrders);
     }
