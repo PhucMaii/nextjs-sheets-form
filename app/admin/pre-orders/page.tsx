@@ -60,6 +60,15 @@ export default function ScheduledOrderPage() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
+    if (preOrderProgress === 100) {
+      setTimeout(() => {
+        setIsPreOrderOpen(false);
+        setPreOrderProgress(0);
+      }, 1000);
+    }
+  }, [preOrderProgress])
+
+  useEffect(() => {
     fetchAllClients();
     pusherClient.subscribe('admin-schedule-order');
 

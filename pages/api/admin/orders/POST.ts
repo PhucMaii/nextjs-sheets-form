@@ -23,6 +23,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       // Check has user order for today, if yes then skip that client
       const hasClientOrder = await checkHasClientOrder(scheduleOrder.user.id, deliveryDate);
       if (hasClientOrder) {
+        await pusherServer.trigger('admin-schedule-order', 'pre-order', hasClientOrder);
         continue;
       }
 

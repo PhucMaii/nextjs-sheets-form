@@ -1,5 +1,5 @@
 import { Box, Divider, FormControl, LinearProgress, Modal, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import axios from 'axios';
@@ -43,12 +43,6 @@ export default function EditDeliveryDate({
     const deliveryDate = generateRecommendDate();
     return deliveryDate;
   });
-
-  useEffect(() => {
-    if (progress !== undefined && progress === 100) {
-      onClose();
-    }
-  }, [progress])
 
   const handlePreOrder = async () => {
     setIsLoading(true);

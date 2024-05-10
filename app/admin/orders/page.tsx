@@ -336,8 +336,6 @@ export default function Orders() {
     );
   }
 
-  console.log(currentPage, 'current page')
-
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = orderData.map((order: Order) => {
       // If order is at targetOrder, then update
