@@ -196,16 +196,16 @@ const OrderAccordion = ({
                 onClick={(e: any) => handleSelectOrder(e, order)}
               />
             </Grid>
-            {order.isReplacement && (
-              <Grid item xs={11.5}>
-                <StatusText text={`Replacement by client `} type={'error'} />
-              </Grid>
-            )}
-            {order.isVoid && (
-              <Grid item xs={12}>
-                <StatusText text={`Void by client `} type={'error'} />
-              </Grid>
-            )}
+            <Grid item xs={11.5}>
+              <Box display="flex" alignItems="center" gap={1}>
+                {order.isReplacement && (
+                  <StatusText text={`Replacement by client `} type={'error'} />
+                )}
+                {order.isVoid && (
+                  <StatusText text={`Void by client `} type={'error'} />
+                )}
+              </Box>
+            </Grid>
             <Grid item xs={12}>
               <Box
                 display="flex"
