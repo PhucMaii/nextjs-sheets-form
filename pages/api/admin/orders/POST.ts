@@ -16,7 +16,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { deliveryDate, scheduleOrderList } = req.body as BodyTypes;
 
-    const isSendToAdmin = true;
+    const isSendToAdmin = false;
     const updatedOrderList: any = [];
 
     for (const scheduleOrder of scheduleOrderList) {
