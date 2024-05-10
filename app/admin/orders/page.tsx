@@ -100,8 +100,9 @@ export default function Orders() {
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.INCOMPLETED,
   );
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -153,14 +154,8 @@ export default function Orders() {
   }, [date]);
 
   useEffect(() => {
-    // To avoid it re render new order data in search
-    if (currentPage > 1) {
-      setOrderData(
-        baseOrderData.slice(
-          orderPerPage * currentPage - orderPerPage,
-          orderPerPage * currentPage,
-        ),
-      );
+    if (currentPage > 0 && !isSearching) {
+      generateOrderData();
     }
   }, [currentPage]);
 
@@ -198,7 +193,10 @@ export default function Orders() {
 
   useEffect(() => {
     if (debouncedKeywords) {
+      setIsSearching(true);
+      // console.log(baseOrderData, 'in debounce keywords');
       const newOrderData = baseOrderData.filter((order: Order) => {
+        // console.log(order, 'map through base orderData in debounce')
         if (
           order.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
@@ -213,6 +211,7 @@ export default function Orders() {
       generateOrderData(newOrderData);
       setCurrentPage(1);
     } else {
+      setIsSearching(false);
       if (baseOrderData.length > 0) {
         generateOrderData();
       }
@@ -326,9 +325,10 @@ export default function Orders() {
   const generateOrderData = (orderList = baseOrderData) => {
     const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
     setPages(newNumberOfPages);
+    console.log({orderList, currentPage, pages} ,'orderList');
     setOrderData(
       orderList.slice(
-        orderPerPage * currentPage - orderPerPage,
+        (orderPerPage * currentPage) - orderPerPage,
         orderPerPage * currentPage,
       ),
     );
