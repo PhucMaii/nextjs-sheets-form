@@ -133,6 +133,8 @@ export default function Orders() {
   useEffect(() => {
     if (baseOrderData.length > 0) {
       generateOrderData();
+    } else {
+      setOrderData([]);
     }
   }, [baseOrderData]);
 

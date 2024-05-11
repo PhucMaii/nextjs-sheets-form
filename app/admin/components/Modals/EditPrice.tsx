@@ -137,7 +137,7 @@ export default function EditPrice({
       setNotification({
         on: true,
         type: 'error',
-        message: 'Fail to update price: ' + error,
+        message: 'Fail to update price: ' + error.reponse.data.error,
       });
       setIsLoading(false);
     }
