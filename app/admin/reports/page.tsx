@@ -55,6 +55,7 @@ import { limitOrderHour } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
+import { pusherClient } from '@/app/pusher';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -75,6 +76,7 @@ export default function ReportPage() {
     const formattedDate = YYYYMMDDFormat(dateObj);
     return formattedDate;
   });
+  const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
@@ -91,7 +93,37 @@ export default function ReportPage() {
 
   useEffect(() => {
     fetchAllClients();
+
+    pusherClient.subscribe('admin-delete-order');
+
+    pusherClient.bind('delete-order', (deletedOrder: Order) => {
+      setNotification({
+        on: true,
+        type: 'success',
+        message: `Order ${deletedOrder.id} deleted successfully`
+      })
+      setDeletedOrder(deletedOrder);
+    });
+
+    return () => {
+      pusherClient.unsubscribe('admin-delete-order');
+    };
   }, []);
+
+  useEffect(() => {
+    if (deletedOrder) {
+      const newClientOrders = clientOrders.filter((order: Order) => {
+        return order.id !== deletedOrder.id;
+      });
+
+      const newBaseClientOrders = clientOrders.filter((order: Order) => {
+        return order.id !== deletedOrder.id;
+      });
+
+      setClientOrders(newClientOrders);
+      setBaseClientOrders(newBaseClientOrders);
+    }
+  }, [deletedOrder]);
 
   useEffect(() => {
     if (clientOrders.length > 0) {
@@ -319,7 +351,6 @@ export default function ReportPage() {
       const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
         data: { orderList: selectedOrders },
       });
-      await fetchClientOrders();
 
       setNotification({
         on: true,

@@ -1,4 +1,5 @@
 import { Order } from '@/app/admin/orders/page';
+import { pusherServer } from '@/app/pusher';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -30,11 +31,13 @@ export default async function DELETE(
           });
         }
 
-        await prisma.orders.delete({
+        const deletedOrder = await prisma.orders.delete({
           where: {
             id: Number(order.id),
           },
         });
+
+        await pusherServer.trigger('admin-delete-order', 'delete-order', deletedOrder);
       }
     } else if (orderId) {
       const existingOrder = await prisma.orders.findUnique({
