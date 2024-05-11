@@ -39,6 +39,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userCategoryId,
     } = updatedData as BodyType;
 
+    // Check before delete items
+    if (updateOption === UpdateOption.CREATE) {
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          name: categoryName,
+        },
+      });
+
+      if (existingCategory) {
+        return res.status(401).json({
+          error: 'Category Name Existed Already',
+        });
+      }
+    }
+
     // Track order items
     let orderedItemList = await prisma.orderedItems.findMany({
       where: {
@@ -133,18 +148,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Second case: if user want to create new category
     if (updateOption === UpdateOption.CREATE) {
-      const existingCategory = await prisma.category.findUnique({
-        where: {
-          name: categoryName,
-        },
-      });
-
-      if (existingCategory) {
-        return res.status(500).json({
-          error: 'Category Name Existed Already',
-        });
-      }
-
       const newCategory = await prisma.category.create({
         data: {
           name: categoryName ? categoryName : '',
@@ -158,7 +161,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // create new items
       const newItems = await prisma.item.createMany({
-        data: [...formattedUpdatedItems],
+        data: formattedUpdatedItems,
       });
 
       // assign client to new categoryId
