@@ -42,6 +42,7 @@ export default function OverrideOrder({
         deliveryDate,
         note: currentNote,
         items: [...correctedIdItems],
+        orderId: lastOrder.id
       });
 
       if (response.data.error) {

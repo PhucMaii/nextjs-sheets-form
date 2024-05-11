@@ -39,7 +39,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userCategoryId,
     } = updatedData as BodyType;
 
-    // Check before delete items
+    // Bad cases
     if (updateOption === UpdateOption.CREATE) {
       const existingCategory = await prisma.category.findUnique({
         where: {
@@ -72,7 +72,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         if (!existingItem) {
           return res.status(404).json({
-            error: 'Item Not Found',
+            error: `Item ${item.name} with price of ${item.price} Not Found`,
           });
         }
 

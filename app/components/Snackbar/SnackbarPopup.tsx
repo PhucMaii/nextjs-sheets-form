@@ -40,7 +40,7 @@ export default function SnackbarPopup(props: PropTypes) {
 
   return (
     <Transition.Root
-      className="fixed top-0 right-0 mx-auto my-8 w-full space-y-4"
+      className="fixed top-0 right-0 mx-auto my-8 w-full space-y-4 z-50"
       show={props.open}
     >
       <FadeIn delay="delay-[0ms]">
