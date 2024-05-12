@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
+import React, { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react';
 import { BoxModal } from './styled';
 import { ModalProps } from './type';
 import axios from 'axios';
@@ -43,7 +43,7 @@ export default function EditPrice({
   handleUpdatePriceUI,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [itemList, setItemList] = useState<OrderedItems[]>(items);
+  const [itemList, setItemList] = useState<OrderedItems[]>([]);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );
@@ -54,6 +54,13 @@ export default function EditPrice({
     quantity: 0,
     totalPrice: 0,
   });
+
+  useEffect(() => {
+    if (items) {
+      setItemList(items);
+    } 
+  }, [items])
+
 
   const addNewItem = () => {
     const newItemName = newItem.name.toUpperCase();

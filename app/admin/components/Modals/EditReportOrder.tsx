@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
+import React, { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react';
 import { BoxModal } from './styled';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -42,7 +42,7 @@ export default function EditReportOrder({
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [itemList, setItemList] = useState<Item[]>([...order.items]);
+  const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
   const [newItem, setNewItem] = useState<Item>({
     name: '',
@@ -55,6 +55,12 @@ export default function EditReportOrder({
     UpdateOption.NONE,
   );
   const [status, setStatus] = useState<ORDER_STATUS>(order.status);
+
+  useEffect(() => {
+    if (order.items) {
+      setItemList(order.items);
+    }
+  }, [order.items])
 
   const addNewItem = () => {
     const newItemName = newItem.name.toUpperCase();
