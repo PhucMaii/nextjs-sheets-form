@@ -11,6 +11,8 @@ import {
   Menu,
   MenuItem,
   Pagination,
+  Tab,
+  Tabs,
   TextField,
   Typography,
   useMediaQuery,
@@ -54,6 +56,7 @@ import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import moment from 'moment';
+import { statusTabs } from '@/app/lib/constant';
 
 interface Category {
   id: number;
@@ -93,7 +96,7 @@ const orderPerPage = 10;
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
-    const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
+  const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [date, setDate] = useState(() => generateRecommendDate());
@@ -166,7 +169,7 @@ export default function Orders() {
     if (searchKeywords) {
       setCurrentPage(1);
     }
-  }, [searchKeywords])
+  }, [searchKeywords]);
 
   useEffect(() => {
     if (totalPosition.current) {
@@ -332,11 +335,11 @@ export default function Orders() {
     setPages(newNumberOfPages);
     setOrderData(
       orderList.slice(
-        (orderPerPage * currentPage) - orderPerPage,
+        orderPerPage * currentPage - orderPerPage,
         orderPerPage * currentPage,
       ),
     );
-  }
+  };
 
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = orderData.map((order: Order) => {
@@ -642,7 +645,7 @@ export default function Orders() {
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          {mdDown && (
+          {/* {mdDown && (
             <Grid item xs={6}>
               <Box
                 sx={{
@@ -659,7 +662,7 @@ export default function Orders() {
                 </Typography>
               </Box>
             </Grid>
-          )}
+          )} */}
           <Grid item xs={2} md={1} textAlign="right">
             <LoadingButton
               disabled={orderData.length === baseOrderData.length}
@@ -675,7 +678,7 @@ export default function Orders() {
             {actionDropdown}
           </Grid>
         </Grid>
-        {!mdDown && (
+        {/* {!mdDown && (
           <Box
             sx={{
               backgroundColor: blueGrey[800],
@@ -690,7 +693,28 @@ export default function Orders() {
               Total: {baseOrderData.length} orders
             </Typography>
           </Box>
-        )}
+        )} */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            aria-label="basic tabs"
+            // value={tabIndex}
+            // onChange={(e, newValue) => setTabIndex(newValue)}
+            variant="fullWidth"
+          >
+            {statusTabs &&
+              statusTabs.map((statusTab: any, index: number) => {
+                return (
+                  <Tab
+                    key={index}
+                    id={`simple-tab-${index}`}
+                    label={statusTab.name}
+                    aria-controls={`tabpanel-${index}`}
+                    value={index}
+                  />
+                );
+              })}
+          </Tabs>
+        </Box>
         <Box>
           <FormControlLabel
             control={

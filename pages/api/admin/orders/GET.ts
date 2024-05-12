@@ -7,8 +7,6 @@ interface RequestQuery {
   date?: string;
   startDate?: string;
   endDate?: string;
-  page?: number;
-  pageSize?: number;
   status?: ORDER_STATUS;
 }
 
@@ -20,14 +18,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       date,
       startDate,
       endDate,
-      // page = 1,
-      // pageSize = 100,
-      status = ORDER_STATUS.INCOMPLETED,
+      status,
     } = req.query as RequestQuery;
 
     // const skip = (page - 1) * pageSize;
+    const fetchCondition: any = {};
 
-    const fetchCondition: any = { status };
+    if (status) {
+      fetchCondition.status = status;
+    }
 
     if (date) {
       fetchCondition.deliveryDate = date;
@@ -44,8 +43,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: 'desc', // If updateTime is the same, sort by id in ascending order
         },
       ],
-      // skip,
-      // take: pageSize,
     });
 
     if (!orders || orders.length === 0) {

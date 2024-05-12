@@ -8,6 +8,10 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
 import { ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import PendingIcon from '@mui/icons-material/Pending';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import BlockIcon from '@mui/icons-material/Block';
 
 export const days = [
   'Sunday',
@@ -66,6 +70,35 @@ export const clientTabs = [
     path: '/account',
   },
 ];
+
+export const statusTabs = [
+  {
+    name: 'All',
+    icon: ReceiptLongIcon,
+    color: COLOR_TYPE.DEFAULT,
+  },
+  {
+    name: 'Incompleted',
+    icon: PendingIcon,
+    color: COLOR_TYPE.WARNING,
+  },
+  {
+    name: 'Delivered',
+    icon: LocalShippingIcon,
+    color: COLOR_TYPE.INFO,
+  },  
+  {
+    name: 'Completed',
+    icon: DoneAllIcon,
+    color: COLOR_TYPE.SUCCESS,
+  },
+  {
+    name: 'Void',
+    icon: BlockIcon,
+    color: COLOR_TYPE.ERROR,
+  },
+
+]
 
 export const orderTypes = [
   { text: ORDER_TYPE.FIXED, type: COLOR_TYPE.SUCCESS },
