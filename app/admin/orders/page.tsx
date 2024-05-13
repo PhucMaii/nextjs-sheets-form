@@ -674,6 +674,9 @@ export default function Orders() {
           <Grid item xs={4} md={3}>
             {actionDropdown}
           </Grid>
+          <Grid item xs={12}>
+            <Typography variant="subtitle1">Track search keywords: {debouncedKeywords}</Typography>
+          </Grid>
         </Grid>
         {!mdDown && (
           <Box
