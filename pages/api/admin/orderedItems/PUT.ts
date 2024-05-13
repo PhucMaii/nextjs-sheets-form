@@ -88,7 +88,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Pop the item off the base list in order to track the item
         const newList = orderedItemList.filter((item: OrderedItems) => {
-          return item.id !== updatedItem.id;
+          return item.name !== updatedItem.name;
         });
         orderedItemList = newList;
       } else {
@@ -112,6 +112,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               quantity: item.quantity,
             },
           });
+
+          // Pop the item off the base list in order to track the item
+          const newList = orderedItemList.filter((item: OrderedItems) => {
+            return item.id !== foundItem.id;
+          });
+          orderedItemList = newList;
         } else {
           // if not, create it in the same order id
           await prisma.orderedItems.create({

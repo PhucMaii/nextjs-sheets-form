@@ -16,8 +16,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    console.log();
-
     return res.status(200).json({
       data: clientItems,
       message: 'Fetch Items For Specific Client Successfully',
