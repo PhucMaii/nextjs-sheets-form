@@ -196,7 +196,7 @@ const OrderAccordion = ({
                 onClick={(e: any) => handleSelectOrder(e, order)}
               />
             </Grid>
-            <Grid item xs={11.5}>
+            <Grid item xs={12} md={11.5}>
               <Box display="flex" alignItems="center" gap={1}>
                 {order.isReplacement && (
                   <StatusText text={`Replacement by client `} type={'error'} />

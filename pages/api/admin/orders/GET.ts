@@ -24,7 +24,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // const skip = (page - 1) * pageSize;
     const fetchCondition: any = {};
 
-    if (status) {
+    if (status && status !== ORDER_STATUS.NONE) {
       fetchCondition.status = status;
     }
 

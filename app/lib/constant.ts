@@ -6,12 +6,13 @@ import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
-import { ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
+import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import PendingIcon from '@mui/icons-material/Pending';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import BlockIcon from '@mui/icons-material/Block';
+import { errorColor, infoColor, successColor, warningColor } from '../theme/color';
 
 export const days = [
   'Sunday',
@@ -73,29 +74,34 @@ export const clientTabs = [
 
 export const statusTabs = [
   {
-    name: 'All',
+    color: '',
     icon: ReceiptLongIcon,
-    color: COLOR_TYPE.DEFAULT,
+    name: 'All',
+    value: ORDER_STATUS.NONE
   },
   {
-    name: 'Incompleted',
+    color: warningColor,
     icon: PendingIcon,
-    color: COLOR_TYPE.WARNING,
+    name: 'Incompleted',
+    value: ORDER_STATUS.INCOMPLETED
   },
   {
-    name: 'Delivered',
+    color: infoColor,
     icon: LocalShippingIcon,
-    color: COLOR_TYPE.INFO,
+    name: 'Delivered',
+    value: ORDER_STATUS.DELIVERED
   },  
   {
-    name: 'Completed',
+    color: successColor,
     icon: DoneAllIcon,
-    color: COLOR_TYPE.SUCCESS,
+    name: 'Completed',
+    value: ORDER_STATUS.COMPLETED
   },
   {
-    name: 'Void',
+    color: errorColor,
     icon: BlockIcon,
-    color: COLOR_TYPE.ERROR,
+    name: 'Void',
+    value: ORDER_STATUS.VOID
   },
 
 ]

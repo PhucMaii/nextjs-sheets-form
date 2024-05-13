@@ -455,11 +455,11 @@ export default function ClientsPage() {
           </Grid>
         </Grid>
         <ShadowSection>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={1.5}>
+          <Grid container spacing={1}>
+            <Grid item xs={12} md={2.5}>
               {generalUpdate}
             </Grid>
-            <Grid item xs={11} md={8}>
+            <Grid item xs={11} md={9}>
               <TextField
                 fullWidth
                 placeholder="Search by client id or client name"
@@ -468,7 +468,7 @@ export default function ClientsPage() {
                 onChange={(e) => setSearchKeywords(e.target.value)}
               />
             </Grid>
-            <Grid item xs={1} textAlign="center">
+            <Grid item xs={1} md={0.5} textAlign="center">
               <IconButton
                 sx={{ width: 50, height: 40 }}
                 onClick={() => setIsAddClientOpen(true)}

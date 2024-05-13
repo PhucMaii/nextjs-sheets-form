@@ -15,7 +15,6 @@ import {
   Tabs,
   TextField,
   Typography,
-  useMediaQuery,
 } from '@mui/material';
 import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
@@ -24,7 +23,6 @@ import { useReactToPrint } from 'react-to-print';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { Notification, UserType } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
-import { blueGrey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -33,16 +31,11 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PrintIcon from '@mui/icons-material/Print';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DoneIcon from '@mui/icons-material/Done';
-import PendingIcon from '@mui/icons-material/Pending';
-import BlockIcon from '@mui/icons-material/Block';
 // import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { DropdownItemContainer } from './styled';
 import {
-  errorColor,
   infoColor,
   successColor,
-  warningColor,
 } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
 import useDebounce from '@/hooks/useDebounce';
@@ -54,7 +47,6 @@ import ErrorComponent from '../components/ErrorComponent';
 import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import moment from 'moment';
 import { statusTabs } from '@/app/lib/constant';
 
@@ -118,21 +110,19 @@ export default function Orders() {
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+  const [tabIndex, setTabIndex] = useState<number>(0);
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   useEffect(() => {
+    fetchAllClients();
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
   }, []);
 
-  useEffect(() => {
-    fetchAllClients();
-  }, []);
-
+  // Whenever base order data change, update the display order data
   useEffect(() => {
     if (baseOrderData.length > 0) {
       generateOrderData();
@@ -158,6 +148,7 @@ export default function Orders() {
     };
   }, [date]);
 
+  // whenever current page change and not in searching mode, then update the display data
   useEffect(() => {
     if (!isSearching) {
       generateOrderData();
@@ -170,6 +161,10 @@ export default function Orders() {
       setCurrentPage(1);
     }
   }, [searchKeywords]);
+
+  useEffect(() => {
+    setCurrentStatus(statusTabs[tabIndex].value);
+  }, [tabIndex])
 
   useEffect(() => {
     if (totalPosition.current) {
@@ -520,84 +515,13 @@ export default function Orders() {
             <Typography>Mark all as completed</Typography>
           </DropdownItemContainer>
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentStatus(ORDER_STATUS.COMPLETED);
-            handleCloseAnchor();
-          }}
-        >
-          <DropdownItemContainer
-            display="flex"
-            gap={2}
-            isSelected={currentStatus === ORDER_STATUS.COMPLETED}
-          >
-            <DoneIcon sx={{ color: successColor }} />
-            <Typography>Filter: Completed Orders</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentStatus(ORDER_STATUS.DELIVERED);
-            handleCloseAnchor();
-          }}
-        >
-          <DropdownItemContainer
-            display="flex"
-            gap={2}
-            isSelected={currentStatus === ORDER_STATUS.DELIVERED}
-          >
-            <LocalShippingIcon sx={{ color: infoColor }} />
-            <Typography>Filter: Delivered Orders</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentStatus(ORDER_STATUS.INCOMPLETED);
-            handleCloseAnchor();
-          }}
-        >
-          <DropdownItemContainer
-            display="flex"
-            gap={2}
-            isSelected={currentStatus === ORDER_STATUS.INCOMPLETED}
-          >
-            <PendingIcon sx={{ color: warningColor }} />
-            <Typography>Filter: Incompleted Orders</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCurrentStatus(ORDER_STATUS.VOID);
-            handleCloseAnchor();
-          }}
-        >
-          <DropdownItemContainer
-            display="flex"
-            gap={2}
-            isSelected={currentStatus === ORDER_STATUS.VOID}
-          >
-            <BlockIcon sx={{ color: errorColor }} />
-            <Typography>Filter: Void Orders</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
       </Menu>
     </Box>
   );
 
-  if (isLoading) {
-    return (
-      <Sidebar>
-        <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-          <LoadingComponent color="blue" />
-        </div>
-      </Sidebar>
-    );
-  }
-
-  return (
-    <Sidebar>
-      <AuthenGuard>
-        <NotificationPopup
+  const constantComponent = (
+    <>
+      <NotificationPopup
           notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
         />
@@ -645,24 +569,6 @@ export default function Orders() {
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          {/* {mdDown && (
-            <Grid item xs={6}>
-              <Box
-                sx={{
-                  backgroundColor: blueGrey[800],
-                  color: 'white',
-                  width: 'fit-content',
-                  padding: 1,
-                  borderRadius: 2,
-                }}
-                ref={totalPosition}
-              >
-                <Typography variant="h6">
-                  Total: {baseOrderData.length} orders
-                </Typography>
-              </Box>
-            </Grid>
-          )} */}
           <Grid item xs={2} md={1} textAlign="right">
             <LoadingButton
               disabled={orderData.length === baseOrderData.length}
@@ -678,38 +584,27 @@ export default function Orders() {
             {actionDropdown}
           </Grid>
         </Grid>
-        {/* {!mdDown && (
-          <Box
-            sx={{
-              backgroundColor: blueGrey[800],
-              color: 'white',
-              width: 'fit-content',
-              padding: 1,
-              borderRadius: 2,
-            }}
-            ref={totalPosition}
-          >
-            <Typography variant="h6">
-              Total: {baseOrderData.length} orders
-            </Typography>
-          </Box>
-        )} */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
             aria-label="basic tabs"
-            // value={tabIndex}
-            // onChange={(e, newValue) => setTabIndex(newValue)}
+            value={tabIndex}
+            onChange={(e, newValue) => setTabIndex(newValue)}
             variant="fullWidth"
+            sx={{width: '100%'}}
           >
             {statusTabs &&
               statusTabs.map((statusTab: any, index: number) => {
                 return (
                   <Tab
                     key={index}
+                    icon={<statusTab.icon />}
                     id={`simple-tab-${index}`}
-                    label={statusTab.name}
+                    label={`${statusTab.name} ${tabIndex === index ? `(${isLoading ? 0 : baseOrderData.length})` : ''} `}
                     aria-controls={`tabpanel-${index}`}
                     value={index}
+                    sx={{ 
+                      "&.Mui-selected": { color: statusTab.color},
+                    }}
                   />
                 );
               })}
@@ -726,6 +621,34 @@ export default function Orders() {
             label="Select All"
           />
         </Box>
+    </>
+  )
+
+  // if (isLoading) {
+  //   return (
+  //     <Sidebar>
+  //       {constantComponent}
+  //       <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+  //         <LoadingComponent color="blue" />
+  //       </div>
+  //     </Sidebar>
+  //   );
+  // }
+
+  return (
+    <Sidebar>
+      <AuthenGuard>
+        {
+          isLoading ? (
+            <>
+            {constantComponent}
+            <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+              <LoadingComponent color="blue" />
+            </div>
+          </>
+          ) : (
+            <>
+       {constantComponent}
         {orderData.length > 0 ? (
           <>
             <Virtuoso
@@ -760,6 +683,9 @@ export default function Orders() {
         ) : (
           <ErrorComponent errorText="There is no orders" />
         )}
+            </>
+          )
+        }
       </AuthenGuard>
     </Sidebar>
   );
