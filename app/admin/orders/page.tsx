@@ -188,7 +188,7 @@ export default function Orders() {
       ) {
         setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
       } else if (incomingOrder.isReplacement || incomingOrder.isVoid) {
-        const newOrderData = orderData.filter((order: Order) => {
+        const newOrderData = baseOrderData.filter((order: Order) => {
           return order.id !== incomingOrder.id;
         });
         setBaseOrderData([incomingOrder, ...newOrderData]);
