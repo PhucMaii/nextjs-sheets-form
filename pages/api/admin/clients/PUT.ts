@@ -76,8 +76,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           id: userId,
         },
         data: updateFields,
+        include: {
+          category: true,
+          preference: true
+        }
       });
-
       if (!orderType && !paymentType) {
         return res.status(200).json({
           data: updatedUser,

@@ -186,7 +186,7 @@ export default function Orders() {
       ) {
         setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
       } else if (incomingOrder.isReplacement || incomingOrder.isVoid) {
-        const newOrderData = orderData.filter((order: Order) => {
+        const newOrderData = baseOrderData.filter((order: Order) => {
           return order.id !== incomingOrder.id;
         });
         setBaseOrderData([incomingOrder, ...newOrderData]);
@@ -582,6 +582,9 @@ export default function Orders() {
           </Grid>
           <Grid item xs={4} md={3}>
             {actionDropdown}
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="subtitle1">Track search keywords: {debouncedKeywords}</Typography>
           </Grid>
         </Grid>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
