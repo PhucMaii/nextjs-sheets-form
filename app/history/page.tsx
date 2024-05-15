@@ -4,15 +4,14 @@ import AuthenGuard, { SplashScreen } from '../HOC/AuthenGuard';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
-  Button,
   Grid,
+  IconButton,
   Menu,
   MenuItem,
   TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -20,6 +19,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import SelectDateRange from '../admin/components/SelectDateRange';
 import { generateMonthRange } from '../utils/time';
 import { Order } from '../admin/orders/page';
+import TuneIcon from '@mui/icons-material/Tune';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { Notification } from '../utils/type';
@@ -148,17 +148,11 @@ export default function HistoryPage() {
       gap={2}
       width="100%"
     >
-      <Button
-        aria-controls={openDropdown ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={openDropdown ? 'true' : undefined}
+      <IconButton
         onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-        endIcon={<ArrowDownwardIcon />}
-        variant="outlined"
-        fullWidth
       >
-        Filter
-      </Button>
+        <TuneIcon />
+      </IconButton>
       <Menu
         id="basic-menu"
         anchorEl={actionButtonAnchor}
@@ -247,13 +241,13 @@ export default function HistoryPage() {
     </Box>
   );
 
-  if (isFetching) {
-    return (
-      <Sidebar>
-        <SplashScreen />
-      </Sidebar>
-    );
-  }
+  // if (isFetching) {
+  //   return (
+  //     <Sidebar>
+  //       <SplashScreen />
+  //     </Sidebar>
+  //   );
+  // }
 
   return (
     <Sidebar>
@@ -278,7 +272,7 @@ export default function HistoryPage() {
               setDateRange={setDateRange}
             />
           </Grid>
-          <Grid item xs={12} md={10}>
+          <Grid item xs={11}>
             <TextField
               fullWidth
               variant="filled"
@@ -287,7 +281,7 @@ export default function HistoryPage() {
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} md={2} textAlign="right">
+          <Grid item xs={1} textAlign="right">
             {filterDropdown}
           </Grid>
           <Grid item xs={12} ref={totalPositionRef}>
@@ -306,7 +300,7 @@ export default function HistoryPage() {
             </Box>
           </Grid>
           <Grid item xs={12}>
-            {clientOrders.length > 0 && (
+            {isFetching ? <SplashScreen /> : clientOrders.length > 0 && (
               <Virtuoso
                 totalCount={clientOrders.length}
                 style={{ height: virtuosoHeight }}
