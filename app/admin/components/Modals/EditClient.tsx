@@ -20,7 +20,7 @@ import AutoCompleteAddress from '../AutoCompleteAddress';
 interface PropTypes {
   client: UserType;
   categories: Category[];
-  handleUpdateClient: (userId: number, updatedData: any) => void;
+  handleUpdateClient: (userId: number, updatedData: any) => Promise<void>;
 }
 
 export default function EditClient({
@@ -33,6 +33,7 @@ export default function EditClient({
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [updatedClient, setUpdatedClient] = useState<UserType>(client);
+  const [newPassword, setNewPassword] = useState<string>('');
 
   const handleOnChangeClient = (key: string, value: any) => {
     if (key === 'category') {
@@ -43,6 +44,28 @@ export default function EditClient({
       });
     } else {
       setUpdatedClient({ ...updatedClient, [key]: value });
+    }
+  };
+
+  const updateClient = async () => {
+    try {
+      const submittedData: any = {
+        clientId: updatedClient.clientId,
+        clientName: updatedClient.clientName,
+        deliveryAddress: deliveryAddress.description,
+        contactNumber: updatedClient.contactNumber,
+        categoryId: updatedClient.categoryId,
+      };
+
+      if (newPassword.trim() !== '') {
+        submittedData.password = newPassword;
+      };
+
+      console.log(submittedData, 'submitted data');
+
+      await handleUpdateClient(client.id, submittedData);
+    } catch (error: any) {
+      console.log('Fail to update client', error);
     }
   };
 
@@ -67,21 +90,13 @@ export default function EditClient({
             <LoadingButtonStyles
               variant="contained"
               color={infoColor}
-              onClick={() =>
-                handleUpdateClient(client.id, {
-                  clientId: updatedClient.clientId,
-                  clientName: updatedClient.clientName,
-                  deliveryAddress: deliveryAddress.description,
-                  contactNumber: updatedClient.contactNumber,
-                  categoryId: updatedClient.categoryId,
-                })
-              }
+              onClick={updateClient}
             >
               SAVE
             </LoadingButtonStyles>
           </Box>
           <Divider />
-          <Grid container mt={2} spacing={2}>
+          <Grid container mt={2} spacing={2} alignItems="center">
             <Grid item xs={12} md={6}>
               <Typography variant="h6">Client Id:</Typography>
             </Grid>
@@ -104,6 +119,16 @@ export default function EditClient({
                 onChange={(e) =>
                   handleOnChangeClient('clientName', e.target.value)
                 }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Password:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
               />
             </Grid>
             <Grid item xs={12} md={6}>

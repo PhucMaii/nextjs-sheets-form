@@ -7,6 +7,7 @@ import {
   User,
   UserPreference,
 } from '@prisma/client';
+import { hash } from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {
@@ -18,6 +19,7 @@ interface BodyTypes {
   orderType?: ORDER_TYPE;
   paymentType?: PAYMENT_TYPE;
   categoryId?: number;
+  password?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -32,6 +34,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryId,
       orderType,
       paymentType,
+      password,
     }: BodyTypes = req.body;
 
     const existingUser = await prisma.user.findUnique({
@@ -63,7 +66,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // If user don't input any updated data
-    if (Object.keys(updateFields).length === 0 && !orderType && !paymentType) {
+    if (Object.keys(updateFields).length === 0 && !orderType && !paymentType && !password) {
       return res.status(404).json({
         error: 'No updated data provided',
       });
@@ -81,7 +84,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           preference: true
         }
       });
-      if (!orderType && !paymentType) {
+      if (!orderType && !paymentType && !password) {
         return res.status(200).json({
           data: updatedUser,
           message: 'User Updated Successfully',
@@ -125,6 +128,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: updatePrefFields,
       });
+    }
+
+    if (password) {
+      const newPassword = await hash(password, 12);
+      await prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          password: newPassword
+        }
+      })
     }
 
     const returnData = await prisma.user.findUnique({
