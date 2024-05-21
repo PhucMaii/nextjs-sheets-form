@@ -18,7 +18,7 @@ model Driver {
 model User {
   id               Int     @id @default(autoincrement())
   categoryId       Int
-  subCategoryId     Int
+  subCategoryId     Int?
   userPreferenceId Int? // will change back to force user to have it
   clientName       String  @db.VarChar(255)
   clientId         String  @unique @db.VarChar(255)
@@ -30,7 +30,7 @@ model User {
   role             String  @db.VarChar(255)
 
   category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory       SubCategory         @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategory       SubCategory[]
   preference     UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders         Orders[]
   scheduleOrders ScheduleOrders[]
@@ -56,10 +56,10 @@ model Item {
   id         Int      @id @default(autoincrement())
   name       String   @db.VarChar(255)
   categoryId Int
-  subCategoryId Int
+  subCategoryId Int?
   price      Float
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
 }

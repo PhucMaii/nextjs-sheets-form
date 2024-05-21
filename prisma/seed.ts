@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { generateUsers } from './userData';
-import { hash } from 'bcrypt';
+// import { generateUsers } from './userData';
+// import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
 // import { items } from './itemData';
 // import { inputs } from './inputFieldData';
@@ -8,36 +8,36 @@ import { hash } from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  const users = await generateUsers();
+  // const users = await generateUsers();
   // const adminPassword = await hash('admin123', 12);
 
-  await prisma.user.createMany({
-    data: [
-      ...users,
-      // {
-      //   clientId: '1',
-      //   clientName: 'Admin 1',
-      //   sheetName: 'Admin 1',
-      //   deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
-      //   contactNumber: '7787891060',
-      //   categoryId: 1,
-      //   password: adminPassword,
-      //   role: 'admin',
-      // },
-    ],
-  });
+  // await prisma.user.createMany({
+  //   data: [
+  //     ...users,
+  //     // {
+  //     //   clientId: '1',
+  //     //   clientName: 'Admin 1',
+  //     //   sheetName: 'Admin 1',
+  //     //   deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
+  //     //   contactNumber: '7787891060',
+  //     //   categoryId: 1,
+  //     //   password: adminPassword,
+  //     //   role: 'admin',
+  //     // },
+  //   ],
+  // });
 
-  for (const user of users) {
-    const password = await hash(user.contactNumber, 12);
-    await prisma.user.update({
-      where: {
-        clientId: user.clientId,
-      },
-      data: {
-        password,
-      },
-    });
-  }
+  // for (const user of users) {
+  //   const password = await hash(user.contactNumber, 12);
+  //   await prisma.user.update({
+  //     where: {
+  //       clientId: user.clientId,
+  //     },
+  //     data: {
+  //       password,
+  //     },
+  //   });
+  // }
 
   // await prisma.category.createMany({
   //   data: [
