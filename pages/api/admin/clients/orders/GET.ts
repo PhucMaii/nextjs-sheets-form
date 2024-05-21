@@ -1,4 +1,3 @@
-import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -12,7 +11,7 @@ interface RequestQuery {
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { userId, startDate, endDate, deliveryDate } =
+    const { userId, deliveryDate } =
       req.query as RequestQuery;
 
     // Check if there is no userId, then fetch all orders with specific delivery date
@@ -24,7 +23,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           items: true,
-          user: true,
+          user: {
+            include: {
+              category: true
+            }
+          },
         },
         orderBy: {
           id: 'desc',
@@ -37,7 +40,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           items: true,
-          user: true,
+          user: {
+            include: {
+              category: true
+            }
+          },
         },
         orderBy: {
           id: 'desc',
@@ -56,21 +63,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return { ...user, ...restOfData, user, items: formatItems };
     });
 
-    if (!startDate || !endDate) {
-      return res.status(200).json({
-        data: formatUserOrders,
-        message: 'Fetch User Orders Successfully',
-      });
-    }
+    // if (!startDate || !endDate) {
+    //   return res.status(200).json({
+    //     data: formatUserOrders,
+    //     message: 'Fetch User Orders Successfully',
+    //   });
+    // }
 
-    const filteredDateRangeOrders = filterDateRangeOrders(
-      formatUserOrders,
-      startDate,
-      endDate,
-    );
+    // const filteredDateRangeOrders = filterDateRangeOrders(
+    //   formatUserOrders,
+    //   startDate,
+    //   endDate,
+    // );
 
     return res.status(200).json({
-      data: filteredDateRangeOrders,
+      data: formatUserOrders,
       message: 'Fetch User Orders In Date Range Successfully',
     });
   } catch (error: any) {

@@ -2,19 +2,11 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { filterDateRangeOrders } from '../utils/date';
 import { ORDER_STATUS } from '@/app/utils/enum';
-
-interface QueryType {
-  startDate?: string;
-  endDate?: string;
-}
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-
-    const { startDate, endDate } = req.query as QueryType;
 
     const session: any = await getServerSession(req, res, authOptions);
 
@@ -83,23 +75,23 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }),
     );
 
-    if (!startDate || !endDate) {
-      return res.status(200).json({
-        data: newOrders,
-        message: 'Fetch User Orders Successfully',
-      });
-    }
+    // if (!startDate || !endDate) {
+    //   return res.status(200).json({
+    //     data: newOrders,
+    //     message: 'Fetch User Orders Successfully',
+    //   });
+    // }
 
-    const filteredDateRangeOrders = filterDateRangeOrders(
-      newOrders,
-      startDate,
-      endDate,
-    );
+    // const filteredDateRangeOrders = filterDateRangeOrders(
+    //   newOrders,
+    //   startDate,
+    //   endDate,
+    // );
 
     return res.status(200).json({
       data: {
         user: existingUser,
-        userOrders: filteredDateRangeOrders,
+        userOrders: newOrders,
       },
       message: 'Fetch User Orders Successfully',
     });

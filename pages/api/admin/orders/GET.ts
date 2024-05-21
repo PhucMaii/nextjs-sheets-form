@@ -1,7 +1,6 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { filterDateRangeOrders } from '../../utils/date';
 
 interface RequestQuery {
   date?: string;
@@ -16,8 +15,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const {
       date,
-      startDate,
-      endDate,
       status,
     } = req.query as RequestQuery;
 
@@ -89,22 +86,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }),
     );
 
-    if (!startDate || !endDate) {
-      return res.status(200).json({
-        message: 'Fetch all orders successfully',
-        data: newOrders,
-      });
-    }
-
-    const filteredDateRangeOrders = filterDateRangeOrders(
-      newOrders,
-      startDate,
-      endDate,
-    );
-
     return res.status(200).json({
       message: 'Fetch All Orders Successfully',
-      data: filteredDateRangeOrders,
+      data: newOrders,
     });
   } catch (error: any) {
     console.log('Fail to get order: ', error);

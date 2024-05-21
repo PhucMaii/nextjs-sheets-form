@@ -56,6 +56,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { pusherClient } from '@/app/pusher';
+import { filterDateRangeOrders } from '@/pages/api/utils/date';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -213,7 +214,7 @@ export default function ReportPage() {
         );
       } else {
         response = await axios.get(
-          `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+          `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
         );
       }
 
@@ -227,16 +228,20 @@ export default function ReportPage() {
         return;
       }
 
-      const newUnpaidOrders = response.data.data.filter((order: Order) => {
+      let orderData: any = response.data.data;
+      if (clientValue?.clientName !== 'All Clients') {
+        orderData = filterDateRangeOrders(response.data.data, dateRange[0], dateRange[1]);
+      }
+      
+      const newUnpaidOrders = orderData.filter((order: Order) => {
         return (
           order.status === ORDER_STATUS.DELIVERED ||
           order.status === ORDER_STATUS.INCOMPLETED
         );
       });
-
       setUnpaidOrders(newUnpaidOrders);
-      setClientOrders(response.data.data);
-      setBaseClientOrders(response.data.data);
+      setClientOrders(orderData);
+      setBaseClientOrders(orderData);
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client orders: ', error);

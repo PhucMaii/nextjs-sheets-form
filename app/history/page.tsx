@@ -37,6 +37,7 @@ import { blue, blueGrey } from '@mui/material/colors';
 import NotificationPopup from '../admin/components/Notification';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { filterDateRangeOrders } from '@/pages/api/utils/date';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -107,9 +108,7 @@ export default function HistoryPage() {
   const handleFetchClientOrders = async () => {
     setIsFetching(true);
     try {
-      const response = await axios.get(
-        `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-      );
+      const response = await axios.get(API_URL.CLIENT_ORDER);
 
       if (response.data.error) {
         setNotification({
@@ -121,8 +120,10 @@ export default function HistoryPage() {
         return;
       }
 
-      setClientOrders(response.data.data.userOrders);
-      setBaseClientOrders(response.data.data.userOrders);
+      const filteredOrders: any = filterDateRangeOrders(response.data.data.userOrders, dateRange[0], dateRange[1]);
+
+      setClientOrders(filteredOrders);
+      setBaseClientOrders(filteredOrders);
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client orders: ', error);

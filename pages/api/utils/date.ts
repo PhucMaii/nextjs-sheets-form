@@ -1,4 +1,4 @@
-import { Orders } from '@prisma/client';
+import { Order } from '@/app/admin/orders/page';
 
 const convertDeliveryDateStringToDate = (deliveryDate: string) => {
   const parts = deliveryDate.split('/');
@@ -11,23 +11,23 @@ const convertDeliveryDateStringToDate = (deliveryDate: string) => {
 }
 
 export const filterDateRangeOrders = (
-  orders: Orders[],
-  startDate: string,
-  endDate: string,
-): Orders[] => {
-  const filteredDateRangeOrders = orders.filter((order: Orders) => {
+  orders: Order[],
+  startDate: Date,
+  endDate: Date,
+): Order[] => {
+  const filteredDateRangeOrders = orders.filter((order: Order) => {
     const orderDeliveryDate = convertDeliveryDateStringToDate(order.deliveryDate);
 
-    const formattedStartDate = new Date(Date.parse(startDate));
-    const formattedEndDate = new Date(Date.parse(endDate));
+    // const formattedStartDate = new Date(Date.parse(startDate));
+    // const formattedEndDate = new Date(Date.parse(endDate));
 
-    formattedEndDate.setDate(formattedEndDate.getDate() - 1);
-    formattedStartDate.setDate(formattedStartDate.getDate() - 1);
+    // formattedEndDate.setDate(formattedEndDate.getDate() - 1);
+    // formattedStartDate.setDate(formattedStartDate.getDate() - 1);
 
 
     return (
-      orderDeliveryDate >= formattedStartDate &&
-      orderDeliveryDate <= formattedEndDate
+      orderDeliveryDate >= startDate &&
+      orderDeliveryDate <= endDate
     );
   });
 
@@ -36,7 +36,7 @@ export const filterDateRangeOrders = (
   return sortedOrders;
 };
 
-const sortByDeliveryDate = (orders: Orders[]) => {
+const sortByDeliveryDate = (orders: Order[]) => {
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(orderA.deliveryDate);
     const deliveryDateB: any = convertDeliveryDateStringToDate(orderB.deliveryDate);
