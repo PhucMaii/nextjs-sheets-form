@@ -1,20 +1,41 @@
-import { PrismaClient } from '@prisma/client';
+import { Item, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
   categoryId?: string;
+  subCategoryId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { categoryId } = req.query as RequestQuery;
+    const { categoryId, subCategoryId } = req.query as RequestQuery;
 
-    const clientItems = await prisma.item.findMany({
-      where: {
-        categoryId: Number(categoryId),
-      },
+    const fetchCondition: any = {categoryId: Number(categoryId)};
+
+    if (subCategoryId) {
+      fetchCondition.subCategoryId = Number(subCategoryId);
+    }
+
+    // only get beansprout
+    const beansprouts = await prisma.item.findMany({
+      where: fetchCondition
     });
+
+    // get the rest of items
+    const otherItems = await prisma.item.findMany({
+      where: {
+        categoryId: Number(categoryId)
+      }
+    });
+
+    
+    const removeDuplicatedItems = otherItems.filter((targetItem: Item) => {
+      const sameItem = beansprouts.some((item: Item) => targetItem.name === item.name);      
+      return !sameItem;
+    })
+
+    const clientItems = [...beansprouts, ...removeDuplicatedItems];
 
     return res.status(200).json({
       data: clientItems,

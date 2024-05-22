@@ -8,9 +8,17 @@ datasource db {
   relationMode = "prisma"
 }
 
+model Driver {
+  id     Int     @id @default(autoincrement())
+  name   String
+  routes Route[]
+}  
+
+
 model User {
   id               Int     @id @default(autoincrement())
   categoryId       Int
+  subCategoryId     Int?
   userPreferenceId Int? // will change back to force user to have it
   clientName       String  @db.VarChar(255)
   clientId         String  @unique @db.VarChar(255)
@@ -22,9 +30,11 @@ model User {
   role             String  @db.VarChar(255)
 
   category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory       SubCategory[]
   preference     UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders         Orders[]
   scheduleOrders ScheduleOrders[]
+  routes Route[]
 }
 
 model Category {
@@ -35,12 +45,21 @@ model Category {
   forms Form[]
 }
 
+model SubCategory {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(255)
+  users User[]
+  items Item[]
+}
+
 model Item {
   id         Int      @id @default(autoincrement())
   name       String   @db.VarChar(255)
   categoryId Int
+  subCategoryId Int?
   price      Float
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
 }
@@ -117,4 +136,13 @@ model ScheduleOrders {
   day        String
   items      OrderedItems[]
   user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Route {
+  id       Int      @id @default(autoincrement())
+  day      String
+  driverId Int
+  clients  User[]
+
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
 }

@@ -54,6 +54,8 @@ export interface UserType {
   deliveryAddress: string;
   sheetName?: string;
   categoryId?: number;
+  subCategoryId?: number;
+  subCategory?: any;
   category?: any;
   preference?: any;
 }
