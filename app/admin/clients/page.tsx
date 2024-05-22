@@ -21,7 +21,7 @@ import { API_URL, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import NotificationPopup from '../components/Notification';
 import ClientsTable from '../components/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
-import { Category } from '@prisma/client';
+import { Category, SubCategory } from '@prisma/client';
 import { ShadowSection } from '../reports/styled';
 import useDebounce from '@/hooks/useDebounce';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -61,9 +61,11 @@ export default function ClientsPage() {
   });
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
+    fetchSubCategories();
     handleFetchAllUsers();
     handleFetchAllCategories();
   }, []);
@@ -112,6 +114,30 @@ export default function ClientsPage() {
       percentage: percentageTaken.toFixed(2),
     };
   }, [baseClientList]);
+
+  const fetchSubCategories = async () => {
+    try {
+      const response = await axios.get(API_URL.SUBCATEGORIES);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      }
+
+      setSubCategories(response.data.data);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error
+      })
+    }
+  }
 
   const handleAddClientUI = (newClient: UserType) => {
     setBaseClientList([...baseClientList, newClient]);
@@ -404,6 +430,7 @@ export default function ClientsPage() {
           open={isAddClientOpen}
           onClose={() => setIsAddClientOpen(false)}
           categories={categoryList}
+          subCategories={subCategories}
           setNotification={setNotification}
           handleAddClientUI={handleAddClientUI}
         />
@@ -487,6 +514,7 @@ export default function ClientsPage() {
               selectedClients={selectedClients}
               handleSelectClient={handleSelectClient}
               handleSelectAll={handleSelectAll}
+              subCategories={subCategories}
             />
           ) : (
             <ErrorComponent errorText="No User Found" />

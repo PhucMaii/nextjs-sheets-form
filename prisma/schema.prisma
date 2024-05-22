@@ -30,7 +30,7 @@ model User {
   role             String  @db.VarChar(255)
 
   category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory       SubCategory[]
+  subCategory       SubCategory?         @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   preference     UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders         Orders[]
   scheduleOrders ScheduleOrders[]

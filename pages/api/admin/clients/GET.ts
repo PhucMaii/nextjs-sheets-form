@@ -13,6 +13,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         category: true,
         preference: true,
+        subCategory: true
       },
     });
 

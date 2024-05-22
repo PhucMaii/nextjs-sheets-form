@@ -95,7 +95,7 @@ export default function ReportPage() {
   const billPrint: any = useRef();
 
   useEffect(() => {
-    fetchCategories();
+    fetchSubCategories();
     fetchAllClients();
 
     pusherClient.subscribe('admin-delete-order');
@@ -257,7 +257,7 @@ export default function ReportPage() {
     }
   };
 
-  const fetchCategories = async () => {
+  const fetchSubCategories = async () => {
     try {
       const response = await axios.get(API_URL.SUBCATEGORIES);
 

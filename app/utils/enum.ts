@@ -42,3 +42,10 @@ export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',
 }
+
+// export enum SUB_CATEGORIES {
+//   BK='B.K',
+//   PP='P.P',
+//   JUMBO_EGG = 'JUMBO EGG',
+//   EXTRA_LARGE_EGG = 'EXTRA LARGE EGG'
+// }

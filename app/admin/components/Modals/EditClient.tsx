@@ -81,7 +81,7 @@ export default function EditClient({
             </LoadingButtonStyles>
           </Box>
           <Divider />
-          <Grid container mt={2} spacing={2}>
+          <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={6}>
               <Typography variant="h6">Client Id:</Typography>
             </Grid>

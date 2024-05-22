@@ -19,7 +19,7 @@ import { Notification, UserType } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
-import { Category } from '@prisma/client';
+import { Category, SubCategory } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from './Modals/DeleteModal';
 import EditClient from './Modals/EditClient';
@@ -33,6 +33,7 @@ interface PropTypes {
   selectedClients: UserType[];
   handleSelectClient: (e: any, targetClient: UserType) => void;
   handleSelectAll: () => void;
+  subCategories: SubCategory[];
 }
 
 const ClientsTable = ({
@@ -44,6 +45,7 @@ const ClientsTable = ({
   selectedClients,
   handleSelectClient,
   handleSelectAll,
+  subCategories,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
 
@@ -102,6 +104,9 @@ const ClientsTable = ({
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Category</Typography>
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          <Typography fontWeight="bold">Subcategory</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Contact Number</Typography>
@@ -166,6 +171,24 @@ const ClientsTable = ({
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
         <TableCell>{client.category.name}</TableCell>
+        <TableCell>
+          <Select
+            value={client.subCategoryId || 'N/A'}
+            onChange={(e, newValue) =>{
+              console.log(newValue);
+              handleUpdateClient(client.id, { subCategoryId: +e.target.value  })
+            }}
+          >
+            <MenuItem value={'N/A'}>N/A</MenuItem>
+            {subCategories && subCategories.map((subCategory: SubCategory, index: number) => {
+              return (
+                <MenuItem value={subCategory.id} key={index}>
+                  {subCategory.name}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </TableCell>
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
         <TableCell>
