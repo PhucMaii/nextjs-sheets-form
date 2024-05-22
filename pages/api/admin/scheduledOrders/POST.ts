@@ -38,9 +38,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
         // Override same day schedule order if it existed
         if (sameDayOrder) {
-          for (const item of items) {
+          for (let item of items) {
             // first, find if there is any of that item
-            const existiedItem = await prisma.orderedItems.findFirst({
+            const existedItem = await prisma.orderedItems.findFirst({
                 where: {
                     scheduledOrderId: sameDayOrder.id,
                     name: item.name,
@@ -48,7 +48,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             });
 
             // if yes, then update it, otherwise create new items
-            if (existiedItem) {
+            if (existedItem) {
                 await prisma.orderedItems.updateMany({
                   where: {
                     scheduledOrderId: sameDayOrder.id,
@@ -60,6 +60,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
                   },
                 });
             } else {
+              if (item.subCategoryId && existingUser.subCategoryId) {
+                item = await prisma.item.findFirst({
+                  where: {
+                    name: item.name,
+                    categoryId: item.categoryId,
+                    subCategoryId: existingUser.subCategoryId,
+                  },
+                });
+              }
                 await prisma.orderedItems.create({
                     data: {
                         name: item.name,
