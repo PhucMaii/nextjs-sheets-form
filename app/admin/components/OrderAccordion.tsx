@@ -47,7 +47,7 @@ interface PropTypes {
   order: Order;
   updateUIItem: (targetOrder: Order, targetItem: Item) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  updateUI: (orderId: number) => void;
+  updateUI: (targetOrder: Order) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
   handleUpdatePriceUI: (
     targetOrder: Order,
@@ -129,7 +129,7 @@ const OrderAccordion = ({
         ...order,
         status,
       });
-      updateUI(order.id);
+      updateUI(response.data.data);
       setNotification({
         on: true,
         type: 'success',

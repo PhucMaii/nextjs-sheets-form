@@ -94,7 +94,7 @@ export default function Orders() {
   const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
-    ORDER_STATUS.INCOMPLETED,
+    ORDER_STATUS.NONE,
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -183,7 +183,7 @@ export default function Orders() {
       setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
-        incomingOrder.status === currentStatus &&
+        (incomingOrder.status === currentStatus || tabIndex === 0) &&
         !incomingOrder.isReplacement
       ) {
         setBaseOrderData((prevOrders) => [incomingOrder, ...prevOrders]);
@@ -454,8 +454,18 @@ export default function Orders() {
     }
   };
 
-  const handleMarkSingleCompletedUI = (orderId: number): void => {
-    const newOrders = orderData.filter((order) => order.id !== orderId);
+  const handleMarkSingleCompletedUI = (targetOrder: Order): void => {
+    let newOrders = [];
+    if (tabIndex !== 0 && targetOrder.status !== currentStatus) {
+      newOrders = orderData.filter((order) => order.id !== targetOrder.id);
+    } else {
+      newOrders = orderData.map((order) => {
+        if (order.id === targetOrder.id) {
+          return targetOrder
+        }
+        return order;
+      });
+    }
     setOrderData(newOrders);
     setBaseOrderData(newOrders);
   };
