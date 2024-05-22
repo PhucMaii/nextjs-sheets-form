@@ -60,6 +60,12 @@ export default function AddOrder({
   const [note, setNote] = useState<string>('');
 
   useEffect(() => {
+    if (currentDate) {
+      setDeliveryDate(currentDate);
+    }
+  }, [currentDate])
+
+  useEffect(() => {
     if (clientValue) {
       fetchClientItems();
     } else {

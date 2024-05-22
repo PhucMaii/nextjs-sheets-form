@@ -33,10 +33,7 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 // import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { DropdownItemContainer } from './styled';
-import {
-  infoColor,
-  successColor,
-} from '@/app/theme/color';
+import { infoColor, successColor } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
 import useDebounce from '@/hooks/useDebounce';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -83,7 +80,7 @@ export interface Order {
   status: ORDER_STATUS;
   isReplacement?: boolean;
   isVoid?: boolean;
-  subCategoryId?: number
+  subCategoryId?: number;
 }
 
 const orderPerPage = 10;
@@ -169,7 +166,7 @@ export default function Orders() {
 
   useEffect(() => {
     setCurrentStatus(statusTabs[tabIndex].value);
-  }, [tabIndex])
+  }, [tabIndex]);
 
   useEffect(() => {
     if (totalPosition.current) {
@@ -338,7 +335,7 @@ export default function Orders() {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
       }
@@ -349,10 +346,10 @@ export default function Orders() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'There was an error: ' + error
-      })
+        message: 'There was an error: ' + error,
+      });
     }
-  }
+  };
 
   const generateOrderData = (orderList = baseOrderData) => {
     const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
@@ -550,161 +547,162 @@ export default function Orders() {
 
   const constantComponent = (
     <>
-      <NotificationPopup
-          notification={notification}
-          onClose={() => setNotification({ ...notification, on: false })}
-        />
-        <div style={{ display: 'none' }}>
-          <AllPrint
-            orders={selectedOrders.length > 0 ? selectedOrders : orderData}
-            ref={componentRef}
-          />
-        </div>
-        <AddOrder
-          open={isAddOrderOpen}
-          onClose={() => setIsAddOrderOpen(false)}
-          clientList={clientList}
-          setNotification={setNotification}
-          currentDate={date}
-          createOrder={addOrder}
-        />
-
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4" fontWeight="bold">
-            Orders
-          </Typography>
-          <FormControl>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Date Filter"
-                value={dayjs(date)}
-                onChange={(e: any) => handleDateChange(e)}
-                sx={{
-                  borderRadius: 2,
-                }}
-              />
-            </LocalizationProvider>
-          </FormControl>
-        </Box>
-        <Grid container alignItems="center" mt={2} spacing={2}>
-          <Grid item xs={12} md={8}>
-            <TextField
-              fullWidth
-              name="Search"
-              variant="filled"
-              // label="Search orders"
-              placeholder="Search by client id, invoice id, or client name"
-              value={searchKeywords}
-              onChange={(e) => setSearchKeywords(e.target.value)}
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Typography variant="h4" fontWeight="bold">
+          Orders
+        </Typography>
+        <FormControl>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Date Filter"
+              value={dayjs(date)}
+              onChange={(e: any) => handleDateChange(e)}
+              sx={{
+                borderRadius: 2,
+              }}
             />
-          </Grid>
-          <Grid item xs={2} md={1} textAlign="right">
-            <LoadingButton
-              disabled={orderData.length === baseOrderData.length}
-              loading={isLoading}
-              loadingIndicator="Refresh..."
-              variant="outlined"
-              onClick={() => window.location.reload()}
-            >
-              <RefreshIcon />
-            </LoadingButton>
-          </Grid>
-          <Grid item xs={4} md={3}>
-            {actionDropdown}
-          </Grid>
-        </Grid>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs
-            aria-label="basic tabs"
-            value={tabIndex}
-            onChange={(e, newValue) => setTabIndex(newValue)}
-            variant="fullWidth"
-            sx={{width: '100%'}}
-          >
-            {statusTabs &&
-              statusTabs.map((statusTab: any, index: number) => {
-                return (
-                  <Tab
-                    key={index}
-                    icon={<statusTab.icon />}
-                    id={`simple-tab-${index}`}
-                    label={`${statusTab.name} ${tabIndex === index ? `(${isLoading ? 0 : baseOrderData.length})` : ''} `}
-                    aria-controls={`tabpanel-${index}`}
-                    value={index}
-                    sx={{ 
-                      "&.Mui-selected": { color: statusTab.color},
-                    }}
-                  />
-                );
-              })}
-          </Tabs>
-        </Box>
-        <Box>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={orderData.length === selectedOrders.length}
-                onClick={handleSelectAll}
-              />
-            }
-            label="Select All"
+          </LocalizationProvider>
+        </FormControl>
+      </Box>
+      <Grid container alignItems="center" mt={2} spacing={2}>
+        <Grid item xs={12} md={8}>
+          <TextField
+            fullWidth
+            name="Search"
+            variant="filled"
+            // label="Search orders"
+            placeholder="Search by client id, invoice id, or client name"
+            value={searchKeywords}
+            onChange={(e) => setSearchKeywords(e.target.value)}
           />
-        </Box>
+        </Grid>
+        <Grid item xs={2} md={1} textAlign="right">
+          <LoadingButton
+            disabled={orderData.length === baseOrderData.length}
+            loading={isLoading}
+            loadingIndicator="Refresh..."
+            variant="outlined"
+            onClick={() => window.location.reload()}
+          >
+            <RefreshIcon />
+          </LoadingButton>
+        </Grid>
+        <Grid item xs={4} md={3}>
+          {actionDropdown}
+        </Grid>
+      </Grid>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          aria-label="basic tabs"
+          value={tabIndex}
+          onChange={(e, newValue) => setTabIndex(newValue)}
+          variant="fullWidth"
+          sx={{ width: '100%' }}
+        >
+          {statusTabs &&
+            statusTabs.map((statusTab: any, index: number) => {
+              return (
+                <Tab
+                  key={index}
+                  icon={<statusTab.icon />}
+                  id={`simple-tab-${index}`}
+                  label={`${statusTab.name} ${
+                    tabIndex === index
+                      ? `(${isLoading ? 0 : baseOrderData.length})`
+                      : ''
+                  } `}
+                  aria-controls={`tabpanel-${index}`}
+                  value={index}
+                  sx={{
+                    '&.Mui-selected': { color: statusTab.color },
+                  }}
+                />
+              );
+            })}
+        </Tabs>
+      </Box>
+      <Box>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={orderData.length === selectedOrders.length}
+              onClick={handleSelectAll}
+            />
+          }
+          label="Select All"
+        />
+      </Box>
     </>
-  )
+  );
 
   return (
     <Sidebar>
       <AuthenGuard>
-        {
-          isLoading ? (
-            <>
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
+      <div style={{ display: 'none' }}>
+        <AllPrint
+          orders={selectedOrders.length > 0 ? selectedOrders : orderData}
+          ref={componentRef}
+        />
+      </div>
+      <AddOrder
+        open={isAddOrderOpen}
+        onClose={() => setIsAddOrderOpen(false)}
+        clientList={clientList}
+        setNotification={setNotification}
+        currentDate={date}
+        createOrder={addOrder}
+      />
+        {isLoading ? (
+          <>
             {constantComponent}
             <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
               <LoadingComponent color="blue" />
             </div>
           </>
-          ) : (
-            <>
-       {constantComponent}
-        {orderData.length > 0 ? (
-          <>
-            <Virtuoso
-              totalCount={orderData.length}
-              style={{ height: virtuosoHeight }}
-              data={orderData}
-              itemContent={(index, order) => {
-                return (
-                  <OrderAccordion
-                    key={index}
-                    order={order}
-                    setNotification={setNotification}
-                    updateUI={handleMarkSingleCompletedUI}
-                    updateUIItem={handleUpdateUISingleOrder}
-                    handleUpdateDateUI={handleUpdateDateUI}
-                    handleUpdatePriceUI={handleUpdatePriceUI}
-                    selectedOrders={selectedOrders}
-                    handleSelectOrder={handleSelectOrder}
-                    subcategories={subcategories}
-                  />
-                );
-              }}
-            />
-            <div style={{ width: '100%' }}>
-              <Pagination
-                count={pages}
-                shape="rounded"
-                size="large"
-                onChange={(e: any, value: number) => setCurrentPage(value)}
-              />
-            </div>
-          </>
         ) : (
-          <ErrorComponent errorText="There is no orders" />
+          <>
+            {constantComponent}
+            {orderData.length > 0 ? (
+              <>
+                <Virtuoso
+                  totalCount={orderData.length}
+                  style={{ height: virtuosoHeight }}
+                  data={orderData}
+                  itemContent={(index, order) => {
+                    return (
+                      <OrderAccordion
+                        key={index}
+                        order={order}
+                        setNotification={setNotification}
+                        updateUI={handleMarkSingleCompletedUI}
+                        updateUIItem={handleUpdateUISingleOrder}
+                        handleUpdateDateUI={handleUpdateDateUI}
+                        handleUpdatePriceUI={handleUpdatePriceUI}
+                        selectedOrders={selectedOrders}
+                        handleSelectOrder={handleSelectOrder}
+                        subcategories={subcategories}
+                      />
+                    );
+                  }}
+                />
+                <div style={{ width: '100%' }}>
+                  <Pagination
+                    count={pages}
+                    shape="rounded"
+                    size="large"
+                    onChange={(e: any, value: number) => setCurrentPage(value)}
+                  />
+                </div>
+              </>
+            ) : (
+              <ErrorComponent errorText="There is no orders" />
+            )}
+          </>
         )}
-            </>
-          )
-        }
       </AuthenGuard>
     </Sidebar>
   );
