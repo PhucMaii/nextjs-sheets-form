@@ -89,12 +89,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         continue;
       }
 
-      const itemData = await prisma.item.findFirst({
+      let itemData = await prisma.item.findFirst({
         where: {
           name: item,
           categoryId: existingUser.categoryId,
         },
       });
+
+      if (existingUser.subCategoryId && itemData?.subCategoryId) {
+        itemData = await prisma.item.findFirst({
+          where: {
+            name: itemData.name,
+            categoryId: existingUser.categoryId,
+            subCategoryId: existingUser.subCategoryId
+          }
+        })
+      }
 
       if (itemData) {
         totalPrice += itemData.price * body[item];

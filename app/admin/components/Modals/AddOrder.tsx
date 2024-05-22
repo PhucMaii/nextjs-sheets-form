@@ -114,7 +114,7 @@ export default function AddOrder({
     try {
       setIsFetching(true);
       const response = await axios.get(
-        `${API_URL.CLIENTS}/items?categoryId=${clientValue?.categoryId}`,
+        `${API_URL.CLIENTS}/items?categoryId=${clientValue?.categoryId}&subCategoryId=${clientValue?.subCategoryId}`,
       );
 
       if (response.data.error) {
