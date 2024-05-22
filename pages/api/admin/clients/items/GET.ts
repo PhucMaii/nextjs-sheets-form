@@ -29,10 +29,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
     });
 
-    
     const removeDuplicatedItems = otherItems.filter((targetItem: Item) => {
-      const sameItem = beansprouts.some((item: Item) => targetItem.name === item.name);      
-      return !sameItem;
+      return !targetItem.subCategoryId
     })
 
     const clientItems = [...beansprouts, ...removeDuplicatedItems];

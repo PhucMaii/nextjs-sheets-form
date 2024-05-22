@@ -49,6 +49,7 @@ import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import moment from 'moment';
 import { statusTabs } from '@/app/lib/constant';
+import { SubCategory } from '@prisma/client';
 
 interface Category {
   id: number;
@@ -61,6 +62,7 @@ export interface Item {
   price: number;
   quantity: number;
   totalPrice: number;
+  subCategoryId?: number;
 }
 
 export interface Order {
@@ -81,6 +83,7 @@ export interface Order {
   status: ORDER_STATUS;
   isReplacement?: boolean;
   isVoid?: boolean;
+  subCategoryId?: number
 }
 
 const orderPerPage = 10;
@@ -110,6 +113,7 @@ export default function Orders() {
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+  const [subcategories, setSubcategories] = useState<SubCategory[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
@@ -117,6 +121,7 @@ export default function Orders() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
+    fetchSubcategories();
     fetchAllClients();
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
@@ -324,6 +329,30 @@ export default function Orders() {
       return;
     }
   };
+
+  const fetchSubcategories = async () => {
+    try {
+      const response = await axios.get(API_URL.SUBCATEGORIES);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      }
+
+      setSubcategories(response.data.data);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error
+      })
+    }
+  }
 
   const generateOrderData = (orderList = baseOrderData) => {
     const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
@@ -583,9 +612,6 @@ export default function Orders() {
           <Grid item xs={4} md={3}>
             {actionDropdown}
           </Grid>
-          <Grid item xs={12}>
-            <Typography variant="subtitle1">Track search keywords: {debouncedKeywords}</Typography>
-          </Grid>
         </Grid>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
@@ -627,17 +653,6 @@ export default function Orders() {
     </>
   )
 
-  // if (isLoading) {
-  //   return (
-  //     <Sidebar>
-  //       {constantComponent}
-  //       <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-  //         <LoadingComponent color="blue" />
-  //       </div>
-  //     </Sidebar>
-  //   );
-  // }
-
   return (
     <Sidebar>
       <AuthenGuard>
@@ -670,6 +685,7 @@ export default function Orders() {
                     handleUpdatePriceUI={handleUpdatePriceUI}
                     selectedOrders={selectedOrders}
                     handleSelectOrder={handleSelectOrder}
+                    subcategories={subcategories}
                   />
                 );
               }}

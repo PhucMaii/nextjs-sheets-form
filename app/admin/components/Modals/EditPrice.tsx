@@ -6,12 +6,20 @@ import {
   Grid,
   IconButton,
   InputLabel,
+  MenuItem,
   Modal,
   OutlinedInput,
+  Select,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { BoxModal } from './styled';
 import { ModalProps } from './type';
 import axios from 'axios';
@@ -22,6 +30,7 @@ import { errorColor, infoColor } from '@/app/theme/color';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../UpdateChoiceSelection';
+import { SubCategory } from '@prisma/client';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
@@ -32,6 +41,7 @@ interface PropTypes extends ModalProps {
     newItems: any[],
     newTotalPrice: number,
   ) => void;
+  subcategories: SubCategory[];
 }
 
 export default function EditPrice({
@@ -41,6 +51,7 @@ export default function EditPrice({
   setNotification,
   order,
   handleUpdatePriceUI,
+  subcategories,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [itemList, setItemList] = useState<OrderedItems[]>([]);
@@ -54,13 +65,13 @@ export default function EditPrice({
     quantity: 0,
     totalPrice: 0,
   });
+  const [subcategoryId, setSubcategoryId] = useState<number>(0);
 
   useEffect(() => {
     if (items) {
       setItemList(items);
-    } 
-  }, [items])
-
+    }
+  }, [items]);
 
   const addNewItem = () => {
     const newItemName = newItem.name.toUpperCase();
@@ -85,7 +96,11 @@ export default function EditPrice({
       });
     } else {
       const totalPrice = newItem.quantity * newItem.price;
-      setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
+      const newItemData: any = { ...newItem, totalPrice, name: newItemName };
+      if (subcategoryId > 0) {
+        newItemData.subCategoryId = subcategoryId;
+      }
+      setItemList([...itemList, newItemData]);
       setNewItem({
         name: '',
         price: 0,
@@ -93,6 +108,8 @@ export default function EditPrice({
         totalPrice: 0,
       });
     }
+
+    setSubcategoryId(0);
   };
 
   const calculateNewTotalPrice = () => {
@@ -119,6 +136,7 @@ export default function EditPrice({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.category.id,
+        userSubCategoryId: order.subCategoryId
       });
 
       if (response.data.error) {
@@ -231,6 +249,29 @@ export default function EditPrice({
                     handleNewItemOnChange('quantity', +e.target.value)
                   }
                 />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="subcategory-label">Subcategory</InputLabel>
+                <Select
+                  disabled={
+                    !newItem.name.toLowerCase().includes('bean') &&
+                    !newItem.name.toLowerCase().includes('egg')
+                  }
+                  value={subcategoryId}
+                  onChange={(e) => setSubcategoryId(+e.target.value)}
+                >
+                  <MenuItem value={0}>-- Choose a subcategory --</MenuItem>
+                  {subcategories &&
+                    subcategories.map((subcategory: SubCategory) => {
+                      return (
+                        <MenuItem key={subcategory.id} value={subcategory.id}>
+                          {subcategory.name}
+                        </MenuItem>
+                      );
+                    })}
+                </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12}>

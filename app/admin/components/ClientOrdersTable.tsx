@@ -22,6 +22,7 @@ import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import axios from 'axios';
 import LoadingModal from './Modals/LoadingModal';
 import DeleteModal from './Modals/DeleteModal';
+import { SubCategory } from '@prisma/client';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -31,6 +32,7 @@ interface PropTypes {
   selectedOrders: Order[];
   handleSelectOrder: (e: any, order: Order) => void;
   handleSelectAll: () => void;
+  subCategories: SubCategory[];
 }
 
 const ClientOrdersTable = ({
@@ -41,6 +43,7 @@ const ClientOrdersTable = ({
   selectedOrders,
   handleSelectOrder,
   handleSelectAll,
+  subCategories
 }: PropTypes) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const windowDimensions = useWindowDimensions();
@@ -196,6 +199,7 @@ const ClientOrdersTable = ({
           <Box display="flex" gap={1}>
             <DeleteModal targetObj={order} handleDelete={handleDeleteOrder} />
             <EditReportOrder
+              subCategories={subCategories}
               order={order}
               setNotification={setNotification}
               handleUpdateOrderUI={handleUpdateOrderUI}

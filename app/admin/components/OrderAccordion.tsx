@@ -41,6 +41,7 @@ import EditDeliveryDate from './Modals/EditDeliveryDate';
 import EditPrice from './Modals/EditPrice';
 import StatusText, { COLOR_TYPE } from './StatusText';
 import { ComponentToPrint } from './Printing/ComponentToPrint';
+import { SubCategory } from '@prisma/client';
 
 interface PropTypes {
   order: Order;
@@ -55,6 +56,7 @@ interface PropTypes {
   ) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
+  subcategories: SubCategory[];
 }
 
 const OrderAccordion = ({
@@ -66,6 +68,7 @@ const OrderAccordion = ({
   handleUpdatePriceUI,
   handleSelectOrder,
   selectedOrders,
+  subcategories,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -184,6 +187,7 @@ const OrderAccordion = ({
         setNotification={setNotification}
         order={order}
         handleUpdatePriceUI={handleUpdatePriceUI}
+        subcategories={subcategories}
       />
       <Accordion
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}

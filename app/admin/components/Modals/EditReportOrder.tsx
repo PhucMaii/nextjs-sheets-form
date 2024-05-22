@@ -28,17 +28,20 @@ import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../UpdateChoiceSelection';
+import { SubCategory } from '@prisma/client';
 
 interface PropTypes {
   order: Order;
   handleUpdateOrderUI: (updatedOrder: Order) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
+  subCategories: SubCategory[];
 }
 
 export default function EditReportOrder({
   order,
   handleUpdateOrderUI,
   setNotification,
+  subCategories
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -50,6 +53,7 @@ export default function EditReportOrder({
     quantity: 0,
     totalPrice: 0,
   });
+  const [subCategoryId, setSubCategoryId] = useState<number>(0); 
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
@@ -85,7 +89,11 @@ export default function EditReportOrder({
       });
     } else {
       const totalPrice = newItem.quantity * newItem.price;
-      setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
+      const newItemData: any = { ...newItem, totalPrice, name: newItemName };
+      if (subCategoryId > 0) {
+        newItemData.subCategoryId = subCategoryId;
+      }
+      setItemList([...itemList, newItemData]);
       setNewItem({
         name: '',
         price: 0,
@@ -145,6 +153,7 @@ export default function EditReportOrder({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.categoryId,
+        userSubCategoryId: order.subCategoryId
       });
 
       if (response.data.error) {
@@ -367,6 +376,29 @@ export default function EditReportOrder({
                   />
                 </FormControl>
               </Grid>
+              <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="subcategory-label">Subcategory</InputLabel>
+                <Select
+                  disabled={
+                    !newItem.name.toLowerCase().includes('bean') &&
+                    !newItem.name.toLowerCase().includes('egg')
+                  }
+                  value={subCategoryId}
+                  onChange={(e) => setSubCategoryId(+e.target.value)}
+                >
+                  <MenuItem value={0}>-- Choose a subcategory --</MenuItem>
+                  {subCategories &&
+                    subCategories.map((subcategory: SubCategory) => {
+                      return (
+                        <MenuItem key={subcategory.id} value={subcategory.id}>
+                          {subcategory.name}
+                        </MenuItem>
+                      );
+                    })}
+                </Select>
+              </FormControl>
+            </Grid>
               <Grid item xs={12}>
                 <Button fullWidth variant="outlined" onClick={addNewItem}>
                   + Add

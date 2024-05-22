@@ -7,6 +7,7 @@ interface UpdatedItem {
   price: number;
   quantity: number;
   orderId: number;
+  subCategoryId?: number;
 }
 
 export enum UpdateOption {
@@ -23,6 +24,7 @@ interface BodyType {
   categoryName?: string;
   userId?: number;
   userCategoryId?: number;
+  userSubCategoryId?: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -37,6 +39,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryName,
       userId,
       userCategoryId,
+      userSubCategoryId,
     } = updatedData as BodyType;
 
     // Bad cases
@@ -160,9 +163,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      const formattedUpdatedItems = formatUpdatedItems(
+      const formattedUpdatedItems = await formatUpdatedItems(
         newCategory.id,
         updatedItems,
+        userSubCategoryId,
       );
 
       // create new items
@@ -194,33 +198,58 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      let baseItemList = await prisma.item.findMany({
-        where: {
-          categoryId: userCategoryId,
-        },
+      let fetchCondition: any = { categoryId: userCategoryId };
+
+      if (userSubCategoryId) {
+        fetchCondition.subCategoryId = userSubCategoryId;
+      }
+
+      const beansprouts = await prisma.item.findMany({
+        where: fetchCondition,
       });
 
+      const itemList = await prisma.item.findMany({
+        where: {
+          categoryId: userCategoryId
+        }
+      });
+
+      const removeSubCategoryItem = itemList.filter((item: Item) => {
+        return !item.subCategoryId;
+      })
+
+      let baseItemList = [...removeSubCategoryItem, ...beansprouts];
+
       for (const item of updatedItems) {
+        if (!item.subCategoryId) {
+          fetchCondition = { categoryId: userCategoryId }; 
+        } else {
+          fetchCondition = { categoryId: userCategoryId, subCategoryId: userSubCategoryId }
+        }
         const existingItem = await prisma.item.findFirst({
           where: {
             name: item.name,
-            categoryId: userCategoryId,
+            ...fetchCondition,
           },
         });
+
+        const updateFields: any = { price: item.price };
+
+        if (item.subCategoryId && item.subCategoryId !== existingItem?.subCategoryId) {
+          updateFields.subCategoryId = item.subCategoryId
+        }
 
         if (existingItem) {
           const updatedItem = await prisma.item.update({
             where: {
               id: existingItem.id,
             },
-            data: {
-              price: item.price,
-            },
+            data: updateFields
           });
 
           // Pop item off the category
           const newBaseItemList = baseItemList.filter((item: Item) => {
-            return item.id !== updatedItem.id;
+            return item.name !== updatedItem.name;
           });
           baseItemList = newBaseItemList;
         } else {
@@ -229,6 +258,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               name: item.name,
               categoryId: userCategoryId,
               price: item.price,
+              subCategoryId: item.subCategoryId,
             },
           });
         }
@@ -277,17 +307,30 @@ export const updateOrderTotalPrice = async (
   }
 };
 
-const formatUpdatedItems = (categoryId: number = 0, updatedItems: any) => {
-  const formattedUpdatedItems = updatedItems.map(
-    (
-      item: UpdatedItem,
-    ): { name: string; price: number; categoryId: number } => {
+const formatUpdatedItems = async (
+  categoryId: number = 0,
+  updatedItems: any,
+  subcategoryId: number = 0,
+) => {
+  const formattedUpdatedItems = await Promise.all(
+    updatedItems.map(async (item: UpdatedItem) => {
+      if (
+        item?.subCategoryId &&
+        item.subCategoryId === subcategoryId
+      ) {
+        return {
+          name: item.name,
+          price: item.price,
+          categoryId: categoryId,
+          subCategoryId: item.subCategoryId,
+        };
+      }
       return {
         name: item.name,
         price: item.price,
         categoryId: categoryId,
       };
-    },
+    }),
   );
 
   return formattedUpdatedItems;

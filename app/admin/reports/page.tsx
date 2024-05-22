@@ -57,6 +57,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { pusherClient } from '@/app/pusher';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import { SubCategory } from '@prisma/client';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -88,11 +89,13 @@ export default function ReportPage() {
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
 
   useEffect(() => {
+    fetchCategories();
     fetchAllClients();
 
     pusherClient.subscribe('admin-delete-order');
@@ -253,6 +256,30 @@ export default function ReportPage() {
       setIsFetching(false);
     }
   };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(API_URL.SUBCATEGORIES);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      }
+
+      setSubCategories(response.data.data);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error
+      })
+    }
+  }
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -618,6 +645,7 @@ export default function ReportPage() {
                 selectedOrders={selectedOrders}
                 handleSelectOrder={handleSelectOrder}
                 handleSelectAll={handleSelectAll}
+                subCategories={subCategories}
               />
             ) : (
               <ErrorComponent errorText="No Order Available" />
