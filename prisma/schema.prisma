@@ -9,16 +9,16 @@ datasource db {
 }
 
 model Driver {
-  id     Int     @id @default(autoincrement())
-  name   String
-  routes Route[]
-}  
-
+  id       Int     @id @default(autoincrement())
+  name     String  @db.VarChar(255)
+  password String  @db.VarChar(255)
+  routes   Route[]
+}
 
 model User {
   id               Int     @id @default(autoincrement())
   categoryId       Int
-  subCategoryId     Int?
+  subCategoryId    Int?
   userPreferenceId Int? // will change back to force user to have it
   clientName       String  @db.VarChar(255)
   clientId         String  @unique @db.VarChar(255)
@@ -30,11 +30,11 @@ model User {
   role             String  @db.VarChar(255)
 
   category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory       SubCategory?         @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategory    SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   preference     UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders         Orders[]
   scheduleOrders ScheduleOrders[]
-  routes Route[]
+  routes         Route[]
 }
 
 model Category {
@@ -53,12 +53,12 @@ model SubCategory {
 }
 
 model Item {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(255)
-  categoryId Int
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(255)
+  categoryId    Int
   subCategoryId Int?
-  price      Float
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  price         Float
+  category      Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
@@ -108,8 +108,8 @@ model Orders {
   isReplacement Boolean?
   isVoid        Boolean?
 
-  user            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items           OrderedItems[]
+  user  User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items OrderedItems[]
   // OrderPreference OrderPreference[] // Should remove
 }
 
@@ -139,7 +139,7 @@ model ScheduleOrders {
 }
 
 model Route {
-  id       Int      @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   day      String
   driverId Int
   clients  User[]

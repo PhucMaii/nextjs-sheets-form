@@ -23,6 +23,7 @@ import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import {
   Notification,
   OrderedItems,
+  Routes,
   ScheduledOrder,
   UserType,
 } from '@/app/utils/type';
@@ -35,7 +36,7 @@ import ScheduleOrdersTable from '../components/ScheduleOrdersTable';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { errorColor } from '@/app/theme/color';
+import { errorColor, infoBackground, infoColor } from '@/app/theme/color';
 import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';
@@ -55,6 +56,7 @@ export default function ScheduledOrderPage() {
   });
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
+  const [routes, setRoutes] = useState<Routes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -66,14 +68,17 @@ export default function ScheduledOrderPage() {
         setPreOrderProgress(0);
       }, 1000);
     }
-  }, [preOrderProgress])
+  }, [preOrderProgress]);
 
   useEffect(() => {
+    fetchRoutes();
     fetchAllClients();
     pusherClient.subscribe('admin-schedule-order');
 
     const handleReceiveOrder = (incomingOrder: Order) => {
-      const sameIdOrder = createdOrders.some((order: Order) => order.id === incomingOrder.id);
+      const sameIdOrder = createdOrders.some(
+        (order: Order) => order.id === incomingOrder.id,
+      );
 
       if (!sameIdOrder) {
         setCreatedOrders((prevOrders) => [...prevOrders, incomingOrder]);
@@ -89,18 +94,23 @@ export default function ScheduledOrderPage() {
   useEffect(() => {
     if (selectedOrders.length > 0) {
       // Filter out item has same id
-      const filteredOrderLength = createdOrders.reduce((accumulator: any, currentOrder: Order) => {
-        const foundItem = accumulator.find((order: Order) => {
-          return order.id === currentOrder.id;
-        });
+      const filteredOrderLength = createdOrders.reduce(
+        (accumulator: any, currentOrder: Order) => {
+          const foundItem = accumulator.find((order: Order) => {
+            return order.id === currentOrder.id;
+          });
 
-        if (!foundItem) {
-          accumulator = accumulator.concat(currentOrder);
-        };
+          if (!foundItem) {
+            accumulator = accumulator.concat(currentOrder);
+          }
 
-        return accumulator;
-      }, []) 
-      setPreOrderProgress((filteredOrderLength.length / selectedOrders.length) * 100);
+          return accumulator;
+        },
+        [],
+      );
+      setPreOrderProgress(
+        (filteredOrderLength.length / selectedOrders.length) * 100,
+      );
     }
   }, [createdOrders]);
 
@@ -283,6 +293,30 @@ export default function ScheduledOrderPage() {
     }
   };
 
+  const fetchRoutes = async () => {
+    try {
+      const response = await axios.get(`${API_URL.ROUTES}?day=${days[tabIndex]}`);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      setRoutes(response.data.data);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error,
+      });
+    }
+  };
+
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
     // update base order list
     const newBaseOrderList = baseOrderList.filter((order: ScheduledOrder) => {
@@ -450,32 +484,82 @@ export default function ScheduledOrderPage() {
                 </IconButton>
               </Box>
             </Grid>
+            <Grid item xs={2} alignSelf="flex-start">
+              {routes.length > 0 ? (
+                <Tabs
+                  orientation="vertical"
+                  aria-label="basic tabs"
+                  value={tabIndex}
+                  onChange={(e, newValue) => setTabIndex(newValue)}
+                  variant="fullWidth"
+                  sx={{
+                    '& button': { borderRadius: 2 },
+                    '& button:hover': {
+                      boxShadow:
+                        'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
+                    },
+                    '& button:active': {
+                      boxShadow:
+                        'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
+                    },
+                    '& button.Mui-selected': {
+                      backgroundColor: infoBackground,
+                      color: infoColor,
+                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
+                    },
+                  }}
+                >
+                  {routes.length > 0 &&
+                    routes.map((route: Routes, index: number) => {
+                      return (
+                        <Tab
+                          key={index}
+                          id={`simple-tab-${index}`}
+                          label={route.driver.name}
+                          aria-controls={`tabpanel-${index}`}
+                          value={index}
+                        />
+                      );
+                    })}
+                </Tabs>
+              ) : (
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  mt={2}
+                >
+                  <ErrorComponent errorText="No Routes Found" />
+                </Box>
+              )}
+            </Grid>
+            <Grid item xs={10}>
+              {isLoading ? (
+                <SplashScreen />
+              ) : orderList.length > 0 ? (
+                <ScheduleOrdersTable
+                  handleDeleteOrderUI={handleDeleteOrderUI}
+                  handleUpdateOrderUI={handleUpdateOrderUI}
+                  clientOrders={orderList}
+                  setNotification={setNotification}
+                  selectedOrders={selectedOrders}
+                  handleSelectOrder={handleSelectOrder}
+                  handleSelectAll={handleSelectAll}
+                />
+              ) : (
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  mt={2}
+                >
+                  <ErrorComponent errorText="No Scheduled Order Found" />
+                </Box>
+              )}
+            </Grid>
           </Grid>
-          {isLoading ? (
-            <SplashScreen />
-          ) : orderList.length > 0 ? (
-            <>
-              <ScheduleOrdersTable
-                handleDeleteOrderUI={handleDeleteOrderUI}
-                handleUpdateOrderUI={handleUpdateOrderUI}
-                clientOrders={orderList}
-                setNotification={setNotification}
-                selectedOrders={selectedOrders}
-                handleSelectOrder={handleSelectOrder}
-                handleSelectAll={handleSelectAll}
-              />
-            </>
-          ) : (
-            <Box
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              mt={2}
-            >
-              <ErrorComponent errorText="No Scheduled Order Found" />
-            </Box>
-          )}
         </ShadowSection>
       </AuthenGuard>
     </Sidebar>

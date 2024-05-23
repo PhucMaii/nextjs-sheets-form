@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcrypt';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
@@ -140,6 +141,47 @@ async function main() {
   // await prisma.input.createMany({
   //   data: [...inputs],
   // });
+
+  // const driverPassword = await hash('driver123', 12);
+  // const driverList = [
+  //   {
+  //     name: 'NATHAN',
+  //     password: driverPassword
+  //   },
+  //   {
+  //     name: 'NGUYEN',
+  //     password: driverPassword
+  //   },
+  //   {
+  //     name: 'PETER',
+  //     password: driverPassword
+  //   },
+  //   {
+  //     name: 'TONY',
+  //     password: driverPassword
+  //   },
+  //   {
+  //     name: 'BAO BAO',
+  //     password: driverPassword
+  //   },
+  // ];
+
+  // await prisma.driver.createMany({
+  //   data: driverList
+  // })
+
+  // const routes = [
+  //   {
+  //     day: 'Sunday',
+  //     driverId: 
+  //   }
+  // ]
+
+  // await prisma.route.createMany({
+  //   data: [
+
+  //   ]
+  // })
 }
 
 main()
@@ -147,5 +189,5 @@ main()
   .catch(async (error) => {
     console.log(error);
     await prisma.$disconnect();
-    process.exit(1);
+    // process.exit(1);
   });
