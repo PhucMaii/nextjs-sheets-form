@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';

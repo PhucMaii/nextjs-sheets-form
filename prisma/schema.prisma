@@ -34,7 +34,7 @@ model User {
   preference     UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders         Orders[]
   scheduleOrders ScheduleOrders[]
-  routes         Route[]
+  routes         UserRoute[]
 }
 
 model Category {
@@ -142,7 +142,15 @@ model Route {
   id       Int    @id @default(autoincrement())
   day      String
   driverId Int
-  clients  User[]
+  clients  UserRoute[]
 
   driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+}
+
+model UserRoute {
+  userId  Int
+  routeId Int
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  route   Route  @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  @@id([userId, routeId])
 }
