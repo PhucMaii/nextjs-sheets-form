@@ -263,7 +263,7 @@ export default function EditPrice({
                   onChange={(e) => setSubcategoryId(+e.target.value)}
                 >
                   <MenuItem value={0}>-- Choose a subcategory --</MenuItem>
-                  {subcategories &&
+                  {subcategories.length > 0 &&
                     subcategories.map((subcategory: SubCategory) => {
                       return (
                         <MenuItem key={subcategory.id} value={subcategory.id}>

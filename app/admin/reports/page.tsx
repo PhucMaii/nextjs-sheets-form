@@ -32,7 +32,6 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { blue } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/ClientOrdersTable';
-import AuthenGuard from '@/app/HOC/AuthenGuard';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import {
   YYYYMMDDFormat,
@@ -502,7 +501,7 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
-      <AuthenGuard>
+      {/* <AuthenGuard> */}
         <div style={{ display: 'none' }}>
           <InvoicePrint
             client={clientValue}
@@ -652,7 +651,7 @@ export default function ReportPage() {
             )}
           </Paper>
         </ShadowSection>
-      </AuthenGuard>
+      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }

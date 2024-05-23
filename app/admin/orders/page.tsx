@@ -36,17 +36,14 @@ import { DropdownItemContainer } from './styled';
 import { infoColor, successColor } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
 import useDebounce from '@/hooks/useDebounce';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
-import AuthenGuard from '@/app/HOC/AuthenGuard';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import moment from 'moment';
 import { statusTabs } from '@/app/lib/constant';
-import { SubCategory } from '@prisma/client';
+import useSWR from 'swr';
 
 interface Category {
   id: number;
@@ -89,7 +86,7 @@ export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
-  const [clientList, setClientList] = useState<UserType[]>([]);
+  // const [clientList, setClientList] = useState<UserType[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
@@ -97,7 +94,7 @@ export default function Orders() {
     ORDER_STATUS.NONE,
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
@@ -110,16 +107,21 @@ export default function Orders() {
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
-  const [subcategories, setSubcategories] = useState<SubCategory[]>([]);
+  // const [subcategories, setSubcategories] = useState<SubCategory[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+  const { data: clientList } = useSWR(API_URL.CLIENTS);
+  const {data: subcategories} = useSWR(API_URL.SUBCATEGORIES);
+
+  console.log({clientList, subcategories})
+
   useEffect(() => {
-    fetchSubcategories();
-    fetchAllClients();
+    // fetchSubcategories();
+    // fetchAllClients();
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
   }, []);
@@ -198,6 +200,9 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
+    // if (orders) {
+    //   setBaseOrderData(orders.data);
+    // }
   }, [date, currentStatus]);
 
   useEffect(() => {
@@ -285,25 +290,6 @@ export default function Orders() {
     }
   };
 
-  const fetchAllClients = async () => {
-    try {
-      const response = await axios.get(API_URL.CLIENTS);
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
-
-      setClientList(response.data.data);
-    } catch (error: any) {
-      console.log('Fail to fetch all clients: ' + error);
-    }
-  };
-
   const fetchOrders = async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -324,30 +310,6 @@ export default function Orders() {
       console.log('Fail to fetch orders: ', error);
       setIsLoading(false);
       return;
-    }
-  };
-
-  const fetchSubcategories = async () => {
-    try {
-      const response = await axios.get(API_URL.SUBCATEGORIES);
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
-
-      setSubcategories(response.data.data);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
     }
   };
 
@@ -443,7 +405,7 @@ export default function Orders() {
         status: ORDER_STATUS.COMPLETED,
         updatedOrders: selectedOrders.length > 0 ? selectedOrders : orderData,
       });
-      await fetchOrders();
+      // await fetchOrders();
       setNotification({
         on: true,
         type: 'success',
@@ -586,17 +548,6 @@ export default function Orders() {
             onChange={(e) => setSearchKeywords(e.target.value)}
           />
         </Grid>
-        <Grid item xs={2} md={1} textAlign="right">
-          <LoadingButton
-            disabled={orderData.length === baseOrderData.length}
-            loading={isLoading}
-            loadingIndicator="Refresh..."
-            variant="outlined"
-            onClick={() => window.location.reload()}
-          >
-            <RefreshIcon />
-          </LoadingButton>
-        </Grid>
         <Grid item xs={4} md={3}>
           {actionDropdown}
         </Grid>
@@ -618,7 +569,7 @@ export default function Orders() {
                   id={`simple-tab-${index}`}
                   label={`${statusTab.name} ${
                     tabIndex === index
-                      ? `(${isLoading ? 0 : baseOrderData.length})`
+                      ? `(${baseOrderData.length})`
                       : ''
                   } `}
                   aria-controls={`tabpanel-${index}`}
@@ -647,7 +598,7 @@ export default function Orders() {
 
   return (
     <Sidebar>
-      <AuthenGuard>
+      {/* <AuthenGuard> */}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -661,7 +612,7 @@ export default function Orders() {
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
-        clientList={clientList}
+        clientList={clientList?.data || []}
         setNotification={setNotification}
         currentDate={date}
         createOrder={addOrder}
@@ -694,7 +645,7 @@ export default function Orders() {
                         handleUpdatePriceUI={handleUpdatePriceUI}
                         selectedOrders={selectedOrders}
                         handleSelectOrder={handleSelectOrder}
-                        subcategories={subcategories}
+                        subcategories={subcategories?.data || []}
                       />
                     );
                   }}
@@ -713,7 +664,7 @@ export default function Orders() {
             )}
           </>
         )}
-      </AuthenGuard>
+      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 import React, { MouseEvent, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { Notification, SessionClientType } from '@/app/utils/type';
+import { Notification } from '@/app/utils/type';
 import Button from '@/app/components/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import Snackbar from '@/app/components/Snackbar/SnackbarPopup';
@@ -21,8 +20,8 @@ import { limitOrderHour } from '../lib/constant';
 import OverrideOrder from '../components/Modals/OverrideOrder';
 import { Order } from '../admin/orders/page';
 import Sidebar from '../components/Sidebar/Sidebar';
-import AuthenGuard from '../HOC/AuthenGuard';
 import Navbar from '../components/Navbar';
+import useSWR from 'swr';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -39,7 +38,6 @@ export default function OrderForm() {
   });
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [note, setNote] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const [isOpenSecurityModal, setIsOpenSecurityModal] =
     useState<boolean>(false);
@@ -50,7 +48,6 @@ export default function OrderForm() {
     type: 'info',
     message: '',
   });
-  const { status }: SessionClientType = useSession() as SessionClientType;
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   let today: any = dayjs();
@@ -59,10 +56,13 @@ export default function OrderForm() {
   }
 
   const minDate = today.startOf('day');
+  const { data: items, isValidating } = useSWR(API_URL.ITEM);
 
   useEffect(() => {
-    fetchItems();
-  }, []);
+    if (items) {
+      initializeItems();
+    }
+  }, [items]);
 
   useEffect(() => {
     if (lastOrder) {
@@ -71,35 +71,13 @@ export default function OrderForm() {
   }, [lastOrder]);
 
   // Get list of items to render input field
-  const fetchItems = async () => {
-    try {
-      const response = await axios.get(API_URL.ITEM);
+  const initializeItems = () => {
+    const formatItems = items.data.items.map((item: any) => {
+      return { ...item, quantity: 0 };
+    });
 
-      if (response.data.error) {
-        setIsLoading(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-      }
-
-      const formatItems = response.data.data.items.map((item: any) => {
-        return { ...item, quantity: 0 };
-      });
-
-      setItemList(formatItems);
-      setClientName(response.data.data.clientName);
-      setIsLoading(false);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
-      setIsLoading(false);
-    }
+    setItemList(formatItems);
+    setClientName(items.data.clientName);
   };
 
   const handleCheckUserHasInput = () => {
@@ -183,7 +161,7 @@ export default function OrderForm() {
     setDeliveryDate(formattedDate);
   };
 
-  if (isLoading || status === 'loading') {
+  if (isValidating) {
     return (
       <Sidebar>
         <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
@@ -196,90 +174,90 @@ export default function OrderForm() {
   return (
     <FadeIn>
       <Sidebar>
-        <AuthenGuard>
-          <Snackbar
-            open={notification.on}
-            onClose={() => setNotification({ ...notification, on: false })}
-            type={notification.type}
-            message={notification.message}
+        {/* <AuthenGuard> */}
+        <Snackbar
+          open={notification.on}
+          onClose={() => setNotification({ ...notification, on: false })}
+          type={notification.type}
+          message={notification.message}
+        />
+        <ChangePasswordModal
+          isOpen={isOpenSecurityModal}
+          onClose={() => setIsOpenSecurityModal(false)}
+        />
+        {lastOrder && (
+          <OverrideOrder
+            open={isOverrideOrderOpen}
+            onClose={() => setIsOverrideOrderOpen(false)}
+            currentItems={itemList}
+            currentNote={note}
+            lastOrder={lastOrder}
+            deliveryDate={deliveryDate}
+            setNotification={setNotification}
           />
-          <ChangePasswordModal
-            isOpen={isOpenSecurityModal}
-            onClose={() => setIsOpenSecurityModal(false)}
-          />
-          {lastOrder && (
-            <OverrideOrder
-              open={isOverrideOrderOpen}
-              onClose={() => setIsOverrideOrderOpen(false)}
-              currentItems={itemList}
-              currentNote={note}
-              lastOrder={lastOrder}
-              deliveryDate={deliveryDate}
-              setNotification={setNotification}
-            />
-          )}
-          <div className="bg-white w-full mx-auto pb-6">
-            {smDown && <Navbar />}
-            <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-              <h4 className="text-center font-bold text-4xl px-8 mb-8">
-                {clientName}
-              </h4>
-              <Box mb={4}>
-                <label className="block text-red-700 text-sm font-bold mb-2">
-                  DELIVERY DATE
-                </label>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    disablePast
-                    minDate={minDate}
-                    value={dayjs(deliveryDate)}
-                    onChange={handleDateChange}
-                    sx={{
-                      width: '100%',
-                      height: '0.1%',
-                      border: `1px solid ${grey[600]}`,
-                      borderRadius: 2,
-                    }}
+        )}
+        <div className="bg-white w-full mx-auto pb-6">
+          {smDown && <Navbar />}
+          <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h4 className="text-center font-bold text-4xl px-8 mb-8">
+              {clientName}
+            </h4>
+            <Box mb={4}>
+              <label className="block text-red-700 text-sm font-bold mb-2">
+                DELIVERY DATE
+              </label>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  disablePast
+                  minDate={minDate}
+                  value={dayjs(deliveryDate)}
+                  onChange={handleDateChange}
+                  sx={{
+                    width: '100%',
+                    height: '0.1%',
+                    border: `1px solid ${grey[600]}`,
+                    borderRadius: 2,
+                  }}
+                />
+              </LocalizationProvider>
+            </Box>
+            {itemList.length > 0 &&
+              itemList.map((item: any, index: number) => {
+                return (
+                  <Input<string | number>
+                    key={index}
+                    label={`${item.name} - $${
+                      item.price === 0
+                        ? ' Variable price'
+                        : item.price.toFixed(2)
+                    }`}
+                    type="number"
+                    value={item.quantity}
+                    className="border-neutral-400 h-full mb-4"
+                    onChange={(e) => handleChangeItem(e, item)}
+                    placeholder={`Enter ${item.name} here...`}
                   />
-                </LocalizationProvider>
-              </Box>
-              {itemList.length > 0 &&
-                itemList.map((item: any, index: number) => {
-                  return (
-                    <Input<string | number>
-                      key={index}
-                      label={`${item.name} - $${
-                        item.price === 0
-                          ? ' Variable price'
-                          : item.price.toFixed(2)
-                      }`}
-                      type="number"
-                      value={item.quantity}
-                      className="border-neutral-400 h-full mb-4"
-                      onChange={(e) => handleChangeItem(e, item)}
-                      placeholder={`Enter ${item.name} here...`}
-                    />
-                  );
-                })}
-              <Input<string>
-                label="NOTE"
-                multiline
-                value={note}
-                className="border-neutral-400 h-full mb-4"
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Writing your note here..."
-              />
-              <Button
-                color="blue"
-                label="Submit"
-                onClick={handleSubmit}
-                width="full"
-                loadingButton
-                isLoading={isButtonLoading}
-              />
-            </form>
-          </div>
-        </AuthenGuard>
+                );
+              })}
+            <Input<string>
+              label="NOTE"
+              multiline
+              value={note}
+              className="border-neutral-400 h-full mb-4"
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Writing your note here..."
+            />
+            <Button
+              color="blue"
+              label="Submit"
+              onClick={handleSubmit}
+              width="full"
+              loadingButton
+              isLoading={isButtonLoading}
+            />
+          </form>
+        </div>
+        {/* </AuthenGuard> */}
       </Sidebar>
     </FadeIn>
   );
