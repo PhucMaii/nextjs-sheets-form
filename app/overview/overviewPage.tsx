@@ -8,7 +8,6 @@ import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { YYYYMMDDFormat, generateMonthRange } from '../utils/time';
 import Sidebar from '../components/Sidebar/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
-import AuthenGuard from '../HOC/AuthenGuard';
 import NotificationPopup from '../admin/components/Notification';
 import { Box, Divider, Grid, IconButton, Typography } from '@mui/material';
 import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
@@ -18,10 +17,11 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { blue, blueGrey } from '@mui/material/colors';
 import OrderAccordion from '../components/OrderAccordion';
 import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
 
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  // const [isFetching, setIsFetching] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isTomorrow, setIsTomorrow] = useState<boolean>(() => {
     // format initial date
@@ -42,9 +42,22 @@ export default function MainPage() {
   const [totalBill, setTotalBill] = useState<number>(0);
   const router: any = useRouter();
 
+  const dateRange = generateMonthRange();
+
+  // set date to tomorrow
+  const today = new Date();
+  const endDate = dateRange[1];
+  endDate.setDate(today.getDate() + 2);
+  // const response = await axios.get(
+  //   `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${endDate}`,
+  // );
+  const { data: clientOrders, isValidating } = useSWR(API_URL.CLIENT_ORDER);
+  console.log({ clientOrders, dateRange });
   useEffect(() => {
-    handleFetchUserOrder();
-  }, []);
+    if (clientOrders) {
+      initializeUser();
+    }
+  }, [clientOrders]);
 
   useEffect(() => {
     if (thisMonthOrders.length > 0) {
@@ -97,52 +110,20 @@ export default function MainPage() {
     }
   };
 
-  const handleFetchUserOrder = async () => {
-    try {
-      setIsFetching(true);
-      const dateRange = generateMonthRange();
-
-      // set date to tomorrow
-      const today = new Date();
-      const endDate = dateRange[1];
-      endDate.setDate(today.getDate() + 2);
-      const response = await axios.get(
-        `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${endDate}`,
-      );
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsFetching(false);
-        return;
-      }
-
-      const dateObj = new Date();
-      if (dateObj.getHours() >= limitOrderHour) {
-        dateObj.setDate(dateObj.getDate() + 1);
-      }
-      const formattedDate = YYYYMMDDFormat(dateObj);
-      const userOrderList = response.data.data.userOrders;
-      const orderToday = userOrderList.find((order: Order) => {
-        return order.deliveryDate === formattedDate;
-      });
-
-      setClient(response.data.data.user);
-      setUserOrder({ ...response.data.data.user, ...orderToday });
-      setThisMonthOrders(response.data.data.userOrders);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('Fail to fetch user orders: ', error);
-      setIsFetching(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch user orders: ' + error,
-      });
+  const initializeUser = () => {
+    const dateObj = new Date();
+    if (dateObj.getHours() >= limitOrderHour) {
+      dateObj.setDate(dateObj.getDate() + 1);
     }
+    const formattedDate = YYYYMMDDFormat(dateObj);
+    const userOrderList = clientOrders.data.userOrders;
+    const orderToday = userOrderList.find((order: Order) => {
+      return order.deliveryDate === formattedDate;
+    });
+
+    setClient(clientOrders.data.user);
+    setUserOrder({ ...clientOrders.data.user, ...orderToday });
+    setThisMonthOrders(clientOrders.data.userOrders);
   };
 
   const handleUpdateOrderUI = (updatedOrder: Order) => {
@@ -157,7 +138,7 @@ export default function MainPage() {
     setThisMonthOrders(newOrders);
   };
 
-  if (isFetching) {
+  if (isValidating) {
     return (
       <Sidebar>
         <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
@@ -169,75 +150,75 @@ export default function MainPage() {
 
   return (
     <Sidebar>
-      <AuthenGuard>
-        <NotificationPopup
-          notification={notification}
-          onClose={() => setNotification({ ...notification, on: false })}
-        />
-        <Box
-          sx={{
-            backgroundColor: blueGrey[800],
-            color: 'white',
-            width: 'fit-content',
-            padding: 1,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h4">Hello, {client?.clientName} !</Typography>
-        </Box>
-        <Grid container spacing={2} my={2}>
-          <Grid item xs={12}>
-            <Typography variant="h6" fontWeight="bold">
-              This month
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <OverviewCard
-              icon={<ReceiptLongIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text="Total Orders"
-              value={thisMonthOrders.length}
-              onClick={() => router.push('/history')}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <OverviewCard
-              icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text="Balance Due"
-              value={totalBill?.toFixed(2)}
-              onClick={() => router.push('/history')}
-            />
-          </Grid>
-        </Grid>
-        <Divider textAlign="left">
+      {/* <AuthenGuard> */}
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
+      <Box
+        sx={{
+          backgroundColor: blueGrey[800],
+          color: 'white',
+          width: 'fit-content',
+          padding: 1,
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant="h4">Hello, {client?.clientName} !</Typography>
+      </Box>
+      <Grid container spacing={2} my={2}>
+        <Grid item xs={12}>
           <Typography variant="h6" fontWeight="bold">
-            Order
+            This month
           </Typography>
-        </Divider>
-        {userOrder?.items ? (
-          <OrderAccordion
-            handleDeleteOrder={handleDeleteOrder}
-            order={userOrder}
-            setNotification={setNotification}
-            handleUpdateOrderUI={handleUpdateOrderUI}
-            isEdit
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <OverviewCard
+            icon={<ReceiptLongIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Total Orders"
+            value={thisMonthOrders.length}
+            onClick={() => router.push('/history')}
           />
-        ) : (
-          <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            mt={2}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              Create an order for {isTomorrow ? 'tomorrow' : 'today'}
-            </Typography>
-            <IconButton onClick={() => router.push('/order')}>
-              <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-            </IconButton>
-          </Box>
-        )}
-      </AuthenGuard>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <OverviewCard
+            icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Balance Due"
+            value={totalBill?.toFixed(2)}
+            onClick={() => router.push('/history')}
+          />
+        </Grid>
+      </Grid>
+      <Divider textAlign="left">
+        <Typography variant="h6" fontWeight="bold">
+          Order
+        </Typography>
+      </Divider>
+      {userOrder?.items ? (
+        <OrderAccordion
+          handleDeleteOrder={handleDeleteOrder}
+          order={userOrder}
+          setNotification={setNotification}
+          handleUpdateOrderUI={handleUpdateOrderUI}
+          isEdit
+        />
+      ) : (
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          mt={2}
+        >
+          <Typography variant="h6" fontWeight="bold">
+            Create an order for {isTomorrow ? 'tomorrow' : 'today'}
+          </Typography>
+          <IconButton onClick={() => router.push('/order')}>
+            <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+          </IconButton>
+        </Box>
+      )}
+      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }

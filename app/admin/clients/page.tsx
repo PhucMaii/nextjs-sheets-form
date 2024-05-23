@@ -1,5 +1,5 @@
 'use client';
-import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
+import { SplashScreen } from '@/app/HOC/AuthenGuard';
 import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
@@ -424,7 +424,7 @@ export default function ClientsPage() {
 
   return (
     <Sidebar>
-      <AuthenGuard>
+      {/* <AuthenGuard> */}
         <LoadingModal open={isUpdating} />
         <AddClient
           open={isAddClientOpen}
@@ -520,7 +520,7 @@ export default function ClientsPage() {
             <ErrorComponent errorText="No User Found" />
           )}
         </ShadowSection>
-      </AuthenGuard>
+      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }

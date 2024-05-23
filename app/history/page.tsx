@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import AuthenGuard, { SplashScreen } from '../HOC/AuthenGuard';
+import { SplashScreen } from '../HOC/AuthenGuard';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -20,7 +20,6 @@ import SelectDateRange from '../admin/components/SelectDateRange';
 import { generateMonthRange } from '../utils/time';
 import { Order } from '../admin/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';
-import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { Notification } from '../utils/type';
 import OrderAccordion from '../components/OrderAccordion';
@@ -38,6 +37,7 @@ import NotificationPopup from '../admin/components/Notification';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import useSWR from 'swr';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -50,7 +50,6 @@ export default function HistoryPage() {
   const [filterOptions, setFilterOptions] = useState<ORDER_STATUS | string>(
     'All',
   );
-  const [isFetching, setIsFetching] = useState<boolean>(true);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -63,6 +62,7 @@ export default function HistoryPage() {
   const totalPositionRef: any = useRef(null);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const { data: orderData, isValidating } = useSWR(API_URL.CLIENT_ORDER);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -70,10 +70,10 @@ export default function HistoryPage() {
   }, []);
 
   useEffect(() => {
-    if (dateRange) {
-      handleFetchClientOrders();
+    if (dateRange && orderData) {
+      initializeOrders();
     }
-  }, [dateRange]);
+  }, [dateRange, orderData]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -105,35 +105,15 @@ export default function HistoryPage() {
     setActionButtonAnchor(null);
   };
 
-  const handleFetchClientOrders = async () => {
-    setIsFetching(true);
-    try {
-      const response = await axios.get(API_URL.CLIENT_ORDER);
+  const initializeOrders = () => {
+    const filteredOrders: any = filterDateRangeOrders(
+      orderData.data.userOrders,
+      dateRange[0],
+      dateRange[1],
+    );
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsFetching(false);
-        return;
-      }
-
-      const filteredOrders: any = filterDateRangeOrders(response.data.data.userOrders, dateRange[0], dateRange[1]);
-
-      setClientOrders(filteredOrders);
-      setBaseClientOrders(filteredOrders);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('Fail to fetch client orders: ', error);
-      setIsFetching(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch client orders: ' + error,
-      });
-    }
+    setClientOrders(filteredOrders);
+    setBaseClientOrders(filteredOrders);
   };
 
   const resetOrders = () => {
@@ -149,9 +129,7 @@ export default function HistoryPage() {
       gap={2}
       width="100%"
     >
-      <IconButton
-        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-      >
+      <IconButton onClick={(e) => setActionButtonAnchor(e.currentTarget)}>
         <TuneIcon />
       </IconButton>
       <Menu
@@ -242,66 +220,57 @@ export default function HistoryPage() {
     </Box>
   );
 
-  // if (isFetching) {
-  //   return (
-  //     <Sidebar>
-  //       <SplashScreen />
-  //     </Sidebar>
-  //   );
-  // }
-
   return (
     <Sidebar>
-      <AuthenGuard>
-        <NotificationPopup
-          notification={notification}
-          onClose={() => setNotification({ ...notification, on: false })}
-        />
-        <Grid
-          container
-          columnSpacing={2}
-          alignItems="center"
-          spacing={2}
-          sx={{ position: 'sticky' }}
-        >
-          <Grid item xs={12} md={6}>
-            <Typography variant="h4">History</Typography>
-          </Grid>
-          <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
-            <SelectDateRange
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-            />
-          </Grid>
-          <Grid item xs={11}>
-            <TextField
-              fullWidth
-              variant="filled"
-              placeholder="Search by invoice id or status"
-              value={searchKeywords}
-              onChange={(e) => setSearchKeywords(e.target.value)}
-            />
-          </Grid>
-          <Grid item xs={1} textAlign="right">
-            {filterDropdown}
-          </Grid>
-          <Grid item xs={12} ref={totalPositionRef}>
-            <Box
-              sx={{
-                backgroundColor: blueGrey[800],
-                color: 'white',
-                width: 'fit-content',
-                padding: 1,
-                borderRadius: 2,
-              }}
-            >
-              <Typography variant="h6">
-                Total: {clientOrders.length} orders
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            {isFetching ? <SplashScreen /> : clientOrders.length > 0 && (
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
+      <Grid
+        container
+        columnSpacing={2}
+        alignItems="center"
+        spacing={2}
+        sx={{ position: 'sticky' }}
+      >
+        <Grid item xs={12} md={6}>
+          <Typography variant="h4">History</Typography>
+        </Grid>
+        <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
+          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+        </Grid>
+        <Grid item xs={11}>
+          <TextField
+            fullWidth
+            variant="filled"
+            placeholder="Search by invoice id or status"
+            value={searchKeywords}
+            onChange={(e) => setSearchKeywords(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={1} textAlign="right">
+          {filterDropdown}
+        </Grid>
+        <Grid item xs={12} ref={totalPositionRef}>
+          <Box
+            sx={{
+              backgroundColor: blueGrey[800],
+              color: 'white',
+              width: 'fit-content',
+              padding: 1,
+              borderRadius: 2,
+            }}
+          >
+            <Typography variant="h6">
+              Total: {clientOrders.length} orders
+            </Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          {isValidating ? (
+            <SplashScreen />
+          ) : (
+            clientOrders.length > 0 && (
               <Virtuoso
                 totalCount={clientOrders.length}
                 style={{ height: virtuosoHeight }}
@@ -310,10 +279,10 @@ export default function HistoryPage() {
                   <OrderAccordion key={index} order={order} />
                 )}
               />
-            )}
-          </Grid>
+            )
+          )}
         </Grid>
-      </AuthenGuard>
+      </Grid>
     </Sidebar>
   );
 }

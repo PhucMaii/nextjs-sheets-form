@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import AuthenGuard, { SplashScreen } from '@/app/HOC/AuthenGuard';
+import { SplashScreen } from '@/app/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
 import {
   Box,
@@ -412,7 +412,7 @@ export default function ScheduledOrderPage() {
 
   return (
     <Sidebar>
-      <AuthenGuard>
+      {/* <AuthenGuard> */}
         <AddOrder
           open={isAddOrderOpen}
           onClose={() => setIsAddOrderOpen(false)}
@@ -610,7 +610,7 @@ export default function ScheduledOrderPage() {
             </Grid>
           </Grid>
         </ShadowSection>
-      </AuthenGuard>
+      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }

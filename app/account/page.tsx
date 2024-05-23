@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import AuthenGuard, { SplashScreen } from '../HOC/AuthenGuard';
+import { SplashScreen } from '../HOC/AuthenGuard';
 import {
   Box,
   IconButton,
@@ -188,7 +188,7 @@ export default function AccountPage() {
 
   return (
     <Sidebar>
-      <AuthenGuard>
+      {/* <AuthenGuard> */}
         <SnackbarPopup
           open={notification.on}
           type={notification.type}
@@ -304,7 +304,7 @@ export default function AccountPage() {
             </LoadingButtonStyles>
           </Box>
         </ShadowSection>
-      </AuthenGuard>
+      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }

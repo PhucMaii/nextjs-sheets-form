@@ -1,39 +1,31 @@
-import { getSession } from 'next-auth/react';
-import { useRouter, usePathname } from 'next/navigation';
-import { FC, useEffect, useState } from 'react';
-import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
-import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { API_URL } from '../utils/enum';
-
-const SplashScreen: FC = () => (
-  <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-    <LoadingComponent color="blue" />
-  </div>
-);
+import useSWR from 'swr';
+import { fetcher } from './AuthenGuard';
 
 export default function LoginAndRegisterGuard({ children }: any) {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
-  const pathname = usePathname();
+
+  const { data: session } = useSWR('/api/auth/session', fetcher, {
+    revalidateOnFocus: false,
+  });
+
+  const { data: user } = useSWR(
+    session?.user ? `${API_URL.USER}?id=${session.user.id}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
   useEffect(() => {
-    const checkSession = async () => {
-      const session: any = await getSession();
-      if (session) {
-        const response: any = await axios.get(
-          `${API_URL.USER}?id=${session?.user.id}`,
-        );
-        if (response.data.data.role === 'client') {
-          router.push('/');
-        } else {
-          router.push('/admin/orders');
-        }
-      }
+    if (user?.data?.role === 'admin') {
+      router.push('/admin/orders');
+    } else if (user?.data?.role === 'client'){
+      router.push('/');
+    }
+  }, [user]);
 
-      setIsLoading(false);
-    };
-    checkSession();
-  }, [pathname]);
-
-  return isLoading ? <SplashScreen /> : children;
+  return children;
 }
