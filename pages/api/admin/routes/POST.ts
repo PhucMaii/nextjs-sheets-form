@@ -5,6 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface BodyType {
   day: string;
   driver: Driver;
+  name: string;
   clientList: UserType[];
 }
 
@@ -12,18 +13,19 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { day, driver, clientList }: BodyType = req.body;
+    const { day, driver, name, clientList }: BodyType = req.body;
 
     const existedRoute = await prisma.route.findFirst({
       where: {
         day,
         driverId: driver.id,
+        name
       },
     });
 
     if (existedRoute) {
       return res.status(500).json({
-        error: `Driver Already Had Route For ${day}`,
+        error: `Driver Or Route Name Already Existed For ${day}`,
       });
     }
 
@@ -31,6 +33,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         day,
         driverId: driver.id,
+        name
       },
     });
 

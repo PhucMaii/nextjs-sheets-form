@@ -87,5 +87,5 @@ export interface ScheduledOrder {
 }
 
 export interface Routes extends Route {
-  driver: Driver
+  driver?: Driver
 }

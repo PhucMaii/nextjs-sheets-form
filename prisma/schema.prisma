@@ -140,6 +140,7 @@ model ScheduleOrders {
 
 model Route {
   id       Int    @id @default(autoincrement())
+  name     String
   day      String
   driverId Int
   clients  UserRoute[]

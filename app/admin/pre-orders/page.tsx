@@ -40,14 +40,18 @@ import { errorColor, infoBackground, infoColor } from '@/app/theme/color';
 import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';
+import AddRoute from '../components/Modals/AddRoute';
+import { Driver } from '@prisma/client';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
+  const [driverList, setDriverList] = useState<Driver[]>([]);
   const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
+  const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -71,6 +75,7 @@ export default function ScheduledOrderPage() {
   }, [preOrderProgress]);
 
   useEffect(() => {
+    fetchDrivers();
     fetchRoutes();
     fetchAllClients();
     pusherClient.subscribe('admin-schedule-order');
@@ -263,6 +268,30 @@ export default function ScheduledOrderPage() {
     }
   };
 
+  const fetchDrivers = async () => {
+    try {
+      const response = await axios.get(API_URL.DRIVERS);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      setDriverList(response.data.data);
+    } catch (error: any) {
+      console.log('Fail to fetch all clients: ' + error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to fetch all clients: ' + error,
+      });
+    }
+  };
+
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
@@ -295,7 +324,9 @@ export default function ScheduledOrderPage() {
 
   const fetchRoutes = async () => {
     try {
-      const response = await axios.get(`${API_URL.ROUTES}?day=${days[tabIndex]}`);
+      const response = await axios.get(
+        `${API_URL.ROUTES}?day=${days[tabIndex]}`,
+      );
 
       if (response.data.error) {
         setNotification({
@@ -388,6 +419,13 @@ export default function ScheduledOrderPage() {
           clientList={clientList}
           setNotification={setNotification}
           createScheduledOrder={createScheduledOrder}
+        />
+        <AddRoute
+          open={isAddRouteOpen}
+          onClose={() => setIsAddRouteOpen(false)}
+          day={days[tabIndex]}
+          driverList={driverList}
+          clientList={clientList}
         />
         <EditDeliveryDate
           open={isPreOrderOpen}
@@ -485,54 +523,65 @@ export default function ScheduledOrderPage() {
               </Box>
             </Grid>
             <Grid item xs={2} alignSelf="flex-start">
-              {routes.length > 0 ? (
-                <Tabs
-                  orientation="vertical"
-                  aria-label="basic tabs"
-                  value={tabIndex}
-                  onChange={(e, newValue) => setTabIndex(newValue)}
-                  variant="fullWidth"
-                  sx={{
-                    '& button': { borderRadius: 2 },
-                    '& button:hover': {
-                      boxShadow:
-                        'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
-                    },
-                    '& button:active': {
-                      boxShadow:
-                        'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
-                    },
-                    '& button.Mui-selected': {
-                      backgroundColor: infoBackground,
-                      color: infoColor,
-                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
-                    },
-                  }}
-                >
-                  {routes.length > 0 &&
-                    routes.map((route: Routes, index: number) => {
-                      return (
-                        <Tab
-                          key={index}
-                          id={`simple-tab-${index}`}
-                          label={route.driver.name}
-                          aria-controls={`tabpanel-${index}`}
-                          value={index}
-                        />
-                      );
-                    })}
-                </Tabs>
-              ) : (
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  justifyContent="center"
-                  alignItems="center"
-                  mt={2}
-                >
-                  <ErrorComponent errorText="No Routes Found" />
-                </Box>
-              )}
+              <Box
+                display="flex"
+                flexDirection="column"
+                gap={1}
+                justifyContent="center"
+                alignItems="center"
+              >
+                {routes.length > 0 ? (
+                  <Tabs
+                    orientation="vertical"
+                    aria-label="basic tabs"
+                    value={tabIndex}
+                    onChange={(e, newValue) => setTabIndex(newValue)}
+                    variant="fullWidth"
+                    sx={{
+                      '& button': { borderRadius: 2 },
+                      '& button:hover': {
+                        boxShadow:
+                          'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
+                      },
+                      '& button:active': {
+                        boxShadow:
+                          'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
+                      },
+                      '& button.Mui-selected': {
+                        backgroundColor: infoBackground,
+                        color: infoColor,
+                        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
+                      },
+                    }}
+                  >
+                    {routes.length > 0 &&
+                      routes.map((route: Routes, index: number) => {
+                        return (
+                          <Tab
+                            key={index}
+                            id={`simple-tab-${index}`}
+                            label={route?.driver?.name}
+                            aria-controls={`tabpanel-${index}`}
+                            value={index}
+                          />
+                        );
+                      })}
+                  </Tabs>
+                ) : (
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    mt={2}
+                  >
+                    <ErrorComponent errorText="No Routes Found" />
+                  </Box>
+                )}
+                <IconButton onClick={() => setIsAddRouteOpen(true)}>
+                  <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+                </IconButton>
+              </Box>
             </Grid>
             <Grid item xs={10}>
               {isLoading ? (
