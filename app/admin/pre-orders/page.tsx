@@ -25,7 +25,6 @@ import {
   OrderedItems,
   Routes,
   ScheduledOrder,
-  UserType,
 } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -41,13 +40,14 @@ import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';
 import AddRoute from '../components/Modals/AddRoute';
-import { Driver } from '@prisma/client';
+import useSWR from 'swr';
+import { UserRoute } from '@prisma/client';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
-  const [clientList, setClientList] = useState<UserType[]>([]);
+  // const [clientList, setClientList] = useState<UserType[]>([]);
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
-  const [driverList, setDriverList] = useState<Driver[]>([]);
+  // const [driverList, setDriverList] = useState<Driver[]>([]);
   const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
@@ -59,11 +59,19 @@ export default function ScheduledOrderPage() {
     message: '',
   });
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
-  const [tabIndex, setTabIndex] = useState<number>(0);
-  const [routes, setRoutes] = useState<Routes[]>([]);
+  const [dayIndex, setDayIndex] = useState<number>(0);
+  const [routeIndex, setRouteIndex] = useState<number>(0);
+  // const [routes, setRoutes] = useState<Routes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+
+
+  const { data: clientList } = useSWR(API_URL.CLIENTS);
+  const { data: driverList } = useSWR(API_URL.DRIVERS);
+  const { data: routes } = useSWR(`${API_URL.ROUTES}?day=${days[dayIndex]}`);
+
+  console.log(routes, 'routes');
 
   useEffect(() => {
     if (preOrderProgress === 100) {
@@ -75,9 +83,9 @@ export default function ScheduledOrderPage() {
   }, [preOrderProgress]);
 
   useEffect(() => {
-    fetchDrivers();
-    fetchRoutes();
-    fetchAllClients();
+    // fetchDrivers();
+    // fetchRoutes();
+    // fetchAllClients();
     pusherClient.subscribe('admin-schedule-order');
 
     const handleReceiveOrder = (incomingOrder: Order) => {
@@ -120,8 +128,12 @@ export default function ScheduledOrderPage() {
   }, [createdOrders]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [tabIndex]);
+    if (routes && routes.data.length > 0) {
+      fetchOrders();
+    } else {
+      setOrderList([]);
+    }
+  }, [dayIndex, routeIndex, routes]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -193,11 +205,13 @@ export default function ScheduledOrderPage() {
 
   const createScheduledOrder = async (userId: number, items: any) => {
     try {
+      console.log(routes.data[routeIndex].id, 'routeid')
       const totalPrice = calculateTotalBillOneOrder(items);
       const response = await axios.post(API_URL.SCHEDULED_ORDER, {
         userId,
         items,
-        day: days[tabIndex],
+        day: days[dayIndex],
+        routeId: routes.data[routeIndex].id,
         newTotalPrice: totalPrice,
       });
 
@@ -244,59 +258,63 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const fetchAllClients = async () => {
-    try {
-      const response = await axios.get(API_URL.CLIENTS);
+  // const fetchAllClients = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL.CLIENTS);
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       return;
+  //     }
 
-      setClientList(response.data.data);
-    } catch (error: any) {
-      console.log('Fail to fetch all clients: ' + error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch all clients: ' + error,
-      });
-    }
-  };
+  //     setClientList(response.data.data);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch all clients: ' + error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'Fail to fetch all clients: ' + error,
+  //     });
+  //   }
+  // };
 
-  const fetchDrivers = async () => {
-    try {
-      const response = await axios.get(API_URL.DRIVERS);
+  // const fetchDrivers = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL.DRIVERS);
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       return;
+  //     }
 
-      setDriverList(response.data.data);
-    } catch (error: any) {
-      console.log('Fail to fetch all clients: ' + error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch all clients: ' + error,
-      });
-    }
-  };
+  //     setDriverList(response.data.data);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch all clients: ' + error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'Fail to fetch all clients: ' + error,
+  //     });
+  //   }
+  // };
 
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
+      console.log(routes.data[routeIndex], 'single route');
+      const clientIds = routes.data[routeIndex]?.clients.map((userRoute: UserRoute) => {
+        return userRoute.userId;
+      })
       const response = await axios.get(
-        `${API_URL.SCHEDULED_ORDER}?day=${days[tabIndex]}`,
+        `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds}`,
       );
 
       if (response.data.error) {
@@ -322,31 +340,31 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const fetchRoutes = async () => {
-    try {
-      const response = await axios.get(
-        `${API_URL.ROUTES}?day=${days[tabIndex]}`,
-      );
+  // const fetchRoutes = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_URL.ROUTES}?day=${days[dayIndex]}`,
+  //     );
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       return;
+  //     }
 
-      setRoutes(response.data.data);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
-    }
-  };
+  //     setRoutes(response.data.data);
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'There was an error: ' + error,
+  //     });
+  //   }
+  // };
 
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
     // update base order list
@@ -416,16 +434,17 @@ export default function ScheduledOrderPage() {
         <AddOrder
           open={isAddOrderOpen}
           onClose={() => setIsAddOrderOpen(false)}
-          clientList={clientList}
+          clientList={clientList?.data || []}
           setNotification={setNotification}
           createScheduledOrder={createScheduledOrder}
         />
         <AddRoute
           open={isAddRouteOpen}
           onClose={() => setIsAddRouteOpen(false)}
-          day={days[tabIndex]}
-          driverList={driverList}
-          clientList={clientList}
+          day={days[dayIndex]}
+          driverList={driverList?.data || []}
+          clientList={clientList?.data || []}
+          setNotification={setNotification}
         />
         <EditDeliveryDate
           open={isPreOrderOpen}
@@ -469,8 +488,8 @@ export default function ScheduledOrderPage() {
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
               aria-label="basic tabs"
-              value={tabIndex}
-              onChange={(e, newValue) => setTabIndex(newValue)}
+              value={dayIndex}
+              onChange={(e, newValue) => setDayIndex(newValue)}
               variant="fullWidth"
             >
               {days &&
@@ -530,12 +549,12 @@ export default function ScheduledOrderPage() {
                 justifyContent="center"
                 alignItems="center"
               >
-                {routes.length > 0 ? (
+                {routes?.data?.length > 0 ? (
                   <Tabs
                     orientation="vertical"
                     aria-label="basic tabs"
-                    value={tabIndex}
-                    onChange={(e, newValue) => setTabIndex(newValue)}
+                    value={routeIndex}
+                    onChange={(e, newValue) => setRouteIndex(newValue)}
                     variant="fullWidth"
                     sx={{
                       '& button': { borderRadius: 2 },
@@ -554,8 +573,8 @@ export default function ScheduledOrderPage() {
                       },
                     }}
                   >
-                    {routes.length > 0 &&
-                      routes.map((route: Routes, index: number) => {
+                    {routes?.data?.length > 0 &&
+                      routes?.data?.map((route: Routes, index: number) => {
                         return (
                           <Tab
                             key={index}

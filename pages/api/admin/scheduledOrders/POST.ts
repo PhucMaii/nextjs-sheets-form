@@ -5,7 +5,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId, items, day, newTotalPrice } = req.body;
+    const { userId, items, day, routeId, newTotalPrice } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -125,6 +125,20 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
       });
     }
+
+    // add target client into selected route
+    await prisma.route.update({
+      where: {
+        id: Number(routeId),
+      },
+      data: {
+        clients: {
+          create: {
+            user: { connect: { id: userId } }
+          },
+        },
+      },
+    });
 
     const updatedScheduledOrder = await prisma.scheduleOrders.findUnique({
       where: {

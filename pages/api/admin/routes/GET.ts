@@ -13,6 +13,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         const routes = await prisma.route.findMany({
             where: {
                 day
+            },
+            include: {
+                driver: true,
+                clients: true,
             }
         });
 

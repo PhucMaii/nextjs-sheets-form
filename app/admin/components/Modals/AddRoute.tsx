@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { ModalProps } from './type';
 import { Driver } from '@prisma/client';
 import {
@@ -16,15 +16,18 @@ import {
 import { BoxModal } from './styled';
 import { infoColor } from '@/app/theme/color';
 import ModalHead from '@/app/lib/ModalHead';
-import { Routes, UserType } from '@/app/utils/type';
+import { Notification, Routes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 
 interface IAddRouteModal extends ModalProps {
   day: string;
   driverList: Driver[];
   clientList: UserType[];
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 export default function AddRoute({
@@ -33,20 +36,69 @@ export default function AddRoute({
   day,
   driverList,
   clientList,
+  setNotification,
 }: IAddRouteModal) {
+  const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newRoute, setNewRoute] = useState<Routes>({
     id: -1,
     name: '',
     driverId: -1,
     day,
   });
+  const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
+
+  const addRoute = async () => {
+    if (newRoute.driverId === -1 || newRoute.name.trim() === '' || selectedClients.length === 0) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Please fill out all blanks'
+      });
+      return;
+    }
+    try {
+      setIsAdding(true);
+      const response = await axios.post(API_URL.ROUTES, {
+        day,
+        driverId: newRoute.driverId,
+        name: newRoute.name,
+        clientList: selectedClients
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        setIsAdding(false);
+        return;
+      }
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      });
+      setIsAdding(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error
+      });
+      setIsAdding(false);
+    }
+  }
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <ModalHead
           heading="Add Route"
-          onClick={() => {}}
-          buttonProps={{ color: infoColor, variant: 'contained' }}
+          onClick={addRoute}
+          buttonProps={{ color: infoColor, variant: 'contained', loading: isAdding }}
         />
         <Divider />
         <Grid container spacing={2}>
@@ -85,7 +137,7 @@ export default function AddRoute({
           </Grid>
           <Grid item xs={12}>
             <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Driver:</Typography>
+              <Typography variant="h6">Clients:</Typography>
               <Autocomplete 
                 multiple
                 options={clientList}
@@ -106,6 +158,8 @@ export default function AddRoute({
                 renderInput={(params) => (
                   <TextField {...params} label="Clients" placeholder="-- Choose clients --" />
                 )}
+                value={selectedClients}
+                onChange={(e, newValue: UserType[]) => setSelectedClients(newValue)}
               />
             </Box>
           </Grid>
