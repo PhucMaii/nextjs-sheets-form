@@ -5,19 +5,64 @@ import { UpdateOption } from '../orderedItems/PUT';
 
 interface BodyTypes {
   user: UserType;
-  items: OrderedItems[];
-  scheduledOrderId: number;
-  totalPrice: number;
+  items?: OrderedItems[];
+  scheduledOrderId?: number;
+  totalPrice?: number;
   updateOption?: UpdateOption;
+  oldRouteId?: number;
+  newRouteId?: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { user, items, scheduledOrderId, totalPrice, updateOption } =
+    const { user, items, scheduledOrderId, totalPrice, updateOption, oldRouteId, newRouteId } =
       req.body as BodyTypes;
 
+    if (oldRouteId && newRouteId) {
+      // remove from user route
+      const existingUserRoute = await prisma.userRoute.findUnique({
+        where: {
+          userId_routeId: {
+            userId: user.id,
+            routeId: oldRouteId
+          }
+        }
+      });
+
+      if (!existingUserRoute) {
+        return res.status(404).json({
+          error: 'Incorrect Old Route Id'
+        })
+      };
+
+      await prisma.userRoute.delete({
+        where: {
+          userId_routeId: {
+            userId: user.id,
+            routeId: oldRouteId
+          }
+        }
+      });
+
+      await prisma.userRoute.create({
+        data: {
+          userId: user.id,
+          routeId: newRouteId
+        }
+      });
+
+      return res.status(200).json({
+        message: 'User Switch Route Successfully'
+      })
+    }
+    
+    if (!items) {
+      return res.status(404).json({
+        error: 'Item List Not Provided'
+      })
+    }
     // Update items in schedule order
     for (const item of items) {
       if (!item.id) {

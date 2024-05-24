@@ -61,18 +61,16 @@ export default function ScheduledOrderPage() {
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [dayIndex, setDayIndex] = useState<number>(0);
   const [routeIndex, setRouteIndex] = useState<number>(0);
-  // const [routes, setRoutes] = useState<Routes[]>([]);
+  const [routes, setRoutes] = useState<Routes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const { data: clientList } = useSWR(API_URL.CLIENTS);
   const { data: driverList } = useSWR(API_URL.DRIVERS);
-  const { data: routes, isValidating } = useSWR(
-    `${API_URL.ROUTES}?day=${days[dayIndex]}`,
-  );
-
-  console.log(routes, 'routes');
+  // const { data: routes, isValidating } = useSWR(
+  //   `${API_URL.ROUTES}?day=${days[dayIndex]}`,
+  // );
 
   useEffect(() => {
     if (preOrderProgress === 100) {
@@ -85,7 +83,6 @@ export default function ScheduledOrderPage() {
 
   useEffect(() => {
     // fetchDrivers();
-    // fetchRoutes();
     // fetchAllClients();
     pusherClient.subscribe('admin-schedule-order');
 
@@ -128,13 +125,24 @@ export default function ScheduledOrderPage() {
     }
   }, [createdOrders]);
 
+  // useEffect(() => {
+  //   if (routes.length > 0) {
+  //     fetchOrders();
+  //     fetchRoutes();
+  //   } else {
+  //     setOrderList([]);
+  //   }
+  // }, [dayIndex, routeIndex]);
+
   useEffect(() => {
-    if (routes && routes.data.length > 0) {
+    if (routes.length > 0) {
       fetchOrders();
-    } else {
-      setOrderList([]);
     }
-  }, [dayIndex, routeIndex, routes]);
+  }, [dayIndex, routeIndex, routes])
+
+  useEffect(() => {
+    fetchRoutes();
+  }, [routeIndex])
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -206,13 +214,12 @@ export default function ScheduledOrderPage() {
 
   const createScheduledOrder = async (userId: number, items: any) => {
     try {
-      console.log(routes.data[routeIndex].id, 'routeid');
       const totalPrice = calculateTotalBillOneOrder(items);
       const response = await axios.post(API_URL.SCHEDULED_ORDER, {
         userId,
         items,
         day: days[dayIndex],
-        routeId: routes.data[routeIndex].id,
+        routeId: routes[routeIndex].id,
         newTotalPrice: totalPrice,
       });
 
@@ -310,8 +317,7 @@ export default function ScheduledOrderPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      console.log(routes.data[routeIndex], 'single route');
-      const clientIds = routes.data[routeIndex]?.clients.map(
+      const clientIds = routes[routeIndex].clients?.map(
         (userRoute: UserRoute) => {
           return userRoute.userId;
         },
@@ -343,31 +349,31 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  // const fetchRoutes = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `${API_URL.ROUTES}?day=${days[dayIndex]}`,
-  //     );
+  const fetchRoutes = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL.ROUTES}?day=${days[dayIndex]}`,
+      );
 
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       return;
-  //     }
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
 
-  //     setRoutes(response.data.data);
-  //   } catch (error: any) {
-  //     console.log('There was an error: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'There was an error: ' + error,
-  //     });
-  //   }
-  // };
+      setRoutes(response.data.data);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error,
+      });
+    }
+  };
 
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
     // update base order list
@@ -550,7 +556,7 @@ export default function ScheduledOrderPage() {
               justifyContent="center"
               alignItems="center"
             >
-              {routes?.data?.length > 0 ? (
+              {routes.length > 0 ? (
                 <Tabs
                   orientation="vertical"
                   aria-label="basic tabs"
@@ -574,8 +580,8 @@ export default function ScheduledOrderPage() {
                     },
                   }}
                 >
-                  {routes?.data?.length > 0 &&
-                    routes?.data?.map((route: Routes, index: number) => {
+                  {routes.length > 0 &&
+                    routes.map((route: Routes, index: number) => {
                       return (
                         <Tab
                           key={index}
@@ -604,7 +610,7 @@ export default function ScheduledOrderPage() {
             </Box>
           </Grid>
           <Grid item xs={10}>
-            {isLoading || isValidating ? (
+            {isLoading ? (
               <SplashScreen />
             ) : orderList.length > 0 ? (
               <ScheduleOrdersTable
@@ -615,7 +621,8 @@ export default function ScheduledOrderPage() {
                 selectedOrders={selectedOrders}
                 handleSelectOrder={handleSelectOrder}
                 handleSelectAll={handleSelectAll}
-                routeId={routes?.data[routeIndex].id}
+                routeId={routes[routeIndex].id}
+                routes={routes}
               />
             ) : (
               <Box

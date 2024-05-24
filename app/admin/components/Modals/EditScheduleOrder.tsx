@@ -6,8 +6,10 @@ import {
   Grid,
   IconButton,
   InputLabel,
+  MenuItem,
   Modal,
   OutlinedInput,
+  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -15,7 +17,12 @@ import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
 import { BoxModal } from './styled';
 import UpdateChoiceSelection from '../UpdateChoiceSelection';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
-import { Notification, OrderedItems, ScheduledOrder } from '@/app/utils/type';
+import {
+  Notification,
+  OrderedItems,
+  Routes,
+  ScheduledOrder,
+} from '@/app/utils/type';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { errorColor, infoColor } from '@/app/theme/color';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
@@ -26,12 +33,18 @@ interface PropTypes {
   order: ScheduledOrder;
   setNotification: Dispatch<SetStateAction<Notification>>;
   handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
+  handleDeleteOrderUI: (targetOrder: ScheduledOrder) => void;
+  routes: Routes[];
+  routeId: number;
 }
 
 export default function EditScheduleOrder({
   order,
   handleUpdateOrderUI,
   setNotification,
+  handleDeleteOrderUI,
+  routes,
+  routeId,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<OrderedItems>({
@@ -40,6 +53,7 @@ export default function EditScheduleOrder({
     quantity: 0,
     totalPrice: 0,
   });
+  const [newRouteId, setNewRouteId] = useState<number>(routeId);
   const [itemList, setItemList] = useState<OrderedItems[]>(() => {
     const formattedItems = order.items.map((item: OrderedItems) => {
       const totalPrice = item.quantity * item.price;
@@ -132,6 +146,52 @@ export default function EditScheduleOrder({
     setItemList(newItemList);
   };
 
+  const switchRoute = async () => {
+    if (newRouteId === routeId) {
+      setNotification({
+        on: true,
+        type: 'warning',
+        message: 'Route Has Not Been Changed',
+      });
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const response = await axios.put(API_URL.SCHEDULED_ORDER, {
+        user: order.user,
+        oldRouteId: routeId,
+        newRouteId
+      });
+
+      if (response.data.error) {
+        setIsSubmitting(false);
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      };
+
+      handleDeleteOrderUI(order);
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsSubmitting(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setIsSubmitting(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update item: ' + error,
+      });
+    }
+  }
+
   const updateItems = async () => {
     try {
       setIsSubmitting(true);
@@ -195,14 +255,34 @@ export default function EditScheduleOrder({
             alignItems="center"
           >
             <Typography variant="h4">Edit Order</Typography>
-            <LoadingButtonStyles
-              variant="contained"
-              color={infoColor}
-              onClick={updateItems}
-              loading={isSubmitting}
+          </Box>
+          <Divider />
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Route:</Typography>
+            <Select
+              value={newRouteId}
+              onChange={(e) => setNewRouteId(+e.target.value)}
+              fullWidth
             >
-              Save
-            </LoadingButtonStyles>
+              {routes &&
+                routes.map((route: Routes) => {
+                  return (
+                    <MenuItem key={route.id} value={route.id}>
+                      {route.name} - {route?.driver?.name}
+                    </MenuItem>
+                  );
+                })}
+            </Select>
+            <Box display="flex" justifyContent="right">
+              <LoadingButtonStyles
+                variant="contained"
+                color={infoColor}
+                onClick={switchRoute}
+                loading={isSubmitting}
+              >
+                Save
+              </LoadingButtonStyles>
+            </Box>
           </Box>
           <Divider textAlign="center" sx={{ mb: 1 }}>
             Add items
@@ -306,6 +386,16 @@ export default function EditScheduleOrder({
                     </Fragment>
                   );
                 })}
+              <Grid item xs={12} textAlign="right">
+                <LoadingButtonStyles
+                  variant="contained"
+                  color={infoColor}
+                  onClick={updateItems}
+                  loading={isSubmitting}
+                >
+                  Save
+                </LoadingButtonStyles>
+              </Grid>
             </Grid>
           </Box>
         </BoxModal>
