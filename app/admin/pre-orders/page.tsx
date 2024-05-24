@@ -125,24 +125,9 @@ export default function ScheduledOrderPage() {
     }
   }, [createdOrders]);
 
-  // useEffect(() => {
-  //   if (routes.length > 0) {
-  //     fetchOrders();
-  //     fetchRoutes();
-  //   } else {
-  //     setOrderList([]);
-  //   }
-  // }, [dayIndex, routeIndex]);
-
   useEffect(() => {
-    if (routes.length > 0) {
-      fetchOrders();
-    }
-  }, [dayIndex, routeIndex, routes])
-
-  useEffect(() => {
-    fetchRoutes();
-  }, [routeIndex])
+    fetchOrders();
+  }, [dayIndex, routeIndex]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -317,7 +302,13 @@ export default function ScheduledOrderPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      const clientIds = routes[routeIndex].clients?.map(
+      const returnRoutes = await fetchRoutes();
+      if (returnRoutes.length === 0) {
+        setOrderList([]);
+        setIsLoading(false);
+        return;
+      }
+      const clientIds = returnRoutes[routeIndex].clients?.map(
         (userRoute: UserRoute) => {
           return userRoute.userId;
         },
@@ -365,6 +356,7 @@ export default function ScheduledOrderPage() {
       }
 
       setRoutes(response.data.data);
+      return response.data.data; // for fetch orders
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
@@ -513,49 +505,23 @@ export default function ScheduledOrderPage() {
               })}
           </Tabs>
         </Box>
-        <Grid container alignItems="center" spacing={2}>
-          <Grid item xs={2}>
-            <Button
-              fullWidth
-              onClick={() => setIsPreOrderOpen(true)}
-              variant="outlined"
-              disabled={selectedOrders.length === 0}
-            >
-              <Box display="flex" gap={1} alignItems="center">
-                <Typography>Pre Order</Typography>
-                <PendingActionsIcon />
-              </Box>
-            </Button>
-          </Grid>
-          <Grid item xs={8}>
-            <TextField
-              fullWidth
-              placeholder="Search by client name or client id"
-              value={searchKeywords}
-              onChange={(e) => setSearchKeywords(e.target.value)}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Box display="flex" alignItems="center">
-              <IconButton onClick={() => setIsAddOrderOpen(true)}>
-                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-              </IconButton>
-              <IconButton
-                disabled={selectedOrders.length === 0}
-                onClick={() => deleteSelectedOrders()}
-              >
-                <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
-              </IconButton>
-            </Box>
-          </Grid>
+        <Grid container mt={3} alignItems="flex-start">
           <Grid item xs={2} alignSelf="flex-start">
             <Box
               display="flex"
               flexDirection="column"
-              gap={1}
+              gap={2}
               justifyContent="center"
               alignItems="center"
             >
+              <Box display="flex" gap={1}>
+                <Button fullWidth variant="outlined" color="error">
+                  Delete
+                </Button>
+                <Button fullWidth variant="outlined">
+                  Edit
+                </Button>
+              </Box>
               {routes.length > 0 ? (
                 <Tabs
                   orientation="vertical"
@@ -586,7 +552,7 @@ export default function ScheduledOrderPage() {
                         <Tab
                           key={index}
                           id={`simple-tab-${index}`}
-                          label={route?.driver?.name}
+                          label={`${route.name} - ${route?.driver?.name}`}
                           aria-controls={`tabpanel-${index}`}
                           value={index}
                         />
@@ -609,32 +575,68 @@ export default function ScheduledOrderPage() {
               </IconButton>
             </Box>
           </Grid>
-          <Grid item xs={10}>
-            {isLoading ? (
-              <SplashScreen />
-            ) : orderList.length > 0 ? (
-              <ScheduleOrdersTable
-                handleDeleteOrderUI={handleDeleteOrderUI}
-                handleUpdateOrderUI={handleUpdateOrderUI}
-                clientOrders={orderList}
-                setNotification={setNotification}
-                selectedOrders={selectedOrders}
-                handleSelectOrder={handleSelectOrder}
-                handleSelectAll={handleSelectAll}
-                routeId={routes[routeIndex].id}
-                routes={routes}
-              />
-            ) : (
-              <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-                alignItems="center"
-                mt={2}
+          <Grid item container alignItems="center" xs={10} spacing={1}>
+            <Grid item xs={2}>
+              <Button
+                fullWidth
+                onClick={() => setIsPreOrderOpen(true)}
+                variant="outlined"
+                disabled={selectedOrders.length === 0}
               >
-                <ErrorComponent errorText="No Scheduled Order Found" />
+                <Box display="flex" gap={1} alignItems="center">
+                  <Typography>Pre Order</Typography>
+                  <PendingActionsIcon />
+                </Box>
+              </Button>
+            </Grid>
+            <Grid item xs={8}>
+              <TextField
+                fullWidth
+                placeholder="Search by client name or client id"
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <Box display="flex" alignItems="center">
+                <IconButton onClick={() => setIsAddOrderOpen(true)}>
+                  <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+                </IconButton>
+                <IconButton
+                  disabled={selectedOrders.length === 0}
+                  onClick={() => deleteSelectedOrders()}
+                >
+                  <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
+                </IconButton>
               </Box>
-            )}
+            </Grid>
+            <Grid item xs={12}>
+              {isLoading ? (
+                <SplashScreen />
+              ) : orderList.length > 0 ? (
+                <ScheduleOrdersTable
+                  handleDeleteOrderUI={handleDeleteOrderUI}
+                  handleUpdateOrderUI={handleUpdateOrderUI}
+                  clientOrders={orderList}
+                  setNotification={setNotification}
+                  selectedOrders={selectedOrders}
+                  handleSelectOrder={handleSelectOrder}
+                  handleSelectAll={handleSelectAll}
+                  routeId={routes[routeIndex]?.id || -1}
+                  routes={routes}
+                />
+              ) : (
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  mt={2}
+                >
+                  <ErrorComponent errorText="No Scheduled Order Found" />
+                </Box>
+              )}
+            </Grid>
           </Grid>
         </Grid>
       </ShadowSection>
