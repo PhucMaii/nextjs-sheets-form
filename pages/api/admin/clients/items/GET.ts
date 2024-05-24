@@ -1,4 +1,5 @@
-import { Item, PrismaClient } from '@prisma/client';
+import { fetchItemsWithSubCategoryId } from '@/pages/api/item/GET';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
@@ -11,37 +12,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
     const { categoryId, subCategoryId } = req.query as RequestQuery;
 
-    const fetchCondition: any = { categoryId: Number(categoryId) };
-
-    let beansprouts: any = [];
-
+    let items: any = [];
     if (Number(subCategoryId)) {
-      fetchCondition.subCategoryId = Number(subCategoryId);
-      // only get beansprouts
-      beansprouts = await prisma.item.findMany({
+      items = await fetchItemsWithSubCategoryId(
+        Number(subCategoryId),
+        Number(categoryId),
+      );
+    } else {
+      items = await prisma.item.findMany({
         where: {
           categoryId: Number(categoryId),
-          subCategoryId: Number(subCategoryId),
         },
       });
     }
 
-    // get the rest of items
-    const otherItems = await prisma.item.findMany({
-      where: {
-        categoryId: Number(categoryId),
-      },
-    });
-
-    // ensure there's no beansprouts left here
-    const removeDuplicatedItems = otherItems.filter((targetItem: Item) => {
-      return !targetItem.subCategoryId;
-    });
-
-    const clientItems = [...beansprouts, ...removeDuplicatedItems];
-
     return res.status(200).json({
-      data: clientItems,
+      data: items,
       message: 'Fetch Items For Specific Client Successfully',
     });
   } catch (error: any) {

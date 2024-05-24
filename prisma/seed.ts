@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcrypt';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
@@ -170,6 +171,16 @@ async function main() {
   //   data: [
   //   ]
   // })
+
+  const password = await hash('test123', 12);
+  await prisma.user.update({
+    where: {
+      id: 204
+    },
+    data: {
+      password
+    }
+  })
 }
 
 main()
