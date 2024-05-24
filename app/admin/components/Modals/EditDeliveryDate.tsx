@@ -1,4 +1,11 @@
-import { Box, Divider, FormControl, LinearProgress, Modal, Typography } from '@mui/material';
+import {
+  Box,
+  Divider,
+  FormControl,
+  LinearProgress,
+  Modal,
+  Typography,
+} from '@mui/material';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
@@ -32,7 +39,7 @@ export default function EditDeliveryDate({
   // handlePreOrder,
   isPreOrder,
   scheduleOrderList,
-  progress
+  progress,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
@@ -50,7 +57,7 @@ export default function EditDeliveryDate({
       const submittedData: any = { deliveryDate: updatedDate };
 
       if (scheduleOrderList) {
-        submittedData.scheduleOrderList = scheduleOrderList
+        submittedData.scheduleOrderList = scheduleOrderList;
       }
 
       const response = await axios.post(API_URL.ORDER, submittedData);
@@ -128,52 +135,55 @@ export default function EditDeliveryDate({
   };
 
   return (
-      <Modal open={open} onClose={onClose}>
-        <BoxModal display="flex" flexDirection="column" gap={2}>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            gap={4}
+    <Modal open={open} onClose={onClose}>
+      <BoxModal display="flex" flexDirection="column" gap={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          gap={4}
+        >
+          <Typography variant="h4">
+            {isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}
+          </Typography>
+          <LoadingButtonStyles
+            loading={isLoading}
+            variant="contained"
+            onClick={() => {
+              if (isPreOrder) {
+                handlePreOrder();
+              } else {
+                handleUpdateDate();
+              }
+            }}
+            color={infoColor}
           >
-            <Typography variant="h4">
-              {isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}
-            </Typography>
-            <LoadingButtonStyles
-              loading={isLoading}
-              variant="contained"
-              onClick={() => {
-                if (isPreOrder) {
-                  handlePreOrder();
-                } else {
-                  handleUpdateDate();
-                }
-              }}
-              color={infoColor}
-            >
-              {isPreOrder ? 'Order' : 'Save'}
-            </LoadingButtonStyles>
-          </Box>
-          <Divider />
-          <Box display="flex" flexDirection="column" gap={1}>
-            <FormControl fullWidth>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Edit Date"
-                  value={dayjs(updatedDate)}
-                  onChange={(e: any) => handleDateChange(e)}
-                  sx={{
-                    width: '100%',
-                    height: '0.1%',
-                    borderRadius: 2,
-                  }}
-                />
-              </LocalizationProvider>
-            </FormControl>
-            {progress !== undefined ? <LinearProgress variant="determinate" value={progress} /> : ''}
-          </Box>
-          
-        </BoxModal>
-      </Modal>
+            {isPreOrder ? 'Order' : 'Save'}
+          </LoadingButtonStyles>
+        </Box>
+        <Divider />
+        <Box display="flex" flexDirection="column" gap={1}>
+          <FormControl fullWidth>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Edit Date"
+                value={dayjs(updatedDate)}
+                onChange={(e: any) => handleDateChange(e)}
+                sx={{
+                  width: '100%',
+                  height: '0.1%',
+                  borderRadius: 2,
+                }}
+              />
+            </LocalizationProvider>
+          </FormControl>
+          {progress !== undefined ? (
+            <LinearProgress variant="determinate" value={progress} />
+          ) : (
+            ''
+          )}
+        </Box>
+      </BoxModal>
+    </Modal>
   );
 }

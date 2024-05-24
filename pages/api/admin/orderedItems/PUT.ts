@@ -210,21 +210,24 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       const itemList = await prisma.item.findMany({
         where: {
-          categoryId: userCategoryId
-        }
+          categoryId: userCategoryId,
+        },
       });
 
       const removeSubCategoryItem = itemList.filter((item: Item) => {
         return !item.subCategoryId;
-      })
+      });
 
       let baseItemList = [...removeSubCategoryItem, ...beansprouts];
 
       for (const item of updatedItems) {
         if (!item.subCategoryId) {
-          fetchCondition = { categoryId: userCategoryId }; 
+          fetchCondition = { categoryId: userCategoryId };
         } else {
-          fetchCondition = { categoryId: userCategoryId, subCategoryId: userSubCategoryId }
+          fetchCondition = {
+            categoryId: userCategoryId,
+            subCategoryId: userSubCategoryId,
+          };
         }
         const existingItem = await prisma.item.findFirst({
           where: {
@@ -235,8 +238,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         const updateFields: any = { price: item.price };
 
-        if (item.subCategoryId && item.subCategoryId !== existingItem?.subCategoryId) {
-          updateFields.subCategoryId = item.subCategoryId
+        if (
+          item.subCategoryId &&
+          item.subCategoryId !== existingItem?.subCategoryId
+        ) {
+          updateFields.subCategoryId = item.subCategoryId;
         }
 
         if (existingItem) {
@@ -244,7 +250,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             where: {
               id: existingItem.id,
             },
-            data: updateFields
+            data: updateFields,
           });
 
           // Pop item off the category
@@ -314,10 +320,7 @@ const formatUpdatedItems = async (
 ) => {
   const formattedUpdatedItems = await Promise.all(
     updatedItems.map(async (item: UpdatedItem) => {
-      if (
-        item?.subCategoryId &&
-        item.subCategoryId === subcategoryId
-      ) {
+      if (item?.subCategoryId && item.subCategoryId === subcategoryId) {
         return {
           name: item.name,
           price: item.price,

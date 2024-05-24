@@ -11,8 +11,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
     const { categoryId, subCategoryId } = req.query as RequestQuery;
 
-    const fetchCondition: any = {categoryId: Number(categoryId)};
-    
+    const fetchCondition: any = { categoryId: Number(categoryId) };
+
     let beansprouts: any = [];
 
     if (Number(subCategoryId)) {
@@ -21,23 +21,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       beansprouts = await prisma.item.findMany({
         where: {
           categoryId: Number(categoryId),
-          subCategoryId: Number(subCategoryId)
-        }
+          subCategoryId: Number(subCategoryId),
+        },
       });
     }
-
 
     // get the rest of items
     const otherItems = await prisma.item.findMany({
       where: {
-        categoryId: Number(categoryId)
-      }
+        categoryId: Number(categoryId),
+      },
     });
 
     // ensure there's no beansprouts left here
     const removeDuplicatedItems = otherItems.filter((targetItem: Item) => {
-      return !targetItem.subCategoryId
-    })
+      return !targetItem.subCategoryId;
+    });
 
     const clientItems = [...beansprouts, ...removeDuplicatedItems];
 

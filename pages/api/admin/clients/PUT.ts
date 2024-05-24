@@ -33,7 +33,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryId,
       orderType,
       paymentType,
-      subCategoryId
+      subCategoryId,
     }: BodyTypes = req.body;
 
     const existingUser = await prisma.user.findUnique({
@@ -86,7 +86,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           category: true,
           preference: true,
           subCategory: true,
-        }
+        },
       });
       if (!orderType && !paymentType) {
         return res.status(200).json({
@@ -124,7 +124,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           userPreferenceId: newPref.id,
         },
       });
-
     } else {
       const updatedPreference = await prisma.userPreference.update({
         where: {

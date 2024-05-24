@@ -43,7 +43,7 @@ const ClientOrdersTable = ({
   selectedOrders,
   handleSelectOrder,
   handleSelectAll,
-  subCategories
+  subCategories,
 }: PropTypes) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const windowDimensions = useWindowDimensions();

@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import { ModalProps } from './type';
 import { Driver } from '@prisma/client';
 import {
-    Autocomplete,
+  Autocomplete,
   Box,
   Divider,
   Grid,
@@ -21,7 +21,6 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-
 
 interface IAddRouteModal extends ModalProps {
   day: string;
@@ -48,11 +47,15 @@ export default function AddRoute({
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
 
   const addRoute = async () => {
-    if (newRoute.driverId === -1 || newRoute.name.trim() === '' || selectedClients.length === 0) {
+    if (
+      newRoute.driverId === -1 ||
+      newRoute.name.trim() === '' ||
+      selectedClients.length === 0
+    ) {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Please fill out all blanks'
+        message: 'Please fill out all blanks',
       });
       return;
     }
@@ -62,14 +65,14 @@ export default function AddRoute({
         day,
         driverId: newRoute.driverId,
         name: newRoute.name,
-        clientList: selectedClients
+        clientList: selectedClients,
       });
 
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         setIsAdding(false);
         return;
@@ -78,7 +81,7 @@ export default function AddRoute({
       setNotification({
         on: true,
         type: 'success',
-        message: response.data.message
+        message: response.data.message,
       });
       setIsAdding(false);
     } catch (error: any) {
@@ -86,11 +89,11 @@ export default function AddRoute({
       setNotification({
         on: true,
         type: 'error',
-        message: 'There was an error: ' + error
+        message: 'There was an error: ' + error,
       });
       setIsAdding(false);
     }
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -98,7 +101,11 @@ export default function AddRoute({
         <ModalHead
           heading="Add Route"
           onClick={addRoute}
-          buttonProps={{ color: infoColor, variant: 'contained', loading: isAdding }}
+          buttonProps={{
+            color: infoColor,
+            variant: 'contained',
+            loading: isAdding,
+          }}
         />
         <Divider />
         <Grid container spacing={2}>
@@ -138,28 +145,36 @@ export default function AddRoute({
           <Grid item xs={12}>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Clients:</Typography>
-              <Autocomplete 
+              <Autocomplete
                 multiple
                 options={clientList}
                 disableCloseOnSelect
-                getOptionLabel={(option: UserType) => `${option.clientName} - ${option.clientId}`}
+                getOptionLabel={(option: UserType) =>
+                  `${option.clientName} - ${option.clientId}`
+                }
                 renderOption={(props, option, { selected }) => (
                   <li {...props}>
-                    <Checkbox 
+                    <Checkbox
                       icon={<CheckBoxOutlineBlankIcon />}
                       checkedIcon={<CheckBoxIcon />}
-                      style={{marginRight: 8}}
+                      style={{ marginRight: 8 }}
                       checked={selected}
                     />
                     {option.clientName} - {option.clientId}
                   </li>
                 )}
-                style={{width: '100%'}}
+                style={{ width: '100%' }}
                 renderInput={(params) => (
-                  <TextField {...params} label="Clients" placeholder="-- Choose clients --" />
+                  <TextField
+                    {...params}
+                    label="Clients"
+                    placeholder="-- Choose clients --"
+                  />
                 )}
                 value={selectedClients}
-                onChange={(e, newValue: UserType[]) => setSelectedClients(newValue)}
+                onChange={(e, newValue: UserType[]) =>
+                  setSelectedClients(newValue)
+                }
               />
             </Box>
           </Grid>

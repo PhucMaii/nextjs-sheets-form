@@ -2,8 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface QueryTypes {
-    day?: string;
-    clientList?: string;
+  day?: string;
+  clientList?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
@@ -12,23 +12,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const { day, clientList }: QueryTypes = req.query;
 
-    // const clientIds = clientList ? clientList.split(',').map(id => parseInt(id, 10)) : [];
-
-    const clientIds = clientList ? clientList.split(',').map(id => parseInt(id)) : [];
-    console.log({clientIds, clientList});
+    const clientIds = clientList
+      ? clientList.split(',').map((id) => parseInt(id))
+      : [];
     const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
         day,
         userId: {
-          in: [...clientIds, 1, 2]
-        }
+          in: clientIds,
+        },
       },
       include: {
         items: true,
         user: true,
       },
     });
-    
+
     return res.status(200).json({
       data: scheduleOrders,
       message: 'Fetch Schedule Order Successfully',

@@ -11,8 +11,7 @@ interface RequestQuery {
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { userId, deliveryDate } =
-      req.query as RequestQuery;
+    const { userId, deliveryDate } = req.query as RequestQuery;
 
     // Check if there is no userId, then fetch all orders with specific delivery date
     let userOrders: any = [];
@@ -25,8 +24,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           items: true,
           user: {
             include: {
-              category: true
-            }
+              category: true,
+            },
           },
         },
         orderBy: {
@@ -42,8 +41,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           items: true,
           user: {
             include: {
-              category: true
-            }
+              category: true,
+            },
           },
         },
         orderBy: {

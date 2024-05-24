@@ -4,15 +4,15 @@ import LoadingButtonStyles from '../components/LoadingButtonStyles';
 import { infoColor } from '../theme/color';
 
 interface IModalHead {
-    heading: string;
-    onClick: any;
-    buttonProps: any;
+  heading: string;
+  onClick: any;
+  buttonProps: any;
 }
 
 export default function ModalHead({
-    heading,
-    onClick,
-    buttonProps
+  heading,
+  onClick,
+  buttonProps,
 }: IModalHead) {
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center">

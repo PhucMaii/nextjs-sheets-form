@@ -103,8 +103,8 @@ export default function ReportPage() {
       setNotification({
         on: true,
         type: 'success',
-        message: `Order ${deletedOrder.id} deleted successfully`
-      })
+        message: `Order ${deletedOrder.id} deleted successfully`,
+      });
       setDeletedOrder(deletedOrder);
     });
 
@@ -232,9 +232,13 @@ export default function ReportPage() {
 
       let orderData: any = response.data.data;
       if (clientValue?.clientName !== 'All Clients') {
-        orderData = filterDateRangeOrders(response.data.data, dateRange[0], dateRange[1]);
+        orderData = filterDateRangeOrders(
+          response.data.data,
+          dateRange[0],
+          dateRange[1],
+        );
       }
-      
+
       const newUnpaidOrders = orderData.filter((order: Order) => {
         return (
           order.status === ORDER_STATUS.DELIVERED ||
@@ -264,7 +268,7 @@ export default function ReportPage() {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
       }
@@ -275,10 +279,10 @@ export default function ReportPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'There was an error: ' + error
-      })
+        message: 'There was an error: ' + error,
+      });
     }
-  }
+  };
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -502,155 +506,152 @@ export default function ReportPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
-        <div style={{ display: 'none' }}>
-          <InvoicePrint
-            client={clientValue}
-            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-            ref={invoicePrint}
-          />
-        </div>
-        <div style={{ display: 'none' }}>
-          <AllPrint
-            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-            ref={billPrint}
-          />
-        </div>
-        <NotificationPopup
-          notification={notification}
-          onClose={() => setNotification({ ...notification, on: false })}
+      <div style={{ display: 'none' }}>
+        <InvoicePrint
+          client={clientValue}
+          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+          ref={invoicePrint}
         />
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h4">Reports</Typography>
-          {clientValue?.clientName === 'All Clients' ? (
-            <>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={dayjs(datePicker)}
-                  onChange={handleDateChange}
-                />
-              </LocalizationProvider>
-            </>
-          ) : (
-            <SelectDateRange
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-            />
-          )}
-        </Box>
-        <ShadowSection display="flex" flexDirection="column" gap={1}>
-          <Typography variant="h6">Clients</Typography>
-          <Autocomplete
-            options={clientList as UserType[]}
-            getOptionLabel={(option) => {
-              if (option.clientName === 'All Clients') {
-                return option.clientName;
-              }
-
-              return `${option.clientName} - ${option.clientId}`;
-            }}
-            renderInput={(params) => <TextField {...params} label="Client" />}
-            value={clientValue}
-            onChange={(e, newValue) => setClientValue(newValue)}
-            sx={{ width: 'auto' }}
-          />
-        </ShadowSection>
-        <ShadowSection display="flex" alignItems="center">
-          <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
-            <Grid container spacing={3} mb={4}>
-              <Grid item xs={12} md={4}>
-                <OverviewCard
-                  icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
-                  text="Total Orders"
-                  value={clientOrders.length}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <OverviewCard
-                  icon={
-                    <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
-                  }
-                  text="Total Bill"
-                  value={`$${totalBill.toFixed(2)}`}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <OverviewCard
-                  icon={
-                    <CheckCircleOutlineIcon
-                      sx={{ color: blue[700], fontSize: 50 }}
-                    />
-                  }
-                  text="Unpaid orders"
-                  value={unpaidOrders.length}
-                />
-              </Grid>
-            </Grid>
-            <Grid container columnSpacing={1} alignItems="center">
-              <Grid item md={2}>
-                {statusDropdown}
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  variant="filled"
-                  // label="Search orders"
-                  placeholder="Search by invoice id, client id, client name or status"
-                  value={searchKeywords}
-                  onChange={(e) => setSearchKeywords(e.target.value)}
-                />
-              </Grid>
-              <Grid item md={2} textAlign="right">
-                <Button
-                  disabled={clientOrders.length === 0}
-                  variant="outlined"
-                  onClick={handleBillPrint}
-                  fullWidth
-                >
-                  <Box display="flex" gap={2}>
-                    <LocalPrintshopIcon />
-                    <Typography>Bill</Typography>
-                  </Box>
-                </Button>
-              </Grid>
-              <Grid item md={2} textAlign="right">
-                <Button
-                  disabled={clientOrders.length === 0}
-                  variant="outlined"
-                  onClick={handleInvoicePrint}
-                  fullWidth
-                >
-                  <Box display="flex" gap={2}>
-                    <LocalPrintshopIcon />
-                    <Typography>Statement</Typography>
-                  </Box>
-                </Button>
-              </Grid>
-            </Grid>
-            {isFetching ? (
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                sx={{ width: '100%', mt: 2 }}
-              >
-                <LoadingComponent color="blue" />
-              </Box>
-            ) : clientOrders.length > 0 ? (
-              <ClientOrdersTable
-                handleDeleteOrderUI={handleDeleteOrderUI}
-                handleUpdateOrderUI={handleUpdateOrderUI}
-                clientOrders={clientOrders}
-                setNotification={setNotification}
-                selectedOrders={selectedOrders}
-                handleSelectOrder={handleSelectOrder}
-                handleSelectAll={handleSelectAll}
-                subCategories={subCategories}
+      </div>
+      <div style={{ display: 'none' }}>
+        <AllPrint
+          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+          ref={billPrint}
+        />
+      </div>
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h4">Reports</Typography>
+        {clientValue?.clientName === 'All Clients' ? (
+          <>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                value={dayjs(datePicker)}
+                onChange={handleDateChange}
               />
-            ) : (
-              <ErrorComponent errorText="No Order Available" />
-            )}
-          </Paper>
-        </ShadowSection>
+            </LocalizationProvider>
+          </>
+        ) : (
+          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+        )}
+      </Box>
+      <ShadowSection display="flex" flexDirection="column" gap={1}>
+        <Typography variant="h6">Clients</Typography>
+        <Autocomplete
+          options={clientList as UserType[]}
+          getOptionLabel={(option) => {
+            if (option.clientName === 'All Clients') {
+              return option.clientName;
+            }
+
+            return `${option.clientName} - ${option.clientId}`;
+          }}
+          renderInput={(params) => <TextField {...params} label="Client" />}
+          value={clientValue}
+          onChange={(e, newValue) => setClientValue(newValue)}
+          sx={{ width: 'auto' }}
+        />
+      </ShadowSection>
+      <ShadowSection display="flex" alignItems="center">
+        <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
+          <Grid container spacing={3} mb={4}>
+            <Grid item xs={12} md={4}>
+              <OverviewCard
+                icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
+                text="Total Orders"
+                value={clientOrders.length}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <OverviewCard
+                icon={
+                  <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
+                }
+                text="Total Bill"
+                value={`$${totalBill.toFixed(2)}`}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <OverviewCard
+                icon={
+                  <CheckCircleOutlineIcon
+                    sx={{ color: blue[700], fontSize: 50 }}
+                  />
+                }
+                text="Unpaid orders"
+                value={unpaidOrders.length}
+              />
+            </Grid>
+          </Grid>
+          <Grid container columnSpacing={1} alignItems="center">
+            <Grid item md={2}>
+              {statusDropdown}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                variant="filled"
+                // label="Search orders"
+                placeholder="Search by invoice id, client id, client name or status"
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
+              />
+            </Grid>
+            <Grid item md={2} textAlign="right">
+              <Button
+                disabled={clientOrders.length === 0}
+                variant="outlined"
+                onClick={handleBillPrint}
+                fullWidth
+              >
+                <Box display="flex" gap={2}>
+                  <LocalPrintshopIcon />
+                  <Typography>Bill</Typography>
+                </Box>
+              </Button>
+            </Grid>
+            <Grid item md={2} textAlign="right">
+              <Button
+                disabled={clientOrders.length === 0}
+                variant="outlined"
+                onClick={handleInvoicePrint}
+                fullWidth
+              >
+                <Box display="flex" gap={2}>
+                  <LocalPrintshopIcon />
+                  <Typography>Statement</Typography>
+                </Box>
+              </Button>
+            </Grid>
+          </Grid>
+          {isFetching ? (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ width: '100%', mt: 2 }}
+            >
+              <LoadingComponent color="blue" />
+            </Box>
+          ) : clientOrders.length > 0 ? (
+            <ClientOrdersTable
+              handleDeleteOrderUI={handleDeleteOrderUI}
+              handleUpdateOrderUI={handleUpdateOrderUI}
+              clientOrders={clientOrders}
+              setNotification={setNotification}
+              selectedOrders={selectedOrders}
+              handleSelectOrder={handleSelectOrder}
+              handleSelectAll={handleSelectAll}
+              subCategories={subCategories}
+            />
+          ) : (
+            <ErrorComponent errorText="No Order Available" />
+          )}
+        </Paper>
+      </ShadowSection>
       {/* </AuthenGuard> */}
     </Sidebar>
   );

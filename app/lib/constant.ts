@@ -12,7 +12,12 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import PendingIcon from '@mui/icons-material/Pending';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import BlockIcon from '@mui/icons-material/Block';
-import { errorColor, infoColor, successColor, warningColor } from '../theme/color';
+import {
+  errorColor,
+  infoColor,
+  successColor,
+  warningColor,
+} from '../theme/color';
 
 export const days = [
   'Sunday',
@@ -21,8 +26,8 @@ export const days = [
   'Wednesday',
   'Thursday',
   'Friday',
-  'Saturday'
-]
+  'Saturday',
+];
 
 export const limitOrderHour = 8;
 
@@ -45,8 +50,8 @@ export const tabs = [
   {
     name: 'Pre Orders',
     icon: PendingActionsIcon,
-    path: '/admin/pre-orders'
-  }
+    path: '/admin/pre-orders',
+  },
 ];
 
 export const clientTabs = [
@@ -77,34 +82,33 @@ export const statusTabs = [
     color: '',
     icon: ReceiptLongIcon,
     name: 'All',
-    value: ORDER_STATUS.NONE
+    value: ORDER_STATUS.NONE,
   },
   {
     color: warningColor,
     icon: PendingIcon,
     name: 'Incompleted',
-    value: ORDER_STATUS.INCOMPLETED
+    value: ORDER_STATUS.INCOMPLETED,
   },
   {
     color: infoColor,
     icon: LocalShippingIcon,
     name: 'Delivered',
-    value: ORDER_STATUS.DELIVERED
-  },  
+    value: ORDER_STATUS.DELIVERED,
+  },
   {
     color: successColor,
     icon: DoneAllIcon,
     name: 'Completed',
-    value: ORDER_STATUS.COMPLETED
+    value: ORDER_STATUS.COMPLETED,
   },
   {
     color: errorColor,
     icon: BlockIcon,
     name: 'Void',
-    value: ORDER_STATUS.VOID
+    value: ORDER_STATUS.VOID,
   },
-
-]
+];
 
 export const orderTypes = [
   { text: ORDER_TYPE.FIXED, type: COLOR_TYPE.SUCCESS },

@@ -23,8 +23,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     if (req.method === 'DELETE') {
-        const response = await DELETE(req, res);
-        return response;
+      const response = await DELETE(req, res);
+      return response;
     }
 
     return res.status(500).json({

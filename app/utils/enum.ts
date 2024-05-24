@@ -14,7 +14,7 @@ export enum API_URL {
   SCHEDULED_ORDER = '/api/admin/scheduledOrders',
   SUBCATEGORIES = '/api/admin/subcategories',
   ROUTES = '/api/admin/routes',
-  DRIVERS = '/api/admin/drivers'
+  DRIVERS = '/api/admin/drivers',
 }
 
 export enum ORDER_STATUS {

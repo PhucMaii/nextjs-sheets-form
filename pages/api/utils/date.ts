@@ -8,7 +8,7 @@ const convertDeliveryDateStringToDate = (deliveryDate: string) => {
   const orderDeliveryDate = new Date(year, month, day);
 
   return orderDeliveryDate;
-}
+};
 
 export const filterDateRangeOrders = (
   orders: Order[],
@@ -16,7 +16,9 @@ export const filterDateRangeOrders = (
   endDate: Date,
 ): Order[] => {
   const filteredDateRangeOrders = orders.filter((order: Order) => {
-    const orderDeliveryDate = convertDeliveryDateStringToDate(order.deliveryDate);
+    const orderDeliveryDate = convertDeliveryDateStringToDate(
+      order.deliveryDate,
+    );
 
     // const formattedStartDate = new Date(Date.parse(startDate));
     // const formattedEndDate = new Date(Date.parse(endDate));
@@ -24,11 +26,7 @@ export const filterDateRangeOrders = (
     // formattedEndDate.setDate(formattedEndDate.getDate() - 1);
     // formattedStartDate.setDate(formattedStartDate.getDate() - 1);
 
-
-    return (
-      orderDeliveryDate >= startDate &&
-      orderDeliveryDate <= endDate
-    );
+    return orderDeliveryDate >= startDate && orderDeliveryDate <= endDate;
   });
 
   const sortedOrders = sortByDeliveryDate(filteredDateRangeOrders);
@@ -38,11 +36,15 @@ export const filterDateRangeOrders = (
 
 const sortByDeliveryDate = (orders: Order[]) => {
   const sortedOrders = orders.sort((orderA, orderB) => {
-    const deliveryDateA: any = convertDeliveryDateStringToDate(orderA.deliveryDate);
-    const deliveryDateB: any = convertDeliveryDateStringToDate(orderB.deliveryDate);
+    const deliveryDateA: any = convertDeliveryDateStringToDate(
+      orderA.deliveryDate,
+    );
+    const deliveryDateB: any = convertDeliveryDateStringToDate(
+      orderB.deliveryDate,
+    );
 
     return deliveryDateA - deliveryDateB;
-  })
+  });
 
   return sortedOrders;
-}
+};

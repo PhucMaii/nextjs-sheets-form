@@ -21,9 +21,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     for (const scheduleOrder of scheduleOrderList) {
       // Check has user order for today, if yes then skip that client
-      const hasClientOrder = await checkHasClientOrder(scheduleOrder.user.id, deliveryDate);
+      const hasClientOrder = await checkHasClientOrder(
+        scheduleOrder.user.id,
+        deliveryDate,
+      );
       if (hasClientOrder) {
-        await pusherServer.trigger('admin-schedule-order', 'pre-order', hasClientOrder);
+        await pusherServer.trigger(
+          'admin-schedule-order',
+          'pre-order',
+          hasClientOrder,
+        );
         continue;
       }
 
@@ -42,7 +49,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         isSendToAdmin,
       );
       updatedOrderList.push(newOrder);
-      
+
       await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
     }
 
@@ -97,7 +104,7 @@ const createOrder = async (
       },
       include: {
         items: true,
-      }
+      },
     });
 
     return updatedOrder;

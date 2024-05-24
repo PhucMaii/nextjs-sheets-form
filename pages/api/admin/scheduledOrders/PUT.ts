@@ -18,7 +18,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const { user, items, scheduledOrderId, totalPrice, updateOption } =
       req.body as BodyTypes;
 
-    console.log(items, 'items');
     // Update items in schedule order
     for (const item of items) {
       if (!item.id) {

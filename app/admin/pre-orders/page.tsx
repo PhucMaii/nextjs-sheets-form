@@ -66,10 +66,11 @@ export default function ScheduledOrderPage() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-
   const { data: clientList } = useSWR(API_URL.CLIENTS);
   const { data: driverList } = useSWR(API_URL.DRIVERS);
-  const { data: routes } = useSWR(`${API_URL.ROUTES}?day=${days[dayIndex]}`);
+  const { data: routes, isValidating } = useSWR(
+    `${API_URL.ROUTES}?day=${days[dayIndex]}`,
+  );
 
   console.log(routes, 'routes');
 
@@ -205,7 +206,7 @@ export default function ScheduledOrderPage() {
 
   const createScheduledOrder = async (userId: number, items: any) => {
     try {
-      console.log(routes.data[routeIndex].id, 'routeid')
+      console.log(routes.data[routeIndex].id, 'routeid');
       const totalPrice = calculateTotalBillOneOrder(items);
       const response = await axios.post(API_URL.SCHEDULED_ORDER, {
         userId,
@@ -310,9 +311,11 @@ export default function ScheduledOrderPage() {
     try {
       setIsLoading(true);
       console.log(routes.data[routeIndex], 'single route');
-      const clientIds = routes.data[routeIndex]?.clients.map((userRoute: UserRoute) => {
-        return userRoute.userId;
-      })
+      const clientIds = routes.data[routeIndex]?.clients.map(
+        (userRoute: UserRoute) => {
+          return userRoute.userId;
+        },
+      );
       const response = await axios.get(
         `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds}`,
       );
@@ -431,190 +434,159 @@ export default function ScheduledOrderPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
-        <AddOrder
-          open={isAddOrderOpen}
-          onClose={() => setIsAddOrderOpen(false)}
-          clientList={clientList?.data || []}
-          setNotification={setNotification}
-          createScheduledOrder={createScheduledOrder}
-        />
-        <AddRoute
-          open={isAddRouteOpen}
-          onClose={() => setIsAddRouteOpen(false)}
-          day={days[dayIndex]}
-          driverList={driverList?.data || []}
-          clientList={clientList?.data || []}
-          setNotification={setNotification}
-        />
-        <EditDeliveryDate
-          open={isPreOrderOpen}
-          onClose={() => setIsPreOrderOpen(false)}
-          isPreOrder
-          setNotification={setNotification}
-          // handlePreOrder={handlePreOrder}
-          progress={preOrderProgress}
-          scheduleOrderList={selectedOrders}
-        />
-        <NotificationPopup
-          notification={notification}
-          onClose={() => setNotification({ ...notification, on: false })}
-        />
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
-            <OverviewCard
-              icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text="Total Orders"
-              value={orderList.length}
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <OverviewCard
-              icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text="Total Bill"
-              value={calculateTotalBill()}
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <OverviewCard
-              icon={
-                <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
-              }
-              text="Total Clients"
-              value={calculateTotalClient() as number}
-            />
-          </Grid>
+      <AddOrder
+        open={isAddOrderOpen}
+        onClose={() => setIsAddOrderOpen(false)}
+        clientList={clientList?.data || []}
+        setNotification={setNotification}
+        createScheduledOrder={createScheduledOrder}
+      />
+      <AddRoute
+        open={isAddRouteOpen}
+        onClose={() => setIsAddRouteOpen(false)}
+        day={days[dayIndex]}
+        driverList={driverList?.data || []}
+        clientList={clientList?.data || []}
+        setNotification={setNotification}
+      />
+      <EditDeliveryDate
+        open={isPreOrderOpen}
+        onClose={() => setIsPreOrderOpen(false)}
+        isPreOrder
+        setNotification={setNotification}
+        // handlePreOrder={handlePreOrder}
+        progress={preOrderProgress}
+        scheduleOrderList={selectedOrders}
+      />
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} md={4}>
+          <OverviewCard
+            icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Total Orders"
+            value={orderList.length}
+          />
         </Grid>
-        <ShadowSection>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs
-              aria-label="basic tabs"
-              value={dayIndex}
-              onChange={(e, newValue) => setDayIndex(newValue)}
-              variant="fullWidth"
+        <Grid item xs={12} md={4}>
+          <OverviewCard
+            icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Total Bill"
+            value={calculateTotalBill()}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <OverviewCard
+            icon={<PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Total Clients"
+            value={calculateTotalClient() as number}
+          />
+        </Grid>
+      </Grid>
+      <ShadowSection>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            aria-label="basic tabs"
+            value={dayIndex}
+            onChange={(e, newValue) => setDayIndex(newValue)}
+            variant="fullWidth"
+          >
+            {days &&
+              days.map((day: string, index: number) => {
+                return (
+                  <Tab
+                    key={index}
+                    id={`simple-tab-${index}`}
+                    label={day}
+                    aria-controls={`tabpanel-${index}`}
+                    value={index}
+                  />
+                );
+              })}
+          </Tabs>
+        </Box>
+        <Grid container alignItems="center" spacing={2}>
+          <Grid item xs={2}>
+            <Button
+              fullWidth
+              onClick={() => setIsPreOrderOpen(true)}
+              variant="outlined"
+              disabled={selectedOrders.length === 0}
             >
-              {days &&
-                days.map((day: string, index: number) => {
-                  return (
-                    <Tab
-                      key={index}
-                      id={`simple-tab-${index}`}
-                      label={day}
-                      aria-controls={`tabpanel-${index}`}
-                      value={index}
-                    />
-                  );
-                })}
-            </Tabs>
-          </Box>
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={2}>
-              <Button
-                fullWidth
-                onClick={() => setIsPreOrderOpen(true)}
-                variant="outlined"
+              <Box display="flex" gap={1} alignItems="center">
+                <Typography>Pre Order</Typography>
+                <PendingActionsIcon />
+              </Box>
+            </Button>
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              fullWidth
+              placeholder="Search by client name or client id"
+              value={searchKeywords}
+              onChange={(e) => setSearchKeywords(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <Box display="flex" alignItems="center">
+              <IconButton onClick={() => setIsAddOrderOpen(true)}>
+                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+              </IconButton>
+              <IconButton
                 disabled={selectedOrders.length === 0}
+                onClick={() => deleteSelectedOrders()}
               >
-                <Box display="flex" gap={1} alignItems="center">
-                  <Typography>Pre Order</Typography>
-                  <PendingActionsIcon />
-                </Box>
-              </Button>
-            </Grid>
-            <Grid item xs={8}>
-              <TextField
-                fullWidth
-                placeholder="Search by client name or client id"
-                value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <Box display="flex" alignItems="center">
-                <IconButton onClick={() => setIsAddOrderOpen(true)}>
-                  <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-                </IconButton>
-                <IconButton
-                  disabled={selectedOrders.length === 0}
-                  onClick={() => deleteSelectedOrders()}
+                <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
+              </IconButton>
+            </Box>
+          </Grid>
+          <Grid item xs={2} alignSelf="flex-start">
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              justifyContent="center"
+              alignItems="center"
+            >
+              {routes?.data?.length > 0 ? (
+                <Tabs
+                  orientation="vertical"
+                  aria-label="basic tabs"
+                  value={routeIndex}
+                  onChange={(e, newValue) => setRouteIndex(newValue)}
+                  variant="fullWidth"
+                  sx={{
+                    '& button': { borderRadius: 2 },
+                    '& button:hover': {
+                      boxShadow:
+                        'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
+                    },
+                    '& button:active': {
+                      boxShadow:
+                        'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
+                    },
+                    '& button.Mui-selected': {
+                      backgroundColor: infoBackground,
+                      color: infoColor,
+                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
+                    },
+                  }}
                 >
-                  <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
-                </IconButton>
-              </Box>
-            </Grid>
-            <Grid item xs={2} alignSelf="flex-start">
-              <Box
-                display="flex"
-                flexDirection="column"
-                gap={1}
-                justifyContent="center"
-                alignItems="center"
-              >
-                {routes?.data?.length > 0 ? (
-                  <Tabs
-                    orientation="vertical"
-                    aria-label="basic tabs"
-                    value={routeIndex}
-                    onChange={(e, newValue) => setRouteIndex(newValue)}
-                    variant="fullWidth"
-                    sx={{
-                      '& button': { borderRadius: 2 },
-                      '& button:hover': {
-                        boxShadow:
-                          'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
-                      },
-                      '& button:active': {
-                        boxShadow:
-                          'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
-                      },
-                      '& button.Mui-selected': {
-                        backgroundColor: infoBackground,
-                        color: infoColor,
-                        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
-                      },
-                    }}
-                  >
-                    {routes?.data?.length > 0 &&
-                      routes?.data?.map((route: Routes, index: number) => {
-                        return (
-                          <Tab
-                            key={index}
-                            id={`simple-tab-${index}`}
-                            label={route?.driver?.name}
-                            aria-controls={`tabpanel-${index}`}
-                            value={index}
-                          />
-                        );
-                      })}
-                  </Tabs>
-                ) : (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                    mt={2}
-                  >
-                    <ErrorComponent errorText="No Routes Found" />
-                  </Box>
-                )}
-                <IconButton onClick={() => setIsAddRouteOpen(true)}>
-                  <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-                </IconButton>
-              </Box>
-            </Grid>
-            <Grid item xs={10}>
-              {isLoading ? (
-                <SplashScreen />
-              ) : orderList.length > 0 ? (
-                <ScheduleOrdersTable
-                  handleDeleteOrderUI={handleDeleteOrderUI}
-                  handleUpdateOrderUI={handleUpdateOrderUI}
-                  clientOrders={orderList}
-                  setNotification={setNotification}
-                  selectedOrders={selectedOrders}
-                  handleSelectOrder={handleSelectOrder}
-                  handleSelectAll={handleSelectAll}
-                />
+                  {routes?.data?.length > 0 &&
+                    routes?.data?.map((route: Routes, index: number) => {
+                      return (
+                        <Tab
+                          key={index}
+                          id={`simple-tab-${index}`}
+                          label={route?.driver?.name}
+                          aria-controls={`tabpanel-${index}`}
+                          value={index}
+                        />
+                      );
+                    })}
+                </Tabs>
               ) : (
                 <Box
                   display="flex"
@@ -623,12 +595,42 @@ export default function ScheduledOrderPage() {
                   alignItems="center"
                   mt={2}
                 >
-                  <ErrorComponent errorText="No Scheduled Order Found" />
+                  <ErrorComponent errorText="No Routes Found" />
                 </Box>
               )}
-            </Grid>
+              <IconButton onClick={() => setIsAddRouteOpen(true)}>
+                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
+              </IconButton>
+            </Box>
           </Grid>
-        </ShadowSection>
+          <Grid item xs={10}>
+            {isLoading || isValidating ? (
+              <SplashScreen />
+            ) : orderList.length > 0 ? (
+              <ScheduleOrdersTable
+                handleDeleteOrderUI={handleDeleteOrderUI}
+                handleUpdateOrderUI={handleUpdateOrderUI}
+                clientOrders={orderList}
+                setNotification={setNotification}
+                selectedOrders={selectedOrders}
+                handleSelectOrder={handleSelectOrder}
+                handleSelectAll={handleSelectAll}
+                routeId={routes?.data[routeIndex].id}
+              />
+            ) : (
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                mt={2}
+              >
+                <ErrorComponent errorText="No Scheduled Order Found" />
+              </Box>
+            )}
+          </Grid>
+        </Grid>
+      </ShadowSection>
       {/* </AuthenGuard> */}
     </Sidebar>
   );

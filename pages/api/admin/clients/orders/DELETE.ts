@@ -37,7 +37,11 @@ export default async function DELETE(
           },
         });
 
-        await pusherServer.trigger('admin-delete-order', 'delete-order', deletedOrder);
+        await pusherServer.trigger(
+          'admin-delete-order',
+          'delete-order',
+          deletedOrder,
+        );
       }
     } else if (orderId) {
       const existingOrder = await prisma.orders.findUnique({

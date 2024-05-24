@@ -29,7 +29,12 @@ import { OrderedItems } from '@prisma/client';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { YYYYMMDDFormat, formatDateChanged, generateCurrentTime, generateRecommendDate } from '@/app/utils/time';
+import {
+  YYYYMMDDFormat,
+  formatDateChanged,
+  generateCurrentTime,
+  generateRecommendDate,
+} from '@/app/utils/time';
 import { limitOrderHour } from '../../../lib/constant';
 import moment from 'moment';
 import { infoColor } from '@/app/theme/color';
@@ -39,7 +44,12 @@ interface PropTypes extends ModalProps {
   clientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
   currentDate?: string;
-  createOrder?: (clientValue: UserType | null, deliveryDate: string, note: string, itemList: Item[]) => Promise<void>;
+  createOrder?: (
+    clientValue: UserType | null,
+    deliveryDate: string,
+    note: string,
+    itemList: Item[],
+  ) => Promise<void>;
   createScheduledOrder?: (userId: number, items: Item[]) => Promise<void>;
 }
 
@@ -50,10 +60,12 @@ export default function AddOrder({
   setNotification,
   currentDate,
   createOrder,
-  createScheduledOrder
+  createScheduledOrder,
 }: PropTypes) {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
-  const [deliveryDate, setDeliveryDate] = useState<string>(currentDate || generateRecommendDate());
+  const [deliveryDate, setDeliveryDate] = useState<string>(
+    currentDate || generateRecommendDate(),
+  );
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
@@ -63,7 +75,7 @@ export default function AddOrder({
     if (currentDate) {
       setDeliveryDate(currentDate);
     }
-  }, [currentDate])
+  }, [currentDate]);
 
   useEffect(() => {
     if (clientValue) {
@@ -98,7 +110,11 @@ export default function AddOrder({
         });
 
         if (targetItem) {
-          return { ...item, quantity: targetItem.quantity, totalPrice: targetItem.totalPrice };
+          return {
+            ...item,
+            quantity: targetItem.quantity,
+            totalPrice: targetItem.totalPrice,
+          };
         }
         return item;
       });
@@ -134,7 +150,7 @@ export default function AddOrder({
       }
 
       const quantitySetUp = response.data.data.map((item: Item) => {
-        return { ...item, quantity: 0, totalPrice: 0  };
+        return { ...item, quantity: 0, totalPrice: 0 };
       });
 
       setItemList(quantitySetUp);
@@ -258,34 +274,34 @@ export default function AddOrder({
               </LoadingButton>
             </Grid>
             {createOrder && (
-            <>
-            <Grid item xs={6}>
-              DELIVERY DATE
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    value={dayjs(deliveryDate)}
-                    onChange={handleDateChange}
+              <>
+                <Grid item xs={6}>
+                  DELIVERY DATE
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControl fullWidth>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        value={dayjs(deliveryDate)}
+                        onChange={handleDateChange}
+                      />
+                    </LocalizationProvider>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6}>
+                  NOTE
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="Note"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    type="text"
+                    inputProps={{ min: 0 }}
                   />
-                </LocalizationProvider>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              NOTE
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Note"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                type="text"
-                inputProps={{ min: 0 }}
-              />
-            </Grid>
-            </>
+                </Grid>
+              </>
             )}
             {isFetching ? (
               <Box

@@ -10,7 +10,6 @@ const prisma = new PrismaClient();
 async function main() {
   // const users = await generateUsers();
   // const adminPassword = await hash('admin123', 12);
-
   // await prisma.user.createMany({
   //   data: [
   //     ...users,
@@ -26,7 +25,6 @@ async function main() {
   //     // },
   //   ],
   // });
-
   // for (const user of users) {
   //   const password = await hash(user.contactNumber, 12);
   //   await prisma.user.update({
@@ -38,7 +36,6 @@ async function main() {
   //     },
   //   });
   // }
-
   // await prisma.category.createMany({
   //   data: [
   //     {
@@ -79,11 +76,9 @@ async function main() {
   //     },
   //   ],
   // });
-
   // await prisma.item.createMany({
   //   data: [...items],
   // });
-
   // await prisma.form.createMany({
   //   data: [
   //     {
@@ -136,11 +131,9 @@ async function main() {
   //     },
   //   ],
   // });
-
   // await prisma.input.createMany({
   //   data: [...inputs],
   // });
-
   // const driverPassword = await hash('driver123', 12);
   // const driverList = [
   //   {
@@ -164,21 +157,17 @@ async function main() {
   //     password: driverPassword
   //   },
   // ];
-
   // await prisma.driver.createMany({
   //   data: driverList
   // })
-
   // const routes = [
   //   {
   //     day: 'Sunday',
-  //     driverId: 
+  //     driverId:
   //   }
   // ]
-
   // await prisma.route.createMany({
   //   data: [
-
   //   ]
   // })
 }

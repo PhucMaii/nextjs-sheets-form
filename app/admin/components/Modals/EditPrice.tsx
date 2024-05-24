@@ -136,7 +136,7 @@ export default function EditPrice({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.category.id,
-        userSubCategoryId: order.subCategoryId
+        userSubCategoryId: order.subCategoryId,
       });
 
       if (response.data.error) {

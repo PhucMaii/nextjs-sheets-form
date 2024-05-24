@@ -174,19 +174,20 @@ const ClientsTable = ({
         <TableCell>
           <Select
             value={client.subCategoryId || 'N/A'}
-            onChange={(e, newValue) =>{
+            onChange={(e, newValue) => {
               console.log(newValue);
-              handleUpdateClient(client.id, { subCategoryId: +e.target.value  })
+              handleUpdateClient(client.id, { subCategoryId: +e.target.value });
             }}
           >
             <MenuItem value={'N/A'}>N/A</MenuItem>
-            {subCategories && subCategories.map((subCategory: SubCategory, index: number) => {
-              return (
-                <MenuItem value={subCategory.id} key={index}>
-                  {subCategory.name}
-                </MenuItem>
-              );
-            })}
+            {subCategories &&
+              subCategories.map((subCategory: SubCategory, index: number) => {
+                return (
+                  <MenuItem value={subCategory.id} key={index}>
+                    {subCategory.name}
+                  </MenuItem>
+                );
+              })}
           </Select>
         </TableCell>
         <TableCell>{client.contactNumber}</TableCell>
