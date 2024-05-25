@@ -27,6 +27,7 @@ interface IAddRouteModal extends ModalProps {
   driverList: Driver[];
   clientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
+  handleAddRouteUI: (targetRoute: IRoutes) => void;
 }
 
 export default function AddRoute({
@@ -36,6 +37,7 @@ export default function AddRoute({
   driverList,
   clientList,
   setNotification,
+  handleAddRouteUI
 }: IAddRouteModal) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newRoute, setNewRoute] = useState<IRoutes>({
@@ -77,6 +79,8 @@ export default function AddRoute({
         setIsAdding(false);
         return;
       }
+
+      handleAddRouteUI(response.data.data)
 
       setNotification({
         on: true,

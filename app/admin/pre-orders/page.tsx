@@ -380,6 +380,10 @@ export default function ScheduledOrderPage() {
     }
   };
 
+  const handleAddRouteUI = (targetRoute: IRoutes) => {
+    setRoutes([...routes, targetRoute]);
+  }
+
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
     // update base order list
     const newBaseOrderList = baseOrderList.filter((order: ScheduledOrder) => {
@@ -442,6 +446,17 @@ export default function ScheduledOrderPage() {
     setOrderList(newOrderList);
   };
 
+  const handleUpdateRouteUI = (targetRoute: IRoutes) => {
+    const newRoutes = routes.map((route: IRoutes) => {
+      if (route.id === targetRoute.id) {
+        return targetRoute;
+      }
+      return route;
+    });
+
+    setRoutes(newRoutes);
+  }
+
   const switchDay = (newValue: number) => {
     setRouteIndex(0);
     setDayIndex(newValue);
@@ -465,6 +480,7 @@ export default function ScheduledOrderPage() {
         driverList={driverList?.data || []}
         clientList={clientList?.data || []}
         setNotification={setNotification}
+        handleAddRouteUI={handleAddRouteUI}
       />
       <EditDeliveryDate
         open={isPreOrderOpen}
@@ -481,6 +497,8 @@ export default function ScheduledOrderPage() {
           onClose={() => setIsEditRouteOpen(false)}
           driverList={driverList?.data || []}
           clientList={clientList?.data || []}
+          day={days[dayIndex]}
+          handleUpdateRouteUI={handleUpdateRouteUI}
           setNotification={setNotification}
           route={routes[routeIndex]}
         />

@@ -19,7 +19,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         day,
         driverId,
-        name,
       },
     });
 
@@ -50,6 +49,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           create: formattedUser,
         },
       },
+      include: {
+        driver: true,
+        clients: {
+          include: {
+            user: true
+          }
+        }
+      }
     });
 
     return res.status(201).json({

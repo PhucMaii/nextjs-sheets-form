@@ -26,7 +26,9 @@ interface IEditRouteModal extends ModalProps {
   route: IRoutes;
   driverList: Driver[];
   clientList: UserType[];
+  day: string;
   setNotification: Dispatch<SetStateAction<Notification>>;
+  handleUpdateRouteUI: (targetRoute: IRoutes) => void;
 }
 
 const convertFromUserRouteToUser = (clientList: IUserRoutes[]) => {
@@ -43,7 +45,9 @@ export default function EditRoute({
   route,
   driverList,
   clientList,
+  day,
   setNotification,
+  handleUpdateRouteUI
 }: IEditRouteModal) {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedRoute, setUpdatedRoute] = useState<IRoutes>(route);
@@ -81,7 +85,8 @@ export default function EditRoute({
       const response = await axios.put(API_URL.ROUTES, {
         routeId: route.id,
         ...updatedValue,
-        clients: selectedClients
+        updatedClients: selectedClients,
+        day
       });
 
       if (response.data.error) {
@@ -94,13 +99,14 @@ export default function EditRoute({
         return;
       }
 
+      handleUpdateRouteUI(response.data.data);
+
       setNotification({
         on: true,
         type: 'success',
         message: response.data.message
       });
       setIsUpdating(false);
-
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
