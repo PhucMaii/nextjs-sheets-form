@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, memo } from 'react';
 import { API_URL } from '@/app/utils/enum';
-import { Notification, Routes, ScheduledOrder } from '@/app/utils/type';
+import { Notification, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import axios from 'axios';
@@ -28,7 +28,7 @@ interface PropTypes {
   handleSelectOrder: (e: any, order: ScheduledOrder) => void;
   handleSelectAll: () => void;
   routeId: number;
-  routes: Routes[];
+  routes: IRoutes[];
 }
 
 const ScheduleOrdersTable = ({

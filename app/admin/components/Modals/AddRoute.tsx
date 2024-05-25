@@ -16,7 +16,7 @@ import {
 import { BoxModal } from './styled';
 import { infoColor } from '@/app/theme/color';
 import ModalHead from '@/app/lib/ModalHead';
-import { Notification, Routes, UserType } from '@/app/utils/type';
+import { Notification, IRoutes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import axios from 'axios';
@@ -38,7 +38,7 @@ export default function AddRoute({
   setNotification,
 }: IAddRouteModal) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [newRoute, setNewRoute] = useState<Routes>({
+  const [newRoute, setNewRoute] = useState<IRoutes>({
     id: -1,
     name: '',
     driverId: -1,

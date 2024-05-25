@@ -23,7 +23,7 @@ import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import {
   Notification,
   OrderedItems,
-  Routes,
+  IRoutes,
   ScheduledOrder,
 } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
@@ -64,7 +64,7 @@ export default function ScheduledOrderPage() {
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [dayIndex, setDayIndex] = useState<number>(0);
   const [routeIndex, setRouteIndex] = useState<number>(0);
-  const [routes, setRoutes] = useState<Routes[]>([]);
+  const [routes, setRoutes] = useState<IRoutes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -590,7 +590,7 @@ export default function ScheduledOrderPage() {
                   }}
                 >
                   {routes.length > 0 &&
-                    routes.map((route: Routes, index: number) => {
+                    routes.map((route: IRoutes, index: number) => {
                       return (
                         <Tab
                           key={index}

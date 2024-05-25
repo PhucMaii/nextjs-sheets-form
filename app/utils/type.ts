@@ -86,7 +86,7 @@ export interface ScheduledOrder {
   user: UserType;
 }
 
-export interface Routes extends Route {
+export interface IRoutes extends Route {
   driver?: Driver;
   clients?: IUserRoutes[];
 }

@@ -16,12 +16,14 @@ import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { infoColor } from '@/app/theme/color';
 import { Driver } from '@prisma/client';
-import { IUserRoutes, Notification, Routes, UserType } from '@/app/utils/type';
+import { IUserRoutes, Notification, IRoutes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface IEditRouteModal extends ModalProps {
-  route: Routes;
+  route: IRoutes;
   driverList: Driver[];
   clientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
@@ -43,7 +45,8 @@ export default function EditRoute({
   clientList,
   setNotification,
 }: IEditRouteModal) {
-  const [updatedRoute, setUpdatedRoute] = useState<Routes>(route);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [updatedRoute, setUpdatedRoute] = useState<IRoutes>(route);
   const [selectedClients, setSelectedClients] = useState<UserType[]>(() => {
     if (route.clients) {
       const formattedClients = convertFromUserRouteToUser(route.clients);
@@ -63,15 +66,62 @@ export default function EditRoute({
     }
   }, [route]);
 
+  const updateRoute = async () => {
+    setIsUpdating(true);
+    const updatedValue: any = {};
+    if (updatedRoute.name !== route.name) {
+      updatedValue.name = updatedRoute.name;
+    }
+
+    if (updatedRoute.driverId !== route.driverId) {
+      updatedValue.driverId = updatedRoute.driverId;
+    }
+
+    try {
+      const response = await axios.put(API_URL.ROUTES, {
+        routeId: route.id,
+        ...updatedValue,
+        clients: selectedClients
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        setIsUpdating(false);
+        return;
+      }
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      });
+      setIsUpdating(false);
+
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error.response.data.error
+      });
+      setIsUpdating(false);
+    }
+  }
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <ModalHead
           heading="Edit Route"
-          onClick={() => {}}
+          onClick={updateRoute}
           buttonProps={{
             color: infoColor,
             variant: 'contained',
+            loading: isUpdating
           }}
           buttonLabel="EDIT"
         />

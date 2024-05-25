@@ -20,7 +20,7 @@ import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import {
   Notification,
   OrderedItems,
-  Routes,
+  IRoutes,
   ScheduledOrder,
 } from '@/app/utils/type';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
@@ -34,7 +34,7 @@ interface PropTypes {
   setNotification: Dispatch<SetStateAction<Notification>>;
   handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
   handleDeleteOrderUI: (targetOrder: ScheduledOrder) => void;
-  routes: Routes[];
+  routes: IRoutes[];
   routeId: number;
 }
 
@@ -265,7 +265,7 @@ export default function EditScheduleOrder({
               fullWidth
             >
               {routes &&
-                routes.map((route: Routes) => {
+                routes.map((route: IRoutes) => {
                   return (
                     <MenuItem key={route.id} value={route.id}>
                       {route.name} - {route?.driver?.name}
