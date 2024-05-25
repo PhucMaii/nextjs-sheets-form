@@ -194,7 +194,11 @@ const ClientsTable = ({
         <TableCell>{client.deliveryAddress}</TableCell>
         <TableCell>
           <Box display="flex" gap={1}>
-            <DeleteModal targetObj={client} handleDelete={handleDeleteClient} />
+            <DeleteModal
+              includedButton
+              targetObj={client}
+              handleDelete={handleDeleteClient}
+            />
             <EditClient
               client={client}
               // setNotification={setNotification}

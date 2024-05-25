@@ -197,7 +197,11 @@ const ClientOrdersTable = ({
         </TableCell>
         <TableCell>
           <Box display="flex" gap={1}>
-            <DeleteModal targetObj={order} handleDelete={handleDeleteOrder} />
+            <DeleteModal
+              includedButton
+              targetObj={order}
+              handleDelete={handleDeleteOrder}
+            />
             <EditReportOrder
               subCategories={subCategories}
               order={order}

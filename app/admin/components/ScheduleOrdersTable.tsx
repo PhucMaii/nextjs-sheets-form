@@ -40,7 +40,7 @@ const ScheduleOrdersTable = ({
   handleSelectOrder,
   handleSelectAll,
   routeId,
-  routes
+  routes,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
 

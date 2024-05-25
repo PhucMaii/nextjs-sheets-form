@@ -14,7 +14,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { routeId, day, name, driverId, updatedClients }: BodyTypes = req.body;
+    const { routeId, day, name, driverId, updatedClients }: BodyTypes =
+      req.body;
 
     const updateOptions: any = {};
 
@@ -51,7 +52,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // check if any updated with day or driverId, then check before update
     if (day || driverId) {
-      console.log({day, driverId});
+      console.log({ day, driverId });
       const checkIsRouteNotValid = await prisma.route.findFirst({
         where: {
           day,
@@ -81,7 +82,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           // pop item off to track
           baseClientList = baseClientList.filter((targetClient: UserType) => {
             return targetClient.id !== client.id;
-          })
+          });
           continue;
         }
 
@@ -99,14 +100,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const removedIds = baseClientList.map((client: UserType) => {
         return client.id;
       });
-  
+
       await prisma.userRoute.deleteMany({
         where: {
           userId: {
-            in: removedIds
-          }
-        }
-      })
+            in: removedIds,
+          },
+        },
+      });
     }
 
     const updatedRoute = await prisma.route.update({

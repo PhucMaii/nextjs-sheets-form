@@ -160,7 +160,7 @@ export default function EditScheduleOrder({
       const response = await axios.put(API_URL.SCHEDULED_ORDER, {
         user: order.user,
         oldRouteId: routeId,
-        newRouteId
+        newRouteId,
       });
 
       if (response.data.error) {
@@ -171,7 +171,7 @@ export default function EditScheduleOrder({
           message: response.data.error,
         });
         return;
-      };
+      }
 
       handleDeleteOrderUI(order);
 
@@ -190,7 +190,7 @@ export default function EditScheduleOrder({
         message: 'Fail to update item: ' + error,
       });
     }
-  }
+  };
 
   const updateItems = async () => {
     try {

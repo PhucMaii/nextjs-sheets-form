@@ -17,8 +17,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { user, items, scheduledOrderId, totalPrice, updateOption, oldRouteId, newRouteId } =
-      req.body as BodyTypes;
+    const {
+      user,
+      items,
+      scheduledOrderId,
+      totalPrice,
+      updateOption,
+      oldRouteId,
+      newRouteId,
+    } = req.body as BodyTypes;
 
     if (oldRouteId && newRouteId) {
       // remove from user route
@@ -26,42 +33,42 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         where: {
           userId_routeId: {
             userId: user.id,
-            routeId: oldRouteId
-          }
-        }
+            routeId: oldRouteId,
+          },
+        },
       });
 
       if (!existingUserRoute) {
         return res.status(404).json({
-          error: 'Incorrect Old Route Id'
-        })
-      };
+          error: 'Incorrect Old Route Id',
+        });
+      }
 
       await prisma.userRoute.delete({
         where: {
           userId_routeId: {
             userId: user.id,
-            routeId: oldRouteId
-          }
-        }
+            routeId: oldRouteId,
+          },
+        },
       });
 
       await prisma.userRoute.create({
         data: {
           userId: user.id,
-          routeId: newRouteId
-        }
+          routeId: newRouteId,
+        },
       });
 
       return res.status(200).json({
-        message: 'User Switch Route Successfully'
-      })
+        message: 'User Switch Route Successfully',
+      });
     }
-    
+
     if (!items) {
       return res.status(404).json({
-        error: 'Item List Not Provided'
-      })
+        error: 'Item List Not Provided',
+      });
     }
     // Update items in schedule order
     for (const item of items) {

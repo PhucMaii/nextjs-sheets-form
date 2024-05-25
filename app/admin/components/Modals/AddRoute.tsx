@@ -37,7 +37,7 @@ export default function AddRoute({
   driverList,
   clientList,
   setNotification,
-  handleAddRouteUI
+  handleAddRouteUI,
 }: IAddRouteModal) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newRoute, setNewRoute] = useState<IRoutes>({
@@ -80,7 +80,7 @@ export default function AddRoute({
         return;
       }
 
-      handleAddRouteUI(response.data.data)
+      handleAddRouteUI(response.data.data);
 
       setNotification({
         on: true,

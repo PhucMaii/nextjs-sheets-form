@@ -24,9 +24,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 category: true,
                 subCategory: true,
                 routes: true,
-              }
+              },
             },
-          }
+          },
         },
       },
     });

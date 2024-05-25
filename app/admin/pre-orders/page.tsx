@@ -43,6 +43,7 @@ import AddRoute from '../components/Modals/AddRoute';
 import useSWR from 'swr';
 import { UserRoute } from '@prisma/client';
 import EditRoute from '../components/Modals/EditRoute';
+import DeleteModal from '../components/Modals/DeleteModal';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -52,6 +53,7 @@ export default function ScheduledOrderPage() {
   const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isEditRouteOpen, setIsEditRouteOpen] = useState<boolean>(false);
   const [isFetchingRoute, setIsFetchingRoute] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -243,6 +245,41 @@ export default function ScheduledOrderPage() {
     }
   };
 
+  const deleteRoute = async (targetRoute: IRoutes) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL.ROUTES}?routeId=${targetRoute.id}`,
+      );
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      const newRoutes = routes.filter((route: IRoutes) => {
+        return route.id !== targetRoute.id;
+      });
+
+      setRoutes(newRoutes);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error.response.data.error,
+      });
+    }
+  };
+
   const deleteSelectedOrders = async () => {
     try {
       const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
@@ -256,7 +293,7 @@ export default function ScheduledOrderPage() {
         message: response.data.message,
       });
     } catch (error: any) {
-      console.log('Fail to mark all as completed: ', error);
+      console.log('Fail to delete selected orders: ', error);
     }
   };
 
@@ -382,7 +419,7 @@ export default function ScheduledOrderPage() {
 
   const handleAddRouteUI = (targetRoute: IRoutes) => {
     setRoutes([...routes, targetRoute]);
-  }
+  };
 
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
     // update base order list
@@ -455,7 +492,7 @@ export default function ScheduledOrderPage() {
     });
 
     setRoutes(newRoutes);
-  }
+  };
 
   const switchDay = (newValue: number) => {
     setRouteIndex(0);
@@ -481,6 +518,12 @@ export default function ScheduledOrderPage() {
         clientList={clientList?.data || []}
         setNotification={setNotification}
         handleAddRouteUI={handleAddRouteUI}
+      />
+      <DeleteModal
+        open={isDeleteModalOpen}
+        handleCloseModal={() => setIsDeleteModalOpen(false)}
+        handleDelete={deleteRoute}
+        targetObj={routes[routeIndex]}
       />
       <EditDeliveryDate
         open={isPreOrderOpen}
@@ -562,7 +605,12 @@ export default function ScheduledOrderPage() {
               alignItems="center"
             >
               <Box display="flex" gap={1}>
-                <Button fullWidth variant="outlined" color="error">
+                <Button
+                  color="error"
+                  fullWidth
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  variant="outlined"
+                >
                   Delete
                 </Button>
                 <Button

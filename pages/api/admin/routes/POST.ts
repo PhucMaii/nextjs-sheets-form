@@ -53,10 +53,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         driver: true,
         clients: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     return res.status(201).json({

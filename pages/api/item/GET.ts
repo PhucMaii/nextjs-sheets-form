@@ -20,7 +20,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     let items: any = [];
     if (existingUser?.subCategoryId) {
-      items = await fetchItemsWithSubCategoryId(existingUser.subCategoryId, existingUser.categoryId);
+      items = await fetchItemsWithSubCategoryId(
+        existingUser.subCategoryId,
+        existingUser.categoryId,
+      );
     } else {
       items = await prisma.item.findMany({
         where: {
@@ -66,7 +69,7 @@ export const fetchItemsWithSubCategoryId = async (
       return !targetItem.subCategoryId;
     });
 
-    return  [...beansprouts, ...removeDuplicatedItems];
+    return [...beansprouts, ...removeDuplicatedItems];
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

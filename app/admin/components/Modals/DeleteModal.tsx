@@ -10,9 +10,18 @@ import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 interface PropTypes {
   targetObj: any;
   handleDelete: (deletedOrder: any) => Promise<void>;
+  includedButton?: boolean;
+  open?: boolean;
+  handleCloseModal?: () => void;
 }
 
-export default function DeleteModal({ targetObj, handleDelete }: PropTypes) {
+export default function DeleteModal({
+  targetObj,
+  handleDelete,
+  includedButton,
+  open,
+  handleCloseModal,
+}: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
@@ -28,16 +37,27 @@ export default function DeleteModal({ targetObj, handleDelete }: PropTypes) {
   };
   return (
     <>
-      <Button
-        color="error"
-        onClick={(e: any) => {
-          e.stopPropagation();
-          setIsOpen(true);
+      {includedButton && (
+        <Button
+          color="error"
+          onClick={(e: any) => {
+            e.stopPropagation();
+            setIsOpen(true);
+          }}
+        >
+          DELETE
+        </Button>
+      )}
+      <Modal
+        open={open || isOpen}
+        onClose={() => {
+          if (handleCloseModal) {
+            handleCloseModal();
+          } else {
+            setIsOpen(false);
+          }
         }}
       >
-        DELETE
-      </Button>
-      <Modal open={isOpen}>
         <BoxModal
           display="flex"
           flexDirection="column"
@@ -53,7 +73,13 @@ export default function DeleteModal({ targetObj, handleDelete }: PropTypes) {
             <Button
               variant="outlined"
               color="error"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                if (handleCloseModal) {
+                  handleCloseModal();
+                } else {
+                  setIsOpen(false);
+                }
+              }}
             >
               Cancel
             </Button>

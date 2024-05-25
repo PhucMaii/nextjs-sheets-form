@@ -47,7 +47,7 @@ export default function EditRoute({
   clientList,
   day,
   setNotification,
-  handleUpdateRouteUI
+  handleUpdateRouteUI,
 }: IEditRouteModal) {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedRoute, setUpdatedRoute] = useState<IRoutes>(route);
@@ -71,29 +71,36 @@ export default function EditRoute({
   }, [route]);
 
   const updateRoute = async () => {
-    setIsUpdating(true);
-    const updatedValue: any = {};
-    if (updatedRoute.name !== route.name) {
-      updatedValue.name = updatedRoute.name;
+    if (updatedRoute.name.trim() === '' || updatedRoute.driverId === -1) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Invalid name or driver',
+      });
+      return;
     }
-
-    if (updatedRoute.driverId !== route.driverId) {
-      updatedValue.driverId = updatedRoute.driverId;
-    }
-
     try {
+      setIsUpdating(true);
+      const updatedValue: any = {};
+      if (updatedRoute.name !== route.name) {
+        updatedValue.name = updatedRoute.name;
+      }
+
+      if (updatedRoute.driverId !== route.driverId) {
+        updatedValue.driverId = updatedRoute.driverId;
+      }
       const response = await axios.put(API_URL.ROUTES, {
         routeId: route.id,
         ...updatedValue,
         updatedClients: selectedClients,
-        day
+        day,
       });
 
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         setIsUpdating(false);
         return;
@@ -104,7 +111,7 @@ export default function EditRoute({
       setNotification({
         on: true,
         type: 'success',
-        message: response.data.message
+        message: response.data.message,
       });
       setIsUpdating(false);
     } catch (error: any) {
@@ -112,11 +119,11 @@ export default function EditRoute({
       setNotification({
         on: true,
         type: 'error',
-        message: 'There was an error: ' + error.response.data.error
+        message: 'There was an error: ' + error.response.data.error,
       });
       setIsUpdating(false);
     }
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -127,7 +134,7 @@ export default function EditRoute({
           buttonProps={{
             color: infoColor,
             variant: 'contained',
-            loading: isUpdating
+            loading: isUpdating,
           }}
           buttonLabel="EDIT"
         />

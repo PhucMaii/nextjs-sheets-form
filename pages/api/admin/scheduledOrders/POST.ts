@@ -131,18 +131,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         userId_routeId: {
           userId: Number(userId),
-          routeId: Number(routeId)
-        }
-      }
+          routeId: Number(routeId),
+        },
+      },
     });
 
     if (!clientInUserRoute) {
       await prisma.userRoute.create({
         data: {
           userId: Number(userId),
-          routeId: Number(routeId)
-        }
-      })
+          routeId: Number(routeId),
+        },
+      });
     }
     // await prisma.route.update({
     //   where: {

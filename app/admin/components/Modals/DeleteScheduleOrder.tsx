@@ -60,7 +60,7 @@ export default function DeleteScheduleOrder({
           <Box display="flex" gap={2}>
             <LoadingButton
               variant="outlined"
-              color='error'
+              color="error"
               loading={isDeleting}
               onClick={() => handleDeleteOrder(DELETE_OPTION.PERMANENT)}
             >

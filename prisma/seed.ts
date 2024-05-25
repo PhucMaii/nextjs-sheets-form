@@ -175,12 +175,12 @@ async function main() {
   const password = await hash('test123', 12);
   await prisma.user.update({
     where: {
-      id: 204
+      id: 204,
     },
     data: {
-      password
-    }
-  })
+      password,
+    },
+  });
 }
 
 main()
