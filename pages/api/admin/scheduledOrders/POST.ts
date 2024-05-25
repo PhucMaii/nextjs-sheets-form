@@ -126,19 +126,36 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // add target client into selected route
-    await prisma.route.update({
+    // check then add target client into selected route
+    const clientInUserRoute = await prisma.userRoute.findUnique({
       where: {
-        id: Number(routeId),
-      },
-      data: {
-        clients: {
-          create: {
-            user: { connect: { id: userId } },
-          },
-        },
-      },
+        userId_routeId: {
+          userId: Number(userId),
+          routeId: Number(routeId)
+        }
+      }
     });
+
+    if (!clientInUserRoute) {
+      await prisma.userRoute.create({
+        data: {
+          userId: Number(userId),
+          routeId: Number(routeId)
+        }
+      })
+    }
+    // await prisma.route.update({
+    //   where: {
+    //     id: Number(routeId),
+    //   },
+    //   data: {
+    //     clients: {
+    //       create: {
+    //         user: { connect: { id: userId } },
+    //       },
+    //     },
+    //   },
+    // });
 
     const updatedScheduledOrder = await prisma.scheduleOrders.findUnique({
       where: {

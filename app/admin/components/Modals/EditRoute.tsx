@@ -1,6 +1,3 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
-import { ModalProps } from './type';
-import { Driver } from '@prisma/client';
 import {
   Autocomplete,
   Box,
@@ -13,100 +10,70 @@ import {
   Typography,
   Checkbox,
 } from '@mui/material';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { ModalProps } from './type';
 import { BoxModal } from './styled';
-import { infoColor } from '@/app/theme/color';
 import ModalHead from '@/app/lib/ModalHead';
-import { Notification, Routes, UserType } from '@/app/utils/type';
+import { infoColor } from '@/app/theme/color';
+import { Driver } from '@prisma/client';
+import { IUserRoutes, Notification, Routes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
 
-interface IAddRouteModal extends ModalProps {
-  day: string;
+interface IEditRouteModal extends ModalProps {
+  route: Routes;
   driverList: Driver[];
   clientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-export default function AddRoute({
+const convertFromUserRouteToUser = (clientList: IUserRoutes[]) => {
+  const formattedClients = clientList.map((userRoute: IUserRoutes) => {
+    return userRoute.user;
+  });
+
+  return formattedClients;
+};
+
+export default function EditRoute({
   open,
   onClose,
-  day,
+  route,
   driverList,
   clientList,
   setNotification,
-}: IAddRouteModal) {
-  const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [newRoute, setNewRoute] = useState<Routes>({
-    id: -1,
-    name: '',
-    driverId: -1,
-    day,
+}: IEditRouteModal) {
+  const [updatedRoute, setUpdatedRoute] = useState<Routes>(route);
+  const [selectedClients, setSelectedClients] = useState<UserType[]>(() => {
+    if (route.clients) {
+      const formattedClients = convertFromUserRouteToUser(route.clients);
+      return formattedClients;
+    }
+    return [];
   });
-  const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
 
-  const addRoute = async () => {
-    if (
-      newRoute.driverId === -1 ||
-      newRoute.name.trim() === '' ||
-      selectedClients.length === 0
-    ) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please fill out all blanks',
-      });
-      return;
+  useEffect(() => {
+    setUpdatedRoute(route);
+
+    if (route.clients) {
+      const formattedClients = convertFromUserRouteToUser(route.clients);
+      setSelectedClients(formattedClients);
+    } else {
+      setSelectedClients([]);
     }
-    try {
-      setIsAdding(true);
-      const response = await axios.post(API_URL.ROUTES, {
-        day,
-        driverId: newRoute.driverId,
-        name: newRoute.name,
-        clientList: selectedClients,
-      });
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsAdding(false);
-        return;
-      }
-
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
-      setIsAdding(false);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
-      setIsAdding(false);
-    }
-  };
+  }, [route]);
 
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <ModalHead
-          heading="Add Route"
-          onClick={addRoute}
+          heading="Edit Route"
+          onClick={() => {}}
           buttonProps={{
             color: infoColor,
             variant: 'contained',
-            loading: isAdding,
           }}
-          buttonLabel="ADD"
+          buttonLabel="EDIT"
         />
         <Divider />
         <Grid container spacing={2}>
@@ -115,9 +82,9 @@ export default function AddRoute({
               <Typography variant="h6">Route Name:</Typography>
               <TextField
                 label="Route Name"
-                value={newRoute.name}
+                value={updatedRoute.name}
                 onChange={(e) =>
-                  setNewRoute({ ...newRoute, name: e.target.value })
+                  setUpdatedRoute({ ...updatedRoute, name: e.target.value })
                 }
               />
             </Box>
@@ -126,9 +93,12 @@ export default function AddRoute({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Driver:</Typography>
               <Select
-                value={newRoute.driverId}
+                value={updatedRoute.driverId}
                 onChange={(e) =>
-                  setNewRoute({ ...newRoute, driverId: +e.target.value })
+                  setUpdatedRoute({
+                    ...updatedRoute,
+                    driverId: +e.target.value,
+                  })
                 }
               >
                 <MenuItem value={-1}>-- Choose a driver --</MenuItem>

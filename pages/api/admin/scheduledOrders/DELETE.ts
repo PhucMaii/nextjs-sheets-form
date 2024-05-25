@@ -29,28 +29,28 @@ export default async function DELETE(
       userId,
     } = req.body as BodyTypes;
 
-    if (deleteOption === DELETE_OPTION.TEMPORARY && routeId && userId) {
-      // get all clients from selected route
-      const selectedRoute = await prisma.route.findUnique({
-        where: {
-          id: routeId,
-        },
-        include: {
-          clients: true,
-        },
+    // get all clients from selected route
+    const selectedRoute = await prisma.route.findUnique({
+      where: {
+        id: routeId,
+      },
+      include: {
+        clients: true,
+      },
+    });
+
+    // check is clients in route
+    const isClientInRoute = selectedRoute?.clients.find(
+      (userRoute: UserRoute) => userRoute.userId === userId,
+    );
+
+    if (!isClientInRoute) {
+      return res.status(404).json({
+        error: `Selected Client Does Not Exist In Route Id ${routeId}`,
       });
+    }
 
-      // check is clients in route
-      const isClientInRoute = selectedRoute?.clients.find(
-        (userRoute: UserRoute) => userRoute.userId === userId,
-      );
-
-      if (!isClientInRoute) {
-        return res.status(404).json({
-          error: `Selected Client Does Not Exist In Route Id ${routeId}`,
-        });
-      }
-
+    if (routeId && userId) {
       await prisma.userRoute.delete({
         where: {
           userId_routeId: {
@@ -59,7 +59,9 @@ export default async function DELETE(
           },
         },
       });
+    }
 
+    if (deleteOption === DELETE_OPTION.TEMPORARY) {
       return res.status(200).json({
         message: `Client Removed From Route Id ${routeId} Successfully`,
       });

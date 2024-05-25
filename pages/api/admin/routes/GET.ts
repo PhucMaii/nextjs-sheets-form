@@ -16,7 +16,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         driver: true,
-        clients: true,
+        clients: {
+          include: {
+            user: {
+              include: {
+                preference: true,
+                category: true,
+                subCategory: true,
+                routes: true,
+              }
+            },
+          }
+        },
       },
     });
 

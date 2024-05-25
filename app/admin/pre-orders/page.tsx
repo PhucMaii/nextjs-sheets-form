@@ -42,6 +42,7 @@ import { Order } from '../orders/page';
 import AddRoute from '../components/Modals/AddRoute';
 import useSWR from 'swr';
 import { UserRoute } from '@prisma/client';
+import EditRoute from '../components/Modals/EditRoute';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -49,10 +50,11 @@ export default function ScheduledOrderPage() {
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
   // const [driverList, setDriverList] = useState<Driver[]>([]);
   const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isFetchingRoute, setIsFetchingRoute] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
+  const [isEditRouteOpen, setIsEditRouteOpen] = useState<boolean>(false);
+  const [isFetchingRoute, setIsFetchingRoute] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -128,13 +130,13 @@ export default function ScheduledOrderPage() {
 
   useEffect(() => {
     fetchRoutes();
-  }, [dayIndex])
+  }, [dayIndex]);
 
   useEffect(() => {
     if (routes.length > 0) {
       fetchOrders();
     }
-  }, [routes, routeIndex])
+  }, [routes, routeIndex]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -444,7 +446,7 @@ export default function ScheduledOrderPage() {
     setRouteIndex(0);
     setDayIndex(newValue);
     setRoutes([]);
-  }
+  };
 
   return (
     <Sidebar>
@@ -473,6 +475,16 @@ export default function ScheduledOrderPage() {
         progress={preOrderProgress}
         scheduleOrderList={selectedOrders}
       />
+      {routes.length > 0 && (
+        <EditRoute
+          open={isEditRouteOpen}
+          onClose={() => setIsEditRouteOpen(false)}
+          driverList={driverList?.data || []}
+          clientList={clientList?.data || []}
+          setNotification={setNotification}
+          route={routes[routeIndex]}
+        />
+      )}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -535,7 +547,11 @@ export default function ScheduledOrderPage() {
                 <Button fullWidth variant="outlined" color="error">
                   Delete
                 </Button>
-                <Button fullWidth variant="outlined">
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => setIsEditRouteOpen(true)}
+                >
                   Edit
                 </Button>
               </Box>

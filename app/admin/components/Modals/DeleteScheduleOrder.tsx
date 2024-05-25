@@ -7,6 +7,7 @@ import { errorColor } from '@/app/theme/color';
 import { grey } from '@mui/material/colors';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   targetObj: any;
@@ -57,13 +58,14 @@ export default function DeleteScheduleOrder({
             Are you sure to delete ?
           </Typography>
           <Box display="flex" gap={2}>
-            <Button
+            <LoadingButton
               variant="outlined"
-              color="error"
+              color='error'
+              loading={isDeleting}
               onClick={() => handleDeleteOrder(DELETE_OPTION.PERMANENT)}
             >
               DELETE
-            </Button>
+            </LoadingButton>
             <LoadingButtonStyles
               color={errorColor}
               loading={isDeleting}

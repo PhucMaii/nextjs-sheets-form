@@ -5,12 +5,14 @@ import { infoColor } from '../theme/color';
 
 interface IModalHead {
   heading: string;
+  buttonLabel: string;
   onClick: any;
   buttonProps: any;
 }
 
 export default function ModalHead({
   heading,
+  buttonLabel,
   onClick,
   buttonProps,
 }: IModalHead) {
@@ -25,7 +27,7 @@ export default function ModalHead({
         color={infoColor}
         {...buttonProps}
       >
-        ADD
+        {buttonLabel}
       </LoadingButtonStyles>
     </Box>
   );
