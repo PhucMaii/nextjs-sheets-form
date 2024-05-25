@@ -50,6 +50,7 @@ export default function ScheduledOrderPage() {
   // const [driverList, setDriverList] = useState<Driver[]>([]);
   const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFetchingRoute, setIsFetchingRoute] = useState<boolean>(true);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
@@ -126,8 +127,14 @@ export default function ScheduledOrderPage() {
   }, [createdOrders]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [dayIndex, routeIndex]);
+    fetchRoutes();
+  }, [dayIndex])
+
+  useEffect(() => {
+    if (routes.length > 0) {
+      fetchOrders();
+    }
+  }, [routes, routeIndex])
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -302,13 +309,13 @@ export default function ScheduledOrderPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      const returnRoutes = await fetchRoutes();
-      if (returnRoutes.length === 0) {
+      // const returnRoutes = await fetchRoutes();
+      if (routes.length === 0) {
         setOrderList([]);
         setIsLoading(false);
         return;
       }
-      const clientIds = returnRoutes[routeIndex].clients?.map(
+      const clientIds = routes[routeIndex].clients?.map(
         (userRoute: UserRoute) => {
           return userRoute.userId;
         },
@@ -342,6 +349,7 @@ export default function ScheduledOrderPage() {
 
   const fetchRoutes = async () => {
     try {
+      setIsFetchingRoute(true);
       const response = await axios.get(
         `${API_URL.ROUTES}?day=${days[dayIndex]}`,
       );
@@ -352,13 +360,16 @@ export default function ScheduledOrderPage() {
           type: 'error',
           message: response.data.error,
         });
+        setIsFetchingRoute(false);
         return;
       }
 
+      setIsFetchingRoute(false);
       setRoutes(response.data.data);
       return response.data.data; // for fetch orders
     } catch (error: any) {
       console.log('There was an error: ', error);
+      setIsFetchingRoute(false);
       setNotification({
         on: true,
         type: 'error',
@@ -429,6 +440,12 @@ export default function ScheduledOrderPage() {
     setOrderList(newOrderList);
   };
 
+  const switchDay = (newValue: number) => {
+    setRouteIndex(0);
+    setDayIndex(newValue);
+    setRoutes([]);
+  }
+
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
@@ -488,7 +505,7 @@ export default function ScheduledOrderPage() {
           <Tabs
             aria-label="basic tabs"
             value={dayIndex}
-            onChange={(e, newValue) => setDayIndex(newValue)}
+            onChange={(e, newValue: number) => switchDay(newValue)}
             variant="fullWidth"
           >
             {days &&
@@ -522,7 +539,17 @@ export default function ScheduledOrderPage() {
                   Edit
                 </Button>
               </Box>
-              {routes.length > 0 ? (
+              {isFetchingRoute ? (
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  mt={2}
+                >
+                  <Typography>Loading Route...</Typography>
+                </Box>
+              ) : routes.length > 0 ? (
                 <Tabs
                   orientation="vertical"
                   aria-label="basic tabs"
