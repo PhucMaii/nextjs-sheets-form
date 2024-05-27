@@ -52,7 +52,7 @@ export default function EditRoute({
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedRoute, setUpdatedRoute] = useState<IRoutes>(route);
   const [selectedClients, setSelectedClients] = useState<UserType[]>(() => {
-    if (route.clients) {
+    if (route?.clients) {
       const formattedClients = convertFromUserRouteToUser(route.clients);
       return formattedClients;
     }
@@ -62,7 +62,7 @@ export default function EditRoute({
   useEffect(() => {
     setUpdatedRoute(route);
 
-    if (route.clients) {
+    if (route?.clients) {
       const formattedClients = convertFromUserRouteToUser(route.clients);
       setSelectedClients(formattedClients);
     } else {

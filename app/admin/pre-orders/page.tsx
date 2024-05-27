@@ -137,6 +137,9 @@ export default function ScheduledOrderPage() {
   useEffect(() => {
     if (routes.length > 0) {
       fetchOrders();
+    } else {
+      setOrderList([]);
+      setIsLoading(false);
     }
   }, [routes, routeIndex]);
 
@@ -264,12 +267,17 @@ export default function ScheduledOrderPage() {
         return route.id !== targetRoute.id;
       });
 
+      if (newRoutes.length > 0) {
+        setRouteIndex(0);
+      }
+
       setRoutes(newRoutes);
       setNotification({
         on: true,
         type: 'success',
         message: response.data.message,
       });
+      setIsDeleteModalOpen(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
@@ -369,6 +377,7 @@ export default function ScheduledOrderPage() {
           type: 'error',
           message: response.data.error,
         });
+        setIsLoading(false);
         return;
       }
 
@@ -389,6 +398,7 @@ export default function ScheduledOrderPage() {
   const fetchRoutes = async () => {
     try {
       setIsFetchingRoute(true);
+      setRoutes([]);
       const response = await axios.get(
         `${API_URL.ROUTES}?day=${days[dayIndex]}`,
       );
