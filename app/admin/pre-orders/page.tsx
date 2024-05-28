@@ -147,7 +147,7 @@ export default function ScheduledOrderPage() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newOrderList = orderList.filter((order: ScheduledOrder) => {
+      const newOrderList = baseOrderList.filter((order: ScheduledOrder) => {
         if (
           order.user.clientId.includes(debouncedKeywords) ||
           order.user.clientName
