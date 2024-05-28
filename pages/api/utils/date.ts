@@ -1,6 +1,6 @@
 import { Order } from '@/app/admin/orders/page';
 
-const convertDeliveryDateStringToDate = (deliveryDate: string) => {
+export const convertDeliveryDateStringToDate = (deliveryDate: string) => {
   const parts = deliveryDate.split('/');
   const month = parseInt(parts[0], 10) - 1; // Months are 0-indexed in JavaScript, so subtract 1
   const day = parseInt(parts[1], 10);

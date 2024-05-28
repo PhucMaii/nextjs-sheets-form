@@ -50,13 +50,15 @@ import {
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { limitOrderHour } from '@/app/lib/constant';
+import { days, limitOrderHour } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { pusherClient } from '@/app/pusher';
-import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import { convertDeliveryDateStringToDate, filterDateRangeOrders } from '@/pages/api/utils/date';
 import { SubCategory } from '@prisma/client';
+import BillPrintModal from '../components/Modals/BillPrintModal';
+import useSWR from 'swr';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -80,6 +82,7 @@ export default function ReportPage() {
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isOpenBillPrintModal, setIsOpenBillPrintModal] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -92,6 +95,11 @@ export default function ReportPage() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
+
+  const currentDate = convertDeliveryDateStringToDate(datePicker);
+  const { data: routes, mutate } = useSWR(`${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`)
+
+  
 
   useEffect(() => {
     fetchSubCategories();
@@ -144,6 +152,13 @@ export default function ReportPage() {
       setBaseClientOrders([]);
     }
   }, [clientValue, dateRange, datePicker]);
+
+
+  useEffect(() => {
+    if (datePicker) {
+      mutate();
+    }
+  }, [datePicker]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -505,7 +520,6 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
-      {/* <AuthenGuard> */}
       <div style={{ display: 'none' }}>
         <InvoicePrint
           client={clientValue}
@@ -519,6 +533,12 @@ export default function ReportPage() {
           ref={billPrint}
         />
       </div>
+      <BillPrintModal
+        open={isOpenBillPrintModal}
+        onClose={() => setIsOpenBillPrintModal(false)}
+        routes={routes?.data || []}
+        orderList={clientOrders}
+      />
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -604,7 +624,9 @@ export default function ReportPage() {
               <Button
                 disabled={clientOrders.length === 0}
                 variant="outlined"
-                onClick={handleBillPrint}
+                onClick={() => {
+                  setIsOpenBillPrintModal(true);
+                }}
                 fullWidth
               >
                 <Box display="flex" gap={2}>

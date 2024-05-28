@@ -42,6 +42,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           user: {
             include: {
               category: true,
+              routes: true
             },
           },
         },

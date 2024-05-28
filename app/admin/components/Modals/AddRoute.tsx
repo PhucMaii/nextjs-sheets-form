@@ -22,7 +22,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
-interface IAddRouteModal extends ModalProps {
+interface PropTypes extends ModalProps {
   day: string;
   driverList: Driver[];
   clientList: UserType[];
@@ -40,7 +40,7 @@ export default function AddRoute({
   disabledClientList,
   setNotification,
   handleAddRouteUI,
-}: IAddRouteModal) {
+}: PropTypes) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newRoute, setNewRoute] = useState<IRoutes>({
     id: -1,
