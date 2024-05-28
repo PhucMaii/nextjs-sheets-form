@@ -25,11 +25,20 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         scheduleOrder.user.id,
         deliveryDate,
       );
-      if (hasClientOrder || scheduleOrder.totalPrice === 0) {
+      if (hasClientOrder) {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
           hasClientOrder,
+        );
+        continue;
+      }
+
+      if (scheduleOrder.totalPrice === 0) {
+        await pusherServer.trigger(
+          'admin-schedule-order',
+          'pre-order',
+          scheduleOrder,
         );
         continue;
       }
