@@ -55,7 +55,10 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { pusherClient } from '@/app/pusher';
-import { convertDeliveryDateStringToDate, filterDateRangeOrders } from '@/pages/api/utils/date';
+import {
+  convertDeliveryDateStringToDate,
+  filterDateRangeOrders,
+} from '@/pages/api/utils/date';
 import { SubCategory } from '@prisma/client';
 import BillPrintModal from '../components/Modals/BillPrintModal';
 import useSWR from 'swr';
@@ -82,7 +85,8 @@ export default function ReportPage() {
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [isOpenBillPrintModal, setIsOpenBillPrintModal] = useState<boolean>(false);
+  const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
+    useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -97,9 +101,9 @@ export default function ReportPage() {
   const billPrint: any = useRef();
 
   const currentDate = convertDeliveryDateStringToDate(datePicker);
-  const { data: routes, mutate } = useSWR(`${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`)
-
-  
+  const { data: routes, mutate } = useSWR(
+    `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
+  );
 
   useEffect(() => {
     fetchSubCategories();
@@ -152,7 +156,6 @@ export default function ReportPage() {
       setBaseClientOrders([]);
     }
   }, [clientValue, dateRange, datePicker]);
-
 
   useEffect(() => {
     if (datePicker) {
@@ -533,12 +536,14 @@ export default function ReportPage() {
           ref={billPrint}
         />
       </div>
-      <BillPrintModal
-        open={isOpenBillPrintModal}
-        onClose={() => setIsOpenBillPrintModal(false)}
-        routes={routes?.data || []}
-        orderList={clientOrders}
-      />
+      {clientValue?.clientName === 'All Clients' && (
+        <BillPrintModal
+          open={isOpenBillPrintModal}
+          onClose={() => setIsOpenBillPrintModal(false)}
+          routes={routes?.data || []}
+          orderList={clientOrders}
+        />
+      )}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -625,7 +630,11 @@ export default function ReportPage() {
                 disabled={clientOrders.length === 0}
                 variant="outlined"
                 onClick={() => {
-                  setIsOpenBillPrintModal(true);
+                  if (clientValue?.clientName === 'All Clients') {
+                    setIsOpenBillPrintModal(true);
+                  } else {
+                    handleBillPrint();
+                  }
                 }}
                 fullWidth
               >

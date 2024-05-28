@@ -66,8 +66,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             id: order.userId,
           },
           include: {
-            routes: true
-          }
+            routes: true,
+          },
         });
 
         const category = await prisma.category.findUnique({

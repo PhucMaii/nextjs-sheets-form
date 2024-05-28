@@ -172,12 +172,10 @@ async function main() {
   //   ]
   // })
 
-  const password = await hash('test123', 12);
-  await prisma.user.update({
-    where: {
-      id: 204,
-    },
+  const password = await hash('driver123', 12);
+  await prisma.driver.create({
     data: {
+      name: 'ROY',
       password,
     },
   });

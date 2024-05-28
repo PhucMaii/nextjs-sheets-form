@@ -156,8 +156,10 @@ export default function AddRoute({
                 multiple
                 options={clientList}
                 getOptionDisabled={(option) => {
-                  const isOptionInvalid = disabledClientList.some((client: UserType) => option.id === client.id)
-                  return isOptionInvalid
+                  const isOptionInvalid = disabledClientList.some(
+                    (client: UserType) => option.id === client.id,
+                  );
+                  return isOptionInvalid;
                 }}
                 disableCloseOnSelect
                 getOptionLabel={(option: UserType) =>
