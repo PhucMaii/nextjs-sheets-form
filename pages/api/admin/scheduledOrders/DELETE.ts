@@ -1,9 +1,17 @@
-import { PrismaClient, ScheduleOrders } from '@prisma/client';
+import { PrismaClient, ScheduleOrders, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+
+export enum DELETE_OPTION {
+  TEMPORARY = 'temporary',
+  PERMANENT = 'permanent',
+}
 
 interface BodyTypes {
   scheduleOrderId?: string;
   scheduleOrderList?: ScheduleOrders[];
+  deleteOption?: DELETE_OPTION;
+  routeId?: number;
+  userId?: number;
 }
 
 export default async function DELETE(
@@ -13,7 +21,51 @@ export default async function DELETE(
   try {
     const prisma = new PrismaClient();
 
-    const { scheduleOrderId, scheduleOrderList } = req.body as BodyTypes;
+    const {
+      scheduleOrderId,
+      scheduleOrderList,
+      deleteOption,
+      routeId,
+      userId,
+    } = req.body as BodyTypes;
+
+    // get all clients from selected route
+    const selectedRoute = await prisma.route.findUnique({
+      where: {
+        id: routeId,
+      },
+      include: {
+        clients: true,
+      },
+    });
+
+    // check is clients in route
+    const isClientInRoute = selectedRoute?.clients.find(
+      (userRoute: UserRoute) => userRoute.userId === userId,
+    );
+
+    if (!isClientInRoute) {
+      return res.status(404).json({
+        error: `Selected Client Does Not Exist In Route Id ${routeId}`,
+      });
+    }
+
+    if (routeId && userId) {
+      await prisma.userRoute.delete({
+        where: {
+          userId_routeId: {
+            userId,
+            routeId,
+          },
+        },
+      });
+    }
+
+    if (deleteOption === DELETE_OPTION.TEMPORARY) {
+      return res.status(200).json({
+        message: `Client Removed From Route Id ${routeId} Successfully`,
+      });
+    }
 
     if (scheduleOrderList) {
       for (const order of scheduleOrderList) {

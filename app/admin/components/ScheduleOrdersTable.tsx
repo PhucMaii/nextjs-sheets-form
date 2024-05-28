@@ -11,12 +11,13 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, memo } from 'react';
 import { API_URL } from '@/app/utils/enum';
-import { Notification, ScheduledOrder } from '@/app/utils/type';
+import { Notification, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import axios from 'axios';
-import DeleteModal from './Modals/DeleteModal';
 import EditScheduleOrder from './Modals/EditScheduleOrder';
+import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
+import DeleteScheduleOrder from './Modals/DeleteScheduleOrder';
 
 interface PropTypes {
   clientOrders: ScheduledOrder[];
@@ -26,6 +27,8 @@ interface PropTypes {
   selectedOrders: ScheduledOrder[];
   handleSelectOrder: (e: any, order: ScheduledOrder) => void;
   handleSelectAll: () => void;
+  routeId: number;
+  routes: IRoutes[];
 }
 
 const ScheduleOrdersTable = ({
@@ -36,13 +39,23 @@ const ScheduleOrdersTable = ({
   selectedOrders,
   handleSelectOrder,
   handleSelectAll,
+  routeId,
+  routes,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
 
-  const handleDeleteOrder = async (order: ScheduledOrder) => {
+  const handleDeleteOrder = async (
+    order: ScheduledOrder,
+    deleteOption: DELETE_OPTION,
+  ) => {
     try {
       const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
-        data: { scheduleOrderId: order.id },
+        data: {
+          scheduleOrderId: order.id,
+          deleteOption,
+          userId: order.userId,
+          routeId,
+        },
       });
 
       if (response.data.error) {
@@ -114,11 +127,17 @@ const ScheduleOrdersTable = ({
         <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
         <TableCell>
           <Box display="flex" gap={1}>
-            <DeleteModal targetObj={order} handleDelete={handleDeleteOrder} />
+            <DeleteScheduleOrder
+              targetObj={order}
+              handleDelete={handleDeleteOrder}
+            />
             <EditScheduleOrder
+              routeId={routeId}
+              routes={routes}
               order={order}
               setNotification={setNotification}
               handleUpdateOrderUI={handleUpdateOrderUI}
+              handleDeleteOrderUI={handleDeleteOrderUI}
             />
           </Box>
         </TableCell>

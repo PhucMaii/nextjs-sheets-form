@@ -123,7 +123,7 @@ export default function ClientsPage() {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
       }
@@ -134,10 +134,10 @@ export default function ClientsPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'There was an error: ' + error
-      })
+        message: 'There was an error: ' + error,
+      });
     }
-  }
+  };
 
   const handleAddClientUI = (newClient: UserType) => {
     setBaseClientList([...baseClientList, newClient]);
@@ -425,101 +425,97 @@ export default function ClientsPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
-        <LoadingModal open={isUpdating} />
-        <AddClient
-          open={isAddClientOpen}
-          onClose={() => setIsAddClientOpen(false)}
-          categories={categoryList}
-          subCategories={subCategories}
-          setNotification={setNotification}
-          handleAddClientUI={handleAddClientUI}
-        />
-        <SingleFieldUpdate
-          open={singleFieldUpdateProps.open}
-          onClose={() =>
-            setSingleFieldUpdateProps({
-              ...singleFieldUpdateProps,
-              open: false,
-            })
-          }
-          title={singleFieldUpdateProps.title}
-          menuList={singleFieldUpdateProps.menuList}
-          label={singleFieldUpdateProps.label}
-          handleUpdate={handleBulkUpdate}
-          updatedField={singleFieldUpdateProps.updatedField}
-        />
-        <NotificationPopup
-          notification={notification}
-          onClose={() => setNotification({ ...notification, on: false })}
-        />
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
-            <OverviewCard
-              icon={
-                <PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />
-              }
-              text="Total Clients"
-              value={baseClientList.length}
+      <LoadingModal open={isUpdating} />
+      <AddClient
+        open={isAddClientOpen}
+        onClose={() => setIsAddClientOpen(false)}
+        categories={categoryList}
+        subCategories={subCategories}
+        setNotification={setNotification}
+        handleAddClientUI={handleAddClientUI}
+      />
+      <SingleFieldUpdate
+        open={singleFieldUpdateProps.open}
+        onClose={() =>
+          setSingleFieldUpdateProps({
+            ...singleFieldUpdateProps,
+            open: false,
+          })
+        }
+        title={singleFieldUpdateProps.title}
+        menuList={singleFieldUpdateProps.menuList}
+        label={singleFieldUpdateProps.label}
+        handleUpdate={handleBulkUpdate}
+        updatedField={singleFieldUpdateProps.updatedField}
+      />
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} md={4}>
+          <OverviewCard
+            icon={<PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Total Clients"
+            value={baseClientList.length}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <OverviewCard
+            icon={<QrCodeIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="No. clients use the app"
+            value={numberOfUserUsingApp().numberOfUsers as number}
+            helperText={`${numberOfUserUsingApp().percentage}% of total`}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <OverviewCard
+            icon={<CalendarMonthIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="No. clients pay monthly"
+            helperText={`${numberOfUserPayMonthly().percentage}% of total`}
+            value={numberOfUserPayMonthly().numberOfUsers as number}
+          />
+        </Grid>
+      </Grid>
+      <ShadowSection>
+        <Grid container spacing={1}>
+          <Grid item xs={12} md={2.5}>
+            {generalUpdate}
+          </Grid>
+          <Grid item xs={11} md={9}>
+            <TextField
+              fullWidth
+              placeholder="Search by client id or client name"
+              sx={{ mb: 2 }}
+              value={searchKeywords}
+              onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} md={4}>
-            <OverviewCard
-              icon={<QrCodeIcon sx={{ color: blue[700], fontSize: 50 }} />}
-              text="No. clients use the app"
-              value={numberOfUserUsingApp().numberOfUsers as number}
-              helperText={`${numberOfUserUsingApp().percentage}% of total`}
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <OverviewCard
-              icon={
-                <CalendarMonthIcon sx={{ color: blue[700], fontSize: 50 }} />
-              }
-              text="No. clients pay monthly"
-              helperText={`${numberOfUserPayMonthly().percentage}% of total`}
-              value={numberOfUserPayMonthly().numberOfUsers as number}
-            />
+          <Grid item xs={1} md={0.5} textAlign="center">
+            <IconButton
+              sx={{ width: 50, height: 40 }}
+              onClick={() => setIsAddClientOpen(true)}
+            >
+              <AddBoxIcon sx={{ color: infoColor, width: 50, height: 50 }} />
+            </IconButton>
           </Grid>
         </Grid>
-        <ShadowSection>
-          <Grid container spacing={1}>
-            <Grid item xs={12} md={2.5}>
-              {generalUpdate}
-            </Grid>
-            <Grid item xs={11} md={9}>
-              <TextField
-                fullWidth
-                placeholder="Search by client id or client name"
-                sx={{ mb: 2 }}
-                value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={1} md={0.5} textAlign="center">
-              <IconButton
-                sx={{ width: 50, height: 40 }}
-                onClick={() => setIsAddClientOpen(true)}
-              >
-                <AddBoxIcon sx={{ color: infoColor, width: 50, height: 50 }} />
-              </IconButton>
-            </Grid>
-          </Grid>
-          {clientList.length > 0 ? (
-            <ClientsTable
-              categories={categoryList}
-              clients={clientList}
-              handleUpdateClient={handleUpdateClient}
-              handleDeleteClientUI={handleDeleteClientUI}
-              setNotification={setNotification}
-              selectedClients={selectedClients}
-              handleSelectClient={handleSelectClient}
-              handleSelectAll={handleSelectAll}
-              subCategories={subCategories}
-            />
-          ) : (
-            <ErrorComponent errorText="No User Found" />
-          )}
-        </ShadowSection>
+        {clientList.length > 0 ? (
+          <ClientsTable
+            categories={categoryList}
+            clients={clientList}
+            handleUpdateClient={handleUpdateClient}
+            handleDeleteClientUI={handleDeleteClientUI}
+            setNotification={setNotification}
+            selectedClients={selectedClients}
+            handleSelectClient={handleSelectClient}
+            handleSelectAll={handleSelectAll}
+            subCategories={subCategories}
+          />
+        ) : (
+          <ErrorComponent errorText="No User Found" />
+        )}
+      </ShadowSection>
       {/* </AuthenGuard> */}
     </Sidebar>
   );

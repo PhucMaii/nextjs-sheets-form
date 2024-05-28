@@ -189,121 +189,121 @@ export default function AccountPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
-        <SnackbarPopup
-          open={notification.on}
-          type={notification.type}
-          message={notification.message}
-          onClose={() => setNotification({ ...notification, on: false })}
-        />
-        <Typography variant="h4">Account</Typography>
-        <ShadowSection display="flex" flexDirection="column" gap={2} mt={2}>
-          <Typography variant="h5" fontWeight="bold">
-            General Information
-          </Typography>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6">Email</Typography>
-            <TextField
-              fullWidth
-              placeholder="New email..."
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Box>
-          <Box display="flex" justifyContent="right">
-            <LoadingButtonStyles
-              onClick={handleUpdateEmail}
-              color={infoColor}
-              loading={isSubmitting}
-              fullWidth={smDown}
-            >
-              Save
-            </LoadingButtonStyles>
-          </Box>
-        </ShadowSection>
-        <ShadowSection display="flex" flexDirection="column" gap={2} mt={2}>
-          <Typography variant="h5" fontWeight="bold">
-            Security
-          </Typography>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6">Current password</Typography>
-            <OutlinedInput
-              fullWidth
-              id="old-password"
-              type={showOldPassword ? 'text' : 'password'}
-              onChange={(e) => {
-                handleChangePasswordGroup('oldPassword', e.target.value);
-              }}
-              value={passwordGroup.oldPassword}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => setShowOldPassword((show) => !show)}
-                    edge="end"
-                  >
-                    {showOldPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </Box>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6">New password</Typography>
-            <OutlinedInput
-              fullWidth
-              id="new-password"
-              type={showNewPassword ? 'text' : 'password'}
-              onChange={(e) => {
-                handleChangePasswordGroup('newPassword', e.target.value);
-              }}
-              value={passwordGroup.newPassword}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => setShowNewPassword((show) => !show)}
-                    edge="end"
-                  >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </Box>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6">Confirm new password</Typography>
-            <OutlinedInput
-              fullWidth
-              id="confirm-password"
-              type={showConfirmPassword ? 'text' : 'password'}
-              onChange={(e) => {
-                handleChangePasswordGroup('confirmPassword', e.target.value);
-              }}
-              value={passwordGroup.confirmPassword}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => setShowConfirmPassword((show) => !show)}
-                    edge="end"
-                  >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </Box>
-          <Box display="flex" justifyContent="right">
-            <LoadingButtonStyles
-              color={infoColor}
-              loading={isSubmitting}
-              fullWidth={smDown}
-              onClick={handleUpdatePassword}
-            >
-              Update
-            </LoadingButtonStyles>
-          </Box>
-        </ShadowSection>
+      <SnackbarPopup
+        open={notification.on}
+        type={notification.type}
+        message={notification.message}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
+      <Typography variant="h4">Account</Typography>
+      <ShadowSection display="flex" flexDirection="column" gap={2} mt={2}>
+        <Typography variant="h5" fontWeight="bold">
+          General Information
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Typography variant="h6">Email</Typography>
+          <TextField
+            fullWidth
+            placeholder="New email..."
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Box>
+        <Box display="flex" justifyContent="right">
+          <LoadingButtonStyles
+            onClick={handleUpdateEmail}
+            color={infoColor}
+            loading={isSubmitting}
+            fullWidth={smDown}
+          >
+            Save
+          </LoadingButtonStyles>
+        </Box>
+      </ShadowSection>
+      <ShadowSection display="flex" flexDirection="column" gap={2} mt={2}>
+        <Typography variant="h5" fontWeight="bold">
+          Security
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Typography variant="h6">Current password</Typography>
+          <OutlinedInput
+            fullWidth
+            id="old-password"
+            type={showOldPassword ? 'text' : 'password'}
+            onChange={(e) => {
+              handleChangePasswordGroup('oldPassword', e.target.value);
+            }}
+            value={passwordGroup.oldPassword}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => setShowOldPassword((show) => !show)}
+                  edge="end"
+                >
+                  {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+        </Box>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Typography variant="h6">New password</Typography>
+          <OutlinedInput
+            fullWidth
+            id="new-password"
+            type={showNewPassword ? 'text' : 'password'}
+            onChange={(e) => {
+              handleChangePasswordGroup('newPassword', e.target.value);
+            }}
+            value={passwordGroup.newPassword}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => setShowNewPassword((show) => !show)}
+                  edge="end"
+                >
+                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+        </Box>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Typography variant="h6">Confirm new password</Typography>
+          <OutlinedInput
+            fullWidth
+            id="confirm-password"
+            type={showConfirmPassword ? 'text' : 'password'}
+            onChange={(e) => {
+              handleChangePasswordGroup('confirmPassword', e.target.value);
+            }}
+            value={passwordGroup.confirmPassword}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => setShowConfirmPassword((show) => !show)}
+                  edge="end"
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+        </Box>
+        <Box display="flex" justifyContent="right">
+          <LoadingButtonStyles
+            color={infoColor}
+            loading={isSubmitting}
+            fullWidth={smDown}
+            onClick={handleUpdatePassword}
+          >
+            Update
+          </LoadingButtonStyles>
+        </Box>
+      </ShadowSection>
       {/* </AuthenGuard> */}
     </Sidebar>
   );

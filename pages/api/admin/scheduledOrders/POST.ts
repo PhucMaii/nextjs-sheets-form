@@ -5,7 +5,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId, items, day, newTotalPrice } = req.body;
+    const { userId, items, day, routeId, newTotalPrice } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -13,14 +13,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         scheduleOrders: {
-            where: {
-              userId,
-              day
-            },
-            include: {
-              items: true
-            }
-        }
+          where: {
+            userId,
+            day,
+          },
+          include: {
+            items: true,
+          },
+        },
       },
     });
 
@@ -31,65 +31,65 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (existingUser.scheduleOrders.length > 0) {
-        const sameDayOrder = existingUser.scheduleOrders.find(
-          (order: ScheduleOrders) => {
-            return order.day === day;
-          },
-        );
-        // Override same day schedule order if it existed
-        if (sameDayOrder) {
-          for (const item of items) {
-            // first, find if there is any of that item
-            const existiedItem = await prisma.orderedItems.findFirst({
-                where: {
-                    scheduledOrderId: sameDayOrder.id,
-                    name: item.name,
-                },
-            });
-
-            // if yes, then update it, otherwise create new items
-            if (existiedItem) {
-                await prisma.orderedItems.updateMany({
-                  where: {
-                    scheduledOrderId: sameDayOrder.id,
-                    name: item.name,
-                  },
-                  data: {
-                    price: item.price,
-                    quantity: item.quantity,
-                  },
-                });
-            } else {
-                await prisma.orderedItems.create({
-                    data: {
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        scheduledOrderId: sameDayOrder.id
-                    }
-                })
-            }
-          }
-    
-          // update schedule order
-          const updatedScheduleOrder = await prisma.scheduleOrders.update({
+      const sameDayOrder = existingUser.scheduleOrders.find(
+        (order: ScheduleOrders) => {
+          return order.day === day;
+        },
+      );
+      // Override same day schedule order if it existed
+      if (sameDayOrder) {
+        for (const item of items) {
+          // first, find if there is any of that item
+          const existiedItem = await prisma.orderedItems.findFirst({
             where: {
-              id: sameDayOrder.id,
-            },
-            data: {
-              totalPrice: newTotalPrice,
-            },
-            include: {
-              items: true,
-              user: true,
+              scheduledOrderId: sameDayOrder.id,
+              name: item.name,
             },
           });
-    
-          return res.status(200).json({
-            data: updatedScheduleOrder,
-            message: 'Override Schedule Order Successfully',
-          });
+
+          // if yes, then update it, otherwise create new items
+          if (existiedItem) {
+            await prisma.orderedItems.updateMany({
+              where: {
+                scheduledOrderId: sameDayOrder.id,
+                name: item.name,
+              },
+              data: {
+                price: item.price,
+                quantity: item.quantity,
+              },
+            });
+          } else {
+            await prisma.orderedItems.create({
+              data: {
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                scheduledOrderId: sameDayOrder.id,
+              },
+            });
+          }
         }
+
+        // update schedule order
+        const updatedScheduleOrder = await prisma.scheduleOrders.update({
+          where: {
+            id: sameDayOrder.id,
+          },
+          data: {
+            totalPrice: newTotalPrice,
+          },
+          include: {
+            items: true,
+            user: true,
+          },
+        });
+
+        return res.status(200).json({
+          data: updatedScheduleOrder,
+          message: 'Override Schedule Order Successfully',
+        });
+      }
     }
 
     // Create schedule order for that day
@@ -126,6 +126,37 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // check then add target client into selected route
+    const clientInUserRoute = await prisma.userRoute.findUnique({
+      where: {
+        userId_routeId: {
+          userId: Number(userId),
+          routeId: Number(routeId),
+        },
+      },
+    });
+
+    if (!clientInUserRoute) {
+      await prisma.userRoute.create({
+        data: {
+          userId: Number(userId),
+          routeId: Number(routeId),
+        },
+      });
+    }
+    // await prisma.route.update({
+    //   where: {
+    //     id: Number(routeId),
+    //   },
+    //   data: {
+    //     clients: {
+    //       create: {
+    //         user: { connect: { id: userId } },
+    //       },
+    //     },
+    //   },
+    // });
+
     const updatedScheduledOrder = await prisma.scheduleOrders.findUnique({
       where: {
         id: newScheduleOrder.id,
@@ -133,7 +164,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       include: {
         items: true,
         user: true,
-      }
+      },
     });
 
     return res.status(201).json({

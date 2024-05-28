@@ -13,7 +13,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, Fragment, SetStateAction, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { BoxModal } from './styled';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -41,7 +47,7 @@ export default function EditReportOrder({
   order,
   handleUpdateOrderUI,
   setNotification,
-  subCategories
+  subCategories,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -53,7 +59,7 @@ export default function EditReportOrder({
     quantity: 0,
     totalPrice: 0,
   });
-  const [subCategoryId, setSubCategoryId] = useState<number>(0); 
+  const [subCategoryId, setSubCategoryId] = useState<number>(0);
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
@@ -64,7 +70,7 @@ export default function EditReportOrder({
     if (order.items) {
       setItemList(order.items);
     }
-  }, [order.items])
+  }, [order.items]);
 
   const addNewItem = () => {
     const newItemName = newItem.name.toUpperCase();
@@ -153,7 +159,7 @@ export default function EditReportOrder({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.categoryId,
-        userSubCategoryId: order.subCategoryId
+        userSubCategoryId: order.subCategoryId,
       });
 
       if (response.data.error) {
@@ -377,28 +383,28 @@ export default function EditReportOrder({
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="subcategory-label">Subcategory</InputLabel>
-                <Select
-                  disabled={
-                    !newItem.name.toLowerCase().includes('bean') &&
-                    !newItem.name.toLowerCase().includes('egg')
-                  }
-                  value={subCategoryId}
-                  onChange={(e) => setSubCategoryId(+e.target.value)}
-                >
-                  <MenuItem value={0}>-- Choose a subcategory --</MenuItem>
-                  {subCategories &&
-                    subCategories.map((subcategory: SubCategory) => {
-                      return (
-                        <MenuItem key={subcategory.id} value={subcategory.id}>
-                          {subcategory.name}
-                        </MenuItem>
-                      );
-                    })}
-                </Select>
-              </FormControl>
-            </Grid>
+                <FormControl fullWidth>
+                  <InputLabel id="subcategory-label">Subcategory</InputLabel>
+                  <Select
+                    disabled={
+                      !newItem.name.toLowerCase().includes('bean') &&
+                      !newItem.name.toLowerCase().includes('egg')
+                    }
+                    value={subCategoryId}
+                    onChange={(e) => setSubCategoryId(+e.target.value)}
+                  >
+                    <MenuItem value={0}>-- Choose a subcategory --</MenuItem>
+                    {subCategories &&
+                      subCategories.map((subcategory: SubCategory) => {
+                        return (
+                          <MenuItem key={subcategory.id} value={subcategory.id}>
+                            {subcategory.name}
+                          </MenuItem>
+                        );
+                      })}
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={12}>
                 <Button fullWidth variant="outlined" onClick={addNewItem}>
                   + Add

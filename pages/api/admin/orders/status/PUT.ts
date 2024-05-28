@@ -16,25 +16,25 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           items: true,
-        }
+        },
       });
 
       const newItems = updatedOrder.items.map((item: OrderedItems) => {
         const totalPrice = item.quantity * item.price;
-        return {...item, totalPrice}
-      })
+        return { ...item, totalPrice };
+      });
 
       const user = await prisma.user.findUnique({
         where: {
-          id: updatedOrder.userId
+          id: updatedOrder.userId,
         },
         include: {
           category: true,
           subCategory: true,
-        }
-      })
+        },
+      });
       return res.status(200).json({
-        data: {...user, ...updatedOrder, items: newItems},
+        data: { ...user, ...updatedOrder, items: newItems },
         message: 'Order Status Updated Successfully',
       });
     }

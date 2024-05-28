@@ -22,7 +22,9 @@ export const ComponentToPrint = forwardRef(
         totalPrice += item.totalPrice;
         orderDetailsTemplate.push(
           <TableRow key={item.name}>
-            <TableCell sx={{ fontSize: 18, fontWeight: 'bold' }}>{item.name}</TableCell>
+            <TableCell sx={{ fontSize: 18, fontWeight: 'bold' }}>
+              {item.name}
+            </TableCell>
             <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
               {item.quantity}
             </TableCell>

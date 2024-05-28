@@ -101,9 +101,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           where: {
             name: itemData.name,
             categoryId: existingUser.categoryId,
-            subCategoryId: existingUser.subCategoryId
-          }
-        })
+            subCategoryId: existingUser.subCategoryId,
+          },
+        });
       }
 
       if (itemData) {
@@ -133,8 +133,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalPrice,
       },
       include: {
-        items: true
-      }
+        items: true,
+      },
     });
 
     await pusherServer.trigger('admin', 'incoming-order', {
@@ -190,7 +190,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       newOrder.id,
       body['DELIVERY DATE'],
       isSendToAdmin,
-      body['NOTE']
+      body['NOTE'],
     );
 
     return res.status(200).json({

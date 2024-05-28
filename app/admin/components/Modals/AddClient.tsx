@@ -241,7 +241,10 @@ export default function AddClient({
               <Select
                 value={JSON.stringify(newClient.subCategory)} // Serialize the object
                 onChange={(e) =>
-                  handleOnChangeClient('subCategory', JSON.parse(e.target.value))
+                  handleOnChangeClient(
+                    'subCategory',
+                    JSON.parse(e.target.value),
+                  )
                 }
                 fullWidth
               >

@@ -115,9 +115,9 @@ export default function Orders() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const { data: clientList } = useSWR(API_URL.CLIENTS);
-  const {data: subcategories} = useSWR(API_URL.SUBCATEGORIES);
+  const { data: subcategories } = useSWR(API_URL.SUBCATEGORIES);
 
-  console.log({clientList, subcategories})
+  console.log({ clientList, subcategories });
 
   useEffect(() => {
     // fetchSubcategories();
@@ -423,7 +423,7 @@ export default function Orders() {
     } else {
       newOrders = orderData.map((order) => {
         if (order.id === targetOrder.id) {
-          return targetOrder
+          return targetOrder;
         }
         return order;
       });
@@ -568,9 +568,7 @@ export default function Orders() {
                   icon={<statusTab.icon />}
                   id={`simple-tab-${index}`}
                   label={`${statusTab.name} ${
-                    tabIndex === index
-                      ? `(${baseOrderData.length})`
-                      : ''
+                    tabIndex === index ? `(${baseOrderData.length})` : ''
                   } `}
                   aria-controls={`tabpanel-${index}`}
                   value={index}
@@ -617,53 +615,53 @@ export default function Orders() {
         currentDate={date}
         createOrder={addOrder}
       />
-        {isLoading ? (
-          <>
-            {constantComponent}
-            <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-              <LoadingComponent color="blue" />
-            </div>
-          </>
-        ) : (
-          <>
-            {constantComponent}
-            {orderData.length > 0 ? (
-              <>
-                <Virtuoso
-                  totalCount={orderData.length}
-                  style={{ height: virtuosoHeight }}
-                  data={orderData}
-                  itemContent={(index, order) => {
-                    return (
-                      <OrderAccordion
-                        key={index}
-                        order={order}
-                        setNotification={setNotification}
-                        updateUI={handleMarkSingleCompletedUI}
-                        updateUIItem={handleUpdateUISingleOrder}
-                        handleUpdateDateUI={handleUpdateDateUI}
-                        handleUpdatePriceUI={handleUpdatePriceUI}
-                        selectedOrders={selectedOrders}
-                        handleSelectOrder={handleSelectOrder}
-                        subcategories={subcategories?.data || []}
-                      />
-                    );
-                  }}
+      {isLoading ? (
+        <>
+          {constantComponent}
+          <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+            <LoadingComponent color="blue" />
+          </div>
+        </>
+      ) : (
+        <>
+          {constantComponent}
+          {orderData.length > 0 ? (
+            <>
+              <Virtuoso
+                totalCount={orderData.length}
+                style={{ height: virtuosoHeight }}
+                data={orderData}
+                itemContent={(index, order) => {
+                  return (
+                    <OrderAccordion
+                      key={index}
+                      order={order}
+                      setNotification={setNotification}
+                      updateUI={handleMarkSingleCompletedUI}
+                      updateUIItem={handleUpdateUISingleOrder}
+                      handleUpdateDateUI={handleUpdateDateUI}
+                      handleUpdatePriceUI={handleUpdatePriceUI}
+                      selectedOrders={selectedOrders}
+                      handleSelectOrder={handleSelectOrder}
+                      subcategories={subcategories?.data || []}
+                    />
+                  );
+                }}
+              />
+              <div style={{ width: '100%' }}>
+                <Pagination
+                  count={pages}
+                  shape="rounded"
+                  size="large"
+                  onChange={(e: any, value: number) => setCurrentPage(value)}
                 />
-                <div style={{ width: '100%' }}>
-                  <Pagination
-                    count={pages}
-                    shape="rounded"
-                    size="large"
-                    onChange={(e: any, value: number) => setCurrentPage(value)}
-                  />
-                </div>
-              </>
-            ) : (
-              <ErrorComponent errorText="There is no orders" />
-            )}
-          </>
-        )}
+              </div>
+            </>
+          ) : (
+            <ErrorComponent errorText="There is no orders" />
+          )}
+        </>
+      )}
       {/* </AuthenGuard> */}
     </Sidebar>
   );

@@ -16,7 +16,7 @@ export enum COLOR_TYPE {
   WARNING = 'warning',
   ERROR = 'error',
   INFO = 'info',
-  DEFAULT = 'default'
+  DEFAULT = 'default',
 }
 
 interface PropTypes {

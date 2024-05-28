@@ -2,19 +2,25 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface QueryTypes {
-    userId?: string;
-    day?: string;
+  day?: string;
+  clientList?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { day }: QueryTypes = req.query;
+    const { day, clientList }: QueryTypes = req.query;
 
+    const clientIds = clientList
+      ? clientList.split(',').map((id) => parseInt(id))
+      : [];
     const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
-        day
+        day,
+        userId: {
+          in: clientIds,
+        },
       },
       include: {
         items: true,

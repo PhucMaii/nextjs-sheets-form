@@ -1,5 +1,11 @@
 import { SplashScreen } from '@/app/HOC/AuthenGuard';
-import { Box, CircularProgress, CircularProgressProps, Modal, Typography } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  CircularProgressProps,
+  Modal,
+  Typography,
+} from '@mui/material';
 import React from 'react';
 
 interface PropTypes {
@@ -38,15 +44,13 @@ function CircularProgressWithLabel(
 export default function LoadingModal({ open, progress }: PropTypes) {
   return (
     <Modal open={open}>
-      {
-        progress ? (
-          <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-            <CircularProgressWithLabel value={progress} />
-          </div>
-        ) : (
-          <SplashScreen />
-        )
-      }
+      {progress ? (
+        <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
+          <CircularProgressWithLabel value={progress} />
+        </div>
+      ) : (
+        <SplashScreen />
+      )}
     </Modal>
   );
 }

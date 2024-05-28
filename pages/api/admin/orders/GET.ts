@@ -13,10 +13,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const {
-      date,
-      status,
-    } = req.query as RequestQuery;
+    const { date, status } = req.query as RequestQuery;
 
     // const skip = (page - 1) * pageSize;
     const fetchCondition: any = {};

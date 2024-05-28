@@ -11,14 +11,18 @@ export const SplashScreen: FC = () => (
   </div>
 );
 
-export const fetcher = (url: string) => axios.get(url).then(res => res.data);
+export const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 export default function AuthenGuard({ children }: any) {
   // const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const { data: session,  error: sessionError, isValidating: isSessionValidating } = useSWR('/api/auth/session', fetcher, {
+  const {
+    data: session,
+    error: sessionError,
+    isValidating: isSessionValidating,
+  } = useSWR('/api/auth/session', fetcher, {
     revalidateOnFocus: false,
   });
 
@@ -27,13 +31,20 @@ export default function AuthenGuard({ children }: any) {
     fetcher,
     {
       revalidateOnFocus: false,
-    }
+    },
   );
 
   useEffect(() => {
-    if (sessionError || (!isSessionValidating && Object.keys(session).length === 0)) {
+    if (
+      sessionError ||
+      (!isSessionValidating && Object.keys(session).length === 0)
+    ) {
       router.push('/auth/login');
-    } else if (user && pathname?.startsWith('/admin') && user.data.role === 'client') {
+    } else if (
+      user &&
+      pathname?.startsWith('/admin') &&
+      user.data.role === 'client'
+    ) {
       router.push('/');
     }
   }, [pathname, session, user]);

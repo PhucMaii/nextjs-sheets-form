@@ -12,7 +12,9 @@ export enum API_URL {
   CLIENT_ORDER = '/api/order',
   CATEGORIES = '/api/admin/categories',
   SCHEDULED_ORDER = '/api/admin/scheduledOrders',
-  SUBCATEGORIES = '/api/admin/subcategories'
+  SUBCATEGORIES = '/api/admin/subcategories',
+  ROUTES = '/api/admin/routes',
+  DRIVERS = '/api/admin/drivers',
 }
 
 export enum ORDER_STATUS {

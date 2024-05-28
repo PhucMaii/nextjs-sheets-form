@@ -11,7 +11,7 @@ interface PropTypes {
 export default function UpdateChoiceSelection({
   updateOption,
   setUpdateOption,
-  noCreate
+  noCreate,
 }: PropTypes) {
   return (
     <RadioGroup
@@ -24,11 +24,13 @@ export default function UpdateChoiceSelection({
         control={<Radio />}
         label="Only for this time"
       />
-      {!noCreate && <FormControlLabel
-        value={UpdateOption.CREATE}
-        control={<Radio />}
-        label="Create new category"
-      />}
+      {!noCreate && (
+        <FormControlLabel
+          value={UpdateOption.CREATE}
+          control={<Radio />}
+          label="Create new category"
+        />
+      )}
       <FormControlLabel
         value={UpdateOption.UPDATE}
         control={<Radio />}

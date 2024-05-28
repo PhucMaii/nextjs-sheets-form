@@ -16,13 +16,13 @@ export default function LoginAndRegisterGuard({ children }: any) {
     fetcher,
     {
       revalidateOnFocus: false,
-    }
+    },
   );
 
   useEffect(() => {
     if (user?.data?.role === 'admin') {
       router.push('/admin/orders');
-    } else if (user?.data?.role === 'client'){
+    } else if (user?.data?.role === 'client') {
       router.push('/');
     }
   }, [user]);

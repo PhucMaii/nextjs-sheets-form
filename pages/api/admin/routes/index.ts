@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
+import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 import POST from './POST';
 import PUT from './PUT';
-import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 import DELETE from './DELETE';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -27,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return response;
     }
 
-    return res.status(500).json({
+    return res.status(404).json({
       error: 'Your method is not supported',
     });
   } catch (error: any) {

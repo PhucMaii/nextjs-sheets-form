@@ -1,4 +1,5 @@
 import { AlertColor } from '@mui/material';
+import { Driver, Route, UserRoute } from '@prisma/client';
 import { Session } from 'next-auth';
 
 export interface Notification {
@@ -82,5 +83,14 @@ export interface ScheduledOrder {
   userId: number;
   totalPrice: number;
   items: OrderedItems[];
+  user: UserType;
+}
+
+export interface IRoutes extends Route {
+  driver?: Driver;
+  clients?: IUserRoutes[];
+}
+
+export interface IUserRoutes extends UserRoute {
   user: UserType;
 }

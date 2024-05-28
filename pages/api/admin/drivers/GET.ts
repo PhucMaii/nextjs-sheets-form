@@ -5,11 +5,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const subcategories = await prisma.subCategory.findMany();
+    const drivers = await prisma.driver.findMany();
 
     return res.status(200).json({
-      message: 'Fetch Subcategories Successfully',
-      data: subcategories,
+      data: drivers,
+      message: 'Fetch Drivers Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

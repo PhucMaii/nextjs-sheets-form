@@ -1,26 +1,50 @@
-import { Box, Button, Divider, FormControl, Grid, IconButton, InputLabel, Modal, OutlinedInput, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Modal,
+  OutlinedInput,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
 import { BoxModal } from './styled';
 import UpdateChoiceSelection from '../UpdateChoiceSelection';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
-import { Notification, OrderedItems, ScheduledOrder } from '@/app/utils/type';
+import {
+  Notification,
+  OrderedItems,
+  IRoutes,
+  ScheduledOrder,
+} from '@/app/utils/type';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { errorColor, infoColor } from '@/app/theme/color';
 import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 
-
 interface PropTypes {
-    order: ScheduledOrder;
-    setNotification: Dispatch<SetStateAction<Notification>>;
-    handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
+  order: ScheduledOrder;
+  setNotification: Dispatch<SetStateAction<Notification>>;
+  handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
+  handleDeleteOrderUI: (targetOrder: ScheduledOrder) => void;
+  routes: IRoutes[];
+  routeId: number;
 }
 
 export default function EditScheduleOrder({
-    order,
-    handleUpdateOrderUI,
-    setNotification
+  order,
+  handleUpdateOrderUI,
+  setNotification,
+  handleDeleteOrderUI,
+  routes,
+  routeId,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<OrderedItems>({
@@ -29,15 +53,18 @@ export default function EditScheduleOrder({
     quantity: 0,
     totalPrice: 0,
   });
+  const [newRouteId, setNewRouteId] = useState<number>(routeId);
   const [itemList, setItemList] = useState<OrderedItems[]>(() => {
     const formattedItems = order.items.map((item: OrderedItems) => {
-        const totalPrice = item.quantity * item.price;
-        return { ...item, totalPrice };
-    })
+      const totalPrice = item.quantity * item.price;
+      return { ...item, totalPrice };
+    });
     return formattedItems;
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [updateOption, setUpdateOption] = useState<UpdateOption>(UpdateOption.NONE);
+  const [updateOption, setUpdateOption] = useState<UpdateOption>(
+    UpdateOption.NONE,
+  );
 
   const addNewItem = (e: any) => {
     e.preventDefault();
@@ -82,7 +109,11 @@ export default function EditScheduleOrder({
     return totalPrice;
   };
 
-  const handleChangeItem = (e: any, targetItem: OrderedItems, keyChange: string) => {
+  const handleChangeItem = (
+    e: any,
+    targetItem: OrderedItems,
+    keyChange: string,
+  ) => {
     e.preventDefault();
     const newItemList = itemList.map((item: OrderedItems) => {
       if (item.id === targetItem.id) {
@@ -115,50 +146,96 @@ export default function EditScheduleOrder({
     setItemList(newItemList);
   };
 
-  const updateItems = async () => {
+  const switchRoute = async () => {
+    if (newRouteId === routeId) {
+      setNotification({
+        on: true,
+        type: 'warning',
+        message: 'Route Has Not Been Changed',
+      });
+      return;
+    }
     try {
-        setIsSubmitting(true);
-        const totalPrice = calculateNewTotalPrice();
-        const response = await axios.put(API_URL.SCHEDULED_ORDER, {
-            user: order.user,
-            items: itemList,
-            scheduledOrderId: order.id,
-            totalPrice,
-            updateOption,
-        });
-  
-        if (response.data.error) {
-          setIsSubmitting(false);
-          setNotification({
-            on: true,
-            type: 'error',
-            message: response.data.error,
-          });
-          return;
-        }
-  
-        handleUpdateOrderUI({
-          ...order,
-          items: itemList,
-          totalPrice,
-        });
-  
-        setNotification({
-          on: true,
-          type: 'success',
-          message: response.data.message,
-        });
-        setIsSubmitting(false);
-      } catch (error: any) {
-        console.log('There was an error: ', error);
+      setIsSubmitting(true);
+      const response = await axios.put(API_URL.SCHEDULED_ORDER, {
+        user: order.user,
+        oldRouteId: routeId,
+        newRouteId,
+      });
+
+      if (response.data.error) {
         setIsSubmitting(false);
         setNotification({
           on: true,
           type: 'error',
-          message: 'Fail to update item: ' + error,
+          message: response.data.error,
         });
+        return;
       }
-  }
+
+      handleDeleteOrderUI(order);
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsSubmitting(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setIsSubmitting(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update item: ' + error,
+      });
+    }
+  };
+
+  const updateItems = async () => {
+    try {
+      setIsSubmitting(true);
+      const totalPrice = calculateNewTotalPrice();
+      const response = await axios.put(API_URL.SCHEDULED_ORDER, {
+        user: order.user,
+        items: itemList,
+        scheduledOrderId: order.id,
+        totalPrice,
+        updateOption,
+      });
+
+      if (response.data.error) {
+        setIsSubmitting(false);
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleUpdateOrderUI({
+        ...order,
+        items: itemList,
+        totalPrice,
+      });
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsSubmitting(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setIsSubmitting(false);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update item: ' + error,
+      });
+    }
+  };
 
   return (
     <>
@@ -172,126 +249,155 @@ export default function EditScheduleOrder({
       </Button>
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
         <BoxModal display="flex" flexDirection="column" gap={2}>
-        <Box
+          <Box
             display="flex"
             justifyContent="space-between"
             alignItems="center"
           >
             <Typography variant="h4">Edit Order</Typography>
-            <LoadingButtonStyles
+          </Box>
+          <Divider />
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Route:</Typography>
+            <Select
+              value={newRouteId}
+              onChange={(e) => setNewRouteId(+e.target.value)}
+              fullWidth
+            >
+              {routes &&
+                routes.map((route: IRoutes) => {
+                  return (
+                    <MenuItem key={route.id} value={route.id}>
+                      {route.name} - {route?.driver?.name}
+                    </MenuItem>
+                  );
+                })}
+            </Select>
+            <Box display="flex" justifyContent="right">
+              <LoadingButtonStyles
                 variant="contained"
                 color={infoColor}
-                onClick={updateItems}
+                onClick={switchRoute}
                 loading={isSubmitting}
               >
                 Save
               </LoadingButtonStyles>
+            </Box>
           </Box>
           <Divider textAlign="center" sx={{ mb: 1 }}>
             Add items
           </Divider>
           <Box overflow="auto" maxHeight="70vh">
-          <Grid container spacing={3} mb={2}>
-            <Grid item xs={12}>
-              <UpdateChoiceSelection
-                updateOption={updateOption}
-                setUpdateOption={setUpdateOption}
-                noCreate
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="item-name-label">Item name</InputLabel>
-                <OutlinedInput
-                  fullWidth
-                  label="Item name"
-                  value={newItem.name}
-                  onChange={(e) =>
-                    handleNewItemOnChange('name', e.target.value)
-                  }
+            <Grid container spacing={3} mb={2}>
+              <Grid item xs={12}>
+                <UpdateChoiceSelection
+                  updateOption={updateOption}
+                  setUpdateOption={setUpdateOption}
+                  noCreate
                 />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel id="item-price-label">Unit price ($)</InputLabel>
-                <OutlinedInput
-                  fullWidth
-                  label="Unit price"
-                  type="number"
-                  value={newItem.price}
-                  onChange={(e) =>
-                    handleNewItemOnChange('price', +e.target.value)
-                  }
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel id="item-quantity-label">Quantity</InputLabel>
-                <OutlinedInput
-                  fullWidth
-                  label="Quantity"
-                  type="number"
-                  value={newItem.quantity}
-                  onChange={(e) =>
-                    handleNewItemOnChange('quantity', +e.target.value)
-                  }
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Button fullWidth variant="outlined" onClick={addNewItem}>
-                + Add
-              </Button>
-            </Grid>
-            <Grid item xs={12}>
-              <Divider>Items</Divider>
-            </Grid>
-            {itemList.length > 0 &&
-              itemList.map((item: OrderedItems, index) => {
-                return (
-                  <Fragment key={index}>
-                    <Grid item xs={12} fontWeight="bold">
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="h6" fontWeight="bold">
-                          {item.name}
-                        </Typography>
-                        <IconButton onClick={() => removeItem(item.name)}>
-                          <RemoveCircleIcon sx={{ color: errorColor }} />
-                        </IconButton>
-                      </Box>
-                    </Grid>
-                    <Grid item container columnSpacing={2}>
-                      <Grid item xs={6} textAlign="right">
-                        <TextField
-                          fullWidth
-                          label="Unit Price ($)"
-                          value={item.price}
-                          onChange={(e) => handleChangeItem(e, item, 'price')}
-                          type="number"
-                          inputProps={{ min: 0 }}
-                        />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="item-name-label">Item name</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    label="Item name"
+                    value={newItem.name}
+                    onChange={(e) =>
+                      handleNewItemOnChange('name', e.target.value)
+                    }
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="item-price-label">Unit price ($)</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    label="Unit price"
+                    type="number"
+                    value={newItem.price}
+                    onChange={(e) =>
+                      handleNewItemOnChange('price', +e.target.value)
+                    }
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="item-quantity-label">Quantity</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    label="Quantity"
+                    type="number"
+                    value={newItem.quantity}
+                    onChange={(e) =>
+                      handleNewItemOnChange('quantity', +e.target.value)
+                    }
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <Button fullWidth variant="outlined" onClick={addNewItem}>
+                  + Add
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider>Items</Divider>
+              </Grid>
+              {itemList.length > 0 &&
+                itemList.map((item: OrderedItems, index) => {
+                  return (
+                    <Fragment key={index}>
+                      <Grid item xs={12} fontWeight="bold">
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Typography variant="h6" fontWeight="bold">
+                            {item.name}
+                          </Typography>
+                          <IconButton onClick={() => removeItem(item.name)}>
+                            <RemoveCircleIcon sx={{ color: errorColor }} />
+                          </IconButton>
+                        </Box>
                       </Grid>
-                      <Grid item xs={6}>
-                        <TextField
-                          fullWidth
-                          label="Quantity"
-                          value={item.quantity}
-                          onChange={(e) =>
-                            handleChangeItem(e, item, 'quantity')
-                          }
-                          type="number"
-                          inputProps={{ min: 0 }}
-                        />
+                      <Grid item container columnSpacing={2}>
+                        <Grid item xs={6} textAlign="right">
+                          <TextField
+                            fullWidth
+                            label="Unit Price ($)"
+                            value={item.price}
+                            onChange={(e) => handleChangeItem(e, item, 'price')}
+                            type="number"
+                            inputProps={{ min: 0 }}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <TextField
+                            fullWidth
+                            label="Quantity"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              handleChangeItem(e, item, 'quantity')
+                            }
+                            type="number"
+                            inputProps={{ min: 0 }}
+                          />
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </Fragment>
-                );
-              })}
-          </Grid>
+                    </Fragment>
+                  );
+                })}
+              <Grid item xs={12} textAlign="right">
+                <LoadingButtonStyles
+                  variant="contained"
+                  color={infoColor}
+                  onClick={updateItems}
+                  loading={isSubmitting}
+                >
+                  Save
+                </LoadingButtonStyles>
+              </Grid>
+            </Grid>
           </Box>
-
         </BoxModal>
       </Modal>
     </>
