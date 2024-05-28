@@ -32,28 +32,29 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const routesInDay = await prisma.route.findMany({
       where: {
-        day: dayRoute
+        day: dayRoute,
       },
       include: {
         clients: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
-    const existedUserRoute = routesInDay.map((route: any) => {
-      return route.clients?.map((userRoute: any) => {
-        return userRoute.user
+    const existedUserRoute = routesInDay
+      .map((route: any) => {
+        return route.clients?.map((userRoute: any) => {
+          return userRoute.user;
+        });
       })
-    }).flat();
+      .flat();
 
     return res.status(200).json({
-      data: {clientList, existedUserRoute},
+      data: { clientList, existedUserRoute },
       message: 'Fetch All Clients Successfully',
     });
-
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

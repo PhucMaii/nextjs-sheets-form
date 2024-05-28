@@ -85,6 +85,25 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
+        // check then add target client into selected route
+        const clientInUserRoute = await prisma.userRoute.findUnique({
+          where: {
+            userId_routeId: {
+              userId: Number(userId),
+              routeId: Number(routeId),
+            },
+          },
+        });
+
+        if (!clientInUserRoute) {
+          await prisma.userRoute.create({
+            data: {
+              userId: Number(userId),
+              routeId: Number(routeId),
+            },
+          });
+        }
+
         return res.status(200).json({
           data: updatedScheduleOrder,
           message: 'Override Schedule Order Successfully',

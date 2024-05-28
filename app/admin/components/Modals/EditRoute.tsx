@@ -127,7 +127,13 @@ export default function EditRoute({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal display="flex" flexDirection="column" gap={2}>
+      <BoxModal
+        display="flex"
+        flexDirection="column"
+        overflow="auto"
+        maxHeight="70vh"
+        gap={2}
+      >
         <ModalHead
           heading="Edit Route"
           onClick={updateRoute}

@@ -628,6 +628,7 @@ export default function ScheduledOrderPage() {
                   fullWidth
                   onClick={() => setIsDeleteModalOpen(true)}
                   variant="outlined"
+                  disabled={routes.length === 0}
                 >
                   Delete
                 </Button>
@@ -635,6 +636,7 @@ export default function ScheduledOrderPage() {
                   fullWidth
                   variant="outlined"
                   onClick={() => setIsEditRouteOpen(true)}
+                  disabled={routes.length === 0}
                 >
                   Edit
                 </Button>

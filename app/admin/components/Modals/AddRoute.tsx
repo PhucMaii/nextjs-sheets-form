@@ -103,7 +103,13 @@ export default function AddRoute({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal display="flex" flexDirection="column" gap={2}>
+      <BoxModal
+        display="flex"
+        flexDirection="column"
+        overflow="auto"
+        maxHeight="70vh"
+        gap={2}
+      >
         <ModalHead
           heading="Add Route"
           onClick={addRoute}
@@ -156,8 +162,10 @@ export default function AddRoute({
                 multiple
                 options={clientList}
                 getOptionDisabled={(option) => {
-                  const isOptionInvalid = disabledClientList.some((client: UserType) => option.id === client.id)
-                  return isOptionInvalid
+                  const isOptionInvalid = disabledClientList.some(
+                    (client: UserType) => option.id === client.id,
+                  );
+                  return isOptionInvalid;
                 }}
                 disableCloseOnSelect
                 getOptionLabel={(option: UserType) =>
