@@ -51,8 +51,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // check if any updated with day or driverId, then check before update
-    if (day || driverId) {
-      console.log({ day, driverId });
+    if (driverId) {
       const checkIsRouteNotValid = await prisma.route.findFirst({
         where: {
           day,

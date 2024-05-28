@@ -183,6 +183,7 @@ export default function EditRoute({
                 multiple
                 options={clientList}
                 disableCloseOnSelect
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 getOptionLabel={(option: UserType) =>
                   `${option.clientName} - ${option.clientId}`
                 }

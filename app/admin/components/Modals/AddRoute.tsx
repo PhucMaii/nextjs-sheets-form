@@ -26,6 +26,7 @@ interface IAddRouteModal extends ModalProps {
   day: string;
   driverList: Driver[];
   clientList: UserType[];
+  disabledClientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
   handleAddRouteUI: (targetRoute: IRoutes) => void;
 }
@@ -36,6 +37,7 @@ export default function AddRoute({
   day,
   driverList,
   clientList,
+  disabledClientList,
   setNotification,
   handleAddRouteUI,
 }: IAddRouteModal) {
@@ -153,6 +155,10 @@ export default function AddRoute({
               <Autocomplete
                 multiple
                 options={clientList}
+                getOptionDisabled={(option) => {
+                  const isOptionInvalid = disabledClientList.some((client: UserType) => option.id === client.id)
+                  return isOptionInvalid
+                }}
                 disableCloseOnSelect
                 getOptionLabel={(option: UserType) =>
                   `${option.clientName} - ${option.clientId}`
