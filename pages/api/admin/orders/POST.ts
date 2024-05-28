@@ -25,7 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         scheduleOrder.user.id,
         deliveryDate,
       );
-      if (hasClientOrder) {
+      if (hasClientOrder || scheduleOrder.totalPrice === 0) {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
