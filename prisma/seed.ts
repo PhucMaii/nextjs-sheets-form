@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
@@ -172,13 +171,45 @@ async function main() {
   //   ]
   // })
 
-  const password = await hash('driver123', 12);
-  await prisma.driver.create({
-    data: {
-      name: 'ROY',
-      password,
+  await prisma.item.updateMany({
+    where: {
+      name: 'BEAN 10'
     },
-  });
+    data: {
+      name: 'BEAN 10 LB'
+    }
+  })
+
+  await prisma.item.updateMany({
+    where: {
+      name: 'BEAN 5LB'
+    },
+    data: {
+      name: 'BEAN 5 LB'
+    }
+  })
+
+  await prisma.orderedItems.updateMany({
+    where: {
+      name: {
+        in: ["BEANSPROUTS 5 LBS", "BEAN 5 LBS"]
+      }
+    },
+    data: {
+      name: 'BEAN 5 LB'
+    }
+  })
+
+  await prisma.orderedItems.updateMany({
+    where: {
+      name: {
+        in: ["BEANSPROUTS 10 LBS", "BEAN 10 LBS"]
+      }
+    },
+    data: {
+      name: 'BEAN 10 LB'
+    }
+  })
 }
 
 main()

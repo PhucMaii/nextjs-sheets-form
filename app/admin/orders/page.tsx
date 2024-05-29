@@ -78,6 +78,9 @@ export interface Order {
   isReplacement?: boolean;
   isVoid?: boolean;
   subCategoryId?: number;
+  subCategory?: any;
+  routeId?: number;
+  route?: any;
 }
 
 const orderPerPage = 10;
