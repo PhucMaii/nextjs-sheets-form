@@ -117,11 +117,7 @@ export default function Orders() {
   const { data: clientList } = useSWR(API_URL.CLIENTS);
   const { data: subcategories } = useSWR(API_URL.SUBCATEGORIES);
 
-  console.log({ clientList, subcategories });
-
   useEffect(() => {
-    // fetchSubcategories();
-    // fetchAllClients();
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
   }, []);
