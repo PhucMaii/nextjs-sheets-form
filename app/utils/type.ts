@@ -67,6 +67,7 @@ export interface Item {
   categoryId?: number;
   price: number;
   quantity?: number;
+  subCategory?: any;
 }
 
 export interface OrderedItems {
