@@ -6,6 +6,9 @@ import { ShadowSection } from '../reports/styled';
 import {
   Box,
   Button,
+  Checkbox,
+  Divider,
+  FormControlLabel,
   Grid,
   IconButton,
   Tab,
@@ -31,7 +34,6 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/AddOrder';
-import ScheduleOrdersTable from '../components/ScheduleOrdersTable';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -44,12 +46,13 @@ import useSWR, { mutate } from 'swr';
 import { UserRoute } from '@prisma/client';
 import EditRoute from '../components/Modals/EditRoute';
 import DeleteModal from '../components/Modals/DeleteModal';
+import ScheduleOrder from '../components/ScheduleOrder';
+import { Reorder } from 'framer-motion';
+import LoadingModal from '../components/Modals/LoadingModal';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
-  // const [clientList, setClientList] = useState<UserType[]>([]);
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
-  // const [driverList, setDriverList] = useState<Driver[]>([]);
   const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
@@ -57,6 +60,8 @@ export default function ScheduledOrderPage() {
   const [isEditRouteOpen, setIsEditRouteOpen] = useState<boolean>(false);
   const [isFetchingRoute, setIsFetchingRoute] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSavingArrangement, setIsSavingArrangement] =
+    useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -89,8 +94,6 @@ export default function ScheduledOrderPage() {
   }, [preOrderProgress]);
 
   useEffect(() => {
-    // fetchDrivers();
-    // fetchAllClients();
     pusherClient.subscribe('admin-schedule-order');
 
     const handleReceiveOrder = (incomingOrder: Order) => {
@@ -309,54 +312,6 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  // const fetchAllClients = async () => {
-  //   try {
-  //     const response = await axios.get(API_URL.CLIENTS);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       return;
-  //     }
-
-  //     setClientList(response.data.data);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch all clients: ' + error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch all clients: ' + error,
-  //     });
-  //   }
-  // };
-
-  // const fetchDrivers = async () => {
-  //   try {
-  //     const response = await axios.get(API_URL.DRIVERS);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       return;
-  //     }
-
-  //     setDriverList(response.data.data);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch all clients: ' + error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch all clients: ' + error,
-  //     });
-  //   }
-  // };
-
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
@@ -511,6 +466,55 @@ export default function ScheduledOrderPage() {
     setRoutes(newRoutes);
   };
 
+  const saveOrderArrangement = async () => {
+    try {
+      setIsSavingArrangement(true);
+      const newListWithId = orderList.map(
+        (order: ScheduledOrder, index: number) => {
+          const newOrderId = baseOrderList[index].id;
+          return { ...order, id: newOrderId };
+        },
+      );
+
+      const updatedIdList = newListWithId.map(
+        (order: ScheduledOrder) => order.id,
+      );
+
+      const response = await axios.put(API_URL.SCHEDULED_ORDER, {
+        removedOrderIdList: updatedIdList,
+        updatedOrderList: newListWithId,
+        reArrangement: true,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        setIsSavingArrangement(false);
+        return;
+      }
+
+      setOrderList(newListWithId);
+      setBaseOrderList(newListWithId);
+      setIsSavingArrangement(false);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('There was an error in rearrangement: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error in rearrangement: ' + error,
+      });
+      setIsSavingArrangement(false);
+    }
+  };
+
   const switchDay = (newValue: number) => {
     setRouteIndex(0);
     setDayIndex(newValue);
@@ -519,7 +523,7 @@ export default function ScheduledOrderPage() {
 
   return (
     <Sidebar>
-      {/* <AuthenGuard> */}
+      <LoadingModal open={isSavingArrangement} />
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
@@ -739,22 +743,56 @@ export default function ScheduledOrderPage() {
                 </IconButton>
               </Box>
             </Grid>
+            <Grid item xs={6}>
+              <FormControlLabel
+                disabled={orderList.length === 0}
+                control={
+                  <Checkbox
+                    checked={selectedOrders.length === orderList.length}
+                    onChange={handleSelectAll}
+                  />
+                }
+                label="All"
+              />
+            </Grid>
+            <Grid item xs={6} textAlign="right">
+              <Button
+                disabled={
+                  baseOrderList.length === 0 ||
+                  orderList.length !== baseOrderList.length
+                }
+                onClick={saveOrderArrangement}
+              >
+                Save order
+              </Button>
+            </Grid>
             <Grid item xs={12}>
               {isLoading ? (
                 <SplashScreen />
               ) : orderList.length > 0 ? (
-                <ScheduleOrdersTable
-                  handleDeleteOrderUI={handleDeleteOrderUI}
-                  handleUpdateOrderUI={handleUpdateOrderUI}
-                  clientOrders={orderList}
-                  setNotification={setNotification}
-                  selectedOrders={selectedOrders}
-                  handleSelectOrder={handleSelectOrder}
-                  handleSelectAll={handleSelectAll}
-                  routeId={routes[routeIndex]?.id || -1}
-                  routes={routes}
-                />
+                // <Box display="flex" flexDirection="column" gap={2}>
+                <Reorder.Group values={orderList} onReorder={setOrderList}>
+                  {orderList.map((order: ScheduledOrder) => {
+                    return (
+                      <Reorder.Item key={order.id} value={order}>
+                        <ScheduleOrder
+                          key={order.id}
+                          scheduleOrder={order}
+                          handleDeleteOrderUI={handleDeleteOrderUI}
+                          handleUpdateOrderUI={handleUpdateOrderUI}
+                          selectedOrders={selectedOrders}
+                          handleSelectOrder={handleSelectOrder}
+                          routes={routes}
+                          routeId={routes[routeIndex]?.id || -1}
+                          setNotification={setNotification}
+                        />
+                        <Divider />
+                      </Reorder.Item>
+                    );
+                  })}
+                </Reorder.Group>
               ) : (
+                // </Box>
                 <Box
                   display="flex"
                   flexDirection="column"
@@ -765,6 +803,19 @@ export default function ScheduledOrderPage() {
                   <ErrorComponent errorText="No Scheduled Order Found" />
                 </Box>
               )}
+              {/* // orderList.length > 0 ? (
+              //   <ScheduleOrdersTable
+              //     handleDeleteOrderUI={handleDeleteOrderUI}
+              //     handleUpdateOrderUI={handleUpdateOrderUI}
+              //     clientOrders={orderList}
+              //     setNotification={setNotification}
+              //     selectedOrders={selectedOrders}
+              //     handleSelectOrder={handleSelectOrder}
+              //     handleSelectAll={handleSelectAll}
+              //     routeId={routes[routeIndex]?.id || -1}
+              //     routes={routes}
+              //   />
+              // )  */}
             </Grid>
           </Grid>
         </Grid>

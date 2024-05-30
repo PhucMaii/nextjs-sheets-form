@@ -4,6 +4,7 @@ import POST from './POST';
 import PUT from './PUT';
 import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 import DELETE from './DELETE';
+import reArrangement from './reArrangement';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -18,6 +19,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     if (req.method === 'PUT') {
+      if (req.body.reArrangement) {
+        const reArrangementResponse = await reArrangement(req, res);
+        return reArrangementResponse;
+      }
       const response = await PUT(req, res);
       return response;
     }

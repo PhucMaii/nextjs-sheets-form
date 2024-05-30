@@ -79,11 +79,12 @@ export interface OrderedItems {
 }
 
 export interface ScheduledOrder {
-  id?: number;
+  id: number;
   userId: number;
   totalPrice: number;
   items: OrderedItems[];
   user: UserType;
+  day: string;
 }
 
 export interface IRoutes extends Route {
