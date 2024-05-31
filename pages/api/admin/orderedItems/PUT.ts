@@ -1,4 +1,10 @@
-import { Item, OrderedItems, PrismaClient } from '@prisma/client';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+  Item,
+  OrderedItems,
+  PrismaClient,
+  ScheduleOrders,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface UpdatedItem {
@@ -7,6 +13,7 @@ interface UpdatedItem {
   price: number;
   quantity: number;
   orderId: number;
+  totalPrice: number;
   subCategoryId?: number;
 }
 
@@ -23,7 +30,7 @@ interface BodyType {
   updateOption?: UpdateOption;
   categoryName?: string;
   userId?: number;
-  userCategoryId?: number;
+  userCategoryId: number;
   userSubCategoryId?: number;
 }
 
@@ -49,7 +56,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           name: categoryName,
         },
       });
-
       if (existingCategory) {
         return res.status(401).json({
           error: 'Category Name Existed Already',
@@ -175,19 +181,36 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // assign client to new categoryId
-      await prisma.user.update({
+      const targetClient = await prisma.user.update({
         where: {
           id: userId,
         },
         data: {
           categoryId: newCategory.id,
         },
+        include: {
+          scheduleOrders: {
+            include: {
+              items: true,
+            },
+          },
+        },
       });
 
-      return res.status(200).json({
-        data: newItems,
-        message: 'New Category Created Successfully',
-      });
+      if (
+        !targetClient.scheduleOrders ||
+        targetClient.scheduleOrders.length === 0
+      ) {
+        return res.status(200).json({
+          data: newItems,
+          message: 'New Category Created Successfully',
+        });
+      }
+
+      // Update schedule order of this client
+      for (const scheduleOrder of targetClient.scheduleOrders) {
+        await updateScheduleOrderItems(updatedItems, scheduleOrder);
+      }
     }
 
     // last case: if user want to update category price
@@ -204,21 +227,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         fetchCondition.subCategoryId = userSubCategoryId;
       }
 
+      // Get beansprouts based on subcateogry id if it is provided
       const beansprouts = await prisma.item.findMany({
         where: fetchCondition,
       });
 
+      // Get the rest of items
       const itemList = await prisma.item.findMany({
         where: {
           categoryId: userCategoryId,
+          subCategoryId: null,
         },
       });
 
-      const removeSubCategoryItem = itemList.filter((item: Item) => {
-        return !item.subCategoryId;
-      });
-
-      let baseItemList = [...removeSubCategoryItem, ...beansprouts];
+      let baseItemList = [...itemList, ...beansprouts];
 
       for (const item of updatedItems) {
         if (!item.subCategoryId) {
@@ -281,6 +303,36 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
       }
 
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          id: userCategoryId,
+        },
+        include: {
+          users: {
+            include: {
+              scheduleOrders: {
+                include: {
+                  items: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!existingCategory) {
+        return res.status(500).json({
+          error: 'User Category Not Found',
+        });
+      }
+
+      // Update schedule order accordingly
+      for (const user of existingCategory.users) {
+        for (const scheduleOrder of user.scheduleOrders) {
+          await updateScheduleOrderItems(updatedItems, scheduleOrder);
+        }
+      }
+
       return res.status(200).json({
         message: 'Category Price Updated Succesfully',
       });
@@ -337,4 +389,65 @@ const formatUpdatedItems = async (
   );
 
   return formattedUpdatedItems;
+};
+
+const generateScheduleOrderItems = (
+  updatedItems: UpdatedItem[],
+  scheduleOrder: any,
+) => {
+  const newItems = updatedItems.map((newItem: UpdatedItem) => {
+    const { name, price, quantity } = newItem;
+    const existingItem = scheduleOrder.items.find(
+      (item: OrderedItems) => item.name === newItem.name,
+    );
+
+    if (existingItem) {
+      return {
+        name,
+        price,
+        quantity: existingItem.quantity,
+        scheduledOrderId: scheduleOrder.id,
+      };
+    }
+    return { name, price, quantity, scheduledOrderId: scheduleOrder.id };
+  });
+
+  return newItems;
+};
+
+const updateScheduleOrderItems = async (
+  updatedItems: UpdatedItem[],
+  scheduleOrder: any,
+) => {
+  const prisma = new PrismaClient();
+  // Get new items and apply quantity from schedule order
+  const newItems: any = generateScheduleOrderItems(updatedItems, scheduleOrder);
+
+  // remove all items of schedule order
+  await prisma.orderedItems.deleteMany({
+    where: {
+      scheduledOrderId: scheduleOrder.id,
+    },
+  });
+
+  // add new items with target schedule order
+  await prisma.orderedItems.createMany({
+    data: newItems,
+  });
+
+  const newTotalPrice: number = newItems.reduce(
+    (acc: number, newItem: OrderedItems) => {
+      return acc + newItem.price;
+    },
+    0,
+  );
+
+  await prisma.scheduleOrders.update({
+    where: {
+      id: scheduleOrder.id,
+    },
+    data: {
+      totalPrice: newTotalPrice,
+    },
+  });
 };

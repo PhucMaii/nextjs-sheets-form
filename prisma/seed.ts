@@ -173,43 +173,43 @@ async function main() {
 
   await prisma.item.updateMany({
     where: {
-      name: 'BEAN 10'
+      name: 'BEAN 10',
     },
     data: {
-      name: 'BEAN 10 LB'
-    }
-  })
+      name: 'BEAN 10 LB',
+    },
+  });
 
   await prisma.item.updateMany({
     where: {
-      name: 'BEAN 5LB'
+      name: 'BEAN 5LB',
     },
     data: {
-      name: 'BEAN 5 LB'
-    }
-  })
+      name: 'BEAN 5 LB',
+    },
+  });
 
   await prisma.orderedItems.updateMany({
     where: {
       name: {
-        in: ["BEANSPROUTS 5 LBS", "BEAN 5 LBS"]
-      }
+        in: ['BEANSPROUTS 5 LBS', 'BEAN 5 LBS'],
+      },
     },
     data: {
-      name: 'BEAN 5 LB'
-    }
-  })
+      name: 'BEAN 5 LB',
+    },
+  });
 
   await prisma.orderedItems.updateMany({
     where: {
       name: {
-        in: ["BEANSPROUTS 10 LBS", "BEAN 10 LBS"]
-      }
+        in: ['BEANSPROUTS 10 LBS', 'BEAN 10 LBS'],
+      },
     },
     data: {
-      name: 'BEAN 10 LB'
-    }
-  })
+      name: 'BEAN 10 LB',
+    },
+  });
 }
 
 main()

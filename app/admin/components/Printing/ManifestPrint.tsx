@@ -16,8 +16,7 @@ interface PropTypes {
 
 export const ManifestPrint = forwardRef(
   ({ manifest, routes }: PropTypes, ref: any) => {
-
-    // Display the beansprouts first then other items    
+    // Display the beansprouts first then other items
     const customSortKeys = (keys: string[]): any => {
       const beanKeys = keys.filter((key) => key.includes('BEAN')).sort();
       const otherKeys = keys.filter((key) => !key.includes('BEAN')).sort();
@@ -49,7 +48,7 @@ export const ManifestPrint = forwardRef(
                 <Typography variant="h5" m={2}>
                   Driver: {targetRoute.driver?.name}
                 </Typography>
-                <Table sx={{mx: 2}}>
+                <Table sx={{ mx: 2 }}>
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>

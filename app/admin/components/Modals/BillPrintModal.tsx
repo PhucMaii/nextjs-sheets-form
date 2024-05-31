@@ -106,7 +106,8 @@ export default function BillPrintModal({
   const getClientRoutes = (): any => {
     const clientRoutes = orderList.map((order: Order): any => {
       // Filter user routes to get only routes related to current given list of routes
-      const relatedRoutes = order.user?.routes?.filter((route: UserRoute): any => {
+      const relatedRoutes = order.user?.routes
+        ?.filter((route: UserRoute): any => {
           const relatedRoute = selectedRoutes.find(
             (baseRoute: IRoutes) => baseRoute.id === route.routeId,
           );
