@@ -67,7 +67,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           include: {
             routes: true,
-            subCategory: true
+            subCategory: true,
           },
         });
 

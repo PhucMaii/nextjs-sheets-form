@@ -25,6 +25,7 @@ import PrintIcon from '@mui/icons-material/Print';
 import _ from 'lodash';
 import { ManifestPrint } from '../Printing/ManifestPrint';
 import { groupBy } from '@/app/utils/array';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface PropTypes extends ModalProps {
   routes: IRoutes[];
@@ -51,8 +52,13 @@ export default function BillPrintModal({
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
 
+  // Filter void orders
+  const activeOrders = orderList.filter(
+    (order: Order) => order.status !== ORDER_STATUS.VOID,
+  );
+
   useEffect(() => {
-    if (routes) {
+    if (routes.length > 0) {
       getClientRoutes();
     }
   }, [orderList, routes, selectedRoutes]);
@@ -104,10 +110,10 @@ export default function BillPrintModal({
 
   // O(n^3) need to optimize this
   const getClientRoutes = (): any => {
-    const clientRoutes = orderList.map((order: Order): any => {
+    const clientRoutes = activeOrders.map((order: Order): any => {
       // Filter user routes to get only routes related to current given list of routes
-      const relatedRoutes = order.user.routes
-        .filter((route: UserRoute): any => {
+      const relatedRoutes = order.user?.routes
+        ?.filter((route: UserRoute): any => {
           const relatedRoute = selectedRoutes.find(
             (baseRoute: IRoutes) => baseRoute.id === route.routeId,
           );
@@ -126,7 +132,7 @@ export default function BillPrintModal({
 
   const getItemsManifest = () => {
     const items = orderPrint.map((order: Order) => {
-      return order.items.map((item: any) => {
+      return order?.items.map((item: any) => {
         if (item.name.includes('BEAN')) {
           return {
             ...item,
@@ -138,6 +144,11 @@ export default function BillPrintModal({
         }
       });
     });
+
+    // If order print is undefined
+    if (!items[0]) {
+      return;
+    }
 
     // Group items by route
     const groupItemRoutes: any = groupBy(
@@ -179,7 +190,7 @@ export default function BillPrintModal({
           <AllPrint
             orders={
               billPrintOption === BILL_PRINT_OPTION.NONE
-                ? orderList
+                ? activeOrders
                 : orderPrint
             }
             ref={billPrint}
