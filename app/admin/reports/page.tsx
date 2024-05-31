@@ -527,6 +527,7 @@ export default function ReportPage() {
         <InvoicePrint
           client={clientValue}
           orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+          endDate={dateRange[1]}
           ref={invoicePrint}
         />
       </div>
@@ -646,7 +647,11 @@ export default function ReportPage() {
             </Grid>
             <Grid item md={2} textAlign="right">
               <Button
-                disabled={clientOrders.length === 0}
+                disabled={
+                  clientOrders.length === 0 ||
+                  clientValue?.clientName === 'All Clients' ||
+                  isFetching
+                }
                 variant="outlined"
                 onClick={handleInvoicePrint}
                 fullWidth

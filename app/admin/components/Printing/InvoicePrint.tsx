@@ -14,23 +14,34 @@ import {
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import useApiDebtData from '@/hooks/useApiDebtData';
 
 interface PropTypes {
   client: UserType | null;
   orders: Order[];
+  endDate: Date;
 }
 
 export const InvoicePrint = forwardRef(
-  ({ client, orders }: PropTypes, ref: any) => {
+  ({ client, orders, endDate }: PropTypes, ref: any) => {
+    if (!client) {
+      return;
+    }
+    
     const filteredOrders = orders.filter((order: Order) => {
       return (
         order.status !== ORDER_STATUS.VOID &&
         order.status !== ORDER_STATUS.COMPLETED
       );
     });
+
+    // Debt Data
+    const endMonth = endDate.getMonth() + 1;
+    const { debtData, sortDebtKeys } = useApiDebtData(client.id, endMonth);
+
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
-    const ordersPerPage = 22;
+    const ordersPerPage = 18;
     const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
     const totalPrices: number[] = [];
@@ -165,6 +176,45 @@ export const InvoicePrint = forwardRef(
                             <Typography>${totalDue.toFixed(2)}</Typography>
                           </Box>
                         </Grid>
+                      </Grid>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={3}>
+                      <Grid
+                        container
+                        display="flex"
+                        justifyContent="space-around"
+                        spacing={2}
+                        flexWrap="wrap"
+                      >
+                        {sortDebtKeys &&
+                          sortDebtKeys.map((month: string, index: number) => {
+                            return (
+                              <Grid item key={index}>
+                                <Box
+                                  display="flex"
+                                  flexDirection="column"
+                                  gap={1}
+                                >
+                                  <Typography
+                                    fontWeight={
+                                      index === sortDebtKeys.length - 1
+                                        ? 'bold'
+                                        : ''
+                                    }
+                                  >
+                                    {index === sortDebtKeys.length - 2
+                                      ? 'This month'
+                                      : month}
+                                  </Typography>
+                                  <Typography>
+                                    ${debtData[month].toFixed(2)}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                            );
+                          })}
                       </Grid>
                     </TableCell>
                   </TableRow>
