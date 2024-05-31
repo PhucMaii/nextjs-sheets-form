@@ -327,10 +327,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Update schedule order accordingly
-      for (const user of existingCategory.users) {
-        for (const scheduleOrder of user.scheduleOrders) {
-          await updateScheduleOrderItems(updatedItems, scheduleOrder);
-        }
+      // for (const user of existingCategory.users) {
+      //   for (const scheduleOrder of user.scheduleOrders) {
+      //     await updateScheduleOrderItems(updatedItems, scheduleOrder);
+      //   }
+      // }
+      const requireUpdateOrders = existingCategory.users.map((user: any) => {
+        return user.scheduleOrders;
+      }).flat();
+
+      for (const scheduleOrder of requireUpdateOrders) {
+        await updateScheduleOrderItems(updatedItems, scheduleOrder);
       }
 
       return res.status(200).json({
