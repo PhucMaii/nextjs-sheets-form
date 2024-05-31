@@ -173,43 +173,21 @@ async function main() {
 
   await prisma.item.updateMany({
     where: {
-      name: 'BEAN 10',
+      name: "KONGNAMUL - SOYA 10 LB "
     },
     data: {
-      name: 'BEAN 10 LB',
-    },
+      name: 'KONGNAMUL - SOYA 10 LB'
+    }
   });
 
   await prisma.item.updateMany({
     where: {
-      name: 'BEAN 5LB',
+      name: "KONGNAMUL - SOYA 5 LB "
     },
     data: {
-      name: 'BEAN 5 LB',
-    },
-  });
-
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: {
-        in: ['BEANSPROUTS 5 LBS', 'BEAN 5 LBS'],
-      },
-    },
-    data: {
-      name: 'BEAN 5 LB',
-    },
-  });
-
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: {
-        in: ['BEANSPROUTS 10 LBS', 'BEAN 10 LBS'],
-      },
-    },
-    data: {
-      name: 'BEAN 10 LB',
-    },
-  });
+      name: 'KONGNAMUL - SOYA 5 LB'
+    }
+  })
 }
 
 main()

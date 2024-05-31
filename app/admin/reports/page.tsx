@@ -226,7 +226,6 @@ export default function ReportPage() {
 
   const fetchClientOrders = async () => {
     try {
-      console.log(clientValue, 'clientValue');
       setIsFetching(true);
       let response;
       if (clientValue?.clientName === 'All Clients') {
