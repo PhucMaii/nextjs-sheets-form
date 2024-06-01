@@ -40,7 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       if (sameDayOrder) {
         for (const item of items) {
           // first, find if there is any of that item
-          const existiedItem = await prisma.orderedItems.findFirst({
+          const existedItem = await prisma.orderedItems.findFirst({
             where: {
               scheduledOrderId: sameDayOrder.id,
               name: item.name,
@@ -48,7 +48,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           });
 
           // if yes, then update it, otherwise create new items
-          if (existiedItem) {
+          if (existedItem) {
             await prisma.orderedItems.updateMany({
               where: {
                 scheduledOrderId: sameDayOrder.id,

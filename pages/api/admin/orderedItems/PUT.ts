@@ -31,7 +31,7 @@ interface BodyType {
   categoryName?: string;
   userId?: number;
   userCategoryId: number;
-  userSubCategoryId?: number;
+  userSubCategoryId: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -309,6 +309,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           users: {
+            where: {
+              subCategoryId: userSubCategoryId
+            },
             include: {
               scheduleOrders: {
                 include: {
@@ -327,11 +330,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Update schedule order accordingly
-      // for (const user of existingCategory.users) {
-      //   for (const scheduleOrder of user.scheduleOrders) {
-      //     await updateScheduleOrderItems(updatedItems, scheduleOrder);
-      //   }
-      // }
       const requireUpdateOrders = existingCategory.users.map((user: any) => {
         return user.scheduleOrders;
       }).flat();
