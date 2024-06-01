@@ -444,7 +444,8 @@ const updateScheduleOrderItems = async (
 
   const newTotalPrice: number = newItems.reduce(
     (acc: number, newItem: OrderedItems) => {
-      return acc + newItem.price;
+      const itemTotalPrice = newItem.price * newItem.quantity;
+      return acc + itemTotalPrice;
     },
     0,
   );

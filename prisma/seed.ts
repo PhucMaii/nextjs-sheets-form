@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { OrderedItems, PrismaClient } from '@prisma/client';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
@@ -171,23 +171,29 @@ async function main() {
   //   ]
   // })
 
-  await prisma.item.updateMany({
-    where: {
-      name: "KONGNAMUL - SOYA 10 LB "
-    },
-    data: {
-      name: 'KONGNAMUL - SOYA 10 LB'
+  const scheduleOrders = await prisma.scheduleOrders.findMany({
+    include: {
+      items: true
     }
   });
 
-  await prisma.item.updateMany({
-    where: {
-      name: "KONGNAMUL - SOYA 5 LB "
-    },
-    data: {
-      name: 'KONGNAMUL - SOYA 5 LB'
-    }
-  })
+  for (const scheduleOrder of scheduleOrders) {
+    const items = scheduleOrder.items;
+
+    const scheduleOrderTotal = items.reduce((acc: number, item: OrderedItems) => {
+      const itemTotalPrice = item.price * item.quantity;
+      return acc + itemTotalPrice;
+    }, 0);
+
+    await prisma.scheduleOrders.update({
+      where: {
+        id: scheduleOrder.id,
+      },
+      data: {
+        totalPrice: scheduleOrderTotal
+      }
+    })
+  } 
 }
 
 main()
