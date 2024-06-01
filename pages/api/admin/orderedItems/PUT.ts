@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { ScheduledOrder } from '@/app/utils/type';
 import {
   Item,
   OrderedItems,
@@ -29,7 +30,7 @@ interface BodyType {
   orderTotalPrice: number;
   updateOption?: UpdateOption;
   categoryName?: string;
-  userId?: number;
+  userId: number;
   userCategoryId: number;
   userSubCategoryId: number;
 }
@@ -209,7 +210,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Update schedule order of this client
       for (const scheduleOrder of targetClient.scheduleOrders) {
-        await updateScheduleOrderItems(updatedItems, scheduleOrder);
+        await updateScheduleOrderItems(
+          updatedItems,
+          scheduleOrder,
+          userSubCategoryId,
+          userSubCategoryId,
+          userId,
+        );
       }
     }
 
@@ -309,9 +316,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           users: {
-            where: {
-              subCategoryId: userSubCategoryId
-            },
             include: {
               scheduleOrders: {
                 include: {
@@ -330,12 +334,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Update schedule order accordingly
-      const requireUpdateOrders = existingCategory.users.map((user: any) => {
-        return user.scheduleOrders;
-      }).flat();
+      const requireUpdateOrders = existingCategory.users
+        .map((user: any) => {
+          return user.scheduleOrders.map((scheduleOrder: ScheduledOrder) => {
+            return { ...scheduleOrder, subCategoryId: user.subCategoryId };
+          });
+        })
+        .flat();
 
       for (const scheduleOrder of requireUpdateOrders) {
-        await updateScheduleOrderItems(updatedItems, scheduleOrder);
+        await updateScheduleOrderItems(
+          updatedItems,
+          scheduleOrder,
+          scheduleOrder.subCategoryId,
+          userSubCategoryId,
+          userId
+        );
       }
 
       return res.status(200).json({
@@ -399,6 +413,9 @@ const formatUpdatedItems = async (
 const generateScheduleOrderItems = (
   updatedItems: UpdatedItem[],
   scheduleOrder: any,
+  subCategoryId: number | null,
+  baseSubCategoryId: number | null, // categoryId of the client update this category
+  userId: number,
 ) => {
   const newItems = updatedItems.map((newItem: UpdatedItem) => {
     const { name, price, quantity } = newItem;
@@ -407,14 +424,32 @@ const generateScheduleOrderItems = (
     );
 
     if (existingItem) {
-      return {
-        name,
-        price,
-        quantity: existingItem.quantity,
-        scheduledOrderId: scheduleOrder.id,
-      };
+      if (!existingItem.name.includes('BEAN')) {
+        return {
+          name,
+          price,
+          quantity: existingItem.quantity,
+          scheduledOrderId: scheduleOrder.id,
+        };
+      }
+
+      // if item is beansprouts and different subCategoryId => use the existing price
+      if (subCategoryId !== baseSubCategoryId) {
+        return {
+          name,
+          price: existingItem.price,
+          quantity: existingItem.quantity,
+          scheduledOrderId: scheduleOrder.id,
+        };
+      }
     }
-    return { name, price, quantity, scheduledOrderId: scheduleOrder.id };
+
+    return { 
+      name, 
+      price, 
+      quantity: userId === scheduleOrder.userId ? quantity : 0, 
+      scheduledOrderId: scheduleOrder.id 
+    };
   });
 
   return newItems;
@@ -423,10 +458,19 @@ const generateScheduleOrderItems = (
 const updateScheduleOrderItems = async (
   updatedItems: UpdatedItem[],
   scheduleOrder: any,
+  subCategoryId: number | null,
+  baseSubCategoryId: number | null,
+  userId: number
 ) => {
   const prisma = new PrismaClient();
   // Get new items and apply quantity from schedule order
-  const newItems: any = generateScheduleOrderItems(updatedItems, scheduleOrder);
+  const newItems: any = generateScheduleOrderItems(
+    updatedItems,
+    scheduleOrder,
+    subCategoryId,
+    baseSubCategoryId,
+    userId,
+  );
 
   // remove all items of schedule order
   await prisma.orderedItems.deleteMany({
