@@ -527,7 +527,7 @@ export default function ReportPage() {
         <InvoicePrint
           client={clientValue}
           orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          endDate={dateRange[1]}
+          endDate={dateRange[0]}
           ref={invoicePrint}
         />
       </div>

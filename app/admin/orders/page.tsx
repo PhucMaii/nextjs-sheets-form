@@ -516,7 +516,7 @@ export default function Orders() {
     </Box>
   );
 
-  const constantComponent = (
+  const uppperContent = (
     <>
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography variant="h4" fontWeight="bold">
@@ -536,7 +536,7 @@ export default function Orders() {
         </FormControl>
       </Box>
       <Grid container alignItems="center" mt={2} spacing={2}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={9}>
           <TextField
             fullWidth
             name="Search"
@@ -616,14 +616,14 @@ export default function Orders() {
       />
       {isLoading ? (
         <>
-          {constantComponent}
+          {uppperContent}
           <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
             <LoadingComponent color="blue" />
           </div>
         </>
       ) : (
         <>
-          {constantComponent}
+          {uppperContent}
           {orderData.length > 0 ? (
             <>
               <Virtuoso
