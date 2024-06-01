@@ -40,16 +40,16 @@ import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';
 import AddRoute from '../components/Modals/AddRoute';
-import useSWR, { mutate } from 'swr';
+import { mutate } from 'swr';
 import { UserRoute } from '@prisma/client';
 import EditRoute from '../components/Modals/EditRoute';
 import DeleteModal from '../components/Modals/DeleteModal';
+import useClients from '@/hooks/fetch/useClients';
+import useDrivers from '@/hooks/fetch/useDrivers';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
-  // const [clientList, setClientList] = useState<UserType[]>([]);
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
-  // const [driverList, setDriverList] = useState<Driver[]>([]);
   const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
@@ -71,10 +71,8 @@ export default function ScheduledOrderPage() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const { data: clientList } = useSWR(
-    `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`,
-  );
-  const { data: driverList } = useSWR(API_URL.DRIVERS);
+  const { clientList } = useClients(days[dayIndex]);
+  const { driverList } = useDrivers();
 
   useEffect(() => {
     if (preOrderProgress === 100) {
@@ -470,7 +468,7 @@ export default function ScheduledOrderPage() {
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
-        clientList={clientList?.data.clientList || []}
+        clientList={clientList.clientList || []}
         setNotification={setNotification}
         createScheduledOrder={createScheduledOrder}
       />
@@ -478,9 +476,9 @@ export default function ScheduledOrderPage() {
         open={isAddRouteOpen}
         onClose={() => setIsAddRouteOpen(false)}
         day={days[dayIndex]}
-        driverList={driverList?.data || []}
-        clientList={clientList?.data.clientList || []}
-        disabledClientList={clientList?.data.existedUserRoute || []}
+        driverList={driverList || []}
+        clientList={clientList.clientList || []}
+        disabledClientList={clientList.existedUserRoute || []}
         setNotification={setNotification}
         handleAddRouteUI={handleAddRouteUI}
       />
@@ -503,8 +501,8 @@ export default function ScheduledOrderPage() {
         <EditRoute
           open={isEditRouteOpen}
           onClose={() => setIsEditRouteOpen(false)}
-          driverList={driverList?.data || []}
-          clientList={clientList?.data.clientList || []}
+          driverList={driverList || []}
+          clientList={clientList.clientList || []}
           day={days[dayIndex]}
           handleUpdateRouteUI={handleUpdateRouteUI}
           setNotification={setNotification}

@@ -59,16 +59,17 @@ import {
   convertDeliveryDateStringToDate,
   filterDateRangeOrders,
 } from '@/pages/api/utils/date';
-import { SubCategory } from '@prisma/client';
 import BillPrintModal from '../components/Modals/BillPrintModal';
-import useSWR from 'swr';
+import useRoutes from '@/hooks/fetch/useRoutes';
+import useClients from '@/hooks/fetch/useClients';
+import useSubCategories from '@/hooks/fetch/useSubCategories';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
-  const [clientList, setClientList] = useState<UserType[]>([]);
+  // const [clientList, setClientList] = useState<UserType[]>([]);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
@@ -95,20 +96,16 @@ export default function ReportPage() {
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
-  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
 
   const currentDate = convertDeliveryDateStringToDate(datePicker);
-  const { data: routes, mutate } = useSWR(
-    `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
-  );
+  const { routes, mutate } = useRoutes(days[currentDate.getDay()]);
+  const { clientList } = useClients();
+  const { subcategories } = useSubCategories();
 
   useEffect(() => {
-    fetchSubCategories();
-    fetchAllClients();
-
     pusherClient.subscribe('admin-delete-order');
 
     pusherClient.bind('delete-order', (deletedOrder: Order) => {
@@ -199,30 +196,30 @@ export default function ReportPage() {
     setTotalBill(bill);
   };
 
-  const fetchAllClients = async () => {
-    try {
-      const response = await axios.get(API_URL.CLIENTS);
+  // const fetchAllClients = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL.CLIENTS);
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       return;
+  //     }
 
-      const allClients = {
-        clientId: '',
-        clientName: 'All Clients',
-        deliveryAddress: '',
-      };
+  //     const allClients = {
+  //       clientId: '',
+  //       clientName: 'All Clients',
+  //       deliveryAddress: '',
+  //     };
 
-      setClientList([allClients, ...response.data.data]);
-    } catch (error: any) {
-      console.log('Fail to fetch all clients: ' + error);
-    }
-  };
+  //     setClientList([allClients, ...response.data.data]);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch all clients: ' + error);
+  //   }
+  // };
 
   const fetchClientOrders = async () => {
     try {
@@ -278,29 +275,29 @@ export default function ReportPage() {
     }
   };
 
-  const fetchSubCategories = async () => {
-    try {
-      const response = await axios.get(API_URL.SUBCATEGORIES);
+  // const fetchSubCategories = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL.SUBCATEGORIES);
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       return;
+  //     }
 
-      setSubCategories(response.data.data);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
-    }
-  };
+  //     setSubCategories(response.data.data);
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'There was an error: ' + error,
+  //     });
+  //   }
+  // };
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -541,7 +538,7 @@ export default function ReportPage() {
         <BillPrintModal
           open={isOpenBillPrintModal}
           onClose={() => setIsOpenBillPrintModal(false)}
-          routes={routes?.data || []}
+          routes={routes || []}
           orderList={clientOrders}
         />
       )}
@@ -567,7 +564,11 @@ export default function ReportPage() {
       <ShadowSection display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6">Clients</Typography>
         <Autocomplete
-          options={clientList as UserType[]}
+          options={[{
+            clientId: '',
+            clientName: 'All Clients',
+            deliveryAddress: '',
+          }, ...clientList] as UserType[]}
           getOptionLabel={(option) => {
             if (option.clientName === 'All Clients') {
               return option.clientName;
@@ -681,7 +682,7 @@ export default function ReportPage() {
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               handleSelectAll={handleSelectAll}
-              subCategories={subCategories}
+              subCategories={subcategories}
             />
           ) : (
             <ErrorComponent errorText="No Order Available" />
