@@ -75,9 +75,6 @@ export default function ScheduledOrderPage() {
     `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`,
   );
   const { data: driverList } = useSWR(API_URL.DRIVERS);
-  // const { data: routes, isValidating } = useSWR(
-  //   `${API_URL.ROUTES}?day=${days[dayIndex]}`,
-  // );
 
   useEffect(() => {
     if (preOrderProgress === 100) {
@@ -89,8 +86,6 @@ export default function ScheduledOrderPage() {
   }, [preOrderProgress]);
 
   useEffect(() => {
-    // fetchDrivers();
-    // fetchAllClients();
     pusherClient.subscribe('admin-schedule-order');
 
     const handleReceiveOrder = (incomingOrder: Order) => {
@@ -308,54 +303,6 @@ export default function ScheduledOrderPage() {
       console.log('Fail to delete selected orders: ', error);
     }
   };
-
-  // const fetchAllClients = async () => {
-  //   try {
-  //     const response = await axios.get(API_URL.CLIENTS);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       return;
-  //     }
-
-  //     setClientList(response.data.data);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch all clients: ' + error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch all clients: ' + error,
-  //     });
-  //   }
-  // };
-
-  // const fetchDrivers = async () => {
-  //   try {
-  //     const response = await axios.get(API_URL.DRIVERS);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       return;
-  //     }
-
-  //     setDriverList(response.data.data);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch all clients: ' + error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch all clients: ' + error,
-  //     });
-  //   }
-  // };
 
   const fetchOrders = async () => {
     try {
