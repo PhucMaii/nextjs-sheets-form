@@ -10,7 +10,7 @@ const useApiDebtData = (userId: number, endMonth: number) => {
     if (userId) {
       fetchDebtData();
     }
-  }, [userId]);
+  }, [userId, endMonth]);
 
   const calculateTotalPrice = (debtList: any) => {
     const totalPrice = Object.keys(debtList).reduce(

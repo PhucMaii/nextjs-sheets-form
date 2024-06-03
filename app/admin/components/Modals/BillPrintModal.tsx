@@ -53,6 +53,8 @@ export default function BillPrintModal({
     nonVoidOrders 
   } = useManifest(orderList, routes, selectedRoutes);
 
+  console.log(itemManifest, 'itemManifest')
+
   const handleSelectRoute = (e: any, targetRoute: IRoutes) => {
     const isRouteExisted = selectedRoutes.find((route: IRoutes) => {
       return route.id === targetRoute.id;
@@ -173,6 +175,7 @@ export default function BillPrintModal({
                       );
                       return (
                         <FormControlLabel
+                          key={route.id}
                           control={
                             <Checkbox
                               checked={isChecked}

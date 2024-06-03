@@ -60,9 +60,10 @@ const useManifest = (
             ...item,
             subCategory: order.subCategory,
             routeId: order.routeId,
+            client: order.clientName,
           };
         } else {
-          return { ...item, routeId: order.routeId };
+          return { ...item, routeId: order.routeId, client: order.clientName, };
         }
       });
     });
@@ -77,6 +78,7 @@ const useManifest = (
       items.flat(),
       ({ routeId }: any) => routeId,
     );
+    console.log(groupItemRoutes, 'groupItem routes')
 
     for (const itemRoute in groupItemRoutes) {
       const manifestItem = groupItemRoutes[itemRoute].reduce(

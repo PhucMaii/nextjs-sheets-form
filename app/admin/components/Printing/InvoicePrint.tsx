@@ -37,6 +37,7 @@ export const InvoicePrint = forwardRef(
 
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
+    console.log(endMonth, 'endMonth')
     const { debtData, sortDebtKeys } = useApiDebtData(client.id, endMonth);
 
     const today = new Date();
@@ -136,7 +137,7 @@ export const InvoicePrint = forwardRef(
                       )
                       .map((order: Order) => {
                         return (
-                          <TableRow sx={{ height: '20px !important' }}>
+                          <TableRow key={order.id} sx={{ height: '20px !important' }}>
                             <TableCell>{order.id}</TableCell>
                             <TableCell>{order.deliveryDate}</TableCell>
                             <TableCell>
