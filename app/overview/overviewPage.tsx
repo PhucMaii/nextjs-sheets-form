@@ -119,10 +119,12 @@ export default function MainPage() {
       return order.deliveryDate === formattedDate;
     });
 
+    const monthRange = generateMonthRange();
+
     const filterMonthOrders = filterDateRangeOrders(
       clientOrders.data.userOrders,
-      dateRange[0],
-      dateRange[1],
+      monthRange[0],
+      monthRange[1],
     );
 
     setClient(clientOrders.data.user);
