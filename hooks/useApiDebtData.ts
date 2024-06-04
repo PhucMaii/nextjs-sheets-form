@@ -16,7 +16,9 @@ const useApiDebtData = (userId: number, endMonth: number) => {
     const totalPrice = Object.keys(debtList).reduce(
       (acc: number, debtMonth: string) => {
         return acc + debtList[debtMonth];
-      }, 0);
+      },
+      0,
+    );
 
     return totalPrice;
   };
@@ -33,7 +35,7 @@ const useApiDebtData = (userId: number, endMonth: number) => {
       }
 
       const totalPrice = calculateTotalPrice(response.data.data);
-      const debtList = { ...response.data.data, 'Balance Due': totalPrice }
+      const debtList = { ...response.data.data, 'Balance Due': totalPrice };
       const sortedKeys = sortKeys(debtList);
 
       setSortDebtKeys(sortedKeys);

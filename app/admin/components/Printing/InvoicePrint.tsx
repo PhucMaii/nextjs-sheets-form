@@ -136,7 +136,10 @@ export const InvoicePrint = forwardRef(
                       )
                       .map((order: Order) => {
                         return (
-                          <TableRow key={order.id} sx={{ height: '20px !important' }}>
+                          <TableRow
+                            key={order.id}
+                            sx={{ height: '20px !important' }}
+                          >
                             <TableCell>{order.id}</TableCell>
                             <TableCell>{order.deliveryDate}</TableCell>
                             <TableCell>

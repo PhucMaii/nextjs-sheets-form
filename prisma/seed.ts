@@ -173,27 +173,30 @@ async function main() {
 
   const scheduleOrders = await prisma.scheduleOrders.findMany({
     include: {
-      items: true
-    }
+      items: true,
+    },
   });
 
   for (const scheduleOrder of scheduleOrders) {
     const items = scheduleOrder.items;
 
-    const scheduleOrderTotal = items.reduce((acc: number, item: OrderedItems) => {
-      const itemTotalPrice = item.price * item.quantity;
-      return acc + itemTotalPrice;
-    }, 0);
+    const scheduleOrderTotal = items.reduce(
+      (acc: number, item: OrderedItems) => {
+        const itemTotalPrice = item.price * item.quantity;
+        return acc + itemTotalPrice;
+      },
+      0,
+    );
 
     await prisma.scheduleOrders.update({
       where: {
         id: scheduleOrder.id,
       },
       data: {
-        totalPrice: scheduleOrderTotal
-      }
-    })
-  } 
+        totalPrice: scheduleOrderTotal,
+      },
+    });
+  }
 }
 
 main()

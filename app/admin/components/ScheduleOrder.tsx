@@ -1,11 +1,5 @@
 import { IRoutes, Notification, ScheduledOrder } from '@/app/utils/type';
-import {
-  Box,
-  Checkbox,
-  Grid,
-  Paper,
-  Typography,
-} from '@mui/material';
+import { Box, Checkbox, Grid, Paper, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import DeleteScheduleOrder from './Modals/DeleteScheduleOrder';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
@@ -34,12 +28,14 @@ export default function ScheduleOrder({
   routeId,
   routes,
 }: PropTypes) {
-   const [isSelected, setIsSelected] = useState<boolean>(false);
+  const [isSelected, setIsSelected] = useState<boolean>(false);
 
-    useEffect(() => {
-        const isChecked = selectedOrders.some((order: ScheduledOrder) => order.id === scheduleOrder.id)
-        setIsSelected(isChecked);
-    }, [selectedOrders])
+  useEffect(() => {
+    const isChecked = selectedOrders.some(
+      (order: ScheduledOrder) => order.id === scheduleOrder.id,
+    );
+    setIsSelected(isChecked);
+  }, [selectedOrders]);
 
   const handleDeleteOrder = async (
     order: ScheduledOrder,
@@ -80,7 +76,7 @@ export default function ScheduleOrder({
     }
   };
   return (
-    <Paper elevation={0}>
+    <Paper elevation={0} sx={{ p: 2 }}>
       <Grid container alignItems="center" columnSpacing={1}>
         <Grid item xs={1}>
           <Checkbox
@@ -92,28 +88,19 @@ export default function ScheduleOrder({
           <Typography variant="subtitle1">{scheduleOrder.id}</Typography>
         </Grid>
         <Grid item xs={2}>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="subtitle2">Client Id</Typography>
-            <Typography fontWeight="bold" variant="subtitle1">
-              {scheduleOrder.user.clientId}
-            </Typography>
-          </Box>
+          <Typography variant="subtitle1">
+            {scheduleOrder.user.clientId}
+          </Typography>
         </Grid>
         <Grid item xs={4}>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="subtitle2">Client Name</Typography>
-            <Typography fontWeight="bold" variant="subtitle1">
-              {scheduleOrder.user.clientName}
-            </Typography>
-          </Box>
+          <Typography variant="subtitle1">
+            {scheduleOrder.user.clientName}
+          </Typography>
         </Grid>
         <Grid item xs={2}>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="subtitle2">Total bill</Typography>
-            <Typography fontWeight="bold" variant="subtitle1">
-              ${scheduleOrder.totalPrice.toFixed(2)}
-            </Typography>
-          </Box>
+          <Typography variant="subtitle1">
+            ${scheduleOrder.totalPrice.toFixed(2)}
+          </Typography>
         </Grid>
         <Grid item xs={2}>
           <Box display="flex" gap={1}>

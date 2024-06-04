@@ -515,11 +515,16 @@ export default function ReportPage() {
       <ShadowSection display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6">Clients</Typography>
         <Autocomplete
-          options={[{
-            clientId: '',
-            clientName: 'All Clients',
-            deliveryAddress: '',
-          }, ...clientList] as UserType[]}
+          options={
+            [
+              {
+                clientId: '',
+                clientName: 'All Clients',
+                deliveryAddress: '',
+              },
+              ...clientList,
+            ] as UserType[]
+          }
           getOptionLabel={(option) => {
             if (option.clientName === 'All Clients') {
               return option.clientName;

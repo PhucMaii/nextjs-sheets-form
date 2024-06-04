@@ -113,7 +113,7 @@ export default function Orders() {
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
-  
+
   const { clientList } = useClients();
   const { subcategories } = useSubCategories();
 

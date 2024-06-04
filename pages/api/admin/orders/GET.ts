@@ -52,7 +52,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             orderId: order.id,
           },
         });
-        
+
         // get user
         const user: any = await prisma.user.findUnique({
           where: {
@@ -63,13 +63,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             subCategory: true,
           },
         });
-        
+
         const newItems = items.map((item: any) => {
           const totalPrice = item.quantity * item.price;
-          const returnData: any = { ...item, totalPrice, isAutoPrint: order.isAutoPrint };
+          const returnData: any = {
+            ...item,
+            totalPrice,
+            isAutoPrint: order.isAutoPrint,
+          };
 
           if (item.name.includes('BEAN')) {
-            return {...returnData, subCategoryId: user.subCategoryId}
+            return { ...returnData, subCategoryId: user.subCategoryId };
           }
           return returnData;
         });

@@ -767,7 +767,6 @@ export default function ScheduledOrderPage() {
               {isLoading ? (
                 <SplashScreen />
               ) : orderList.length > 0 ? (
-                // <Box display="flex" flexDirection="column" gap={2}>
                 <Reorder.Group values={orderList} onReorder={setOrderList}>
                   {orderList.map((order: ScheduledOrder) => {
                     return (
@@ -789,7 +788,6 @@ export default function ScheduledOrderPage() {
                   })}
                 </Reorder.Group>
               ) : (
-                // </Box>
                 <Box
                   display="flex"
                   flexDirection="column"
@@ -800,24 +798,10 @@ export default function ScheduledOrderPage() {
                   <ErrorComponent errorText="No Scheduled Order Found" />
                 </Box>
               )}
-              {/* // orderList.length > 0 ? (
-              //   <ScheduleOrdersTable
-              //     handleDeleteOrderUI={handleDeleteOrderUI}
-              //     handleUpdateOrderUI={handleUpdateOrderUI}
-              //     clientOrders={orderList}
-              //     setNotification={setNotification}
-              //     selectedOrders={selectedOrders}
-              //     handleSelectOrder={handleSelectOrder}
-              //     handleSelectAll={handleSelectAll}
-              //     routeId={routes[routeIndex]?.id || -1}
-              //     routes={routes}
-              //   />
-              // )  */}
             </Grid>
           </Grid>
         </Grid>
       </ShadowSection>
-      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }

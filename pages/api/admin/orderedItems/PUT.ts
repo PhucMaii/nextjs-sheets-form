@@ -348,7 +348,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           scheduleOrder,
           scheduleOrder.subCategoryId,
           userSubCategoryId,
-          userId
+          userId,
         );
       }
 
@@ -444,11 +444,11 @@ const generateScheduleOrderItems = (
       }
     }
 
-    return { 
-      name, 
-      price, 
-      quantity: userId === scheduleOrder.userId ? quantity : 0, 
-      scheduledOrderId: scheduleOrder.id 
+    return {
+      name,
+      price,
+      quantity: userId === scheduleOrder.userId ? quantity : 0,
+      scheduledOrderId: scheduleOrder.id,
     };
   });
 
@@ -460,7 +460,7 @@ const updateScheduleOrderItems = async (
   scheduleOrder: any,
   subCategoryId: number | null,
   baseSubCategoryId: number | null,
-  userId: number
+  userId: number,
 ) => {
   const prisma = new PrismaClient();
   // Get new items and apply quantity from schedule order

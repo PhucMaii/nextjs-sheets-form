@@ -48,9 +48,9 @@ export default function MainPage() {
   const today = new Date();
   const endDate = dateRange[1];
   endDate.setDate(today.getDate() + 2);
-  
+
   const { data: clientOrders, isValidating } = useSWR(API_URL.CLIENT_ORDER);
-  
+
   useEffect(() => {
     if (clientOrders) {
       initializeUser();
@@ -119,7 +119,11 @@ export default function MainPage() {
       return order.deliveryDate === formattedDate;
     });
 
-    const filterMonthOrders = filterDateRangeOrders(clientOrders.data.userOrders, dateRange[0], dateRange[1])
+    const filterMonthOrders = filterDateRangeOrders(
+      clientOrders.data.userOrders,
+      dateRange[0],
+      dateRange[1],
+    );
 
     setClient(clientOrders.data.user);
     setUserOrder({ ...clientOrders.data.user, ...orderToday });

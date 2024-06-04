@@ -46,14 +46,10 @@ export default function BillPrintModal({
   const [selectedRoutes, setSelectedRoutes] = useState<IRoutes[]>([]);
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
-  const { 
-    orderPrint, 
-    itemManifest, 
-    setItemManifest, 
-    nonVoidOrders 
-  } = useManifest(orderList, routes, selectedRoutes);
+  const { orderPrint, itemManifest, setItemManifest, nonVoidOrders } =
+    useManifest(orderList, routes, selectedRoutes);
 
-  console.log(itemManifest, 'itemManifest')
+  console.log(itemManifest, 'itemManifest');
 
   const handleSelectRoute = (e: any, targetRoute: IRoutes) => {
     const isRouteExisted = selectedRoutes.find((route: IRoutes) => {

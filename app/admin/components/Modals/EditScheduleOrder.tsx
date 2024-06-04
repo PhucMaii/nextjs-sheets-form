@@ -248,7 +248,13 @@ export default function EditScheduleOrder({
         Edit
       </Button>
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <BoxModal overflow="auto" maxHeight="100vh" display="flex" flexDirection="column" gap={2}>
+        <BoxModal
+          overflow="auto"
+          maxHeight="100vh"
+          display="flex"
+          flexDirection="column"
+          gap={2}
+        >
           <Box
             display="flex"
             justifyContent="space-between"
