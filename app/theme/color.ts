@@ -1,4 +1,4 @@
-import { blue, green, red, yellow } from '@mui/material/colors';
+import { blue, blueGrey, green, red, yellow } from '@mui/material/colors';
 
 export const successColor = green[800];
 export const errorColor = red[600];
@@ -15,3 +15,5 @@ export const warningText = yellow[900];
 export const warningBackground = yellow[50];
 
 export const infoBackground = blue[50];
+
+export const greyBackground = blueGrey[700];
