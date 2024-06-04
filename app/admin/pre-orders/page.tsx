@@ -51,6 +51,7 @@ import useDrivers from '@/hooks/fetch/useDrivers';
 import ScheduleOrder from '../components/ScheduleOrder';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
+import { insertInSortedIdArray } from '@/app/utils/array';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -170,8 +171,26 @@ export default function ScheduledOrderPage() {
     );
 
     if (!hasOrderExisted) {
-      setOrderList([...orderList, newOrder]);
-      setBaseOrderList([...baseOrderList, newOrder]);
+      const newBaseOrderList = insertInSortedIdArray(baseOrderList, newOrder);
+      setOrderList(newBaseOrderList);
+      setBaseOrderList(newBaseOrderList);
+    } else {
+      const newOrderList = orderList.map((order: ScheduledOrder) => {
+        if (order.id === newOrder.id) {
+          return newOrder;
+        };
+        return order;
+      });
+
+      const newBaseOrderList = baseOrderList.map((order: ScheduledOrder) => {
+        if (order.id === newOrder.id) {
+          return newOrder;
+        }
+        return order;
+      });
+
+      setOrderList(newOrderList);
+      setBaseOrderList(newBaseOrderList)
     }
   };
 
@@ -492,7 +511,6 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      await fetchOrders();
       setIsSavingArrangement(false);
       setNotification({
         on: true,
