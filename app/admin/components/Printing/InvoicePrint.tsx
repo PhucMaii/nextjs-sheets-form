@@ -14,42 +14,53 @@ import {
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import useApiDebtData from '@/hooks/useApiDebtData';
 
 interface PropTypes {
   client: UserType | null;
   orders: Order[];
+  endDate: Date;
 }
 
 export const InvoicePrint = forwardRef(
-  ({ client, orders }: PropTypes, ref: any) => {
+  ({ client, orders, endDate }: PropTypes, ref: any) => {
+    if (!client) {
+      return;
+    }
+
     const filteredOrders = orders.filter((order: Order) => {
       return (
         order.status !== ORDER_STATUS.VOID &&
         order.status !== ORDER_STATUS.COMPLETED
       );
     });
+
+    // Debt Data
+    const endMonth = endDate.getMonth() + 1;
+    const { debtData, sortDebtKeys } = useApiDebtData(client.id, endMonth);
+
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
-    const ordersPerPage = 22;
+    const ordersPerPage = 18;
     const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
-    const totalPrices: number[] = [];
+    // const totalPrices: number[] = [];
 
-    // Calculate total bill for each page
-    for (let i = 0; i < totalPages; i++) {
-      const currentPageOrders = filteredOrders.slice(
-        i * ordersPerPage,
-        (i + 1) * ordersPerPage,
-      );
-      const totalPrice = currentPageOrders.reduce((acc: number, cV: Order) => {
-        return acc + cV.totalPrice;
-      }, 0);
-      totalPrices.push(totalPrice);
-    }
+    // // Calculate total bill for each page
+    // for (let i = 0; i < totalPages; i++) {
+    //   const currentPageOrders = filteredOrders.slice(
+    //     i * ordersPerPage,
+    //     (i + 1) * ordersPerPage,
+    //   );
+    //   const totalPrice = currentPageOrders.reduce((acc: number, cV: Order) => {
+    //     return acc + cV.totalPrice;
+    //   }, 0);
+    //   totalPrices.push(totalPrice);
+    // }
 
-    const totalDue = totalPrices.reduce((acc: number, cV: number) => {
-      return acc + cV;
-    }, 0);
+    // const totalDue = totalPrices.reduce((acc: number, cV: number) => {
+    //   return acc + cV;
+    // }, 0);
 
     return (
       <div ref={ref}>
@@ -88,7 +99,7 @@ export const InvoicePrint = forwardRef(
                 </Grid>
                 <Grid item xs={12}>
                   <Typography fontWeight="bold" variant="h6">
-                    To: {client?.clientName}
+                    To: {client.clientId} - {client.clientName}
                   </Typography>
                 </Grid>
                 <Grid item textAlign="right" xs={12}>
@@ -125,7 +136,7 @@ export const InvoicePrint = forwardRef(
                       )
                       .map((order: Order) => {
                         return (
-                          <TableRow sx={{ height: '20px !important' }}>
+                          <TableRow key={order.id} sx={{ height: '20px !important' }}>
                             <TableCell>{order.id}</TableCell>
                             <TableCell>{order.deliveryDate}</TableCell>
                             <TableCell>
@@ -134,7 +145,7 @@ export const InvoicePrint = forwardRef(
                           </TableRow>
                         );
                       })}
-                  <TableRow>
+                  {/* <TableRow>
                     <TableCell colSpan={3}>
                       <Grid
                         container
@@ -165,6 +176,49 @@ export const InvoicePrint = forwardRef(
                             <Typography>${totalDue.toFixed(2)}</Typography>
                           </Box>
                         </Grid>
+                      </Grid>
+                    </TableCell>
+                  </TableRow> */}
+                  <TableRow>
+                    <TableCell colSpan={3}>
+                      <Grid
+                        container
+                        display="flex"
+                        justifyContent="space-between"
+                        spacing={2}
+                        flexWrap="wrap"
+                      >
+                        {sortDebtKeys &&
+                          sortDebtKeys.map((month: string, index: number) => {
+                            const localizedDebt = debtData[
+                              month
+                            ].toLocaleString('en-US', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            });
+                            return (
+                              <Grid item key={index}>
+                                <Box
+                                  display="flex"
+                                  flexDirection="column"
+                                  gap={1}
+                                >
+                                  <Typography
+                                    fontWeight={
+                                      index === sortDebtKeys.length - 1
+                                        ? 'bold'
+                                        : ''
+                                    }
+                                  >
+                                    {index === sortDebtKeys.length - 2
+                                      ? 'Current Statement'
+                                      : month}
+                                  </Typography>
+                                  <Typography>${localizedDebt}</Typography>
+                                </Box>
+                              </Grid>
+                            );
+                          })}
                       </Grid>
                     </TableCell>
                   </TableRow>

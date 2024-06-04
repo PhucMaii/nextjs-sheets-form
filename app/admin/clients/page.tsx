@@ -21,7 +21,6 @@ import { API_URL, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import NotificationPopup from '../components/Notification';
 import ClientsTable from '../components/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
-import { Category, SubCategory } from '@prisma/client';
 import { ShadowSection } from '../reports/styled';
 import useDebounce from '@/hooks/useDebounce';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -35,12 +34,13 @@ import SingleFieldUpdate, {
 } from '../components/Modals/SingleFieldUpdate';
 import { infoColor } from '@/app/theme/color';
 import AddClient from '../components/Modals/AddClient';
+import useSubCategories from '@/hooks/fetch/useSubCategories';
+import useCategories from '@/hooks/fetch/useCategories';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
-  const [categoryList, setCategoryList] = useState<Category[]>([]);
   const [baseClientList, setBaseClientList] = useState<UserType[]>([]);
   const [clientList, setClientList] = useState<UserType[]>([]);
   const [singleFieldUpdateProps, setSingleFieldUpdateProps] =
@@ -61,13 +61,14 @@ export default function ClientsPage() {
   });
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+  const { subcategories } = useSubCategories();
+  const { categories } = useCategories();
+
   useEffect(() => {
-    fetchSubCategories();
     handleFetchAllUsers();
-    handleFetchAllCategories();
+    // handleFetchAllCategories();
   }, []);
 
   useEffect(() => {
@@ -115,61 +116,37 @@ export default function ClientsPage() {
     };
   }, [baseClientList]);
 
-  const fetchSubCategories = async () => {
-    try {
-      const response = await axios.get(API_URL.SUBCATEGORIES);
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        return;
-      }
-
-      setSubCategories(response.data.data);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
-    }
-  };
-
   const handleAddClientUI = (newClient: UserType) => {
     setBaseClientList([...baseClientList, newClient]);
     setClientList([...clientList, newClient]);
   };
 
-  const handleFetchAllCategories = async () => {
-    try {
-      const response = await axios.get(API_URL.CATEGORIES);
+  // const handleFetchAllCategories = async () => {
+  //   try {
+  //     const response = await axios.get(API_URL.CATEGORIES);
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsFetching(false);
-        return;
-      }
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       setIsFetching(false);
+  //       return;
+  //     }
 
-      setCategoryList(response.data.data);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('Fail to fetch all categories: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch all categories: ' + error,
-      });
-      setIsFetching(true);
-    }
-  };
+  //     setCategoryList(response.data.data);
+  //     setIsFetching(false);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch all categories: ', error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'Fail to fetch all categories: ' + error,
+  //     });
+  //     setIsFetching(true);
+  //   }
+  // };
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -192,6 +169,7 @@ export default function ClientsPage() {
 
       setClientList(response.data.data);
       setBaseClientList(response.data.data);
+      setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch all users: ', error);
       setNotification({
@@ -199,7 +177,7 @@ export default function ClientsPage() {
         type: 'error',
         message: 'Fail to fetch all users: ' + error,
       });
-      setIsFetching(true);
+      setIsFetching(false);
     }
   };
 
@@ -429,8 +407,8 @@ export default function ClientsPage() {
       <AddClient
         open={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
-        categories={categoryList}
-        subCategories={subCategories}
+        categories={categories}
+        subCategories={subcategories}
         setNotification={setNotification}
         handleAddClientUI={handleAddClientUI}
       />
@@ -502,7 +480,7 @@ export default function ClientsPage() {
         </Grid>
         {clientList.length > 0 ? (
           <ClientsTable
-            categories={categoryList}
+            categories={categories}
             clients={clientList}
             handleUpdateClient={handleUpdateClient}
             handleDeleteClientUI={handleDeleteClientUI}
@@ -510,7 +488,7 @@ export default function ClientsPage() {
             selectedClients={selectedClients}
             handleSelectClient={handleSelectClient}
             handleSelectAll={handleSelectAll}
-            subCategories={subCategories}
+            subCategories={subcategories}
           />
         ) : (
           <ErrorComponent errorText="No User Found" />

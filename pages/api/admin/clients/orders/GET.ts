@@ -25,6 +25,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           user: {
             include: {
               category: true,
+              subCategory: true,
             },
           },
         },
@@ -43,6 +44,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             include: {
               category: true,
               routes: true,
+              subCategory: true,
             },
           },
         },

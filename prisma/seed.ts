@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { OrderedItems, PrismaClient } from '@prisma/client';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
@@ -172,13 +171,29 @@ async function main() {
   //   ]
   // })
 
-  const password = await hash('driver123', 12);
-  await prisma.driver.create({
-    data: {
-      name: 'ROY',
-      password,
-    },
+  const scheduleOrders = await prisma.scheduleOrders.findMany({
+    include: {
+      items: true
+    }
   });
+
+  for (const scheduleOrder of scheduleOrders) {
+    const items = scheduleOrder.items;
+
+    const scheduleOrderTotal = items.reduce((acc: number, item: OrderedItems) => {
+      const itemTotalPrice = item.price * item.quantity;
+      return acc + itemTotalPrice;
+    }, 0);
+
+    await prisma.scheduleOrders.update({
+      where: {
+        id: scheduleOrder.id,
+      },
+      data: {
+        totalPrice: scheduleOrderTotal
+      }
+    })
+  } 
 }
 
 main()

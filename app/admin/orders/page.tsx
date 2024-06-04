@@ -31,7 +31,6 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PrintIcon from '@mui/icons-material/Print';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-// import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import { DropdownItemContainer } from './styled';
 import { infoColor, successColor } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
@@ -43,7 +42,8 @@ import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import moment from 'moment';
 import { statusTabs } from '@/app/lib/constant';
-import useSWR from 'swr';
+import useClients from '@/hooks/fetch/useClients';
+import useSubCategories from '@/hooks/fetch/useSubCategories';
 
 interface Category {
   id: number;
@@ -78,6 +78,9 @@ export interface Order {
   isReplacement?: boolean;
   isVoid?: boolean;
   subCategoryId?: number;
+  subCategory?: any;
+  routeId?: number;
+  route?: any;
 }
 
 const orderPerPage = 10;
@@ -86,7 +89,6 @@ export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
-  // const [clientList, setClientList] = useState<UserType[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [date, setDate] = useState(() => generateRecommendDate());
   const openDropdown = Boolean(actionButtonAnchor);
@@ -107,15 +109,13 @@ export default function Orders() {
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
-  // const [subcategories, setSubcategories] = useState<SubCategory[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
-
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
-
-  const { data: clientList } = useSWR(API_URL.CLIENTS);
-  const { data: subcategories } = useSWR(API_URL.SUBCATEGORIES);
+  
+  const { clientList } = useClients();
+  const { subcategories } = useSubCategories();
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -196,9 +196,6 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
-    // if (orders) {
-    //   setBaseOrderData(orders.data);
-    // }
   }, [date, currentStatus]);
 
   useEffect(() => {
@@ -513,7 +510,7 @@ export default function Orders() {
     </Box>
   );
 
-  const constantComponent = (
+  const uppperContent = (
     <>
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography variant="h4" fontWeight="bold">
@@ -533,7 +530,7 @@ export default function Orders() {
         </FormControl>
       </Box>
       <Grid container alignItems="center" mt={2} spacing={2}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={9}>
           <TextField
             fullWidth
             name="Search"
@@ -606,21 +603,21 @@ export default function Orders() {
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
-        clientList={clientList?.data || []}
+        clientList={clientList || []}
         setNotification={setNotification}
         currentDate={date}
         createOrder={addOrder}
       />
       {isLoading ? (
         <>
-          {constantComponent}
+          {uppperContent}
           <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
             <LoadingComponent color="blue" />
           </div>
         </>
       ) : (
         <>
-          {constantComponent}
+          {uppperContent}
           {orderData.length > 0 ? (
             <>
               <Virtuoso
@@ -639,7 +636,7 @@ export default function Orders() {
                       handleUpdatePriceUI={handleUpdatePriceUI}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
-                      subcategories={subcategories?.data || []}
+                      subcategories={subcategories || []}
                     />
                   );
                 }}

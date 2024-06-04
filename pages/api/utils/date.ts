@@ -20,12 +20,6 @@ export const filterDateRangeOrders = (
       order.deliveryDate,
     );
 
-    // const formattedStartDate = new Date(Date.parse(startDate));
-    // const formattedEndDate = new Date(Date.parse(endDate));
-
-    // formattedEndDate.setDate(formattedEndDate.getDate() - 1);
-    // formattedStartDate.setDate(formattedStartDate.getDate() - 1);
-
     return orderDeliveryDate >= startDate && orderDeliveryDate <= endDate;
   });
 
