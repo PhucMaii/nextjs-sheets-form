@@ -82,6 +82,15 @@ export default function ScheduledOrderPage() {
   const { driverList } = useDrivers();
 
   useEffect(() => {
+    if (routes.length > 0) {
+      fetchOrders();
+    } else {
+      setOrderList([]);
+      setIsLoading(false);
+    }
+  }, [routes, routeIndex]);
+
+  useEffect(() => {
     if (preOrderProgress === 100) {
       setTimeout(() => {
         setIsPreOrderOpen(false);
@@ -135,15 +144,6 @@ export default function ScheduledOrderPage() {
   useEffect(() => {
     fetchRoutes();
   }, [dayIndex]);
-
-  useEffect(() => {
-    if (routes.length > 0) {
-      fetchOrders();
-    } else {
-      setOrderList([]);
-      setIsLoading(false);
-    }
-  }, [routes, routeIndex]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -492,8 +492,7 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      setOrderList(newListWithId);
-      setBaseOrderList(newListWithId);
+      await fetchOrders();
       setIsSavingArrangement(false);
       setNotification({
         on: true,

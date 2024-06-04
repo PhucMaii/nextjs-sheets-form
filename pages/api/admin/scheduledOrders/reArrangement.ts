@@ -26,14 +26,18 @@ export default async function reArrangement(
     }
 
     // Add scheduled order back with new id from client
+    const returnData: any = [];
     for (const scheduledOrder of updatedOrderList) {
-      await prisma.scheduleOrders.create({
+      const updatedScheduleOrder = await prisma.scheduleOrders.create({
         data: {
           id: scheduledOrder.id,
           userId: scheduledOrder.userId,
           totalPrice: scheduledOrder.totalPrice,
           day: scheduledOrder.day,
         },
+        include: {
+          user: true
+        }
       });
 
       const newItems = scheduledOrder.items.map((item: any) => {
@@ -48,9 +52,12 @@ export default async function reArrangement(
       await prisma.orderedItems.createMany({
         data: newItems,
       });
+
+      returnData.push({...updatedScheduleOrder, items: newItems});
     }
 
     return res.status(200).json({
+      data: returnData,
       message: 'Rearrange Successfully',
     });
   } catch (error: any) {

@@ -29,6 +29,7 @@ export default function ScheduleOrder({
   routes,
 }: PropTypes) {
   const [isSelected, setIsSelected] = useState<boolean>(false);
+  console.log(scheduleOrder, 'scheduleOrder');
 
   useEffect(() => {
     const isChecked = selectedOrders.some(
@@ -75,6 +76,7 @@ export default function ScheduleOrder({
       });
     }
   };
+
   return (
     <Paper elevation={0} sx={{ p: 2 }}>
       <Grid container alignItems="center" columnSpacing={1}>
