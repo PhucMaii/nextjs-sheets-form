@@ -78,7 +78,11 @@ const useManifest = (
       items.flat(),
       ({ routeId }: any) => routeId,
     );
-    console.log(groupItemRoutes, 'groupItem routes')
+    const groupItemClients: any = groupBy(
+        items.flat(),
+        ({ client }: any) => client,
+      );
+    console.log(groupItemClients, 'groupItemClients')
 
     for (const itemRoute in groupItemRoutes) {
       const manifestItem = groupItemRoutes[itemRoute].reduce(
@@ -95,6 +99,9 @@ const useManifest = (
           }
 
           acc[itemKey] = acc[itemKey] + item.quantity;
+          if (itemKey === 'BEAN 5 LB-B.K') {
+            console.log({current: acc[itemKey], item, itemKey})
+          }
           return acc;
         },
         {},

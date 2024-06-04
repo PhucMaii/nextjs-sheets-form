@@ -37,7 +37,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Group order by mm/yyyy
         const debtOrdersByMonth = incompletedOrders.reduce((acc: any, order: Orders) => {
             const splitDeliveryDate = order.deliveryDate.split('/');
-            console.log({month: splitDeliveryDate[0], endMonth})
             if (Number(splitDeliveryDate[0]) > Number(endMonth)) {
                 return acc;
             }

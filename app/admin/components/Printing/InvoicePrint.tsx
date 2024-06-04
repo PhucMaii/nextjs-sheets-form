@@ -37,7 +37,6 @@ export const InvoicePrint = forwardRef(
 
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
-    console.log(endMonth, 'endMonth')
     const { debtData, sortDebtKeys } = useApiDebtData(client.id, endMonth);
 
     const today = new Date();

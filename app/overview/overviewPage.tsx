@@ -18,10 +18,10 @@ import { blue, blueGrey } from '@mui/material/colors';
 import OrderAccordion from '../components/OrderAccordion';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
+import { filterDateRangeOrders } from '@/pages/api/utils/date';
 
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
-  // const [isFetching, setIsFetching] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isTomorrow, setIsTomorrow] = useState<boolean>(() => {
     // format initial date
@@ -48,11 +48,9 @@ export default function MainPage() {
   const today = new Date();
   const endDate = dateRange[1];
   endDate.setDate(today.getDate() + 2);
-  // const response = await axios.get(
-  //   `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${endDate}`,
-  // );
+  
   const { data: clientOrders, isValidating } = useSWR(API_URL.CLIENT_ORDER);
-  console.log({ clientOrders, dateRange });
+  
   useEffect(() => {
     if (clientOrders) {
       initializeUser();
@@ -121,9 +119,11 @@ export default function MainPage() {
       return order.deliveryDate === formattedDate;
     });
 
+    const filterMonthOrders = filterDateRangeOrders(clientOrders.data.userOrders, dateRange[0], dateRange[1])
+
     setClient(clientOrders.data.user);
     setUserOrder({ ...clientOrders.data.user, ...orderToday });
-    setThisMonthOrders(clientOrders.data.userOrders);
+    setThisMonthOrders(filterMonthOrders);
   };
 
   const handleUpdateOrderUI = (updatedOrder: Order) => {
