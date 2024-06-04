@@ -37,7 +37,12 @@ export default async function reArrangement(
       });
 
       const newItems = scheduledOrder.items.map((item: any) => {
-        return { ...item, scheduledOrderId: scheduledOrder.id };
+        return {
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity, 
+          scheduledOrderId: scheduledOrder.id 
+        };
       });
 
       await prisma.orderedItems.createMany({

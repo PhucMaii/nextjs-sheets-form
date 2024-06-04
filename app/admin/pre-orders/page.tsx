@@ -312,7 +312,6 @@ export default function ScheduledOrderPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      // const returnRoutes = await fetchRoutes();
       if (routes.length === 0) {
         setOrderList([]);
         setIsLoading(false);
