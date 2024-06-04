@@ -4,8 +4,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
   date?: string;
-  startDate?: string;
-  endDate?: string;
   status?: ORDER_STATUS;
 }
 
@@ -54,12 +52,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             orderId: order.id,
           },
         });
-
-        const newItems = items.map((item: any) => {
-          const totalPrice = item.quantity * item.price;
-          return { ...item, totalPrice, isAutoPrint: order.isAutoPrint };
-        });
-
+        
         // get user
         const user: any = await prisma.user.findUnique({
           where: {
@@ -69,6 +62,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             routes: true,
             subCategory: true,
           },
+        });
+        
+        const newItems = items.map((item: any) => {
+          const totalPrice = item.quantity * item.price;
+          const returnData: any = { ...item, totalPrice, isAutoPrint: order.isAutoPrint };
+
+          if (item.name.includes('BEAN')) {
+            return {...returnData, subCategoryId: user.subCategoryId}
+          }
+          return returnData;
         });
 
         const category = await prisma.category.findUnique({

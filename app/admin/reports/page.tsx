@@ -196,31 +196,6 @@ export default function ReportPage() {
     setTotalBill(bill);
   };
 
-  // const fetchAllClients = async () => {
-  //   try {
-  //     const response = await axios.get(API_URL.CLIENTS);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       return;
-  //     }
-
-  //     const allClients = {
-  //       clientId: '',
-  //       clientName: 'All Clients',
-  //       deliveryAddress: '',
-  //     };
-
-  //     setClientList([allClients, ...response.data.data]);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch all clients: ' + error);
-  //   }
-  // };
-
   const fetchClientOrders = async () => {
     try {
       setIsFetching(true);
@@ -274,30 +249,6 @@ export default function ReportPage() {
       setIsFetching(false);
     }
   };
-
-  // const fetchSubCategories = async () => {
-  //   try {
-  //     const response = await axios.get(API_URL.SUBCATEGORIES);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       return;
-  //     }
-
-  //     setSubCategories(response.data.data);
-  //   } catch (error: any) {
-  //     console.log('There was an error: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'There was an error: ' + error,
-  //     });
-  //   }
-  // };
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
