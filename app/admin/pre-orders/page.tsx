@@ -328,7 +328,7 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (newRoutes: IRoutes[] = routes) => {
     try {
       setIsLoading(true);
       if (routes.length === 0) {
@@ -336,7 +336,7 @@ export default function ScheduledOrderPage() {
         setIsLoading(false);
         return;
       }
-      const clientIds = routes[routeIndex].clients?.map(
+      const clientIds = newRoutes[routeIndex].clients?.map(
         (userRoute: UserRoute) => {
           return userRoute.userId;
         },
@@ -510,6 +510,9 @@ export default function ScheduledOrderPage() {
         setIsSavingArrangement(false);
         return;
       }
+
+      const newRoutes = await fetchRoutes();
+      await fetchOrders(newRoutes);
 
       setIsSavingArrangement(false);
       setNotification({

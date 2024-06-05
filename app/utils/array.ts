@@ -13,12 +13,22 @@ export const groupBy = (array: any[], key: (item: any) => any) => {
 
 export const insertInSortedIdArray = (array: any[], newElement: any) => {
   const result = [...array];
+
+  if (result.length === 0) {
+    return [newElement];
+  }
+
   for (let i = 0; i < result.length; i++) {
+    if (!result[i + 1]) {
+      break;
+    }
+    
     if (result[i].id < newElement.id && result[i + 1].id > newElement.id) {
       result.splice(i + 1, 0, newElement);
-      break;
+      return result;
     }
   }
 
+  result.push(newElement);
   return result;
 }

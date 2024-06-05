@@ -109,8 +109,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           data: updatedScheduleOrder,
           message: 'Override Schedule Order Successfully',
         });
-      } else {
-        return null;
       }
     }
 
