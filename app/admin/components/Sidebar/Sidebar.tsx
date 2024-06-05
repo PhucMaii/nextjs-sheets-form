@@ -25,10 +25,11 @@ import { pusherClient } from '@/app/pusher';
 
 interface PropTypes {
   children: ReactNode;
+  noMargin?: boolean;
 }
 
 const drawerWidth = 250;
-export default function Sidebar({ children }: PropTypes) {
+export default function Sidebar({ children, noMargin }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -105,6 +106,8 @@ export default function Sidebar({ children }: PropTypes) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {tabs.map((tab, index) => (
             <ListItemButtonStyled
+              $textColor={blueGrey[900]}
+              $bgColor={blueGrey[50]}
               $currentTab={currentTab === tab.path}
               key={index}
               onClick={() => handleChangeTab(tab.path)}
@@ -166,7 +169,7 @@ export default function Sidebar({ children }: PropTypes) {
           >
             {content}
           </Drawer>
-          <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+          <Box display="flex" width="100%" flexDirection="column" m={noMargin ? 0 : 2} gap={2}>
             {printComponents}
             {children}
           </Box>
@@ -194,7 +197,7 @@ export default function Sidebar({ children }: PropTypes) {
         >
           {content}
         </Drawer>
-        <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+        <Box display="flex" width="100%" flexDirection="column" m={noMargin ? 0 : 2} gap={2}>
           {printComponents}
           {children}
         </Box>

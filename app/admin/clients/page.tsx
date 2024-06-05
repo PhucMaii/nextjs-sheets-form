@@ -19,7 +19,7 @@ import { Notification, UserType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import NotificationPopup from '../components/Notification';
-import ClientsTable from '../components/ClientsTable';
+import ClientsTable from '../components/Tables/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { ShadowSection } from '../reports/styled';
 import useDebounce from '@/hooks/useDebounce';

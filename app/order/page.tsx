@@ -56,7 +56,7 @@ export default function OrderForm() {
   }
 
   const minDate = today.startOf('day');
-  const { data: items, isValidating } = useSWR(API_URL.ITEM);
+  const { data: items, isValidating } = useSWR(API_URL.CLIENT_ITEM);
 
   useEffect(() => {
     if (items) {

@@ -94,6 +94,8 @@ export default function Sidebar({ children }: PropTypes) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {clientTabs.map((tab, index) => (
             <ListItemButtonStyled
+              $textColor={blueGrey[900]}
+              $bgColor={blueGrey[50]}
               $currentTab={currentTab === tab.path}
               key={index}
               onClick={() => handleChangeTab(tab.path)}

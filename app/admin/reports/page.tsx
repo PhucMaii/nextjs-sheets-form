@@ -31,7 +31,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { blue } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
-import ClientOrdersTable from '../components/ClientOrdersTable';
+import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import {
   YYYYMMDDFormat,
