@@ -36,6 +36,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           return order.day === day;
         },
       );
+
       // Override same day schedule order if it existed
       if (sameDayOrder) {
         for (const item of items) {
@@ -163,18 +164,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
       });
     }
-    // await prisma.route.update({
-    //   where: {
-    //     id: Number(routeId),
-    //   },
-    //   data: {
-    //     clients: {
-    //       create: {
-    //         user: { connect: { id: userId } },
-    //       },
-    //     },
-    //   },
-    // });
 
     const updatedScheduledOrder = await prisma.scheduleOrders.findUnique({
       where: {

@@ -51,6 +51,7 @@ import useDrivers from '@/hooks/fetch/useDrivers';
 import ScheduleOrder from '../components/ScheduleOrder';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
+import { insertInSortedIdArray } from '@/app/utils/array';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -80,6 +81,15 @@ export default function ScheduledOrderPage() {
 
   const { clientList } = useClients(days[dayIndex]);
   const { driverList } = useDrivers();
+
+  useEffect(() => {
+    if (routes.length > 0) {
+      fetchOrders();
+    } else {
+      setOrderList([]);
+      setIsLoading(false);
+    }
+  }, [routes, routeIndex]);
 
   useEffect(() => {
     if (preOrderProgress === 100) {
@@ -137,15 +147,6 @@ export default function ScheduledOrderPage() {
   }, [dayIndex]);
 
   useEffect(() => {
-    if (routes.length > 0) {
-      fetchOrders();
-    } else {
-      setOrderList([]);
-      setIsLoading(false);
-    }
-  }, [routes, routeIndex]);
-
-  useEffect(() => {
     if (debouncedKeywords) {
       const newOrderList = baseOrderList.filter((order: ScheduledOrder) => {
         if (
@@ -170,8 +171,26 @@ export default function ScheduledOrderPage() {
     );
 
     if (!hasOrderExisted) {
-      setOrderList([...orderList, newOrder]);
-      setBaseOrderList([...baseOrderList, newOrder]);
+      const newBaseOrderList = insertInSortedIdArray(baseOrderList, newOrder);
+      setOrderList(newBaseOrderList);
+      setBaseOrderList(newBaseOrderList);
+    } else {
+      const newOrderList = orderList.map((order: ScheduledOrder) => {
+        if (order.id === newOrder.id) {
+          return newOrder;
+        };
+        return order;
+      });
+
+      const newBaseOrderList = baseOrderList.map((order: ScheduledOrder) => {
+        if (order.id === newOrder.id) {
+          return newOrder;
+        }
+        return order;
+      });
+
+      setOrderList(newOrderList);
+      setBaseOrderList(newBaseOrderList)
     }
   };
 
@@ -309,16 +328,15 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (newRoutes: IRoutes[] = routes) => {
     try {
       setIsLoading(true);
-      // const returnRoutes = await fetchRoutes();
       if (routes.length === 0) {
         setOrderList([]);
         setIsLoading(false);
         return;
       }
-      const clientIds = routes[routeIndex].clients?.map(
+      const clientIds = newRoutes[routeIndex].clients?.map(
         (userRoute: UserRoute) => {
           return userRoute.userId;
         },
@@ -493,8 +511,9 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      setOrderList(newListWithId);
-      setBaseOrderList(newListWithId);
+      const newRoutes = await fetchRoutes();
+      await fetchOrders(newRoutes);
+
       setIsSavingArrangement(false);
       setNotification({
         on: true,
