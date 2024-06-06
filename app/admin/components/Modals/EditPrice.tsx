@@ -1,6 +1,7 @@
 import { Notification, OrderedItems } from '@/app/utils/type';
 import {
   Box,
+  Button,
   Divider,
   FormControl,
   Grid,
@@ -26,11 +27,11 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { Order } from '../../orders/page';
-import { errorColor, infoColor } from '@/app/theme/color';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import { errorColor } from '@/app/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../UpdateChoiceSelection';
 import { SubCategory } from '@prisma/client';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
@@ -193,22 +194,21 @@ export default function EditPrice({
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Edit Price</Typography>
-          <LoadingButtonStyles
+          <LoadingButton
             variant="contained"
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdatePrice}
-            color={infoColor}
           >
             Save
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
         <UpdateChoiceSelection
           updateOption={updateOption}
           setUpdateOption={setUpdateOption}
         />
         <Box overflow="auto" maxHeight="70vh" mt={1}>
-          <Divider>Add items</Divider>
+          <Divider sx={{ mb: 2 }}>Add items</Divider>
           <Grid container spacing={3} mb={1}>
             <Grid item xs={12}>
               <FormControl fullWidth>
@@ -275,13 +275,9 @@ export default function EditPrice({
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <LoadingButtonStyles
-                fullWidth
-                color={infoColor}
-                onClick={addNewItem}
-              >
+              <Button fullWidth onClick={addNewItem} variant="contained">
                 Add
-              </LoadingButtonStyles>
+              </Button>
             </Grid>
           </Grid>
           <Divider>Items</Divider>

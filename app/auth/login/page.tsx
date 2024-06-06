@@ -1,11 +1,12 @@
 'use client';
 import FadeIn from '@/app/HOC/FadeIn';
 import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
-import Button from '@/app/components/Button';
-import Input from '@/app/components/Input';
-import Snackbar from '@/app/components/Snackbar/SnackbarPopup';
+import NotificationPopup from '@/app/admin/components/Notification';
 import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
+import { LoadingButton } from '@mui/lab';
+import { Box, Paper, TextField, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import axios from 'axios';
 import { useFormik } from 'formik';
 import { getSession, signIn } from 'next-auth/react';
@@ -93,74 +94,97 @@ export default function LoginPage() {
   return (
     <LoginAndRegisterGuard>
       <FadeIn>
-        <div className="flex flex-col justify-center items-center h-screen gap-2">
-          <Snackbar
-            open={notification.on}
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          height="100vh"
+          gap={2}
+        >
+          {/* <div className="flex flex-col justify-center items-center h-screen gap-2"> */}
+          <NotificationPopup
+            notification={notification}
             onClose={() => setNotification({ ...notification, on: false })}
-            type={notification.type}
-            message={notification.message}
           />
-          <div className="shadow-lg rounded-3xl">
-            <div className="flex gap-2 m-4 items-center cursor-pointer">
+          {/* <div className="shadow-lg rounded-3xl"> */}
+          <Paper elevation={8} sx={{ borderRadius: 3 }}>
+            {/* <div className="flex gap-2 m-4 items-center cursor-pointer"> */}
+            <Box display="flex" gap={2} m={4} alignItems="center">
               <Image
-                width={20}
-                height={20}
-                src="/computer-icon.png"
-                alt="computer"
+                width={100}
+                height={80}
+                src="/supremesproutsIcon.png"
+                alt="SupremeSproutsLogo"
               />
-              <h2 className="text-blue-500 font-bold text-lg">DataHabor Pro</h2>
-            </div>
-            <form className="p-16" noValidate onSubmit={formik.handleSubmit}>
-              <h4 className="text-3xl font-bold text-left">Hello there</h4>
-              <h4 className="text-md text-gray-500 mb-8 text-left">
-                Log in to place your order
-              </h4>
-              <div className="flex flex-col gap-2">
-                <Input
+              <Typography variant="h6" fontWeight="bold" color="primary">
+                Supreme Sprouts Ltd.
+              </Typography>
+            </Box>
+            {/* </div> */}
+            <form
+              className="px-16 pb-16"
+              noValidate
+              onSubmit={formik.handleSubmit}
+            >
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                gap={0.5}
+                mb={2}
+              >
+                {/* <h4 className="text-3xl font-bold text-left">Hello there</h4>
+                <h4 className="text-md text-gray-500 text-left">
+                  Log in to place your order
+                </h4> */}
+                <Typography variant="h4" fontWeight="bold">
+                  Hello there
+                </Typography>
+                <Typography variant="subtitle1" color={grey[700]}>
+                  Log in to place your order
+                </Typography>
+              </Box>
+              <Box display="flex" flexDirection="column" gap={4}>
+                <TextField
+                  name="clientId"
                   label="Client Id"
                   placeholder="Enter your client id"
-                  onChange={formik.handleChange}
                   type="text"
+                  onChange={formik.handleChange}
                   value={formik.values.clientId}
-                  className={`m-0 p-0 w-80 ${
-                    !(formik.touched.clientId && formik.errors.clientId)
-                      ? ''
-                      : 'border-red-500'
-                  }`}
                   onBlur={formik.handleBlur}
-                  name="clientId"
                   error={!!(formik.touched.clientId && formik.errors.clientId)}
                   helperText={formik.touched.clientId && formik.errors.clientId}
+                  variant="standard"
                 />
-                <Input
-                  label="Password"
-                  placeholder="Enter your password"
-                  onChange={formik.handleChange}
-                  type="password"
-                  value={formik.values.password}
-                  className={`m-0 p-0 w-80 ${
-                    !(formik.touched.password && formik.errors.password)
-                      ? ''
-                      : 'border-red-500'
-                  }`}
+                <TextField
                   name="password"
+                  label="Password"
+                  placeholder="Enter your client id"
+                  type="password"
+                  onChange={formik.handleChange}
+                  value={formik.values.password}
                   error={!!(formik.touched.password && formik.errors.password)}
                   onBlur={formik.handleBlur}
                   helperText={formik.touched.password && formik.errors.password}
+                  variant="standard"
                 />
-                <Button
-                  color="blue"
-                  label="Sign in"
-                  width="full"
-                  loadingButton
-                  isLoading={isLoading}
+                <LoadingButton
+                  variant="contained"
+                  fullWidth
+                  loading={isLoading}
                   type="submit"
-                  className="bg-blue-600"
-                />
-              </div>
+                >
+                  Sign in
+                </LoadingButton>
+              </Box>
             </form>
-          </div>
-        </div>
+          </Paper>
+
+          {/* </div> */}
+        </Box>
+        {/* </div> */}
       </FadeIn>
     </LoginAndRegisterGuard>
   );

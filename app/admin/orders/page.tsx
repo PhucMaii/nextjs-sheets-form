@@ -535,7 +535,7 @@ export default function Orders() {
             fullWidth
             name="Search"
             variant="filled"
-            // label="Search orders"
+            label="Search orders"
             placeholder="Search by client id, invoice id, or client name"
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}

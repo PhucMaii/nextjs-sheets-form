@@ -49,8 +49,6 @@ export default function BillPrintModal({
   const { orderPrint, itemManifest, setItemManifest, nonVoidOrders } =
     useManifest(orderList, routes, selectedRoutes);
 
-  console.log(itemManifest, 'itemManifest');
-
   const handleSelectRoute = (e: any, targetRoute: IRoutes) => {
     const isRouteExisted = selectedRoutes.find((route: IRoutes) => {
       return route.id === targetRoute.id;
@@ -136,6 +134,8 @@ export default function BillPrintModal({
               billPrintOption === BILL_PRINT_OPTION.NONE ||
               selectedRoutes.length === 0
             }
+            color="info"
+            variant="outlined"
           >
             <Box
               display="flex"

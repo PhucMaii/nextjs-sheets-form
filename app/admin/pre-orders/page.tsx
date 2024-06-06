@@ -8,9 +8,9 @@ import {
   Button,
   Checkbox,
   Divider,
+  Fab,
   FormControlLabel,
   Grid,
-  IconButton,
   Tab,
   Tabs,
   TextField,
@@ -30,14 +30,13 @@ import {
   ScheduledOrder,
 } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
-import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/AddOrder';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { errorColor, infoBackground, infoColor } from '@/app/theme/color';
+import { infoBackground, infoColor } from '@/app/theme/color';
 import EditDeliveryDate from '../components/Modals/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';
@@ -51,6 +50,7 @@ import useDrivers from '@/hooks/fetch/useDrivers';
 import ScheduleOrder from '../components/ScheduleOrder';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
+import AddIcon from '@mui/icons-material/Add';
 import { insertInSortedIdArray } from '@/app/utils/array';
 
 export default function ScheduledOrderPage() {
@@ -178,7 +178,7 @@ export default function ScheduledOrderPage() {
       const newOrderList = orderList.map((order: ScheduledOrder) => {
         if (order.id === newOrder.id) {
           return newOrder;
-        };
+        }
         return order;
       });
 
@@ -190,7 +190,7 @@ export default function ScheduledOrderPage() {
       });
 
       setOrderList(newOrderList);
-      setBaseOrderList(newBaseOrderList)
+      setBaseOrderList(newBaseOrderList);
     }
   };
 
@@ -633,7 +633,7 @@ export default function ScheduledOrderPage() {
               })}
           </Tabs>
         </Box>
-        <Grid container mt={3} alignItems="flex-start">
+        <Grid container mt={3} alignItems="flex-start" columnSpacing={2}>
           <Grid item xs={2} alignSelf="flex-start">
             <Box
               display="flex"
@@ -719,9 +719,14 @@ export default function ScheduledOrderPage() {
                   <ErrorComponent errorText="No Routes Found" />
                 </Box>
               )}
-              <IconButton onClick={() => setIsAddRouteOpen(true)}>
-                <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-              </IconButton>
+              <Fab
+                size="medium"
+                color="primary"
+                variant="extended"
+                onClick={() => setIsAddRouteOpen(true)}
+              >
+                <AddIcon />
+              </Fab>
             </Box>
           </Grid>
           <Grid item container alignItems="center" xs={10} spacing={1}>
@@ -747,16 +752,24 @@ export default function ScheduledOrderPage() {
               />
             </Grid>
             <Grid item xs={2}>
-              <Box display="flex" alignItems="center">
-                <IconButton onClick={() => setIsAddOrderOpen(true)}>
-                  <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
-                </IconButton>
-                <IconButton
+              <Box display="flex" alignItems="center" gap={1}>
+                <Fab
+                  variant="extended"
+                  size="medium"
+                  color="primary"
+                  onClick={() => setIsAddOrderOpen(true)}
+                >
+                  <AddIcon />
+                </Fab>
+                <Fab
                   disabled={selectedOrders.length === 0}
                   onClick={() => deleteSelectedOrders()}
+                  color="error"
+                  size="medium"
+                  variant="extended"
                 >
-                  <DeleteIcon sx={{ color: errorColor, fontSize: 50 }} />
-                </IconButton>
+                  <DeleteIcon />
+                </Fab>
               </Box>
             </Grid>
             <Grid item xs={6}>
@@ -789,7 +802,11 @@ export default function ScheduledOrderPage() {
                 <Reorder.Group values={orderList} onReorder={setOrderList}>
                   {orderList.map((order: ScheduledOrder) => {
                     return (
-                      <Reorder.Item key={order.id} value={order}>
+                      <Reorder.Item
+                        key={order.id}
+                        value={order}
+                        style={{ listStyle: 'none' }}
+                      >
                         <ScheduleOrder
                           key={order.id}
                           scheduleOrder={order}

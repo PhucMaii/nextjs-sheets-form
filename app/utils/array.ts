@@ -10,7 +10,6 @@ export const groupBy = (array: any[], key: (item: any) => any) => {
   }, {});
 };
 
-
 export const insertInSortedIdArray = (array: any[], newElement: any) => {
   const result = [...array];
 
@@ -22,7 +21,7 @@ export const insertInSortedIdArray = (array: any[], newElement: any) => {
     if (!result[i + 1]) {
       break;
     }
-    
+
     if (result[i].id < newElement.id && result[i + 1].id > newElement.id) {
       result.splice(i + 1, 0, newElement);
       return result;
@@ -31,4 +30,4 @@ export const insertInSortedIdArray = (array: any[], newElement: any) => {
 
   result.push(newElement);
   return result;
-}
+};

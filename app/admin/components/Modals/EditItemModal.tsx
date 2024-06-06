@@ -13,8 +13,7 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { Item, Order } from '../../orders/page';
 import { ModalProps } from './type';
-import { infoColor } from '@/app/theme/color';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -89,15 +88,14 @@ export default function EditItemModal({
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">{item.name}</Typography>
-          <LoadingButtonStyles
+          <LoadingButton
             variant="contained"
             loadingIndicator="Saving..."
             loading={isLoading}
             onClick={handleUpdateData}
-            color={infoColor}
           >
             Save
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
         <Divider />
         <Grid container alignItems="center" rowGap={4} mt={2}>

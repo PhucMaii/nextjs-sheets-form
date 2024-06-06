@@ -17,8 +17,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { infoColor } from '@/app/theme/color';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   order?: Order;
@@ -146,7 +145,7 @@ export default function EditDeliveryDate({
           <Typography variant="h4">
             {isPreOrder ? 'Pre Order' : 'Edit Delivery Date'}
           </Typography>
-          <LoadingButtonStyles
+          <LoadingButton
             loading={isLoading}
             variant="contained"
             onClick={() => {
@@ -156,10 +155,9 @@ export default function EditDeliveryDate({
                 handleUpdateDate();
               }
             }}
-            color={infoColor}
           >
             {isPreOrder ? 'Order' : 'Save'}
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
         <Divider />
         <Box display="flex" flexDirection="column" gap={1}>

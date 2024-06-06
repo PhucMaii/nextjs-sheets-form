@@ -5,7 +5,6 @@ import { BoxModal } from './styled';
 import ErrorIcon from '@mui/icons-material/Error';
 import { errorColor } from '@/app/theme/color';
 import { grey } from '@mui/material/colors';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
 import { LoadingButton } from '@mui/lab';
 
@@ -66,14 +65,14 @@ export default function DeleteScheduleOrder({
             >
               DELETE
             </LoadingButton>
-            <LoadingButtonStyles
-              color={errorColor}
+            <LoadingButton
               loading={isDeleting}
               onClick={() => handleDeleteOrder(DELETE_OPTION.TEMPORARY)}
               variant="contained"
+              color="error"
             >
               REMOVE FROM ROUTE
-            </LoadingButtonStyles>
+            </LoadingButton>
           </Box>
         </BoxModal>
       </Modal>
