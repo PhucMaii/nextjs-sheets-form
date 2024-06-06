@@ -30,9 +30,9 @@ const config: Config = {
     },
   },
   plugins: [require('@tailwindcss/forms')],
-  // corePlugins: {
-  //   preflight: false,
-  // },
+  corePlugins: {
+    preflight: false,
+  },
   // important: '#root'
 };
 export default config;

@@ -1,13 +1,18 @@
 import React, { forwardRef } from 'react';
 import { Order } from '../../orders/page';
 import {
+  Box,
+  Divider,
+  Grid,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 
+const printFontSize = 28;
 export const ComponentToPrint = forwardRef(
   ({ order }: { order: Order | null }, ref: any) => {
     if (!order) {
@@ -34,66 +39,68 @@ export const ComponentToPrint = forwardRef(
         );
       }
     }
+
+    const orderFields: any = {
+      Invoice: order.id,
+      'Client Name': order.clientName,
+      'Order Time': order.orderTime,
+      'Delivery Date': order.deliveryDate
+    }
     return (
       <div ref={ref}>
-        <div className="flex gap-2 flex-col ml-6 mr-auto mb-24 mt-4">
-          <div className="w-full">
-            <h2 className="text-center font-bold text-3xl">
+        <Box display="flex" flexDirection="column" m={4}>
+          <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            sx={{ width: '100%' }}
+          >
+            <Typography variant="h4" fontWeight="bold">
               {order.isReplacement
                 ? 'REPLACEMENT ORDER'
                 : order.isVoid
                   ? 'VOID ORDER'
                   : ''}
-            </h2>
-            <h2 className="text-center font-semibold text-2xl">
+            </Typography>
+            <Typography variant="h5" fontWeight="bold">
               SUPREME SPROUTS LTD
-            </h2>
-            <h4 className="text-center font-semibold text-2xl">
+            </Typography>
+            <Typography textAlign="center" variant="h6">
               1-6420 Beresford Street, Burnaby, BC, V5E 1B3
-            </h4>
-            <div className="text-center font-semibold text-2xl">
-              778 789 1060
-              <br />
-              709 989 6000
-            </div>
-          </div>
-          <div className="h-px bg-black w-full m-auto"></div>
-          <div className="flex flex-col gap-2 w-full">
-            <div className="flex flex-wrap gap-2 text-2xl items-center ">
-              <h3 className="text-left font-bold">Invoice: </h3>
-              <h3 className="text-left text-2xl">{order.id}</h3>
-            </div>
-            <div className="flex flex-wrap gap-2 text-2xl mr-6">
-              <h3 className="text-left font-bold">Client Name: </h3>
-              <h3 className="text-left font-bold">{order.clientName}</h3>
-            </div>
-            <div className="flex gap-2 text-2xl">
-              <h3 className="text-left font-bold">Client Number:</h3>
-              <h3 className="text-left">{order.clientId}</h3>
-            </div>
-            <div className="flex gap-2 text-2xl">
-              <h3 className="text-left font-bold">Order Time:</h3>
-              <h3 className="text-left">{order.orderTime}</h3>
-            </div>
-            <div className="flex gap-2 text-2xl">
-              <h3 className="text-left font-bold">Delivery Date:</h3>
-              <h3 className="text-left">{order.deliveryDate}</h3>
-            </div>
-            <h3 className="text-left font-bold text-2xl">ORDER DETAILS</h3>
-            <Table sx={{ marginLeft: '-16px' }}>
+            </Typography>
+            <Typography variant="h6">
+            778 789 1060
+            <br />
+            709 989 6000
+            </Typography>
+          </Box>
+          <Divider sx={{my: 3}} />
+          <Grid container alignItems="center" rowGap={3} mb={2}>
+            {
+              orderFields && Object.keys(orderFields).map((orderField: string, index: number) => {
+                return (
+                  <Grid key={index} item xs={12}>
+                    <Typography variant="h5" sx={{fontSize: printFontSize}}><strong>{orderField}:</strong> {orderFields[orderField]}</Typography>
+                  </Grid>
+                )
+              })
+            }
+            <Typography sx={{fontSize: printFontSize}} fontWeight="bold">Order Details: </Typography>
+            <Table sx={{ marginLeft: '-10px' }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: printFontSize - 10 }}>
                     Item
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: printFontSize - 10 }}>
                     No. Items
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: printFontSize - 10 }}>
                     Unit Price
                   </TableCell>
                   <TableCell
-                    sx={{ fontWeight: 'bold', fontSize: 15, marginRight: 4 }}
+                    sx={{ fontWeight: 'bold', fontSize: printFontSize - 10, marginRight: 4 }}
                   >
                     Total Price
                   </TableCell>
@@ -101,19 +108,29 @@ export const ComponentToPrint = forwardRef(
               </TableHead>
               <TableBody>{orderDetailsTemplate}</TableBody>
             </Table>
-            <div className="h-px bg-black w-full m-auto"></div>
-            <div className="flex justify-between text-2xl">
+            <Divider sx={{mt: 3}} />
+            {/* <div className="flex justify-between text-2xl">
               <h3 className="text-left font-bold">Total:</h3>
               <h3 className="text-left font-bold mr-8">
                 ${totalPrice.toFixed(2)}
               </h3>
-            </div>
-            <h4 className="text-left font-medium text-xl">
-              DELIVERY ADDRESS: {order.deliveryAddress}
-            </h4>
-            <h4 className="text-left font-medium text-xl">
-              CONTACT: {order.contactNumber}
-            </h4>
+            </div> */}
+            <Grid container>
+              <Grid item xs={6}>
+                <Typography sx={{fontSize: printFontSize - 5}}>Total:</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography sx={{fontSize: printFontSize - 5}}>${totalPrice.toFixed(2)}</Typography>
+              </Grid>
+            </Grid>
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Typography sx={{fontSize: printFontSize - 10}}>
+                <strong>DELIVERY ADDRESS:</strong> {order.deliveryAddress}
+              </Typography>
+              <Typography sx={{fontSize: printFontSize - 10}}>
+                <strong>CONTACT:</strong> {order.contactNumber}
+              </Typography>
+            </Box>
             {order.note && (
               <>
                 <div className="h-px bg-black w-full m-auto"></div>
@@ -121,8 +138,8 @@ export const ComponentToPrint = forwardRef(
                 <h4 className="text-xl">{order.note}</h4>
               </>
             )}
-          </div>
-        </div>
+            </Grid>
+        </Box>
       </div>
     );
   },
