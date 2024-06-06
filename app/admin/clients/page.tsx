@@ -5,8 +5,8 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
   Button,
+  Fab,
   Grid,
-  IconButton,
   Menu,
   MenuItem,
   TextField,
@@ -24,7 +24,7 @@ import LoadingModal from '../components/Modals/LoadingModal';
 import { ShadowSection } from '../reports/styled';
 import useDebounce from '@/hooks/useDebounce';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddIcon from '@mui/icons-material/Add';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ErrorComponent from '../components/ErrorComponent';
@@ -32,7 +32,6 @@ import { DropdownItemContainer } from '../orders/styled';
 import SingleFieldUpdate, {
   SingleFieldUpdateProps,
 } from '../components/Modals/SingleFieldUpdate';
-import { infoColor } from '@/app/theme/color';
 import AddClient from '../components/Modals/AddClient';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
 import useCategories from '@/hooks/fetch/useCategories';
@@ -120,33 +119,6 @@ export default function ClientsPage() {
     setBaseClientList([...baseClientList, newClient]);
     setClientList([...clientList, newClient]);
   };
-
-  // const handleFetchAllCategories = async () => {
-  //   try {
-  //     const response = await axios.get(API_URL.CATEGORIES);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       setIsFetching(false);
-  //       return;
-  //     }
-
-  //     setCategoryList(response.data.data);
-  //     setIsFetching(false);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch all categories: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch all categories: ' + error,
-  //     });
-  //     setIsFetching(true);
-  //   }
-  // };
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
@@ -456,26 +428,28 @@ export default function ClientsPage() {
         </Grid>
       </Grid>
       <ShadowSection>
-        <Grid container spacing={1}>
+        <Grid container spacing={1} alignItems="center">
           <Grid item xs={12} md={2.5}>
             {generalUpdate}
           </Grid>
           <Grid item xs={11} md={9}>
             <TextField
               fullWidth
+              variant="filled"
               placeholder="Search by client id or client name"
-              sx={{ mb: 2 }}
+              sx={{ borderRadius: 1 }}
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
           <Grid item xs={1} md={0.5} textAlign="center">
-            <IconButton
-              sx={{ width: 50, height: 40 }}
+            <Fab
+              size="medium"
               onClick={() => setIsAddClientOpen(true)}
+              color="primary"
             >
-              <AddBoxIcon sx={{ color: infoColor, width: 50, height: 50 }} />
-            </IconButton>
+              <AddIcon />
+            </Fab>
           </Grid>
         </Grid>
         {clientList.length > 0 ? (

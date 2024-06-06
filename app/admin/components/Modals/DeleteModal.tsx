@@ -5,7 +5,7 @@ import { BoxModal } from './styled';
 import ErrorIcon from '@mui/icons-material/Error';
 import { errorColor } from '@/app/theme/color';
 import { grey } from '@mui/material/colors';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   targetObj: any;
@@ -83,14 +83,14 @@ export default function DeleteModal({
             >
               Cancel
             </Button>
-            <LoadingButtonStyles
-              color={errorColor}
+            <LoadingButton
+              color="error"
               loading={isDeleting}
               onClick={handleDeleteOrder}
               variant="contained"
             >
               DELETE
-            </LoadingButtonStyles>
+            </LoadingButton>
           </Box>
         </BoxModal>
       </Modal>

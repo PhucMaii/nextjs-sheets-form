@@ -11,8 +11,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
-import { infoColor } from '@/app/theme/color';
 import AutoCompleteAddress from '../AutoCompleteAddress';
 import { Category, SubCategory } from '@prisma/client';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
@@ -20,6 +18,7 @@ import StatusText from '../StatusText';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import axios from 'axios';
 import { Notification, UserType } from '@/app/utils/type';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   categories: Category[];
@@ -133,14 +132,13 @@ export default function AddClient({
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Add Client</Typography>
-          <LoadingButtonStyles
+          <LoadingButton
             variant="contained"
             loading={isAdding}
             onClick={handleAddClient}
-            color={infoColor}
           >
             ADD
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
         <Divider />
         <Typography variant="h5" fontWeight="bold">
@@ -152,6 +150,7 @@ export default function AddClient({
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
+              label="Client Id"
               value={newClient.clientId}
               onChange={(e) => handleOnChangeClient('clientId', e.target.value)}
               placeholder="Enter client id"
@@ -163,6 +162,7 @@ export default function AddClient({
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
+              label="Client Name"
               value={newClient.clientName}
               onChange={(e) =>
                 handleOnChangeClient('clientName', e.target.value)
@@ -176,6 +176,7 @@ export default function AddClient({
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
+              label="Contact Number"
               value={newClient.contactNumber}
               onChange={(e) =>
                 handleOnChangeClient('contactNumber', e.target.value)

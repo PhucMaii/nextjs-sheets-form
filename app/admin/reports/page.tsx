@@ -503,6 +503,7 @@ export default function ReportPage() {
           <>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
+                label="Date"
                 value={dayjs(datePicker)}
                 onChange={handleDateChange}
               />

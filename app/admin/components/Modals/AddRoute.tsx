@@ -14,7 +14,6 @@ import {
   Checkbox,
 } from '@mui/material';
 import { BoxModal } from './styled';
-import { infoColor } from '@/app/theme/color';
 import ModalHead from '@/app/lib/ModalHead';
 import { Notification, IRoutes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -114,9 +113,11 @@ export default function AddRoute({
           heading="Add Route"
           onClick={addRoute}
           buttonProps={{
-            color: infoColor,
-            variant: 'contained',
             loading: isAdding,
+            disabled:
+              newRoute.driverId === -1 ||
+              newRoute.name.trim() === '' ||
+              selectedClients.length === 0,
           }}
           buttonLabel="ADD"
         />

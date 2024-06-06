@@ -38,7 +38,6 @@ import {
 import { limitOrderHour } from '../../../lib/constant';
 import moment from 'moment';
 import { infoColor } from '@/app/theme/color';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -216,15 +215,14 @@ export default function AddOrder({
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Add Order</Typography>
-          <LoadingButtonStyles
+          <LoadingButton
             variant="contained"
             disabled={itemList.length === 0}
             loading={isButtonLoading}
             onClick={handleSubmit}
-            color={infoColor}
           >
             ADD
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
         <Divider />
         <Box overflow="auto" maxHeight="70vh">

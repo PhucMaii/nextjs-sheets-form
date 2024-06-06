@@ -12,10 +12,9 @@ import {
 } from '@mui/material';
 import { BoxModal } from './styled';
 import { UserType } from '@/app/utils/type';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
-import { infoColor } from '@/app/theme/color';
 import { Category } from '@prisma/client';
 import AutoCompleteAddress from '../AutoCompleteAddress';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   client: UserType;
@@ -64,9 +63,8 @@ export default function EditClient({
             alignItems="center"
           >
             <Typography variant="h4">Edit Client</Typography>
-            <LoadingButtonStyles
+            <LoadingButton
               variant="contained"
-              color={infoColor}
               onClick={() =>
                 handleUpdateClient(client.id, {
                   clientId: updatedClient.clientId,
@@ -78,7 +76,7 @@ export default function EditClient({
               }
             >
               SAVE
-            </LoadingButtonStyles>
+            </LoadingButton>
           </Box>
           <Divider />
           <Grid container spacing={2} alignItems="center">
@@ -87,6 +85,7 @@ export default function EditClient({
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
+                label="Client Id"
                 value={updatedClient.clientId}
                 onChange={(e) =>
                   handleOnChangeClient('clientId', e.target.value)
@@ -99,6 +98,7 @@ export default function EditClient({
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
+                label="Client Name"
                 fullWidth
                 value={updatedClient.clientName}
                 onChange={(e) =>
@@ -133,6 +133,7 @@ export default function EditClient({
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
+                label="Contact Number"
                 fullWidth
                 value={updatedClient.contactNumber}
                 onChange={(e) =>

@@ -29,12 +29,12 @@ import { formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
 import { Notification, OrderedItems } from '@/app/utils/type';
-import { errorColor, infoColor } from '@/app/theme/color';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import { errorColor } from '@/app/theme/color';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../UpdateChoiceSelection';
 import { SubCategory } from '@prisma/client';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   order: Order;
@@ -320,15 +320,14 @@ export default function EditReportOrder({
                 </FormControl>
               </Grid>
               <Grid item xs={12} textAlign="right">
-                <LoadingButtonStyles
+                <LoadingButton
                   variant="contained"
                   disabled={itemList.length === 0}
                   loading={isSubmitting}
                   onClick={handleUpdateOrder}
-                  color={infoColor}
                 >
                   SAVE
-                </LoadingButtonStyles>
+                </LoadingButton>
               </Grid>
             </Grid>
             <Divider textAlign="center" sx={{ my: 3 }}>
@@ -406,7 +405,7 @@ export default function EditReportOrder({
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <Button fullWidth variant="outlined" onClick={addNewItem}>
+                <Button fullWidth variant="contained" onClick={addNewItem}>
                   + Add
                 </Button>
               </Grid>
@@ -470,14 +469,13 @@ export default function EditReportOrder({
                   );
                 })}
               <Grid item xs={12} textAlign="right">
-                <LoadingButtonStyles
+                <LoadingButton
                   variant="contained"
-                  color={infoColor}
                   onClick={handleUpdateItems}
                   loading={isSubmitting}
                 >
                   Save
-                </LoadingButtonStyles>
+                </LoadingButton>
               </Grid>
             </Grid>
           </Box>

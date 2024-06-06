@@ -24,10 +24,10 @@ import {
   ScheduledOrder,
 } from '@/app/utils/type';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import { errorColor, infoColor } from '@/app/theme/color';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
+import { errorColor } from '@/app/theme/color';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   order: ScheduledOrder;
@@ -280,14 +280,13 @@ export default function EditScheduleOrder({
                 })}
             </Select>
             <Box display="flex" justifyContent="right">
-              <LoadingButtonStyles
+              <LoadingButton
                 variant="contained"
-                color={infoColor}
                 onClick={switchRoute}
                 loading={isSubmitting}
               >
                 Save
-              </LoadingButtonStyles>
+              </LoadingButton>
             </Box>
           </Box>
           <Divider textAlign="center" sx={{ mb: 1 }}>
@@ -344,7 +343,12 @@ export default function EditScheduleOrder({
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <Button fullWidth variant="outlined" onClick={addNewItem}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="info"
+                  onClick={addNewItem}
+                >
                   + Add
                 </Button>
               </Grid>
@@ -393,14 +397,13 @@ export default function EditScheduleOrder({
                   );
                 })}
               <Grid item xs={12} textAlign="right">
-                <LoadingButtonStyles
+                <LoadingButton
                   variant="contained"
-                  color={infoColor}
                   onClick={updateItems}
                   loading={isSubmitting}
                 >
                   Save
-                </LoadingButtonStyles>
+                </LoadingButton>
               </Grid>
             </Grid>
           </Box>
