@@ -265,7 +265,7 @@ export default function Sidebar({ children }: PropTypes) {
               setNotification={setNotification}
             />
           )}
-          <Box display="flex" width="100%" flexDirection="column" m={2} gap={2}>
+          <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
             {children}
           </Box>
         </Box>

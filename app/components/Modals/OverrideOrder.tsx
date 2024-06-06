@@ -3,11 +3,10 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import { Item, Order } from '@/app/admin/orders/page';
 import { BoxModal } from '../../admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
-import { infoColor } from '@/app/theme/color';
 import { Notification } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import LoadingButtonStyles from '../LoadingButtonStyles';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   currentItems: Item[];
@@ -115,15 +114,14 @@ export default function OverrideOrder({
             </Button>
           </Grid>
           <Grid item xs={12} md={6}>
-            <LoadingButtonStyles
+            <LoadingButton
               fullWidth
               loading={isOverriding}
               onClick={handleOverrideOrder}
               variant="contained"
-              color={infoColor}
             >
               Override
-            </LoadingButtonStyles>
+            </LoadingButton>
           </Grid>
         </Grid>
       </BoxModal>

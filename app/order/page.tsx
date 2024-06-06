@@ -1,19 +1,20 @@
 'use client';
 import React, { MouseEvent, useEffect, useState } from 'react';
 import { Notification } from '@/app/utils/type';
-import Button from '@/app/components/Button';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import Snackbar from '@/app/components/Snackbar/SnackbarPopup';
-import Input from '@/app/components/Input';
 import FadeIn from '@/app/HOC/FadeIn';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Box, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
-import { grey } from '@mui/material/colors';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
 import { limitOrderHour } from '../lib/constant';
@@ -22,6 +23,8 @@ import { Order } from '../admin/orders/page';
 import Sidebar from '../components/Sidebar/Sidebar';
 import Navbar from '../components/Navbar';
 import useSWR from 'swr';
+import NotificationPopup from '../admin/components/Notification';
+import { LoadingButton } from '@mui/lab';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -174,12 +177,13 @@ export default function OrderForm() {
   return (
     <FadeIn>
       <Sidebar>
-        {/* <AuthenGuard> */}
-        <Snackbar
-          open={notification.on}
+        <NotificationPopup
+          notification={notification}
           onClose={() => setNotification({ ...notification, on: false })}
-          type={notification.type}
-          message={notification.message}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
         />
         <ChangePasswordModal
           isOpen={isOpenSecurityModal}
@@ -196,68 +200,105 @@ export default function OrderForm() {
             setNotification={setNotification}
           />
         )}
-        <div className="bg-white w-full mx-auto pb-6">
+        <div className="w-full mx-auto pb-6">
           {smDown && <Navbar />}
           <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
             <h4 className="text-center font-bold text-4xl px-8 mb-8">
               {clientName}
             </h4>
             <Box mb={4}>
-              <label className="block text-red-700 text-sm font-bold mb-2">
+              <Typography fontWeight="bold" variant="subtitle1" color="error">
                 DELIVERY DATE
-              </label>
+              </Typography>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   disablePast
                   minDate={minDate}
                   value={dayjs(deliveryDate)}
                   onChange={handleDateChange}
-                  sx={{
-                    width: '100%',
-                    height: '0.1%',
-                    border: `1px solid ${grey[600]}`,
-                    borderRadius: 2,
-                  }}
+                  sx={{ width: '100%' }}
                 />
               </LocalizationProvider>
             </Box>
-            {itemList.length > 0 &&
-              itemList.map((item: any, index: number) => {
-                return (
-                  <Input<string | number>
-                    key={index}
-                    label={`${item.name} - $${
-                      item.price === 0
-                        ? ' Variable price'
-                        : item.price.toFixed(2)
-                    }`}
-                    type="number"
-                    value={item.quantity}
-                    className="border-neutral-400 h-full mb-4"
-                    onChange={(e) => handleChangeItem(e, item)}
-                    placeholder={`Enter ${item.name} here...`}
-                  />
-                );
-              })}
-            <Input<string>
-              label="NOTE"
-              multiline
-              value={note}
-              className="border-neutral-400 h-full mb-4"
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Writing your note here..."
-            />
-            <Button
+            <Box display="flex" flexDirection="column" gap={4}>
+              {itemList.length > 0 &&
+                itemList.map((item: any, index: number) => {
+                  return (
+                    // <Input<string | number>
+                    //   key={index}
+                    //   label={`${item.name} - $${
+                    //     item.price === 0
+                    //       ? ' Variable price'
+                    //       : item.price.toFixed(2)
+                    //   }`}
+                    //   type="number"
+                    //   value={item.quantity}
+                    //   className="border-neutral-400 h-full mb-4"
+                    //   onChange={(e) => handleChangeItem(e, item)}
+                    //   placeholder={`Enter ${item.name} here...`}
+                    // />
+                    <Box
+                      key={index}
+                      display="flex"
+                      flexDirection="column"
+                      gap={1}
+                    >
+                      <Typography fontWeight="bold" variant="subtitle1">
+                        {`${item.name} - $${
+                          item.price === 0
+                            ? ' Variable price'
+                            : item.price.toFixed(2)
+                        }`}
+                      </Typography>
+                      <TextField
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => handleChangeItem(e, item)}
+                        placeholder={`Enter ${item.name} here...`}
+                      />
+                    </Box>
+                  );
+                })}
+              {/* <Input<string>
+                label="NOTE"
+                multiline
+                value={note}
+                className="border-neutral-400 h-full mb-4"
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Writing your note here..."
+              /> */}
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="subtitle1">NOTE</Typography>
+                <TextField
+                  multiline
+                  maxRows={4}
+                  value={note}
+                  className="border-neutral-400 h-full mb-4"
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Writing your note here..."
+                />
+              </Box>
+            </Box>
+            {/* <Button
               color="blue"
               label="Submit"
               onClick={handleSubmit}
               width="full"
               loadingButton
               isLoading={isButtonLoading}
-            />
+            /> */}
+            <LoadingButton
+              variant="contained"
+              onClick={handleSubmit}
+              type="submit"
+              loading={isButtonLoading}
+              fullWidth
+              sx={{ mt: 2 }}
+            >
+              Submit
+            </LoadingButton>
           </form>
         </div>
-        {/* </AuthenGuard> */}
       </Sidebar>
     </FadeIn>
   );

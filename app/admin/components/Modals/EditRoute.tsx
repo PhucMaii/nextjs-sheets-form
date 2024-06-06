@@ -14,7 +14,6 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { infoColor } from '@/app/theme/color';
 import { Driver } from '@prisma/client';
 import { IUserRoutes, Notification, IRoutes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -138,8 +137,6 @@ export default function EditRoute({
           heading="Edit Route"
           onClick={updateRoute}
           buttonProps={{
-            color: infoColor,
-            variant: 'contained',
             loading: isUpdating,
           }}
           buttonLabel="EDIT"

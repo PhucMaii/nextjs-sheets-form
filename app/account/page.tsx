@@ -12,14 +12,13 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { ShadowSection } from '../admin/reports/styled';
-import { infoColor } from '../theme/color';
 import { Notification } from '../utils/type';
 import axios from 'axios';
 import { API_URL } from '../utils/enum';
 import { useSession } from 'next-auth/react';
-import LoadingButtonStyles from '../components/LoadingButtonStyles';
-import SnackbarPopup from '../components/Snackbar/SnackbarPopup';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { LoadingButton } from '@mui/lab';
+import NotificationPopup from '../admin/components/Notification';
 
 export default function AccountPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
@@ -189,10 +188,14 @@ export default function AccountPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
-      <SnackbarPopup
+      {/* <SnackbarPopup
         open={notification.on}
         type={notification.type}
         message={notification.message}
+        onClose={() => setNotification({ ...notification, on: false })}
+      /> */}
+      <NotificationPopup
+        notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
       />
       <Typography variant="h4">Account</Typography>
@@ -210,14 +213,14 @@ export default function AccountPage() {
           />
         </Box>
         <Box display="flex" justifyContent="right">
-          <LoadingButtonStyles
+          <LoadingButton
+            variant="contained"
             onClick={handleUpdateEmail}
-            color={infoColor}
             loading={isSubmitting}
             fullWidth={smDown}
           >
             Save
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
       </ShadowSection>
       <ShadowSection display="flex" flexDirection="column" gap={2} mt={2}>
@@ -294,14 +297,14 @@ export default function AccountPage() {
           />
         </Box>
         <Box display="flex" justifyContent="right">
-          <LoadingButtonStyles
-            color={infoColor}
+          <LoadingButton
+            variant="contained"
             loading={isSubmitting}
             fullWidth={smDown}
             onClick={handleUpdatePassword}
           >
             Update
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
       </ShadowSection>
       {/* </AuthenGuard> */}

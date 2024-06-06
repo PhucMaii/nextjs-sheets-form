@@ -36,16 +36,16 @@ export default async function reArrangement(
           day: scheduledOrder.day,
         },
         include: {
-          user: true
-        }
+          user: true,
+        },
       });
 
       const newItems = scheduledOrder.items.map((item: any) => {
         return {
           name: item.name,
           price: item.price,
-          quantity: item.quantity, 
-          scheduledOrderId: scheduledOrder.id 
+          quantity: item.quantity,
+          scheduledOrderId: scheduledOrder.id,
         };
       });
 
@@ -53,7 +53,7 @@ export default async function reArrangement(
         data: newItems,
       });
 
-      returnData.push({...updatedScheduleOrder, items: newItems});
+      returnData.push({ ...updatedScheduleOrder, items: newItems });
     }
 
     return res.status(200).json({

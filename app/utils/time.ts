@@ -56,7 +56,7 @@ export const generateMonthRange = () => {
   const today = new Date();
   const month = today.getMonth();
   const year = today.getFullYear();
-  
+
   const firstDayOfThisMonth = new Date(year, month, 1);
   const firstDayOfNextMonth = new Date(year, month + 1, 1);
   const lastDayOfThisMonth = new Date(firstDayOfNextMonth);

@@ -3,6 +3,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  Button,
   Divider,
   Grid,
   IconButton,
@@ -15,7 +16,6 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import StatusText, { COLOR_TYPE } from '../admin/components/StatusText';
-import Button from './Button';
 import { Item, Order } from '../admin/orders/page';
 import { ORDER_STATUS } from '../utils/enum';
 import { blue, grey } from '@mui/material/colors';
@@ -127,7 +127,7 @@ export default function OrderAccordion({
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Button label={order.clientName} color="blue" width="auto" />
+              <Button variant="contained">{order.clientName}</Button>
             </Grid>
             <Grid item xs={12} md={3} textAlign="center">
               <Typography fontWeight="bold" variant="subtitle1">

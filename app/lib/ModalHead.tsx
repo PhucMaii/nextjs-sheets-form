@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
-import LoadingButtonStyles from '../components/LoadingButtonStyles';
-import { infoColor } from '../theme/color';
+import { LoadingButton } from '@mui/lab';
 
 interface IModalHead {
   heading: string;
@@ -19,16 +18,9 @@ export default function ModalHead({
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center">
       <Typography variant="h4">{heading}</Typography>
-      <LoadingButtonStyles
-        variant="contained"
-        // disabled={itemList.length === 0}
-        // loading={isButtonLoading
-        onClick={onClick}
-        color={infoColor}
-        {...buttonProps}
-      >
+      <LoadingButton variant="contained" onClick={onClick} {...buttonProps}>
         {buttonLabel}
-      </LoadingButtonStyles>
+      </LoadingButton>
     </Box>
   );
 }

@@ -12,6 +12,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  Button,
   Checkbox,
   Divider,
   Grid,
@@ -25,7 +26,6 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import Button from '@/app/components/Button';
 import { grey } from '@mui/material/colors';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Item, Order } from '../orders/page';
@@ -323,11 +323,12 @@ const OrderAccordion = ({
             </Grid>
             <Grid item xs={12} md={6}>
               <Button
-                label={order.clientName}
-                color="blue"
+                color="info"
+                variant="contained"
                 onClick={handleOpenClientModal}
-                width="auto"
-              />
+              >
+                {order.clientName}
+              </Button>
             </Grid>
             <Grid item xs={12} md={3} textAlign="center">
               <Typography fontWeight="bold" variant="subtitle1">

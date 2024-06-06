@@ -8,8 +8,7 @@ import {
 } from '@mui/material';
 import React, { memo, useState } from 'react';
 import { BoxModal } from './styled';
-import LoadingButtonStyles from '@/app/components/LoadingButtonStyles';
-import { infoColor } from '@/app/theme/color';
+import { LoadingButton } from '@mui/lab';
 
 export interface SingleFieldUpdateProps {
   title: string;
@@ -53,15 +52,14 @@ const SingleFieldUpdate = ({
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">{title}</Typography>
-          <LoadingButtonStyles
+          <LoadingButton
             variant="contained"
             disabled={value === ''}
             loading={isLoading}
             onClick={handleSavingUpdate}
-            color={infoColor}
           >
             UPDATE
-          </LoadingButtonStyles>
+          </LoadingButton>
         </Box>
         <Divider />
         <Typography variant="h6">{label}</Typography>
