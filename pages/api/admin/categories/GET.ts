@@ -6,7 +6,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     // Get all categories
-    const cateogries = await prisma.category.findMany();
+    const cateogries = await prisma.category.findMany({
+      include: {
+        users: true
+      }
+    });
 
     return res.status(200).json({
       data: cateogries,

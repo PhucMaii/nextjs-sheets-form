@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { ModalProps } from './type';
-import { BoxModal } from './styled';
+import { ModalProps } from '../type';
+import { BoxModal } from '../styled';
 import {
   Box,
   Divider,
@@ -11,10 +11,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import AutoCompleteAddress from '../AutoCompleteAddress';
+import AutoCompleteAddress from '../../AutoCompleteAddress';
 import { Category, SubCategory } from '@prisma/client';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
-import StatusText from '../StatusText';
+import StatusText from '../../StatusText';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import axios from 'axios';
 import { Notification, UserType } from '@/app/utils/type';

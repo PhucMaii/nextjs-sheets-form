@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { memo, useState } from 'react';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import { LoadingButton } from '@mui/lab';
 
 export interface SingleFieldUpdateProps {

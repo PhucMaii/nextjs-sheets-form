@@ -31,8 +31,8 @@ import ErrorComponent from '../components/ErrorComponent';
 import { DropdownItemContainer } from '../orders/styled';
 import SingleFieldUpdate, {
   SingleFieldUpdateProps,
-} from '../components/Modals/SingleFieldUpdate';
-import AddClient from '../components/Modals/AddClient';
+} from '../components/Modals/edit/SingleFieldUpdate';
+import AddClient from '../components/Modals/add/AddClient';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
 import useCategories from '@/hooks/fetch/useCategories';
 

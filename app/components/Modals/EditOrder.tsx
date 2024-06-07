@@ -3,7 +3,7 @@ import { BoxModal } from '@/app/admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { infoColor } from '@/app/theme/color';
-import { Item, Notification } from '@/app/utils/type';
+import { IItem, Notification } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -30,8 +30,8 @@ export default function EditOrder({
   setNotification,
   handleUpdateOrderUI,
 }: PropTypes) {
-  const [itemList, setItemList] = useState<Item[]>(
-    (order.items as Item[]) || [],
+  const [itemList, setItemList] = useState<IItem[]>(
+    (order.items as IItem[]) || [],
   );
   const [isOverriding, setIsOverriding] = useState<boolean>(false);
   const [note, setNote] = useState<string>(order.note || '');
@@ -39,7 +39,7 @@ export default function EditOrder({
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const handleChangeItem = (e: any, itemId: number) => {
-    const newItemList = itemList.map((item: Item) => {
+    const newItemList = itemList.map((item: IItem) => {
       if (item.id === itemId) {
         return { ...item, quantity: +e.target.value };
       }
@@ -114,7 +114,7 @@ export default function EditOrder({
         <Box overflow="auto" maxHeight="70vh">
           <Grid container rowGap={3}>
             {itemList.length > 0 &&
-              itemList.map((item: Item) => {
+              itemList.map((item: IItem) => {
                 return (
                   <Grid key={item.id} container item spacing={1}>
                     <Grid item xs={12}>

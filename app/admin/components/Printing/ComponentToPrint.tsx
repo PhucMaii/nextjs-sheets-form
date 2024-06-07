@@ -109,12 +109,6 @@ export const ComponentToPrint = forwardRef(
               <TableBody>{orderDetailsTemplate}</TableBody>
             </Table>
             <Divider sx={{mt: 3}} />
-            {/* <div className="flex justify-between text-2xl">
-              <h3 className="text-left font-bold">Total:</h3>
-              <h3 className="text-left font-bold mr-8">
-                ${totalPrice.toFixed(2)}
-              </h3>
-            </div> */}
             <Grid container>
               <Grid item xs={6}>
                 <Typography sx={{fontSize: printFontSize - 5}}>Total:</Typography>

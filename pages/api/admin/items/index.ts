@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import GET from "./GET";
+import DELETE from "./DELETE";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -7,6 +8,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const response = await GET(req, res);
             return response;
         };
+
+        if (req.method === 'DELETE') {
+            const response = await DELETE(req, res);
+            return response;
+        }
 
         return res.status(404).json({
             error: 'Your method is not supported'

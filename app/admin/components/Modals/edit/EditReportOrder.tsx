@@ -20,11 +20,11 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Item, Order } from '../../orders/page';
+import { Item, Order } from '../../../orders/page';
 import { formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
@@ -32,7 +32,7 @@ import { Notification, OrderedItems } from '@/app/utils/type';
 import { errorColor } from '@/app/theme/color';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import UpdateChoiceSelection from '../UpdateChoiceSelection';
+import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { SubCategory } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 

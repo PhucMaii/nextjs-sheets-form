@@ -15,9 +15,9 @@ import { Notification, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import axios from 'axios';
-import EditScheduleOrder from '../Modals/EditScheduleOrder';
+import EditScheduleOrder from '../Modals/edit/EditScheduleOrder';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
-import DeleteScheduleOrder from '../Modals/DeleteScheduleOrder';
+import DeleteScheduleOrder from '../Modals/delete/DeleteScheduleOrder';
 
 interface PropTypes {
   clientOrders: ScheduledOrder[];

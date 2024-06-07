@@ -1,7 +1,6 @@
 import { greyBackground } from '@/app/theme/color';
 import {
   Box,
-  Drawer,
   IconButton,
   List,
   ListItemText,
@@ -24,7 +23,7 @@ interface IProps {
   children: any;
 }
 
-const drawerWidth = 250;
+const drawerWidth = 300;
 export default function CategorySidebar({
   currentCategory,
   categories,
@@ -42,10 +41,14 @@ export default function CategorySidebar({
         </IconButton>
       </Box>}
       <Box display="flex">
-        <Slide direction="right" in={isNavOpen} mountOnEnter unmountOnExit>
+        <Slide 
+          direction="right" 
+          in={isNavOpen} 
+          mountOnEnter 
+          unmountOnExit
+        >
           <Box
             sx={{
-              width: drawerWidth,
               backgroundColor: 'white',
               m: '0 !important',
               boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
@@ -53,7 +56,7 @@ export default function CategorySidebar({
             overflow="auto"
             maxHeight="100vh"
           >
-            <Box display="flex" gap={1} m={2} alignItems="center">
+            <Box display="flex" gap={1} m={2} flexWrap="wrap" alignItems="center">
               <IconButton onClick={() => setIsNavOpen(false)}>
                 <ArrowBackIcon />
               </IconButton>
@@ -62,7 +65,7 @@ export default function CategorySidebar({
             <List
               sx={{
                 width: '100%',
-                maxWidth: 300,
+                maxWidth: drawerWidth,
                 bgColor: greyBackground,
                 mt: 2,
               }}

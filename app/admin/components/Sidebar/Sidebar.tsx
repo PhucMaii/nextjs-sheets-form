@@ -154,7 +154,6 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         <Box display="flex">
           <Drawer
             sx={{
-              width: drawerWidth,
               flexShrink: 0,
               '& .MuiDrawer-paper': {
                 width: drawerWidth,

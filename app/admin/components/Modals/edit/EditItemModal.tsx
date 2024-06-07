@@ -7,12 +7,12 @@ import {
   Typography,
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import { Notification, OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import { Item, Order } from '../../orders/page';
-import { ModalProps } from './type';
+import { Item, Order } from '../../../orders/page';
+import { ModalProps } from '../type';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {

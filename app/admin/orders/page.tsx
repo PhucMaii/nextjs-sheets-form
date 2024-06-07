@@ -36,7 +36,7 @@ import { infoColor, successColor } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
 import useDebounce from '@/hooks/useDebounce';
 import OrderAccordion from '../components/OrderAccordion';
-import AddOrder from '../components/Modals/AddOrder';
+import AddOrder from '../components/Modals/add/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';

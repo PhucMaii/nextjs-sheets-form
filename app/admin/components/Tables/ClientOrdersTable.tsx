@@ -15,13 +15,13 @@ import React, { Dispatch, SetStateAction, memo, useState } from 'react';
 import StatusText from '../StatusText';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
-import EditReportOrder from '../Modals/EditReportOrder';
+import EditReportOrder from '../Modals/edit/EditReportOrder';
 import { Notification } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import axios from 'axios';
 import LoadingModal from '../Modals/LoadingModal';
-import DeleteModal from '../Modals/DeleteModal';
+import DeleteModal from '../Modals/delete/DeleteModal';
 import { SubCategory } from '@prisma/client';
 
 interface PropTypes {

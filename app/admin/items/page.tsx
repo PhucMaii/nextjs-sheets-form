@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import NotificationPopup from '../components/Notification';
-import { Notification } from '@/app/utils/type';
+import { ICategory, IItem, Notification } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import useCategories from '@/hooks/fetch/useCategories';
 import { Category, Item } from '@prisma/client';
 import CategorySidebar from '../components/Sidebar/CategorySidebar';
 import EditIcon from '@mui/icons-material/Edit';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import { fetchData } from '@/app/utils/db';
 import {
   Box,
@@ -18,6 +19,10 @@ import {
   Typography,
 } from '@mui/material';
 import useDebounce from '@/hooks/useDebounce';
+import ItemsTable from '../components/Tables/ItemsTable';
+import { ShadowSection } from '../reports/styled';
+import { SplashScreen } from '@/app/HOC/AuthenGuard';
+import axios from 'axios';
 
 export default function ItemPage() {
   const [isCategorySidebarOpen, setIsCategorySidebarOpen] =
@@ -32,7 +37,7 @@ export default function ItemPage() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   const { categories, mutate } = useCategories();
-  const [currentCategory, setCurrentCategory] = useState<Category>(
+  const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories[0],
   );
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -44,6 +49,7 @@ export default function ItemPage() {
   }, [categories, currentCategory]);
 
   const fetchItems = async () => {
+    setIsFetching(true);
     const itemData = await fetchData(
       `${API_URL.ITEM}?categoryId=${currentCategory.id}`,
       setNotification,
@@ -52,7 +58,47 @@ export default function ItemPage() {
     setIsFetching(false);
   };
 
-  const handleSwitchCurrentCategory = (newCategory: Category) => {
+  const handleDeleteItem = async (targetItem: IItem) => {
+    try {
+      const response = await axios.delete(API_URL.ITEM, {
+        data: {removedId: targetItem.id}
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        return;
+      };
+
+      handleDeleteItemUI(targetItem);
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      })
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error
+      })
+    }
+  }
+
+  const handleDeleteItemUI = (targetItem: IItem) => {
+    const newItems = items.filter((item: IItem) => {
+      return item.id !== targetItem.id;
+    });
+
+    setItems(newItems);
+  }
+
+  const switchCurrentCategory = (newCategory: Category) => {
     setCurrentCategory(newCategory);
   };
 
@@ -65,15 +111,18 @@ export default function ItemPage() {
       <CategorySidebar
         currentCategory={currentCategory}
         categories={categories}
-        handleChangeTab={handleSwitchCurrentCategory}
+        handleChangeTab={switchCurrentCategory}
         isNavOpen={isCategorySidebarOpen}
         setIsNavOpen={setIsCategorySidebarOpen}
       >
         <Grid container alignItems="center">
           <Grid item xs={12} md={10}>
             <Box display="flex" gap={1} alignItems="center">
-              <Typography variant="h6">{currentCategory?.name}</Typography>
-              <IconButton color="primary">
+              <Typography variant="h6">
+                {currentCategory?.name} ( {currentCategory?.users?.length}{' '}
+                clients )
+              </Typography>
+              <IconButton>
                 <EditIcon />
               </IconButton>
             </Box>
@@ -84,18 +133,27 @@ export default function ItemPage() {
             </Button>
           </Grid>
         </Grid>
-        <Grid container>
-          <Grid item xs={12} md={8}>
-            <TextField
-              fullWidth
-              variant="filled"
-              label="Search orders"
-              placeholder="Search by invoice id, client id, client name or status"
-              value={searchKeywords}
-              onChange={(e) => setSearchKeywords(e.target.value)}
-            />
+        <ShadowSection sx={{ mt: 2 }}>
+          <Grid container alignItems="center" columnSpacing={1}>
+            <Grid item xs={12} md={11}>
+              <TextField
+                fullWidth
+                variant="standard"
+                label="Search items"
+                placeholder="Search by name, price, or subcategory"
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
+                sx={{ borderRadius: 4 }}
+              />
+            </Grid>
+            <Grid item xs={12} md={1}>
+              <IconButton size="large">
+                <AddBoxIcon fontSize="large" color="primary" />
+              </IconButton>
+            </Grid>
           </Grid>
-        </Grid>
+          {isFetching ? <SplashScreen /> : <ItemsTable items={items} handleDeleteItem={handleDeleteItem} />}
+        </ShadowSection>
       </CategorySidebar>
     </Sidebar>
   );

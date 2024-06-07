@@ -21,8 +21,8 @@ import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
 import { Category, SubCategory } from '@prisma/client';
 import axios from 'axios';
-import DeleteModal from '../Modals/DeleteModal';
-import EditClient from '../Modals/EditClient';
+import DeleteModal from '../Modals/delete/DeleteModal';
+import EditClient from '../Modals/edit/EditClient';
 
 interface PropTypes {
   categories: Category[];

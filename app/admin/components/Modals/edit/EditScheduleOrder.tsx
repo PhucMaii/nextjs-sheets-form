@@ -14,8 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
-import { BoxModal } from './styled';
-import UpdateChoiceSelection from '../UpdateChoiceSelection';
+import { BoxModal } from '../styled';
+import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import {
   Notification,

@@ -20,6 +20,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         const items = await prisma.item.findMany({
             where: {
                 categoryId: Number(categoryId)
+            },
+            include: {
+                subCategory: true
             }
         });
 
