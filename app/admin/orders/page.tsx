@@ -216,9 +216,9 @@ export default function Orders() {
       generateOrderData(newOrderData);
     } else {
       setIsSearching(false);
-      if (baseOrderData.length > 0) {
-        generateOrderData();
-      }
+      // if (baseOrderData.length > 0) {
+      //   generateOrderData();
+      // }
     }
   }, [debouncedKeywords, baseOrderData]);
 

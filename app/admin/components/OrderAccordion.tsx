@@ -330,14 +330,14 @@ const OrderAccordion = ({
                 {order.clientName}
               </Button>
             </Grid>
-            <Grid item xs={12} md={3} textAlign="center">
+            <Grid item xs={12} md={3} textAlign="center" alignItems="center">
               <Typography fontWeight="bold" variant="subtitle1">
                 Items: {totalQuantity}
               </Typography>
               <Typography fontWeight="bold" variant="subtitle1">
                 Total: ${order.totalPrice.toFixed(2)}
               </Typography>
-              <Box display="flex" gap={2} alignItems="center">
+              <Box display="flex" gap={2} alignItems="center" justifyContent="center">
                 <Typography fontWeight="bold" variant="subtitle1">
                   Delivery Date: {order.deliveryDate}
                 </Typography>

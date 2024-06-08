@@ -20,6 +20,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const updatedOrderList: any = [];
 
     for (const scheduleOrder of scheduleOrderList) {
+      if (scheduleOrder.totalPrice === 0) {
+        await pusherServer.trigger(
+          'admin-schedule-order',
+          'pre-order',
+          scheduleOrder,
+        );
+        console.log({zeroTotalPrice: scheduleOrder});
+        continue;
+      }
       // Check has user order for today, if yes then skip that client
       const hasClientOrder = await checkHasClientOrder(
         scheduleOrder.user.id,
@@ -31,15 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           'pre-order',
           hasClientOrder,
         );
-        continue;
-      }
-
-      if (scheduleOrder.totalPrice === 0) {
-        await pusherServer.trigger(
-          'admin-schedule-order',
-          'pre-order',
-          scheduleOrder,
-        );
+        console.log({alreadyOrder: scheduleOrder});
         continue;
       }
 
@@ -60,6 +61,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       updatedOrderList.push(newOrder);
 
       await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
+      console.log({successful: scheduleOrder})
     }
 
     return res.status(201).json({
