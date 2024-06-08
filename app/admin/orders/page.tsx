@@ -115,7 +115,7 @@ export default function Orders() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const { clientList } = useClients();
-  const { subcategories } = useSubCategories();
+  const { subCategories } = useSubCategories();
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -636,7 +636,7 @@ export default function Orders() {
                       handleUpdatePriceUI={handleUpdatePriceUI}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
-                      subcategories={subcategories || []}
+                      subcategories={subCategories || []}
                     />
                   );
                 }}

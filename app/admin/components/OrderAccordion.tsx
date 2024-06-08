@@ -35,7 +35,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Notification, OrderedItems } from '@/app/utils/type';
-import EditItemModal from './Modals/edit/EditItemModal';
+import EditItemModal from './Modals/edit/EditOrderItem';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
 import EditPrice from './Modals/edit/EditPrice';

@@ -103,7 +103,7 @@ export default function ReportPage() {
   const currentDate = convertDeliveryDateStringToDate(datePicker);
   const { routes, mutate } = useRoutes(days[currentDate.getDay()]);
   const { clientList } = useClients();
-  const { subcategories } = useSubCategories();
+  const { subCategories } = useSubCategories();
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');
@@ -639,7 +639,7 @@ export default function ReportPage() {
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               handleSelectAll={handleSelectAll}
-              subCategories={subcategories}
+              subCategories={subCategories}
             />
           ) : (
             <ErrorComponent errorText="No Order Available" />

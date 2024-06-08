@@ -168,7 +168,13 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
           >
             {content}
           </Drawer>
-          <Box display="flex" width="100%" flexDirection="column" m={noMargin ? 0 : 2} gap={2}>
+          <Box
+            display="flex"
+            width="100%"
+            flexDirection="column"
+            m={noMargin ? 0 : 2}
+            gap={2}
+          >
             {printComponents}
             {children}
           </Box>
@@ -196,7 +202,13 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         >
           {content}
         </Drawer>
-        <Box display="flex" width="100%" flexDirection="column" m={noMargin ? 0 : 2} gap={2}>
+        <Box
+          display="flex"
+          width="100%"
+          flexDirection="column"
+          m={noMargin ? 0 : 2}
+          gap={2}
+        >
           {printComponents}
           {children}
         </Box>

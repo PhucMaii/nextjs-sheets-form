@@ -8,8 +8,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Get all categories
     const cateogries = await prisma.category.findMany({
       include: {
-        users: true
-      }
+        users: true,
+      },
     });
 
     return res.status(200).json({

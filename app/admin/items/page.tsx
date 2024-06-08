@@ -5,7 +5,7 @@ import NotificationPopup from '../components/Notification';
 import { ICategory, IItem, Notification } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import useCategories from '@/hooks/fetch/useCategories';
-import { Category, Item } from '@prisma/client';
+import { Category } from '@prisma/client';
 import CategorySidebar from '../components/Sidebar/CategorySidebar';
 import EditIcon from '@mui/icons-material/Edit';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -23,12 +23,13 @@ import ItemsTable from '../components/Tables/ItemsTable';
 import { ShadowSection } from '../reports/styled';
 import { SplashScreen } from '@/app/HOC/AuthenGuard';
 import axios from 'axios';
+import useSubCategories from '@/hooks/fetch/useSubCategories';
 
 export default function ItemPage() {
   const [isCategorySidebarOpen, setIsCategorySidebarOpen] =
     useState<boolean>(true);
   const [isFetching, setIsFetching] = useState<boolean>(true);
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<IItem[]>([]);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -36,10 +37,12 @@ export default function ItemPage() {
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
-  const { categories, mutate } = useCategories();
+  const { categories } = useCategories();
+  const { subCategories, isLoading } = useSubCategories();
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories[0],
   );
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
@@ -61,34 +64,34 @@ export default function ItemPage() {
   const handleDeleteItem = async (targetItem: IItem) => {
     try {
       const response = await axios.delete(API_URL.ITEM, {
-        data: {removedId: targetItem.id}
+        data: { removedId: targetItem.id },
       });
 
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         return;
-      };
+      }
 
       handleDeleteItemUI(targetItem);
 
       setNotification({
         on: true,
         type: 'success',
-        message: response.data.message
-      })
+        message: response.data.message,
+      });
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: error.response.data.error
-      })
+        message: error.response.data.error,
+      });
     }
-  }
+  };
 
   const handleDeleteItemUI = (targetItem: IItem) => {
     const newItems = items.filter((item: IItem) => {
@@ -96,7 +99,48 @@ export default function ItemPage() {
     });
 
     setItems(newItems);
-  }
+  };
+
+  const handleUpdateItem = async (updatedItem: IItem) => {
+    try {
+      const response = await axios.put(API_URL.ITEM, {
+        updatedItem,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleUpdateItemUI(response.data.data);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+    }
+  };
+
+  const handleUpdateItemUI = (updatedItem: IItem) => {
+    const newItems = items.map((item: IItem) => {
+      if (item.id === updatedItem.id) {
+        return updatedItem;
+      }
+      return item;
+    });
+    setItems(newItems);
+  };
 
   const switchCurrentCategory = (newCategory: Category) => {
     setCurrentCategory(newCategory);
@@ -152,7 +196,16 @@ export default function ItemPage() {
               </IconButton>
             </Grid>
           </Grid>
-          {isFetching ? <SplashScreen /> : <ItemsTable items={items} handleDeleteItem={handleDeleteItem} />}
+          {isFetching || isLoading ? (
+            <SplashScreen />
+          ) : (
+            <ItemsTable
+              items={items}
+              handleDeleteItem={handleDeleteItem}
+              subCategories={subCategories}
+              handleUpdateItem={handleUpdateItem}
+            />
+          )}
         </ShadowSection>
       </CategorySidebar>
     </Sidebar>

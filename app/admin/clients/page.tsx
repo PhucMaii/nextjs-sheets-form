@@ -62,7 +62,7 @@ export default function ClientsPage() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const { subcategories } = useSubCategories();
+  const { subCategories } = useSubCategories();
   const { categories } = useCategories();
 
   useEffect(() => {
@@ -380,7 +380,7 @@ export default function ClientsPage() {
         open={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
         categories={categories}
-        subCategories={subcategories}
+        subCategories={subCategories}
         setNotification={setNotification}
         handleAddClientUI={handleAddClientUI}
       />
@@ -462,7 +462,7 @@ export default function ClientsPage() {
             selectedClients={selectedClients}
             handleSelectClient={handleSelectClient}
             handleSelectAll={handleSelectAll}
-            subCategories={subcategories}
+            subCategories={subCategories}
           />
         ) : (
           <ErrorComponent errorText="No User Found" />

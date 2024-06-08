@@ -11,15 +11,23 @@ import {
 } from '@mui/material';
 import React from 'react';
 import DeleteModal from '../Modals/delete/DeleteModal';
+import { SubCategory } from '@prisma/client';
+import EditItem from '../Modals/edit/EditItem';
 
 interface IProps {
   items: IItem[];
   handleDeleteItem: (targetItem: IItem) => Promise<void>;
+  handleUpdateItem: (updatedItem: IItem) => Promise<void>;
+  subCategories: SubCategory[];
 }
 
-export default function ItemsTable({ items, handleDeleteItem }: IProps) {
-    const itemFields = ['Name', 'Price', 'Subcategory'];
-
+export const itemFields = ['Name', 'Price', 'Subcategory'];
+export default function ItemsTable({
+  items,
+  handleDeleteItem,
+  handleUpdateItem,
+  subCategories,
+}: IProps) {
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
       <Table>
@@ -28,15 +36,16 @@ export default function ItemsTable({ items, handleDeleteItem }: IProps) {
             <TableCell variant="head">
               <Checkbox />
             </TableCell>
-            {
-                itemFields && itemFields.map((field: string) => {
-                    return (
-                        <TableCell>
-                            <Typography key={field} variant="subtitle1">{field}</Typography>
-                        </TableCell>
-                    )
-                })
-            }
+            {itemFields &&
+              itemFields.map((field: string) => {
+                return (
+                  <TableCell>
+                    <Typography key={field} variant="subtitle1">
+                      {field}
+                    </Typography>
+                  </TableCell>
+                );
+              })}
             <TableCell></TableCell>
           </TableRow>
         </TableHead>
@@ -44,7 +53,7 @@ export default function ItemsTable({ items, handleDeleteItem }: IProps) {
           {items &&
             items.map((item: IItem) => {
               return (
-                <TableRow key={item.id} sx={{p: 2}}>
+                <TableRow key={item.id} sx={{ p: 2 }}>
                   <TableCell variant="head">
                     <Checkbox />
                   </TableCell>
@@ -52,7 +61,16 @@ export default function ItemsTable({ items, handleDeleteItem }: IProps) {
                   <TableCell>${item.price}</TableCell>
                   <TableCell>{item?.subCategory?.name || ''}</TableCell>
                   <TableCell>
-                    <DeleteModal targetObj={item} handleDelete={handleDeleteItem} includedButton/>
+                    <DeleteModal
+                      targetObj={item}
+                      handleDelete={handleDeleteItem}
+                      includedButton
+                    />
+                    <EditItem
+                      targetItem={item}
+                      subCategories={subCategories}
+                      handleUpdateItem={handleUpdateItem}
+                    />
                   </TableCell>
                 </TableRow>
               );

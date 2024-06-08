@@ -30,23 +30,19 @@ export default function CategorySidebar({
   handleChangeTab,
   isNavOpen,
   setIsNavOpen,
-  children
-}
-: IProps) {
+  children,
+}: IProps) {
   return (
     <>
-      {!isNavOpen && <Box>
-        <IconButton onClick={() => setIsNavOpen(true)}>
-          <ArrowForwardIcon />
-        </IconButton>
-      </Box>}
+      {!isNavOpen && (
+        <Box>
+          <IconButton onClick={() => setIsNavOpen(true)}>
+            <ArrowForwardIcon />
+          </IconButton>
+        </Box>
+      )}
       <Box display="flex">
-        <Slide 
-          direction="right" 
-          in={isNavOpen} 
-          mountOnEnter 
-          unmountOnExit
-        >
+        <Slide direction="right" in={isNavOpen} mountOnEnter unmountOnExit>
           <Box
             sx={{
               backgroundColor: 'white',
@@ -56,7 +52,13 @@ export default function CategorySidebar({
             overflow="auto"
             maxHeight="100vh"
           >
-            <Box display="flex" gap={1} m={2} flexWrap="wrap" alignItems="center">
+            <Box
+              display="flex"
+              gap={1}
+              m={2}
+              flexWrap="wrap"
+              alignItems="center"
+            >
               <IconButton onClick={() => setIsNavOpen(false)}>
                 <ArrowBackIcon />
               </IconButton>
