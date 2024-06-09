@@ -42,6 +42,7 @@ export const ComponentToPrint = forwardRef(
 
     const orderFields: any = {
       Invoice: order.id,
+      'Client Id': order.clientId,
       'Client Name': order.clientName,
       'Order Time': order.orderTime,
       'Delivery Date': order.deliveryDate
