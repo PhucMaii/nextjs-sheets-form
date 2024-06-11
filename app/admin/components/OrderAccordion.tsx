@@ -193,14 +193,14 @@ const OrderAccordion = ({
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
       >
         <AccordionSummary>
-          <Grid container alignItems="center">
+          <Grid container alignItems="center" columnSpacing={1}>
             <Grid item xs={0.5}>
               <Checkbox
                 checked={isOrderSelected}
                 onClick={(e: any) => handleSelectOrder(e, order)}
               />
             </Grid>
-            <Grid item xs={12} md={11.5}>
+            <Grid item xs={12} md={11}>
               <Box display="flex" alignItems="center" gap={1}>
                 {order.isReplacement && (
                   <StatusText text={`Replacement by client `} type={'error'} />

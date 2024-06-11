@@ -3,23 +3,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
-  Button,
   Checkbox,
+  Fab,
   FormControl,
   FormControlLabel,
   Grid,
-  Menu,
-  MenuItem,
   Pagination,
   Tab,
   Tabs,
-  TextField,
   Typography,
 } from '@mui/material';
-import { API_URL, ORDER_STATUS } from '../../utils/enum';
+import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import { useReactToPrint } from 'react-to-print';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { Notification, UserType } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
@@ -27,14 +23,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import PrintIcon from '@mui/icons-material/Print';
-import PostAddIcon from '@mui/icons-material/PostAdd';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { DropdownItemContainer } from './styled';
-import { infoColor, successColor } from '@/app/theme/color';
 import { pusherClient } from '@/app/pusher';
-import useDebounce from '@/hooks/useDebounce';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
@@ -44,6 +33,14 @@ import moment from 'moment';
 import { statusTabs } from '@/app/lib/constant';
 import useClients from '@/hooks/fetch/useClients';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
+import AddIcon from '@mui/icons-material/Add';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import SearchIcon from '@mui/icons-material/Search';
+import SearchModal from '../components/Modals/SearchModal';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import { ShadowSection } from '../reports/styled';
+import { blue, blueGrey } from '@mui/material/colors';
 
 interface Category {
   id: number;
@@ -81,23 +78,21 @@ export interface Order {
   subCategory?: any;
   routeId?: number;
   route?: any;
+  preference?: any;
 }
 
 const orderPerPage = 10;
 
 export default function Orders() {
-  const [actionButtonAnchor, setActionButtonAnchor] =
-    useState<null | HTMLElement>(null);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [date, setDate] = useState(() => generateRecommendDate());
-  const openDropdown = Boolean(actionButtonAnchor);
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.NONE,
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
     on: false,
@@ -107,12 +102,10 @@ export default function Orders() {
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [pages, setPages] = useState<number>(0);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
-  const [searchKeywords, setSearchKeywords] = useState<string | undefined>();
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
-  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const { clientList } = useClients();
   const { subcategories } = useSubCategories();
@@ -150,17 +143,8 @@ export default function Orders() {
 
   // whenever current page change and not in searching mode, then update the display data
   useEffect(() => {
-    if (!isSearching) {
-      generateOrderData();
-    }
-  }, [currentPage, isSearching]);
-
-  // Pre set current page to 1 whenever there is search key words
-  useEffect(() => {
-    if (searchKeywords) {
-      setCurrentPage(1);
-    }
-  }, [searchKeywords]);
+    generateOrderData();
+  }, [currentPage]);
 
   useEffect(() => {
     setCurrentStatus(statusTabs[tabIndex].value);
@@ -178,7 +162,6 @@ export default function Orders() {
 
   useEffect(() => {
     if (incomingOrder) {
-      setIncomingOrder(null);
       if (
         incomingOrder.deliveryDate === date &&
         (incomingOrder.status === currentStatus || tabIndex === 0) &&
@@ -191,36 +174,13 @@ export default function Orders() {
         });
         setBaseOrderData([incomingOrder, ...newOrderData]);
       }
+      setIncomingOrder(null);
     }
   }, [incomingOrder]);
 
   useEffect(() => {
     fetchOrders();
   }, [date, currentStatus]);
-
-  useEffect(() => {
-    if (debouncedKeywords) {
-      setIsSearching(true);
-      const newOrderData = baseOrderData.filter((order: Order) => {
-        if (
-          order.clientId.includes(debouncedKeywords) ||
-          debouncedKeywords == order.id.toString() ||
-          order.clientName
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
-        ) {
-          return true;
-        }
-        return false;
-      });
-      generateOrderData(newOrderData);
-    } else {
-      setIsSearching(false);
-      // if (baseOrderData.length > 0) {
-      //   generateOrderData();
-      // }
-    }
-  }, [debouncedKeywords, baseOrderData]);
 
   const addOrder = async (
     clientValue: UserType | null,
@@ -317,6 +277,154 @@ export default function Orders() {
     );
   };
 
+  const generateOverview = () => {
+    const titleColor = blueGrey[50];
+    const dataColor = 'white';
+
+    const openBill = baseOrderData.filter((order: Order) => {
+      return order.status === ORDER_STATUS.INCOMPLETED || order.status === ORDER_STATUS.DELIVERED
+    });
+
+    const totalBill = openBill.length > 0 ? openBill.reduce((acc: number, order: Order) => {
+      return acc + order.totalPrice;
+    }, 0) : 0;
+
+    const codOrders = baseOrderData.filter((order: Order) => {
+      return order?.preference?.paymentType === PAYMENT_TYPE.COD;
+    });
+
+    const codBill = codOrders.length > 0 ? codOrders.reduce((acc: number, order: Order) => {
+      return acc + order.totalPrice;
+    }, 0) : 0;
+
+    return (
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        flexWrap="wrap"
+      >
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          gap={1.5}
+        >
+          <Box display="flex" gap={1} alignItems="center">
+            <RequestQuoteIcon sx={{color: `${dataColor} !important`}} />
+            <Typography
+              variant="subtitle1"
+              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+            >
+              Bill
+            </Typography>
+          </Box>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            sx={{ color: `${dataColor} !important` }}
+          >
+            {openBill.length}
+          </Typography>
+          <Typography
+              variant="subtitle2"
+              sx={{ color: `${titleColor} !important` }}
+            >
+              Open Bill
+            </Typography>
+        </Box>
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          gap={1.5}
+        >
+          <Box display="flex" gap={1} alignItems="center">
+            <AttachMoneyIcon sx={{color: `${dataColor} !important`}} />
+            <Typography
+              variant="subtitle1"
+              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+            >
+              Balance Due
+            </Typography>
+          </Box>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            sx={{ color: `${dataColor} !important` }}
+          >
+            {totalBill.toFixed(2)}
+          </Typography>
+          <Typography
+              variant="subtitle2"
+              sx={{ color: `${titleColor} !important` }}
+            >
+              Balance due
+            </Typography>
+        </Box>
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          gap={1.5}
+        >
+          <Box display="flex" gap={1} alignItems="center">
+            <CalendarTodayIcon sx={{color: `${dataColor} !important`}} />
+            <Typography
+              variant="subtitle1"
+              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+            >
+              COD ($)
+            </Typography>
+          </Box>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            sx={{ color: `${dataColor} !important` }}
+          >
+            {codBill.toFixed(2)}
+          </Typography>
+          <Typography
+              variant="subtitle2"
+              sx={{ color: `${titleColor} !important` }}
+            >
+              Bill
+            </Typography>
+        </Box>
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          gap={1.5}
+        >
+          <Box display="flex" gap={1} alignItems="center">
+            <CalendarTodayIcon sx={{color: `${dataColor} !important`}} />
+            <Typography
+              variant="subtitle1"
+              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+            >
+              COD
+            </Typography>
+          </Box>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            sx={{ color: `${dataColor} !important` }}
+          >
+            {codOrders.length}
+          </Typography>
+          <Typography
+              variant="subtitle2"
+              sx={{ color: `${titleColor} !important` }}
+            >
+              Orders
+            </Typography>
+        </Box>
+        
+      </Box>
+    );
+  };
+
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = orderData.map((order: Order) => {
       // If order is at targetOrder, then update
@@ -382,31 +490,10 @@ export default function Orders() {
     }
   };
 
-  const handleCloseAnchor = () => {
-    setActionButtonAnchor(null);
-  };
-
   const handleDateChange = (e: any): void => {
     const formattedDate: string = formatDateChanged(e);
 
     setDate(formattedDate);
-  };
-
-  const handleMarkAllCompleted = async (): Promise<void> => {
-    try {
-      const response = await axios.put(API_URL.ORDER_STATUS, {
-        status: ORDER_STATUS.COMPLETED,
-        updatedOrders: selectedOrders.length > 0 ? selectedOrders : orderData,
-      });
-      // await fetchOrders();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
-    } catch (error: any) {
-      console.log('Fail to mark all as completed: ', error);
-    }
   };
 
   const handleMarkSingleCompletedUI = (targetOrder: Order): void => {
@@ -425,10 +512,6 @@ export default function Orders() {
     setBaseOrderData(newOrders);
   };
 
-  const handlePrintAll = useReactToPrint({
-    content: () => componentRef.current,
-  });
-
   const handleUpdateDateUI = (orderId: number, updatedDate: string): void => {
     const newOrders = orderData.filter((order) => {
       if (order.id !== orderId) {
@@ -445,70 +528,6 @@ export default function Orders() {
     setOrderData(newOrders);
     setBaseOrderData(newOrders);
   };
-
-  const actionDropdown = (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      gap={2}
-      width="100%"
-    >
-      <Button
-        aria-controls={openDropdown ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={openDropdown ? 'true' : undefined}
-        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-        endIcon={<ArrowDownwardIcon />}
-        variant="outlined"
-        fullWidth
-      >
-        Actions
-      </Button>
-      <Menu
-        id="basic-menu"
-        anchorEl={actionButtonAnchor}
-        open={openDropdown}
-        onClose={handleCloseAnchor}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            handlePrintAll();
-            handleCloseAnchor();
-          }}
-          disabled={orderData.length === 0}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <PrintIcon sx={{ color: infoColor }} />
-            <Typography>Print bills</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem onClick={() => setIsAddOrderOpen(true)}>
-          <DropdownItemContainer display="flex" gap={2}>
-            <PostAddIcon sx={{ color: infoColor }} />
-            <Typography>Add Order</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleMarkAllCompleted();
-            handleCloseAnchor();
-          }}
-          disabled={
-            currentStatus === ORDER_STATUS.COMPLETED || orderData.length === 0
-          }
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Mark all as completed</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
 
   const uppperContent = (
     <>
@@ -529,50 +548,65 @@ export default function Orders() {
           </LocalizationProvider>
         </FormControl>
       </Box>
-      <Grid container alignItems="center" mt={2} spacing={2}>
-        <Grid item xs={12} md={9}>
-          <TextField
-            fullWidth
-            name="Search"
-            variant="filled"
-            label="Search orders"
-            placeholder="Search by client id, invoice id, or client name"
-            value={searchKeywords}
-            onChange={(e) => setSearchKeywords(e.target.value)}
-          />
+      <ShadowSection sx={{ backgroundColor: `${blue[800]} !important` }}>
+        {generateOverview()}
+      </ShadowSection>
+      <Grid container alignItems="center">
+        <Grid item xs={12} md={10.5}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs
+              aria-label="basic tabs"
+              value={tabIndex}
+              onChange={(e, newValue) => setTabIndex(newValue)}
+              variant="fullWidth"
+              sx={{ width: '100%' }}
+            >
+              {statusTabs &&
+                statusTabs.map((statusTab: any, index: number) => {
+                  return (
+                    <Tab
+                      key={index}
+                      icon={<statusTab.icon />}
+                      id={`simple-tab-${index}`}
+                      label={`${statusTab.name} ${
+                        tabIndex === index ? `(${baseOrderData.length})` : ''
+                      } `}
+                      aria-controls={`tabpanel-${index}`}
+                      value={index}
+                      sx={{
+                        '&.Mui-selected': { color: statusTab.color },
+                        fontWeight: 600
+                      }}
+                    />
+                  );
+                })}
+            </Tabs>
+          </Box>
         </Grid>
-        <Grid item xs={4} md={3}>
-          {actionDropdown}
+        <Grid item xs={1.5} textAlign="right">
+          <Box
+            display="flex"
+            justifyContent="right"
+            alignItems="center"
+            gap={2}
+          >
+            <Fab
+              size="medium"
+              sx={{ backgroundColor: 'white' }}
+              onClick={() => setIsSearchModalOpen(true)}
+            >
+              <SearchIcon />
+            </Fab>
+            <Fab
+              size="medium"
+              color="primary"
+              onClick={() => setIsAddOrderOpen(true)}
+            >
+              <AddIcon />
+            </Fab>
+          </Box>
         </Grid>
       </Grid>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          aria-label="basic tabs"
-          value={tabIndex}
-          onChange={(e, newValue) => setTabIndex(newValue)}
-          variant="fullWidth"
-          sx={{ width: '100%' }}
-        >
-          {statusTabs &&
-            statusTabs.map((statusTab: any, index: number) => {
-              return (
-                <Tab
-                  key={index}
-                  icon={<statusTab.icon />}
-                  id={`simple-tab-${index}`}
-                  label={`${statusTab.name} ${
-                    tabIndex === index ? `(${baseOrderData.length})` : ''
-                  } `}
-                  aria-controls={`tabpanel-${index}`}
-                  value={index}
-                  sx={{
-                    '&.Mui-selected': { color: statusTab.color },
-                  }}
-                />
-              );
-            })}
-        </Tabs>
-      </Box>
       <Box>
         <FormControlLabel
           control={
@@ -589,7 +623,6 @@ export default function Orders() {
 
   return (
     <Sidebar>
-      {/* <AuthenGuard> */}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -607,6 +640,19 @@ export default function Orders() {
         setNotification={setNotification}
         currentDate={date}
         createOrder={addOrder}
+      />
+      <SearchModal
+        open={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        baseOrderList={baseOrderData}
+        setNotification={setNotification}
+        updateUI={handleMarkSingleCompletedUI}
+        updateUIItem={handleUpdateUISingleOrder}
+        handleUpdateDateUI={handleUpdateDateUI}
+        handleUpdatePriceUI={handleUpdatePriceUI}
+        selectedOrders={selectedOrders}
+        handleSelectOrder={handleSelectOrder}
+        subcategories={subcategories || []}
       />
       {isLoading ? (
         <>
@@ -655,7 +701,6 @@ export default function Orders() {
           )}
         </>
       )}
-      {/* </AuthenGuard> */}
     </Sidebar>
   );
 }
