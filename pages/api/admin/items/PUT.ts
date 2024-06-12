@@ -42,6 +42,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const itemSameName = await prisma.item.findMany({
         where: {
           name: updatedItem.name,
+          categoryId: updatedItem.categoryId
         },
       });
 

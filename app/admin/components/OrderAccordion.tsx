@@ -193,14 +193,14 @@ const OrderAccordion = ({
         sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
       >
         <AccordionSummary>
-          <Grid container alignItems="center">
+          <Grid container alignItems="center" columnSpacing={1}>
             <Grid item xs={0.5}>
               <Checkbox
                 checked={isOrderSelected}
                 onClick={(e: any) => handleSelectOrder(e, order)}
               />
             </Grid>
-            <Grid item xs={12} md={11.5}>
+            <Grid item xs={12} md={11}>
               <Box display="flex" alignItems="center" gap={1}>
                 {order.isReplacement && (
                   <StatusText text={`Replacement by client `} type={'error'} />
@@ -330,14 +330,14 @@ const OrderAccordion = ({
                 {order.clientName}
               </Button>
             </Grid>
-            <Grid item xs={12} md={3} textAlign="center">
+            <Grid item xs={12} md={3} textAlign="center" alignItems="center">
               <Typography fontWeight="bold" variant="subtitle1">
                 Items: {totalQuantity}
               </Typography>
               <Typography fontWeight="bold" variant="subtitle1">
                 Total: ${order.totalPrice.toFixed(2)}
               </Typography>
-              <Box display="flex" gap={2} alignItems="center">
+              <Box display="flex" gap={2} alignItems="center" justifyContent="center">
                 <Typography fontWeight="bold" variant="subtitle1">
                   Delivery Date: {order.deliveryDate}
                 </Typography>
