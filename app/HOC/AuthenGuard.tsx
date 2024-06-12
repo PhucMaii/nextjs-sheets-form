@@ -48,7 +48,6 @@ export default function AuthenGuard({ children }: any) {
       router.push('/');
     }
   }, [pathname, session, user]);
-  // console.log(isLoading, 'is loading from authen guard')
 
   return children;
 }

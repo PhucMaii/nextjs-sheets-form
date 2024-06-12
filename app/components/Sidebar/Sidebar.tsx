@@ -51,17 +51,24 @@ export default function Sidebar({ children }: PropTypes) {
   const router = useRouter();
   const pathname: any = usePathname();
 
-  const [userData] = useContext(UserContext);
+  const { user, isValidating } = useContext(UserContext);
   const orderDate = generateRecommendDate();
-  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(
-    !userData?.email,
-  );
+  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(false);
 
   const url = process.env.NEXT_PUBLIC_WEB_URL;
 
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isValidating && !user?.email) {
+      setIsOpenSnackbar(true);
+    } else {
+      setIsOpenSnackbar(false);
+    }
+  }, [isValidating, user]);
+  // console.log(isOpenSnackbar, 'is open snack bar');
 
   const handleChangeTab = (path: string) => {
     router.push(path);
