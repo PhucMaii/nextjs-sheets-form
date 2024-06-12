@@ -69,7 +69,7 @@ export interface IItem {
   id: number;
   name: string;
   categoryId: number;
-  subCategoryId?: number;
+  subCategoryId?: number | null;
   price: number;
   quantity?: number;
   subCategory?: any;

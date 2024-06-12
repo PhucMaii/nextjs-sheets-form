@@ -39,8 +39,9 @@ export default function EditItem({
   }, [targetItem]);
 
   const updateItem = async () => {
+    const newUpdatedItem = {...updatedItem, name: updatedItem.name.toUpperCase()}
     setIsUpdating(true);
-    await handleUpdateItem(updatedItem);
+    await handleUpdateItem(newUpdatedItem);
     setIsUpdating(false);
   };
 
@@ -97,9 +98,9 @@ export default function EditItem({
             <Grid item xs={12} md={6}>
               <Select
                 fullWidth
-                disabled={!updatedItem.name.includes('BEAN')}
+                disabled={!updatedItem.name.toLowerCase().includes('bean')}
                 value={updatedItem?.subCategoryId}
-                onChange={(e) =>
+                onChange={(e: any) =>
                   setUpdatedItem({
                     ...updatedItem,
                     subCategoryId: +e.target.value,
@@ -108,7 +109,7 @@ export default function EditItem({
               >
                 {/* <MenuItem value={null || undefined}>N/A</MenuItem> */}
                 {subCategories &&
-                  [...subCategories, { name: 'N/A', id: -1 }].map(
+                  [...subCategories, { name: 'N/A', id: 0 }].map(
                     (subCategory: SubCategory | any) => {
                       return (
                         <MenuItem value={subCategory.id} key={subCategory.id}>

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
 import DELETE from './DELETE';
 import PUT from './PUT';
+import POST from './POST';
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,6 +21,11 @@ export default async function handler(
 
     if (req.method === 'DELETE') {
       const response = await DELETE(req, res);
+      return response;
+    }
+
+    if (req.method === 'POST') {
+      const response = await POST(req, res);
       return response;
     }
 

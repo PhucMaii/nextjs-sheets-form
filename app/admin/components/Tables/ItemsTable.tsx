@@ -1,6 +1,5 @@
 import { IItem } from '@/app/utils/type';
 import {
-  Checkbox,
   Table,
   TableBody,
   TableCell,
@@ -33,9 +32,9 @@ export default function ItemsTable({
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell variant="head">
+            {/* <TableCell variant="head">
               <Checkbox />
-            </TableCell>
+            </TableCell> */}
             {itemFields &&
               itemFields.map((field: string) => {
                 return (
@@ -54,9 +53,9 @@ export default function ItemsTable({
             items.map((item: IItem) => {
               return (
                 <TableRow key={item.id} sx={{ p: 2 }}>
-                  <TableCell variant="head">
+                  {/* <TableCell variant="head">
                     <Checkbox />
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>{item.name}</TableCell>
                   <TableCell>${item.price}</TableCell>
                   <TableCell>{item?.subCategory?.name || ''}</TableCell>

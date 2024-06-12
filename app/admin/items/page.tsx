@@ -24,8 +24,11 @@ import { ShadowSection } from '../reports/styled';
 import { SplashScreen } from '@/app/HOC/AuthenGuard';
 import axios from 'axios';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
+import AddItem from '../components/Modals/add/AddItem';
 
 export default function ItemPage() {
+  const [baseItems, setBaseItems] = useState<IItem[]>([]);
+  const [isAddItem, setIsAddItem] = useState<boolean>(false);
   const [isCategorySidebarOpen, setIsCategorySidebarOpen] =
     useState<boolean>(true);
   const [isFetching, setIsFetching] = useState<boolean>(true);
@@ -46,10 +49,52 @@ export default function ItemPage() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
+    if (categories.length > 0) {
+      setCurrentCategory(categories[0]);
+    }
+  }, [categories]);
+
+  useEffect(() => {
     if (categories.length > 0 && currentCategory) {
       fetchItems();
     }
   }, [categories, currentCategory]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newItems = baseItems.filter((item: IItem) => {
+        if (
+          item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) ||
+          item.price == parseInt(debouncedKeywords) ||
+          item?.subCategory?.name
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setItems(newItems);
+    } else {
+      setItems(baseItems);
+    }
+  }, [debouncedKeywords]);
+
+  const checkIsNewItemValid = (newItem: IItem) => {
+    if (
+      newItem.name.trim() === '' ||
+      newItem.price < 0 ||
+      !newItem.categoryId
+    ) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Your input data is invalid',
+      });
+      return false;
+    }
+    return true;
+  };
 
   const fetchItems = async () => {
     setIsFetching(true);
@@ -58,7 +103,48 @@ export default function ItemPage() {
       setNotification,
     );
     setItems(itemData);
+    setBaseItems(itemData);
     setIsFetching(false);
+  };
+
+  const handleAddItem = async (newItem: IItem) => {
+    try {
+      const isNewItemValid = checkIsNewItemValid(newItem);
+      if (!isNewItemValid) {
+        return;
+      }
+      const response = await axios.post(API_URL.ITEM, { newItem });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleAddItemUI(response.data.data);
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+      return;
+    }
+  };
+
+  const handleAddItemUI = (newItem: IItem) => {
+    setItems([...items, newItem]);
+    setBaseItems([...items, newItem]);
   };
 
   const handleDeleteItem = async (targetItem: IItem) => {
@@ -99,6 +185,7 @@ export default function ItemPage() {
     });
 
     setItems(newItems);
+    setBaseItems(newItems);
   };
 
   const handleUpdateItem = async (updatedItem: IItem) => {
@@ -140,6 +227,7 @@ export default function ItemPage() {
       return item;
     });
     setItems(newItems);
+    setBaseItems(newItems);
   };
 
   const switchCurrentCategory = (newCategory: Category) => {
@@ -148,6 +236,13 @@ export default function ItemPage() {
 
   return (
     <Sidebar noMargin>
+      <AddItem
+        open={isAddItem}
+        onClose={() => setIsAddItem(false)}
+        subCategories={subCategories}
+        categoryId={currentCategory?.id}
+        addItem={handleAddItem}
+      />
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -191,7 +286,7 @@ export default function ItemPage() {
               />
             </Grid>
             <Grid item xs={12} md={1}>
-              <IconButton size="large">
+              <IconButton size="large" onClick={() => setIsAddItem(true)}>
                 <AddBoxIcon fontSize="large" color="primary" />
               </IconButton>
             </Grid>
