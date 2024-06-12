@@ -25,12 +25,16 @@ import { SplashScreen } from '@/app/HOC/AuthenGuard';
 import axios from 'axios';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
 import AddItem from '../components/Modals/add/AddItem';
+import DeleteModal from '../components/Modals/delete/DeleteModal';
+import EditCategory from '../components/Modals/edit/EditCategory';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
   const [isAddItem, setIsAddItem] = useState<boolean>(false);
   const [isCategorySidebarOpen, setIsCategorySidebarOpen] =
     useState<boolean>(true);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isEditCategory, setIsEditCategory] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [items, setItems] = useState<IItem[]>([]);
   const [notification, setNotification] = useState<Notification>({
@@ -40,7 +44,7 @@ export default function ItemPage() {
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
-  const { categories } = useCategories();
+  const { categories, mutate } = useCategories();
   const { subCategories, isLoading } = useSubCategories();
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories[0],
@@ -147,6 +151,37 @@ export default function ItemPage() {
     setBaseItems([...items, newItem]);
   };
 
+  const handleDeleteCategory = async (targetObj: any) => {
+    try {
+      const response = await axios.delete(API_URL.CATEGORIES, {
+        data: { categoryId: targetObj?.id },
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      mutate();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+    }
+  };
+
   const handleDeleteItem = async (targetItem: IItem) => {
     try {
       const response = await axios.delete(API_URL.ITEM, {
@@ -243,6 +278,16 @@ export default function ItemPage() {
         categoryId={currentCategory?.id}
         addItem={handleAddItem}
       />
+      <DeleteModal
+        targetObj={currentCategory}
+        handleDelete={handleDeleteCategory}
+        open={isDeleteModalOpen}
+        handleCloseModal={() => setIsDeleteModalOpen(false)}
+      />
+      <EditCategory 
+        open={isEditCategory}
+        onClose={() => setIsEditCategory(false)}
+      />
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -261,13 +306,19 @@ export default function ItemPage() {
                 {currentCategory?.name} ( {currentCategory?.users?.length}{' '}
                 clients )
               </Typography>
-              <IconButton>
+              <IconButton onClick={() => setIsEditCategory(true)}>
                 <EditIcon />
               </IconButton>
             </Box>
           </Grid>
           <Grid item xs={12} md={2} textAlign="right">
-            <Button fullWidth color="error" variant="outlined">
+            <Button
+              disabled={!currentCategory}
+              fullWidth
+              color="error"
+              variant="outlined"
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
               Delete
             </Button>
           </Grid>

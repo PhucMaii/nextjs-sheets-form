@@ -1,11 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
 import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
+import DELETE from './DELETE';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const response = await GET(req, res);
+      return response;
+    }
+
+    if (req.method === 'DELETE') {
+      const response = await DELETE(req, res);
       return response;
     }
 
