@@ -68,7 +68,7 @@ export interface ICategory extends Category {
 export interface IItem {
   id: number;
   name: string;
-  categoryId?: number;
+  categoryId: number;
   subCategoryId?: number;
   price: number;
   quantity?: number;
