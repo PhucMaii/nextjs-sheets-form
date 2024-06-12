@@ -23,7 +23,7 @@ export default function EmailAlert({
 }: PropTypes) {
   const [email, setEmail] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [userData, setUserData] = useContext(UserContext);
+  const { mutate } = useContext(UserContext);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
@@ -44,7 +44,7 @@ export default function EmailAlert({
 
       setIsSubmitting(false);
       setIsOpenSnackbar(false);
-      setUserData({ ...userData, email });
+      mutate();
       setNotification({
         on: true,
         type: 'success',
