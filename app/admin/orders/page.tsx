@@ -490,7 +490,7 @@ export default function Orders() {
   ) => {
     const newBaseOrderList = baseOrderData.map((order: Order) => {
       if (order.id === targetOrder.id) {
-        return { ...order, totalPrice: newTotalPrice, items: newItems };
+        return { ...targetOrder, totalPrice: newTotalPrice, items: newItems };
       }
       return order;
     });

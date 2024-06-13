@@ -150,7 +150,11 @@ export default function EditPrice({
         return;
       }
 
-      handleUpdatePriceUI(order, itemList, totalPrice);
+      handleUpdatePriceUI(
+        updateOption === UpdateOption.CREATE ? response.data.data : order,
+        itemList,
+        totalPrice,
+      );
 
       setNotification({
         on: true,

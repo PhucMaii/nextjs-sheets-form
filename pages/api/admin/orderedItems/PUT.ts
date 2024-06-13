@@ -7,6 +7,7 @@ import {
   ScheduleOrders,
 } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import order from '../../order';
 
 interface UpdatedItem {
   id: number;
@@ -164,9 +165,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Second case: if user want to create new category
     if (updateOption === UpdateOption.CREATE) {
+      if (!categoryName || categoryName.trim() === '') {
+        return res.status(404).json({
+          error: 'Category Name Must Not Be Blank',
+        });
+      }
+
       const newCategory = await prisma.category.create({
         data: {
-          name: categoryName ? categoryName : '',
+          name: categoryName,
         },
       });
 
@@ -199,25 +206,39 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
 
       if (
-        !targetClient.scheduleOrders ||
-        targetClient.scheduleOrders.length === 0
+        targetClient.scheduleOrders &&
+        targetClient.scheduleOrders.length > 0
       ) {
-        return res.status(200).json({
-          data: newItems,
-          message: 'New Category Created Successfully',
-        });
+        // Update schedule order of this client
+        for (const scheduleOrder of targetClient.scheduleOrders) {
+          await updateScheduleOrderItems(
+            updatedItems,
+            scheduleOrder,
+            userSubCategoryId,
+            userSubCategoryId,
+            userId,
+          );
+        }
       }
 
-      // Update schedule order of this client
-      for (const scheduleOrder of targetClient.scheduleOrders) {
-        await updateScheduleOrderItems(
-          updatedItems,
-          scheduleOrder,
-          userSubCategoryId,
-          userSubCategoryId,
-          userId,
-        );
-      }
+      const returnOrder = await prisma.orders.findUnique({
+        where: {
+          id: orderId,
+        },
+        include: {
+          user: true,
+          items: true,
+        },
+      });
+
+      return res.status(200).json({
+        data: {
+          category: newCategory,
+          ...returnOrder?.user,
+          ...returnOrder,
+        },
+        message: 'New Category Created Successfully',
+      });
     }
 
     // last case: if user want to update category price
@@ -356,6 +377,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         message: 'Category Price Updated Succesfully',
       });
     }
+    return res.status(200).json({
+      message: 'Updating Progress Has Done',
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
