@@ -1,7 +1,7 @@
 import { Order } from '@/app/admin/orders/page';
 import { groupBy } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { IRoutes, Item } from '@/app/utils/type';
+import { IItem, IRoutes } from '@/app/utils/type';
 import { UserRoute } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
@@ -86,7 +86,7 @@ const useManifest = (
 
     for (const itemRoute in groupItemRoutes) {
       const manifestItem = groupItemRoutes[itemRoute].reduce(
-        (acc: any, item: Item) => {
+        (acc: any, item: IItem) => {
           const { name, subCategory } = item;
 
           let itemKey = name;

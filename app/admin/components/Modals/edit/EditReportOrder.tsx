@@ -54,6 +54,7 @@ export default function EditReportOrder({
   const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
   const [newItem, setNewItem] = useState<Item>({
+    id: -1,
     name: '',
     price: 0,
     quantity: 0,
@@ -95,12 +96,15 @@ export default function EditReportOrder({
       });
     } else {
       const totalPrice = newItem.quantity * newItem.price;
-      const newItemData: any = { ...newItem, totalPrice, name: newItemName };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...restOfNewItem} = newItem;
+      const newItemData: any = { ...restOfNewItem, totalPrice, name: newItemName };
       if (subCategoryId > 0) {
         newItemData.subCategoryId = subCategoryId;
       }
       setItemList([...itemList, newItemData]);
       setNewItem({
+        id: -1,
         name: '',
         price: 0,
         quantity: 0,
