@@ -11,6 +11,7 @@ import {
   Pagination,
   Tab,
   Tabs,
+  TextField,
   Typography,
 } from '@mui/material';
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '../../utils/enum';
@@ -41,6 +42,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import { ShadowSection } from '../reports/styled';
 import { blue, blueGrey } from '@mui/material/colors';
+import useDebounce from '@/hooks/useDebounce';
 
 interface Category {
   id: number;
@@ -102,10 +104,12 @@ export default function Orders() {
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [pages, setPages] = useState<number>(0);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const { clientList } = useClients();
   const { subCategories } = useSubCategories();
@@ -140,6 +144,27 @@ export default function Orders() {
       pusherClient.unsubscribe('void-order');
     };
   }, [date]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newOrderList = baseOrderData.filter((order: Order) => {
+        if (
+          order.clientId.includes(debouncedKeywords) ||
+          debouncedKeywords == order.id.toString() ||
+          order.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      setOrderData(newOrderList);
+      setPages(1);
+    } else {
+      generateOrderData();
+    }
+  }, [debouncedKeywords]);
 
   // whenever current page change and not in searching mode, then update the display data
   useEffect(() => {
@@ -282,20 +307,29 @@ export default function Orders() {
     const dataColor = 'white';
 
     const openBill = baseOrderData.filter((order: Order) => {
-      return order.status === ORDER_STATUS.INCOMPLETED || order.status === ORDER_STATUS.DELIVERED
+      return (
+        order.status === ORDER_STATUS.INCOMPLETED ||
+        order.status === ORDER_STATUS.DELIVERED
+      );
     });
 
-    const totalBill = openBill.length > 0 ? openBill.reduce((acc: number, order: Order) => {
-      return acc + order.totalPrice;
-    }, 0) : 0;
+    const totalBill =
+      openBill.length > 0
+        ? openBill.reduce((acc: number, order: Order) => {
+            return acc + order.totalPrice;
+          }, 0)
+        : 0;
 
     const codOrders = baseOrderData.filter((order: Order) => {
       return order?.preference?.paymentType === PAYMENT_TYPE.COD;
     });
 
-    const codBill = codOrders.length > 0 ? codOrders.reduce((acc: number, order: Order) => {
-      return acc + order.totalPrice;
-    }, 0) : 0;
+    const codBill =
+      codOrders.length > 0
+        ? codOrders.reduce((acc: number, order: Order) => {
+            return acc + order.totalPrice;
+          }, 0)
+        : 0;
 
     return (
       <Box
@@ -311,7 +345,7 @@ export default function Orders() {
           gap={1.5}
         >
           <Box display="flex" gap={1} alignItems="center">
-            <RequestQuoteIcon sx={{color: `${dataColor} !important`}} />
+            <RequestQuoteIcon sx={{ color: `${dataColor} !important` }} />
             <Typography
               variant="subtitle1"
               sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
@@ -327,11 +361,11 @@ export default function Orders() {
             {openBill.length}
           </Typography>
           <Typography
-              variant="subtitle2"
-              sx={{ color: `${titleColor} !important` }}
-            >
-              Open Bill
-            </Typography>
+            variant="subtitle2"
+            sx={{ color: `${titleColor} !important` }}
+          >
+            Open Bill
+          </Typography>
         </Box>
         <Box
           display="flex"
@@ -340,7 +374,7 @@ export default function Orders() {
           gap={1.5}
         >
           <Box display="flex" gap={1} alignItems="center">
-            <AttachMoneyIcon sx={{color: `${dataColor} !important`}} />
+            <AttachMoneyIcon sx={{ color: `${dataColor} !important` }} />
             <Typography
               variant="subtitle1"
               sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
@@ -356,11 +390,11 @@ export default function Orders() {
             {totalBill.toFixed(2)}
           </Typography>
           <Typography
-              variant="subtitle2"
-              sx={{ color: `${titleColor} !important` }}
-            >
-              Balance due
-            </Typography>
+            variant="subtitle2"
+            sx={{ color: `${titleColor} !important` }}
+          >
+            Balance due
+          </Typography>
         </Box>
         <Box
           display="flex"
@@ -369,7 +403,7 @@ export default function Orders() {
           gap={1.5}
         >
           <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{color: `${dataColor} !important`}} />
+            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
             <Typography
               variant="subtitle1"
               sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
@@ -385,11 +419,11 @@ export default function Orders() {
             {codBill.toFixed(2)}
           </Typography>
           <Typography
-              variant="subtitle2"
-              sx={{ color: `${titleColor} !important` }}
-            >
-              Bill
-            </Typography>
+            variant="subtitle2"
+            sx={{ color: `${titleColor} !important` }}
+          >
+            Bill
+          </Typography>
         </Box>
         <Box
           display="flex"
@@ -398,7 +432,7 @@ export default function Orders() {
           gap={1.5}
         >
           <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{color: `${dataColor} !important`}} />
+            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
             <Typography
               variant="subtitle1"
               sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
@@ -414,13 +448,12 @@ export default function Orders() {
             {codOrders.length}
           </Typography>
           <Typography
-              variant="subtitle2"
-              sx={{ color: `${titleColor} !important` }}
-            >
-              Orders
-            </Typography>
+            variant="subtitle2"
+            sx={{ color: `${titleColor} !important` }}
+          >
+            Orders
+          </Typography>
         </Box>
-        
       </Box>
     );
   };
@@ -575,7 +608,7 @@ export default function Orders() {
                       value={index}
                       sx={{
                         '&.Mui-selected': { color: statusTab.color },
-                        fontWeight: 600
+                        fontWeight: 600,
                       }}
                     />
                   );
@@ -605,6 +638,16 @@ export default function Orders() {
               <AddIcon />
             </Fab>
           </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            variant="filled"
+            // label="Search orders"
+            placeholder="Search by invoice id, client id, client name or status"
+            value={searchKeywords}
+            onChange={(e) => setSearchKeywords(e.target.value)}
+          />
         </Grid>
       </Grid>
       <Box>
