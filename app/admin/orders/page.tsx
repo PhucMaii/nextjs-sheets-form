@@ -14,7 +14,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '../../utils/enum';
+import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
@@ -35,14 +35,10 @@ import { statusTabs } from '@/app/lib/constant';
 import useClients from '@/hooks/fetch/useClients';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
 import AddIcon from '@mui/icons-material/Add';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SearchIcon from '@mui/icons-material/Search';
 import SearchModal from '../components/Modals/SearchModal';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
-import { ShadowSection } from '../reports/styled';
-import { blue, blueGrey } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
+import OrderOverview from '../components/OrderOverview';
 
 interface Category {
   id: number;
@@ -302,161 +298,165 @@ export default function Orders() {
     );
   };
 
-  const generateOverview = () => {
-    const titleColor = blueGrey[50];
-    const dataColor = 'white';
+  // const generateOverview = () => {
+  //   const titleColor = blueGrey[50];
+  //   const dataColor = 'white';
 
-    const openBill = baseOrderData.filter((order: Order) => {
-      return (
-        order.status === ORDER_STATUS.INCOMPLETED ||
-        order.status === ORDER_STATUS.DELIVERED
-      );
-    });
+  //   const openBill = baseOrderData.filter((order: Order) => {
+  //     return (
+  //       order.status === ORDER_STATUS.INCOMPLETED ||
+  //       order.status === ORDER_STATUS.DELIVERED
+  //     );
+  //   });
 
-    const totalBill =
-      openBill.length > 0
-        ? openBill.reduce((acc: number, order: Order) => {
-            return acc + order.totalPrice;
-          }, 0)
-        : 0;
+  //   const totalBill =
+  //     openBill.length > 0
+  //       ? openBill.reduce((acc: number, order: Order) => {
+  //           return acc + order.totalPrice;
+  //         }, 0)
+  //       : 0;
 
-    const codOrders = baseOrderData.filter((order: Order) => {
-      return order?.preference?.paymentType === PAYMENT_TYPE.COD;
-    });
+  //   const codOrders = baseOrderData.filter((order: Order) => {
+  //     return (
+  //       order?.preference?.paymentType === PAYMENT_TYPE.COD &&
+  //       order.status !== ORDER_STATUS.VOID &&
+  //       order.status !== ORDER_STATUS.COMPLETED
+  //     );
+  //   });
 
-    const codBill =
-      codOrders.length > 0
-        ? codOrders.reduce((acc: number, order: Order) => {
-            return acc + order.totalPrice;
-          }, 0)
-        : 0;
+  //   const codBill =
+  //     codOrders.length > 0
+  //       ? codOrders.reduce((acc: number, order: Order) => {
+  //           return acc + order.totalPrice;
+  //         }, 0)
+  //       : 0;
 
-    return (
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        flexWrap="wrap"
-      >
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <RequestQuoteIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
-            >
-              Bill
-            </Typography>
-          </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {openBill.length}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Open Bill
-          </Typography>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <AttachMoneyIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
-            >
-              Balance Due
-            </Typography>
-          </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {totalBill.toFixed(2)}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Balance due
-          </Typography>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
-            >
-              COD ($)
-            </Typography>
-          </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {codBill.toFixed(2)}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Bill
-          </Typography>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
-            >
-              COD
-            </Typography>
-          </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {codOrders.length}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Orders
-          </Typography>
-        </Box>
-      </Box>
-    );
-  };
+  //   return (
+  //     <Box
+  //       display="flex"
+  //       justifyContent="space-between"
+  //       alignItems="center"
+  //       flexWrap="wrap"
+  //     >
+  //       <Box
+  //         display="flex"
+  //         flexDirection="column"
+  //         justifyContent="center"
+  //         gap={1.5}
+  //       >
+  //         <Box display="flex" gap={1} alignItems="center">
+  //           <RequestQuoteIcon sx={{ color: `${dataColor} !important` }} />
+  //           <Typography
+  //             variant="subtitle1"
+  //             sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+  //           >
+  //             Bill
+  //           </Typography>
+  //         </Box>
+  //         <Typography
+  //           variant="h4"
+  //           fontWeight="bold"
+  //           sx={{ color: `${dataColor} !important` }}
+  //         >
+  //           {openBill.length}
+  //         </Typography>
+  //         <Typography
+  //           variant="subtitle2"
+  //           sx={{ color: `${titleColor} !important` }}
+  //         >
+  //           Open Bill
+  //         </Typography>
+  //       </Box>
+  //       <Box
+  //         display="flex"
+  //         flexDirection="column"
+  //         justifyContent="center"
+  //         gap={1.5}
+  //       >
+  //         <Box display="flex" gap={1} alignItems="center">
+  //           <AttachMoneyIcon sx={{ color: `${dataColor} !important` }} />
+  //           <Typography
+  //             variant="subtitle1"
+  //             sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+  //           >
+  //             Balance Due
+  //           </Typography>
+  //         </Box>
+  //         <Typography
+  //           variant="h4"
+  //           fontWeight="bold"
+  //           sx={{ color: `${dataColor} !important` }}
+  //         >
+  //           {totalBill.toFixed(2)}
+  //         </Typography>
+  //         <Typography
+  //           variant="subtitle2"
+  //           sx={{ color: `${titleColor} !important` }}
+  //         >
+  //           Balance due
+  //         </Typography>
+  //       </Box>
+  //       <Box
+  //         display="flex"
+  //         flexDirection="column"
+  //         justifyContent="center"
+  //         gap={1.5}
+  //       >
+  //         <Box display="flex" gap={1} alignItems="center">
+  //           <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
+  //           <Typography
+  //             variant="subtitle1"
+  //             sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+  //           >
+  //             COD ($)
+  //           </Typography>
+  //         </Box>
+  //         <Typography
+  //           variant="h4"
+  //           fontWeight="bold"
+  //           sx={{ color: `${dataColor} !important` }}
+  //         >
+  //           {codBill.toFixed(2)}
+  //         </Typography>
+  //         <Typography
+  //           variant="subtitle2"
+  //           sx={{ color: `${titleColor} !important` }}
+  //         >
+  //           Bill
+  //         </Typography>
+  //       </Box>
+  //       <Box
+  //         display="flex"
+  //         flexDirection="column"
+  //         justifyContent="center"
+  //         gap={1.5}
+  //       >
+  //         <Box display="flex" gap={1} alignItems="center">
+  //           <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
+  //           <Typography
+  //             variant="subtitle1"
+  //             sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+  //           >
+  //             COD
+  //           </Typography>
+  //         </Box>
+  //         <Typography
+  //           variant="h4"
+  //           fontWeight="bold"
+  //           sx={{ color: `${dataColor} !important` }}
+  //         >
+  //           {codOrders.length}
+  //         </Typography>
+  //         <Typography
+  //           variant="subtitle2"
+  //           sx={{ color: `${titleColor} !important` }}
+  //         >
+  //           Orders
+  //         </Typography>
+  //       </Box>
+  //     </Box>
+  //   );
+  // };
 
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = orderData.map((order: Order) => {
@@ -581,9 +581,10 @@ export default function Orders() {
           </LocalizationProvider>
         </FormControl>
       </Box>
-      <ShadowSection sx={{ backgroundColor: `${blue[800]} !important` }}>
+      {/* <ShadowSection sx={{ backgroundColor: `${blue[800]} !important` }}>
         {generateOverview()}
-      </ShadowSection>
+      </ShadowSection> */}
+      <OrderOverview baseOrderData={baseOrderData} currentDate={date} />
       <Grid container alignItems="center">
         <Grid item xs={12} md={10.5}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
