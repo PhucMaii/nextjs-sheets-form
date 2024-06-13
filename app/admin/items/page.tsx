@@ -53,8 +53,20 @@ export default function ItemPage() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
-    if (categories.length > 0) {
+    if (categories.length > 0 && !currentCategory) {
       setCurrentCategory(categories[0]);
+    }
+
+    if (categories.length > 0 && currentCategory) {
+
+      let targetIndex = 0;
+      categories.forEach((category: Category, index: number) => {
+        if (category.id === currentCategory.id) {
+          targetIndex = index;
+          return;
+        }
+      });
+      setCurrentCategory(categories[targetIndex]);
     }
   }, [categories]);
 
@@ -223,6 +235,49 @@ export default function ItemPage() {
     setBaseItems(newItems);
   };
 
+  const handleUpdateCategoryName = async (newName: string) => {
+    if (newName.trim() === '') {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Item Name Must Not Be Blank'
+      });
+      return;
+    }
+    try {
+      const response = await axios.put(API_URL.CATEGORIES, {
+        updatedCategory: {
+          id: currentCategory.id,
+          name: newName
+        }
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      mutate();
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message
+      })
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error
+      })
+    }
+  }
+
   const handleUpdateItem = async (updatedItem: IItem) => {
     try {
       const response = await axios.put(API_URL.ITEM, {
@@ -287,6 +342,8 @@ export default function ItemPage() {
       <EditCategory 
         open={isEditCategory}
         onClose={() => setIsEditCategory(false)}
+        updateCategory={handleUpdateCategoryName}
+        currentName={currentCategory?.name}
       />
       <NotificationPopup
         notification={notification}
