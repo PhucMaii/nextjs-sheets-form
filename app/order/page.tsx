@@ -163,7 +163,7 @@ export default function OrderForm() {
     return (
       <Sidebar>
         <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-          <LoadingComponent color="blue" />
+          <LoadingComponent />
         </div>
       </Sidebar>
     );

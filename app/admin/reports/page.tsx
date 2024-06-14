@@ -628,7 +628,7 @@ export default function ReportPage() {
               alignItems="center"
               sx={{ width: '100%', mt: 2 }}
             >
-              <LoadingComponent color="blue" />
+              <LoadingComponent />
             </Box>
           ) : clientOrders.length > 0 ? (
             <ClientOrdersTable

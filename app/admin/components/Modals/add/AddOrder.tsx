@@ -308,7 +308,7 @@ export default function AddOrder({
                 alignItems="center"
                 sx={{ width: '100%' }}
               >
-                <LoadingComponent color="blue" />
+                <LoadingComponent />
               </Box>
             ) : itemList.length === 0 ? (
               <ErrorComponent errorText="User Has No Items" />

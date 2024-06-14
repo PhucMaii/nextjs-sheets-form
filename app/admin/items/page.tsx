@@ -120,7 +120,7 @@ export default function ItemPage() {
     );
     setItems(itemData);
     setBaseItems(itemData);
-    setIsFetching(false);
+    // setIsFetching(false);
   };
 
   const handleAddItem = async (newItem: IItem) => {

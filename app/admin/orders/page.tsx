@@ -702,7 +702,7 @@ export default function Orders() {
         <>
           {uppperContent}
           <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
-            <LoadingComponent color="blue" />
+            <LoadingComponent />
           </div>
         </>
       ) : (
