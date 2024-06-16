@@ -139,7 +139,7 @@ model ScheduleOrders {
 }
 
 model Route {
-  id       Int    @id @default(autoincrement())
+  id       Int         @id @default(autoincrement())
   name     String
   day      String
   driverId Int
@@ -151,7 +151,8 @@ model Route {
 model UserRoute {
   userId  Int
   routeId Int
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  route   Route  @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  route   Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
   @@id([userId, routeId])
 }

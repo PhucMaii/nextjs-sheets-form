@@ -7,11 +7,15 @@ export const CardStyled = styled(Card)`
     box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px; !important;
 `;
 
-export const IconBackground = styled.div`
+interface IIconBackground {
+  $backgroundColor?: string;
+}
+
+export const IconBackground = styled.div<IIconBackground>`
   border-radius: 50%;
   width: 80px;
   height: 80px;
-  background-color: rgba(52, 152, 219, 0.15);
+  background-color: ${(props) => props.$backgroundColor ? props.$backgroundColor : 'rgba(52, 152, 219, 0.15)'};
   display: flex;
   justify-content: center;
   align-items: center;

@@ -34,6 +34,11 @@ export const limitOrderHour = 8;
 
 export const tabs = [
   {
+    name: 'Overview',
+    icon: DashboardIcon,
+    path: '/admin/overview'
+  },
+  {
     name: 'Orders',
     icon: ReceiptLongIcon,
     path: '/admin/orders',

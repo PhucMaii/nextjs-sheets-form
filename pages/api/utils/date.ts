@@ -11,11 +11,11 @@ export const convertDeliveryDateStringToDate = (deliveryDate: string) => {
 };
 
 export const filterDateRangeOrders = (
-  orders: Order[],
+  orders: Order[] | any,
   startDate: Date,
   endDate: Date,
 ): Order[] => {
-  const filteredDateRangeOrders = orders.filter((order: Order) => {
+  const filteredDateRangeOrders = orders.filter((order: Order): any => {
     const orderDeliveryDate = convertDeliveryDateStringToDate(
       order.deliveryDate,
     );
@@ -28,7 +28,7 @@ export const filterDateRangeOrders = (
   return sortedOrders;
 };
 
-const sortByDeliveryDate = (orders: Order[]) => {
+const sortByDeliveryDate = (orders: Order[]): any => {
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(
       orderA.deliveryDate,

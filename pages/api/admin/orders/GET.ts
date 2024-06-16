@@ -24,8 +24,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       fetchCondition.deliveryDate = date;
     }
 
-    // Fetch today's order and status Incompleted only
-    const orders = await prisma.orders.findMany({
+    const orders: any = await prisma.orders.findMany({
       where: fetchCondition,
       orderBy: [
         {

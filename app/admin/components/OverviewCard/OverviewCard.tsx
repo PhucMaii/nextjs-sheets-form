@@ -9,6 +9,9 @@ interface PropTypes {
   value: number | string;
   onClick?: any;
   helperText?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  iconBackground?: string;
 }
 
 export default function OverviewCard({
@@ -17,21 +20,29 @@ export default function OverviewCard({
   value,
   onClick,
   helperText,
+  backgroundColor,
+  textColor,
+  iconBackground,
 }: PropTypes) {
   return (
-    <CardStyled onClick={onClick ? onClick : null}>
+    <CardStyled
+      sx={{ backgroundColor: backgroundColor ? backgroundColor : 'white' }}
+      onClick={onClick ? onClick : null}
+    >
       <Grid container spacing={2} margin={'auto'}>
         <Grid item xs={5}>
-          <IconBackground>{icon}</IconBackground>
+          <IconBackground $backgroundColor={iconBackground}>
+            {icon}
+          </IconBackground>
         </Grid>
         <Grid item xs={7}>
-          <Typography fontWeight="bold" variant="h4">
+          <Typography fontWeight="bold" variant="h4" sx={{color: textColor, width: '90% !important'}}>
             {value}
           </Typography>
           {helperText && (
             <Typography
               fontWeight="bold"
-              sx={{ color: grey[500] }}
+              sx={{ color: textColor ? textColor : grey[500] }}
               variant="subtitle1"
             >
               {helperText}
@@ -40,7 +51,7 @@ export default function OverviewCard({
           <Typography
             marginTop={helperText ? '0px' : '8px'}
             fontWeight="bold"
-            sx={{ color: grey[500] }}
+            sx={{ color: textColor ? textColor : grey[500], width: '90% !important' }}
           >
             {text}
           </Typography>
