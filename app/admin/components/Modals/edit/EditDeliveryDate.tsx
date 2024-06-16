@@ -7,11 +7,11 @@ import {
   Typography,
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { ModalProps } from './type';
-import { BoxModal } from './styled';
+import { ModalProps } from '../type';
+import { BoxModal } from '../styled';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import { Order } from '../../orders/page';
+import { Order } from '../../../orders/page';
 import { Notification, ScheduledOrder } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';

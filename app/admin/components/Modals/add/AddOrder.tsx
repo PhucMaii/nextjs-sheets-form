@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { ModalProps } from './type';
+import { ModalProps } from '../type';
 import {
   Autocomplete,
   Box,
@@ -17,13 +17,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import { LoadingButton } from '@mui/lab';
-import { Item, Notification, UserType } from '@/app/utils/type';
+import { IItem, Notification, UserType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import ErrorComponent from '../ErrorComponent';
+import ErrorComponent from '../../ErrorComponent';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { OrderedItems } from '@prisma/client';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -35,7 +35,7 @@ import {
   generateCurrentTime,
   generateRecommendDate,
 } from '@/app/utils/time';
-import { limitOrderHour } from '../../../lib/constant';
+import { limitOrderHour } from '../../../../lib/constant';
 import moment from 'moment';
 import { infoColor } from '@/app/theme/color';
 
@@ -47,9 +47,9 @@ interface PropTypes extends ModalProps {
     clientValue: UserType | null,
     deliveryDate: string,
     note: string,
-    itemList: Item[],
+    itemList: IItem[],
   ) => Promise<void>;
-  createScheduledOrder?: (userId: number, items: Item[]) => Promise<void>;
+  createScheduledOrder?: (userId: number, items: IItem[]) => Promise<void>;
 }
 
 export default function AddOrder({
@@ -67,7 +67,7 @@ export default function AddOrder({
   );
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [itemList, setItemList] = useState<Item[]>([]);
+  const [itemList, setItemList] = useState<IItem[]>([]);
   const [note, setNote] = useState<string>('');
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function AddOrder({
 
       const lastOrder = response.data.data[0];
 
-      const newItemList = itemList.map((item: Item) => {
+      const newItemList = itemList.map((item: IItem) => {
         const targetItem = lastOrder.items.find((targetItem: OrderedItems) => {
           return targetItem.name === item.name;
         });
@@ -148,7 +148,7 @@ export default function AddOrder({
         return;
       }
 
-      const quantitySetUp = response.data.data.map((item: Item) => {
+      const quantitySetUp = response.data.data.map((item: IItem) => {
         return { ...item, quantity: 0, totalPrice: 0 };
       });
 
@@ -313,7 +313,7 @@ export default function AddOrder({
             ) : itemList.length === 0 ? (
               <ErrorComponent errorText="User Has No Items" />
             ) : (
-              itemList.map((item: Item, index: number) => {
+              itemList.map((item: IItem, index: number) => {
                 return (
                   <Fragment key={index}>
                     <Grid item xs={6}>

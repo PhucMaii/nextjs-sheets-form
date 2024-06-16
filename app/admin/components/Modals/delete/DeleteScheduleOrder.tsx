@@ -1,34 +1,32 @@
 'use client';
 import { Box, Button, Modal, Typography } from '@mui/material';
 import React, { useState } from 'react';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import ErrorIcon from '@mui/icons-material/Error';
 import { errorColor } from '@/app/theme/color';
 import { grey } from '@mui/material/colors';
+import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   targetObj: any;
-  handleDelete: (deletedOrder: any) => Promise<void>;
-  includedButton?: boolean;
-  open?: boolean;
-  handleCloseModal?: () => void;
+  handleDelete: (
+    deletedOrder: any,
+    deleteOption: DELETE_OPTION,
+  ) => Promise<void>;
 }
 
-export default function DeleteModal({
+export default function DeleteScheduleOrder({
   targetObj,
   handleDelete,
-  includedButton,
-  open,
-  handleCloseModal,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  const handleDeleteOrder = async () => {
+  const handleDeleteOrder = async (deleteOption: DELETE_OPTION) => {
     try {
       setIsDeleting(true);
-      await handleDelete(targetObj);
+      await handleDelete(targetObj, deleteOption);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('Fail to delete order: ' + error);
@@ -37,27 +35,16 @@ export default function DeleteModal({
   };
   return (
     <>
-      {includedButton && (
-        <Button
-          color="error"
-          onClick={(e: any) => {
-            e.stopPropagation();
-            setIsOpen(true);
-          }}
-        >
-          DELETE
-        </Button>
-      )}
-      <Modal
-        open={open || isOpen}
-        onClose={() => {
-          if (handleCloseModal) {
-            handleCloseModal();
-          } else {
-            setIsOpen(false);
-          }
+      <Button
+        color="error"
+        onClick={(e: any) => {
+          e.stopPropagation();
+          setIsOpen(true);
         }}
       >
+        DELETE
+      </Button>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
         <BoxModal
           display="flex"
           flexDirection="column"
@@ -70,26 +57,21 @@ export default function DeleteModal({
             Are you sure to delete ?
           </Typography>
           <Box display="flex" gap={2}>
-            <Button
+            <LoadingButton
               variant="outlined"
               color="error"
-              onClick={() => {
-                if (handleCloseModal) {
-                  handleCloseModal();
-                } else {
-                  setIsOpen(false);
-                }
-              }}
-            >
-              Cancel
-            </Button>
-            <LoadingButton
-              color="error"
               loading={isDeleting}
-              onClick={handleDeleteOrder}
-              variant="contained"
+              onClick={() => handleDeleteOrder(DELETE_OPTION.PERMANENT)}
             >
               DELETE
+            </LoadingButton>
+            <LoadingButton
+              loading={isDeleting}
+              onClick={() => handleDeleteOrder(DELETE_OPTION.TEMPORARY)}
+              variant="contained"
+              color="error"
+            >
+              REMOVE FROM ROUTE
             </LoadingButton>
           </Box>
         </BoxModal>

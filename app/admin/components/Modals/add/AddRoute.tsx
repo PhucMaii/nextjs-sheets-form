@@ -1,3 +1,6 @@
+import React, { Dispatch, SetStateAction, useState } from 'react';
+import { ModalProps } from '../type';
+import { Driver } from '@prisma/client';
 import {
   Autocomplete,
   Box,
@@ -10,89 +13,62 @@ import {
   Typography,
   Checkbox,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { ModalProps } from './type';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { Driver } from '@prisma/client';
-import { IUserRoutes, Notification, IRoutes, UserType } from '@/app/utils/type';
+import { Notification, IRoutes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
-interface IEditRouteModal extends ModalProps {
-  route: IRoutes;
+interface PropTypes extends ModalProps {
+  day: string;
   driverList: Driver[];
   clientList: UserType[];
-  day: string;
+  disabledClientList: UserType[];
   setNotification: Dispatch<SetStateAction<Notification>>;
-  handleUpdateRouteUI: (targetRoute: IRoutes) => void;
+  handleAddRouteUI: (targetRoute: IRoutes) => void;
 }
 
-const convertFromUserRouteToUser = (clientList: IUserRoutes[]) => {
-  const formattedClients = clientList.map((userRoute: IUserRoutes) => {
-    return userRoute.user;
-  });
-
-  return formattedClients;
-};
-
-export default function EditRoute({
+export default function AddRoute({
   open,
   onClose,
-  route,
+  day,
   driverList,
   clientList,
-  day,
+  disabledClientList,
   setNotification,
-  handleUpdateRouteUI,
-}: IEditRouteModal) {
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [updatedRoute, setUpdatedRoute] = useState<IRoutes>(route);
-  const [selectedClients, setSelectedClients] = useState<UserType[]>(() => {
-    if (route?.clients) {
-      const formattedClients = convertFromUserRouteToUser(route.clients);
-      return formattedClients;
-    }
-    return [];
+  handleAddRouteUI,
+}: PropTypes) {
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [newRoute, setNewRoute] = useState<IRoutes>({
+    id: -1,
+    name: '',
+    driverId: -1,
+    day,
   });
+  const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
 
-  useEffect(() => {
-    setUpdatedRoute(route);
-
-    if (route?.clients) {
-      const formattedClients = convertFromUserRouteToUser(route.clients);
-      setSelectedClients(formattedClients);
-    } else {
-      setSelectedClients([]);
-    }
-  }, [route]);
-
-  const updateRoute = async () => {
-    if (updatedRoute.name.trim() === '' || updatedRoute.driverId === -1) {
+  const addRoute = async () => {
+    if (
+      newRoute.driverId === -1 ||
+      newRoute.name.trim() === '' ||
+      selectedClients.length === 0
+    ) {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Invalid name or driver',
+        message: 'Please fill out all blanks',
       });
       return;
     }
     try {
-      setIsUpdating(true);
-      const updatedValue: any = {};
-      if (updatedRoute.name !== route.name) {
-        updatedValue.name = updatedRoute.name;
-      }
-
-      if (updatedRoute.driverId !== route.driverId) {
-        updatedValue.driverId = updatedRoute.driverId;
-      }
-      const response = await axios.put(API_URL.ROUTES, {
-        routeId: route.id,
-        ...updatedValue,
-        updatedClients: selectedClients,
+      setIsAdding(true);
+      const response = await axios.post(API_URL.ROUTES, {
         day,
+        driverId: newRoute.driverId,
+        name: newRoute.name,
+        clientList: selectedClients,
       });
 
       if (response.data.error) {
@@ -101,26 +77,26 @@ export default function EditRoute({
           type: 'error',
           message: response.data.error,
         });
-        setIsUpdating(false);
+        setIsAdding(false);
         return;
       }
 
-      handleUpdateRouteUI(response.data.data);
+      handleAddRouteUI(response.data.data);
 
       setNotification({
         on: true,
         type: 'success',
         message: response.data.message,
       });
-      setIsUpdating(false);
+      setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
+        message: 'There was an error: ' + error,
       });
-      setIsUpdating(false);
+      setIsAdding(false);
     }
   };
 
@@ -134,12 +110,16 @@ export default function EditRoute({
         gap={2}
       >
         <ModalHead
-          heading="Edit Route"
-          onClick={updateRoute}
+          heading="Add Route"
+          onClick={addRoute}
           buttonProps={{
-            loading: isUpdating,
+            loading: isAdding,
+            disabled:
+              newRoute.driverId === -1 ||
+              newRoute.name.trim() === '' ||
+              selectedClients.length === 0,
           }}
-          buttonLabel="EDIT"
+          buttonLabel="ADD"
         />
         <Divider />
         <Grid container spacing={2}>
@@ -148,9 +128,9 @@ export default function EditRoute({
               <Typography variant="h6">Route Name:</Typography>
               <TextField
                 label="Route Name"
-                value={updatedRoute.name}
+                value={newRoute.name}
                 onChange={(e) =>
-                  setUpdatedRoute({ ...updatedRoute, name: e.target.value })
+                  setNewRoute({ ...newRoute, name: e.target.value })
                 }
               />
             </Box>
@@ -159,12 +139,9 @@ export default function EditRoute({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Driver:</Typography>
               <Select
-                value={updatedRoute.driverId}
+                value={newRoute.driverId}
                 onChange={(e) =>
-                  setUpdatedRoute({
-                    ...updatedRoute,
-                    driverId: +e.target.value,
-                  })
+                  setNewRoute({ ...newRoute, driverId: +e.target.value })
                 }
               >
                 <MenuItem value={-1}>-- Choose a driver --</MenuItem>
@@ -185,8 +162,13 @@ export default function EditRoute({
               <Autocomplete
                 multiple
                 options={clientList}
+                getOptionDisabled={(option) => {
+                  const isOptionInvalid = disabledClientList.some(
+                    (client: UserType) => option.id === client.id,
+                  );
+                  return isOptionInvalid;
+                }}
                 disableCloseOnSelect
-                isOptionEqualToValue={(option, value) => option.id === value.id}
                 getOptionLabel={(option: UserType) =>
                   `${option.clientName} - ${option.clientId}`
                 }

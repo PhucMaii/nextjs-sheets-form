@@ -19,7 +19,7 @@ import { Notification, UserType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import NotificationPopup from '../components/Notification';
-import ClientsTable from '../components/ClientsTable';
+import ClientsTable from '../components/Tables/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { ShadowSection } from '../reports/styled';
 import useDebounce from '@/hooks/useDebounce';
@@ -31,8 +31,8 @@ import ErrorComponent from '../components/ErrorComponent';
 import { DropdownItemContainer } from '../orders/styled';
 import SingleFieldUpdate, {
   SingleFieldUpdateProps,
-} from '../components/Modals/SingleFieldUpdate';
-import AddClient from '../components/Modals/AddClient';
+} from '../components/Modals/edit/SingleFieldUpdate';
+import AddClient from '../components/Modals/add/AddClient';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
 import useCategories from '@/hooks/fetch/useCategories';
 
@@ -62,7 +62,7 @@ export default function ClientsPage() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const { subcategories } = useSubCategories();
+  const { subCategories } = useSubCategories();
   const { categories } = useCategories();
 
   useEffect(() => {
@@ -380,7 +380,7 @@ export default function ClientsPage() {
         open={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
         categories={categories}
-        subCategories={subcategories}
+        subCategories={subCategories}
         setNotification={setNotification}
         handleAddClientUI={handleAddClientUI}
       />
@@ -462,7 +462,7 @@ export default function ClientsPage() {
             selectedClients={selectedClients}
             handleSelectClient={handleSelectClient}
             handleSelectAll={handleSelectAll}
-            subCategories={subcategories}
+            subCategories={subCategories}
           />
         ) : (
           <ErrorComponent errorText="No User Found" />

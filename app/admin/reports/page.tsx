@@ -31,7 +31,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { blue } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
-import ClientOrdersTable from '../components/ClientOrdersTable';
+import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import {
   YYYYMMDDFormat,
@@ -103,7 +103,7 @@ export default function ReportPage() {
   const currentDate = convertDeliveryDateStringToDate(datePicker);
   const { routes, mutate } = useRoutes(days[currentDate.getDay()]);
   const { clientList } = useClients();
-  const { subcategories } = useSubCategories();
+  const { subCategories } = useSubCategories();
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');
@@ -639,7 +639,7 @@ export default function ReportPage() {
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               handleSelectAll={handleSelectAll}
-              subCategories={subcategories}
+              subCategories={subCategories}
             />
           ) : (
             <ErrorComponent errorText="No Order Available" />

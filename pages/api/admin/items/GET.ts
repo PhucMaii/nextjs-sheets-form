@@ -1,20 +1,34 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+interface IQuery {
+  categoryId?: string;
+}
+
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    // Get all categories
-    const cateogries = await prisma.category.findMany({
+    const { categoryId }: IQuery = req.query;
+
+    if (!categoryId) {
+      return res.status(404).json({
+        error: 'Category id is missing',
+      });
+    }
+
+    const items = await prisma.item.findMany({
+      where: {
+        categoryId: Number(categoryId),
+      },
       include: {
-        users: true,
+        subCategory: true,
       },
     });
 
     return res.status(200).json({
-      data: cateogries,
-      message: 'Fetch All Categories Successfully',
+      data: items,
+      message: 'Fetch Items Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

@@ -20,11 +20,11 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Item, Order } from '../../orders/page';
+import { Item, Order } from '../../../orders/page';
 import { formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
@@ -32,7 +32,7 @@ import { Notification, OrderedItems } from '@/app/utils/type';
 import { errorColor } from '@/app/theme/color';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import UpdateChoiceSelection from '../UpdateChoiceSelection';
+import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { SubCategory } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 
@@ -54,6 +54,7 @@ export default function EditReportOrder({
   const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
   const [newItem, setNewItem] = useState<Item>({
+    id: -1,
     name: '',
     price: 0,
     quantity: 0,
@@ -95,12 +96,15 @@ export default function EditReportOrder({
       });
     } else {
       const totalPrice = newItem.quantity * newItem.price;
-      const newItemData: any = { ...newItem, totalPrice, name: newItemName };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...restOfNewItem} = newItem;
+      const newItemData: any = { ...restOfNewItem, totalPrice, name: newItemName };
       if (subCategoryId > 0) {
         newItemData.subCategoryId = subCategoryId;
       }
       setItemList([...itemList, newItemData]);
       setNewItem({
+        id: -1,
         name: '',
         price: 0,
         quantity: 0,

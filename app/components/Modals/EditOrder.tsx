@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { BoxModal } from '@/app/admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
-import { Order } from '@/app/admin/orders/page';
+import { Item, Order } from '@/app/admin/orders/page';
 import { infoColor } from '@/app/theme/color';
-import { Item, Notification } from '@/app/utils/type';
+import { Notification } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,

@@ -21,15 +21,15 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { BoxModal } from './styled';
-import { ModalProps } from './type';
+import { BoxModal } from '../styled';
+import { ModalProps } from '../type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
-import { Order } from '../../orders/page';
+import { Order } from '../../../orders/page';
 import { errorColor } from '@/app/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import UpdateChoiceSelection from '../UpdateChoiceSelection';
+import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { SubCategory } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 
@@ -150,7 +150,11 @@ export default function EditPrice({
         return;
       }
 
-      handleUpdatePriceUI(order, itemList, totalPrice);
+      handleUpdatePriceUI(
+        updateOption === UpdateOption.CREATE ? response.data.data : order,
+        itemList,
+        totalPrice,
+      );
 
       setNotification({
         on: true,

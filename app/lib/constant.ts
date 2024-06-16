@@ -6,6 +6,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
+import KitchenIcon from '@mui/icons-material/Kitchen';
 import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
@@ -36,6 +37,11 @@ export const tabs = [
     name: 'Orders',
     icon: ReceiptLongIcon,
     path: '/admin/orders',
+  },
+  {
+    name: 'Items',
+    icon: KitchenIcon,
+    path: '/admin/items',
   },
   {
     name: 'Reports',

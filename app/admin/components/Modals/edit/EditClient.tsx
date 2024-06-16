@@ -10,10 +10,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { BoxModal } from './styled';
+import { BoxModal } from '../styled';
 import { UserType } from '@/app/utils/type';
 import { Category } from '@prisma/client';
-import AutoCompleteAddress from '../AutoCompleteAddress';
+import AutoCompleteAddress from '../../AutoCompleteAddress';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
