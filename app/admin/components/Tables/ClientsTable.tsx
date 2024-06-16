@@ -174,8 +174,7 @@ const ClientsTable = ({
         <TableCell>
           <Select
             value={client.subCategoryId || 'N/A'}
-            onChange={(e, newValue) => {
-              console.log(newValue);
+            onChange={(e) => {
               handleUpdateClient(client.id, { subCategoryId: +e.target.value });
             }}
           >

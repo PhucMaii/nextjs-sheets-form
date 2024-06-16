@@ -1,20 +1,21 @@
 import React from 'react';
 import loaderStyle from './style.module.css';
 
-interface PropTypes {
-  color: string;
-  width?: string;
-  height?: string;
-}
-
-export default function LoadingComponent({ color, width }: PropTypes) {
+export default function LoadingComponent() {
   return (
-    <div className="flex justify-center">
-      <div
+    <div className="flex justify-center flex-col items-center">
+      {/* <div
         className={`${loaderStyle.loader} ${width ? `w-${width}` : 'w-12'}
         } text-${color}-500`}
         role="status"
-      ></div>
+      ></div> */}
+      <div className={loaderStyle.loader}>
+        <img
+          alt="Supreme Sprouts Logo"
+          src="/supremesproutsIcon.png"
+        />
+      </div>
+      <div className={loaderStyle.text}></div>
     </div>
   );
 }

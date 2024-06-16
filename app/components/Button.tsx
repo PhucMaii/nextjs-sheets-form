@@ -47,7 +47,7 @@ export default function Button({
     >
       {loadingButton &&
         (isLoading ? (
-          <LoadingComponent color="white" width="6" />
+          <LoadingComponent />
         ) : (
           <svg
             width="25"
