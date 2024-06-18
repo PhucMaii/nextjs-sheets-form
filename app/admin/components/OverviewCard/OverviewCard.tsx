@@ -30,12 +30,12 @@ export default function OverviewCard({
       onClick={onClick ? onClick : null}
     >
       <Grid container spacing={2} margin={'auto'}>
-        <Grid item xs={5}>
+        <Grid item xs={4}>
           <IconBackground $backgroundColor={iconBackground}>
             {icon}
           </IconBackground>
         </Grid>
-        <Grid item xs={7}>
+        <Grid item xs={8}>
           <Typography fontWeight="bold" variant="h4" sx={{color: textColor, width: '90% !important'}}>
             {value}
           </Typography>
