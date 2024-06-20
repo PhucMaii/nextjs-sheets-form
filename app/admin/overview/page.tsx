@@ -231,7 +231,7 @@ export default function Overview() {
           <ManifestTable manifest={overviewData.manifest || null} />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h5" fontWeight="bold">
+          <Typography variant="h5" fontWeight="bold" sx={{my: 2}}>
             Customers in debt
           </Typography>
           <CustomersInDebt customersInDebt={customersInDebt} />
