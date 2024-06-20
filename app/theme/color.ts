@@ -17,3 +17,5 @@ export const warningBackground = yellow[50];
 export const infoBackground = blue[50];
 
 export const greyBackground = blueGrey[700];
+
+export const primaryColor = blue[800]

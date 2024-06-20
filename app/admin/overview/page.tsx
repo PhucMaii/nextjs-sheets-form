@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar/Sidebar'
 import NotificationPopup from '../components/Notification'
 import { Notification } from '@/app/utils/type'
-import { Grid, Typography } from '@mui/material';
+import { Box, CircularProgress, Grid, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import OverviewData from '../components/OverviewData';
@@ -12,8 +12,44 @@ import { API_URL } from '@/app/utils/enum';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
 import PieChart from '../components/Charts/PieChart';
+import { primaryColor } from '@/app/theme/color';
+import ManifestTable from '../components/Tables/ManifestTable';
+
+function CircularProgressWithLabel(props: any) {
+    return (
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'inline-flex',
+          transform: `scale(4)`,
+          transformOrigin: 'center center',
+        }}
+      >
+        <CircularProgress variant="determinate" {...props} />
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: 'absolute',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="caption" component="div" sx={{color: primaryColor, fontSize: 5}}>
+            <strong>{`${Math.round(props.value)}%`}</strong>
+            <br />
+            Revenue
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
 
 export default function Overview() {
+    const [beansproutsData, setBeansproutsData] = useState<any>();
     const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
     const [notification, setNotification] = useState<Notification>({
       on: false,
@@ -35,6 +71,7 @@ export default function Overview() {
 
             setOverviewData(returnData.overviewData);
             setRevenueData(returnData.reports);
+            setBeansproutsData(returnData.beansprouts)
         } catch (error: any) {
             console.log('There was an error: ', error);
             setNotification({
@@ -80,6 +117,57 @@ export default function Overview() {
                 <PieChart overviewData={overviewData} />
                 <Typography variant="h6">Paid vs Unpaid</Typography>
             </ShadowSection>
+        </Grid>
+        <Grid item xs={12} md={6}>
+            <ShadowSection>
+                <Typography color={primaryColor} fontWeight="bold" variant="h6">B.K</Typography>
+                <Grid container mt={2} alignItems="center">
+                    <Grid item xs={6}>
+                        <Box display="flex" flexDirection="column" gap={2}>
+                            <ShadowSection sx={{backgroundColor: primaryColor, color: 'white'}}>
+                                <Typography sx={{fontWeight: 50}} variant='subtitle1'>Number of bags</Typography>
+                                <Typography fontWeight="bold" variant="h6">{beansproutsData?.BKQuantity || 0} bags</Typography>
+                            </ShadowSection>
+                            <ShadowSection sx={{backgroundColor: primaryColor, color: 'white'}}>
+                                <Typography sx={{fontWeight: 50}} variant='subtitle1'>Revenue ($)</Typography>
+                                <Typography fontWeight="bold" variant="h6">{beansproutsData?.BKRevenue || 0}</Typography>
+                            </ShadowSection>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={6} textAlign="center">
+                        <CircularProgressWithLabel value={beansproutsData?.BKPercentage || 0}/>
+                    </Grid>
+                </Grid>
+            </ShadowSection>
+        </Grid>
+        <Grid item xs={12} md={6}>
+            <ShadowSection>
+                <Typography color={primaryColor} fontWeight="bold" variant="h6">P.P</Typography>
+                <Grid container mt={2} alignItems="center">
+                    <Grid item xs={6}>
+                        <Box display="flex" flexDirection="column" gap={2}>
+                            <ShadowSection sx={{backgroundColor: primaryColor, color: 'white'}}>
+                                <Typography sx={{fontWeight: 50}} variant='subtitle1'>Number of bags</Typography>
+                                <Typography fontWeight="bold" variant="h6">{beansproutsData?.PPQuantity || 0} bags</Typography>
+                            </ShadowSection>
+                            <ShadowSection sx={{backgroundColor: primaryColor, color: 'white'}}>
+                                <Typography sx={{fontWeight: 50}} variant='subtitle1'>Revenue</Typography>
+                                <Typography fontWeight="bold" variant="h6">{beansproutsData?.PPRevenue || 0}</Typography>
+                            </ShadowSection>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={6} textAlign="center">
+                        <CircularProgressWithLabel value={beansproutsData?.PPPercentage || 0} />
+                    </Grid>
+                </Grid>
+            </ShadowSection>
+        </Grid>
+        <Grid item xs={12}>
+          <Box display="flex" flexDirection="column" mb={2}>
+            <Typography variant="h5" fontWeight="bold">Manifest</Typography>
+            <Typography variant="subtitle2">Delivered Items</Typography>
+          </Box>
+          <ManifestTable manifest={overviewData.manifest || null} />
         </Grid>
       </Grid>
     </Sidebar>

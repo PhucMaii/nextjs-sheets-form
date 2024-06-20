@@ -1,4 +1,4 @@
-import { blue, blueGrey } from '@mui/material/colors';
+import { blueGrey } from '@mui/material/colors';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Order } from '../orders/page';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
@@ -11,6 +11,7 @@ import useRoutes from '@/hooks/fetch/useRoutes';
 import { days } from '@/app/lib/constant';
 import { IRoutes } from '@/app/utils/type';
 import { UserRoute } from '@prisma/client';
+import { primaryColor } from '@/app/theme/color';
 
 interface IProps {
   baseOrderData: Order[];
@@ -89,7 +90,7 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
   }
 
   return (
-    <ShadowSection sx={{ backgroundColor: `${blue[800]} !important` }}>
+    <ShadowSection sx={{ backgroundColor: `${primaryColor} !important` }}>
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Select
           label="Routes"

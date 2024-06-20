@@ -297,7 +297,7 @@ export default function Orders() {
       ),
     );
   };
-  
+
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = orderData.map((order: Order) => {
       // If order is at targetOrder, then update
@@ -421,9 +421,6 @@ export default function Orders() {
           </LocalizationProvider>
         </FormControl>
       </Box>
-      {/* <ShadowSection sx={{ backgroundColor: `${blue[800]} !important` }}>
-        {generateOverview()}
-      </ShadowSection> */}
       <OrderOverview baseOrderData={baseOrderData} currentDate={date} />
       <Grid container alignItems="center">
         <Grid item xs={12} md={10.5}>

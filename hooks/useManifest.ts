@@ -78,11 +78,10 @@ const useManifest = (
       items.flat(),
       ({ routeId }: any) => routeId,
     );
-    const groupItemClients: any = groupBy(
-      items.flat(),
-      ({ client }: any) => client,
-    );
-    console.log(groupItemClients, 'groupItemClients');
+    // const groupItemClients: any = groupBy(
+    //   items.flat(),
+    //   ({ client }: any) => client,
+    // );
 
     for (const itemRoute in groupItemRoutes) {
       const manifestItem = groupItemRoutes[itemRoute].reduce(
