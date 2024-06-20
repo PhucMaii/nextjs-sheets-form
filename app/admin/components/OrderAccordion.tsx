@@ -337,7 +337,12 @@ const OrderAccordion = ({
               <Typography fontWeight="bold" variant="subtitle1">
                 Total: ${order.totalPrice.toFixed(2)}
               </Typography>
-              <Box display="flex" gap={2} alignItems="center" justifyContent="center">
+              <Box
+                display="flex"
+                gap={2}
+                alignItems="center"
+                justifyContent="center"
+              >
                 <Typography fontWeight="bold" variant="subtitle1">
                   Delivery Date: {order.deliveryDate}
                 </Typography>

@@ -1,19 +1,22 @@
 import { ApexOptions } from 'apexcharts';
+import dynamic from 'next/dynamic';
 import React from 'react';
-import ReactApexChart from 'react-apexcharts';
+
+export const DynamicApexCharts = dynamic(() => import('react-apexcharts'), {
+  ssr: false, // Ensure ApexCharts is not imported during SSR
+});
 
 interface IProps {
-    timeSeries: string[]; // list of delivery date
-    thisMonthData: number[];
-    lastMonthData: number[];
+  timeSeries: string[]; // list of delivery date
+  thisMonthData: number[];
+  lastMonthData: number[];
 }
 
 export default function AreaChart({
-    timeSeries,
-    thisMonthData,
-    lastMonthData
+  timeSeries,
+  thisMonthData,
+  lastMonthData,
 }: IProps) {
-    console.log({timeSeries, thisMonthData, lastMonthData});
   const series = [
     {
       name: 'Current Month',
@@ -47,7 +50,7 @@ export default function AreaChart({
   };
 
   return (
-    <ReactApexChart
+    <DynamicApexCharts
       options={options}
       series={series}
       type="line"

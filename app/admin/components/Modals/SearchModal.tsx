@@ -92,7 +92,7 @@ export default function SearchModal({
               width: 'fit-content',
               padding: 1,
               borderRadius: 2,
-              mb: 2
+              mb: 2,
             }}
           >
             <Typography variant="h6">

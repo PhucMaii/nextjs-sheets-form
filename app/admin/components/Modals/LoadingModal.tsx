@@ -49,7 +49,9 @@ export default function LoadingModal({ open, progress }: PropTypes) {
           <CircularProgressWithLabel value={progress} />
         </div>
       ) : (
-        <SplashScreen />
+        <div>
+          <SplashScreen />
+        </div>
       )}
     </Modal>
   );

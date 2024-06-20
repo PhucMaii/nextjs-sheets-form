@@ -58,7 +58,6 @@ export default function ItemPage() {
     }
 
     if (categories.length > 0 && currentCategory) {
-
       let targetIndex = 0;
       categories.forEach((category: Category, index: number) => {
         if (category.id === currentCategory.id) {
@@ -240,7 +239,7 @@ export default function ItemPage() {
       setNotification({
         on: true,
         type: 'error',
-        message: 'Item Name Must Not Be Blank'
+        message: 'Item Name Must Not Be Blank',
       });
       return;
     }
@@ -248,8 +247,8 @@ export default function ItemPage() {
       const response = await axios.put(API_URL.CATEGORIES, {
         updatedCategory: {
           id: currentCategory.id,
-          name: newName
-        }
+          name: newName,
+        },
       });
 
       if (response.data.error) {
@@ -266,17 +265,17 @@ export default function ItemPage() {
       setNotification({
         on: true,
         type: 'success',
-        message: response.data.message
-      })
+        message: response.data.message,
+      });
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: error.response.data.error
-      })
+        message: error.response.data.error,
+      });
     }
-  }
+  };
 
   const handleUpdateItem = async (updatedItem: IItem) => {
     try {
@@ -339,7 +338,7 @@ export default function ItemPage() {
         open={isDeleteModalOpen}
         handleCloseModal={() => setIsDeleteModalOpen(false)}
       />
-      <EditCategory 
+      <EditCategory
         open={isEditCategory}
         onClose={() => setIsEditCategory(false)}
         updateCategory={handleUpdateCategoryName}

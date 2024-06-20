@@ -22,6 +22,7 @@ import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
+import { primaryColor } from '@/app/theme/color';
 
 interface PropTypes {
   children: ReactNode;
@@ -106,14 +107,20 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {tabs.map((tab, index) => (
             <ListItemButtonStyled
-              $textColor={blueGrey[900]}
-              $bgColor={blueGrey[50]}
+              $textColor="white"
+              $bgColor={primaryColor}
               $currentTab={currentTab === tab.path}
               key={index}
               onClick={() => handleChangeTab(tab.path)}
             >
               <ListItemIcon>
-                {tab.icon && <tab.icon sx={{ color: blueGrey[800] }} />}
+                {tab.icon && (
+                  <tab.icon
+                    sx={{
+                      color: currentTab === tab.path ? 'white' : blueGrey[800],
+                    }}
+                  />
+                )}
               </ListItemIcon>
               <ListItemText primary={tab.name} />
             </ListItemButtonStyled>

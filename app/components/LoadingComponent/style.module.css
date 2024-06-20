@@ -76,6 +76,10 @@
   animation: l2 2s linear infinite;
 }
 .text:before {
-  content:"Loading..."
+  content: 'Loading...';
 }
-@keyframes l2 {to{background-size: 100% 3px}}
+@keyframes l2 {
+  to {
+    background-size: 100% 3px;
+  }
+}

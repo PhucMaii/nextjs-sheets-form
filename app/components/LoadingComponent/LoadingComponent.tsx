@@ -10,10 +10,7 @@ export default function LoadingComponent() {
         role="status"
       ></div> */}
       <div className={loaderStyle.loader}>
-        <img
-          alt="Supreme Sprouts Logo"
-          src="/supremesproutsIcon.png"
-        />
+        <img alt="Supreme Sprouts Logo" src="/supremesproutsIcon.png" />
       </div>
       <div className={loaderStyle.text}></div>
     </div>

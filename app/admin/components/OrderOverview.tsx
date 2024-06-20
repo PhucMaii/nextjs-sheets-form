@@ -30,10 +30,9 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
   useEffect(() => {
     if (baseOrderData) {
       setOrderData(baseOrderData);
-      setCurrentRoute(0)
+      setCurrentRoute(0);
     }
   }, [baseOrderData]);
-
 
   useEffect(() => {
     if (currentRoute > 0) {
@@ -79,15 +78,21 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
   }, [codOrders]);
 
   const filterOrderByRoute = () => {
-    const targetRoute = routes.find((route: IRoutes) => route.id === currentRoute);
-    
-    const filteredOrders = targetRoute.clients.map((client: UserRoute) => {
-      const clientOrder = baseOrderData.find((order: Order) => order.userId === client.userId);
-      return clientOrder;
-    }).filter((order: Order) => order !== undefined);
+    const targetRoute = routes.find(
+      (route: IRoutes) => route.id === currentRoute,
+    );
 
-    setOrderData(filteredOrders)
-  }
+    const filteredOrders = targetRoute.clients
+      .map((client: UserRoute) => {
+        const clientOrder = baseOrderData.find(
+          (order: Order) => order.userId === client.userId,
+        );
+        return clientOrder;
+      })
+      .filter((order: Order) => order !== undefined);
+
+    setOrderData(filteredOrders);
+  };
 
   return (
     <ShadowSection sx={{ backgroundColor: `${primaryColor} !important` }}>

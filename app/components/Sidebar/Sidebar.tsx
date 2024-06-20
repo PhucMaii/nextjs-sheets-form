@@ -13,7 +13,6 @@ import {
   ListItemText,
   Paper,
   Snackbar,
-  TextField,
   Toolbar,
   Typography,
   useMediaQuery,
@@ -32,7 +31,7 @@ import EmailAlert from '../EmailAlert';
 import SnackbarPopup from '../Snackbar/SnackbarPopup';
 import { Notification } from '@/app/utils/type';
 import { generateRecommendDate } from '@/app/utils/time';
-import { Order } from '@/app/admin/orders/page';
+import { primaryColor } from '@/app/theme/color';
 
 interface PropTypes {
   children: ReactNode;
@@ -68,7 +67,6 @@ export default function Sidebar({ children }: PropTypes) {
       setIsOpenSnackbar(false);
     }
   }, [isValidating, user]);
-  // console.log(isOpenSnackbar, 'is open snack bar');
 
   const handleChangeTab = (path: string) => {
     router.push(path);
@@ -101,14 +99,20 @@ export default function Sidebar({ children }: PropTypes) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {clientTabs.map((tab, index) => (
             <ListItemButtonStyled
-              $textColor={blueGrey[900]}
-              $bgColor={blueGrey[50]}
+              $textColor="white"
+              $bgColor={primaryColor}
               $currentTab={currentTab === tab.path}
               key={index}
               onClick={() => handleChangeTab(tab.path)}
             >
               <ListItemIcon>
-                {tab.icon && <tab.icon sx={{ color: blueGrey[800] }} />}
+                {tab.icon && (
+                  <tab.icon
+                    sx={{
+                      color: currentTab === tab.path ? 'white' : blueGrey[800],
+                    }}
+                  />
+                )}
               </ListItemIcon>
               <ListItemText primary={tab.name} />
             </ListItemButtonStyled>
@@ -164,7 +168,6 @@ export default function Sidebar({ children }: PropTypes) {
             sx={{ width: '100vw !important' }}
             value={currentTab}
             onChange={(e, newValue) => {
-              console.log(newValue, 'new value');
               setCurrentTab(newValue);
             }}
           >

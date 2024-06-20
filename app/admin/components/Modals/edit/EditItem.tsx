@@ -39,7 +39,10 @@ export default function EditItem({
   }, [targetItem]);
 
   const updateItem = async () => {
-    const newUpdatedItem = {...updatedItem, name: updatedItem.name.toUpperCase()}
+    const newUpdatedItem = {
+      ...updatedItem,
+      name: updatedItem.name.toUpperCase(),
+    };
     setIsUpdating(true);
     await handleUpdateItem(newUpdatedItem);
     setIsUpdating(false);

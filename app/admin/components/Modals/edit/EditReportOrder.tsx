@@ -97,8 +97,12 @@ export default function EditReportOrder({
     } else {
       const totalPrice = newItem.quantity * newItem.price;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...restOfNewItem} = newItem;
-      const newItemData: any = { ...restOfNewItem, totalPrice, name: newItemName };
+      const { id, ...restOfNewItem } = newItem;
+      const newItemData: any = {
+        ...restOfNewItem,
+        totalPrice,
+        name: newItemName,
+      };
       if (subCategoryId > 0) {
         newItemData.subCategoryId = subCategoryId;
       }

@@ -26,7 +26,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           'pre-order',
           scheduleOrder,
         );
-        console.log({zeroTotalPrice: scheduleOrder});
+        console.log({ zeroTotalPrice: scheduleOrder });
         continue;
       }
       // Check has user order for today, if yes then skip that client
@@ -40,7 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           'pre-order',
           hasClientOrder,
         );
-        console.log({alreadyOrder: scheduleOrder});
+        console.log({ alreadyOrder: scheduleOrder });
         continue;
       }
 
@@ -61,7 +61,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       updatedOrderList.push(newOrder);
 
       await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
-      console.log({successful: scheduleOrder})
+      console.log({ successful: scheduleOrder });
     }
 
     return res.status(201).json({

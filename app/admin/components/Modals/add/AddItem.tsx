@@ -1,4 +1,12 @@
-import { Divider, Grid, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
+import {
+  Divider,
+  Grid,
+  MenuItem,
+  Modal,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -12,7 +20,13 @@ interface IProps extends ModalProps {
   addItem: (newItem: IItem) => Promise<void>;
 }
 
-export default function AddItem({ open, onClose, categoryId, subCategories, addItem }: IProps) {
+export default function AddItem({
+  open,
+  onClose,
+  categoryId,
+  subCategories,
+  addItem,
+}: IProps) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<IItem>({
     id: -1,
@@ -24,16 +38,16 @@ export default function AddItem({ open, onClose, categoryId, subCategories, addI
 
   useEffect(() => {
     if (categoryId) {
-      setNewItem({...newItem, categoryId})
+      setNewItem({ ...newItem, categoryId });
     }
-  }, [categoryId])
+  }, [categoryId]);
 
   const handleAddItem = async () => {
-    const updatedNewItem = {...newItem, name: newItem.name.toUpperCase()}
+    const updatedNewItem = { ...newItem, name: newItem.name.toUpperCase() };
     setIsAdding(true);
     await addItem(updatedNewItem);
     setIsAdding(false);
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -43,11 +57,17 @@ export default function AddItem({ open, onClose, categoryId, subCategories, addI
           buttonLabel="ADD"
           onClick={handleAddItem}
           buttonProps={{
-            loading: isAdding
+            loading: isAdding,
           }}
         />
         <Divider sx={{ my: 2 }} />
-        <Grid container overflow="auto" maxHeight="80vh" alignItems="center" rowGap={2}>
+        <Grid
+          container
+          overflow="auto"
+          maxHeight="80vh"
+          alignItems="center"
+          rowGap={2}
+        >
           <Grid item xs={12} md={6}>
             <Typography variant="h6">Name:</Typography>
           </Grid>
@@ -67,7 +87,9 @@ export default function AddItem({ open, onClose, categoryId, subCategories, addI
               fullWidth
               label="Price"
               value={newItem.price}
-              onChange={(e) => setNewItem({ ...newItem, price: +e.target.value })}
+              onChange={(e) =>
+                setNewItem({ ...newItem, price: +e.target.value })
+              }
               type="number"
             />
           </Grid>
@@ -75,30 +97,30 @@ export default function AddItem({ open, onClose, categoryId, subCategories, addI
             <Typography variant="h6">Subcategory:</Typography>
           </Grid>
           <Grid item xs={12} md={6}>
-              <Select
-                fullWidth
-                disabled={!newItem.name.toLowerCase().includes('bean')}
-                value={newItem?.subCategoryId}
-                onChange={(e: any) =>
-                  setNewItem({
-                    ...newItem,
-                    subCategoryId: +e.target.value,
-                  })
-                }
-              >
-                {/* <MenuItem value={null || undefined}>N/A</MenuItem> */}
-                {subCategories &&
-                  [...subCategories, { name: 'N/A', id: 0 }].map(
-                    (subCategory: SubCategory | any) => {
-                      return (
-                        <MenuItem value={subCategory.id} key={subCategory.id}>
-                          {subCategory.name}
-                        </MenuItem>
-                      );
-                    },
-                  )}
-              </Select>
-            </Grid>
+            <Select
+              fullWidth
+              disabled={!newItem.name.toLowerCase().includes('bean')}
+              value={newItem?.subCategoryId}
+              onChange={(e: any) =>
+                setNewItem({
+                  ...newItem,
+                  subCategoryId: +e.target.value,
+                })
+              }
+            >
+              {/* <MenuItem value={null || undefined}>N/A</MenuItem> */}
+              {subCategories &&
+                [...subCategories, { name: 'N/A', id: 0 }].map(
+                  (subCategory: SubCategory | any) => {
+                    return (
+                      <MenuItem value={subCategory.id} key={subCategory.id}>
+                        {subCategory.name}
+                      </MenuItem>
+                    );
+                  },
+                )}
+            </Select>
+          </Grid>
         </Grid>
       </BoxModal>
     </Modal>

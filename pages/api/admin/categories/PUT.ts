@@ -30,15 +30,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const sameNameCategory = await prisma.category.findUnique({
-        where: {
-            name: updatedCategory.name
-        }
+      where: {
+        name: updatedCategory.name,
+      },
     });
 
     if (sameNameCategory) {
-        return res.status(400).json({
-            error: 'Category Name Existed Already'
-        })
+      return res.status(400).json({
+        error: 'Category Name Existed Already',
+      });
     }
 
     const newNameCategory = await prisma.category.update({

@@ -20,6 +20,8 @@ import {
   warningColor,
 } from '../theme/color';
 
+export const officiallyStartDate = new Date('03/31/2024');
+
 export const days = [
   'Sunday',
   'Monday',
@@ -36,7 +38,7 @@ export const tabs = [
   {
     name: 'Overview',
     icon: DashboardIcon,
-    path: '/admin/overview'
+    path: '/admin/overview',
   },
   {
     name: 'Orders',

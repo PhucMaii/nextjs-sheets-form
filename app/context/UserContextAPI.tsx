@@ -7,13 +7,15 @@ import useSWR from 'swr';
 export const UserContext = createContext<any>([]);
 
 const UserContextAPI = ({ children }: { children: ReactNode }) => {
-  const {
-    data: session,
-  } = useSWR('/api/auth/session', fetcher, {
+  const { data: session } = useSWR('/api/auth/session', fetcher, {
     revalidateOnFocus: false,
   });
 
-  const { data: user, mutate, isValidating } = useSWR(
+  const {
+    data: user,
+    mutate,
+    isValidating,
+  } = useSWR(
     session?.user ? `${API_URL.USER}?id=${session.user.id}` : null,
     fetcher,
     {
@@ -22,7 +24,7 @@ const UserContextAPI = ({ children }: { children: ReactNode }) => {
   );
 
   return (
-    <UserContext.Provider value={{user: user?.data, mutate, isValidating}}>
+    <UserContext.Provider value={{ user: user?.data, mutate, isValidating }}>
       {children}
     </UserContext.Provider>
   );

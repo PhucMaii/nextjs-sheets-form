@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -9,13 +9,10 @@ import { Grid } from '@mui/material';
 import { primaryColor } from '@/app/theme/color';
 
 interface IProps {
-    overviewData: any;
+  overviewData: any;
 }
 
-export default function OverviewData({
-    overviewData,
-}: IProps) {
-
+export default function OverviewData({ overviewData }: IProps) {
   return (
     <>
       <Grid item xs={12} md={6} lg={3}>

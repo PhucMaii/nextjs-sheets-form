@@ -9,7 +9,12 @@ interface IProps extends ModalProps {
   currentName: string;
 }
 
-export default function EditCategory({ open, onClose, currentName, updateCategory }: IProps) {
+export default function EditCategory({
+  open,
+  onClose,
+  currentName,
+  updateCategory,
+}: IProps) {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>(currentName);
 
@@ -17,26 +22,26 @@ export default function EditCategory({ open, onClose, currentName, updateCategor
     if (currentName) {
       setNewCategoryName(currentName);
     }
-  }, [currentName])
+  }, [currentName]);
 
   const handleUpdateCategory = async () => {
     setIsUpdating(true);
     await updateCategory(newCategoryName);
     setIsUpdating(false);
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
-        <ModalHead 
-            heading="Edit Category"
-            buttonLabel="EDIT"
-            onClick={handleUpdateCategory}
-            buttonProps={{
-              loading: isUpdating
-            }}
+        <ModalHead
+          heading="Edit Category"
+          buttonLabel="EDIT"
+          onClick={handleUpdateCategory}
+          buttonProps={{
+            loading: isUpdating,
+          }}
         />
-        <Divider sx={{my: 1}} />
+        <Divider sx={{ my: 1 }} />
         <Grid container rowGap={1}>
           <Grid item xs={12}>
             <Typography variant="h6">Name:</Typography>

@@ -31,8 +31,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         price: newItem.price,
       },
       include: {
-        subCategory: true
-      }
+        subCategory: true,
+      },
     });
 
     return res.status(201).json({

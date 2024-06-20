@@ -36,7 +36,11 @@ export default function OverviewCard({
           </IconBackground>
         </Grid>
         <Grid item xs={8}>
-          <Typography fontWeight="bold" variant="h4" sx={{color: textColor, width: '90% !important'}}>
+          <Typography
+            fontWeight="bold"
+            variant="h4"
+            sx={{ color: textColor, width: '90% !important' }}
+          >
             {value}
           </Typography>
           {helperText && (
@@ -51,7 +55,10 @@ export default function OverviewCard({
           <Typography
             marginTop={helperText ? '0px' : '8px'}
             fontWeight="bold"
-            sx={{ color: textColor ? textColor : grey[500], width: '90% !important' }}
+            sx={{
+              color: textColor ? textColor : grey[500],
+              width: '90% !important',
+            }}
           >
             {text}
           </Typography>
