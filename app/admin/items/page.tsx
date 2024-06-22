@@ -406,6 +406,7 @@ export default function ItemPage() {
               handleDeleteItem={handleDeleteItem}
               subCategories={subCategories}
               handleUpdateItem={handleUpdateItem}
+              setNotification={setNotification}
             />
           )}
         </ShadowSection>

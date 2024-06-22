@@ -110,7 +110,6 @@ export default function EditItem({
                   })
                 }
               >
-                {/* <MenuItem value={null || undefined}>N/A</MenuItem> */}
                 {subCategories &&
                   [...subCategories, { name: 'N/A', id: 0 }].map(
                     (subCategory: SubCategory | any) => {

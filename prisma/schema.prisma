@@ -42,7 +42,6 @@ model Category {
   name  String @unique @db.VarChar(255)
   users User[]
   items Item[]
-  forms Form[]
 }
 
 model SubCategory {
@@ -58,30 +57,11 @@ model Item {
   categoryId    Int
   subCategoryId Int?
   price         Float
+  availability  Boolean
   category      Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
-}
-
-model Form {
-  formId     Int      @id @default(autoincrement()) @map("form_id")
-  formName   String   @map("form_name") @db.VarChar(255)
-  categoryId Int
-  inputs     Input[]
-  Category   Category @relation(fields: [categoryId], references: [id])
-
-  @@index([categoryId])
-}
-
-model Input {
-  inputId   Int    @id @default(autoincrement()) @map("input_id")
-  inputName String @map("input_name") @db.VarChar(255)
-  inputType String @map("input_type") @db.VarChar(10)
-  formId    Int
-  form      Form   @relation(fields: [formId], references: [formId], onDelete: Cascade)
-
-  @@index([formId])
 }
 
 model OrderedItems {
@@ -110,16 +90,7 @@ model Orders {
 
   user  User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items OrderedItems[]
-  // OrderPreference OrderPreference[] // Should remove
 }
-
-// model OrderPreference {
-//   id          Int     @id @default(autoincrement())
-//   isAutoPrint Boolean
-//   orderId     Int
-
-//   order Orders @relation(fields: [orderId], references: [id], onDelete: Cascade)
-// }
 
 model UserPreference {
   id          Int     @id @default(autoincrement())

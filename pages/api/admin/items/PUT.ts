@@ -33,7 +33,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // * BAD CASE
+    // * BAD CASE: Item name existed already in that category
     if (
       !updatedItem.name.includes('BEAN') &&
       existingItem.name !== updatedItem.name
@@ -53,7 +53,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    // * BAD CASE
+    // * BAD CASE: Beansprouts name and subcategoryId existed already in that category
     // If updated item is beansprouts => check is subcategory id valid
     if (updatedItem.name.includes('BEAN')) {
       if (!updatedItem.subCategoryId) {
@@ -95,6 +95,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           updatedItem.subCategoryId && updatedItem.subCategoryId > 0
             ? updatedItem.subCategoryId
             : null,
+        availability: updatedItem.availability
       },
       include: {
         subCategory: true,
