@@ -213,7 +213,11 @@ const getLastMonthRevenue = (
 
 const getCustomersInDebt = (orders: any, startDate: Date, endDate: Date) => {
   const ordersInRange = filterDateRangeOrders(orders, startDate, endDate);
+  console.log({startDate, endDate});
   const customersInDebt = ordersInRange.reduce((acc: any, order: any) => {
+    if (order.user.clientId === '00145') {
+      console.log({order});
+    }
     const key = `${order.user.clientName} __ ${order.user.clientId}`;
 
     if (!acc[key]) {
