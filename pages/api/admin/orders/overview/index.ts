@@ -128,10 +128,16 @@ export default async function handler(
     const BKPercentage = (BKRevenue / revenue) * 100;
     const PPPercentage = (PPRevenue / revenue) * 100;
 
+    const lastMonthEnd = new Date(
+      formattedStartDate.getFullYear(),
+      formattedStartDate.getMonth(),
+      1,
+    );
+    lastMonthEnd.setDate(0);
     const customersInDebt = getCustomersInDebt(
       orders,
       officiallyStartDate,
-      formattedStartDate,
+      lastMonthEnd,
     );
 
     return res.status(200).json({

@@ -183,7 +183,7 @@ export default function Overview() {
                       Revenue ($)
                     </Typography>
                     <Typography fontWeight="bold" variant="h6">
-                      {beansproutsData?.BKRevenue || 0}
+                      {beansproutsData?.BKRevenue?.toFixed(2)|| 0}
                     </Typography>
                   </ShadowSection>
                 </Box>
@@ -227,7 +227,7 @@ export default function Overview() {
                       Revenue
                     </Typography>
                     <Typography fontWeight="bold" variant="h6">
-                      {beansproutsData?.PPRevenue || 0}
+                      {beansproutsData?.PPRevenue?.toFixed(2) || 0}
                     </Typography>
                   </ShadowSection>
                 </Box>
