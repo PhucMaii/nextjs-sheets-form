@@ -317,7 +317,10 @@ export default function AddOrder({
                 return (
                   <Fragment key={index}>
                     <Grid item xs={6}>
-                      {item.name} - ${item.price.toFixed(2)}
+                      {item.name} -{' '}
+                      {item.availability
+                        ? `$${item.price.toFixed(2)}`
+                        : 'Out of stock'}
                     </Grid>
                     <Grid item xs={6}>
                       <TextField

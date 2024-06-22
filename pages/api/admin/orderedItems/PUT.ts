@@ -315,6 +315,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               categoryId: userCategoryId,
               price: item.price,
               subCategoryId: item.subCategoryId,
+              availability: true,
             },
           });
         }
@@ -421,12 +422,14 @@ const formatUpdatedItems = async (
           price: item.price,
           categoryId: categoryId,
           subCategoryId: item.subCategoryId,
+          availability: true,
         };
       }
       return {
         name: item.name,
         price: item.price,
         categoryId: categoryId,
+        availability: true,
       };
     }),
   );

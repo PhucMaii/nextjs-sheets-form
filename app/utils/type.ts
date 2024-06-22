@@ -1,5 +1,5 @@
 import { AlertColor } from '@mui/material';
-import { Category, Driver, Item, Route, User, UserRoute } from '@prisma/client';
+import { Category, Driver, Route, User, UserRoute } from '@prisma/client';
 import { Session } from 'next-auth';
 
 export interface Notification {
@@ -65,7 +65,7 @@ export interface ICategory extends Category {
   users?: User[];
 }
 
-export interface IItem extends Item {
+export interface IItem {
   id: number;
   name: string;
   categoryId: number;

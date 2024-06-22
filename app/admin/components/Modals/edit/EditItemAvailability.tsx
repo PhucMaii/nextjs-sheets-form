@@ -41,7 +41,7 @@ export default function EditItemAvailability({
     const handleUpdateAllItemAvailability = async () => {
         setIsUpdating(true);
         try {
-            const response = await axios.put(`${API_URL.ITEM}/availability`, {itemName: item.name, availability});
+            const response = await axios.put(`${API_URL.ITEM}/availability`, {item, availability});
 
             if (response.data.error) {
                 setNotification({

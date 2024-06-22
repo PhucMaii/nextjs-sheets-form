@@ -34,6 +34,7 @@ export default function AddItem({
     price: 0,
     categoryId,
     subCategoryId: null,
+    availability: true,
   });
 
   useEffect(() => {

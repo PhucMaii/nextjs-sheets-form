@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from '@prisma/client';
+import { IItem } from "@/app/utils/type";
 
 interface IBody {
-    itemName: string;
+    item: IItem;
     availability: boolean;
 }
 
@@ -16,28 +17,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const prisma = new PrismaClient();
 
-        const { itemName, availability }: IBody = req.body;
+        const { item, availability }: IBody = req.body;
 
         const itemNameExisted = await prisma.item.findMany({
             where: {
-                name: itemName
+                name: item.name
             }
         });
 
         if (itemNameExisted.length === 0) {
             return res.status(404).json({
-                error: `No Item Found With Name ${itemName}`
+                error: `No Item Found With Name ${item.name}`
             })
         }
 
-        await prisma.item.updateMany({
-            where: {
-                name: itemName
-            },
-            data: {
-                availability
-            }
-        });
+        if (item.name.includes('BEAN')) {
+            await prisma.item.updateMany({
+                where: {
+                    name: item.name,
+                    subCategoryId: item.subCategoryId
+                },
+                data: {
+                    availability
+                }
+            });
+        } else {
+            await prisma.item.updateMany({
+                where: {
+                    name: item.name,
+                },
+                data: {
+                    availability
+                }
+            }); 
+        }
 
         return res.status(200).json({
             message: 'Item Availability Updated Successfully'

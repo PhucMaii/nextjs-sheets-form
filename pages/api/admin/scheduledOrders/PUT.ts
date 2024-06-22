@@ -186,6 +186,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             name: item.name,
             categoryId: userCategory.id,
             price: item.price,
+            availability: true
           },
         });
       }

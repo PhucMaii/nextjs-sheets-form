@@ -20,6 +20,7 @@ import Navbar from '../components/Navbar';
 import useSWR from 'swr';
 import NotificationPopup from '../admin/components/Notification';
 import { LoadingButton } from '@mui/lab';
+import { grey } from '@mui/material/colors';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -219,30 +220,18 @@ export default function OrderForm() {
               {itemList.length > 0 &&
                 itemList.map((item: any, index: number) => {
                   return (
-                    // <Input<string | number>
-                    //   key={index}
-                    //   label={`${item.name} - $${
-                    //     item.price === 0
-                    //       ? ' Variable price'
-                    //       : item.price.toFixed(2)
-                    //   }`}
-                    //   type="number"
-                    //   value={item.quantity}
-                    //   className="border-neutral-400 h-full mb-4"
-                    //   onChange={(e) => handleChangeItem(e, item)}
-                    //   placeholder={`Enter ${item.name} here...`}
-                    // />
                     <Box
                       key={index}
                       display="flex"
                       flexDirection="column"
                       gap={1}
                     >
-                      <Typography fontWeight="bold" variant="subtitle1">
-                        {`${item.name} - $${
+                      <Typography sx={{color: item.availability ? 'black' : grey[500]}} fontWeight="bold" variant="subtitle1">
+                        {`${item.name} - ${
+                          !item.availability ? 'Out of stock' :
                           item.price === 0
                             ? ' Variable price'
-                            : item.price.toFixed(2)
+                            : `$${item.price.toFixed(2)}`
                         }`}
                       </Typography>
                       <TextField
@@ -250,18 +239,11 @@ export default function OrderForm() {
                         value={item.quantity}
                         onChange={(e) => handleChangeItem(e, item)}
                         placeholder={`Enter ${item.name} here...`}
+                        disabled={!item.availability}
                       />
                     </Box>
                   );
                 })}
-              {/* <Input<string>
-                label="NOTE"
-                multiline
-                value={note}
-                className="border-neutral-400 h-full mb-4"
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Writing your note here..."
-              /> */}
               <Box display="flex" flexDirection="column" gap={1}>
                 <Typography variant="subtitle1">NOTE</Typography>
                 <TextField
@@ -274,14 +256,6 @@ export default function OrderForm() {
                 />
               </Box>
             </Box>
-            {/* <Button
-              color="blue"
-              label="Submit"
-              onClick={handleSubmit}
-              width="full"
-              loadingButton
-              isLoading={isButtonLoading}
-            /> */}
             <LoadingButton
               variant="contained"
               onClick={handleSubmit}
