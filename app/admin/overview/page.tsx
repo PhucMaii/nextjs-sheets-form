@@ -70,7 +70,7 @@ export default function Overview() {
     type: 'info',
     message: '',
   });
-  const [overviewData, setOverviewData] = useState<any>({});
+  const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
 
   useEffect(() => {
@@ -133,17 +133,24 @@ export default function Overview() {
           )}
         </Grid>
         <Grid item xs={12} md={4}>
-          <ShadowSection
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            gap={2}
-            sx={{ height: 365 }}
-          >
-            <PieChart overviewData={overviewData} />
-            <Typography variant="h6">Paid vs Unpaid</Typography>
-          </ShadowSection>
+          {overviewData ? (
+            <ShadowSection
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              gap={2}
+              sx={{ height: 365 }}
+            >
+              <PieChart overviewData={overviewData} />
+              <Typography variant="h6">Paid vs Unpaid</Typography>
+            </ShadowSection>
+          ) : (
+            <Skeleton
+              variant="rounded"
+              sx={{ width: '100% !important', height: '390px !important' }}
+            />
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <ShadowSection>
@@ -154,7 +161,10 @@ export default function Overview() {
               <Grid item xs={6}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <ShadowSection
-                    sx={{ backgroundColor: `${primaryColor} !important`, color: 'white' }}
+                    sx={{
+                      backgroundColor: `${primaryColor} !important`,
+                      color: 'white',
+                    }}
                   >
                     <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
                       Number of bags
@@ -164,7 +174,10 @@ export default function Overview() {
                     </Typography>
                   </ShadowSection>
                   <ShadowSection
-                    sx={{ backgroundColor: `${primaryColor} !important`, color: 'white' }}
+                    sx={{
+                      backgroundColor: `${primaryColor} !important`,
+                      color: 'white',
+                    }}
                   >
                     <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
                       Revenue ($)
@@ -192,7 +205,10 @@ export default function Overview() {
               <Grid item xs={6}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <ShadowSection
-                    sx={{ backgroundColor: `${primaryColor} !important`, color: 'white' }}
+                    sx={{
+                      backgroundColor: `${primaryColor} !important`,
+                      color: 'white',
+                    }}
                   >
                     <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
                       Number of bags
@@ -202,7 +218,10 @@ export default function Overview() {
                     </Typography>
                   </ShadowSection>
                   <ShadowSection
-                    sx={{ backgroundColor: `${primaryColor} !important`, color: 'white' }}
+                    sx={{
+                      backgroundColor: `${primaryColor} !important`,
+                      color: 'white',
+                    }}
                   >
                     <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
                       Revenue
@@ -228,10 +247,10 @@ export default function Overview() {
             </Typography>
             <Typography variant="subtitle2">Delivered Items</Typography>
           </Box>
-          <ManifestTable manifest={overviewData.manifest || null} />
+          <ManifestTable manifest={overviewData?.manifest || null} />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h5" fontWeight="bold" sx={{my: 2}}>
+          <Typography variant="h5" fontWeight="bold" sx={{ my: 2 }}>
             Customers in debt
           </Typography>
           <CustomersInDebt customersInDebt={customersInDebt} />

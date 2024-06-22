@@ -8,6 +8,10 @@ interface IProps {
 
 export default function PieChart({ overviewData }: IProps) {
   const unpaidPercentage = useMemo(() => {
+    if (!overviewData) {
+      return 0;
+    }
+
     return (
       Math.round(
         (overviewData.unpaidAmount / overviewData.revenue) * 100 * 100,
