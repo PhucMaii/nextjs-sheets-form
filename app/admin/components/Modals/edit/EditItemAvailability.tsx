@@ -9,6 +9,13 @@ import { API_URL } from '@/app/utils/enum';
 import LoadingModal from '../LoadingModal';
 import CloseIcon from '@mui/icons-material/Close';
 import { primaryColor } from '@/app/theme/color';
+import styled from 'styled-components';
+
+const ShadowSectionStyled = styled(ShadowSection)`
+    &:hover {
+        box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+    }
+`
 
 interface IProps {
     item: IItem;
@@ -107,7 +114,7 @@ export default function EditItemAvailability({
             alignItems="center"
             gap={2}
           >
-            <ShadowSection
+            <ShadowSectionStyled
               onClick={handleUpdateItemThisCategory}
               sx={{
                 backgroundColor: `${primaryColor} !important`,
@@ -122,8 +129,8 @@ export default function EditItemAvailability({
                 This option only affect item in current category only and won't
                 affect other item with same name in other category.
               </Typography>
-            </ShadowSection>
-            <ShadowSection
+            </ShadowSectionStyled>
+            <ShadowSectionStyled
               onClick={handleUpdateAllItemAvailability}
               sx={{
                 backgroundColor: `${primaryColor} !important`,
@@ -138,7 +145,7 @@ export default function EditItemAvailability({
                 This option will affect all <strong>{item.name}</strong> in the
                 database, no matter which category they are assigned.
               </Typography>
-            </ShadowSection>
+            </ShadowSectionStyled>
           </Box>
         </BoxModal>
       </Modal>
