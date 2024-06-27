@@ -29,6 +29,7 @@ import DeleteModal from '../components/Modals/delete/DeleteModal';
 import EditCategory from '../components/Modals/edit/EditCategory';
 import { Reorder } from 'framer-motion';
 import Item from '../components/Reorder/Item';
+import { LoadingButton } from '@mui/lab';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -39,6 +40,8 @@ export default function ItemPage() {
   const [isEditCategory, setIsEditCategory] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [items, setItems] = useState<IItem[]>([]);
+  const [isSavingArrangement, setIsSavingArrangement] =
+    useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -321,6 +324,50 @@ export default function ItemPage() {
     setBaseItems(newItems);
   };
 
+  const saveItemArrangement = async () => {
+    try {
+      setIsSavingArrangement(true);
+      const newListWithId = items.map((item: IItem, index: number) => {
+        const newOrderId = baseItems[index].id;
+        return { ...item, id: newOrderId };
+      });
+
+      const updatedIdList = newListWithId.map((item: IItem) => item.id);
+
+      const response = await axios.put(`${API_URL.ITEM}/reArrangement`, {
+        removedItemIdList: updatedIdList,
+        updatedItemList: newListWithId,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        setIsSavingArrangement(false);
+        return;
+      }
+
+      await fetchItems();
+
+      setIsSavingArrangement(false);
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('There was an error in rearrangement: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error in rearrangement: ' + error,
+      });
+      setIsSavingArrangement(false);
+    }
+  };
+
   const switchCurrentCategory = (newCategory: Category) => {
     setCurrentCategory(newCategory);
   };
@@ -382,7 +429,7 @@ export default function ItemPage() {
           </Grid>
         </Grid>
         <ShadowSection sx={{ mt: 2 }}>
-          <Grid container alignItems="center" columnSpacing={1}>
+          <Grid container alignItems="center" spacing={1}>
             <Grid item xs={12} md={11}>
               <TextField
                 fullWidth
@@ -399,11 +446,23 @@ export default function ItemPage() {
                 <AddBoxIcon fontSize="large" color="primary" />
               </IconButton>
             </Grid>
+            <Grid item xs={12} textAlign="right">
+              <LoadingButton
+                loading={isSavingArrangement}
+                onClick={saveItemArrangement}
+              >
+                Save Arrangement
+              </LoadingButton>
+            </Grid>
           </Grid>
           {isFetching || isLoading ? (
             <SplashScreen />
           ) : (
-            <Reorder.Group values={items} onReorder={setItems} style={{padding: 0}}>
+            <Reorder.Group
+              values={items}
+              onReorder={setItems}
+              style={{ padding: 0 }}
+            >
               {items.map((item: IItem) => {
                 return (
                   <Reorder.Item
@@ -411,9 +470,10 @@ export default function ItemPage() {
                     value={item}
                     style={{ listStyle: 'none' }}
                     transition={{
-                      type: "spring",
+                      type: 'spring',
                       damping: 10,
-                      stiffness: 300
+                      stiffness: 300,
+                      mass: 0.5,
                     }}
                   >
                     <Item

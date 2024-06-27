@@ -806,6 +806,12 @@ export default function ScheduledOrderPage() {
                         key={order.id}
                         value={order}
                         style={{ listStyle: 'none' }}
+                        transition={{
+                          type: "spring",
+                          damping: 10,
+                          stiffness: 300,
+                          mass: 0.5
+                        }}
                       >
                         <ScheduleOrder
                           key={order.id}
