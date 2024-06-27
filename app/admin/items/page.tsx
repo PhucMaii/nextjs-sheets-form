@@ -13,13 +13,13 @@ import { fetchData } from '@/app/utils/db';
 import {
   Box,
   Button,
+  Divider,
   Grid,
   IconButton,
   TextField,
   Typography,
 } from '@mui/material';
 import useDebounce from '@/hooks/useDebounce';
-import ItemsTable from '../components/Tables/ItemsTable';
 import { ShadowSection } from '../reports/styled';
 import { SplashScreen } from '@/app/HOC/AuthenGuard';
 import axios from 'axios';
@@ -27,6 +27,8 @@ import useSubCategories from '@/hooks/fetch/useSubCategories';
 import AddItem from '../components/Modals/add/AddItem';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import EditCategory from '../components/Modals/edit/EditCategory';
+import { Reorder } from 'framer-motion';
+import Item from '../components/Reorder/Item';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -401,13 +403,31 @@ export default function ItemPage() {
           {isFetching || isLoading ? (
             <SplashScreen />
           ) : (
-            <ItemsTable
-              items={items}
-              handleDeleteItem={handleDeleteItem}
-              subCategories={subCategories}
-              handleUpdateItem={handleUpdateItem}
-              setNotification={setNotification}
-            />
+            <Reorder.Group values={items} onReorder={setItems} style={{padding: 0}}>
+              {items.map((item: IItem) => {
+                return (
+                  <Reorder.Item
+                    key={item.id}
+                    value={item}
+                    style={{ listStyle: 'none' }}
+                    transition={{
+                      type: "spring",
+                      damping: 10,
+                      stiffness: 300
+                    }}
+                  >
+                    <Item
+                      item={item}
+                      handleUpdateItem={handleUpdateItem}
+                      handleDeleteItem={handleDeleteItem}
+                      setNotification={setNotification}
+                      subCategories={subCategories}
+                    />
+                    <Divider />
+                  </Reorder.Item>
+                );
+              })}
+            </Reorder.Group>
           )}
         </ShadowSection>
       </CategorySidebar>

@@ -57,13 +57,6 @@ export default function ItemsTable({
               return (
                 <TableRow key={item.id} sx={{ p: 2 }}>
                   <TableCell>
-                    {/* <Switch 
-                      checked={item.availability} 
-                      onChange={(e) => {
-                        handleUpdateItem({...item, availability: e.target.checked})
-                        console.log({checked: e.target.checked});
-                      }}
-                    /> */}
                     <EditItemAvailability
                       item={item}
                       setNotification={setNotification}

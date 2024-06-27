@@ -47,7 +47,7 @@ import EditRoute from '../components/Modals/edit/EditRoute';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import useClients from '@/hooks/fetch/useClients';
 import useDrivers from '@/hooks/fetch/useDrivers';
-import ScheduleOrder from '../components/ScheduleOrder';
+import ScheduleOrder from '../components/Reorder/ScheduleOrder';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';

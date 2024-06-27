@@ -1,11 +1,11 @@
 import { IRoutes, Notification, ScheduledOrder } from '@/app/utils/type';
 import { Box, Checkbox, Grid, Paper, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import DeleteScheduleOrder from './Modals/delete/DeleteScheduleOrder';
+import DeleteScheduleOrder from '../Modals/delete/DeleteScheduleOrder';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import EditScheduleOrder from './Modals/edit/EditScheduleOrder';
+import EditScheduleOrder from '../Modals/edit/EditScheduleOrder';
 
 interface PropTypes {
   selectedOrders: ScheduledOrder[];
