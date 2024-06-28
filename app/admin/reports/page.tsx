@@ -142,6 +142,7 @@ export default function ReportPage() {
     } else {
       setTotalBill(0);
     }
+    setSelectedOrders([]);
   }, [clientOrders]);
 
   useEffect(() => {
@@ -610,7 +611,10 @@ export default function ReportPage() {
                   isFetching
                 }
                 variant="outlined"
-                onClick={handleInvoicePrint}
+                onClick={() => {
+                  handleInvoicePrint();
+                  setSelectedOrders([]);
+                }}
                 fullWidth
               >
                 <Box display="flex" gap={2}>
