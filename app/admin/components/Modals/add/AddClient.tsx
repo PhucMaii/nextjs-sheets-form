@@ -141,178 +141,191 @@ export default function AddClient({
           </LoadingButton>
         </Box>
         <Divider />
-        <Typography variant="h5" fontWeight="bold">
-          General Information
-        </Typography>
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6">Client Id:</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Client Id"
-              value={newClient.clientId}
-              onChange={(e) => handleOnChangeClient('clientId', e.target.value)}
-              placeholder="Enter client id"
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6">Client Name:</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Client Name"
-              value={newClient.clientName}
-              onChange={(e) =>
-                handleOnChangeClient('clientName', e.target.value)
-              }
-              placeholder="Enter client name"
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6">Contact Number:</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Contact Number"
-              value={newClient.contactNumber}
-              onChange={(e) =>
-                handleOnChangeClient('contactNumber', e.target.value)
-              }
-              placeholder="Enter contact number"
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6">Delivery Address:</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <AutoCompleteAddress
-              onDataReceived={(data) => setDeliveryAddress(data)}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6">Role:</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Select
-              value={newClient.role}
-              onChange={(e) => handleOnChangeClient('role', e.target.value)}
-              fullWidth
-            >
-              <MenuItem value={USER_ROLE.CLIENT}>Client</MenuItem>
-              <MenuItem value={USER_ROLE.ADMIN}>Admin</MenuItem>
-            </Select>
-          </Grid>
-        </Grid>
-        <Typography sx={{ mt: 2 }} variant="h5" fontWeight="bold">
-          User Preference
-        </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Category:</Typography>
-              <Select
-                value={JSON.stringify(newClient.category)} // Serialize the object
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          overflow="auto"
+          maxHeight="80vh"
+        >
+          <Typography variant="h5" fontWeight="bold">
+            General Information
+          </Typography>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Client Id:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Client Id"
+                value={newClient.clientId}
                 onChange={(e) =>
-                  handleOnChangeClient('category', JSON.parse(e.target.value))
+                  handleOnChangeClient('clientId', e.target.value)
                 }
+                placeholder="Enter client id"
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Client Name:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Client Name"
+                value={newClient.clientName}
+                onChange={(e) =>
+                  handleOnChangeClient('clientName', e.target.value)
+                }
+                placeholder="Enter client name"
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Contact Number:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Contact Number"
+                value={newClient.contactNumber}
+                onChange={(e) =>
+                  handleOnChangeClient('contactNumber', e.target.value)
+                }
+                placeholder="Enter contact number"
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Delivery Address:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <AutoCompleteAddress
+                onDataReceived={(data) => setDeliveryAddress(data)}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Role:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Select
+                value={newClient.role}
+                onChange={(e) => handleOnChangeClient('role', e.target.value)}
                 fullWidth
               >
-                <MenuItem value={JSON.stringify({ name: '', id: -1 })}>
-                  -- Choose a category --
-                </MenuItem>
-                {categories &&
-                  categories.map((category: Category) => (
-                    <MenuItem
-                      key={category.id}
-                      value={JSON.stringify(category)}
-                    >
-                      {category.name}
-                    </MenuItem>
-                  ))}
+                <MenuItem value={USER_ROLE.CLIENT}>Client</MenuItem>
+                <MenuItem value={USER_ROLE.ADMIN}>Admin</MenuItem>
               </Select>
-            </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Subcategory:</Typography>
-              <Select
-                value={JSON.stringify(newClient.subCategory)} // Serialize the object
-                onChange={(e) =>
-                  handleOnChangeClient(
-                    'subCategory',
-                    JSON.parse(e.target.value),
-                  )
-                }
-                fullWidth
-              >
-                <MenuItem value={JSON.stringify({ name: '', id: -1 })}>
-                  -- Choose a subcategory --
-                </MenuItem>
-                {subCategories &&
-                  subCategories.map((subCategory: SubCategory) => (
-                    <MenuItem
-                      key={subCategory.id}
-                      value={JSON.stringify(subCategory)}
-                    >
-                      {subCategory.name}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </Box>
+          <Typography sx={{ mt: 2 }} variant="h5" fontWeight="bold">
+            User Preference
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="h6">Category:</Typography>
+                <Select
+                  value={JSON.stringify(newClient.category)} // Serialize the object
+                  onChange={(e) =>
+                    handleOnChangeClient('category', JSON.parse(e.target.value))
+                  }
+                  fullWidth
+                >
+                  <MenuItem value={JSON.stringify({ name: '', id: -1 })}>
+                    -- Choose a category --
+                  </MenuItem>
+                  {categories &&
+                    categories.map((category: Category) => (
+                      <MenuItem
+                        key={category.id}
+                        value={JSON.stringify(category)}
+                      >
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="h6">Subcategory:</Typography>
+                <Select
+                  value={JSON.stringify(newClient.subCategory)} // Serialize the object
+                  onChange={(e) =>
+                    handleOnChangeClient(
+                      'subCategory',
+                      JSON.parse(e.target.value),
+                    )
+                  }
+                  fullWidth
+                >
+                  <MenuItem value={JSON.stringify({ name: '', id: -1 })}>
+                    -- Choose a subcategory --
+                  </MenuItem>
+                  {subCategories &&
+                    subCategories.map((subCategory: SubCategory) => (
+                      <MenuItem
+                        key={subCategory.id}
+                        value={JSON.stringify(subCategory)}
+                      >
+                        {subCategory.name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="h6">Order Type:</Typography>
+                <Select
+                  value={newClient.preference.orderType}
+                  onChange={(e) =>
+                    handleOnChangeClient('preference', {
+                      ...newClient.preference,
+                      orderType: e.target.value,
+                    })
+                  }
+                  placeholder="-- Choose an order type --"
+                  fullWidth
+                >
+                  <MenuItem value="">-- Choose an order type --</MenuItem>
+                  {orderTypes &&
+                    orderTypes.map((orderType: any, index: number) => (
+                      <MenuItem key={index} value={orderType.text}>
+                        <StatusText
+                          text={orderType.text}
+                          type={orderType.type}
+                        />
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="h6">Payment Type:</Typography>
+                <Select
+                  value={newClient.preference.paymentType}
+                  onChange={(e) =>
+                    handleOnChangeClient('preference', {
+                      ...newClient.preference,
+                      paymentType: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  placeholder="-- Choose a payment type --"
+                >
+                  <MenuItem value="">-- Choose a payment type --</MenuItem>
+                  {paymentTypes &&
+                    paymentTypes.map((paymentType: any, index: number) => (
+                      <MenuItem key={index} value={paymentType}>
+                        {paymentType}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Order Type:</Typography>
-              <Select
-                value={newClient.preference.orderType}
-                onChange={(e) =>
-                  handleOnChangeClient('preference', {
-                    ...newClient.preference,
-                    orderType: e.target.value,
-                  })
-                }
-                placeholder="-- Choose an order type --"
-                fullWidth
-              >
-                <MenuItem value="">-- Choose an order type --</MenuItem>
-                {orderTypes &&
-                  orderTypes.map((orderType: any, index: number) => (
-                    <MenuItem key={index} value={orderType.text}>
-                      <StatusText text={orderType.text} type={orderType.type} />
-                    </MenuItem>
-                  ))}
-              </Select>
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Payment Type:</Typography>
-              <Select
-                value={newClient.preference.paymentType}
-                onChange={(e) =>
-                  handleOnChangeClient('preference', {
-                    ...newClient.preference,
-                    paymentType: e.target.value,
-                  })
-                }
-                fullWidth
-                placeholder="-- Choose a payment type --"
-              >
-                <MenuItem value="">-- Choose a payment type --</MenuItem>
-                {paymentTypes &&
-                  paymentTypes.map((paymentType: any, index: number) => (
-                    <MenuItem key={index} value={paymentType}>
-                      {paymentType}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </Box>
-          </Grid>
-        </Grid>
+        </Box>
       </BoxModal>
     </Modal>
   );

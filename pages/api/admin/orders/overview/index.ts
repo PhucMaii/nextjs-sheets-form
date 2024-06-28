@@ -150,12 +150,16 @@ export default async function handler(
           timeSeries: thisMonthRevenueReport.keys, // Time series for displaying time for the chart
         },
         beansprouts: {
-          BKQuantity,
-          BKRevenue,
-          BKPercentage,
-          PPQuantity,
-          PPRevenue,
-          PPPercentage,
+          BK: {
+            quantity: BKQuantity,
+            revenue: BKRevenue, 
+            percentage: BKPercentage
+          },
+          PP: {
+            quantity: PPQuantity,
+            revenue: PPRevenue, 
+            percentage: PPPercentage
+          },
           totalItems,
         },
       },

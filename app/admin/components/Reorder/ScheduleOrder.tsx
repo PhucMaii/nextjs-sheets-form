@@ -1,5 +1,12 @@
 import { IRoutes, Notification, ScheduledOrder } from '@/app/utils/type';
-import { Box, Checkbox, Grid, Paper, Typography } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  Grid,
+  Paper,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import DeleteScheduleOrder from '../Modals/delete/DeleteScheduleOrder';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
@@ -29,6 +36,7 @@ export default function ScheduleOrder({
   routes,
 }: PropTypes) {
   const [isSelected, setIsSelected] = useState<boolean>(false);
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   useEffect(() => {
     const isChecked = selectedOrders.some(
@@ -76,49 +84,60 @@ export default function ScheduleOrder({
     }
   };
 
+  const actions = (
+    <Box display="flex" gap={1}>
+      <DeleteScheduleOrder
+        targetObj={scheduleOrder}
+        handleDelete={handleDeleteOrder}
+      />
+      <EditScheduleOrder
+        routeId={routeId}
+        routes={routes}
+        order={scheduleOrder}
+        setNotification={setNotification}
+        handleUpdateOrderUI={handleUpdateOrderUI}
+        handleDeleteOrderUI={handleDeleteOrderUI}
+      />
+    </Box>
+  );
+
   return (
-    <Paper elevation={0} sx={{ p: 2 }}>
-      <Grid container alignItems="center" columnSpacing={1}>
-        <Grid item xs={1}>
+    <Paper elevation={0} sx={{ py: 2 }}>
+      <Grid container alignItems="center" spacing={1}>
+        <Grid item md={1}>
           <Checkbox
             checked={isSelected}
             onClick={(e) => handleSelectOrder(e, scheduleOrder)}
           />
         </Grid>
-        <Grid item xs={1}>
+        <Grid item md={1} xs={6}>
           <Typography variant="subtitle1">{scheduleOrder.id}</Typography>
         </Grid>
+        {mdDown && (
+          <Grid item md={1} xs={4}>
+            {actions}
+          </Grid>
+        )}
         <Grid item xs={2}>
           <Typography variant="subtitle1">
             {scheduleOrder.user.clientId}
           </Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item md={4} xs={10}>
           <Typography variant="subtitle1">
             {scheduleOrder.user.clientName}
           </Typography>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item md={2} xs={12} textAlign={mdDown ? "right" : "left"}>
           <Typography variant="subtitle1">
             ${scheduleOrder.totalPrice.toFixed(2)}
           </Typography>
         </Grid>
-        <Grid item xs={2}>
-          <Box display="flex" gap={1}>
-            <DeleteScheduleOrder
-              targetObj={scheduleOrder}
-              handleDelete={handleDeleteOrder}
-            />
-            <EditScheduleOrder
-              routeId={routeId}
-              routes={routes}
-              order={scheduleOrder}
-              setNotification={setNotification}
-              handleUpdateOrderUI={handleUpdateOrderUI}
-              handleDeleteOrderUI={handleDeleteOrderUI}
-            />
-          </Box>
-        </Grid>
+        {!mdDown && (
+          <Grid item md={2}>
+            {actions}
+          </Grid>
+        )}
       </Grid>
     </Paper>
   );

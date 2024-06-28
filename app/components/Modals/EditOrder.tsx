@@ -7,6 +7,7 @@ import { Notification } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Button,
   Divider,
   Grid,
   Modal,
@@ -147,15 +148,20 @@ export default function EditOrder({
             </Grid>
             {mdDown && (
               <Grid item xs={12}>
-                <LoadingButton
-                  variant="contained"
-                  fullWidth
-                  disabled={itemList.length === 0}
-                  loading={isOverriding}
-                  onClick={handleOverrideOrder}
-                >
-                  SAVE
-                </LoadingButton>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Button variant="outlined" onClick={onClose}>
+                    Cancel
+                  </Button>
+                  <LoadingButton
+                    variant="contained"
+                    fullWidth
+                    disabled={itemList.length === 0}
+                    loading={isOverriding}
+                    onClick={handleOverrideOrder}
+                  >
+                    SAVE
+                  </LoadingButton>
+                </Box>
               </Grid>
             )}
           </Grid>

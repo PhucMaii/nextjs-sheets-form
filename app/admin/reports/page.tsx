@@ -69,7 +69,6 @@ export default function ReportPage() {
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
-  // const [clientList, setClientList] = useState<UserType[]>([]);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
@@ -384,7 +383,7 @@ export default function ReportPage() {
   const statusDropdown = (
     <Box
       display="flex"
-      justifyContent="center"
+      justifyContent="flex-end"
       alignItems="center"
       gap={2}
       width="100%"
@@ -570,8 +569,8 @@ export default function ReportPage() {
               />
             </Grid>
           </Grid>
-          <Grid container columnSpacing={1} alignItems="center">
-            <Grid item md={2}>
+          <Grid container spacing={1} alignItems="center">
+            <Grid item md={2} xs={12}>
               {statusDropdown}
             </Grid>
             <Grid item xs={12} md={6}>

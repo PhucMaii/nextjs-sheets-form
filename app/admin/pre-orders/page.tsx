@@ -15,6 +15,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { days } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
@@ -81,6 +82,8 @@ export default function ScheduledOrderPage() {
 
   const { clientList } = useClients(days[dayIndex]);
   const { driverList } = useDrivers();
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   useEffect(() => {
     if (routes.length > 0) {
@@ -633,8 +636,8 @@ export default function ScheduledOrderPage() {
               })}
           </Tabs>
         </Box>
-        <Grid container mt={3} alignItems="flex-start" columnSpacing={2}>
-          <Grid item xs={2} alignSelf="flex-start">
+        <Grid container mt={3} alignItems="flex-start" spacing={2}>
+          <Grid item md={2} xs={12} alignSelf="flex-start">
             <Box
               display="flex"
               flexDirection="column"
@@ -673,7 +676,7 @@ export default function ScheduledOrderPage() {
                 </Box>
               ) : routes.length > 0 ? (
                 <Tabs
-                  orientation="vertical"
+                  orientation={mdDown ? "horizontal" : "vertical"}
                   aria-label="basic tabs"
                   value={routeIndex}
                   onChange={(e, newValue) => setRouteIndex(newValue)}
@@ -729,8 +732,8 @@ export default function ScheduledOrderPage() {
               </Fab>
             </Box>
           </Grid>
-          <Grid item container alignItems="center" xs={10} spacing={1}>
-            <Grid item xs={2}>
+          <Grid item container alignItems="center" md={10} xs={12} spacing={1}>
+            <Grid item md={2} xs={12}>
               <Button
                 fullWidth
                 onClick={() => setIsPreOrderOpen(true)}
@@ -743,7 +746,7 @@ export default function ScheduledOrderPage() {
                 </Box>
               </Button>
             </Grid>
-            <Grid item xs={8}>
+            <Grid item md={8} xs={12}>
               <TextField
                 fullWidth
                 placeholder="Search by client name or client id"
@@ -751,8 +754,8 @@ export default function ScheduledOrderPage() {
                 onChange={(e) => setSearchKeywords(e.target.value)}
               />
             </Grid>
-            <Grid item xs={2}>
-              <Box display="flex" alignItems="center" gap={1}>
+            <Grid item md={2} xs={12}>
+              <Box display="flex" alignItems="center" justifyContent={mdDown ? "flex-end" : ""} gap={1}>
                 <Fab
                   variant="extended"
                   size="medium"
@@ -799,7 +802,7 @@ export default function ScheduledOrderPage() {
               {isLoading ? (
                 <SplashScreen />
               ) : orderList.length > 0 ? (
-                <Reorder.Group values={orderList} onReorder={setOrderList}>
+                <Reorder.Group style={{ padding: 0 }} values={orderList} onReorder={setOrderList}>
                   {orderList.map((order: ScheduledOrder) => {
                     return (
                       <Reorder.Item
