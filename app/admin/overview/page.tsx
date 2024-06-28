@@ -5,9 +5,9 @@ import NotificationPopup from '../components/Notification';
 import { Notification } from '@/app/utils/type';
 import {
   Box,
-  CircularProgress,
   Grid,
   Skeleton,
+  Switch,
   Typography,
 } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
@@ -18,53 +18,17 @@ import { API_URL } from '@/app/utils/enum';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
 import PieChart from '../components/Charts/PieChart';
-import { primaryColor } from '@/app/theme/color';
 import ManifestTable from '../components/Tables/ManifestTable';
 import CustomersInDebt from '../components/Tables/CustomersInDebt';
 import LoadingModal from '../components/Modals/LoadingModal';
-
-function CircularProgressWithLabel(props: any) {
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-        display: 'inline-flex',
-        transform: `scale(4)`,
-        transformOrigin: 'center center',
-      }}
-    >
-      <CircularProgress variant="determinate" {...props} />
-      <Box
-        sx={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography
-          variant="caption"
-          component="div"
-          sx={{ color: primaryColor, fontSize: 5 }}
-        >
-          <strong>{`${Math.round(props.value)}%`}</strong>
-          <br />
-          Revenue
-        </Typography>
-      </Box>
-    </Box>
-  );
-}
+import BSOverview from '../components/BSOverview';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isMinify, setIsMinify] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -114,7 +78,21 @@ export default function Overview() {
         <Grid item xs={12} textAlign="right">
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
         </Grid>
-        <OverviewData overviewData={overviewData} />
+        <Grid item xs={12} textAlign="right">
+          <Box
+            display="flex"
+            gap={1}
+            alignItems="center"
+            justifyContent="flex-end"
+          >
+            <Switch
+              checked={isMinify}
+              onChange={(e) => setIsMinify(e.target.checked)}
+            />
+            <Typography variant="subtitle1">Minify</Typography>
+          </Box>
+        </Grid>
+        <OverviewData isMinify={isMinify} overviewData={overviewData} />
         <Grid item md={8} xs={12}>
           {revenueData ? (
             <ShadowSection sx={{ height: 365 }}>
@@ -153,92 +131,18 @@ export default function Overview() {
           )}
         </Grid>
         <Grid item xs={12} md={6}>
-          <ShadowSection>
-            <Typography color={primaryColor} fontWeight="bold" variant="h6">
-              B.K
-            </Typography>
-            <Grid container mt={2} alignItems="center">
-              <Grid item xs={6}>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <ShadowSection
-                    sx={{
-                      backgroundColor: `${primaryColor} !important`,
-                      color: 'white',
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
-                      Number of bags
-                    </Typography>
-                    <Typography fontWeight="bold" variant="h6">
-                      {beansproutsData?.BKQuantity || 0} bags
-                    </Typography>
-                  </ShadowSection>
-                  <ShadowSection
-                    sx={{
-                      backgroundColor: `${primaryColor} !important`,
-                      color: 'white',
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
-                      Revenue ($)
-                    </Typography>
-                    <Typography fontWeight="bold" variant="h6">
-                      {beansproutsData?.BKRevenue?.toFixed(2)|| 0}
-                    </Typography>
-                  </ShadowSection>
-                </Box>
-              </Grid>
-              <Grid item xs={6} textAlign="center">
-                <CircularProgressWithLabel
-                  value={beansproutsData?.BKPercentage || 0}
-                />
-              </Grid>
-            </Grid>
-          </ShadowSection>
+          <BSOverview
+            type="B.K"
+            beansproutsData={beansproutsData?.BK || null}
+            isMinify={isMinify}
+          />
         </Grid>
         <Grid item xs={12} md={6}>
-          <ShadowSection>
-            <Typography color={primaryColor} fontWeight="bold" variant="h6">
-              P.P
-            </Typography>
-            <Grid container mt={2} alignItems="center">
-              <Grid item xs={6}>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <ShadowSection
-                    sx={{
-                      backgroundColor: `${primaryColor} !important`,
-                      color: 'white',
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
-                      Number of bags
-                    </Typography>
-                    <Typography fontWeight="bold" variant="h6">
-                      {beansproutsData?.PPQuantity || 0} bags
-                    </Typography>
-                  </ShadowSection>
-                  <ShadowSection
-                    sx={{
-                      backgroundColor: `${primaryColor} !important`,
-                      color: 'white',
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 50 }} variant="subtitle1">
-                      Revenue
-                    </Typography>
-                    <Typography fontWeight="bold" variant="h6">
-                      {beansproutsData?.PPRevenue?.toFixed(2) || 0}
-                    </Typography>
-                  </ShadowSection>
-                </Box>
-              </Grid>
-              <Grid item xs={6} textAlign="center">
-                <CircularProgressWithLabel
-                  value={beansproutsData?.PPPercentage || 0}
-                />
-              </Grid>
-            </Grid>
-          </ShadowSection>
+          <BSOverview
+            type="B.K"
+            beansproutsData={beansproutsData?.PP || null}
+            isMinify={isMinify}
+          />
         </Grid>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" my={2}>

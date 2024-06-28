@@ -179,7 +179,6 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
             display="flex"
             width="100%"
             flexDirection="column"
-            m={noMargin ? 0 : 2}
             gap={2}
           >
             {printComponents}

@@ -119,6 +119,7 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
         justifyContent="space-between"
         alignItems="center"
         flexWrap="wrap"
+        gap={2}
       >
         <Box
           display="flex"

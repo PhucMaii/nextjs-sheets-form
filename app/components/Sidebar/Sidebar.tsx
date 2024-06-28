@@ -139,7 +139,7 @@ export default function Sidebar({ children }: PropTypes) {
   if (smDown) {
     return (
       <>
-        <Box sx={{ p: 2, pb: 8 }}>{children}</Box>
+        <Box sx={{ pb: 8 }}>{children}</Box>
         {isOpenSnackbar && (
           <Snackbar
             open={isOpenSnackbar}

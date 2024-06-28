@@ -319,7 +319,6 @@ export default function Orders() {
       return order;
     });
 
-    // setOrderData(newOrderData);
     setBaseOrderData(newOrderData);
   };
 
@@ -422,7 +421,7 @@ export default function Orders() {
         </FormControl>
       </Box>
       <OrderOverview baseOrderData={baseOrderData} currentDate={date} />
-      <Grid container alignItems="center">
+      <Grid container alignItems="center" spacing={1}>
         <Grid item xs={12} md={10.5}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
@@ -454,12 +453,13 @@ export default function Orders() {
             </Tabs>
           </Box>
         </Grid>
-        <Grid item xs={1.5} textAlign="right">
+        <Grid item lg={1.5} md={12} xs={12} textAlign="right">
           <Box
             display="flex"
-            justifyContent="right"
+            justifyContent="flex-end"
             alignItems="center"
-            gap={2}
+            gap={1}
+            sx={{width: '100% !important'}}
           >
             <Fab
               size="medium"
@@ -481,7 +481,7 @@ export default function Orders() {
           <TextField
             fullWidth
             variant="filled"
-            // label="Search orders"
+            label="Search orders"
             placeholder="Search by invoice id, client id, client name or status"
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}
