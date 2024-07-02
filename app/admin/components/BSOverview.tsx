@@ -58,7 +58,7 @@ export default function BSOverview({ type, beansproutsData, isMinify }: IProps) 
       return minifyNumber(beansproutsData.revenue);
     }
 
-    return beansproutsData.revenue;
+    return beansproutsData.revenue.toFixed(2);
   }, [isMinify, beansproutsData]);
 
   return (

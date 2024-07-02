@@ -24,7 +24,7 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
       return minifyNumber(overviewData.revenue)
     }
 
-    return overviewData.revenue;
+    return overviewData.revenue.toFixed(2);
   }, [isMinify, overviewData])
 
   const unpaidAmount = useMemo(() => {
@@ -36,7 +36,7 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
       return minifyNumber(overviewData.unpaidAmount)
     }
 
-    return overviewData.unpaidAmount;
+    return overviewData.unpaidAmount.toFixed(2);
   }, [isMinify, overviewData])
 
   return (

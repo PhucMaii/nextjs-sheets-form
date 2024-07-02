@@ -2,7 +2,7 @@ export const minifyNumber = (num: number | null) => {
     if (!num) {
         return null;
     }
-    
+
     if (num < 1000) {
         return num.toString();
     }
@@ -16,5 +16,5 @@ export const minifyNumber = (num: number | null) => {
         unitIndex++;
     }
 
-    return Math.round(reducedNum) + units[unitIndex];
+    return Math.round(reducedNum * 10) / 10 + units[unitIndex];
 }
