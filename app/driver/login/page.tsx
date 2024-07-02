@@ -2,21 +2,19 @@
 import FadeIn from '@/app/HOC/FadeIn';
 import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
 import NotificationPopup from '@/app/admin/components/Notification';
-import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import { Box, Paper, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import axios from 'axios';
 import { useFormik } from 'formik';
-import { getSession, signIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
 
 interface FormValues {
-  clientId: string;
+  driverName: string;
   password: string;
   submit: any;
 }
@@ -32,35 +30,29 @@ export default function LoginPage() {
 
   const formik = useFormik<FormValues>({
     initialValues: {
-      clientId: '',
+      driverName: '',
       password: '',
       submit: null,
     },
     validationSchema: Yup.object({
-      clientId: Yup.string().max(255).required('Client ID is required'),
+      driverName: Yup.string().max(255).required('Name is required'),
       password: Yup.string().max(255).required('Password is required'),
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
 
       try {
-        const user = await signIn('credentials', {
+        const driver = await signIn('credentials', {
           redirect: false,
-          clientId: values.clientId,
+          driverName: values.driverName.toUpperCase(),
           password: values.password,
         });
 
-        const session: any = await getSession();
-        const response = await axios.get(
-          `${API_URL.USER}?id=${session?.user.id}`,
-        );
-        const userData = response.data.data;
-
-        if (user && user.error) {
+        if (driver && driver.error) {
           setNotification({
             on: true,
             type: 'error',
-            message: user.error,
+            message: driver.error,
           });
           setIsLoading(false);
           return;
@@ -73,11 +65,7 @@ export default function LoginPage() {
         });
         setIsLoading(false);
         setTimeout(() => {
-          if (userData.role === 'client') {
-            router.push('/');
-          } else {
-            router.push('/admin/orders');
-          }
+          router.push('/driver/overview');
         }, 1000);
       } catch (error: any) {
         console.log('Fail to sign in: ', error);
@@ -102,14 +90,11 @@ export default function LoginPage() {
           height="100vh"
           gap={2}
         >
-          {/* <div className="flex flex-col justify-center items-center h-screen gap-2"> */}
           <NotificationPopup
             notification={notification}
             onClose={() => setNotification({ ...notification, on: false })}
           />
-          {/* <div className="shadow-lg rounded-3xl"> */}
           <Paper elevation={8} sx={{ borderRadius: 3 }}>
-            {/* <div className="flex gap-2 m-4 items-center cursor-pointer"> */}
             <Box display="flex" gap={2} m={4} alignItems="center">
               <Image
                 width={100}
@@ -121,7 +106,6 @@ export default function LoginPage() {
                 Supreme Sprouts Ltd.
               </Typography>
             </Box>
-            {/* </div> */}
             <form
               className="px-16 pb-16"
               noValidate
@@ -134,28 +118,24 @@ export default function LoginPage() {
                 gap={0.5}
                 mb={2}
               >
-                {/* <h4 className="text-3xl font-bold text-left">Hello there</h4>
-                <h4 className="text-md text-gray-500 text-left">
-                  Log in to place your order
-                </h4> */}
                 <Typography variant="h4" fontWeight="bold">
-                  Hello there
+                  Welcome back
                 </Typography>
                 <Typography variant="subtitle1" color={grey[700]}>
-                  Log in to place your order
+                  Log in to view your schedule today
                 </Typography>
               </Box>
               <Box display="flex" flexDirection="column" gap={4}>
                 <TextField
-                  name="clientId"
-                  label="Client Id"
-                  placeholder="Enter your client id"
+                  name="driverName"
+                  label="Driver Name"
+                  placeholder="Enter your name"
                   type="text"
                   onChange={formik.handleChange}
-                  value={formik.values.clientId}
+                  value={formik.values.driverName}
                   onBlur={formik.handleBlur}
-                  error={!!(formik.touched.clientId && formik.errors.clientId)}
-                  helperText={formik.touched.clientId && formik.errors.clientId}
+                  error={!!(formik.touched.driverName && formik.errors.driverName)}
+                  helperText={formik.touched.driverName && formik.errors.driverName}
                   variant="standard"
                 />
                 <TextField
@@ -181,10 +161,7 @@ export default function LoginPage() {
               </Box>
             </form>
           </Paper>
-
-          {/* </div> */}
         </Box>
-        {/* </div> */}
       </FadeIn>
     </LoginAndRegisterGuard>
   );

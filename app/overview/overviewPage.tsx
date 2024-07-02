@@ -120,7 +120,6 @@ export default function MainPage() {
     });
 
     const monthRange = generateMonthRange();
-    console.log(monthRange, 'month range');
 
     const filterMonthOrders = filterDateRangeOrders(
       clientOrders.data.userOrders,

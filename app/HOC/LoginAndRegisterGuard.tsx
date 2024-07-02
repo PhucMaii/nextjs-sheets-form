@@ -12,7 +12,14 @@ export default function LoginAndRegisterGuard({ children }: any) {
   });
 
   const { data: user } = useSWR(
-    session?.user ? `${API_URL.USER}?id=${session.user.id}` : null,
+    (session?.user && !session.user.name) ? `${API_URL.USER}?id=${session.user.id}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+  const { data: driver } = useSWR(
+    session?.user?.name ? `${API_URL.DRIVER}?id=${session.user.id}` : null,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -20,12 +27,14 @@ export default function LoginAndRegisterGuard({ children }: any) {
   );
 
   useEffect(() => {
-    if (user?.data?.role === 'admin') {
+    if (session?.user?.name && driver?.data) {
+      router.push('/driver/overview');
+    } else if (user?.data?.role === 'admin') {
       router.push('/admin/orders');
     } else if (user?.data?.role === 'client') {
       router.push('/');
     }
-  }, [user]);
+  }, [user, driver]);
 
   return children;
 }

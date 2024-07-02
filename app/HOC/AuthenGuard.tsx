@@ -27,27 +27,45 @@ export default function AuthenGuard({ children }: any) {
   });
 
   const { data: user } = useSWR(
-    session?.user ? `${API_URL.USER}?id=${session.user.id}` : null,
+    (session?.user && !session.user.name) ? `${API_URL.USER}?id=${session?.user.id}` : null,
     fetcher,
     {
       revalidateOnFocus: false,
     },
   );
 
+  const { data: driver } = useSWR(
+    session?.user?.name ? `${API_URL.DRIVER}?id=${session?.user?.id}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  console.log({session, user, driver});
+
   useEffect(() => {
     if (
-      sessionError ||
-      (!isSessionValidating && Object.keys(session).length === 0)
+      (sessionError || (!isSessionValidating && Object.keys(session).length === 0)) &&
+      pathname !== '/driver/login'
     ) {
       router.push('/auth/login');
-    } else if (
+    } 
+    
+    else if (
       user &&
-      pathname?.startsWith('/admin') &&
+      (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
       user.data.role === 'client'
     ) {
       router.push('/');
+    } 
+    
+    else if (
+      driver && !pathname?.startsWith('/driver') 
+    ) {
+      router.push('/driver/overview')
     }
-  }, [pathname, session, user]);
+  }, [pathname, session, user, driver]);
 
   return children;
 }

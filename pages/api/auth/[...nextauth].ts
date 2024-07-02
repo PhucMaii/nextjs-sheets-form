@@ -15,6 +15,10 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       credentials: {
+        driverName: {
+          label: "Driver Name",
+          type: 'text'
+        },
         clientId: {
           label: 'Client Id',
           type: 'text',
@@ -22,32 +26,22 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        console.log(credentials, 'credentials');
         try {
-          if (!credentials?.clientId || !credentials?.password) {
-            throw new Error('Email or Password missing');
+          if (!credentials?.password) {
+            throw new Error('Password missing');
           }
-          const user = await prisma.user.findUnique({
-            where: {
-              clientId: credentials.clientId,
-            },
-          });
-          if (!user) {
-            throw new Error('User does not Exist');
+
+          if (credentials?.clientId) {
+            const userData = await loginUser(credentials);
+            return userData;
           }
-          const isPasswordValid = await compare(
-            credentials.password,
-            user.password,
-          );
-          if (!isPasswordValid) {
-            throw new Error('Incorrect Credentials');
+
+          if (credentials?.driverName) {
+            const driverData = await loginDriver(credentials);
+            return driverData;
           }
-          return {
-            id: user.id + '',
-            clientId: user.clientId,
-            clientName: user.clientName,
-            role: user.role,
-          };
+
+          throw new Error('Credentials missing');
         } catch (error: any) {
           console.error('Authorize error: ', error);
           return null;
@@ -80,3 +74,47 @@ export const authOptions: NextAuthOptions = {
 
 const handler = NextAuth(authOptions);
 export { handler as default };
+
+const loginUser = async (credentials: any) => {
+  const prisma = new PrismaClient();
+
+  const user = await prisma.user.findUnique({
+    where: {
+      clientId: credentials.clientId,
+    },
+  });
+  if (!user) {
+    throw new Error('User does not Exist');
+  }
+  const isPasswordValid = await compare(credentials.password, user.password);
+  if (!isPasswordValid) {
+    throw new Error('Incorrect Credentials');
+  }
+  return {
+    id: user.id + '',
+    clientId: user.clientId,
+    clientName: user.clientName,
+    role: user.role,
+  };
+};
+
+const loginDriver = async (credentials: any) => {
+  const prisma = new PrismaClient();
+
+  const driver = await prisma.driver.findFirst({
+    where: {
+      name: credentials.driverName,
+    },
+  });
+  if (!driver) {
+    throw new Error('Driver name does not Exist');
+  }
+  const isPasswordValid = await compare(credentials.password, driver.password);
+  if (!isPasswordValid) {
+    throw new Error('Incorrect Credentials');
+  }
+  return {
+    id: driver.id + '',
+    name: driver.name,
+  };
+};
