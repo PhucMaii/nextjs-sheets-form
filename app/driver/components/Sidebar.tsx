@@ -29,7 +29,7 @@ import { UserContext } from '@/app/context/UserContextAPI';
 import CloseIcon from '@mui/icons-material/Close';
 import { Notification } from '@/app/utils/type';
 import { generateRecommendDate } from '@/app/utils/time';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 import EmailAlert from '@/app/components/EmailAlert';
 import SnackbarPopup from '@/app/components/Snackbar/SnackbarPopup';
 

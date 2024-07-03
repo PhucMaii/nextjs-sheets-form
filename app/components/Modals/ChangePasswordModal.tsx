@@ -9,7 +9,7 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
 import Alert from '../Alert';
-import FadeIn from '@/app/HOC/FadeIn';
+import FadeIn from '@/HOC/FadeIn';
 
 interface PropTypes {
   isOpen: boolean;

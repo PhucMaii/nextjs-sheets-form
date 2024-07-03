@@ -1,4 +1,4 @@
-import { SplashScreen } from '@/app/HOC/AuthenGuard';
+import { SplashScreen } from '@/HOC/AuthenGuard';
 import {
   Box,
   CircularProgress,

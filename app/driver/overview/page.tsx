@@ -5,7 +5,7 @@ import { Grid, Typography } from '@mui/material';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import OverviewCard from '@/app/admin/components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 import useSWR from 'swr';
 import { API_URL } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';

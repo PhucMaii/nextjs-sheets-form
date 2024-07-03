@@ -1,4 +1,4 @@
-import { greyBackground } from '@/app/theme/color';
+import { greyBackground } from '@/theme/color';
 import {
   Box,
   IconButton,

@@ -30,7 +30,7 @@ import { grey } from '@mui/material/colors';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Item, Order } from '../orders/page';
 import { useReactToPrint } from 'react-to-print';
-
+import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
@@ -42,6 +42,7 @@ import EditPrice from './Modals/edit/EditPrice';
 import StatusText, { COLOR_TYPE } from './StatusText';
 import { ComponentToPrint } from './Printing/ComponentToPrint';
 import { SubCategory } from '@prisma/client';
+// import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 interface PropTypes {
   order: Order;
@@ -330,16 +331,10 @@ const OrderAccordion = ({
                 {order.clientName}
               </Button>
             </Grid>
-            <Grid item xs={12} md={3} textAlign="center" alignItems="center">
-              <Typography fontWeight="bold" variant="subtitle1">
-                Items: {totalQuantity}
-              </Typography>
-              <Typography fontWeight="bold" variant="subtitle1">
-                Total: ${order.totalPrice.toFixed(2)}
-              </Typography>
+            <Grid item xs={12} md={3} textAlign="left" alignItems="center">
               <Box
                 display="flex"
-                gap={2}
+                gap={1}
                 alignItems="center"
                 justifyContent="center"
               >
@@ -355,6 +350,19 @@ const OrderAccordion = ({
                 >
                   <EditIcon sx={{ width: '20px', height: '20px' }} />
                 </IconButton>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" gap={1} alignItems="center">
+                    <SellIcon color="primary" />
+                    <Typography color="primary" variant="subtitle1">{totalQuantity}</Typography>
+                  </Box>
+                  <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
+                  {/* <Box display="flex" gap={1} alignItems="center">
+                    <LocalShippingIcon color="primary" />
+                    <Typography color="primary" variant="subtitle1">{order.deliveryDate}</Typography>
+                  </Box> */}
               </Box>
             </Grid>
           </Grid>

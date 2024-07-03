@@ -46,7 +46,7 @@ import {
   infoColor,
   successColor,
   warningColor,
-} from '@/app/theme/color';
+} from '@/theme/color';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';

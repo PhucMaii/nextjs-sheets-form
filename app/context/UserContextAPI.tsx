@@ -1,7 +1,7 @@
 'use client';
 import React, { ReactNode, createContext } from 'react';
 import { API_URL } from '../utils/enum';
-import { fetcher } from '../HOC/AuthenGuard';
+import { fetcher } from '../../HOC/AuthenGuard';
 import useSWR from 'swr';
 
 export const UserContext = createContext<any>([]);

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { SplashScreen } from '../HOC/AuthenGuard';
+import { SplashScreen } from '../../HOC/AuthenGuard';
 import Sidebar from '../components/Sidebar';
 import {
   Box,
@@ -31,7 +31,7 @@ import {
   infoColor,
   successColor,
   warningColor,
-} from '../theme/color';
+} from '../../theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
 import NotificationPopup from '../admin/components/Notification';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';

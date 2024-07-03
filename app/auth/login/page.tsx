@@ -1,6 +1,6 @@
 'use client';
-import FadeIn from '@/app/HOC/FadeIn';
-import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
+import FadeIn from '@/HOC/FadeIn';
+import LoginAndRegisterGuard from '@/HOC/LoginAndRegisterGuard';
 import NotificationPopup from '@/app/admin/components/Notification';
 import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';

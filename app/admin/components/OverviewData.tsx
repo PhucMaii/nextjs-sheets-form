@@ -6,7 +6,7 @@ import LoopIcon from '@mui/icons-material/Loop';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import { blue } from '@mui/material/colors';
 import { Grid } from '@mui/material';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 import { minifyNumber } from '@/app/utils/number';
 
 interface IProps {

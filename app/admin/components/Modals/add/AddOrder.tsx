@@ -37,7 +37,7 @@ import {
 } from '@/app/utils/time';
 import { limitOrderHour } from '../../../../lib/constant';
 import moment from 'moment';
-import { infoColor } from '@/app/theme/color';
+import { infoColor } from '@/theme/color';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];

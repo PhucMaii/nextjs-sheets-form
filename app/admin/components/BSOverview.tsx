@@ -1,7 +1,7 @@
 import { Box, CircularProgress, Grid, Typography } from '@mui/material';
 import React, { useMemo } from 'react';
 import { ShadowSection } from '../reports/styled';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 import { minifyNumber } from '@/app/utils/number';
 import { BSData } from '@/app/utils/type';
 

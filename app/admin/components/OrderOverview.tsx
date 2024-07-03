@@ -11,7 +11,7 @@ import useRoutes from '@/hooks/fetch/useRoutes';
 import { days } from '@/app/lib/constant';
 import { IRoutes } from '@/app/utils/type';
 import { UserRoute } from '@prisma/client';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 
 interface IProps {
   baseOrderData: Order[];

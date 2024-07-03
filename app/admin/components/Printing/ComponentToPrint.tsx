@@ -57,7 +57,7 @@ export const ComponentToPrint = forwardRef(
             alignItems="center"
             sx={{ width: '100%' }}
           >
-            <Typography variant="h4" fontWeight="bold">
+            <Typography variant="h6" fontWeight="bold">
               {order.isReplacement
                 ? 'REPLACEMENT ORDER'
                 : order.isVoid
@@ -137,7 +137,7 @@ export const ComponentToPrint = forwardRef(
                 </Typography>
               </Grid>
             </Grid>
-            <Box display="flex" flexDirection="column" gap={2}>
+            <Box display="flex" flexDirection="column" gap={2} mt={2}>
               <Typography sx={{ fontSize: printFontSize - 10 }}>
                 <strong>DELIVERY ADDRESS:</strong> {order.deliveryAddress}
               </Typography>

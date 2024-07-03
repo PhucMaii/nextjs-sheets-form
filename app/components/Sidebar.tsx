@@ -31,7 +31,7 @@ import EmailAlert from './EmailAlert';
 import SnackbarPopup from './Snackbar/SnackbarPopup';
 import { Notification } from '@/app/utils/type';
 import { generateRecommendDate } from '@/app/utils/time';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 
 interface PropTypes {
   children: ReactNode;

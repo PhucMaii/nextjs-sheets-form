@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import { BoxModal } from '@/app/admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Item, Order } from '@/app/admin/orders/page';
-import { infoColor } from '@/app/theme/color';
+import { infoColor } from '@/theme/color';
 import { Notification } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import {
@@ -147,11 +147,13 @@ export default function EditOrder({
               </Grid>
             </Grid>
             {mdDown && (
-              <Grid item xs={12}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Button variant="outlined" onClick={onClose}>
+              <Grid container item xs={12} spacing={2}>
+                <Grid item xs={6}>
+                  <Button fullWidth variant="outlined" onClick={onClose}>
                     Cancel
                   </Button>
+                </Grid>
+                <Grid item xs={6}>
                   <LoadingButton
                     variant="contained"
                     fullWidth
@@ -161,7 +163,7 @@ export default function EditOrder({
                   >
                     SAVE
                   </LoadingButton>
-                </Box>
+                </Grid>
               </Grid>
             )}
           </Grid>

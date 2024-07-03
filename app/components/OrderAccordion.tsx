@@ -21,10 +21,11 @@ import { ORDER_STATUS } from '../utils/enum';
 import { blue, grey } from '@mui/material/colors';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { errorColor } from '../theme/color';
+import { errorColor } from '../../theme/color';
 import EditOrder from './Modals/EditOrder';
 import { Notification } from '../utils/type';
 import DeleteModal from './Modals/DeleteModal';
+import SellIcon from '@mui/icons-material/Sell';
 
 interface PropTypes {
   handleDeleteOrder?: (orderId: number) => void;
@@ -129,22 +130,30 @@ export default function OrderAccordion({
             <Grid item xs={12} md={6}>
               <Button variant="contained">{order.clientName}</Button>
             </Grid>
-            <Grid item xs={12} md={3} textAlign="center">
+            <Grid item xs={12} md={3} textAlign="left">
               <Typography fontWeight="bold" variant="subtitle1">
-                Items: {totalQuantity}
+                Delivery Date: {order.deliveryDate}
               </Typography>
-              <Typography fontWeight="bold" variant="subtitle1">
-                Total: ${order.totalPrice.toFixed(2)}
-              </Typography>
+            </Grid>
+            <Grid item xs={12}>
               <Box
                 display="flex"
-                gap={2}
+                justifyContent="space-between"
                 alignItems="center"
-                justifyContent="center"
               >
-                <Typography fontWeight="bold" variant="subtitle1">
-                  Delivery Date: {order.deliveryDate}
-                </Typography>
+                <Box display="flex" gap={1} alignItems="center">
+                  <SellIcon color="primary" />
+                  <Typography color="primary" variant="subtitle1">
+                    {totalQuantity}
+                  </Typography>
+                </Box>
+                <Button variant="outlined">
+                  ${order.totalPrice.toFixed(2)}
+                </Button>
+                {/* <Box display="flex" gap={1} alignItems="center">
+                    <LocalShippingIcon color="primary" />
+                    <Typography color="primary" variant="subtitle1">{order.deliveryDate}</Typography>
+                  </Box> */}
               </Box>
             </Grid>
           </Grid>

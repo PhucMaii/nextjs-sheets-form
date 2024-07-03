@@ -2,7 +2,7 @@
 import React, { MouseEvent, useEffect, useState } from 'react';
 import { Notification } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import FadeIn from '@/app/HOC/FadeIn';
+import FadeIn from '@/HOC/FadeIn';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';

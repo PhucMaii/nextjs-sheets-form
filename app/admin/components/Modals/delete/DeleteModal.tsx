@@ -3,7 +3,7 @@ import { Box, Button, Modal, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import ErrorIcon from '@mui/icons-material/Error';
-import { errorColor } from '@/app/theme/color';
+import { errorColor } from '@/theme/color';
 import { grey } from '@mui/material/colors';
 import { LoadingButton } from '@mui/lab';
 

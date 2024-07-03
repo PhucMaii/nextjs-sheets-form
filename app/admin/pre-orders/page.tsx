@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { SplashScreen } from '@/app/HOC/AuthenGuard';
+import { SplashScreen } from '@/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
 import {
   Box,
@@ -37,7 +37,7 @@ import AddOrder from '../components/Modals/add/AddOrder';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { infoBackground, infoColor } from '@/app/theme/color';
+import { infoBackground, infoColor } from '@/theme/color';
 import EditDeliveryDate from '../components/Modals/edit/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';

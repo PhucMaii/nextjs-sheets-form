@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 import useDebounce from '@/hooks/useDebounce';
 import { ShadowSection } from '../reports/styled';
-import { SplashScreen } from '@/app/HOC/AuthenGuard';
+import { SplashScreen } from '@/HOC/AuthenGuard';
 import axios from 'axios';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
 import AddItem from '../components/Modals/add/AddItem';

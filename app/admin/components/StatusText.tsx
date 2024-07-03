@@ -7,7 +7,7 @@ import {
   successText,
   warningBackground,
   warningText,
-} from '@/app/theme/color';
+} from '@/theme/color';
 import { Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 

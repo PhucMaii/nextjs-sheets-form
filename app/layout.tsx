@@ -3,9 +3,9 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './provider';
 import { ThemeProvider } from '@mui/material';
-import { theme } from './theme/theme';
 import '../styles/reactCalendar.css';
 import UserContextAPI from './context/UserContextAPI';
+import { theme } from '@/theme';
 
 const inter = Inter({ subsets: ['latin'] });
 

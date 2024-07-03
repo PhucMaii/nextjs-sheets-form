@@ -22,7 +22,7 @@ import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 
 interface PropTypes {
   children: ReactNode;

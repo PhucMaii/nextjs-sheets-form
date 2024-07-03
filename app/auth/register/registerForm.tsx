@@ -1,5 +1,5 @@
 'use client';
-import FadeIn from '@/app/HOC/FadeIn';
+import FadeIn from '@/HOC/FadeIn';
 import Button from '@/app/components/Button';
 import Input from '@/app/components/Input';
 import Snackbar from '@/app/components/Snackbar/SnackbarPopup';
@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import LoginAndRegisterGuard from '@/app/HOC/LoginAndRegisterGuard';
+import LoginAndRegisterGuard from '@/HOC/LoginAndRegisterGuard';
 
 interface FormValues {
   sheetName: string;

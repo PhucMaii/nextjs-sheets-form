@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { API_URL } from '../utils/enum';
+import { API_URL } from '../app/utils/enum';
 import useSWR from 'swr';
 import { fetcher } from './AuthenGuard';
 

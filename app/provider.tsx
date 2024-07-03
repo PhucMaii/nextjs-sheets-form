@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { SessionProvider } from 'next-auth/react';
 import { SWRConfig } from 'swr';
-import AuthenGuard from './HOC/AuthenGuard';
+import AuthenGuard from '../HOC/AuthenGuard';
 
 type Props = {
   children?: React.ReactNode;

@@ -8,7 +8,7 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import LoadingModal from '../LoadingModal';
 import CloseIcon from '@mui/icons-material/Close';
-import { primaryColor } from '@/app/theme/color';
+import { primaryColor } from '@/theme/color';
 import styled from 'styled-components';
 
 const ShadowSectionStyled = styled(ShadowSection)`

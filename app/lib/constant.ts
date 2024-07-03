@@ -19,7 +19,7 @@ import {
   infoColor,
   successColor,
   warningColor,
-} from '../theme/color';
+} from '../../theme/color';
 
 export const officiallyStartDate = new Date('03/31/2024');
 

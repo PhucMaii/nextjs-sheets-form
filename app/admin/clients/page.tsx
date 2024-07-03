@@ -1,5 +1,5 @@
 'use client';
-import { SplashScreen } from '@/app/HOC/AuthenGuard';
+import { SplashScreen } from '@/HOC/AuthenGuard';
 import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {

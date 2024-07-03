@@ -24,7 +24,7 @@ import {
   ScheduledOrder,
 } from '@/app/utils/type';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import { errorColor } from '@/app/theme/color';
+import { errorColor } from '@/theme/color';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
