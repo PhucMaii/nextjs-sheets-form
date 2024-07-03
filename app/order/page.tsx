@@ -15,7 +15,7 @@ import moment from 'moment';
 import { limitOrderHour } from '../lib/constant';
 import OverrideOrder from '../components/Modals/OverrideOrder';
 import { Order } from '../admin/orders/page';
-import Sidebar from '../components/Sidebar/Sidebar';
+import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import useSWR from 'swr';
 import NotificationPopup from '../admin/components/Notification';

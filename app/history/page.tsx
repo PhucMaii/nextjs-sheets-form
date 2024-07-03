@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { SplashScreen } from '../HOC/AuthenGuard';
-import Sidebar from '../components/Sidebar/Sidebar';
+import Sidebar from '../components/Sidebar';
 import {
   Box,
   Grid,

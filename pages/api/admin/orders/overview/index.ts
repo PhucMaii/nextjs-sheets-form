@@ -173,7 +173,7 @@ export default async function handler(
   }
 }
 
-const generateManifest = (orders: any) => {
+export const generateManifest = (orders: any) => {
   const itemList = orders.flatMap((order: any) => {
     return order.items;
   });

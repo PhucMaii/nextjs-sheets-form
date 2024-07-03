@@ -6,7 +6,7 @@ import { Notification, UserType } from '../utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { YYYYMMDDFormat, generateMonthRange } from '../utils/time';
-import Sidebar from '../components/Sidebar/Sidebar';
+import Sidebar from '../components/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import NotificationPopup from '../admin/components/Notification';
 import { Box, Divider, Grid, IconButton, Typography } from '@mui/material';

@@ -22,23 +22,23 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
-import { clientTabs } from '@/app/lib/constant';
+import { clientTabs, driverTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
 import CloseIcon from '@mui/icons-material/Close';
-import EmailAlert from '../EmailAlert';
-import SnackbarPopup from '../Snackbar/SnackbarPopup';
 import { Notification } from '@/app/utils/type';
 import { generateRecommendDate } from '@/app/utils/time';
 import { primaryColor } from '@/app/theme/color';
+import EmailAlert from '@/app/components/EmailAlert';
+import SnackbarPopup from '@/app/components/Snackbar/SnackbarPopup';
 
-interface PropTypes {
+interface IProps {
   children: ReactNode;
 }
 
 const drawerWidth = 250;
-export default function Sidebar({ children }: PropTypes) {
+export default function Sidebar({ children }: IProps) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
@@ -52,21 +52,12 @@ export default function Sidebar({ children }: PropTypes) {
 
   const { user, isValidating } = useContext(UserContext);
   const orderDate = generateRecommendDate();
-  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(false);
 
   const url = process.env.NEXT_PUBLIC_WEB_URL;
 
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
-
-  useEffect(() => {
-    if (!isValidating && !user?.email) {
-      setIsOpenSnackbar(true);
-    } else {
-      setIsOpenSnackbar(false);
-    }
-  }, [isValidating, user]);
 
   const handleChangeTab = (path: string) => {
     router.push(path);
@@ -97,7 +88,7 @@ export default function Sidebar({ children }: PropTypes) {
         aria-labelledby="nested-list-subheader"
       >
         <Box display="flex" flexDirection="column" rowGap={2}>
-          {clientTabs.map((tab, index) => (
+          {driverTabs.map((tab, index) => (
             <ListItemButtonStyled
               $textColor="white"
               $bgColor={primaryColor}
@@ -140,29 +131,6 @@ export default function Sidebar({ children }: PropTypes) {
     return (
       <>
         <Box sx={{ pb: 8 }}>{children}</Box>
-        {isOpenSnackbar && (
-          <Snackbar
-            open={isOpenSnackbar}
-            onClose={() => setIsOpenSnackbar(false)}
-            action={
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => setIsOpenSnackbar(false)}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            }
-          >
-            <div>
-              <EmailAlert
-                setIsOpenSnackbar={setIsOpenSnackbar}
-                setNotification={setNotification}
-              />
-            </div>
-          </Snackbar>
-        )}
         <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
           <BottomNavigation
             sx={{ width: '100vw !important' }}
@@ -171,7 +139,7 @@ export default function Sidebar({ children }: PropTypes) {
               setCurrentTab(newValue);
             }}
           >
-            {clientTabs.map((tab, index) => {
+            {driverTabs.map((tab, index) => {
               return (
                 <BottomNavigationAction
                   key={index}
@@ -230,12 +198,6 @@ export default function Sidebar({ children }: PropTypes) {
             {content}
           </Drawer>
           <Box width="100%">
-            {isOpenSnackbar && (
-              <EmailAlert
-                setIsOpenSnackbar={setIsOpenSnackbar}
-                setNotification={setNotification}
-              />
-            )}
             <Box
               display="flex"
               width="100%"
@@ -271,12 +233,6 @@ export default function Sidebar({ children }: PropTypes) {
           {content}
         </Drawer>
         <Box width="100%">
-          {isOpenSnackbar && (
-            <EmailAlert
-              setIsOpenSnackbar={setIsOpenSnackbar}
-              setNotification={setNotification}
-            />
-          )}
           <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
             {children}
           </Box>

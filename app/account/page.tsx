@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar/Sidebar';
+import Sidebar from '../components/Sidebar';
 import { SplashScreen } from '../HOC/AuthenGuard';
 import {
   Box,
@@ -187,13 +187,6 @@ export default function AccountPage() {
 
   return (
     <Sidebar>
-      {/* <AuthenGuard> */}
-      {/* <SnackbarPopup
-        open={notification.on}
-        type={notification.type}
-        message={notification.message}
-        onClose={() => setNotification({ ...notification, on: false })}
-      /> */}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
