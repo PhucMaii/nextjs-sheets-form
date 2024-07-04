@@ -11,7 +11,7 @@ interface IProps {
   isMinify: boolean;
 }
 
-function CircularProgressWithLabel(props: any) {
+export function CircularProgressWithLabel(props: any) {
     return (
       <Box
         sx={{

@@ -42,8 +42,6 @@ export default function AuthenGuard({ children }: any) {
     },
   );
 
-  console.log({session, user, driver});
-
   useEffect(() => {
     if (
       (sessionError || (!isSessionValidating && Object.keys(session).length === 0)) &&
