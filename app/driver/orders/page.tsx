@@ -25,7 +25,7 @@ import { Virtuoso } from 'react-virtuoso';
 import OrderComponent from '../components/OrderComponent';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 
-export function CircularProgressWithLabel(props: any) {
+function CircularProgressWithLabel(props: any) {
   return (
     <Box
       sx={{
