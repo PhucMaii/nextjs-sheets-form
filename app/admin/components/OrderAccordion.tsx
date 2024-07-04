@@ -8,25 +8,15 @@ import React, {
   useState,
 } from 'react';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Button,
   Checkbox,
-  Divider,
   Grid,
   IconButton,
   Menu,
   MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Item, Order } from '../orders/page';
 import { useReactToPrint } from 'react-to-print';
@@ -34,15 +24,16 @@ import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
-import { Notification, OrderedItems } from '@/app/utils/type';
-import EditItemModal from './Modals/edit/EditOrderItem';
+import { Notification } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
 import EditPrice from './Modals/edit/EditPrice';
 import StatusText, { COLOR_TYPE } from './StatusText';
 import { ComponentToPrint } from './Printing/ComponentToPrint';
 import { SubCategory } from '@prisma/client';
-// import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { ShadowSection } from '../reports/styled';
+import PreviewIcon from '@mui/icons-material/Preview';
+import OrderDetails from './Modals/OrderDetails';
 
 interface PropTypes {
   order: Order;
@@ -76,15 +67,8 @@ const OrderAccordion = ({
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
-  const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
-  const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
-  const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
-    name: '',
-    price: 0,
-    totalPrice: 0,
-    quantity: 0,
-  });
+  const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const statusText = {
     text: order.status,
@@ -105,12 +89,6 @@ const OrderAccordion = ({
   useEffect(() => {
     calculateTotalQuantity();
   }, [order]);
-
-  useEffect(() => {
-    if (Object.keys(selectedItem).length > 0) {
-      setIsOpenEditModal(true);
-    }
-  }, [selectedItem]);
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -150,6 +128,92 @@ const OrderAccordion = ({
     setTotalQuantity(quantity);
   };
 
+  const actions = (
+    <>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setAnchorEl(e.currentTarget);
+        }}
+      >
+        <MoreHorizIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+        onClose={() => setAnchorEl(null)}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            '& .MuiAvatar-root': {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            '&::before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePrinting();
+          }}
+        >
+          Print
+        </MenuItem>
+        <MenuItem
+          disabled={
+            isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
+          }
+          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.COMPLETED)}
+        >
+          Mark as completed
+        </MenuItem>
+        <MenuItem
+          disabled={
+            isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
+          }
+          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.DELIVERED)}
+        >
+          Mark as delivered
+        </MenuItem>
+        <MenuItem
+          disabled={
+            isMarkButtonDisabled || order.status === ORDER_STATUS.INCOMPLETED
+          }
+          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)}
+        >
+          Mark as incompleted
+        </MenuItem>
+        <MenuItem
+          disabled={isMarkButtonDisabled || order.status === ORDER_STATUS.VOID}
+          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.VOID)}
+        >
+          Mark as void
+        </MenuItem>
+      </Menu>
+    </>
+  );
+
   return (
     <>
       <div style={{ display: 'none' }}>
@@ -169,18 +233,6 @@ const OrderAccordion = ({
         setNotification={setNotification}
         handleUpdateDateUI={handleUpdateDateUI}
       />
-      <EditItemModal
-        open={isOpenEditModal}
-        onClose={() => {
-          setIsOpenEditModal(false);
-          setSelectedItem({});
-        }}
-        item={updatedItem}
-        setItem={setUpdatedItem}
-        setNotification={setNotification}
-        updateUIItem={updateUIItem}
-        order={order}
-      />
       <EditPrice
         open={isOpenEditPrice}
         onClose={() => setIsOpenEditPrice(false)}
@@ -190,264 +242,99 @@ const OrderAccordion = ({
         handleUpdatePriceUI={handleUpdatePriceUI}
         subcategories={subcategories}
       />
-      <Accordion
-        sx={{ borderRadius: 2, border: `1px solid white`, width: '100%' }}
-      >
-        <AccordionSummary>
-          <Grid container alignItems="center" columnSpacing={1}>
-            <Grid item xs={0.5}>
-              <Checkbox
-                checked={isOrderSelected}
-                onClick={(e: any) => handleSelectOrder(e, order)}
-              />
-            </Grid>
-            <Grid item xs={12} md={11}>
-              <Box display="flex" alignItems="center" gap={1}>
-                {order.isReplacement && (
-                  <StatusText text={`Replacement by client `} type={'error'} />
-                )}
-                {order.isVoid && (
-                  <StatusText text={`Void by client `} type={'error'} />
-                )}
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <StatusText text={statusText.text} type={statusText.type} />
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setAnchorEl(e.currentTarget);
-                  }}
-                >
-                  <MoreHorizIcon />
-                </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={!!anchorEl}
-                  onClose={() => setAnchorEl(null)}
-                  PaperProps={{
-                    elevation: 0,
-                    sx: {
-                      overflow: 'visible',
-                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                      mt: 1.5,
-                      '& .MuiAvatar-root': {
-                        width: 32,
-                        height: 32,
-                        ml: -0.5,
-                        mr: 1,
-                      },
-                      '&::before': {
-                        content: '""',
-                        display: 'block',
-                        position: 'absolute',
-                        top: 0,
-                        right: 14,
-                        width: 10,
-                        height: 10,
-                        bgcolor: 'background.paper',
-                        transform: 'translateY(-50%) rotate(45deg)',
-                        zIndex: 0,
-                      },
-                    },
-                  }}
-                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                >
-                  <MenuItem onClick={() => setIsOpenEditPrice(true)}>
-                    Edit price
-                  </MenuItem>
-                  <MenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePrinting();
-                    }}
-                  >
-                    Print
-                  </MenuItem>
-                  <MenuItem
-                    disabled={
-                      isMarkButtonDisabled ||
-                      order.status === ORDER_STATUS.COMPLETED
-                    }
-                    onClick={(e) =>
-                      handleChangeStatus(e, ORDER_STATUS.COMPLETED)
-                    }
-                  >
-                    Mark as completed
-                  </MenuItem>
-                  <MenuItem
-                    disabled={
-                      isMarkButtonDisabled ||
-                      order.status === ORDER_STATUS.COMPLETED
-                    }
-                    onClick={(e) =>
-                      handleChangeStatus(e, ORDER_STATUS.DELIVERED)
-                    }
-                  >
-                    Mark as delivered
-                  </MenuItem>
-                  <MenuItem
-                    disabled={
-                      isMarkButtonDisabled ||
-                      order.status === ORDER_STATUS.INCOMPLETED
-                    }
-                    onClick={(e) =>
-                      handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)
-                    }
-                  >
-                    Mark as incompleted
-                  </MenuItem>
-                  <MenuItem
-                    disabled={
-                      isMarkButtonDisabled || order.status === ORDER_STATUS.VOID
-                    }
-                    onClick={(e) => handleChangeStatus(e, ORDER_STATUS.VOID)}
-                  >
-                    Mark as void
-                  </MenuItem>
-                </Menu>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={2} sx={{ mr: 2 }}>
-              <Typography fontWeight="bold" variant="subtitle1">
-                #{order.id}
-              </Typography>
-              <Typography variant="body2">
-                Order at: {order.orderTime}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Button
-                color="info"
-                variant="contained"
-                onClick={handleOpenClientModal}
-              >
-                {order.clientName}
-              </Button>
-            </Grid>
-            <Grid item xs={12} md={3} textAlign="left" alignItems="center">
-              <Box
-                display="flex"
-                gap={1}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Typography fontWeight="bold" variant="subtitle1">
-                  Delivery Date: {order.deliveryDate}
-                </Typography>
-                <IconButton
-                  sx={{ width: '25px', height: '25px' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditDateOpen(true);
-                  }}
-                >
-                  <EditIcon sx={{ width: '20px', height: '20px' }} />
-                </IconButton>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Box display="flex" gap={1} alignItems="center">
-                    <SellIcon color="primary" />
-                    <Typography color="primary" variant="subtitle1">{totalQuantity}</Typography>
-                  </Box>
-                  <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
-                  {/* <Box display="flex" gap={1} alignItems="center">
-                    <LocalShippingIcon color="primary" />
-                    <Typography color="primary" variant="subtitle1">{order.deliveryDate}</Typography>
-                  </Box> */}
-              </Box>
-            </Grid>
+      <OrderDetails
+        open={isOpenDetails}
+        onClose={() => setIsOpenDetails(false)}
+        order={order}
+        setNotification={setNotification}
+        updateUIItem={updateUIItem}
+      />
+      <ShadowSection>
+        <Grid container alignItems="center" columnSpacing={1}>
+          <Grid item xs={0.5}>
+            <Checkbox
+              checked={isOrderSelected}
+              onClick={(e: any) => handleSelectOrder(e, order)}
+            />
           </Grid>
-        </AccordionSummary>
-        <AccordionDetails sx={{ backgroundColor: grey[50] }}>
-          <Grid container rowGap={4} alignItems="flex-start">
-            <Grid item textAlign="center" xs={12} md={6}>
-              <Typography fontWeight="bold" variant="h6">
-                ORDER
-              </Typography>
-              <Table sx={{ minWidth: '100%' }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Price</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {order.items.length > 0 &&
-                    order.items.map((row, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{row.name}</TableCell>
-                        <TableCell>{row.quantity}</TableCell>
-                        <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <IconButton
-                            onClick={() => {
-                              setSelectedItem(row);
-                              setUpdatedItem(row);
-                            }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </Grid>
-            <Grid
-              container
-              item
-              textAlign="center"
+          <Grid item xs={12} md={8}>
+            <Box display="flex" alignItems="center" gap={1}>
+              {order.isReplacement && (
+                <StatusText text={`Replacement by client `} type={'error'} />
+              )}
+              {order.isVoid && (
+                <StatusText text={`Void by client `} type={'error'} />
+              )}
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={3.5} textAlign="right">
+            {actions}
+          </Grid>
+          <Grid item xs={12}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
               alignItems="center"
-              rowGap={2}
-              xs={12}
-              md={6}
             >
-              <Grid item xs={12}>
-                <Typography fontWeight="bold" variant="h6">
-                  NOTE
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle1">
-                  {order.note ? order.note : 'N/A'}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} mt={4}>
-                <Typography fontWeight="bold" variant="h6">
-                  TOTAL
-                </Typography>
-              </Grid>
-              <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography fontWeight="bold">Number of items</Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">{totalQuantity} items</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-              <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography fontWeight="bold">Total</Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">
-                  ${order.totalPrice.toFixed(2)}
-                </Typography>
-              </Grid>
-            </Grid>
+              <StatusText text={statusText.text} type={statusText.type} />
+              <IconButton onClick={() => setIsOpenDetails(true)}>
+                <PreviewIcon color="primary" />
+              </IconButton>
+            </Box>
           </Grid>
-        </AccordionDetails>
-      </Accordion>
+          <Grid item xs={12} md={2} sx={{ mr: 2 }}>
+            <Typography fontWeight="bold" variant="subtitle1">
+              #{order.id}
+            </Typography>
+            <Typography variant="body2">Order at: {order.orderTime}</Typography>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Button
+              color="info"
+              variant="contained"
+              onClick={handleOpenClientModal}
+            >
+              {order.clientName}
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={3} textAlign="left" alignItems="center">
+            <Box
+              display="flex"
+              gap={1}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Typography fontWeight="bold" variant="subtitle1">
+                Delivery Date: {order.deliveryDate}
+              </Typography>
+              <IconButton
+                sx={{ width: '25px', height: '25px' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditDateOpen(true);
+                }}
+              >
+                <EditIcon sx={{ width: '20px', height: '20px' }} />
+              </IconButton>
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <SellIcon color="primary" />
+                <Typography color="primary" variant="subtitle1">
+                  {totalQuantity}
+                </Typography>
+              </Box>
+              <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </ShadowSection>
     </>
   );
 };
