@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import {
   Box,
@@ -13,7 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { Notification } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import { Order } from '@/app/admin/orders/page';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -26,6 +26,7 @@ import OrderComponent from '../components/OrderComponent';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 
 function CircularProgressWithLabel(props: any) {
+  const value = Math.round((props.currentValue / props.basedValue) * 100);
   return (
     <Box
       sx={{
@@ -40,7 +41,7 @@ function CircularProgressWithLabel(props: any) {
         color={props.color}
         variant="determinate"
         size={120}
-        {...props}
+        value={value}
       />
       <Box
         sx={{
@@ -60,7 +61,7 @@ function CircularProgressWithLabel(props: any) {
           textAlign="center"
           color={`${props.color}.main`}
         >
-          800 / 100
+          {props.currentValue} / {props.basedValue}
         </Typography>
       </Box>
     </Box>
@@ -85,8 +86,9 @@ export default function OrdersPage() {
     message: '',
   });
   const [orders, setOrders] = useState<Order[]>([]);
+  const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
-  
+
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
@@ -95,6 +97,67 @@ export default function OrdersPage() {
   useEffect(() => {
     fetchOrders();
   }, [currentTab, datePicker]);
+
+  useEffect(() => {
+    if (orders && orders.length > 0) {
+      const newOrders = filterOrderByStatus(
+        orders,
+        currentTab === 'Today'
+          ? ORDER_STATUS.INCOMPLETED
+          : currentTab === 'Delivered'
+            ? ORDER_STATUS.DELIVERED
+            : ORDER_STATUS.COMPLETED,
+      );
+      setDisplayOrders(newOrders);
+    }
+  }, [orders]);
+
+  const deliveredOrders = useMemo(() => {
+    if (orders.length === 0) {
+      return [];
+    }
+
+    const newDeliveredOrders = orders.filter((order: Order) => {
+      return (
+        order.status === ORDER_STATUS.DELIVERED ||
+        order.status === ORDER_STATUS.COMPLETED
+      );
+    });
+
+    return newDeliveredOrders;
+  }, [orders]);
+
+  const collectedAmount = useMemo(() => {
+    if (orders.length === 0) {
+      return 0;
+    }
+
+    const codCollected = orders.reduce((acc: number, order: Order) => {
+      if (order.status === ORDER_STATUS.COMPLETED) {
+        return acc + order.totalPrice;
+      }
+
+      return acc;
+    }, 0);
+
+    return codCollected;
+  }, [orders]);
+
+  const codAmount = useMemo(() => {
+    if (orders.length === 0) {
+      return 0;
+    }
+
+    const amount = orders.reduce((acc: number, order: Order) => {
+      if (order.user.preference.paymentType === PAYMENT_TYPE.COD) {
+        return acc + order.totalPrice;
+      }
+
+      return acc;
+    }, 0);
+
+    return amount;
+  }, [orders]);
 
   const fetchOrders = async () => {
     try {
@@ -117,22 +180,7 @@ export default function OrdersPage() {
         return;
       }
 
-      if (currentTab === 'Today') {
-        setOrders(response.data.data.deliveryOrders);
-      } else if (currentTab === 'Delivered') {
-        const deliveredOrders = filterOrderByStatus(
-          response.data.data.deliveryOrders,
-          ORDER_STATUS.DELIVERED,
-        );
-        setOrders(deliveredOrders);
-      } else if (currentTab === 'Completed') {
-        const completedOrders = filterOrderByStatus(
-          response.data.data.deliveryOrders,
-          ORDER_STATUS.COMPLETED,
-        );
-        setOrders(completedOrders);
-      }
-
+      setOrders(response.data.data.deliveryOrders);
       setIsFetching(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -160,9 +208,9 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
-      <NotificationPopup 
+      <NotificationPopup
         notification={notification}
-        onClose={() => setNotification({...notification, on: false})}
+        onClose={() => setNotification({ ...notification, on: false })}
       />
       <LoadingModal open={isFetching} />
       <Grid container alignItems="center">
@@ -199,16 +247,18 @@ export default function OrdersPage() {
             );
           })}
       </Box>
-      {currentTab !== 'Today' && <Box display="flex" justifyContent="flex-end" my={2}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Date"
-            value={dayjs(datePicker)}
-            onChange={handleDateChange}
-          />
-        </LocalizationProvider>
-      </Box>}
-      <Grid container mt={2} spacing={2}>
+      {currentTab !== 'Today' && (
+        <Box display="flex" justifyContent="flex-end" my={2}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Date"
+              value={dayjs(datePicker)}
+              onChange={handleDateChange}
+            />
+          </LocalizationProvider>
+        </Box>
+      )}
+      <Grid container my={2} spacing={2}>
         <Grid item xs={6}>
           <ShadowSection
             display="flex"
@@ -218,9 +268,13 @@ export default function OrdersPage() {
             alignItems="center"
           >
             <Typography color="primary" variant="h6">
-              Total Orders
+              Delivered Orders
             </Typography>
-            <CircularProgressWithLabel value={80} color="primary" />
+            <CircularProgressWithLabel
+              currentValue={deliveredOrders.length || 0}
+              basedValue={orders.length || 0}
+              color="primary"
+            />
           </ShadowSection>
         </Grid>
         <Grid item xs={6}>
@@ -232,22 +286,18 @@ export default function OrdersPage() {
             alignItems="center"
           >
             <Typography color="success.main" variant="h6">
-              Total Orders
+              Collect Amount
             </Typography>
-            <CircularProgressWithLabel value={80} color="success" />
+            <CircularProgressWithLabel currentValue={collectedAmount} basedValue={codAmount} color="success" />
           </ShadowSection>
         </Grid>
       </Grid>
       <Virtuoso
-        totalCount={orders?.length || 0}
+        totalCount={displayOrders?.length || 0}
         style={{ height: virtuosoHeight, marginTop: 2 }}
-        data={orders}
-        itemContent={(index) => {
-          return (
-            <OrderComponent
-              key={index}
-            />
-          );
+        data={displayOrders}
+        itemContent={(index, order) => {
+          return <OrderComponent key={index} order={order} />;
         }}
       />
     </Sidebar>

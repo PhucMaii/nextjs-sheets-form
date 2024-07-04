@@ -14,14 +14,16 @@ import EditItemModal from '../Modals/edit/EditOrderItem';
 
 interface IProps {
   order: Order;
-  setNotification: Dispatch<SetStateAction<Notification>>;
-  updateUIItem: (targetOrder: Order, targetItem: Item) => void;
+  setNotification?: Dispatch<SetStateAction<Notification>>;
+  updateUIItem?: (targetOrder: Order, targetItem: Item) => void;
+  isAdmin: boolean;
 }
 
 export default function OrderDetailsTable({
   order,
   setNotification,
   updateUIItem,
+  isAdmin
 }: IProps) {
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
@@ -31,14 +33,16 @@ export default function OrderDetailsTable({
     totalPrice: 0,
     quantity: 0,
   });
+
   useEffect(() => {
-    if (Object.keys(selectedItem).length > 0) {
+    if (Object.keys(selectedItem).length > 0 && isAdmin) {
       setIsOpenEditModal(true);
     }
   }, [selectedItem]);
+
   return (
     <>
-      <EditItemModal
+{  isAdmin && setNotification && updateUIItem &&    <EditItemModal
         open={isOpenEditModal}
         onClose={() => {
           setIsOpenEditModal(false);
@@ -49,14 +53,14 @@ export default function OrderDetailsTable({
         setNotification={setNotification}
         updateUIItem={updateUIItem}
         order={order}
-      />
+      />}
       <Table sx={{ minWidth: '100%' }}>
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Price</TableCell>
-            <TableCell></TableCell>
+            {isAdmin && <TableCell></TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -66,7 +70,7 @@ export default function OrderDetailsTable({
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.quantity}</TableCell>
                 <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
-                <TableCell>
+                {isAdmin && <TableCell>
                   <IconButton
                     onClick={() => {
                       setSelectedItem(row);
@@ -75,7 +79,7 @@ export default function OrderDetailsTable({
                   >
                     <EditIcon />
                   </IconButton>
-                </TableCell>
+                </TableCell>}
               </TableRow>
             ))}
         </TableBody>
