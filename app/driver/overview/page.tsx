@@ -17,7 +17,6 @@ export default function OverviewPage() {
     const today = YYYYMMDDFormat(date);
     const { data: orders } = useSWR(`${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`);
 
-    console.log({orders});
   return (
     <Sidebar>
       <Typography variant="h5" fontWeight="bold">Good Morning, NGUYEN</Typography>
