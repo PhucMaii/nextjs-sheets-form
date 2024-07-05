@@ -26,5 +26,4 @@ export function createTheme() {
   });
 }
 
-
 export const theme = createTheme();

@@ -16,8 +16,8 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       credentials: {
         driverName: {
-          label: "Driver Name",
-          type: 'text'
+          label: 'Driver Name',
+          type: 'text',
         },
         clientId: {
           label: 'Client Id',

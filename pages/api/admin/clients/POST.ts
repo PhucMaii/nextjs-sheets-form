@@ -58,7 +58,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         subCategoryId,
         password: newPassword,
         deliveryAddressLat: addresss.latitude,
-        deliveryAddressLng: addresss.longitude
+        deliveryAddressLng: addresss.longitude,
       },
     });
 

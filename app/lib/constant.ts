@@ -112,7 +112,7 @@ export const driverTabs = [
     icon: AccountCircleIcon,
     path: '/account',
   },
-]
+];
 
 export const statusTabs = [
   {
