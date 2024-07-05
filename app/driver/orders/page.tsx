@@ -285,7 +285,11 @@ export default function OrdersPage() {
           </Typography>
         </Grid>
         <Grid item xs={4} textAlign="right">
-          <IconButton onClick={() => setIsSearchModalOpen(true)} color="primary" size="large">
+          <IconButton
+            onClick={() => setIsSearchModalOpen(true)}
+            color="primary"
+            size="large"
+          >
             <SearchIcon fontSize="large" />
           </IconButton>
         </Grid>

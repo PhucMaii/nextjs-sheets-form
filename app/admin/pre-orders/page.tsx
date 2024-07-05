@@ -676,7 +676,7 @@ export default function ScheduledOrderPage() {
                 </Box>
               ) : routes.length > 0 ? (
                 <Tabs
-                  orientation={mdDown ? "horizontal" : "vertical"}
+                  orientation={mdDown ? 'horizontal' : 'vertical'}
                   aria-label="basic tabs"
                   value={routeIndex}
                   onChange={(e, newValue) => setRouteIndex(newValue)}
@@ -755,7 +755,12 @@ export default function ScheduledOrderPage() {
               />
             </Grid>
             <Grid item md={2} xs={12}>
-              <Box display="flex" alignItems="center" justifyContent={mdDown ? "flex-end" : ""} gap={1}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent={mdDown ? 'flex-end' : ''}
+                gap={1}
+              >
                 <Fab
                   variant="extended"
                   size="medium"
@@ -802,7 +807,11 @@ export default function ScheduledOrderPage() {
               {isLoading ? (
                 <SplashScreen />
               ) : orderList.length > 0 ? (
-                <Reorder.Group style={{ padding: 0 }} values={orderList} onReorder={setOrderList}>
+                <Reorder.Group
+                  style={{ padding: 0 }}
+                  values={orderList}
+                  onReorder={setOrderList}
+                >
                   {orderList.map((order: ScheduledOrder) => {
                     return (
                       <Reorder.Item
@@ -810,10 +819,10 @@ export default function ScheduledOrderPage() {
                         value={order}
                         style={{ listStyle: 'none' }}
                         transition={{
-                          type: "spring",
+                          type: 'spring',
                           damping: 10,
                           stiffness: 300,
-                          mass: 0.5
+                          mass: 0.5,
                         }}
                       >
                         <ScheduleOrder

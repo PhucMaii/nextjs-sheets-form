@@ -457,7 +457,7 @@ export default function Orders() {
             justifyContent="flex-end"
             alignItems="center"
             gap={1}
-            sx={{width: '100% !important'}}
+            sx={{ width: '100% !important' }}
           >
             <Fab
               size="medium"

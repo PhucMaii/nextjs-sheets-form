@@ -134,8 +134,12 @@ export default function LoginPage() {
                   onChange={formik.handleChange}
                   value={formik.values.driverName}
                   onBlur={formik.handleBlur}
-                  error={!!(formik.touched.driverName && formik.errors.driverName)}
-                  helperText={formik.touched.driverName && formik.errors.driverName}
+                  error={
+                    !!(formik.touched.driverName && formik.errors.driverName)
+                  }
+                  helperText={
+                    formik.touched.driverName && formik.errors.driverName
+                  }
                   variant="standard"
                 />
                 <TextField

@@ -21,11 +21,11 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
     }
 
     if (isMinify) {
-      return minifyNumber(overviewData.revenue)
+      return minifyNumber(overviewData.revenue);
     }
 
     return overviewData.revenue.toFixed(2);
-  }, [isMinify, overviewData])
+  }, [isMinify, overviewData]);
 
   const unpaidAmount = useMemo(() => {
     if (!overviewData) {
@@ -33,11 +33,11 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
     }
 
     if (isMinify) {
-      return minifyNumber(overviewData.unpaidAmount)
+      return minifyNumber(overviewData.unpaidAmount);
     }
 
     return overviewData.unpaidAmount.toFixed(2);
-  }, [isMinify, overviewData])
+  }, [isMinify, overviewData]);
 
   return (
     <>

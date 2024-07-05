@@ -95,7 +95,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           updatedItem.subCategoryId && updatedItem.subCategoryId > 0
             ? updatedItem.subCategoryId
             : null,
-        availability: updatedItem.availability
+        availability: updatedItem.availability,
       },
       include: {
         subCategory: true,

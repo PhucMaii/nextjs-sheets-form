@@ -7,12 +7,7 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, {
-  Dispatch,
-  SetStateAction,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { Dispatch, SetStateAction, useMemo, useRef } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import CloseIcon from '@mui/icons-material/Close';

@@ -128,7 +128,7 @@ export default function ScheduleOrder({
             {scheduleOrder.user.clientName}
           </Typography>
         </Grid>
-        <Grid item md={2} xs={12} textAlign={mdDown ? "right" : "left"}>
+        <Grid item md={2} xs={12} textAlign={mdDown ? 'right' : 'left'}>
           <Typography variant="subtitle1">
             ${scheduleOrder.totalPrice.toFixed(2)}
           </Typography>

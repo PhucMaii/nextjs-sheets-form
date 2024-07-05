@@ -226,12 +226,17 @@ export default function OrderForm() {
                       flexDirection="column"
                       gap={1}
                     >
-                      <Typography sx={{color: item.availability ? 'black' : grey[500]}} fontWeight="bold" variant="subtitle1">
+                      <Typography
+                        sx={{ color: item.availability ? 'black' : grey[500] }}
+                        fontWeight="bold"
+                        variant="subtitle1"
+                      >
                         {`${item.name} - ${
-                          !item.availability ? 'Out of stock' :
-                          item.price === 0
-                            ? ' Variable price'
-                            : `$${item.price.toFixed(2)}`
+                          !item.availability
+                            ? 'Out of stock'
+                            : item.price === 0
+                              ? ' Variable price'
+                              : `$${item.price.toFixed(2)}`
                         }`}
                       </Typography>
                       <TextField

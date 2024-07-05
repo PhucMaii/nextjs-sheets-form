@@ -8,10 +8,7 @@ interface IBody {
   updatedItemList: IItem[];
 }
 
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'PUT') {
       return res.status(400).json({
@@ -32,37 +29,37 @@ const handler = async (
     //   });
     // }
     await prisma.item.deleteMany({
-        where: {
-            id: {
-                in: removedItemIdList
-            }
-        }
-    })
+      where: {
+        id: {
+          in: removedItemIdList,
+        },
+      },
+    });
 
     const formattedNewItems = updatedItemList.map((item: IItem): Item => {
-        return {
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            availability: item.availability,
-            categoryId: item.categoryId,
-            subCategoryId: item?.subCategoryId || null,
-        }
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        availability: item.availability,
+        categoryId: item.categoryId,
+        subCategoryId: item?.subCategoryId || null,
+      };
     });
 
     await prisma.item.createMany({
-        data: formattedNewItems,
+      data: formattedNewItems,
     });
 
     return res.status(200).json({
-        message: 'Item Rearrange Succesfully'
-    })
+      message: 'Item Rearrange Succesfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
       error: 'Internal Server Error: ' + error,
     });
   }
-}
+};
 
 export default withAdminAuthGuard(handler);

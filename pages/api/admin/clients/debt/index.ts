@@ -8,10 +8,7 @@ interface QueryTypes {
   endMonth?: string;
 }
 
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({
@@ -68,6 +65,6 @@ const handler = async (
       error: 'Internal Server Error: ' + error,
     });
   }
-}
+};
 
 export default withAdminAuthGuard(handler);

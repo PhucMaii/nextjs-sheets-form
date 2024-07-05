@@ -12,75 +12,78 @@ import { primaryColor } from '@/theme/color';
 import styled from 'styled-components';
 
 const ShadowSectionStyled = styled(ShadowSection)`
-    &:hover {
-        box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
-    }
-`
+  &:hover {
+    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+  }
+`;
 
 interface IProps {
-    item: IItem;
-    handleUpdateItem: (targetItem: IItem) => Promise<void>;
-    setNotification: Dispatch<SetStateAction<Notification>>;
+  item: IItem;
+  handleUpdateItem: (targetItem: IItem) => Promise<void>;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 export default function EditItemAvailability({
-    item,
-    handleUpdateItem,
-    setNotification
+  item,
+  handleUpdateItem,
+  setNotification,
 }: IProps) {
-    const [availability, setAvailability] = useState<boolean>(item.availability);
-    const [isUpdating, setIsUpdating] = useState<boolean>(false);
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [availability, setAvailability] = useState<boolean>(item.availability);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    useEffect(() => {
-        if (item) {
-            setAvailability(item.availability);
-        }
-    }, [item]);
+  useEffect(() => {
+    if (item) {
+      setAvailability(item.availability);
+    }
+  }, [item]);
 
-    const handleUpdateItemThisCategory = async () => {
-        setIsUpdating(true);
-        await handleUpdateItem({ ...item, availability });
+  const handleUpdateItemThisCategory = async () => {
+    setIsUpdating(true);
+    await handleUpdateItem({ ...item, availability });
+    setIsUpdating(false);
+    setIsOpen(false);
+  };
+
+  const handleUpdateAllItemAvailability = async () => {
+    setIsUpdating(true);
+    try {
+      const response = await axios.put(`${API_URL.ITEM}/availability`, {
+        item,
+        availability,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
         setIsUpdating(false);
+        setAvailability(!availability);
         setIsOpen(false);
+        return;
+      }
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsOpen(false);
+      setIsUpdating(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+      setAvailability(!availability);
+      setIsUpdating(false);
+      setIsOpen(false);
     }
-
-    const handleUpdateAllItemAvailability = async () => {
-        setIsUpdating(true);
-        try {
-            const response = await axios.put(`${API_URL.ITEM}/availability`, {item, availability});
-
-            if (response.data.error) {
-                setNotification({
-                    on: true,
-                    type: 'error',
-                    message: response.data.error
-                });
-                setIsUpdating(false);
-                setAvailability(!availability);
-                setIsOpen(false);
-                return;
-            }
-
-            setNotification({
-                on: true,
-                type: 'success',
-                message: response.data.message
-            });
-            setIsOpen(false);
-            setIsUpdating(false);
-        } catch (error: any) {
-            console.log('There was an error: ', error);
-            setNotification({
-                on: true,
-                type: 'error',
-                message: error.response.data.error
-            });
-            setAvailability(!availability);
-            setIsUpdating(false);
-            setIsOpen(false);
-        }
-    }
+  };
 
   return (
     <>
@@ -119,7 +122,7 @@ export default function EditItemAvailability({
               sx={{
                 backgroundColor: `${primaryColor} !important`,
                 color: 'white',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               <Typography variant="h6" fontWeight="bold">
@@ -135,7 +138,7 @@ export default function EditItemAvailability({
               sx={{
                 backgroundColor: `${primaryColor} !important`,
                 color: 'white',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               <Typography variant="h6" fontWeight="bold">

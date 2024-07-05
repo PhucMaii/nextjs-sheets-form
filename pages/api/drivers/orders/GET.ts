@@ -1,4 +1,10 @@
-import { OrderedItems, Orders, PrismaClient, Route, UserRoute } from '@prisma/client';
+import {
+  OrderedItems,
+  Orders,
+  PrismaClient,
+  Route,
+  UserRoute,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
@@ -62,15 +68,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         deliveryDate,
         status: {
-            in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED, ORDER_STATUS.COMPLETED]
+          in: [
+            ORDER_STATUS.INCOMPLETED,
+            ORDER_STATUS.DELIVERED,
+            ORDER_STATUS.COMPLETED,
+          ],
         },
       },
       include: {
         user: {
-            include: {
-                preference: true,
-                category: true
-            }
+          include: {
+            preference: true,
+            category: true,
+          },
         },
         items: true,
       },
@@ -100,9 +110,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       const newItems = deliveryOrder.items.map((item: OrderedItems) => {
         const totalPrice = item.quantity * item.price;
-        return {...item, totalPrice}
-      })
-      sortedDeliveryOrders.push({...deliveryOrder.user, ...deliveryOrder, items: newItems});
+        return { ...item, totalPrice };
+      });
+      sortedDeliveryOrders.push({
+        ...deliveryOrder.user,
+        ...deliveryOrder,
+        items: newItems,
+      });
     }
 
     const manifest = generateManifest(deliveryOrders);

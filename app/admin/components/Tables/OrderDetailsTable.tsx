@@ -23,7 +23,7 @@ export default function OrderDetailsTable({
   order,
   setNotification,
   updateUIItem,
-  isAdmin
+  isAdmin,
 }: IProps) {
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
@@ -42,18 +42,20 @@ export default function OrderDetailsTable({
 
   return (
     <>
-{  isAdmin && setNotification && updateUIItem &&    <EditItemModal
-        open={isOpenEditModal}
-        onClose={() => {
-          setIsOpenEditModal(false);
-          setSelectedItem({});
-        }}
-        item={updatedItem}
-        setItem={setUpdatedItem}
-        setNotification={setNotification}
-        updateUIItem={updateUIItem}
-        order={order}
-      />}
+      {isAdmin && setNotification && updateUIItem && (
+        <EditItemModal
+          open={isOpenEditModal}
+          onClose={() => {
+            setIsOpenEditModal(false);
+            setSelectedItem({});
+          }}
+          item={updatedItem}
+          setItem={setUpdatedItem}
+          setNotification={setNotification}
+          updateUIItem={updateUIItem}
+          order={order}
+        />
+      )}
       <Table sx={{ minWidth: '100%' }}>
         <TableHead>
           <TableRow>
@@ -70,16 +72,18 @@ export default function OrderDetailsTable({
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.quantity}</TableCell>
                 <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
-                {isAdmin && <TableCell>
-                  <IconButton
-                    onClick={() => {
-                      setSelectedItem(row);
-                      setUpdatedItem(row);
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </TableCell>}
+                {isAdmin && (
+                  <TableCell>
+                    <IconButton
+                      onClick={() => {
+                        setSelectedItem(row);
+                        setUpdatedItem(row);
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
         </TableBody>

@@ -31,9 +31,9 @@ export default function SearchModal({
 
   useEffect(() => {
     if (orders) {
-        setOrderList(orders);
+      setOrderList(orders);
     }
-  }, [orders])
+  }, [orders]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -62,7 +62,7 @@ export default function SearchModal({
         gap={2}
         maxHeight="80vh"
         overflow="auto"
-        sx={{backgroundColor: `${grey[100]} !important`}}
+        sx={{ backgroundColor: `${grey[100]} !important` }}
       >
         <Box display="flex" justifyContent="flex-end">
           <IconButton onClick={onClose}>

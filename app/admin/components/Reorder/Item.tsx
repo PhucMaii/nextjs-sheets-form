@@ -22,7 +22,7 @@ export default function Item({
   subCategories,
 }: IProps) {
   return (
-    <Paper elevation={0} sx={{ py: 2, }}>
+    <Paper elevation={0} sx={{ py: 2 }}>
       <Grid container alignItems="center" columnSpacing={1}>
         <Grid item lg={1} md={12}>
           <EditItemAvailability
@@ -31,7 +31,7 @@ export default function Item({
             handleUpdateItem={handleUpdateItem}
           />
         </Grid>
-        <Grid item md={4} >
+        <Grid item md={4}>
           <Typography variant="subtitle1">{item.name}</Typography>
         </Grid>
         <Grid item md={2}>

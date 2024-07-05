@@ -17,7 +17,7 @@ export enum API_URL {
   ROUTES = '/api/admin/routes',
   DRIVERS = '/api/admin/drivers',
   DRIVER = '/api/driver',
-  DRIVER_ORDERS = '/api/drivers/orders'
+  DRIVER_ORDERS = '/api/drivers/orders',
 }
 
 export enum ORDER_STATUS {

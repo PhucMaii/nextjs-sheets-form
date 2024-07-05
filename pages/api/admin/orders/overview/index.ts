@@ -10,10 +10,7 @@ interface IQuery {
   endDate?: string;
 }
 
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({
@@ -153,13 +150,13 @@ const handler = async (
         beansprouts: {
           BK: {
             quantity: BKQuantity,
-            revenue: BKRevenue, 
-            percentage: BKPercentage
+            revenue: BKRevenue,
+            percentage: BKPercentage,
           },
           PP: {
             quantity: PPQuantity,
-            revenue: PPRevenue, 
-            percentage: PPPercentage
+            revenue: PPRevenue,
+            percentage: PPPercentage,
           },
           totalItems,
         },
@@ -172,7 +169,7 @@ const handler = async (
       error: 'Internal Server Error: ' + error,
     });
   }
-}
+};
 
 export default withAdminAuthGuard(handler);
 
@@ -227,7 +224,10 @@ const getLastMonthRevenue = (
 const getCustomersInDebt = (orders: any, startDate: Date, endDate: Date) => {
   const ordersInRange = filterDateRangeOrders(orders, startDate, endDate);
   const customersInDebt = ordersInRange.reduce((acc: any, order: any) => {
-    if (order.status === ORDER_STATUS.VOID || order.status === ORDER_STATUS.COMPLETED) {
+    if (
+      order.status === ORDER_STATUS.VOID ||
+      order.status === ORDER_STATUS.COMPLETED
+    ) {
       return acc;
     }
     const key = `${order.user.clientName} __ ${order.user.clientId}`;

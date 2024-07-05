@@ -15,7 +15,10 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   heading: string;
-  handleConfirm: (orderId: number, updatedStatus: ORDER_STATUS) => Promise<void>;
+  handleConfirm: (
+    orderId: number,
+    updatedStatus: ORDER_STATUS,
+  ) => Promise<void>;
   color: any;
   updatedStatus: ORDER_STATUS;
   orderId: number;
@@ -27,7 +30,7 @@ export default function ConfirmModal({
   heading,
   color,
   updatedStatus,
-  orderId
+  orderId,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -52,7 +55,9 @@ export default function ConfirmModal({
             <CloseIcon />
           </IconButton>
         </Box>
-        <Typography textAlign="center" variant="h6">{heading}</Typography>
+        <Typography textAlign="center" variant="h6">
+          {heading}
+        </Typography>
         <Grid container alignItems="center" spacing={1}>
           <Grid item xs={6}>
             <Button

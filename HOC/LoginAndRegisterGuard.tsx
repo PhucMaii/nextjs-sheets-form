@@ -12,7 +12,9 @@ export default function LoginAndRegisterGuard({ children }: any) {
   });
 
   const { data: user } = useSWR(
-    (session?.user && !session.user.name) ? `${API_URL.USER}?id=${session.user.id}` : null,
+    session?.user && !session.user.name
+      ? `${API_URL.USER}?id=${session.user.id}`
+      : null,
     fetcher,
     {
       revalidateOnFocus: false,
