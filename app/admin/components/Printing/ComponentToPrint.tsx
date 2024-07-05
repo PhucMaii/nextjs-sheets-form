@@ -34,7 +34,7 @@ export const ComponentToPrint = forwardRef(
               {item.quantity}
             </TableCell>
             <TableCell sx={{ fontSize: 18 }}>${item.price}</TableCell>
-            <TableCell sx={{ fontSize: 18 }}>${item.totalPrice}</TableCell>
+            <TableCell sx={{ fontSize: 18 }}>${item.totalPrice?.toFixed(2)}</TableCell>
           </TableRow>,
         );
       }
@@ -83,7 +83,7 @@ export const ComponentToPrint = forwardRef(
                 (orderField: string, index: number) => {
                   return (
                     <Grid key={index} item xs={12}>
-                      <Typography variant="h5" sx={{ fontSize: printFontSize }}>
+                      <Typography sx={{ fontSize: printFontSize }}>
                         <strong>{orderField}:</strong> {orderFields[orderField]}
                       </Typography>
                     </Grid>
