@@ -1,4 +1,4 @@
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';

@@ -1,5 +1,6 @@
 import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
+import axios from 'axios';
 import { hash } from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -14,6 +15,7 @@ interface BodyTypes {
   preference: any;
 }
 
+const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
@@ -42,6 +44,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const newPassword = await hash(contactNumber, 12);
+    const addresss = await generateLatLng(deliveryAddress);
 
     const newClient = await prisma.user.create({
       data: {
@@ -54,6 +57,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         categoryId,
         subCategoryId,
         password: newPassword,
+        deliveryAddressLat: addresss.latitude,
+        deliveryAddressLng: addresss.longitude
       },
     });
 
@@ -85,3 +90,23 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+const generateLatLng = async (deliveryAddress: string) => {
+  if (deliveryAddress === 'N/A') {
+    return { latitude: null, longitude: null };
+  }
+
+  const response = await axios.get(GEOCODING_API_URL, {
+    params: {
+      address: deliveryAddress,
+      key: process.env.NEXT_PUBLIC_MAPS_KEY,
+    },
+  });
+
+  if (response.data.status === 'OK') {
+    const location = response.data.results[0].geometry.location;
+    return { latitude: location.lat, longitude: location.lng };
+  }
+
+  return { latitude: null, longitude: null };
+};
