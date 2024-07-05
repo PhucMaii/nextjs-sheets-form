@@ -299,7 +299,7 @@ export default function Orders() {
   };
 
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
-    const newOrderData: Order[] = orderData.map((order: Order) => {
+    const newOrderData: Order[] = baseOrderData.map((order: Order) => {
       // If order is at targetOrder, then update
       if (order.id === targetOrder.id) {
         // update total price of the order
@@ -371,21 +371,20 @@ export default function Orders() {
   const handleMarkSingleCompletedUI = (targetOrder: Order): void => {
     let newOrders = [];
     if (tabIndex !== 0 && targetOrder.status !== currentStatus) {
-      newOrders = orderData.filter((order) => order.id !== targetOrder.id);
+      newOrders = baseOrderData.filter((order) => order.id !== targetOrder.id);
     } else {
-      newOrders = orderData.map((order) => {
+      newOrders = baseOrderData.map((order) => {
         if (order.id === targetOrder.id) {
           return targetOrder;
         }
         return order;
       });
     }
-    setOrderData(newOrders);
     setBaseOrderData(newOrders);
   };
 
   const handleUpdateDateUI = (orderId: number, updatedDate: string): void => {
-    const newOrders = orderData.filter((order) => {
+    const newOrders = baseOrderData.filter((order) => {
       if (order.id !== orderId) {
         return true;
       }
@@ -397,7 +396,6 @@ export default function Orders() {
       return false;
     });
 
-    setOrderData(newOrders);
     setBaseOrderData(newOrders);
   };
 

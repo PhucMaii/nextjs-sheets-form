@@ -16,18 +16,20 @@ model Driver {
 }
 
 model User {
-  id               Int     @id @default(autoincrement())
-  categoryId       Int
-  subCategoryId    Int?
-  userPreferenceId Int? // will change back to force user to have it
-  clientName       String  @db.VarChar(255)
-  clientId         String  @unique @db.VarChar(255)
-  contactNumber    String  @db.VarChar(11)
-  deliveryAddress  String  @db.VarChar(255)
-  email            String? @db.VarChar(255)
-  password         String  @db.VarChar(255)
-  sheetName        String  @db.VarChar(255)
-  role             String  @db.VarChar(255)
+  id                 Int     @id @default(autoincrement())
+  categoryId         Int
+  subCategoryId      Int?
+  userPreferenceId   Int? // will change back to force user to have it
+  clientName         String  @db.VarChar(255)
+  clientId           String  @unique @db.VarChar(255)
+  contactNumber      String  @db.VarChar(11)
+  deliveryAddress    String  @db.VarChar(255)
+  deliveryAddressLng Float?
+  deliveryAddressLat Float?
+  email              String? @db.VarChar(255)
+  password           String  @db.VarChar(255)
+  sheetName          String  @db.VarChar(255)
+  role               String  @db.VarChar(255)
 
   category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory    SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
