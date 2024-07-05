@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BoxModal } from '@/app/admin/components/Modals/styled';
 import OrderDetailsTable from '@/app/admin/components/Tables/OrderDetailsTable';
 import {
@@ -17,13 +17,33 @@ import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { LoadingButton } from '@mui/lab';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   order: Order;
   totalQuantity: number;
+  handleUpdateStatus: (
+    orderId: number,
+    updatedStatus: ORDER_STATUS,
+  ) => Promise<void>;
 }
 
-export default function OrderDetails({ open, onClose, order, totalQuantity }: IProps) {
+export default function OrderDetails({
+  open,
+  onClose,
+  order,
+  totalQuantity,
+  handleUpdateStatus,
+}: IProps) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleOnClick = async (updatedStatus: ORDER_STATUS) => {
+    setIsLoading(true);
+    await handleUpdateStatus(order.id, updatedStatus);
+    setIsLoading(false);
+    onClose();
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal
@@ -97,12 +117,23 @@ export default function OrderDetails({ open, onClose, order, totalQuantity }: IP
             </Grid>
           </Grid>
           <Grid item xs={6}>
-            <LoadingButton fullWidth variant="contained">
+            <LoadingButton
+              onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
+              loading={isLoading}
+              fullWidth
+              variant="contained"
+            >
               Delivered
             </LoadingButton>
           </Grid>
           <Grid item xs={6}>
-            <LoadingButton color="success" fullWidth variant="contained">
+            <LoadingButton
+              onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
+              loading={isLoading}
+              color="success"
+              fullWidth
+              variant="contained"
+            >
               Collect Money
             </LoadingButton>
           </Grid>

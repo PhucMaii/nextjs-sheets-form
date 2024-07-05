@@ -1,6 +1,7 @@
 import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -9,10 +10,10 @@ interface IQuery {
   endDate?: string;
 }
 
-export default async function handler(
+const handler = async (
   req: NextApiRequest,
   res: NextApiResponse,
-) {
+) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({
@@ -172,6 +173,8 @@ export default async function handler(
     });
   }
 }
+
+export default withAdminAuthGuard(handler);
 
 export const generateManifest = (orders: any) => {
   const itemList = orders.flatMap((order: any) => {

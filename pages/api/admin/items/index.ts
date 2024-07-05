@@ -3,11 +3,12 @@ import GET from './GET';
 import DELETE from './DELETE';
 import PUT from './PUT';
 import POST from './POST';
+import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 
-export default async function handler(
+const handler = async (
   req: NextApiRequest,
   res: NextApiResponse,
-) {
+) => {
   try {
     if (req.method === 'GET') {
       const response = await GET(req, res);
@@ -39,3 +40,5 @@ export default async function handler(
     });
   }
 }
+
+export default withAdminAuthGuard(handler);

@@ -1,4 +1,5 @@
 import { IItem } from '@/app/utils/type';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { Item, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -7,10 +8,10 @@ interface IBody {
   updatedItemList: IItem[];
 }
 
-export default async function handler(
+const handler = async (
   req: NextApiRequest,
   res: NextApiResponse,
-) {
+) => {
   try {
     if (req.method !== 'PUT') {
       return res.status(400).json({
@@ -63,3 +64,5 @@ export default async function handler(
     });
   }
 }
+
+export default withAdminAuthGuard(handler);

@@ -1,11 +1,11 @@
+import withDriverAuthGuard from "@/pages/api/utils/withDriverAuthGuar";
 import { NextApiRequest, NextApiResponse } from "next";
-import GET from "./GET";
-import withDriverAuthGuard from "../../utils/withDriverAuthGuar";
+import PUT from "./PUT";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-        if (req.method === 'GET') {
-            const response = await GET(req, res);
+        if (req.method === 'PUT') {
+            const response = await PUT(req, res);
             return response;
         }
 
@@ -15,9 +15,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     } catch (error: any) {
         console.log('Internal Server Error: ', error);
         return res.status(500).json({
-            error: 'Internal Server Error: ' + error
+            error: 'Internal Server Error: '  + error 
         })
     }
 }
 
-export default withDriverAuthGuard(handler)
+export default withDriverAuthGuard(handler);
+

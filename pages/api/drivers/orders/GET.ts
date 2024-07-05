@@ -68,7 +68,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         user: {
             include: {
-                preference: true
+                preference: true,
+                category: true
             }
         },
         items: true,
