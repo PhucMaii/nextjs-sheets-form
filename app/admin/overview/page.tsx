@@ -3,13 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import NotificationPopup from '../components/Notification';
 import { Notification } from '@/app/utils/type';
-import {
-  Box,
-  Grid,
-  Skeleton,
-  Switch,
-  Typography,
-} from '@mui/material';
+import { Box, Grid, Skeleton, Switch, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import OverviewData from '../components/OverviewData';

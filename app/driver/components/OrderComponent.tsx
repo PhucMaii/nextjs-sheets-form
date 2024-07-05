@@ -20,10 +20,10 @@ export default function OrderComponent() {
             alignItems="center"
             gap={1}
           >
-            <Fab sx={{zIndex: 1}} color="primary" size="small">
+            <Fab sx={{ zIndex: 1 }} color="primary" size="small">
               <LocalShippingIcon />
             </Fab>
-            <Fab sx={{zIndex: 1}} color="success" size="small">
+            <Fab sx={{ zIndex: 1 }} color="success" size="small">
               <CreditScoreIcon />
             </Fab>
           </Box>

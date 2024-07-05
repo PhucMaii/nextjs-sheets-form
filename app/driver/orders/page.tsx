@@ -86,7 +86,7 @@ export default function OrdersPage() {
   });
   const [orders, setOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
-  
+
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
@@ -160,9 +160,9 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
-      <NotificationPopup 
+      <NotificationPopup
         notification={notification}
-        onClose={() => setNotification({...notification, on: false})}
+        onClose={() => setNotification({ ...notification, on: false })}
       />
       <LoadingModal open={isFetching} />
       <Grid container alignItems="center">
@@ -199,15 +199,17 @@ export default function OrdersPage() {
             );
           })}
       </Box>
-      {currentTab !== 'Today' && <Box display="flex" justifyContent="flex-end" my={2}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Date"
-            value={dayjs(datePicker)}
-            onChange={handleDateChange}
-          />
-        </LocalizationProvider>
-      </Box>}
+      {currentTab !== 'Today' && (
+        <Box display="flex" justifyContent="flex-end" my={2}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Date"
+              value={dayjs(datePicker)}
+              onChange={handleDateChange}
+            />
+          </LocalizationProvider>
+        </Box>
+      )}
       <Grid container mt={2} spacing={2}>
         <Grid item xs={6}>
           <ShadowSection
@@ -243,11 +245,7 @@ export default function OrdersPage() {
         style={{ height: virtuosoHeight, marginTop: 2 }}
         data={orders}
         itemContent={(index) => {
-          return (
-            <OrderComponent
-              key={index}
-            />
-          );
+          return <OrderComponent key={index} />;
         }}
       />
     </Sidebar>

@@ -451,8 +451,7 @@ export default function ItemPage() {
                 loading={isSavingArrangement}
                 onClick={saveItemArrangement}
                 disabled={
-                  baseItems.length === 0 ||
-                  items.length !== baseItems.length
+                  baseItems.length === 0 || items.length !== baseItems.length
                 }
               >
                 Save Arrangement
