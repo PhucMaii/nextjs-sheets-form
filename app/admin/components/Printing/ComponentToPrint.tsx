@@ -150,8 +150,6 @@ export const ComponentToPrint = forwardRef(
             {order.note && (
               <Grid item xs={12}>
                 <Divider sx={{ mt: 1, mb: 3 }} />
-                {/* <h4 className="text-left font-bold text-xl">NOTE</h4>
-                <h4 className="text-xl">{order.note}</h4> */}
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   <strong>NOTE:</strong> {order.note}
                 </Typography>
