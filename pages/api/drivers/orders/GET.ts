@@ -125,7 +125,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }, 0);
 
     return res.status(200).json({
-      data: { deliveryOrders: sortedDeliveryOrders, manifest, codAmount },
+      data: {
+        driver: existingDriver,
+        deliveryOrders: sortedDeliveryOrders,
+        manifest,
+        codAmount,
+      },
       message: 'Fetch Orders Successfully',
     });
   } catch (error: any) {

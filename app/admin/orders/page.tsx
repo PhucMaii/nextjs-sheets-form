@@ -63,6 +63,8 @@ export interface Order {
   deliveryDate: string;
   clientId: string;
   deliveryAddress: string;
+  deliveryAddressLng?: number;
+  deliveryAddressLat?: number;
   clientName: string;
   contactNumber: string;
   totalPrice: number;

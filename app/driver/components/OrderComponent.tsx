@@ -12,6 +12,7 @@ import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
+import { getGoogleMapsUrl } from '@/app/utils/googleMaps';
 
 interface IProps {
   order: Order;
@@ -55,6 +56,19 @@ export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
 
     return quantity;
   }, [order]);
+
+  const handleNavigation = async () => {
+    if (!order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng) {
+      return;
+    }
+    const url = await getGoogleMapsUrl(
+      order.user.deliveryAddressLat,
+      order.user.deliveryAddressLng,
+    );
+    // router.push(url);
+    window.open(url, '_blank');
+    setIsOpenDetails(true);
+  };
 
   return (
     <ShadowSection mt={1}>
@@ -140,7 +154,13 @@ export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
         </Grid>
         <Grid item xs={6} textAlign="right">
           <Box display="flex" alignItems="center" justifyContent="flex-end">
-            <IconButton onClick={() => setIsOpenDetails(true)}>
+            <IconButton
+              disabled={
+                !order.user?.deliveryAddressLat ||
+                !order.user?.deliveryAddressLng
+              }
+              onClick={handleNavigation}
+            >
               <AssistantDirectionIcon color="primary" />
             </IconButton>
           </Box>

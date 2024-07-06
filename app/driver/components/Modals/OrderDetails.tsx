@@ -18,6 +18,7 @@ import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { LoadingButton } from '@mui/lab';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { getGoogleMapsUrl } from '@/app/utils/googleMaps';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -42,6 +43,18 @@ export default function OrderDetails({
     await handleUpdateStatus(order.id, updatedStatus);
     setIsLoading(false);
     onClose();
+  };
+
+  const handleNavigation = async () => {
+    if (!order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng) {
+      return;
+    }
+    const url = await getGoogleMapsUrl(
+      order.user.deliveryAddressLat,
+      order.user.deliveryAddressLng,
+    );
+    // router.push(url);
+    window.open(url, '_blank');
   };
 
   return (
@@ -69,7 +82,13 @@ export default function OrderDetails({
             <Typography>Order at: {order.orderTime}</Typography>
           </Grid>
           <Grid item xs={2} textAlign="right">
-            <IconButton>
+            <IconButton
+              onClick={handleNavigation}
+              disabled={
+                !order.user?.deliveryAddressLat ||
+                !order.user?.deliveryAddressLng
+              }
+            >
               <AssistantDirectionIcon color="info" />
             </IconButton>
           </Grid>
