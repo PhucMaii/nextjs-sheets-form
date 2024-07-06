@@ -1,5 +1,5 @@
 import { officiallyStartDate } from '@/app/lib/constant';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -128,16 +128,16 @@ export default async function handler(
     const BKPercentage = (BKRevenue / revenue) * 100;
     const PPPercentage = (PPRevenue / revenue) * 100;
 
-    const lastMonthEnd = new Date(
-      formattedStartDate.getFullYear(),
-      formattedStartDate.getMonth(),
-      1,
-    );
-    lastMonthEnd.setDate(0);
+    // const lastMonthEnd = new Date(
+    //   formattedStartDate.getFullYear(),
+    //   formattedStartDate.getMonth(),
+    //   1,
+    // );
+    // lastMonthEnd.setDate(0);
     const customersInDebt = getCustomersInDebt(
       orders,
       officiallyStartDate,
-      lastMonthEnd,
+      formattedEndDate,
     );
 
     return res.status(200).json({
@@ -226,7 +226,8 @@ const getCustomersInDebt = (orders: any, startDate: Date, endDate: Date) => {
   const customersInDebt = ordersInRange.reduce((acc: any, order: any) => {
     if (
       order.status === ORDER_STATUS.VOID ||
-      order.status === ORDER_STATUS.COMPLETED
+      order.status === ORDER_STATUS.COMPLETED ||
+      order.user.role === USER_ROLE.ADMIN
     ) {
       return acc;
     }
