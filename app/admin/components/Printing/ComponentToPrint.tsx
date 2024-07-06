@@ -34,7 +34,9 @@ export const ComponentToPrint = forwardRef(
               {item.quantity}
             </TableCell>
             <TableCell sx={{ fontSize: 18 }}>${item.price}</TableCell>
-            <TableCell sx={{ fontSize: 18 }}>${item.totalPrice}</TableCell>
+            <TableCell sx={{ fontSize: 18 }}>
+              ${item.totalPrice?.toFixed(2)}
+            </TableCell>
           </TableRow>,
         );
       }
@@ -83,7 +85,7 @@ export const ComponentToPrint = forwardRef(
                 (orderField: string, index: number) => {
                   return (
                     <Grid key={index} item xs={12}>
-                      <Typography variant="h5" sx={{ fontSize: printFontSize }}>
+                      <Typography sx={{ fontSize: printFontSize }}>
                         <strong>{orderField}:</strong> {orderFields[orderField]}
                       </Typography>
                     </Grid>
@@ -97,24 +99,24 @@ export const ComponentToPrint = forwardRef(
               <TableHead>
                 <TableRow>
                   <TableCell
-                    sx={{ fontWeight: 'bold', fontSize: printFontSize - 10 }}
+                    sx={{ fontWeight: 'bold', fontSize: printFontSize - 5 }}
                   >
                     Item
                   </TableCell>
                   <TableCell
-                    sx={{ fontWeight: 'bold', fontSize: printFontSize - 10 }}
+                    sx={{ fontWeight: 'bold', fontSize: printFontSize - 5 }}
                   >
                     No. Items
                   </TableCell>
                   <TableCell
-                    sx={{ fontWeight: 'bold', fontSize: printFontSize - 10 }}
+                    sx={{ fontWeight: 'bold', fontSize: printFontSize - 5 }}
                   >
                     Unit Price
                   </TableCell>
                   <TableCell
                     sx={{
                       fontWeight: 'bold',
-                      fontSize: printFontSize - 10,
+                      fontSize: printFontSize - 5,
                       marginRight: 4,
                     }}
                   >
@@ -138,23 +140,34 @@ export const ComponentToPrint = forwardRef(
               </Grid>
             </Grid>
             <Box display="flex" flexDirection="column" gap={2} mt={2}>
-              <Typography sx={{ fontSize: printFontSize - 10 }}>
+              <Typography sx={{ fontSize: printFontSize - 5 }}>
                 <strong>DELIVERY ADDRESS:</strong> {order.deliveryAddress}
               </Typography>
-              <Typography sx={{ fontSize: printFontSize - 10 }}>
+              <Typography sx={{ fontSize: printFontSize - 5 }}>
                 <strong>CONTACT:</strong> {order.contactNumber}
               </Typography>
             </Box>
             {order.note && (
               <Grid item xs={12}>
                 <Divider sx={{ mt: 1, mb: 3 }} />
-                {/* <h4 className="text-left font-bold text-xl">NOTE</h4>
-                <h4 className="text-xl">{order.note}</h4> */}
-                <Typography sx={{ fontSize: printFontSize - 10 }}>
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
                   <strong>NOTE:</strong> {order.note}
                 </Typography>
               </Grid>
             )}
+            <Grid item xs={12}>
+              <Divider sx={{ my: 2 }} />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography
+                textAlign="center"
+                sx={{ fontSize: printFontSize - 5 }}
+              >
+                * Please be advised that we will discontinue providing Premier
+                Pacific Beansprouts starting next month. Thank you for your
+                understanding. *
+              </Typography>
+            </Grid>
           </Grid>
         </Box>
       </div>

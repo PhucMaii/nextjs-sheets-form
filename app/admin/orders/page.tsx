@@ -160,7 +160,7 @@ export default function Orders() {
     } else {
       generateOrderData();
     }
-  }, [debouncedKeywords]);
+  }, [debouncedKeywords, baseOrderData]);
 
   // whenever current page change and not in searching mode, then update the display data
   useEffect(() => {
