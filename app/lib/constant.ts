@@ -21,7 +21,7 @@ import {
   warningColor,
 } from '../../theme/color';
 
-export const officiallyStartDate = new Date('03/31/2024');
+export const officiallyStartDate = new Date('01/01/2024');
 
 export const days = [
   'Sunday',
