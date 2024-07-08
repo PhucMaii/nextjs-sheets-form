@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 
-const printFontSize = 28;
+export const printFontSize = 28;
 export const ComponentToPrint = forwardRef(
   ({ order }: { order: Order | null }, ref: any) => {
     if (!order) {

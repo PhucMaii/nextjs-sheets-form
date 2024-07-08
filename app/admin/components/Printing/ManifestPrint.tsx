@@ -1,6 +1,7 @@
 import { IRoutes } from '@/app/utils/type';
 import {
   Table,
+  TableBody,
   TableCell,
   TableHead,
   TableRow,
@@ -8,14 +9,26 @@ import {
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import './print.css';
+import styled from 'styled-components';
+import { grey } from '@mui/material/colors';
+import { printFontSize } from './ComponentToPrint';
 
 interface PropTypes {
   manifest: any;
   routes: IRoutes[];
 }
 
+const BorderRightTableCell = styled(TableCell)`
+  border-style: solid;
+  border: 1px solid ${grey[100]} !important;
+`;
+
 export const ManifestPrint = forwardRef(
   ({ manifest, routes }: PropTypes, ref: any) => {
+    if (!manifest || Object.keys(manifest).length === 0) {
+      return;
+    }
+
     // Display the beansprouts first then other items
     const customSortKeys = (keys: string[]): any => {
       const beanKeys = keys.filter((key) => key.includes('BEAN')).sort();
@@ -32,12 +45,12 @@ export const ManifestPrint = forwardRef(
               (route: IRoutes) => route.id === Number(routeId),
             );
             if (!targetRoute) {
-              return;
+              return null;
             }
 
             // sort the item for each route then loop through it
             const sortedItems: any = customSortKeys(
-              Object.keys(manifest[routeId]),
+              Object.keys(manifest[routeId].summary),
             );
 
             return (
@@ -49,7 +62,7 @@ export const ManifestPrint = forwardRef(
                   Driver: {targetRoute.driver?.name}
                 </Typography>
                 <Table sx={{ mx: 2 }}>
-                  <TableHead>
+                  {/* <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
                         Item
@@ -58,21 +71,96 @@ export const ManifestPrint = forwardRef(
                         Quantity
                       </TableCell>
                     </TableRow>
+                  </TableHead> */}
+                  <TableHead>
+                    <TableRow>
+                      <BorderRightTableCell align="center"></BorderRightTableCell>
+                      {sortedItems.length > 0 &&
+                        sortedItems.map((item: string, index: number) => {
+                          const { summary } = manifest[routeId];
+                          if (summary[item] === 0) {
+                            return null;
+                          }
+                          return (
+                            <>
+                              <BorderRightTableCell
+                                align="center"
+                                sx={{ fontSize: 20 }}
+                                key={index}
+                              >
+                                {item} ({summary[item]})
+                              </BorderRightTableCell>
+                              {/* <TableCell
+                                sx={{ fontSize: 20, fontWeight: 'bold' }}
+                              >
+                                {summary[item]}
+                              </TableCell> */}
+                            </>
+                          );
+                        })}
+                    </TableRow>
                   </TableHead>
-                  {sortedItems.length > 0 &&
-                    sortedItems.map((item: string, index: number) => {
-                      if (manifest[routeId][item] === 0) {
-                        return null;
-                      }
-                      return (
-                        <TableRow key={index}>
-                          <TableCell sx={{ fontSize: 20 }}>{item}</TableCell>
-                          <TableCell sx={{ fontSize: 20, fontWeight: 'bold' }}>
-                            {manifest[routeId][item]}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                  <TableBody>
+                    {manifest[routeId].details.map(
+                      (user: any, index: number) => {
+                        const { summary } = manifest[routeId];
+                        return (
+                          <TableRow key={index}>
+                            <BorderRightTableCell
+                              align="center"
+                              sx={{
+                                fontSize: printFontSize,
+                                maxWidth: '120px',
+                              }}
+                            >
+                              {user.user.clientName}
+                            </BorderRightTableCell>
+                            {sortedItems.map((item: string, index: number) => {
+                              const itemQuantity = user[item];
+                              if (summary[item] === 0) {
+                                return null;
+                              }
+
+                              if (!itemQuantity || itemQuantity === 0) {
+                                return (
+                                  <BorderRightTableCell
+                                    align="center"
+                                    key={index}
+                                  ></BorderRightTableCell>
+                                );
+                              }
+                              // Ensure the value is renderable
+                              if (typeof itemQuantity === 'object') {
+                                console.error(
+                                  `Invalid value to render for key ${item}: `,
+                                  itemQuantity,
+                                );
+                                return (
+                                  <BorderRightTableCell
+                                    key={itemQuantity}
+                                    align="center"
+                                    sx={{ fontSize: printFontSize }}
+                                  >
+                                    [Object]
+                                  </BorderRightTableCell>
+                                );
+                              }
+                              // console.log({userName: user.user.clientName, item: user[item]})
+                              return (
+                                <BorderRightTableCell
+                                  align="center"
+                                  sx={{ fontSize: printFontSize }}
+                                  key={index}
+                                >
+                                  {itemQuantity}
+                                </BorderRightTableCell>
+                              );
+                            })}
+                          </TableRow>
+                        );
+                      },
+                    )}
+                  </TableBody>
                 </Table>
                 {index < Object.keys(manifest).length - 1 && (
                   <div className="page-break"></div>
