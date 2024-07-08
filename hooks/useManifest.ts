@@ -61,9 +61,15 @@ const useManifest = (
             subCategory: order.subCategory,
             routeId: order.routeId,
             client: order.clientName,
+            user: order.user,
           };
         } else {
-          return { ...item, routeId: order.routeId, client: order.clientName };
+          return {
+            ...item,
+            routeId: order.routeId,
+            client: order.clientName,
+            user: order.user,
+          };
         }
       });
     });
@@ -78,10 +84,6 @@ const useManifest = (
       items.flat(),
       ({ routeId }: any) => routeId,
     );
-    // const groupItemClients: any = groupBy(
-    //   items.flat(),
-    //   ({ client }: any) => client,
-    // );
 
     for (const itemRoute in groupItemRoutes) {
       const manifestItem = groupItemRoutes[itemRoute].reduce(
@@ -98,17 +100,52 @@ const useManifest = (
           }
 
           acc[itemKey] = acc[itemKey] + item.quantity;
-          if (itemKey === 'BEAN 5 LB-B.K') {
-            console.log({ current: acc[itemKey], item, itemKey });
-          }
           return acc;
         },
         {},
       );
 
+      const manifestDetail = groupItemRoutes[itemRoute].reduce(
+        (acc: any, item: IItem, index: number) => {
+          const { user, name, quantity } = item;
+          if (!user) {
+            return acc;
+          }
+
+          const { subCategory } = item;
+          let itemKey = name;
+          if (subCategory) {
+            itemKey = `${name}-${subCategory.name}`;
+          }
+
+          // Beginning of new customer
+          if (
+            index === 0 ||
+            groupItemRoutes[itemRoute][index - 1].user.id !== user.id
+          ) {
+
+            const newUserManifest = {
+              user,
+              [itemKey]: quantity,
+            };
+            acc.push(newUserManifest);
+            return acc;
+          }
+
+          const currentUserManifest = acc[acc.length - 1];
+          const updatedUserManifest = {
+            ...currentUserManifest,
+            [itemKey]: quantity,
+          };
+          acc[acc.length - 1] = updatedUserManifest;
+          return acc;
+        },
+        [],
+      );
+
       setItemManifest((prevManifest: any) => ({
         ...prevManifest,
-        [itemRoute]: manifestItem,
+        [itemRoute]: { details: manifestDetail, summary: manifestItem },
       }));
     }
   };

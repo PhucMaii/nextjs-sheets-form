@@ -1,9 +1,7 @@
 import { IRoutes } from '@/app/utils/type';
 import {
-  Table,
-  TableCell,
-  TableHead,
-  TableRow,
+  Box,
+  Divider,
   Typography,
 } from '@mui/material';
 import React, { forwardRef } from 'react';
@@ -16,6 +14,10 @@ interface PropTypes {
 
 export const ManifestPrint = forwardRef(
   ({ manifest, routes }: PropTypes, ref: any) => {
+    if (!manifest || Object.keys(manifest).length === 0) {
+      return;
+    }
+
     // Display the beansprouts first then other items
     const customSortKeys = (keys: string[]): any => {
       const beanKeys = keys.filter((key) => key.includes('BEAN')).sort();
@@ -32,12 +34,12 @@ export const ManifestPrint = forwardRef(
               (route: IRoutes) => route.id === Number(routeId),
             );
             if (!targetRoute) {
-              return;
+              return null;
             }
 
             // sort the item for each route then loop through it
             const sortedItems: any = customSortKeys(
-              Object.keys(manifest[routeId]),
+              Object.keys(manifest[routeId].summary),
             );
 
             return (
@@ -48,32 +50,172 @@ export const ManifestPrint = forwardRef(
                 <Typography variant="h5" m={2}>
                   Driver: {targetRoute.driver?.name}
                 </Typography>
-                <Table sx={{ mx: 2 }}>
+                <Divider sx={{ my: 2 }} />
+                <Box display="flex" flexDirection="column" gap={1} m={2}>
+                  <Typography variant="h5" m={2}>
+                    Summary
+                  </Typography>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    flexWrap="wrap"
+                    justifyContent="space-between"
+                    gap={1}
+                  >
+                    {sortedItems.length > 0 &&
+                      sortedItems.map((item: string, index: number) => {
+                        const { summary } = manifest[routeId];
+                        if (summary[item] === 0) {
+                          return null;
+                        }
+                        return (
+                          <Typography key={index} variant="body1">
+                            {item}: {summary[item]}
+                            {/* <TableCell
+                                sx={{ fontSize: 20, fontWeight: 'bold' }}
+                              >
+                                {summary[item]}
+                              </TableCell> */}
+                          </Typography>
+                        );
+                      })}
+                  </Box>
+                </Box>
+                <Divider sx={{ my: 2 }} />
+                {manifest[routeId].details.map(
+                  (user: any, userIndex: number) => {
+                    const { summary } = manifest[routeId];
+                    return (
+                      <Box
+                        display="flex"
+                        // flexDirection="column"
+                        gap={2}
+                        m={2}
+                        key={userIndex}
+                        flexWrap="wrap"
+                        alignItems="center"
+                      >
+                        <Typography variant="h6" m={2}>
+                          {user.user.clientName}:
+                        </Typography>
+                        {/* <Box
+                          display="flex"
+                          alignItems="center"
+                          flexWrap="wrap"
+                          justifyContent="space-between"
+                          gap={1}
+                        > */}
+                          {sortedItems.map((item: any, itemIndex: number) => {
+                            if (
+                              summary[item] === 0 ||
+                              !user[item] ||
+                              user[item] === 0
+                            ) {
+                              return null;
+                            }
+
+                            return (
+                              <Typography key={itemIndex} variant="body1">
+                                {item}: {user[item]}
+                                {/* <TableCell
+                                sx={{ fontSize: 20, fontWeight: 'bold' }}
+                              >
+                                {summary[item]}
+                              </TableCell> */}
+                              </Typography>
+                            );
+                          })}
+                        {/* </Box> */}
+                      </Box>
+                    );
+                  },
+                )}
+                {/* <Table sx={{ mx: 2 }}>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
-                        Item
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: 15 }}>
-                        Quantity
-                      </TableCell>
+                      <BorderRightTableCell align="center"></BorderRightTableCell>
+                      {sortedItems.length > 0 &&
+                        sortedItems.map((item: string, index: number) => {
+                          const { summary } = manifest[routeId];
+                          if (summary[item] === 0) {
+                            return null;
+                          }
+                          return (
+                            <>
+                              <BorderRightTableCell
+                                align="center"
+                                sx={{ fontSize: 20 }}
+                                key={index}
+                              >
+                                {item} ({summary[item]})
+                              </BorderRightTableCell>
+                            </>
+                          );
+                        })}
                     </TableRow>
                   </TableHead>
-                  {sortedItems.length > 0 &&
-                    sortedItems.map((item: string, index: number) => {
-                      if (manifest[routeId][item] === 0) {
-                        return null;
-                      }
-                      return (
-                        <TableRow key={index}>
-                          <TableCell sx={{ fontSize: 20 }}>{item}</TableCell>
-                          <TableCell sx={{ fontSize: 20, fontWeight: 'bold' }}>
-                            {manifest[routeId][item]}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                </Table>
+                  <TableBody>
+                    {manifest[routeId].details.map(
+                      (user: any, index: number) => {
+                        const { summary } = manifest[routeId];
+                        return (
+                          <TableRow key={index}>
+                            <BorderRightTableCell
+                              align="center"
+                              sx={{
+                                fontSize: printFontSize,
+                                maxWidth: '120px',
+                              }}
+                            >
+                              {user.user.clientName}
+                            </BorderRightTableCell>
+                            {sortedItems.map((item: string, index: number) => {
+                              const itemQuantity = user[item];
+                              if (summary[item] === 0) {
+                                return null;
+                              }
+
+                              if (!itemQuantity || itemQuantity === 0) {
+                                return (
+                                  <BorderRightTableCell
+                                    align="center"
+                                    key={index}
+                                  ></BorderRightTableCell>
+                                );
+                              }
+                              // Ensure the value is renderable
+                              if (typeof itemQuantity === 'object') {
+                                console.error(
+                                  `Invalid value to render for key ${item}: `,
+                                  itemQuantity,
+                                );
+                                return (
+                                  <BorderRightTableCell
+                                    key={itemQuantity}
+                                    align="center"
+                                    sx={{ fontSize: printFontSize }}
+                                  >
+                                    [Object]
+                                  </BorderRightTableCell>
+                                );
+                              }
+                              // console.log({userName: user.user.clientName, item: user[item]})
+                              return (
+                                <BorderRightTableCell
+                                  align="center"
+                                  sx={{ fontSize: printFontSize }}
+                                  key={index}
+                                >
+                                  {itemQuantity}
+                                </BorderRightTableCell>
+                              );
+                            })}
+                          </TableRow>
+                        );
+                      },
+                    )}
+                  </TableBody>
+                </Table> */}
                 {index < Object.keys(manifest).length - 1 && (
                   <div className="page-break"></div>
                 )}

@@ -79,6 +79,7 @@ export interface IItem {
   quantity?: number;
   subCategory?: any;
   availability: boolean;
+  user?: User;
 }
 
 export interface OrderedItems {
