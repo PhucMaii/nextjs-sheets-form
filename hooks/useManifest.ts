@@ -1,22 +1,40 @@
 import { Order } from '@/app/admin/orders/page';
 import { groupBy } from '@/app/utils/array';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { IItem, IRoutes } from '@/app/utils/type';
 import { UserRoute } from '@prisma/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import _ from 'lodash';
+import useSWR from 'swr';
+import { days } from '@/app/lib/constant';
 
 const useManifest = (
   orderList: Order[],
   routes: IRoutes[],
   selectedRoutes: IRoutes[],
+  date: string,
 ) => {
   const [orderPrint, setOrderPrint] = useState<any>([]);
   const [itemManifest, setItemManifest] = useState<any>({});
-  // Filter void orders
-  const nonVoidOrders = orderList.filter(
-    (order: Order) => order.status !== ORDER_STATUS.VOID,
+
+  const formattedDate = new Date(date);
+  const givenDay = days[formattedDate.getDay()];
+  const { data: userRoute } = useSWR(
+    `${API_URL.ROUTES}/clients?day=${givenDay}`,
   );
+
+  // Filter void orders and sort it by user route
+  const nonVoidOrders = useMemo(() => {
+    if (!userRoute?.data) {
+      return [];
+    }
+
+    const filteredVoidOrders = orderList.filter(
+      (order: Order) => order.status !== ORDER_STATUS.VOID,
+    );
+
+    return filteredVoidOrders;
+  }, [orderList, userRoute]);
 
   useEffect(() => {
     if (routes.length > 0) {
@@ -30,7 +48,7 @@ const useManifest = (
     }
   }, [orderPrint]);
 
-  // O(n^3) need to optimize this
+  // *** O(n^3) need to optimize this ***
   const getClientRoutes = (): any => {
     const clientRoutes = nonVoidOrders.map((order: Order): any => {
       // Filter user routes to get only routes related to current given list of routes
@@ -48,7 +66,22 @@ const useManifest = (
         }));
       return relatedRoutes;
     });
+
     const orderByRoutes = _.orderBy(clientRoutes.flat(), ['routeId'], ['asc']);
+
+    const sortedOrderByRoutes = [];
+    for (const selectedRoute of selectedRoutes) {
+      const sortedUserIds = userRoute.data[selectedRoute.id];
+      for (const userId of sortedUserIds) {
+        const targetOrder = orderByRoutes.find((order: Order) => {
+          return order.userId === userId;
+        });
+        if (targetOrder) {
+          sortedOrderByRoutes.push(targetOrder);
+        }
+      }
+
+    }
     setOrderPrint(orderByRoutes);
   };
 
@@ -123,7 +156,6 @@ const useManifest = (
             index === 0 ||
             groupItemRoutes[itemRoute][index - 1].user.id !== user.id
           ) {
-
             const newUserManifest = {
               user,
               [itemKey]: quantity,

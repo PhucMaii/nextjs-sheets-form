@@ -491,6 +491,7 @@ export default function ReportPage() {
           onClose={() => setIsOpenBillPrintModal(false)}
           routes={routes || []}
           orderList={clientOrders}
+          day={datePicker}
         />
       )}
       <NotificationPopup

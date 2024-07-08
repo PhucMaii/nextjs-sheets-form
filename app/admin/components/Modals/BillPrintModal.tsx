@@ -27,6 +27,7 @@ import useManifest from '@/hooks/useManifest';
 interface PropTypes extends ModalProps {
   routes: IRoutes[];
   orderList: Order[];
+  day: string;
 }
 
 enum BILL_PRINT_OPTION {
@@ -39,6 +40,7 @@ export default function BillPrintModal({
   onClose,
   routes,
   orderList,
+  day,
 }: PropTypes) {
   const [billPrintOption, setBillPrintOption] = useState<BILL_PRINT_OPTION>(
     BILL_PRINT_OPTION.NONE,
@@ -47,7 +49,7 @@ export default function BillPrintModal({
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
   const { orderPrint, itemManifest, setItemManifest, nonVoidOrders } =
-    useManifest(orderList, routes, selectedRoutes);
+    useManifest(orderList, routes, selectedRoutes, day);
 
   const handleSelectRoute = (e: any, targetRoute: IRoutes) => {
     const isRouteExisted = selectedRoutes.find((route: IRoutes) => {
