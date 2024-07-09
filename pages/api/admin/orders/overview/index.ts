@@ -37,7 +37,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Batch processing to handle large amount of orders data
-    const batchSize = 1000;
+    const batchSize = 90000;
     let skip = 0;
     let orders: any = [];
     const trueCondition = true;
