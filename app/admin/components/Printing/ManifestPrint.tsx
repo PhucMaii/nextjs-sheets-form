@@ -2,10 +2,16 @@ import { IRoutes } from '@/app/utils/type';
 import {
   Box,
   Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   Typography,
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import './print.css';
+import { printFontSize } from './ComponentToPrint';
 
 interface PropTypes {
   manifest: any;
@@ -27,6 +33,8 @@ export const ManifestPrint = forwardRef(
 
     return (
       <div ref={ref}>
+        <Box sx={{width: '100%', height: '100%', m: 2}}>
+
         {/* Loop through route */}
         {Object.keys(manifest).length > 0 &&
           Object.keys(manifest).map((routeId: string, index: number) => {
@@ -55,31 +63,41 @@ export const ManifestPrint = forwardRef(
                   <Typography variant="h5" m={2}>
                     Summary
                   </Typography>
-                  <Box
+                  {/* <Box
                     display="flex"
                     alignItems="center"
                     flexWrap="wrap"
                     justifyContent="space-between"
                     gap={1}
-                  >
-                    {sortedItems.length > 0 &&
-                      sortedItems.map((item: string, index: number) => {
-                        const { summary } = manifest[routeId];
-                        if (summary[item] === 0) {
-                          return null;
-                        }
-                        return (
-                          <Typography key={index} variant="body1">
-                            {item}: {summary[item]}
-                            {/* <TableCell
-                                sx={{ fontSize: 20, fontWeight: 'bold' }}
-                              >
-                                {summary[item]}
-                              </TableCell> */}
-                          </Typography>
-                        );
-                      })}
-                  </Box>
+                  > */}
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Item</TableCell>
+                        <TableCell>Quantity</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {sortedItems.length > 0 &&
+                        sortedItems.map((item: string, index: number) => {
+                          const { summary } = manifest[routeId];
+                          if (summary[item] === 0) {
+                            return null;
+                          }
+                          return (
+                            <TableRow key={index}>
+                              <TableCell sx={{ fontSize: printFontSize - 10 }}>{item}</TableCell>
+                              <TableCell
+                                  sx={{ fontSize: printFontSize - 10, fontWeight: 'bold' }}
+                                >
+                                  {summary[item]}
+                                </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                  {/* </Box> */}
                 </Box>
                 <Divider sx={{ my: 2 }} />
                 {manifest[routeId].details.map(
@@ -222,6 +240,8 @@ export const ManifestPrint = forwardRef(
               </>
             );
           })}
+        </Box>
+
       </div>
     );
   },
