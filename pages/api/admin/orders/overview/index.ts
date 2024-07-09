@@ -36,21 +36,37 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const orders = await prisma.orders.findMany({
-      where: {
-        status: {
-          in: [
-            ORDER_STATUS.COMPLETED,
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.INCOMPLETED,
-          ],
+    // Batch processing to handle large amount of orders data
+    const batchSize = 90000;
+    let skip = 0;
+    let orders: any = [];
+    const trueCondition = true;
+    
+    while(trueCondition) {
+      const ordersBatch = await prisma.orders.findMany({
+        where: {
+          status: {
+            in: [
+              ORDER_STATUS.COMPLETED,
+              ORDER_STATUS.DELIVERED,
+              ORDER_STATUS.INCOMPLETED,
+            ],
+          },
         },
-      },
-      include: {
-        items: true,
-        user: true,
-      },
-    });
+        include: {
+          items: true,
+          user: true,
+        },
+        skip,
+        take: batchSize
+      });
+      
+      if (ordersBatch.length === 0) break;
+
+      orders = orders.concat(ordersBatch);
+      skip += batchSize;
+
+    }
 
     if (!orders || orders.length === 0) {
       return res.status(500).json({
