@@ -1,10 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
+import withDriverAuthGuard from '../utils/withDriverAuthGuar';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const response = await GET(req, res);
@@ -20,4 +18,6 @@ export default async function handler(
       error: 'Internal Server Error: ' + error,
     });
   }
-}
+};
+
+export default withDriverAuthGuard(handler);

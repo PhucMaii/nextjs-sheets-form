@@ -248,6 +248,7 @@ const OrderAccordion = ({
         order={order}
         setNotification={setNotification}
         updateUIItem={updateUIItem}
+        isAdmin
       />
       <ShadowSection>
         <Grid container alignItems="center" columnSpacing={1}>

@@ -1,4 +1,5 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -7,10 +8,7 @@ interface QueryTypes {
   endMonth?: string;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({
@@ -67,4 +65,6 @@ export default async function handler(
       error: 'Internal Server Error: ' + error,
     });
   }
-}
+};
+
+export default withAdminAuthGuard(handler);

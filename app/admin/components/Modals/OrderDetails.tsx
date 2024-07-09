@@ -24,6 +24,7 @@ interface IProps extends ModalProps {
   order: Order;
   setNotification: Dispatch<SetStateAction<Notification>>;
   updateUIItem: (targetOrder: Order, targetItem: Item) => void;
+  isAdmin?: boolean;
 }
 
 export default function OrderDetails({
@@ -32,6 +33,7 @@ export default function OrderDetails({
   order,
   setNotification,
   updateUIItem,
+  isAdmin,
 }: IProps) {
   const billPrintRef: any = useRef();
 
@@ -72,10 +74,10 @@ export default function OrderDetails({
                 <CloseIcon />
               </IconButton>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={10} md={6}>
               <Typography>Order at: {order.orderTime}</Typography>
             </Grid>
-            <Grid item xs={12} md={6} textAlign="right">
+            <Grid item xs={2} md={6} textAlign="right">
               <IconButton onClick={handlePrinting}>
                 <PrintIcon color="primary" />
               </IconButton>
@@ -106,6 +108,7 @@ export default function OrderDetails({
                 order={order}
                 setNotification={setNotification}
                 updateUIItem={updateUIItem}
+                isAdmin={isAdmin || false}
               />
             </Grid>
             <Grid

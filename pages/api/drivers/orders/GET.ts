@@ -1,10 +1,17 @@
-import { Orders, PrismaClient, Route, UserRoute } from '@prisma/client';
+import {
+  OrderedItems,
+  Orders,
+  PrismaClient,
+  Route,
+  UserRoute,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
 import { days } from '@/app/lib/constant';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
 import { generateManifest } from '../../admin/orders/overview';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface IQuery {
   deliveryDate?: string;
@@ -60,12 +67,57 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           in: userIds,
         },
         deliveryDate,
+        status: {
+          in: [
+            ORDER_STATUS.INCOMPLETED,
+            ORDER_STATUS.DELIVERED,
+            ORDER_STATUS.COMPLETED,
+          ],
+        },
       },
       include: {
-        user: true,
+        user: {
+          include: {
+            preference: true,
+            category: true,
+          },
+        },
         items: true,
       },
     });
+
+    const arrangedOrders = await prisma.scheduleOrders.findMany({
+      where: {
+        userId: {
+          in: userIds,
+        },
+        day,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    const sortedDeliveryOrders = [];
+    for (const order of arrangedOrders) {
+      const deliveryOrder = deliveryOrders.find(
+        (browsingOrder: any) => browsingOrder.userId === order.userId,
+      );
+
+      if (!deliveryOrder) {
+        continue;
+      }
+
+      const newItems = deliveryOrder.items.map((item: OrderedItems) => {
+        const totalPrice = item.quantity * item.price;
+        return { ...item, totalPrice };
+      });
+      sortedDeliveryOrders.push({
+        ...deliveryOrder.user,
+        ...deliveryOrder,
+        items: newItems,
+      });
+    }
 
     const manifest = generateManifest(deliveryOrders);
     const codAmount = deliveryOrders.reduce((acc: number, order: Orders) => {
@@ -73,7 +125,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }, 0);
 
     return res.status(200).json({
-      data: { deliveryOrders, manifest, codAmount },
+      data: {
+        driver: existingDriver,
+        deliveryOrders: sortedDeliveryOrders,
+        manifest,
+        codAmount,
+      },
       message: 'Fetch Orders Successfully',
     });
   } catch (error: any) {

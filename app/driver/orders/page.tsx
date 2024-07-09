@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import {
   Box,
@@ -13,7 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { Notification } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import { Order } from '@/app/admin/orders/page';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -24,8 +24,12 @@ import NotificationPopup from '@/app/admin/components/Notification';
 import { Virtuoso } from 'react-virtuoso';
 import OrderComponent from '../components/OrderComponent';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
+import { primary, success } from '@/theme/color';
+import ErrorComponent from '@/app/admin/components/ErrorComponent';
+import SearchModal from '../components/Modals/SearchModal';
 
 function CircularProgressWithLabel(props: any) {
+  const value = Math.round((props.currentValue / props.basedValue) * 100);
   return (
     <Box
       sx={{
@@ -37,10 +41,10 @@ function CircularProgressWithLabel(props: any) {
       }}
     >
       <CircularProgress
-        color={props.color}
         variant="determinate"
         size={120}
-        {...props}
+        value={value > 100 ? 100 : value}
+        sx={{ color: props.color['light'] }}
       />
       <Box
         sx={{
@@ -58,16 +62,16 @@ function CircularProgressWithLabel(props: any) {
           variant="h6"
           component="div"
           textAlign="center"
-          color={`${props.color}.main`}
+          color="white"
         >
-          800 / 100
+          {props.currentValue} / {props.basedValue}
         </Typography>
       </Box>
     </Box>
   );
 }
 
-const tabs = ['Today', 'Delivered', 'Completed'];
+const tabs = ['Today', 'Delivered', 'Paid'];
 
 const totalYPosition = 250;
 export default function OrdersPage() {
@@ -79,12 +83,14 @@ export default function OrdersPage() {
     return formattedDate;
   });
   const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
     message: '',
   });
   const [orders, setOrders] = useState<Order[]>([]);
+  const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
 
   useEffect(() => {
@@ -95,6 +101,88 @@ export default function OrdersPage() {
   useEffect(() => {
     fetchOrders();
   }, [currentTab, datePicker]);
+
+  useEffect(() => {
+    if (orders && orders.length > 0) {
+      if (currentTab === 'Delivered') {
+        const newDeliveredOrders = orders.filter((order: Order) => {
+          return (
+            order.status === ORDER_STATUS.DELIVERED ||
+            order.status === ORDER_STATUS.COMPLETED
+          );
+        });
+        setDisplayOrders(newDeliveredOrders);
+      } else {
+        const newOrders = filterOrderByStatus(
+          orders,
+          currentTab === 'Today'
+            ? ORDER_STATUS.INCOMPLETED
+            : ORDER_STATUS.COMPLETED,
+        );
+        setDisplayOrders(newOrders);
+      }
+    }
+  }, [orders]);
+
+  const deliveredOrders = useMemo(() => {
+    if (orders.length === 0) {
+      return [];
+    }
+
+    const newDeliveredOrders = orders.filter((order: Order) => {
+      return (
+        order.status === ORDER_STATUS.DELIVERED ||
+        order.status === ORDER_STATUS.COMPLETED
+      );
+    });
+
+    return newDeliveredOrders;
+  }, [orders]);
+
+  const collectedAmount = useMemo(() => {
+    if (orders.length === 0) {
+      return 0;
+    }
+
+    const codCollected = orders.reduce((acc: number, order: Order) => {
+      if (order.status === ORDER_STATUS.COMPLETED) {
+        return acc + order.totalPrice;
+      }
+
+      return acc;
+    }, 0);
+
+    return codCollected;
+  }, [orders]);
+
+  const codAmount = useMemo(() => {
+    if (orders.length === 0) {
+      return 0;
+    }
+
+    const amount = orders.reduce((acc: number, order: Order) => {
+      if (order.user.preference.paymentType === PAYMENT_TYPE.COD) {
+        return acc + order.totalPrice;
+      }
+
+      return acc;
+    }, 0);
+
+    return amount;
+  }, [orders]);
+
+  const filterOrderByStatus = (orderList: Order[], status: ORDER_STATUS) => {
+    const filteredOrders = orderList.filter((order: Order) => {
+      return order.status === status;
+    });
+
+    return filteredOrders;
+  };
+
+  const handleDateChange = (e: any) => {
+    const formattedDate = formatDateChanged(e);
+    setDatePicker(formattedDate);
+  };
 
   const fetchOrders = async () => {
     try {
@@ -117,22 +205,7 @@ export default function OrdersPage() {
         return;
       }
 
-      if (currentTab === 'Today') {
-        setOrders(response.data.data.deliveryOrders);
-      } else if (currentTab === 'Delivered') {
-        const deliveredOrders = filterOrderByStatus(
-          response.data.data.deliveryOrders,
-          ORDER_STATUS.DELIVERED,
-        );
-        setOrders(deliveredOrders);
-      } else if (currentTab === 'Completed') {
-        const completedOrders = filterOrderByStatus(
-          response.data.data.deliveryOrders,
-          ORDER_STATUS.COMPLETED,
-        );
-        setOrders(completedOrders);
-      }
-
+      setOrders(response.data.data.deliveryOrders);
       setIsFetching(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -145,17 +218,50 @@ export default function OrdersPage() {
     }
   };
 
-  const filterOrderByStatus = (orderList: Order[], status: ORDER_STATUS) => {
-    const filteredOrders = orderList.filter((order: Order) => {
-      return order.status === status;
-    });
+  const handleUpdateStatus = async (
+    orderId: number,
+    updatedStatus: ORDER_STATUS,
+  ) => {
+    try {
+      const response = await axios.put(`${API_URL.DRIVER_ORDERS}/status`, {
+        orderId,
+        updatedStatus,
+      });
 
-    return filteredOrders;
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleUpdateStatusUI(response.data.data);
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+    }
   };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setDatePicker(formattedDate);
+  const handleUpdateStatusUI = (updatedOrder: Order) => {
+    const newOrders: any = orders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
+    setOrders(newOrders);
   };
 
   return (
@@ -165,6 +271,12 @@ export default function OrdersPage() {
         onClose={() => setNotification({ ...notification, on: false })}
       />
       <LoadingModal open={isFetching} />
+      <SearchModal
+        open={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        orders={orders}
+        handleUpdateStatus={handleUpdateStatus}
+      />
       <Grid container alignItems="center">
         <Grid item xs={4}></Grid>
         <Grid item xs={4} textAlign="center">
@@ -173,7 +285,11 @@ export default function OrdersPage() {
           </Typography>
         </Grid>
         <Grid item xs={4} textAlign="right">
-          <IconButton color="primary" size="large">
+          <IconButton
+            onClick={() => setIsSearchModalOpen(true)}
+            color="primary"
+            size="large"
+          >
             <SearchIcon fontSize="large" />
           </IconButton>
         </Grid>
@@ -210,7 +326,7 @@ export default function OrdersPage() {
           </LocalizationProvider>
         </Box>
       )}
-      <Grid container mt={2} spacing={2}>
+      <Grid container my={2} spacing={2}>
         <Grid item xs={6}>
           <ShadowSection
             display="flex"
@@ -218,11 +334,16 @@ export default function OrdersPage() {
             gap={2}
             justifyContent="center"
             alignItems="center"
+            sx={{ backgroundColor: `${primary['main']} !important` }}
           >
-            <Typography color="primary" variant="h6">
-              Total Orders
+            <Typography color="primary.contrastText" variant="h6">
+              Delivered Orders
             </Typography>
-            <CircularProgressWithLabel value={80} color="primary" />
+            <CircularProgressWithLabel
+              currentValue={deliveredOrders.length || 0}
+              basedValue={orders.length || 0}
+              color={primary}
+            />
           </ShadowSection>
         </Grid>
         <Grid item xs={6}>
@@ -232,22 +353,37 @@ export default function OrdersPage() {
             gap={2}
             justifyContent="center"
             alignItems="center"
+            sx={{ backgroundColor: `${success['main']} !important` }}
           >
-            <Typography color="success.main" variant="h6">
-              Total Orders
+            <Typography color="success.contrastText" variant="h6">
+              Collect Amount
             </Typography>
-            <CircularProgressWithLabel value={80} color="success" />
+            <CircularProgressWithLabel
+              currentValue={collectedAmount}
+              basedValue={codAmount}
+              color={success}
+            />
           </ShadowSection>
         </Grid>
       </Grid>
-      <Virtuoso
-        totalCount={orders?.length || 0}
-        style={{ height: virtuosoHeight, marginTop: 2 }}
-        data={orders}
-        itemContent={(index) => {
-          return <OrderComponent key={index} />;
-        }}
-      />
+      {displayOrders.length > 0 ? (
+        <Virtuoso
+          totalCount={displayOrders?.length || 0}
+          style={{ height: virtuosoHeight, marginTop: 2 }}
+          data={displayOrders}
+          itemContent={(index, order) => {
+            return (
+              <OrderComponent
+                key={index}
+                order={order}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            );
+          }}
+        />
+      ) : (
+        <ErrorComponent errorText="No Order Found" />
+      )}
     </Sidebar>
   );
 }
