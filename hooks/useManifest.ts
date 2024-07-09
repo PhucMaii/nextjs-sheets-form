@@ -48,16 +48,18 @@ const useManifest = (
     }
   }, [orderPrint]);
 
-  // *** O(n^3) need to optimize this ***
   const getClientRoutes = (): any => {
+    const selectedRoutesMap = new Map(selectedRoutes.map((route: IRoutes) => [route.id, route]));
+    // Attach route id in order
     const clientRoutes = nonVoidOrders.map((order: Order): any => {
       // Filter user routes to get only routes related to current given list of routes
       const relatedRoutes = order.user?.routes
         ?.filter((route: UserRoute): any => {
-          const relatedRoute = selectedRoutes.find(
-            (baseRoute: IRoutes) => baseRoute.id === route.routeId,
-          );
-          return !!relatedRoute;
+          // const relatedRoute = selectedRoutes.find(
+          //   (baseRoute: IRoutes) => baseRoute.id === route.routeId,
+          // );
+          // return !!relatedRoute;
+          return selectedRoutesMap.has(route.routeId);
         })
         .map((route: UserRoute): any => ({
           // map to attach order information
@@ -69,20 +71,22 @@ const useManifest = (
 
     const orderByRoutes = _.orderBy(clientRoutes.flat(), ['routeId'], ['asc']);
 
+    // Arrange as user route
     const sortedOrderByRoutes = [];
     for (const selectedRoute of selectedRoutes) {
       const sortedUserIds = userRoute.data[selectedRoute.id];
-      for (const userId of sortedUserIds) {
-        const targetOrder = orderByRoutes.find((order: Order) => {
-          return order.userId === userId;
-        });
-        if (targetOrder) {
-          sortedOrderByRoutes.push(targetOrder);
-        }
-      }
+      const routeOrders = orderByRoutes.filter((order: Order) => {
+        return order.routeId === selectedRoute.id;
+      });
 
+      // Create a map for quick lookup of index positions
+      const orderIdIndexMap: any = new Map(sortedUserIds.map((id: string, index: number) => [id, index]));
+      // Sort users based on the index positions in index map
+      routeOrders.sort((orderA: Order, orderB: Order) => orderIdIndexMap.get(orderA.userId) - orderIdIndexMap.get(orderB.userId));
+      sortedOrderByRoutes.push(...routeOrders);
     }
-    setOrderPrint(orderByRoutes);
+
+    setOrderPrint(sortedOrderByRoutes);
   };
 
   const getItemsManifest = () => {
