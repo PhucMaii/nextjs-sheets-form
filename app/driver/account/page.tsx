@@ -6,7 +6,6 @@ export default function AccountPage() {
   return (
     <Sidebar>
       <Typography variant="h5" textAlign="center">Account</Typography>
-    
     </Sidebar>
   )
 }
