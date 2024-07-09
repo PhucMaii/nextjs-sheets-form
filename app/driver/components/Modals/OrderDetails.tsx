@@ -135,27 +135,31 @@ export default function OrderDetails({
               </Typography>
             </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <LoadingButton
-              onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
-              loading={isLoading}
-              fullWidth
-              variant="contained"
-            >
-              Delivered
-            </LoadingButton>
-          </Grid>
-          <Grid item xs={6}>
-            <LoadingButton
-              onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
-              loading={isLoading}
-              color="success"
-              fullWidth
-              variant="contained"
-            >
-              Collect Money
-            </LoadingButton>
-          </Grid>
+          <Box mt={2} position="sticky" bottom={0} sx={{width: '100%'}}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={6}>
+                <LoadingButton
+                  onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
+                  loading={isLoading}
+                  fullWidth
+                  variant="contained"
+                >
+                  Delivered
+                </LoadingButton>
+              </Grid>
+              <Grid item xs={6}>
+                <LoadingButton
+                  onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
+                  loading={isLoading}
+                  color="success"
+                  fullWidth
+                  variant="contained"
+                >
+                  Collect Money
+                </LoadingButton>
+              </Grid>
+            </Grid>
+          </Box>
         </Grid>
       </BoxModal>
     </Modal>

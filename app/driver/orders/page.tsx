@@ -337,7 +337,7 @@ export default function OrdersPage() {
             sx={{ backgroundColor: `${primary['main']} !important` }}
           >
             <Typography color="primary.contrastText" variant="h6">
-              Delivered Orders
+              Delivered
             </Typography>
             <CircularProgressWithLabel
               currentValue={deliveredOrders.length || 0}
