@@ -14,6 +14,8 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Notification } from '@/app/utils/type';
 import NotificationPopup from '@/app/admin/components/Notification';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 export default function AccountPage() {
   const [passwordGroup, setPasswordGroup] = useState<any>({
@@ -26,6 +28,7 @@ export default function AccountPage() {
     type: 'info',
     message: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -57,9 +60,44 @@ export default function AccountPage() {
   };
 
   const handleUpdatePassword = async () => {
+    const { isValid, message } = checkPasswordInput();
+    if (!isValid) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message,
+      });
+      return;
+    }
     try {
+      setIsSubmitting(true);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword, ...submittedData } = passwordGroup;
+      const response = await axios.put(API_URL.DRIVER, submittedData);
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsSubmitting(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error.response.data.error,
+      });
+      setIsSubmitting(false);
     }
   };
 
@@ -148,7 +186,7 @@ export default function AccountPage() {
         <Box display="flex" justifyContent="right">
           <LoadingButton
             variant="contained"
-            loading={false}
+            loading={isSubmitting}
             fullWidth={smDown}
             onClick={handleUpdatePassword}
           >
