@@ -6,7 +6,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
-import MessageIcon from '@mui/icons-material/Message';
+// import MessageIcon from '@mui/icons-material/Message';
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
@@ -102,15 +102,15 @@ export const driverTabs = [
     icon: ReceiptLongIcon,
     path: '/driver/orders',
   },
-  {
-    name: 'Message',
-    icon: MessageIcon,
-    path: '/driver/message',
-  },
+  // {
+  //   name: 'Message',
+  //   icon: MessageIcon,
+  //   path: '/driver/message',
+  // },
   {
     name: 'Account',
     icon: AccountCircleIcon,
-    path: '/account',
+    path: '/driver/account',
   },
 ];
 
