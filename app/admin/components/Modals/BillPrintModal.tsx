@@ -51,6 +51,7 @@ export default function BillPrintModal({
   const { orderPrint, itemManifest, setItemManifest, nonVoidOrders } =
     useManifest(orderList, routes, selectedRoutes, day);
 
+  
   const handleSelectRoute = (e: any, targetRoute: IRoutes) => {
     const isRouteExisted = selectedRoutes.find((route: IRoutes) => {
       return route.id === targetRoute.id;

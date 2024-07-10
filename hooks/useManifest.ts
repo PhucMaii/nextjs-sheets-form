@@ -16,7 +16,16 @@ const useManifest = (
 ) => {
   const [orderPrint, setOrderPrint] = useState<any>([]);
   const [itemManifest, setItemManifest] = useState<any>({});
+  const [officialSelectedRoutes, setOfficialSelectedRoutes] = useState<IRoutes[]>(selectedRoutes);
 
+  useEffect(() => {
+    setOfficialSelectedRoutes(selectedRoutes);
+  }, [selectedRoutes]);
+
+  
+  useEffect(() => {
+    setOfficialSelectedRoutes([]);
+  }, [date]);
   const formattedDate = new Date(date);
   const givenDay = days[formattedDate.getDay()];
   const { data: userRoute } = useSWR(
@@ -49,7 +58,7 @@ const useManifest = (
   }, [orderPrint]);
 
   const getClientRoutes = (): any => {
-    const selectedRoutesMap = new Map(selectedRoutes.map((route: IRoutes) => [route.id, route]));
+    const selectedRoutesMap = new Map(officialSelectedRoutes.map((route: IRoutes) => [route.id, route]));
     // Attach route id in order
     const clientRoutes = nonVoidOrders.map((order: Order): any => {
       // Filter user routes to get only routes related to current given list of routes
@@ -73,7 +82,7 @@ const useManifest = (
 
     // Arrange as user route
     const sortedOrderByRoutes = [];
-    for (const selectedRoute of selectedRoutes) {
+    for (const selectedRoute of officialSelectedRoutes) {
       const sortedUserIds = userRoute.data[selectedRoute.id];
       const routeOrders = orderByRoutes.filter((order: Order) => {
         return order.routeId === selectedRoute.id;
