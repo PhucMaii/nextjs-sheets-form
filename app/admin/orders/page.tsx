@@ -3,11 +3,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
+  Button,
   Checkbox,
   Fab,
   FormControl,
   FormControlLabel,
   Grid,
+  Menu,
+  MenuItem,
   Pagination,
   Tab,
   Tabs,
@@ -39,6 +42,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import SearchModal from '../components/Modals/SearchModal';
 import useDebounce from '@/hooks/useDebounce';
 import OrderOverview from '../components/OrderOverview';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import { useReactToPrint } from 'react-to-print';
+import LoadingModal from '../components/Modals/LoadingModal';
 
 interface Category {
   id: number;
@@ -84,6 +90,9 @@ export interface Order {
 const orderPerPage = 10;
 
 export default function Orders() {
+  const [actionButtonAnchor, setActionButtonAnchor] =
+  useState<null | HTMLElement>(null);
+  const openDropdown = Boolean(actionButtonAnchor);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [date, setDate] = useState(() => generateRecommendDate());
@@ -92,6 +101,7 @@ export default function Orders() {
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
@@ -116,6 +126,10 @@ export default function Orders() {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
   }, []);
+
+  useEffect(() => {
+    setSelectedOrders([]);
+  }, [date, currentStatus])
 
   // Whenever base order data change, update the display order data
   useEffect(() => {
@@ -300,6 +314,10 @@ export default function Orders() {
     );
   };
 
+  const handleCloseAnchor = () => {
+    setActionButtonAnchor(null);
+  };
+
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = baseOrderData.map((order: Order) => {
       // If order is at targetOrder, then update
@@ -322,6 +340,41 @@ export default function Orders() {
     });
 
     setBaseOrderData(newOrderData);
+  };
+
+  const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+    try {
+      setIsUpdating(true);
+      const response = await axios.put(API_URL.ORDER_STATUS, {
+        status,
+        updatedOrders: selectedOrders
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error
+        });
+        setIsUpdating(false);
+        return;
+      }
+      await fetchOrders();
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      setIsUpdating(false);
+    } catch (error: any) {
+      console.log('Fail to mark all as completed: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Something went wrong: ' + error.response.data.error,
+      });
+      setIsUpdating(false);
+    }
   };
 
   const handleUpdatePriceUI = (
@@ -385,6 +438,10 @@ export default function Orders() {
     setBaseOrderData(newOrders);
   };
 
+  const handlePrintAll = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
   const handleUpdateDateUI = (orderId: number, updatedDate: string): void => {
     const newOrders = baseOrderData.filter((order) => {
       if (order.id !== orderId) {
@@ -400,6 +457,91 @@ export default function Orders() {
 
     setBaseOrderData(newOrders);
   };
+
+  const actionDropdown = (
+    <Box
+      display="flex"
+      justifyContent="flex-end"
+      alignItems="center"
+      gap={2}
+      width="100%"
+    >
+      <Button
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+        endIcon={<ArrowDownwardIcon />}
+        variant="outlined"
+        disabled={selectedOrders.length === 0}
+      >
+        Actions
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={actionButtonAnchor}
+        open={openDropdown}
+        onClose={handleCloseAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handlePrintAll();
+            handleCloseAnchor();
+          }}
+          disabled={orderData.length === 0}
+        >
+            <Typography>Print bills</Typography>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(ORDER_STATUS.INCOMPLETED);
+            handleCloseAnchor();
+          }}
+          disabled={
+            currentStatus === ORDER_STATUS.INCOMPLETED
+          }
+        >
+            <Typography>Mark as incompleted</Typography>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(ORDER_STATUS.DELIVERED);
+            handleCloseAnchor();
+          }}
+          disabled={
+            currentStatus === ORDER_STATUS.DELIVERED
+          }
+        >
+            <Typography>Mark as delivered</Typography>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(ORDER_STATUS.COMPLETED);
+            handleCloseAnchor();
+          }}
+          disabled={
+            currentStatus === ORDER_STATUS.COMPLETED
+          }
+        >
+            <Typography>Mark as completed</Typography>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(ORDER_STATUS.VOID);
+            handleCloseAnchor();
+          }}
+          disabled={
+            currentStatus === ORDER_STATUS.VOID
+          }
+        >
+            <Typography>Mark as void</Typography>
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
 
   const uppperContent = (
     <>
@@ -487,23 +629,27 @@ export default function Orders() {
             onChange={(e) => setSearchKeywords(e.target.value)}
           />
         </Grid>
+        <Grid item xs={6}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={orderData.length === selectedOrders.length}
+                onClick={handleSelectAll}
+              />
+            }
+            label="Select All"
+          />
+        </Grid>
+        <Grid item xs={6} textAlign="right">
+          {actionDropdown}
+        </Grid>
       </Grid>
-      <Box>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={orderData.length === selectedOrders.length}
-              onClick={handleSelectAll}
-            />
-          }
-          label="Select All"
-        />
-      </Box>
     </>
   );
 
   return (
     <Sidebar>
+      <LoadingModal open={isUpdating} />
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
