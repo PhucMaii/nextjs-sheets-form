@@ -28,7 +28,7 @@ export const filterDateRangeOrders = (
   return sortedOrders;
 };
 
-const sortByDeliveryDate = (orders: Order[]): any => {
+export const sortByDeliveryDate = (orders: Order[]): any => {
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(
       orderA.deliveryDate,

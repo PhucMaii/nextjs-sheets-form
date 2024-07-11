@@ -1,6 +1,7 @@
 import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
+import { sortByDeliveryDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -41,7 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedStartDate,
       formattedEndDate,
     );
-    const thisMonthOrders: any = await prisma.orders.findMany({
+    const orders: any = await prisma.orders.findMany({
       where: {
         status: {
           in: [
@@ -60,16 +61,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    if (!thisMonthOrders || thisMonthOrders.length === 0) {
+    if (!orders || orders.length === 0) {
       return res.status(500).json({
         error: 'No Orders Found',
       });
     }
 
-    const revenue = thisMonthOrders.reduce((acc: number, order: any) => {
+    const sortedThisMonthOrders = sortByDeliveryDate(orders);
+
+    const revenue = sortedThisMonthOrders.reduce((acc: number, order: any) => {
       return acc + order.totalPrice;
     }, 0);
-    const ongoingOrders = thisMonthOrders.filter((order: any) => {
+    const ongoingOrders = sortedThisMonthOrders.filter((order: any) => {
       return order.status !== ORDER_STATUS.COMPLETED;
     });
     const unpaidAmount = ongoingOrders.reduce((acc: number, order: any) => {
@@ -77,15 +80,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }, 0);
 
     const thisMonthRevenueReport: any =
-      revenueGroupByDeliveryDate(thisMonthOrders);
+      revenueGroupByDeliveryDate(sortedThisMonthOrders);
     const lastMonthRevenueReport =
       await getLastMonthRevenue(thisMonthRevenueReport, formattedStartDate);
 
-    const manifest = generateManifest(thisMonthOrders);
+    const manifest = generateManifest(sortedThisMonthOrders);
 
     const overviewData = {
       manifest,
-      numberOfOrders: thisMonthOrders.length,
+      numberOfOrders: sortedThisMonthOrders.length,
       revenue,
       ongoingOrders: ongoingOrders.length,
       unpaidAmount,
@@ -98,7 +101,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let PPQuantity = 0;
     let PPRevenue = 0;
     let totalItems = 0;
-    for (const order of thisMonthOrders) {
+    for (const order of sortedThisMonthOrders) {
       for (const item of order.items) {
         totalItems += item.quantity;
         if (!order.user.subCategoryId) {
@@ -195,7 +198,6 @@ const getLastMonthRevenue = async (
 ) => {
   const prisma = new PrismaClient();
   const lastMonth = startDate.getMonth();
-  console.log({ lastMonth });
 
   const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 2, 1);
   const lastMonthEnd = new Date(
@@ -204,14 +206,13 @@ const getLastMonthRevenue = async (
     1,
   );
   lastMonthEnd.setDate(0);
-  console.log({ lastMonthStart, lastMonthEnd });
 
-  // const thisMonthOrders = filterDateRangeOrders(
+  // const sortedThisMonthOrders = filterDateRangeOrders(
   //   orders,
   //   lastMonthStart,
   //   lastMonthEnd,
   // );
-  // const revenueByDate = revenueGroupByDeliveryDate(thisMonthOrders);
+  // const revenueByDate = revenueGroupByDeliveryDate(sortedThisMonthOrders);
   // const formatLengthRevenue = revenueByDate.values.slice(
   //   0,
   //   thisMonthRevenue.length,
@@ -239,7 +240,7 @@ const getLastMonthRevenue = async (
   const revenueByDate = revenueGroupByDeliveryDate(orders);
   const formatLengthRevenue = revenueByDate.values.slice(
     0,
-    thisMonthRevenue.length,
+    thisMonthRevenue.values.length,
   );
   return formatLengthRevenue;
 };
