@@ -266,6 +266,7 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
+      {/* <a href="https://www.google.com/maps?q=37.7749,-122.4194" target="_blank">Open in Google Maps</a> IT WORKS */}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}

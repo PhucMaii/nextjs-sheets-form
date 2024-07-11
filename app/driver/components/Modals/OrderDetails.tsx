@@ -49,12 +49,33 @@ export default function OrderDetails({
     if (!order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng) {
       return;
     }
-    const url = await getGoogleMapsUrl(
-      order.user.deliveryAddressLat,
-      order.user.deliveryAddressLng,
-    );
-    // router.push(url);
-    window.open(url, '_blank');
+    // const url = await getGoogleMapsUrl(
+    //   order.user.deliveryAddressLat,
+    //   order.user.deliveryAddressLat,
+    // );
+    // // router.push(url);
+    // window.open(url, '_blank');
+    // setIsOpenDetails(true);
+    try {
+      const { webUrl, appUrl } = await getGoogleMapsUrl(
+        order.user.deliveryAddressLat,
+        order.user.deliveryAddressLng,
+      );
+
+      // Try to open the app in a new tab
+      const newWindow = window.open(appUrl, '_blank');
+
+      // Fallback to the web URL after a delay if the app URL fails
+      setTimeout(() => {
+        if (newWindow) {
+          newWindow.location.href = webUrl;
+        } else {
+          window.open(webUrl, '_blank');
+        }
+      }, 500); // Adjust delay as needed
+    } catch (error) {
+      console.error('Error getting Google Maps URL:', error);
+    }
   };
 
   return (

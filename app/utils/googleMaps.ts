@@ -1,4 +1,5 @@
-const googleMapsUrl = 'https://www.google.com/maps/dir/?api=1';
+const googleMapsBaseUrl = "https://www.google.com/maps/dir/?api=1";
+const googleMapsAppBaseUrl = "http://maps.apple.com/?daddr=San+Francisco";
 
 const getCurrentLocation = () => {
   return new Promise((resolve, reject) => {
@@ -16,10 +17,22 @@ const getCurrentLocation = () => {
   });
 };
 
-export const getGoogleMapsUrl = async (
-  destinationLat: number,
-  destinationLng: number,
-) => {
+// export const getGoogleMapsUrl = async (
+//   destinationLat: number,
+//   destinationLng: number,
+// ) => {
+//   const currentLocation: any = await getCurrentLocation();
+//   return `${googleMapsUrl}&origin=${currentLocation.latitude},${currentLocation.longitude}&destination=${destinationLat},${destinationLng}`;
+// };
+
+
+export const getGoogleMapsUrl = async (destinationLat: number, destinationLng: number) => {
   const currentLocation: any = await getCurrentLocation();
-  return `${googleMapsUrl}&origin=${currentLocation.latitude},${currentLocation.longitude}&destination=${destinationLat},${destinationLng}`;
+  const origin = `${currentLocation.latitude},${currentLocation.longitude}`;
+  const destination = `${destinationLat},${destinationLng}`;
+
+  const webUrl = `${googleMapsBaseUrl}&${origin}&destination=${destination}`;
+  const appUrl = `${googleMapsAppBaseUrl}${destination}&saddr=${origin}`;
+
+  return { webUrl, appUrl };
 };
