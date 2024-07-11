@@ -38,6 +38,7 @@ import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import useSWR from 'swr';
+import ErrorComponent from '../admin/components/ErrorComponent';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -270,7 +271,7 @@ export default function HistoryPage() {
           {isValidating ? (
             <SplashScreen />
           ) : (
-            clientOrders.length > 0 && (
+            clientOrders.length > 0 ? (
               <Virtuoso
                 totalCount={clientOrders.length}
                 style={{ height: virtuosoHeight }}
@@ -279,6 +280,8 @@ export default function HistoryPage() {
                   <OrderAccordion key={index} order={order} />
                 )}
               />
+            ) : (
+              <ErrorComponent errorText='No Order Found' />
             )
           )}
         </Grid>

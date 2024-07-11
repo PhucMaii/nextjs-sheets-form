@@ -133,8 +133,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedEndDate,
     );
 
-    console.log({ thisMonthRevenueReport, lastMonthRevenueReport });
-
     return res.status(200).json({
       data: {
         customersInDebt,

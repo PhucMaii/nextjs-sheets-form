@@ -9,6 +9,7 @@ import { grey } from '@mui/material/colors';
 import { useFormik } from 'formik';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
@@ -165,6 +166,9 @@ export default function LoginPage() {
               </Box>
             </form>
           </Paper>
+          <Box display="flex" justifyContent="flex-start">
+            <Link href="/auth/login">Sign in here as a client</Link>
+          </Box>
         </Box>
       </FadeIn>
     </LoginAndRegisterGuard>
