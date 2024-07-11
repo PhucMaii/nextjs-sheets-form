@@ -64,3 +64,21 @@ export const generateMonthRange = () => {
 
   return [firstDayOfThisMonth, lastDayOfThisMonth];
 };
+
+export const generateListOfDateString = (startDate: Date, endDate: Date) => {
+  const startDateString = YYYYMMDDFormat(startDate);
+  const dates = [startDateString];
+  const currentDate = startDate;
+  currentDate.setDate(currentDate.getDate() + 1);
+
+  while(currentDate <= endDate) {
+    // dates.push(currentDate);
+    const currentDateString = YYYYMMDDFormat(currentDate);
+    dates.push(currentDateString);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
+
+
+}

@@ -1,7 +1,7 @@
 {
   "name": "Supreme Sprouts Ltd.",
   "short_name": "SupremeSprouts",
-  "theme_color": "#1565c0",
+  "theme_color": "#f5f5f5",
   "background_color": "#f5f5f5",
   "display": "standalone",
   "orientation": "portrait",

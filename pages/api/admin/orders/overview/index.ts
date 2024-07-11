@@ -1,6 +1,6 @@
 import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import { generateListOfDateString } from '@/app/utils/time';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -36,50 +36,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    // Batch processing to handle large amount of orders data
-    const batchSize = 1000;
-    let skip = 0;
-    let orders: any = [];
-    const trueCondition = true;
-    
-    while(trueCondition) {
-      const ordersBatch = await prisma.orders.findMany({
-        where: {
-          status: {
-            in: [
-              ORDER_STATUS.COMPLETED,
-              ORDER_STATUS.DELIVERED,
-              ORDER_STATUS.INCOMPLETED,
-            ],
-          },
-        },
-        include: {
-          items: true,
-          user: true,
-        },
-        skip,
-        take: batchSize
-      });
-      
-      if (ordersBatch.length === 0) break;
-
-      orders = orders.concat(ordersBatch);
-      skip += batchSize;
-
-    }
-
-    if (!orders || orders.length === 0) {
-      return res.status(500).json({
-        error: 'Internal Server Error: Could Not Fetch Order',
-      });
-    }
-
-    // Get all overview data
-    const thisMonthOrders = filterDateRangeOrders(
-      orders,
+    // Generate list of dates in range
+    const datesInRange = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
     );
+    const thisMonthOrders: any = await prisma.orders.findMany({
+      where: {
+        status: {
+          in: [
+            ORDER_STATUS.COMPLETED,
+            ORDER_STATUS.DELIVERED,
+            ORDER_STATUS.INCOMPLETED,
+          ],
+        },
+        deliveryDate: {
+          in: datesInRange,
+        },
+      },
+      include: {
+        items: true,
+        user: true,
+      },
+    });
+
+    if (!thisMonthOrders || thisMonthOrders.length === 0) {
+      return res.status(500).json({
+        error: 'No Orders Found',
+      });
+    }
+
     const revenue = thisMonthOrders.reduce((acc: number, order: any) => {
       return acc + order.totalPrice;
     }, 0);
@@ -92,11 +78,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const thisMonthRevenueReport: any =
       revenueGroupByDeliveryDate(thisMonthOrders);
-    const lastMonthRevenueReport = getLastMonthRevenue(
-      orders,
-      formattedStartDate,
-      thisMonthRevenueReport.values,
-    );
+    const lastMonthRevenueReport =
+      await getLastMonthRevenue(formattedStartDate);
 
     const manifest = generateManifest(thisMonthOrders);
 
@@ -142,14 +125,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const BKPercentage = (BKRevenue / revenue) * 100;
     const PPPercentage = (PPRevenue / revenue) * 100;
 
-    // const lastMonthEnd = new Date(
-    //   formattedStartDate.getFullYear(),
-    //   formattedStartDate.getMonth(),
-    //   1,
-    // );
-    // lastMonthEnd.setDate(0);
-    const customersInDebt = getCustomersInDebt(
-      orders,
+    const customersInDebt = await getCustomersInDebt(
       officiallyStartDate,
       formattedEndDate,
     );
@@ -209,11 +185,13 @@ export const generateManifest = (orders: any) => {
   return manifest;
 };
 
-const getLastMonthRevenue = (
-  orders: any,
+const getLastMonthRevenue = async (
+  // orders: any,
+  // startDate: Date,
+  // thisMonthRevenue: any[],
   startDate: Date,
-  thisMonthRevenue: any[],
 ) => {
+  const prisma = new PrismaClient();
   const lastMonth = startDate.getMonth();
 
   const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 1, 1);
@@ -224,27 +202,59 @@ const getLastMonthRevenue = (
   );
   lastMonthEnd.setDate(0);
 
-  const thisMonthOrders = filterDateRangeOrders(
-    orders,
-    lastMonthStart,
-    lastMonthEnd,
-  );
-  const revenueByDate = revenueGroupByDeliveryDate(thisMonthOrders);
-  const formatLengthRevenue = revenueByDate.values.slice(
-    0,
-    thisMonthRevenue.length,
-  );
-  return formatLengthRevenue;
+  // const thisMonthOrders = filterDateRangeOrders(
+  //   orders,
+  //   lastMonthStart,
+  //   lastMonthEnd,
+  // );
+  // const revenueByDate = revenueGroupByDeliveryDate(thisMonthOrders);
+  // const formatLengthRevenue = revenueByDate.values.slice(
+  //   0,
+  //   thisMonthRevenue.length,
+  // );
+  // return formatLengthRevenue;
+  const datesInRange = generateListOfDateString(lastMonthStart, lastMonthEnd);
+  const orders: any = await prisma.orders.findMany({
+    where: {
+      status: {
+        in: [
+          ORDER_STATUS.COMPLETED,
+          ORDER_STATUS.DELIVERED,
+          ORDER_STATUS.INCOMPLETED,
+        ],
+      },
+      deliveryDate: {
+        in: datesInRange,
+      },
+    },
+    include: {
+      items: true,
+      user: true,
+    },
+  });
+  const revenueByDate = revenueGroupByDeliveryDate(orders);
+  return revenueByDate;
 };
 
-const getCustomersInDebt = (orders: any, startDate: Date, endDate: Date) => {
-  const ordersInRange = filterDateRangeOrders(orders, startDate, endDate);
+const getCustomersInDebt = async (startDate: Date, endDate: Date) => {
+  const prisma = new PrismaClient();
+  const datesInRange = generateListOfDateString(startDate, endDate);
+  const ordersInRange = await prisma.orders.findMany({
+    where: {
+      status: {
+        in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+      },
+      deliveryDate: {
+        in: datesInRange,
+      },
+    },
+    include: {
+      items: true,
+      user: true,
+    }
+  });
   const customersInDebt = ordersInRange.reduce((acc: any, order: any) => {
-    if (
-      order.status === ORDER_STATUS.VOID ||
-      order.status === ORDER_STATUS.COMPLETED ||
-      order.user.role === USER_ROLE.ADMIN
-    ) {
+    if (order.user.role === USER_ROLE.ADMIN) {
       return acc;
     }
     const key = `${order.user.clientName} __ ${order.user.clientId}`;
