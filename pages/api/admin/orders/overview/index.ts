@@ -79,7 +79,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const thisMonthRevenueReport: any =
       revenueGroupByDeliveryDate(thisMonthOrders);
     const lastMonthRevenueReport =
-      await getLastMonthRevenue(formattedStartDate);
+      await getLastMonthRevenue(thisMonthRevenueReport, formattedStartDate);
 
     const manifest = generateManifest(thisMonthOrders);
 
@@ -129,6 +129,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       officiallyStartDate,
       formattedEndDate,
     );
+
+    console.log({ thisMonthRevenueReport, lastMonthRevenueReport });
 
     return res.status(200).json({
       data: {
@@ -188,19 +190,21 @@ export const generateManifest = (orders: any) => {
 const getLastMonthRevenue = async (
   // orders: any,
   // startDate: Date,
-  // thisMonthRevenue: any[],
+  thisMonthRevenue: any[],
   startDate: Date,
 ) => {
   const prisma = new PrismaClient();
   const lastMonth = startDate.getMonth();
+  console.log({ lastMonth });
 
-  const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 1, 1);
+  const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 2, 1);
   const lastMonthEnd = new Date(
     startDate.getFullYear(),
-    startDate.getMonth(),
+    startDate.getMonth() - 1,
     1,
   );
   lastMonthEnd.setDate(0);
+  console.log({ lastMonthStart, lastMonthEnd });
 
   // const thisMonthOrders = filterDateRangeOrders(
   //   orders,
@@ -233,7 +237,11 @@ const getLastMonthRevenue = async (
     },
   });
   const revenueByDate = revenueGroupByDeliveryDate(orders);
-  return revenueByDate;
+  const formatLengthRevenue = revenueByDate.values.slice(
+    0,
+    thisMonthRevenue.length,
+  );
+  return formatLengthRevenue;
 };
 
 const getCustomersInDebt = async (startDate: Date, endDate: Date) => {
@@ -251,7 +259,7 @@ const getCustomersInDebt = async (startDate: Date, endDate: Date) => {
     include: {
       items: true,
       user: true,
-    }
+    },
   });
   const customersInDebt = ordersInRange.reduce((acc: any, order: any) => {
     if (order.user.role === USER_ROLE.ADMIN) {

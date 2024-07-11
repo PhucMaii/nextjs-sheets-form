@@ -22,9 +22,9 @@ export const metadata: Metadata = {
     }
   ],
   icons: {
-    icon: ['/supremesproutsIcon.png'],
-    apple: ['/supremesproutsIcon.png'],
-    shortcut: ['/supremesproutsIcon.png'],
+    icon: ['/logo-48x48.png'],
+    apple: ['/logo-144.png'],
+    shortcut: ['/logo-144.png'],
   },
   manifest: '/manifest.json',
 };
