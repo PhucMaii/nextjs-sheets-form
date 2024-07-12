@@ -8,7 +8,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Typography,
 } from '@mui/material';
@@ -217,7 +216,6 @@ const ClientsTable = ({
         sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
       />
     ),
-    TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     TableRow: ({ item: item, ...props }) => {
       const isClientSelected = selectedClients.some(

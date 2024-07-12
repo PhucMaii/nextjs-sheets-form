@@ -340,6 +340,7 @@ export default function OrdersPage() {
         onClose={() => setIsSearchModalOpen(false)}
         orders={orders}
         handleUpdateStatus={handleUpdateStatus}
+        handleUpdateItem={handleUpdateItem}
       />
       <Grid container alignItems="center">
         <Grid item xs={4}></Grid>

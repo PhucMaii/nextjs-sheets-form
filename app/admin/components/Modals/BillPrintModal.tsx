@@ -11,7 +11,7 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import StatusText from '../StatusText';
@@ -50,6 +50,10 @@ export default function BillPrintModal({
   const manifestPrint: any = useRef();
   const { orderPrint, itemManifest, setItemManifest, nonVoidOrders } =
     useManifest(orderList, routes, selectedRoutes, day);
+
+  useEffect(() => {
+    setSelectedRoutes([]);
+  }, [day]);
 
   const handleSelectRoute = (e: any, targetRoute: IRoutes) => {
     const isRouteExisted = selectedRoutes.find((route: IRoutes) => {

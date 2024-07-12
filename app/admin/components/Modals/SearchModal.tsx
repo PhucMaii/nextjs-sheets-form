@@ -1,11 +1,11 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { ModalProps } from './type';
-import { Item, Order } from '../../orders/page';
+import { Order } from '../../orders/page';
 import { Box, Modal, TextField, Typography } from '@mui/material';
 import { BoxModal } from './styled';
 import useDebounce from '@/hooks/useDebounce';
 import OrderAccordion from '../OrderAccordion';
-import { Notification } from '@/app/utils/type';
+import { Notification, OrderedItems } from '@/app/utils/type';
 import { SubCategory } from '@prisma/client';
 import ErrorComponent from '../ErrorComponent';
 import { blueGrey } from '@mui/material/colors';
@@ -14,7 +14,6 @@ interface IProps extends ModalProps {
   baseOrderList: Order[];
   setNotification: Dispatch<SetStateAction<Notification>>;
   updateUI: (targetOrder: Order) => void;
-  updateUIItem: (targetOrder: Order, targetItem: Item) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
   handleUpdatePriceUI: (
     targetOrder: Order,
@@ -24,6 +23,11 @@ interface IProps extends ModalProps {
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
   subcategories: SubCategory[];
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => Promise<void>;
 }
 
 export default function SearchModal({
@@ -32,12 +36,12 @@ export default function SearchModal({
   baseOrderList,
   setNotification,
   updateUI,
-  updateUIItem,
   handleUpdateDateUI,
   handleUpdatePriceUI,
   selectedOrders,
   handleSelectOrder,
   subcategories,
+  handleUpdateItem,
 }: IProps) {
   //   const [currentPage, setCurrentPage] = useState<number>(1);
   const [returnOrders, setReturnOrders] = useState<Order[]>([]);
@@ -107,12 +111,12 @@ export default function SearchModal({
                   order={order}
                   setNotification={setNotification}
                   updateUI={updateUI}
-                  updateUIItem={updateUIItem}
                   handleUpdateDateUI={handleUpdateDateUI}
                   handleUpdatePriceUI={handleUpdatePriceUI}
                   selectedOrders={selectedOrders}
                   handleSelectOrder={handleSelectOrder}
                   subcategories={subcategories || []}
+                  handleUpdateItem={handleUpdateItem}
                 />
               );
             })

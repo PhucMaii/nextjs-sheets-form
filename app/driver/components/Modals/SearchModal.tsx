@@ -9,6 +9,7 @@ import OrderComponent from '../OrderComponent';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import { blueGrey, grey } from '@mui/material/colors';
+import { OrderedItems } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
   orders: Order[];
@@ -16,6 +17,12 @@ interface IProps extends ModalProps {
     orderId: number,
     updatedStatus: ORDER_STATUS,
   ) => Promise<void>;
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => Promise<void>;
+
 }
 
 export default function SearchModal({
@@ -23,6 +30,7 @@ export default function SearchModal({
   onClose,
   orders,
   handleUpdateStatus,
+  handleUpdateItem
 }: IProps) {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -101,6 +109,7 @@ export default function SearchModal({
                   key={index}
                   order={order}
                   handleUpdateStatus={handleUpdateStatus}
+                  handleUpdateItem={handleUpdateItem}
                 />
               );
             })
