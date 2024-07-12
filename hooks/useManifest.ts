@@ -49,7 +49,7 @@ const useManifest = (
     if (routes.length > 0) {
       getClientRoutes();
     }
-  }, [orderList, routes, selectedRoutes]);
+  }, [orderList, routes, officialSelectedRoutes]);
 
   useEffect(() => {
     if (orderPrint.length > 0) {
