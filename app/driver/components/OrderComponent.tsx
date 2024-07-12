@@ -12,7 +12,6 @@ import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
-import { getGoogleMapsUrl } from '@/app/utils/googleMaps';
 
 interface IProps {
   order: Order;
@@ -57,35 +56,35 @@ export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
     return quantity;
   }, [order]);
 
-  const handleNavigation = async () => {
-    if (!order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng) {
-      return;
-    }
-    // const url = await getGoogleMapsUrl(
-    //   order.user.deliveryAddressLat,
-    //   order.user.deliveryAddressLat,
-    // );
-    // // router.push(url);
-    // window.open(url, '_blank');
-    // setIsOpenDetails(true);
-    try {
-      const { webUrl, appUrl } = await getGoogleMapsUrl(
-        order.user.deliveryAddressLat,
-        order.user.deliveryAddressLng,
-      );
+  // const handleNavigation = async () => {
+  //   if (!order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng) {
+  //     return;
+  //   }
+  //   // const url = await getGoogleMapsUrl(
+  //   //   order.user.deliveryAddressLat,
+  //   //   order.user.deliveryAddressLat,
+  //   // );
+  //   // // router.push(url);
+  //   // window.open(url, '_blank');
+  //   // setIsOpenDetails(true);
+  //   try {
+  //     const { webUrl, appUrl } = await getGoogleMapsUrl(
+  //       order.user.deliveryAddressLat,
+  //       order.user.deliveryAddressLng,
+  //     );
 
-      // Try to open the app in a new tab
-      window.location.href = appUrl;
+  //     // Try to open the app in a new tab
+  //     window.location.href = appUrl;
 
-      // Fallback to the web URL after a delay if the app URL fails
-      setTimeout(() => {
-          window.open(webUrl, '_blank');
-      }, 500); // Adjust delay as needed
-      setIsOpenDetails(true);
-    } catch (error) {
-      console.error('Error getting Google Maps URL:', error);
-    }
-  };
+  //     // Fallback to the web URL after a delay if the app URL fails
+  //     setTimeout(() => {
+  //       window.open(webUrl, '_blank');
+  //     }, 500); // Adjust delay as needed
+  //     setIsOpenDetails(true);
+  //   } catch (error) {
+  //     console.error('Error getting Google Maps URL:', error);
+  //   }
+  // };
 
   return (
     <ShadowSection mt={1}>
@@ -170,17 +169,15 @@ export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
           <Typography variant="subtitle1">#{order.id}</Typography>
         </Grid>
         <Grid item xs={6} textAlign="right">
-          <Box display="flex" alignItems="center" justifyContent="flex-end">
-            <IconButton
-              disabled={
-                !order.user?.deliveryAddressLat ||
-                !order.user?.deliveryAddressLng
-              }
-              onClick={handleNavigation}
-            >
-              <AssistantDirectionIcon color="primary" />
-            </IconButton>
-          </Box>
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
+            target="_blank"
+            aria-disabled={
+              !order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng
+            }
+          >
+            <AssistantDirectionIcon />
+          </a>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="subtitle1">

@@ -50,7 +50,7 @@ export default function OverviewPage() {
             textColor="white"
             icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
             text="COD Amount"
-            value={orders?.data.codAmount || 0}
+            value={orders?.data.codAmount.toFixed(2) || 0}
           />
         </Grid>
       </Grid>
