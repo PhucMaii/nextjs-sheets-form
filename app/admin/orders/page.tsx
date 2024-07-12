@@ -705,12 +705,12 @@ export default function Orders() {
         baseOrderList={baseOrderData}
         setNotification={setNotification}
         updateUI={handleMarkSingleCompletedUI}
-        updateUIItem={handleUpdateUISingleOrder}
         handleUpdateDateUI={handleUpdateDateUI}
         handleUpdatePriceUI={handleUpdatePriceUI}
         selectedOrders={selectedOrders}
         handleSelectOrder={handleSelectOrder}
         subcategories={subCategories || []}
+        handleUpdateItem={handleUpdateItem}
       />
       {isLoading ? (
         <>
