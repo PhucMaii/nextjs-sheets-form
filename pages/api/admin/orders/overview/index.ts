@@ -79,10 +79,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return acc + order.totalPrice;
     }, 0);
 
-    const thisMonthRevenueReport: any =
-      revenueGroupByDeliveryDate(sortedThisMonthOrders);
-    const lastMonthRevenueReport =
-      await getLastMonthRevenue(thisMonthRevenueReport, formattedStartDate);
+    const thisMonthRevenueReport: any = revenueGroupByDeliveryDate(
+      sortedThisMonthOrders,
+    );
+    const lastMonthRevenueReport = await getLastMonthRevenue(
+      thisMonthRevenueReport,
+      formattedStartDate,
+    );
 
     const manifest = generateManifest(sortedThisMonthOrders);
 

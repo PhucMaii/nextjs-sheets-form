@@ -16,13 +16,13 @@ const useManifest = (
 ) => {
   const [orderPrint, setOrderPrint] = useState<any>([]);
   const [itemManifest, setItemManifest] = useState<any>({});
-  const [officialSelectedRoutes, setOfficialSelectedRoutes] = useState<IRoutes[]>(selectedRoutes);
+  const [officialSelectedRoutes, setOfficialSelectedRoutes] =
+    useState<IRoutes[]>(selectedRoutes);
 
   useEffect(() => {
     setOfficialSelectedRoutes(selectedRoutes);
   }, [selectedRoutes]);
 
-  
   useEffect(() => {
     setOfficialSelectedRoutes([]);
   }, [date]);
@@ -58,7 +58,9 @@ const useManifest = (
   }, [orderPrint]);
 
   const getClientRoutes = (): any => {
-    const selectedRoutesMap = new Map(officialSelectedRoutes.map((route: IRoutes) => [route.id, route]));
+    const selectedRoutesMap = new Map(
+      officialSelectedRoutes.map((route: IRoutes) => [route.id, route]),
+    );
     // Attach route id in order
     const clientRoutes = nonVoidOrders.map((order: Order): any => {
       // Filter user routes to get only routes related to current given list of routes
@@ -89,9 +91,15 @@ const useManifest = (
       });
 
       // Create a map for quick lookup of index positions
-      const orderIdIndexMap: any = new Map(sortedUserIds.map((id: string, index: number) => [id, index]));
+      const orderIdIndexMap: any = new Map(
+        sortedUserIds.map((id: string, index: number) => [id, index]),
+      );
       // Sort users based on the index positions in index map
-      routeOrders.sort((orderA: Order, orderB: Order) => orderIdIndexMap.get(orderA.userId) - orderIdIndexMap.get(orderB.userId));
+      routeOrders.sort(
+        (orderA: Order, orderB: Order) =>
+          orderIdIndexMap.get(orderA.userId) -
+          orderIdIndexMap.get(orderB.userId),
+      );
       sortedOrderByRoutes.push(...routeOrders);
     }
 

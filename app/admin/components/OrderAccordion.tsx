@@ -18,13 +18,13 @@ import {
   Typography,
 } from '@mui/material';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
-import { Item, Order } from '../orders/page';
+import { Order } from '../orders/page';
 import { useReactToPrint } from 'react-to-print';
 import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
-import { Notification } from '@/app/utils/type';
+import { Notification, OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
 import EditPrice from './Modals/edit/EditPrice';
@@ -37,7 +37,6 @@ import OrderDetails from './Modals/OrderDetails';
 
 interface PropTypes {
   order: Order;
-  updateUIItem: (targetOrder: Order, targetItem: Item) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
   updateUI: (targetOrder: Order) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
@@ -49,11 +48,15 @@ interface PropTypes {
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
   subcategories: SubCategory[];
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => Promise<void>;
 }
 
 const OrderAccordion = ({
   order,
-  updateUIItem,
   setNotification,
   updateUI,
   handleUpdateDateUI,
@@ -61,6 +64,7 @@ const OrderAccordion = ({
   handleSelectOrder,
   selectedOrders,
   subcategories,
+  handleUpdateItem,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -246,9 +250,10 @@ const OrderAccordion = ({
         open={isOpenDetails}
         onClose={() => setIsOpenDetails(false)}
         order={order}
-        setNotification={setNotification}
-        updateUIItem={updateUIItem}
-        isAdmin
+        // setNotification={setNotification}
+        // updateUIItem={updateUIItem}
+        handleUpdateItem={handleUpdateItem}
+        // isAdmin
       />
       <ShadowSection>
         <Grid container alignItems="center" columnSpacing={1}>

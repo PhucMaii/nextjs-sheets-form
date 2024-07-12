@@ -12,6 +12,7 @@ import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
+import { OrderedItems } from '@/app/utils/type';
 
 interface IProps {
   order: Order;
@@ -19,9 +20,18 @@ interface IProps {
     orderId: number,
     updatedStatus: ORDER_STATUS,
   ) => Promise<void>;
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => Promise<void>;
 }
 
-export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
+export default function OrderComponent({
+  order,
+  handleUpdateStatus,
+  handleUpdateItem,
+}: IProps) {
   const [confirmModalProps, setConfirmModalProps] = useState<any>({
     on: false,
     heading: '',
@@ -56,36 +66,6 @@ export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
     return quantity;
   }, [order]);
 
-  // const handleNavigation = async () => {
-  //   if (!order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng) {
-  //     return;
-  //   }
-  //   // const url = await getGoogleMapsUrl(
-  //   //   order.user.deliveryAddressLat,
-  //   //   order.user.deliveryAddressLat,
-  //   // );
-  //   // // router.push(url);
-  //   // window.open(url, '_blank');
-  //   // setIsOpenDetails(true);
-  //   try {
-  //     const { webUrl, appUrl } = await getGoogleMapsUrl(
-  //       order.user.deliveryAddressLat,
-  //       order.user.deliveryAddressLng,
-  //     );
-
-  //     // Try to open the app in a new tab
-  //     window.location.href = appUrl;
-
-  //     // Fallback to the web URL after a delay if the app URL fails
-  //     setTimeout(() => {
-  //       window.open(webUrl, '_blank');
-  //     }, 500); // Adjust delay as needed
-  //     setIsOpenDetails(true);
-  //   } catch (error) {
-  //     console.error('Error getting Google Maps URL:', error);
-  //   }
-  // };
-
   return (
     <ShadowSection mt={1}>
       <ClientDetailsModal
@@ -112,6 +92,7 @@ export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
         order={order}
         totalQuantity={totalQuantity}
         handleUpdateStatus={handleUpdateStatus}
+        handleUpdateItem={handleUpdateItem}
       />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={1}>
@@ -175,6 +156,7 @@ export default function OrderComponent({ order, handleUpdateStatus }: IProps) {
             aria-disabled={
               !order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng
             }
+            onClick={() => setIsOpenDetails(true)}
           >
             <AssistantDirectionIcon />
           </a>

@@ -71,7 +71,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   const currentDate = startDate;
   currentDate.setDate(currentDate.getDate() + 1);
 
-  while(currentDate <= endDate) {
+  while (currentDate <= endDate) {
     // dates.push(currentDate);
     const currentDateString = YYYYMMDDFormat(currentDate);
     dates.push(currentDateString);
@@ -79,6 +79,4 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   }
 
   return dates;
-
-
-}
+};

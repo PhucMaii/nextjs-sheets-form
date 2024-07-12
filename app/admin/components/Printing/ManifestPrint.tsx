@@ -33,90 +33,96 @@ export const ManifestPrint = forwardRef(
 
     return (
       <div ref={ref}>
-        <Box sx={{width: '100%', height: '100%', m: 2}}>
+        <Box sx={{ width: '100%', height: '100%', m: 2 }}>
+          {/* Loop through route */}
+          {Object.keys(manifest).length > 0 &&
+            Object.keys(manifest).map((routeId: string, index: number) => {
+              const targetRoute = routes.find(
+                (route: IRoutes) => route.id === Number(routeId),
+              );
+              if (!targetRoute) {
+                return null;
+              }
 
-        {/* Loop through route */}
-        {Object.keys(manifest).length > 0 &&
-          Object.keys(manifest).map((routeId: string, index: number) => {
-            const targetRoute = routes.find(
-              (route: IRoutes) => route.id === Number(routeId),
-            );
-            if (!targetRoute) {
-              return null;
-            }
+              // sort the item for each route then loop through it
+              const sortedItems: any = customSortKeys(
+                Object.keys(manifest[routeId].summary),
+              );
 
-            // sort the item for each route then loop through it
-            const sortedItems: any = customSortKeys(
-              Object.keys(manifest[routeId].summary),
-            );
-
-            return (
-              <>
-                <Typography variant="h4" textAlign="center" m={2}>
-                  {targetRoute.name}
-                </Typography>
-                <Typography variant="h5" m={2}>
-                  Driver: {targetRoute.driver?.name}
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                <Box display="flex" flexDirection="column" gap={1} m={2}>
-                  <Typography variant="h5" m={2}>
-                    Summary
+              return (
+                <>
+                  <Typography variant="h4" textAlign="center" m={2}>
+                    {targetRoute.name}
                   </Typography>
-                  {/* <Box
+                  <Typography variant="h5" m={2}>
+                    Driver: {targetRoute.driver?.name}
+                  </Typography>
+                  <Divider sx={{ my: 2 }} />
+                  <Box display="flex" flexDirection="column" gap={1} m={2}>
+                    <Typography variant="h5" m={2}>
+                      Summary
+                    </Typography>
+                    {/* <Box
                     display="flex"
                     alignItems="center"
                     flexWrap="wrap"
                     justifyContent="space-between"
                     gap={1}
                   > */}
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Item</TableCell>
-                        <TableCell>Quantity</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {sortedItems.length > 0 &&
-                        sortedItems.map((item: string, index: number) => {
-                          const { summary } = manifest[routeId];
-                          if (summary[item] === 0) {
-                            return null;
-                          }
-                          return (
-                            <TableRow key={index}>
-                              <TableCell sx={{ fontSize: printFontSize - 10 }}>{item}</TableCell>
-                              <TableCell
-                                  sx={{ fontSize: printFontSize - 10, fontWeight: 'bold' }}
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Item</TableCell>
+                          <TableCell>Quantity</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {sortedItems.length > 0 &&
+                          sortedItems.map((item: string, index: number) => {
+                            const { summary } = manifest[routeId];
+                            if (summary[item] === 0) {
+                              return null;
+                            }
+                            return (
+                              <TableRow key={index}>
+                                <TableCell
+                                  sx={{ fontSize: printFontSize - 10 }}
+                                >
+                                  {item}
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    fontSize: printFontSize - 10,
+                                    fontWeight: 'bold',
+                                  }}
                                 >
                                   {summary[item]}
                                 </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                    </TableBody>
-                  </Table>
-                  {/* </Box> */}
-                </Box>
-                <Divider sx={{ my: 2 }} />
-                {manifest[routeId].details.map(
-                  (user: any, userIndex: number) => {
-                    const { summary } = manifest[routeId];
-                    return (
-                      <Box
-                        display="flex"
-                        // flexDirection="column"
-                        gap={2}
-                        m={2}
-                        key={userIndex}
-                        flexWrap="wrap"
-                        alignItems="center"
-                      >
-                        <Typography variant="h6" m={2}>
-                          {user.user.clientName}:
-                        </Typography>
-                        {/* <Box
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                    </Table>
+                    {/* </Box> */}
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
+                  {manifest[routeId].details.map(
+                    (user: any, userIndex: number) => {
+                      const { summary } = manifest[routeId];
+                      return (
+                        <Box
+                          display="flex"
+                          // flexDirection="column"
+                          gap={2}
+                          m={2}
+                          key={userIndex}
+                          flexWrap="wrap"
+                          alignItems="center"
+                        >
+                          <Typography variant="h6" m={2}>
+                            {user.user.clientName}:
+                          </Typography>
+                          {/* <Box
                           display="flex"
                           alignItems="center"
                           flexWrap="wrap"
@@ -143,12 +149,12 @@ export const ManifestPrint = forwardRef(
                               </Typography>
                             );
                           })}
-                        {/* </Box> */}
-                      </Box>
-                    );
-                  },
-                )}
-                {/* <Table sx={{ mx: 2 }}>
+                          {/* </Box> */}
+                        </Box>
+                      );
+                    },
+                  )}
+                  {/* <Table sx={{ mx: 2 }}>
                   <TableHead>
                     <TableRow>
                       <BorderRightTableCell align="center"></BorderRightTableCell>
@@ -234,14 +240,13 @@ export const ManifestPrint = forwardRef(
                     )}
                   </TableBody>
                 </Table> */}
-                {index < Object.keys(manifest).length - 1 && (
-                  <div className="page-break"></div>
-                )}
-              </>
-            );
-          })}
+                  {index < Object.keys(manifest).length - 1 && (
+                    <div className="page-break"></div>
+                  )}
+                </>
+              );
+            })}
         </Box>
-
       </div>
     );
   },

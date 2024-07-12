@@ -8,9 +8,7 @@ import {
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { BoxModal } from '../styled';
-import { Notification, OrderedItems } from '@/app/utils/type';
-import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { OrderedItems } from '@/app/utils/type';
 import { Item, Order } from '../../../orders/page';
 import { ModalProps } from '../type';
 import { LoadingButton } from '@mui/lab';
@@ -18,9 +16,12 @@ import { LoadingButton } from '@mui/lab';
 interface PropTypes extends ModalProps {
   order: Order;
   item: OrderedItems;
-  updateUIItem: (targetOrder: Order, targetItem: Item) => void;
   setItem: Dispatch<SetStateAction<OrderedItems>>;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => Promise<void>;
 }
 
 export default function EditItemModal({
@@ -28,49 +29,16 @@ export default function EditItemModal({
   onClose,
   order,
   item,
-  updateUIItem,
   setItem,
-  setNotification,
+  handleUpdateItem,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleUpdateData = async () => {
     setIsLoading(true);
-    try {
-      const orderTotalPrice = calculateNewTotalPrice();
-      const response = await axios.put(`${API_URL.ORDERED_ITEMS}/single`, {
-        ...item,
-        orderId: order.id,
-        orderTotalPrice,
-      });
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      updateUIItem(order, response.data.data);
-
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Update Item Successfully',
-      });
-      setIsLoading(false);
-    } catch (error: any) {
-      console.log('Fail to update order items: ', error);
-      setIsLoading(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update order items: ' + error,
-      });
-    }
+    const newTotalPrice = calculateNewTotalPrice();
+    await handleUpdateItem(newTotalPrice, order, item);
+    setIsLoading(false);
   };
 
   const calculateNewTotalPrice = () => {

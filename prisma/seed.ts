@@ -170,6 +170,7 @@ async function main() {
   //   data: [
   //   ]
   // })
+  await prisma.scheduleOrders.deleteMany();
 }
 
 main()

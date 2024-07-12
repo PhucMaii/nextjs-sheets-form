@@ -18,7 +18,7 @@ import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { LoadingButton } from '@mui/lab';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { getGoogleMapsUrl } from '@/app/utils/googleMaps';
+import { OrderedItems } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -26,6 +26,11 @@ interface IProps extends ModalProps {
   handleUpdateStatus: (
     orderId: number,
     updatedStatus: ORDER_STATUS,
+  ) => Promise<void>;
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
   ) => Promise<void>;
 }
 
@@ -35,6 +40,7 @@ export default function OrderDetails({
   order,
   totalQuantity,
   handleUpdateStatus,
+  handleUpdateItem,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -43,39 +49,6 @@ export default function OrderDetails({
     await handleUpdateStatus(order.id, updatedStatus);
     setIsLoading(false);
     onClose();
-  };
-
-  const handleNavigation = async () => {
-    if (!order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng) {
-      return;
-    }
-    // const url = await getGoogleMapsUrl(
-    //   order.user.deliveryAddressLat,
-    //   order.user.deliveryAddressLat,
-    // );
-    // // router.push(url);
-    // window.open(url, '_blank');
-    // setIsOpenDetails(true);
-    try {
-      const { webUrl, appUrl } = await getGoogleMapsUrl(
-        order.user.deliveryAddressLat,
-        order.user.deliveryAddressLng,
-      );
-
-      // Try to open the app in a new tab
-      const newWindow = window.open(appUrl, '_blank');
-
-      // Fallback to the web URL after a delay if the app URL fails
-      setTimeout(() => {
-        if (newWindow) {
-          newWindow.location.href = webUrl;
-        } else {
-          window.open(webUrl, '_blank');
-        }
-      }, 500); // Adjust delay as needed
-    } catch (error) {
-      console.error('Error getting Google Maps URL:', error);
-    }
   };
 
   return (
@@ -103,15 +76,16 @@ export default function OrderDetails({
             <Typography>Order at: {order.orderTime}</Typography>
           </Grid>
           <Grid item xs={2} textAlign="right">
-            <IconButton
-              onClick={handleNavigation}
-              disabled={
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
+              target="_blank"
+              aria-disabled={
                 !order.user?.deliveryAddressLat ||
                 !order.user?.deliveryAddressLng
               }
             >
-              <AssistantDirectionIcon color="info" />
-            </IconButton>
+              <AssistantDirectionIcon />
+            </a>
           </Grid>
         </Grid>
         <Box display="flex" justifyContent="space-between">
@@ -135,7 +109,10 @@ export default function OrderDetails({
             <Typography fontWeight="bold" variant="h6">
               ORDER
             </Typography>
-            <OrderDetailsTable order={order} isAdmin={false} />
+            <OrderDetailsTable
+              order={order}
+              handleUpdateItem={handleUpdateItem}
+            />
           </Grid>
           <Grid
             container
@@ -156,7 +133,7 @@ export default function OrderDetails({
               </Typography>
             </Grid>
           </Grid>
-          <Box mt={2} position="sticky" bottom={0} sx={{width: '100%'}}>
+          <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={6}>
                 <LoadingButton

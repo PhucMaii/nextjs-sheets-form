@@ -21,7 +21,7 @@ import { API_URL, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
-import { Notification, UserType } from '@/app/utils/type';
+import { Notification, OrderedItems, UserType } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -91,7 +91,7 @@ const orderPerPage = 10;
 
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
-  useState<null | HTMLElement>(null);
+    useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -129,7 +129,7 @@ export default function Orders() {
 
   useEffect(() => {
     setSelectedOrders([]);
-  }, [date, currentStatus])
+  }, [date, currentStatus]);
 
   // Whenever base order data change, update the display order data
   useEffect(() => {
@@ -318,6 +318,45 @@ export default function Orders() {
     setActionButtonAnchor(null);
   };
 
+  const handleUpdateItem = async (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => {
+    try {
+      // const orderTotalPrice = calculateNewTotalPrice();
+      const response = await axios.put(`${API_URL.ORDERED_ITEMS}/single`, {
+        ...updatedItem,
+        orderId: order.id,
+        orderTotalPrice,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleUpdateUISingleOrder(order, response.data.data);
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: 'Update Item Successfully',
+      });
+    } catch (error: any) {
+      console.log('Fail to update order items: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update order items: ' + error,
+      });
+    }
+  };
+
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = baseOrderData.map((order: Order) => {
       // If order is at targetOrder, then update
@@ -347,14 +386,14 @@ export default function Orders() {
       setIsUpdating(true);
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status,
-        updatedOrders: selectedOrders
+        updatedOrders: selectedOrders,
       });
 
       if (response.data.error) {
         setNotification({
           on: true,
           type: 'error',
-          message: response.data.error
+          message: response.data.error,
         });
         setIsUpdating(false);
         return;
@@ -493,51 +532,43 @@ export default function Orders() {
           }}
           disabled={orderData.length === 0}
         >
-            <Typography>Print bills</Typography>
+          <Typography>Print bills</Typography>
         </MenuItem>
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.INCOMPLETED);
             handleCloseAnchor();
           }}
-          disabled={
-            currentStatus === ORDER_STATUS.INCOMPLETED
-          }
+          disabled={currentStatus === ORDER_STATUS.INCOMPLETED}
         >
-            <Typography>Mark as incompleted</Typography>
+          <Typography>Mark as incompleted</Typography>
         </MenuItem>
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.DELIVERED);
             handleCloseAnchor();
           }}
-          disabled={
-            currentStatus === ORDER_STATUS.DELIVERED
-          }
+          disabled={currentStatus === ORDER_STATUS.DELIVERED}
         >
-            <Typography>Mark as delivered</Typography>
+          <Typography>Mark as delivered</Typography>
         </MenuItem>
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.COMPLETED);
             handleCloseAnchor();
           }}
-          disabled={
-            currentStatus === ORDER_STATUS.COMPLETED
-          }
+          disabled={currentStatus === ORDER_STATUS.COMPLETED}
         >
-            <Typography>Mark as completed</Typography>
+          <Typography>Mark as completed</Typography>
         </MenuItem>
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.VOID);
             handleCloseAnchor();
           }}
-          disabled={
-            currentStatus === ORDER_STATUS.VOID
-          }
+          disabled={currentStatus === ORDER_STATUS.VOID}
         >
-            <Typography>Mark as void</Typography>
+          <Typography>Mark as void</Typography>
         </MenuItem>
       </Menu>
     </Box>
@@ -704,12 +735,13 @@ export default function Orders() {
                       order={order}
                       setNotification={setNotification}
                       updateUI={handleMarkSingleCompletedUI}
-                      updateUIItem={handleUpdateUISingleOrder}
+                      // updateUIItem={handleUpdateUISingleOrder}
                       handleUpdateDateUI={handleUpdateDateUI}
                       handleUpdatePriceUI={handleUpdatePriceUI}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
                       subcategories={subCategories || []}
+                      handleUpdateItem={handleUpdateItem}
                     />
                   );
                 }}

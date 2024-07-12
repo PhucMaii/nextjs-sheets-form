@@ -270,19 +270,17 @@ export default function HistoryPage() {
         <Grid item xs={12}>
           {isValidating ? (
             <SplashScreen />
+          ) : clientOrders.length > 0 ? (
+            <Virtuoso
+              totalCount={clientOrders.length}
+              style={{ height: virtuosoHeight }}
+              data={clientOrders}
+              itemContent={(index: number, order: Order) => (
+                <OrderAccordion key={index} order={order} />
+              )}
+            />
           ) : (
-            clientOrders.length > 0 ? (
-              <Virtuoso
-                totalCount={clientOrders.length}
-                style={{ height: virtuosoHeight }}
-                data={clientOrders}
-                itemContent={(index: number, order: Order) => (
-                  <OrderAccordion key={index} order={order} />
-                )}
-              />
-            ) : (
-              <ErrorComponent errorText='No Order Found' />
-            )
+            <ErrorComponent errorText="No Order Found" />
           )}
         </Grid>
       </Grid>

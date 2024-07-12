@@ -11,11 +11,11 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { Notification } from '@/app/utils/type';
+import { Notification, OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
-import { Order } from '@/app/admin/orders/page';
+import { Item, Order } from '@/app/admin/orders/page';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -264,6 +264,69 @@ export default function OrdersPage() {
     setOrders(newOrders);
   };
 
+  const handleUpdateItem = async (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => {
+    try {
+      // const orderTotalPrice = calculateNewTotalPrice();
+      const response = await axios.put(`${API_URL.DRIVER}/orderedItems`, {
+        ...updatedItem,
+        orderId: order.id,
+        orderTotalPrice,
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      handleUpdateUIItem(order, response.data.data);
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: 'Update Item Successfully',
+      });
+    } catch (error: any) {
+      console.log('Fail to update order items: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Fail to update order items: ' + error,
+      });
+    }
+  };
+
+  const handleUpdateUIItem = (targetOrder: Order, targetItem: Item) => {
+    const newOrderData: Order[] = orders.map((order: Order) => {
+      // If order is at targetOrder, then update
+      if (order.id === targetOrder.id) {
+        // update total price of the order
+        let orderTotalPrice = 0;
+
+        const newItems = order.items.map((item: Item) => {
+          if (item.id === targetItem.id) {
+            const totalPrice = targetItem.quantity * targetItem.price;
+            orderTotalPrice += totalPrice;
+            return { ...targetItem, totalPrice };
+          }
+          orderTotalPrice += item.totalPrice;
+          return item;
+        });
+        return { ...order, items: newItems, totalPrice: orderTotalPrice };
+      }
+      return order;
+    });
+
+    setOrders(newOrderData);
+  };
+
   return (
     <Sidebar>
       {/* <a href="https://www.google.com/maps/dir/?api=1&destination=37.7749,-122.4194" target="_blank">Open in Google Maps</a> */}
@@ -378,6 +441,7 @@ export default function OrdersPage() {
                 key={index}
                 order={order}
                 handleUpdateStatus={handleUpdateStatus}
+                handleUpdateItem={handleUpdateItem}
               />
             );
           }}

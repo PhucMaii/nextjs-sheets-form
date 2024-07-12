@@ -6,25 +6,22 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
-import { Item, Order } from '../../orders/page';
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { Order } from '../../orders/page';
+import { OrderedItems } from '@/app/utils/type';
 import EditItemModal from '../Modals/edit/EditOrderItem';
 
 interface IProps {
   order: Order;
-  setNotification?: Dispatch<SetStateAction<Notification>>;
-  updateUIItem?: (targetOrder: Order, targetItem: Item) => void;
-  isAdmin: boolean;
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => Promise<void>;
 }
 
-export default function OrderDetailsTable({
-  order,
-  setNotification,
-  updateUIItem,
-  isAdmin,
-}: IProps) {
+export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
   const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
@@ -35,34 +32,31 @@ export default function OrderDetailsTable({
   });
 
   useEffect(() => {
-    if (Object.keys(selectedItem).length > 0 && isAdmin) {
+    if (Object.keys(selectedItem).length > 0) {
       setIsOpenEditModal(true);
     }
   }, [selectedItem]);
 
   return (
     <>
-      {isAdmin && setNotification && updateUIItem && (
-        <EditItemModal
-          open={isOpenEditModal}
-          onClose={() => {
-            setIsOpenEditModal(false);
-            setSelectedItem({});
-          }}
-          item={updatedItem}
-          setItem={setUpdatedItem}
-          setNotification={setNotification}
-          updateUIItem={updateUIItem}
-          order={order}
-        />
-      )}
+      <EditItemModal
+        open={isOpenEditModal}
+        onClose={() => {
+          setIsOpenEditModal(false);
+          setSelectedItem({});
+        }}
+        item={updatedItem}
+        setItem={setUpdatedItem}
+        handleUpdateItem={handleUpdateItem}
+        order={order}
+      />
       <Table sx={{ minWidth: '100%' }}>
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Price</TableCell>
-            {isAdmin && <TableCell></TableCell>}
+            <TableCell></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -72,18 +66,17 @@ export default function OrderDetailsTable({
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.quantity}</TableCell>
                 <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
-                {isAdmin && (
-                  <TableCell>
-                    <IconButton
-                      onClick={() => {
-                        setSelectedItem(row);
-                        setUpdatedItem(row);
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </TableCell>
-                )}
+
+                <TableCell>
+                  <IconButton
+                    onClick={() => {
+                      setSelectedItem(row);
+                      setUpdatedItem(row);
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
         </TableBody>

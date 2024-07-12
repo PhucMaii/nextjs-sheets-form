@@ -7,33 +7,33 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import CloseIcon from '@mui/icons-material/Close';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PrintIcon from '@mui/icons-material/Print';
 import SellIcon from '@mui/icons-material/Sell';
-import { Item, Order } from '../../orders/page';
-import { Notification } from '@/app/utils/type';
+import { Order } from '../../orders/page';
+import { OrderedItems } from '@/app/utils/type';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
 
 interface IProps extends ModalProps {
   order: Order;
-  setNotification: Dispatch<SetStateAction<Notification>>;
-  updateUIItem: (targetOrder: Order, targetItem: Item) => void;
-  isAdmin?: boolean;
+  handleUpdateItem: (
+    orderTotalPrice: number,
+    order: Order,
+    updatedItem: OrderedItems,
+  ) => Promise<void>;
 }
 
 export default function OrderDetails({
   open,
   onClose,
   order,
-  setNotification,
-  updateUIItem,
-  isAdmin,
+  handleUpdateItem,
 }: IProps) {
   const billPrintRef: any = useRef();
 
@@ -106,9 +106,7 @@ export default function OrderDetails({
               </Typography>
               <OrderDetailsTable
                 order={order}
-                setNotification={setNotification}
-                updateUIItem={updateUIItem}
-                isAdmin={isAdmin || false}
+                handleUpdateItem={handleUpdateItem}
               />
             </Grid>
             <Grid
