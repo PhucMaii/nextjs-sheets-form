@@ -15,6 +15,7 @@ import { YYYYMMDDFormat } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import useApiDebtData from '@/hooks/useApiDebtData';
+import { sendChequeMsg } from '@/app/lib/constant';
 
 interface PropTypes {
   client: UserType | null;
@@ -176,6 +177,21 @@ export const InvoicePrint = forwardRef(
                   </TableRow>
                 </TableBody>
               </Table>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                p={5}
+              >
+                <Typography variant="h6" textAlign="center">
+                  {sendChequeMsg.split('\n').map((line, index) => (
+                    <React.Fragment key={index}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </Typography>
+              </Box>
             </Box>
           );
         })}

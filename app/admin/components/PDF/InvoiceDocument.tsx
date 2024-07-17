@@ -6,6 +6,7 @@ import { grey } from '@mui/material/colors';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { UserType } from '@/app/utils/type';
 import { Order } from '../../orders/page';
+import { sendChequeMsg } from '@/app/lib/constant';
 
 const styles = StyleSheet.create({
   page: {
@@ -25,6 +26,13 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     width: '33% !important',
+  },
+  bottomSubtitle: {
+    display: 'flex',
+    // justifyContent: 'center',
+    // alignItems:"center", 
+    textAlign: "center",
+    marginTop: 20
   },
   table: {
     display: 'flex',
@@ -57,9 +65,8 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 8,
   },
-  subtitleRight: {
+  body: {
     fontSize: 10,
-    textAlign: 'right',
   },
   flex_between: {
     display: 'flex',
@@ -90,12 +97,6 @@ const InvoiceDocument: React.FC<IProps> = ({
   sortDebtKeys,
 }: IProps) => {
   if (!client) return null;
-  // const endMonth = endDate.getMonth() + 1;
-  // const { debtData, sortDebtKeys, isLoading } = useApiDebtData(client.id, endMonth);
-
-  //   if (isLoading) {
-  //     return null;
-  //   }
 
   const filteredOrders = orders.filter((order: Order) => {
     return (
@@ -107,6 +108,7 @@ const InvoiceDocument: React.FC<IProps> = ({
   const todayString = YYYYMMDDFormat(today);
   const ordersPerPage = 25;
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
 
   return (
     <Document>
@@ -129,7 +131,7 @@ const InvoiceDocument: React.FC<IProps> = ({
           <Text style={styles.h2}>
             To: {client.clientId} - {client.clientName}
           </Text>
-          <Text style={styles.subtitleRight}>
+          <Text style={styles.body}>
             IF PAYING BY INVOICE, CHECK INDIVIDUAL INVOICES PAID
           </Text>
           <Text style={styles.subtitle}>
@@ -175,6 +177,12 @@ const InvoiceDocument: React.FC<IProps> = ({
                   : ${debtData[month]}
                 </Text>
               ))}
+          </View>
+          <View style={styles.bottomSubtitle}>
+            <Text style={styles.h2}>  
+            {sendChequeMsg}
+            </Text>
+          
           </View>
         </Page>
       ))}

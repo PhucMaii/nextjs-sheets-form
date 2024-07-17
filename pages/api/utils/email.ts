@@ -124,7 +124,7 @@ export const sendInvoiceThroughEmail = async (
   await transporter.sendMail(mailOptions);
 };
 
-const generateInvoiceEmail = (clientName: string) => {
+export const generateInvoiceEmail = (clientName: string) => {
   return `
     Dear ${clientName},
 
