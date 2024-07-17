@@ -6,7 +6,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
 } from '@mui/material';
 import React, { Dispatch, SetStateAction, memo } from 'react';
@@ -152,7 +151,6 @@ const ScheduleOrdersTable = ({
         sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
       />
     ),
-    TableHead,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     TableRow: ({ item: item, ...props }) => {
       const isOrderSelected = selectedOrders.some(

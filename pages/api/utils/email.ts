@@ -109,7 +109,7 @@ export const sendInvoiceThroughEmail = async (
 
   const mailOptions: any = {
     from: process.env.NODEMAILER_EMAIL,
-    to: 'binmaiforwork@gmail.com',
+    to: client.email,
     subject: 'Invoice from Supreme Sprouts Ltd.',
     text: invoiceEmail,
     attachments: [
@@ -140,5 +140,11 @@ Best regards,
 
 Tim
 Supreme Sprouts Ltd.
+
+Please send your payment by cheque to:
+Unit 1 - 6420 Beresford Street Burnaby, 
+British Columbia V5E 1B6, Canada
+if we are unable to collect it in person.
+Thank you for your cooperation.
   `
 }
