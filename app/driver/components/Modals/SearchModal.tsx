@@ -22,7 +22,6 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
-
 }
 
 export default function SearchModal({

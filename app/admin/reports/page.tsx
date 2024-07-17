@@ -67,7 +67,11 @@ import useSubCategories from '@/hooks/fetch/useSubCategories';
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
-  const openDropdown = Boolean(actionButtonAnchor);
+  const openActionsDropdown = Boolean(actionButtonAnchor);
+  const [statementAnchor, setStatementAnchor] = useState<null | HTMLElement>(
+    null,
+  );
+  const openStatementDropdown = Boolean(statementAnchor);
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
@@ -250,8 +254,12 @@ export default function ReportPage() {
     }
   };
 
-  const handleCloseAnchor = () => {
+  const handleCloseActionsAnchor = () => {
     setActionButtonAnchor(null);
+  };
+
+  const handleCloseStatementAnchor = () => {
+    setStatementAnchor(null);
   };
 
   const handleDateChange = (e: any) => {
@@ -381,6 +389,102 @@ export default function ReportPage() {
     }
   };
 
+  const handleSendInvoice = async () => {
+    try {
+      const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
+        client: clientValue,
+        orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
+        endDate: dateRange[0],
+      });
+
+      if (response.data.error) {
+        setNotification({
+          on: true,
+          type: 'error',
+          message: response.data.error,
+        });
+        return;
+      }
+
+      setNotification({
+        on: true,
+        type: 'success',
+        message: response.data.message,
+      });
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: error.response.data.error,
+      });
+    }
+  };
+
+  const statementDropdown = (
+    <Box
+      display="flex"
+      justifyContent="flex-end"
+      alignItems="center"
+      gap={2}
+      width="100%"
+    >
+      <Button
+        disabled={
+          clientOrders.length === 0 ||
+          clientValue?.clientName === 'All Clients' ||
+          isFetching
+        }
+        variant="outlined"
+        onClick={(e) => setStatementAnchor(e.currentTarget)}
+        fullWidth
+      >
+        <Box display="flex" gap={2}>
+          <Typography>Statement</Typography>
+          <ArrowDownwardIcon />
+        </Box>
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={statementAnchor}
+        open={openStatementDropdown}
+        onClose={handleCloseStatementAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handleInvoicePrint();
+            handleCloseStatementAnchor();
+          }}
+        >
+          Print
+        </MenuItem>
+        <MenuItem
+          disabled={!clientValue?.email || false}
+          onClick={() => {
+            handleSendInvoice();
+            handleCloseStatementAnchor();
+          }}
+        >
+          Send to client
+        </MenuItem>
+        <MenuItem
+          disabled={!clientValue?.email || false}
+          onClick={() => {
+            handleInvoicePrint();
+            handleSendInvoice();
+            handleCloseStatementAnchor();
+          }}
+        >
+          Print and Send
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
+  console.log({ email: clientValue?.email });
+
   const statusDropdown = (
     <Box
       display="flex"
@@ -390,9 +494,9 @@ export default function ReportPage() {
       width="100%"
     >
       <Button
-        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-controls={openActionsDropdown ? 'basic-menu' : undefined}
         aria-haspopup="true"
-        aria-expanded={openDropdown ? 'true' : undefined}
+        aria-expanded={openActionsDropdown ? 'true' : undefined}
         disabled={selectedOrders.length === 0}
         onClick={(e) => setActionButtonAnchor(e.currentTarget)}
         endIcon={<ArrowDownwardIcon />}
@@ -404,8 +508,8 @@ export default function ReportPage() {
       <Menu
         id="basic-menu"
         anchorEl={actionButtonAnchor}
-        open={openDropdown}
-        onClose={handleCloseAnchor}
+        open={openActionsDropdown}
+        onClose={handleCloseActionsAnchor}
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
@@ -413,7 +517,7 @@ export default function ReportPage() {
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.COMPLETED);
-            handleCloseAnchor();
+            handleCloseActionsAnchor();
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -424,7 +528,7 @@ export default function ReportPage() {
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.DELIVERED);
-            handleCloseAnchor();
+            handleCloseActionsAnchor();
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -435,7 +539,7 @@ export default function ReportPage() {
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.INCOMPLETED);
-            handleCloseAnchor();
+            handleCloseActionsAnchor();
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -446,7 +550,7 @@ export default function ReportPage() {
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.VOID);
-            handleCloseAnchor();
+            handleCloseActionsAnchor();
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -457,7 +561,7 @@ export default function ReportPage() {
         <MenuItem
           onClick={() => {
             handleDeleteSelectedOrders();
-            handleCloseAnchor();
+            handleCloseActionsAnchor();
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -605,24 +709,7 @@ export default function ReportPage() {
               </Button>
             </Grid>
             <Grid item md={2} textAlign="right">
-              <Button
-                disabled={
-                  clientOrders.length === 0 ||
-                  clientValue?.clientName === 'All Clients' ||
-                  isFetching
-                }
-                variant="outlined"
-                onClick={() => {
-                  handleInvoicePrint();
-                  setSelectedOrders([]);
-                }}
-                fullWidth
-              >
-                <Box display="flex" gap={2}>
-                  <LocalPrintshopIcon />
-                  <Typography>Statement</Typography>
-                </Box>
-              </Button>
+              {statementDropdown}
             </Grid>
           </Grid>
           {isFetching ? (

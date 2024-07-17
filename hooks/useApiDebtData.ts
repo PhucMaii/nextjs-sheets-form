@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 const useApiDebtData = (userId: number, endMonth: number) => {
   const [debtData, setDebtData] = useState<any>();
   const [sortDebtKeys, setSortDebtKeys] = useState<any>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (userId) {
@@ -31,6 +32,7 @@ const useApiDebtData = (userId: number, endMonth: number) => {
 
       if (response.data.error) {
         console.log(response.data.error);
+        setIsLoading(false);
         return;
       }
 
@@ -40,8 +42,10 @@ const useApiDebtData = (userId: number, endMonth: number) => {
 
       setSortDebtKeys(sortedKeys);
       setDebtData(debtList);
+      setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error fetching debt data: ', error);
+      setIsLoading(false);
     }
   };
 
@@ -56,7 +60,7 @@ const useApiDebtData = (userId: number, endMonth: number) => {
     return sortedKeys;
   };
 
-  return { debtData, sortDebtKeys };
+  return { debtData, sortDebtKeys, isLoading };
 };
 
 export default useApiDebtData;

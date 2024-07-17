@@ -3,7 +3,7 @@ import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-interface QueryTypes {
+interface IQuery {
   userId?: string;
   endMonth?: string;
 }
@@ -17,7 +17,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const prisma = new PrismaClient();
 
-    const { userId, endMonth }: QueryTypes = req.query;
+    const { userId, endMonth }: IQuery = req.query;
+
+    if (!userId || !endMonth) {
+      return res.status(404).json({
+        error: 'Parameters are missing',
+      });
+    }
 
     const incompletedOrders = await prisma.orders.findMany({
       where: {
@@ -36,24 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Group order by mm/yyyy
-    const debtOrdersByMonth = incompletedOrders.reduce(
-      (acc: any, order: Orders) => {
-        const splitDeliveryDate = order.deliveryDate.split('/');
-        if (Number(splitDeliveryDate[0]) > Number(endMonth)) {
-          return acc;
-        }
-        // key is mm/yyyy
-        const key = `${splitDeliveryDate[0]}/${splitDeliveryDate[2]}`;
-
-        if (!acc[key]) {
-          acc[key] = 0;
-        }
-
-        acc[key] = acc[key] + order.totalPrice;
-        return acc;
-      },
-      {},
-    );
+    const debtOrdersByMonth = groupOrderByMMYYYY(incompletedOrders, endMonth);
 
     return res.status(200).json({
       data: debtOrdersByMonth,
@@ -68,3 +57,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAdminAuthGuard(handler);
+
+export const groupOrderByMMYYYY = (orders: Orders[], endMonth: string) => {
+  const debtOrdersByMonth = orders.reduce((acc: any, order: Orders) => {
+    const splitDeliveryDate = order.deliveryDate.split('/');
+    if (Number(splitDeliveryDate[0]) > Number(endMonth)) {
+      return acc;
+    }
+    // key is mm/yyyy
+    const key = `${splitDeliveryDate[0]}/${splitDeliveryDate[2]}`;
+
+    if (!acc[key]) {
+      acc[key] = 0;
+    }
+
+    acc[key] = acc[key] + order.totalPrice;
+    return acc;
+  }, {});
+  return debtOrdersByMonth;
+};

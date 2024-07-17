@@ -23,6 +23,16 @@ import {
 
 export const officiallyStartDate = new Date('01/01/2024');
 
+export const sendChequeMsg = `
+* Please send your payment by cheque to:
+Unit 1 - 6420 Beresford Street
+Burnaby, British Columbia V5E 1B6, Canada
+
+if we are unable to collect it in person.
+Thank you for your cooperation. *
+`;
+
+
 export const days = [
   'Sunday',
   'Monday',

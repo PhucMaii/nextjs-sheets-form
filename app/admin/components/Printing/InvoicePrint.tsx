@@ -15,6 +15,7 @@ import { YYYYMMDDFormat } from '@/app/utils/time';
 import { grey } from '@mui/material/colors';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import useApiDebtData from '@/hooks/useApiDebtData';
+import { sendChequeMsg } from '@/app/lib/constant';
 
 interface PropTypes {
   client: UserType | null;
@@ -38,29 +39,12 @@ export const InvoicePrint = forwardRef(
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
     const { debtData, sortDebtKeys } = useApiDebtData(client.id, endMonth);
+    console.log({ debtData, sortDebtKeys });
 
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
     const ordersPerPage = 18;
     const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-
-    // const totalPrices: number[] = [];
-
-    // // Calculate total bill for each page
-    // for (let i = 0; i < totalPages; i++) {
-    //   const currentPageOrders = filteredOrders.slice(
-    //     i * ordersPerPage,
-    //     (i + 1) * ordersPerPage,
-    //   );
-    //   const totalPrice = currentPageOrders.reduce((acc: number, cV: Order) => {
-    //     return acc + cV.totalPrice;
-    //   }, 0);
-    //   totalPrices.push(totalPrice);
-    // }
-
-    // const totalDue = totalPrices.reduce((acc: number, cV: number) => {
-    //   return acc + cV;
-    // }, 0);
 
     return (
       <div ref={ref}>
@@ -148,40 +132,6 @@ export const InvoicePrint = forwardRef(
                           </TableRow>
                         );
                       })}
-                  {/* <TableRow>
-                    <TableCell colSpan={3}>
-                      <Grid
-                        container
-                        display="flex"
-                        justifyContent="space-around"
-                        spacing={2}
-                        flexWrap="wrap"
-                      >
-                        {[...Array(totalPages)].map((_, pageIndex) => {
-                          return (
-                            <Grid item>
-                              <Box
-                                display="flex"
-                                flexDirection="column"
-                                gap={1}
-                              >
-                                <Typography>Page {pageIndex + 1}</Typography>
-                                <Typography>
-                                  ${totalPrices[pageIndex].toFixed(2)}
-                                </Typography>
-                              </Box>
-                            </Grid>
-                          );
-                        })}
-                        <Grid item>
-                          <Box display="flex" flexDirection="column" gap={1}>
-                            <Typography fontWeight="bold">Total Due</Typography>
-                            <Typography>${totalDue.toFixed(2)}</Typography>
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </TableCell>
-                  </TableRow> */}
                   <TableRow>
                     <TableCell colSpan={3}>
                       <Grid
@@ -227,6 +177,21 @@ export const InvoicePrint = forwardRef(
                   </TableRow>
                 </TableBody>
               </Table>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                p={5}
+              >
+                <Typography variant="h6" textAlign="center">
+                  {sendChequeMsg.split('\n').map((line, index) => (
+                    <React.Fragment key={index}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </Typography>
+              </Box>
             </Box>
           );
         })}
