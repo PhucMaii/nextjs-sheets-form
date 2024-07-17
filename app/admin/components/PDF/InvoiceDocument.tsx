@@ -1,0 +1,185 @@
+// lib/InvoiceDocument.js
+import React from 'react';
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { YYYYMMDDFormat } from '@/app/utils/time';
+import { grey } from '@mui/material/colors';
+import { ORDER_STATUS } from '@/app/utils/enum';
+import { UserType } from '@/app/utils/type';
+import { Order } from '../../orders/page';
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 30,
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  leftHeader: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '33% !important',
+  },
+  table: {
+    display: 'flex',
+    flexDirection: 'column',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: grey[200],
+    marginBottom: 20,
+  },
+  tableRow: {
+    flexDirection: 'row',
+  },
+  tableCol: {
+    width: '33%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: grey[200],
+  },
+  tableCell: {
+    margin: 5,
+    fontSize: 10,
+  },
+  h1: {
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  h2: {
+    fontSize: 12,
+  },
+  subtitle: {
+    fontSize: 8,
+  },
+  subtitleRight: {
+    fontSize: 10,
+    textAlign: 'right',
+  },
+  flex_between: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    fontSize: 10,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: grey[200],
+  },
+  font_10: {
+    fontSize: 10,
+  },
+});
+
+interface IProps {
+  client: UserType | null;
+  orders: Order[];
+  debtData: any;
+  sortDebtKeys: any;
+}
+const InvoiceDocument: React.FC<IProps> = ({
+  client,
+  orders,
+  debtData,
+  sortDebtKeys,
+}: IProps) => {
+  if (!client) return null;
+  // const endMonth = endDate.getMonth() + 1;
+  // const { debtData, sortDebtKeys, isLoading } = useApiDebtData(client.id, endMonth);
+
+  //   if (isLoading) {
+  //     return null;
+  //   }
+
+  const filteredOrders = orders.filter((order: Order) => {
+    return (
+      order.status !== ORDER_STATUS.VOID &&
+      order.status !== ORDER_STATUS.COMPLETED
+    );
+  });
+  const today = new Date();
+  const todayString = YYYYMMDDFormat(today);
+  const ordersPerPage = 25;
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+  return (
+    <Document>
+      {[...Array(totalPages)].map((_, pageIndex) => (
+        <Page size="A4" style={styles.page} key={pageIndex}>
+          <View style={styles.header}>
+            <View style={styles.leftHeader}>
+              <Text style={styles.h2}>Supreme Sprouts Ltd.</Text>
+              <Text style={styles.subtitle}>
+                Unit 1 - 6420 Beresford Street Burnaby, British Columbia V5E
+                1B6, Canada
+              </Text>
+            </View>
+            <Text style={styles.h1}>STATEMENT</Text>
+            <View>
+              <Text style={styles.h2}>Statement Date</Text>
+              <Text style={styles.subtitle}>{todayString}</Text>
+            </View>
+          </View>
+          <Text style={styles.h2}>
+            To: {client.clientId} - {client.clientName}
+          </Text>
+          <Text style={styles.subtitleRight}>
+            IF PAYING BY INVOICE, CHECK INDIVIDUAL INVOICES PAID
+          </Text>
+          <Text style={styles.subtitle}>
+            Page: {pageIndex + 1} / {totalPages}
+          </Text>
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>Invoice No.</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>Delivery Date</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>Total Bill</Text>
+              </View>
+            </View>
+            {filteredOrders
+              .slice(pageIndex * ordersPerPage, (pageIndex + 1) * ordersPerPage)
+              .map((order) => (
+                <View style={styles.tableRow} key={order.id}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>{order.id}</Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>{order.deliveryDate}</Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>
+                      ${order.totalPrice.toFixed(2)}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+          </View>
+          <View style={styles.flex_between}>
+            {sortDebtKeys &&
+              sortDebtKeys.map((month: string, index: number) => (
+                <Text style={styles.font_10} key={index}>
+                  {index === sortDebtKeys.length - 2
+                    ? 'Current Statement'
+                    : month}
+                  : ${debtData[month]}
+                </Text>
+              ))}
+          </View>
+        </Page>
+      ))}
+    </Document>
+  );
+};
+
+export default InvoiceDocument;

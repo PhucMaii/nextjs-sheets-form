@@ -22,7 +22,6 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
-
 }
 
 export default function SearchModal({
@@ -30,7 +29,7 @@ export default function SearchModal({
   onClose,
   orders,
   handleUpdateStatus,
-  handleUpdateItem
+  handleUpdateItem,
 }: IProps) {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);

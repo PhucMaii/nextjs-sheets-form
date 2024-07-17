@@ -1,4 +1,5 @@
 export enum API_URL {
+  ADMIN = '/api/admin',
   USER = '/api/user',
   SIGNUP = '/api/signup',
   FORM = '/api/form',
