@@ -35,6 +35,19 @@ export default async function handler(
       },
     });
 
+    const scheduleOrders = await prisma.scheduleOrders.findMany({
+      where: {
+        day,
+      },
+      include: {
+        user: {
+          include: {
+            routes: true,
+          },
+        },
+      },
+    });
+
     const routeListWithUserId = routeList.reduce((acc: any, route: any) => {
       const routeKey = route.id;
 
@@ -42,11 +55,42 @@ export default async function handler(
         return client.userId;
       });
       acc[routeKey] = clientIds;
+
+      if (!acc[routeKey]) {
+        acc[routeKey] = [];
+      }
       return acc;
     }, {});
 
+    const sortedUserIds: any = {};
+
+    // Loop run O(n ^ 3) - Need to optimize
+    for (const scheduleOrder of scheduleOrders) {
+      // Find the right route of the schedule order owner
+      const clientRoute: any = scheduleOrder.user.routes.find(
+        (route: UserRoute) => {
+          const targetRoute = Object.keys(routeListWithUserId).find(
+            (id: string) => {
+              return route.routeId === Number(id);
+            },
+          );
+
+          return targetRoute;
+        },
+      );
+
+      if (!sortedUserIds[clientRoute.routeId]) {
+        sortedUserIds[clientRoute.routeId] = [scheduleOrder.userId];
+      } else {
+        sortedUserIds[clientRoute.routeId] = [
+          ...sortedUserIds[clientRoute.routeId],
+          scheduleOrder.userId,
+        ];
+      }
+    }
+
     return res.status(200).json({
-      data: routeListWithUserId,
+      data: sortedUserIds,
       message: 'Fetch Clients Based On Routes Successfully',
     });
   } catch (error: any) {
