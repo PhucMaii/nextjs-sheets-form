@@ -16,7 +16,7 @@ import { ShadowSection } from './styled';
 import { Notification, UserType } from '@/app/utils/type';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
-import NotificationPopup from '../components/Notification';
+import NotificationPopup from '../components/Notifications/Notification';
 import { Order } from '../orders/page';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';

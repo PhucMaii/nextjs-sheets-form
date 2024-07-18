@@ -1,7 +1,7 @@
 'use client';
 import FadeIn from '@/HOC/FadeIn';
 import LoginAndRegisterGuard from '@/HOC/LoginAndRegisterGuard';
-import NotificationPopup from '@/app/admin/components/Notification';
+import NotificationPopup from '@/app/admin/components/Notifications/Notification';
 import { API_URL } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';

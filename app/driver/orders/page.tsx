@@ -20,7 +20,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
-import NotificationPopup from '@/app/admin/components/Notification';
+import NotificationPopup from '@/app/admin/components/Notifications/Notification';
 import { Virtuoso } from 'react-virtuoso';
 import OrderComponent from '../components/OrderComponent';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';

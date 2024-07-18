@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import NotificationPopup from '../components/Notification';
+import NotificationPopup from '../components/Notifications/Notification';
 import { Notification } from '@/app/utils/type';
 import { Box, Grid, Skeleton, Switch, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';

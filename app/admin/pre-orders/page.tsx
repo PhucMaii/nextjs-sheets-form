@@ -30,7 +30,7 @@ import {
   IRoutes,
   ScheduledOrder,
 } from '@/app/utils/type';
-import NotificationPopup from '../components/Notification';
+import NotificationPopup from '../components/Notifications/Notification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/add/AddOrder';

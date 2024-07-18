@@ -22,7 +22,7 @@ import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { Notification, OrderedItems, UserType } from '@/app/utils/type';
-import NotificationPopup from '../components/Notification';
+import NotificationPopup from '../components/Notifications/Notification';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';

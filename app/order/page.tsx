@@ -18,7 +18,7 @@ import { Order } from '../admin/orders/page';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import useSWR from 'swr';
-import NotificationPopup from '../admin/components/Notification';
+import NotificationPopup from '../admin/components/Notifications/Notification';
 import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
 

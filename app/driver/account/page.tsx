@@ -13,7 +13,7 @@ import { ShadowSection } from '@/app/admin/reports/styled';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Notification } from '@/app/utils/type';
-import NotificationPopup from '@/app/admin/components/Notification';
+import NotificationPopup from '@/app/admin/components/Notifications/Notification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import NotificationPopup from '../components/Notification';
+import NotificationPopup from '../components/Notifications/Notification';
 import { ICategory, IItem, Notification } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import useCategories from '@/hooks/fetch/useCategories';

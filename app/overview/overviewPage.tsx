@@ -8,7 +8,7 @@ import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { YYYYMMDDFormat, generateMonthRange } from '../utils/time';
 import Sidebar from '../components/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
-import NotificationPopup from '../admin/components/Notification';
+import NotificationPopup from '../admin/components/Notifications/Notification';
 import { Box, Divider, Grid, IconButton, Typography } from '@mui/material';
 import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';

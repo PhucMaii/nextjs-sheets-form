@@ -18,7 +18,7 @@ import { API_URL } from '../utils/enum';
 import { useSession } from 'next-auth/react';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import NotificationPopup from '../admin/components/Notification';
+import NotificationPopup from '../admin/components/Notifications/Notification';
 
 export default function AccountPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);

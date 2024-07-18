@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import {
+  Badge,
   Box,
   Button,
   Drawer,
@@ -8,6 +9,7 @@ import {
   List,
   ListItemIcon,
   ListItemText,
+  Menu,
   Toolbar,
   useMediaQuery,
 } from '@mui/material';
@@ -23,6 +25,8 @@ import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primaryColor } from '@/theme/color';
+import useLocalStorage, { ILocalNoti } from '@/hooks/useLocalStorage';
+import NotificationBadge from '../Notifications/NotificationBadge';
 
 interface PropTypes {
   children: ReactNode;
@@ -30,6 +34,8 @@ interface PropTypes {
 }
 
 const drawerWidth = 250;
+const url = process.env.NEXT_PUBLIC_WEB_URL;
+
 export default function Sidebar({ children, noMargin }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
@@ -37,8 +43,11 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
-  const url = process.env.NEXT_PUBLIC_WEB_URL;
 
+  const [localNotifications, setLocalNotifications] = useLocalStorage(
+    'notifications',
+    [],
+  );
   const singlePrintRef: any = useRef();
   const allPrintRef: any = useRef();
 
@@ -50,6 +59,13 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
 
     pusherClient.bind('incoming-order', (order: Order) => {
       setSingleOrder(order);
+
+      const newLocalNoti: ILocalNoti = {
+        title: 'Order Placed Successfully',
+        description: `${order.clientName} placed an order for ${order.deliveryDate} at ${order.orderTime}`,
+      };
+
+      setLocalNotifications([...localNotifications, newLocalNoti]);
     });
 
     return () => {
@@ -63,31 +79,19 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
     handleSinglePrint();
   }, [singleOrder]);
 
-  const handleSinglePrint = useReactToPrint({
-    content: () => singlePrintRef.current,
-  });
-
-  const handleAllPrint = useReactToPrint({
-    content: () => allPrintRef.current,
-  });
-
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
+
+  const handleSinglePrint = useReactToPrint({
+    content: () => singlePrintRef.current,
+  });
 
   const handleChangeTab = (path: string) => {
     router.push(path);
   };
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-
-  const handleOnDataReceived = (data: any) => {
-    if (data.length > 1) {
-      setOrders(data);
-    } else {
-      setSingleOrder(data);
-    }
-  };
 
   const content = (
     <>
@@ -154,10 +158,21 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
 
   if (mdDown) {
     return (
-      <>
-        <IconButton onClick={() => setIsNavOpen(true)}>
-          <MenuIcon />
-        </IconButton>
+      <Box sx={{ m: 1 }}>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={1}
+        >
+          <IconButton onClick={() => setIsNavOpen(true)}>
+            <MenuIcon />
+          </IconButton>
+          <NotificationBadge
+            localNoti={localNotifications}
+            setLocalNoti={setLocalNotifications}
+          />
+        </Box>
         <Box display="flex">
           <Drawer
             sx={{
@@ -180,7 +195,7 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
             {children}
           </Box>
         </Box>
-      </>
+      </Box>
     );
   }
 
@@ -211,6 +226,12 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
           gap={2}
         >
           {printComponents}
+          <Box display="flex" justifyContent="right">
+            <NotificationBadge
+              localNoti={localNotifications}
+              setLocalNoti={setLocalNotifications}
+            />
+          </Box>
           {children}
         </Box>
       </Box>

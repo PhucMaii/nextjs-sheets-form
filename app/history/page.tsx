@@ -33,7 +33,7 @@ import {
   warningColor,
 } from '../../theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
-import NotificationPopup from '../admin/components/Notification';
+import NotificationPopup from '../admin/components/Notifications/Notification';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
