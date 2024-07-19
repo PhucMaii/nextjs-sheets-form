@@ -17,7 +17,7 @@ interface IProps {
 
 const NotiDetails = ({ title, description }: ILocalNoti) => {
   return (
-    <Box display="flex" gap={2} p={5}>
+    <Box display="flex" flexDirection="column" gap={2} p={5}>
       <Typography variant="h6">{title}</Typography>
       <Typography variant="body1">{description}</Typography>
     </Box>
@@ -30,11 +30,11 @@ export default function NotificationBadge({ localNoti, setLocalNoti }: IProps) {
 
   const handleCloseAnchor = () => {
     setNotiAnchor(null);
+    setLocalNoti([]);
   };
 
   const handleOpenNoti = (e: any) => {
     setNotiAnchor(e.currentTarget);
-    setLocalNoti([]);
   };
 
   return (

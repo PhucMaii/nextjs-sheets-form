@@ -45,6 +45,7 @@ import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import LoadingModal from '../components/Modals/LoadingModal';
+import { io, Socket } from 'socket.io-client';
 
 interface Category {
   id: number;
@@ -88,7 +89,7 @@ export interface Order {
 }
 
 const orderPerPage = 10;
-
+let socket;
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -117,6 +118,7 @@ export default function Orders() {
   const [tabIndex, setTabIndex] = useState<number>(0);
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const { clientList } = useClients();
@@ -150,10 +152,13 @@ export default function Orders() {
       setIncomingOrder(order);
     });
 
+    initializeSocket();
+   
     return () => {
       pusherClient.unsubscribe('admin');
       pusherClient.unsubscribe('override-order');
       pusherClient.unsubscribe('void-order');
+
     };
   }, [date]);
 
@@ -279,6 +284,19 @@ export default function Orders() {
       return;
     }
   };
+
+  const initializeSocket = async () => {
+    await fetch('/api/socket');
+    socket = io({path: '/api/socket'});
+    console.log(socket)
+    socket.on('connect', () => {
+      console.log('Connected to socket');
+    });
+
+    socket.on('incoming-order', (data: any) => {
+      console.log({data});
+    })
+  }
 
   const fetchOrders = async (): Promise<void> => {
     setIsLoading(true);

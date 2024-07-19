@@ -1,5 +1,5 @@
 // import { google } from 'googleapis';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest } from 'next';
 import { sendEmail } from '../utils/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
@@ -7,12 +7,13 @@ import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
+import { NextApiResponseWithSocket } from '../socket';
 
 interface RequestQuery {
   userId?: string;
 }
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponseWithSocket) => {
   if (req.method !== 'POST') {
     return res.status(500).send('Only Post method allowed');
   }
@@ -144,6 +145,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       totalPrice,
       category: userCategory,
     });
+
+    console.log({socketServer: res.socket.server.io})
+    if (res.socket.server.io) {
+      res.socket.server.io.emit('incoming-order', {
+        items: itemList,
+        ...existingUser,
+        ...newOrder,
+        totalPrice,
+        category: userCategory,
+      })
+    }
 
     // Generate object of quantity, price, and totalPrice
     const orderDetails = body;
