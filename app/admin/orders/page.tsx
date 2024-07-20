@@ -45,7 +45,7 @@ import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import LoadingModal from '../components/Modals/LoadingModal';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 interface Category {
   id: number;
@@ -294,7 +294,7 @@ export default function Orders() {
     });
 
     socket.on('incoming-order', (data: any) => {
-      console.log({data});
+      console.log({data})
     })
   }
 

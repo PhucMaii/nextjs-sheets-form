@@ -4,6 +4,7 @@ import LoadingComponent from '../app/components/LoadingComponent/LoadingComponen
 import axios from 'axios';
 import { API_URL } from '../app/utils/enum';
 import useSWR from 'swr';
+import { connectSocket } from '@/app/utils/socketClient';
 
 export const SplashScreen: FC = () => (
   <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
@@ -43,6 +44,13 @@ export default function AuthenGuard({ children }: any) {
       revalidateOnFocus: false,
     },
   );
+
+  useEffect(() => {
+    if (user) {
+      connectSocket(session?.user.id)
+    }
+    console.log({session, user})
+  }, [session, user])
 
   useEffect(() => {
     if (
