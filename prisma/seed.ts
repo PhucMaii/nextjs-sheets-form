@@ -170,6 +170,14 @@ async function main() {
   //   data: [
   //   ]
   // })
+  await prisma.item.updateMany({
+    where: {
+      name: 'BEAN 24X1'
+    },
+    data: {
+      name: 'BEAN 24X1 LB'
+    }
+  })
 }
 
 main()

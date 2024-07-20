@@ -100,15 +100,6 @@ const useManifest = (
   const getItemsManifest = () => {
     const items = orderPrint.map((order: Order) => {
       return order?.items.map((item: any) => {
-        if (item.name.includes('BEAN')) {
-          return {
-            ...item,
-            subCategory: order.subCategory,
-            routeId: order.routeId,
-            client: order.clientName,
-            user: order.user,
-          };
-        } else {
           return {
             ...item,
             routeId: order.routeId,
@@ -116,7 +107,7 @@ const useManifest = (
             user: order.user,
           };
         }
-      });
+      );
     });
 
     // If order print is undefined

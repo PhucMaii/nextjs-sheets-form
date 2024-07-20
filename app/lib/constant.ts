@@ -25,7 +25,7 @@ export const mainItems = [
   'BEAN 10 LB',
   'BEAN 5 LB',
   'BASIL',
-  'BEAN 24X1',
+  'BEAN 24X1 LB',
   'SOYA 10 LBS',
   'SOYA 5 LBS',
   'SOYA 24X1 LB',

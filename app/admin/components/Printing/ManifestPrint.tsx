@@ -12,6 +12,7 @@ import {
 import React, { forwardRef } from 'react';
 import './print.css';
 import styled from 'styled-components';
+import { mainItems } from '@/app/lib/constant';
 
 interface PropTypes {
   manifest: any;
@@ -29,11 +30,11 @@ export const ManifestPrint = forwardRef(
     }
 
     // Display the beansprouts first then other items
-    const customSortKeys = (keys: string[]): any => {
-      const beanKeys = keys.filter((key) => key.includes('BEAN')).sort();
-      const otherKeys = keys.filter((key) => !key.includes('BEAN')).sort();
-      return [...beanKeys, ...otherKeys];
-    };
+    // const customSortKeys = (keys: string[]): any => {
+    //   const beanKeys = keys.filter((key) => key.includes('BEAN')).sort();
+    //   const otherKeys = keys.filter((key) => !key.includes('BEAN')).sort();
+    //   return [...beanKeys, ...otherKeys];
+    // };
 
     return (
       <div ref={ref}>
@@ -49,10 +50,10 @@ export const ManifestPrint = forwardRef(
               }
 
               // sort the item for each route then loop through it
-              const sortedItems: any = customSortKeys(
-                Object.keys(manifest[routeId].summary),
-              );
-              // const sortedItems = [...mainItems];
+              // const sortedItems: any = customSortKeys(
+              //   Object.keys(manifest[routeId].summary),
+              // );
+              const sortedItems = [...mainItems];
 
               return (
                 <>
@@ -82,7 +83,7 @@ export const ManifestPrint = forwardRef(
                                 sx={{ fontSize: 20 }}
                                 key={index}
                               >
-                                {item} ({summary[item]})
+                                {item === "MUSHROOM" ? 'MUSH ROOM' : item} ({summary[item] || 0})
                               </BorderRightTableCell>
                             </>
                           );
