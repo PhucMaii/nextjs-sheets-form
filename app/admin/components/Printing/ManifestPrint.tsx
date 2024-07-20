@@ -11,12 +11,16 @@ import {
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import './print.css';
-import { printFontSize } from './ComponentToPrint';
+import styled from 'styled-components';
 
 interface PropTypes {
   manifest: any;
   routes: IRoutes[];
 }
+
+const BorderRightTableCell = styled(TableCell) `
+  border: 1px solid grey;
+`
 
 export const ManifestPrint = forwardRef(
   ({ manifest, routes }: PropTypes, ref: any) => {
@@ -33,7 +37,7 @@ export const ManifestPrint = forwardRef(
 
     return (
       <div ref={ref}>
-        <Box sx={{ width: '100%', height: '100%', m: 2 }}>
+        <Box sx={{ width: '100%', height: '100%', mr: 4 }}>
           {/* Loop through route */}
           {Object.keys(manifest).length > 0 &&
             Object.keys(manifest).map((routeId: string, index: number) => {
@@ -48,6 +52,7 @@ export const ManifestPrint = forwardRef(
               const sortedItems: any = customSortKeys(
                 Object.keys(manifest[routeId].summary),
               );
+              // const sortedItems = [...mainItems];
 
               return (
                 <>
@@ -58,109 +63,15 @@ export const ManifestPrint = forwardRef(
                     Driver: {targetRoute.driver?.name}
                   </Typography>
                   <Divider sx={{ my: 2 }} />
-                  <Box display="flex" flexDirection="column" gap={1} m={2}>
-                    <Typography variant="h5" m={2}>
-                      Summary
-                    </Typography>
-                    {/* <Box
-                    display="flex"
-                    alignItems="center"
-                    flexWrap="wrap"
-                    justifyContent="space-between"
-                    gap={1}
-                  > */}
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Item</TableCell>
-                          <TableCell>Quantity</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {sortedItems.length > 0 &&
-                          sortedItems.map((item: string, index: number) => {
-                            const { summary } = manifest[routeId];
-                            if (summary[item] === 0) {
-                              return null;
-                            }
-                            return (
-                              <TableRow key={index}>
-                                <TableCell
-                                  sx={{ fontSize: printFontSize - 10 }}
-                                >
-                                  {item}
-                                </TableCell>
-                                <TableCell
-                                  sx={{
-                                    fontSize: printFontSize - 10,
-                                    fontWeight: 'bold',
-                                  }}
-                                >
-                                  {summary[item]}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                      </TableBody>
-                    </Table>
-                    {/* </Box> */}
-                  </Box>
-                  <Divider sx={{ my: 2 }} />
-                  {manifest[routeId].details.map(
-                    (user: any, userIndex: number) => {
-                      const { summary } = manifest[routeId];
-                      return (
-                        <Box
-                          display="flex"
-                          // flexDirection="column"
-                          gap={2}
-                          m={2}
-                          key={userIndex}
-                          flexWrap="wrap"
-                          alignItems="center"
-                        >
-                          <Typography variant="h6" m={2}>
-                            {user.user.clientName}:
-                          </Typography>
-                          {/* <Box
-                          display="flex"
-                          alignItems="center"
-                          flexWrap="wrap"
-                          justifyContent="space-between"
-                          gap={1}
-                        > */}
-                          {sortedItems.map((item: any, itemIndex: number) => {
-                            if (
-                              summary[item] === 0 ||
-                              !user[item] ||
-                              user[item] === 0
-                            ) {
-                              return null;
-                            }
-
-                            return (
-                              <Typography key={itemIndex} variant="body1">
-                                {item}: {user[item]}
-                                {/* <TableCell
-                                sx={{ fontSize: 20, fontWeight: 'bold' }}
-                              >
-                                {summary[item]}
-                              </TableCell> */}
-                              </Typography>
-                            );
-                          })}
-                          {/* </Box> */}
-                        </Box>
-                      );
-                    },
-                  )}
-                  {/* <Table sx={{ mx: 2 }}>
+                  
+                  <Table sx={{ mx: 2 }}>
                   <TableHead>
                     <TableRow>
                       <BorderRightTableCell align="center"></BorderRightTableCell>
                       {sortedItems.length > 0 &&
                         sortedItems.map((item: string, index: number) => {
                           const { summary } = manifest[routeId];
+                          console.log({summary});
                           if (summary[item] === 0) {
                             return null;
                           }
@@ -187,7 +98,7 @@ export const ManifestPrint = forwardRef(
                             <BorderRightTableCell
                               align="center"
                               sx={{
-                                fontSize: printFontSize,
+                                fontSize: 20,
                                 maxWidth: '120px',
                               }}
                             >
@@ -217,7 +128,7 @@ export const ManifestPrint = forwardRef(
                                   <BorderRightTableCell
                                     key={itemQuantity}
                                     align="center"
-                                    sx={{ fontSize: printFontSize }}
+                                    sx={{ fontSize: 20 }}
                                   >
                                     [Object]
                                   </BorderRightTableCell>
@@ -227,7 +138,7 @@ export const ManifestPrint = forwardRef(
                               return (
                                 <BorderRightTableCell
                                   align="center"
-                                  sx={{ fontSize: printFontSize }}
+                                  sx={{ fontSize: 20 }}
                                   key={index}
                                 >
                                   {itemQuantity}
@@ -239,7 +150,7 @@ export const ManifestPrint = forwardRef(
                       },
                     )}
                   </TableBody>
-                </Table> */}
+                </Table>
                   {index < Object.keys(manifest).length - 1 && (
                     <div className="page-break"></div>
                   )}
