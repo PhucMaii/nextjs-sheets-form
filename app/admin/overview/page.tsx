@@ -133,7 +133,7 @@ export default function Overview() {
         </Grid>
         <Grid item xs={12} md={6}>
           <BSOverview
-            type="B.K"
+            type="P.P"
             beansproutsData={beansproutsData?.PP || null}
             isMinify={isMinify}
           />
