@@ -55,7 +55,7 @@ export default function ItemPage() {
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories[0],
   );
-  const { changes, emitChange } = useSocket('update-item-page', 'change-item-page');
+  const [ changes, emitChange ] = useSocket('update-item-page', 'change-item-page');
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 

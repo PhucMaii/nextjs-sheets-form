@@ -63,6 +63,7 @@ import BillPrintModal from '../components/Modals/BillPrintModal';
 import useRoutes from '@/hooks/fetch/useRoutes';
 import useClients from '@/hooks/fetch/useClients';
 import useSubCategories from '@/hooks/fetch/useSubCategories';
+import useSocket from '@/hooks/useSocket';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -107,6 +108,7 @@ export default function ReportPage() {
   const { routes, mutate } = useRoutes(days[currentDate.getDay()]);
   const { clientList } = useClients();
   const { subCategories } = useSubCategories();
+  const [ changes, emitChange ] = useSocket('update-report-page', 'change-report-page');
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');
@@ -124,6 +126,16 @@ export default function ReportPage() {
       pusherClient.unsubscribe('admin-delete-order');
     };
   }, []);
+
+  useEffect(() => {
+    if (changes) {
+      if (changes.unpaidOrders) {
+        setUnpaidOrders(changes.unpaidOrders);
+      }
+      setClientOrders(changes.clientOrders);
+      setBaseClientOrders(changes.baseClientOrders)
+    }
+  })
 
   useEffect(() => {
     if (deletedOrder) {
@@ -243,6 +255,11 @@ export default function ReportPage() {
       setClientOrders(orderData);
       setBaseClientOrders(orderData);
       setIsFetching(false);
+      return {
+        unpaidOrders: newUnpaidOrders,
+        clientOrders: orderData,
+        baseClientOrders: orderData
+      }
     } catch (error: any) {
       console.log('Fail to fetch client orders: ', error);
       setNotification({
@@ -278,6 +295,7 @@ export default function ReportPage() {
       return order.id !== deletedOrder.id;
     });
 
+    const emitOrders: any = {};
     // update unpaid order list
     if (
       deletedOrder.status === ORDER_STATUS.INCOMPLETED ||
@@ -290,10 +308,14 @@ export default function ReportPage() {
         );
       });
       setUnpaidOrders(newUnpaidOrders);
+      emitOrders.unpaidOrders = newUnpaidOrders;
     }
 
     setBaseClientOrders(newBaseOrderList);
     setClientOrders(newOrderList);
+    emitOrders.baseClientOrders = newBaseOrderList;
+    emitOrders.clientOrders = newOrderList;
+    emitChange(emitOrders);
   };
 
   const handleInvoicePrint = useReactToPrint({
@@ -353,6 +375,11 @@ export default function ReportPage() {
     setBaseClientOrders(newBaseOrderList);
     setClientOrders(newOrderList);
     setUnpaidOrders(newUnpaidOrders);
+    emitChange({
+      baseClientOrders: newBaseOrderList,
+      clientOrders: newOrderList,
+      unpaidOrders: newUnpaidOrders
+    })
   };
 
   const handleDeleteSelectedOrders = async () => {
@@ -377,7 +404,8 @@ export default function ReportPage() {
         status,
         updatedOrders: selectedOrders,
       });
-      await fetchClientOrders();
+      const emitOrders = await fetchClientOrders();
+      emitChange(emitOrders);
 
       setNotification({
         on: true,

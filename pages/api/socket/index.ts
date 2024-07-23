@@ -43,9 +43,16 @@ export default async function handler(
       await synchronizeLocalChange(socket, data, 'update-order');
     });
 
+    // Listen to item page
     socket.on('change-item-page', async (data: any) => {
         await synchronizeLocalChange(socket, data, 'update-item-page');
-      });
+    });
+
+    // Listen to report page
+    socket.on('change-report-page', async (data: any) => {
+        await synchronizeLocalChange(socket, data, 'update-report-page');
+    });
+    
     
     socket.on('disconnect', () => {
       console.log('A client disconnected.');

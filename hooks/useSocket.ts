@@ -35,7 +35,7 @@ const useSocket = (receivingMsg: string, sendingMsg: string) => {
     }
   };
 
-  return { changes, emitChange };
+  return [ changes, emitChange ];
 };
 
 export default useSocket;
