@@ -117,7 +117,7 @@ export default function Orders() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
-  const { changes, emitChange } = useSocket('change-order' , 'update-order');
+  const { changes, emitChange } = useSocket('update-order' , 'change-order');
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
 

@@ -38,16 +38,15 @@ export default async function handler(
     const clientId = socket.id;
     console.log(`A client connected. ID: ${clientId}`);
 
-    // socket.on('change', async (data: any) => {
-    //     const { sessionId, changes } = data;
-    //     await redis.set(`session:${sessionId}`, JSON.stringify(changes));
-    //     socket.broadcast.emit('update', changes);
-    // });
-
     // Listen to order page
     socket.on('change-order', async (data: any) => {
       await synchronizeLocalChange(socket, data, 'update-order');
     });
+
+    socket.on('change-item-page', async (data: any) => {
+        await synchronizeLocalChange(socket, data, 'update-item-page');
+      });
+    
     socket.on('disconnect', () => {
       console.log('A client disconnected.');
     });

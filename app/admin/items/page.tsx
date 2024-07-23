@@ -30,6 +30,7 @@ import EditCategory from '../components/Modals/edit/EditCategory';
 import { Reorder } from 'framer-motion';
 import Item from '../components/Reorder/Item';
 import { LoadingButton } from '@mui/lab';
+import useSocket from '@/hooks/useSocket';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -54,8 +55,16 @@ export default function ItemPage() {
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories[0],
   );
+  const { changes, emitChange } = useSocket('update-item-page', 'change-item-page');
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+
+  useEffect(() => {
+    if (changes) {
+      setItems(changes);
+      setBaseItems(changes);
+    }
+  }, [changes])
 
   useEffect(() => {
     if (categories.length > 0 && !currentCategory) {
@@ -125,6 +134,7 @@ export default function ItemPage() {
     setItems(itemData);
     setBaseItems(itemData);
     setIsFetching(false);
+    return itemData;
   };
 
   const handleAddItem = async (newItem: IItem) => {
@@ -165,6 +175,7 @@ export default function ItemPage() {
   const handleAddItemUI = (newItem: IItem) => {
     setItems([...items, newItem]);
     setBaseItems([...items, newItem]);
+    emitChange([...items, newItem]);
   };
 
   const handleDeleteCategory = async (targetObj: any) => {
@@ -237,6 +248,7 @@ export default function ItemPage() {
 
     setItems(newItems);
     setBaseItems(newItems);
+    emitChange(newItems);
   };
 
   const handleUpdateCategoryName = async (newName: string) => {
@@ -322,6 +334,7 @@ export default function ItemPage() {
     });
     setItems(newItems);
     setBaseItems(newItems);
+    emitChange(newItems);
   };
 
   const saveItemArrangement = async () => {
@@ -349,7 +362,8 @@ export default function ItemPage() {
         return;
       }
 
-      await fetchItems();
+      const itemData = await fetchItems();
+      emitChange(itemData);
 
       setIsSavingArrangement(false);
       setNotification({

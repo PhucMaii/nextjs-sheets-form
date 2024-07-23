@@ -2,7 +2,7 @@ import { UserContext } from '@/app/context/UserContextAPI';
 import { useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const useSocket = (sendingMsg: string, receivingMsg: string) => {
+const useSocket = (receivingMsg: string, sendingMsg: string) => {
   const [socket, setSocket] = useState<any>(null);
   const [changes, setChanges] = useState<any>(null);
 
