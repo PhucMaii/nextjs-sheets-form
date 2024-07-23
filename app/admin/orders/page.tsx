@@ -46,6 +46,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { io } from 'socket.io-client';
+import useSocket from '@/hooks/useSocket';
 
 interface Category {
   id: number;
@@ -116,6 +117,7 @@ export default function Orders() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
+  const { changes, emitChange } = useSocket('change-order' , 'update-order');
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
 
@@ -123,6 +125,13 @@ export default function Orders() {
 
   const { clientList } = useClients();
   const { subCategories } = useSubCategories();
+
+  // Handle synchronize from multiple tabs
+  useEffect(() => {
+    if (changes) {
+      setBaseOrderData(changes);
+    }
+  }, [changes])
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -314,6 +323,7 @@ export default function Orders() {
       setBaseOrderData(response.data.data);
       setIsLoading(false);
       setCurrentPage(1);
+      return response.data.data;
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
       setIsLoading(false);
@@ -396,6 +406,7 @@ export default function Orders() {
       return order;
     });
 
+    emitChange(newOrderData);
     setBaseOrderData(newOrderData);
   };
 
@@ -416,7 +427,8 @@ export default function Orders() {
         setIsUpdating(false);
         return;
       }
-      await fetchOrders();
+      const data = await fetchOrders();
+      emitChange(data);
       setNotification({
         on: true,
         type: 'success',
@@ -446,6 +458,7 @@ export default function Orders() {
       return order;
     });
     setBaseOrderData(newBaseOrderList);
+    emitChange(newBaseOrderList);
   };
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
@@ -480,7 +493,7 @@ export default function Orders() {
     setDate(formattedDate);
   };
 
-  const handleMarkSingleCompletedUI = (targetOrder: Order): void => {
+  const handleUpdateStatusUI = (targetOrder: Order): void => {
     let newOrders = [];
     if (tabIndex !== 0 && targetOrder.status !== currentStatus) {
       newOrders = baseOrderData.filter((order) => order.id !== targetOrder.id);
@@ -493,6 +506,7 @@ export default function Orders() {
       });
     }
     setBaseOrderData(newOrders);
+    emitChange(newOrders);
   };
 
   const handlePrintAll = useReactToPrint({
@@ -722,7 +736,7 @@ export default function Orders() {
         onClose={() => setIsSearchModalOpen(false)}
         baseOrderList={baseOrderData}
         setNotification={setNotification}
-        updateUI={handleMarkSingleCompletedUI}
+        updateUI={handleUpdateStatusUI}
         handleUpdateDateUI={handleUpdateDateUI}
         handleUpdatePriceUI={handleUpdatePriceUI}
         selectedOrders={selectedOrders}
@@ -752,7 +766,7 @@ export default function Orders() {
                       key={index}
                       order={order}
                       setNotification={setNotification}
-                      updateUI={handleMarkSingleCompletedUI}
+                      updateUI={handleUpdateStatusUI}
                       // updateUIItem={handleUpdateUISingleOrder}
                       handleUpdateDateUI={handleUpdateDateUI}
                       handleUpdatePriceUI={handleUpdatePriceUI}

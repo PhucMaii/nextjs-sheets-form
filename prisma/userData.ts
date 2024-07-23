@@ -1,7 +1,6 @@
-import { hash } from 'bcrypt';
-
+import bcrypt from 'bcryptjs';
 export const generateUsers = async () => {
-  const password = await hash('17788998293', 12);
+  const password = await bcrypt.hash('17788998293', 12);
   const users = [
     // {
     //   clientId: '00100',

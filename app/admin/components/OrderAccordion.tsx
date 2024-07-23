@@ -74,6 +74,7 @@ const OrderAccordion = ({
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [totalQuantity, setTotalQuantity] = useState(0);
+
   const statusText = {
     text: order.status,
     type:

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 type UserForm = {
   sheetName: string;
@@ -28,7 +28,7 @@ export default async function handler(
       return res.status(400).json({ error: 'Client ID Already Existed' });
     }
 
-    const password = await hash(userData.password, 12);
+    const password = await bcrypt.hash(userData.password, 12);
     const newUser = await prisma.user.create({
       data: {
         sheetName: userData.sheetName,

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import {
-  Badge,
   Box,
   Button,
   Drawer,
@@ -9,11 +8,10 @@ import {
   List,
   ListItemIcon,
   ListItemText,
-  Menu,
   Toolbar,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { tabs } from '../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
@@ -27,6 +25,7 @@ import { pusherClient } from '@/app/pusher';
 import { primaryColor } from '@/theme/color';
 import useLocalStorage, { ILocalNoti } from '@/hooks/useLocalStorage';
 import NotificationBadge from '../Notifications/NotificationBadge';
+import { UserContext } from '@/app/context/UserContextAPI';
 
 interface PropTypes {
   children: ReactNode;
