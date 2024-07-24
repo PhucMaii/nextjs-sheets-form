@@ -3,6 +3,7 @@ import { Server as HTTPServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import Redis from 'ioredis';
 import cors from 'cors';
+import { initializeSocket } from '../utils/socketManager';
 
 const corsMiddleware = cors();
 
@@ -15,7 +16,7 @@ const redis = new Redis({
 export type NextApiResponseWithSocket = NextApiResponse & {
   socket: {
     server: HTTPServer & {
-      io?: SocketIOServer;
+      io: SocketIOServer;
     };
   };
 };
@@ -30,11 +31,10 @@ export default async function handler(
     return;
   }
 
-  const io = new SocketIOServer(res.socket.server, {
-    path: '/api/socket',
-  });
+  initializeSocket(res.socket.server);
+  res.socket.server.io = initializeSocket(res.socket.server);
 
-  io.on('connection', (socket: any) => {
+  res.socket.server.io.on('connection', (socket: any) => {
     const clientId = socket.id;
     console.log(`A client connected. ID: ${clientId}`);
 
@@ -45,22 +45,25 @@ export default async function handler(
 
     // Listen to item page
     socket.on('change-item-page', async (data: any) => {
-        await synchronizeLocalChange(socket, data, 'update-item-page');
+      await synchronizeLocalChange(socket, data, 'update-item-page');
     });
 
     // Listen to report page
     socket.on('change-report-page', async (data: any) => {
-        await synchronizeLocalChange(socket, data, 'update-report-page');
+      await synchronizeLocalChange(socket, data, 'update-report-page');
     });
-    
-    
+
+    // Listen to preOrder page
+    socket.on('change-preOrder-page', async (data: any) => {
+      await synchronizeLocalChange(socket, data, 'update-preOrder-page');
+    });
+
     socket.on('disconnect', () => {
       console.log('A client disconnected.');
     });
   });
 
   corsMiddleware(req, res, () => {
-    res.socket.server.io = io;
     res.end();
   });
 

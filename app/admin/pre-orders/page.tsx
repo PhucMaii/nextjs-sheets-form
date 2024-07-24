@@ -53,6 +53,7 @@ import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import { insertInSortedIdArray } from '@/app/utils/array';
+import useSocket from '@/hooks/useSocket';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -79,11 +80,29 @@ export default function ScheduledOrderPage() {
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const [changes, emitChange ] = useSocket('update-preOrder-page', 'change-preOrder-page') 
 
   const { clientList } = useClients(days[dayIndex]);
   const { driverList } = useDrivers();
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  useEffect(() => {
+    if (changes) {
+      if (changes.orderList) {
+        setOrderList(changes.orderList);
+      }
+      if (changes.baseOrderList) {
+        setBaseOrderList(changes.baseOrderList);
+      }
+      if (changes.routes) {
+        setRoutes(changes.routes);
+      }
+      if (changes.mutate) {
+        mutate(changes.mutate);
+      }
+    }
+  }, [changes])
 
   useEffect(() => {
     if (routes.length > 0) {
@@ -177,6 +196,10 @@ export default function ScheduledOrderPage() {
       const newBaseOrderList = insertInSortedIdArray(baseOrderList, newOrder);
       setOrderList(newBaseOrderList);
       setBaseOrderList(newBaseOrderList);
+      emitChange({
+        orderList: newBaseOrderList,
+        baseOrderList: newBaseOrderList
+      })
     } else {
       const newOrderList = orderList.map((order: ScheduledOrder) => {
         if (order.id === newOrder.id) {
@@ -194,6 +217,10 @@ export default function ScheduledOrderPage() {
 
       setOrderList(newOrderList);
       setBaseOrderList(newBaseOrderList);
+      emitChange({
+        orderList: newOrderList,
+        baseOrderList: newBaseOrderList
+      })
     }
   };
 
@@ -288,6 +315,9 @@ export default function ScheduledOrderPage() {
       }
 
       mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+      emitChange({
+        mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`
+      })
 
       const newRoutes = routes.filter((route: IRoutes) => {
         return route.id !== targetRoute.id;
@@ -319,7 +349,11 @@ export default function ScheduledOrderPage() {
       const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
         data: { scheduleOrderList: selectedOrders },
       });
-      await fetchOrders();
+      const orderData = await fetchOrders();
+      emitChange({
+        orderList: orderData,
+        baseOrderList: orderData
+      })
 
       setNotification({
         on: true,
@@ -361,6 +395,7 @@ export default function ScheduledOrderPage() {
       setBaseOrderList(response.data.data);
       setOrderList(response.data.data);
       setIsLoading(false);
+      return response.data.data
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
       setNotification({
@@ -407,6 +442,10 @@ export default function ScheduledOrderPage() {
   const handleAddRouteUI = (targetRoute: IRoutes) => {
     setRoutes([...routes, targetRoute]);
     mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+    emitChange({
+      routes: [...routes, targetRoute],
+      mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`
+    })
   };
 
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
@@ -422,6 +461,10 @@ export default function ScheduledOrderPage() {
 
     setBaseOrderList(newBaseOrderList);
     setOrderList(newOrderList);
+    emitChange({
+      baseOrderList: newBaseOrderList,
+      orderList: newOrderList,
+    })
   };
 
   const handleSelectOrder = (e: any, targetOrder: ScheduledOrder) => {
@@ -469,6 +512,10 @@ export default function ScheduledOrderPage() {
 
     setBaseOrderList(newBaseOrderList);
     setOrderList(newOrderList);
+    emitChange({
+      baseOrderList: newBaseOrderList,
+      orderList: newOrderList,
+    })
   };
 
   const handleUpdateRouteUI = (targetRoute: IRoutes) => {
@@ -480,8 +527,14 @@ export default function ScheduledOrderPage() {
     });
 
     mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+    emitChange({
+      mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`
+    })
 
     setRoutes(newRoutes);
+    emitChange({
+      routes: newRoutes,
+    })
   };
 
   const saveOrderArrangement = async () => {
@@ -515,7 +568,11 @@ export default function ScheduledOrderPage() {
       }
 
       const newRoutes = await fetchRoutes();
-      await fetchOrders(newRoutes);
+      const orderData = await fetchOrders(newRoutes);
+      emitChange({
+        orderList: orderData,
+        baseOrderList: orderData,
+      })
 
       setIsSavingArrangement(false);
       setNotification({

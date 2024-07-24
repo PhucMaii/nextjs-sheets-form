@@ -45,7 +45,6 @@ import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import LoadingModal from '../components/Modals/LoadingModal';
-import { io } from 'socket.io-client';
 import useSocket from '@/hooks/useSocket';
 
 interface Category {
@@ -90,7 +89,6 @@ export interface Order {
 }
 
 const orderPerPage = 10;
-let socket;
 export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -117,7 +115,9 @@ export default function Orders() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
-  const [ changes, emitChange ] = useSocket('update-order' , 'change-order');
+  const [ changes, emitChange ] = useSocket('update-order' , 'change-order'); // synchronize tabs
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [ socketIncomingOrder, _emitIncomingOrder ] = useSocket('admin-incoming-order' , 'change-order');
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
 
@@ -131,7 +131,13 @@ export default function Orders() {
     if (changes) {
       setBaseOrderData(changes);
     }
-  }, [changes])
+  }, [changes]);
+
+  useEffect(() => {
+    if (socketIncomingOrder) {
+      console.log({socketIncomingOrder})
+    }
+  }, [socketIncomingOrder])
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -160,8 +166,6 @@ export default function Orders() {
     pusherClient.bind('incoming-order', (order: Order) => {
       setIncomingOrder(order);
     });
-
-    initializeSocket();
    
     return () => {
       pusherClient.unsubscribe('admin');
@@ -293,19 +297,6 @@ export default function Orders() {
       return;
     }
   };
-
-  const initializeSocket = async () => {
-    await fetch('/api/socket');
-    socket = io({path: '/api/socket'});
-    console.log(socket)
-    socket.on('connect', () => {
-      console.log('Connected to socket');
-    });
-
-    socket.on('incoming-order', (data: any) => {
-      console.log({data})
-    })
-  }
 
   const fetchOrders = async (): Promise<void> => {
     setIsLoading(true);

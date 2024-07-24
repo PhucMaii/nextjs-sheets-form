@@ -8,6 +8,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
 import { NextApiResponseWithSocket } from '../socket';
+import { getSocketInstance } from '../utils/socketManager';
 
 interface RequestQuery {
   userId?: string;
@@ -20,6 +21,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponseWithSocket) => {
 
   try {
     const prisma = new PrismaClient();
+    const io: any = getSocketInstance(res);
+
     const { userId } = req.query as RequestQuery;
 
     let id = userId;
@@ -145,17 +148,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponseWithSocket) => {
       totalPrice,
       category: userCategory,
     });
-
-    console.log({socketServer: res.socket.server.io})
-    if (res.socket.server.io) {
-      res.socket.server.io.emit('incoming-order', {
-        items: itemList,
-        ...existingUser,
-        ...newOrder,
-        totalPrice,
-        category: userCategory,
-      })
-    }
+    io.emit('admin-incoming-order', {
+      items: itemList,
+      ...existingUser,
+      ...newOrder,
+      totalPrice,
+      category: userCategory,
+    })
 
     // Generate object of quantity, price, and totalPrice
     const orderDetails = body;
@@ -169,32 +168,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponseWithSocket) => {
       }
     }
 
-    // Notify Email for admin
-    // const emailSendTo: any = process.env.NODEMAILER_EMAIL;
-    // const htmlTemplate: string = generateOrderTemplate(
-    //   existingUser.clientName,
-    //   existingUser.clientId,
-    //   orderDetails,
-    //   existingUser.contactNumber,
-    //   existingUser.deliveryAddress,
-    //   newOrder.id,
-    // );
-
-    // await emailHandler(
-    //   emailSendTo,
-    //   'Order Supreme Sprouts',
-    //   'Supreme Sprouts LTD',
-    //   htmlTemplate,
-    // );
-
-    // if (existingUser.email) {
-    //   await emailHandler(
-    //     existingUser.email,
-    //     'Order Supreme Sprouts',
-    //     'Supreme Sprouts LTD',
-    //     htmlTemplate,
-    //   );
-    // }
     const isSendToAdmin = true;
     await sendEmail(
       existingUser,
