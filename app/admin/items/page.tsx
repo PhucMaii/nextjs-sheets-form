@@ -55,7 +55,10 @@ export default function ItemPage() {
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories[0],
   );
-  const [ changes, emitChange ] = useSocket('update-item-page', 'change-item-page');
+  const [changes, emitChange] = useSocket(
+    'update-item-page',
+    'change-item-page',
+  );
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
@@ -64,7 +67,7 @@ export default function ItemPage() {
       setItems(changes);
       setBaseItems(changes);
     }
-  }, [changes])
+  }, [changes]);
 
   useEffect(() => {
     if (categories.length > 0 && !currentCategory) {

@@ -1,9 +1,9 @@
 version: '3.8'
 
-services: 
+services:
   app:
     build: .
-    ports: 
+    ports:
       - '3000:3000'
     volumes:
       - .:/app
@@ -12,8 +12,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-  
-  redis: 
+
+  redis:
     image: redis:alpine
     ports:
       - '6379:6379'

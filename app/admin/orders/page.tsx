@@ -114,9 +114,12 @@ export default function Orders() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
-  const [ changes, emitChange ] = useSocket('update-order' , 'change-order'); // synchronize tabs
+  const [changes, emitChange] = useSocket('update-order', 'change-order'); // synchronize tabs
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [ socketIncomingOrder, _emitIncomingOrder ] = useSocket('admin-incoming-order' , '');
+  const [socketIncomingOrder, _emitIncomingOrder] = useSocket(
+    'admin-incoming-order',
+    '',
+  );
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
 
@@ -136,7 +139,7 @@ export default function Orders() {
     if (socketIncomingOrder) {
       setIncomingOrder(socketIncomingOrder);
     }
-  }, [socketIncomingOrder])
+  }, [socketIncomingOrder]);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -165,7 +168,7 @@ export default function Orders() {
   //   pusherClient.bind('incoming-order', (order: Order) => {
   //     setIncomingOrder(order);
   //   });
-   
+
   //   return () => {
   //     pusherClient.unsubscribe('admin');
   //     pusherClient.unsubscribe('override-order');

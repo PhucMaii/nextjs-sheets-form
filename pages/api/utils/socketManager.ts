@@ -12,5 +12,5 @@ export const initializeSocket = (server: HTTPServer) => {
 };
 
 export const getSocketInstance = (res: any) => {
-    return res.socket.server.io;
+  return res.socket.server.io;
 };

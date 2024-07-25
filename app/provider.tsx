@@ -15,13 +15,13 @@ export const Providers = ({ children }: Props) => {
     <SessionProvider>
       <AuthenGuard>
         <SocketProvider>
-        <SWRConfig
-          value={{
-            fetcher: (url: string) => axios.get(url).then((r) => r.data),
-          }}
-        >
-          {children}
-        </SWRConfig>
+          <SWRConfig
+            value={{
+              fetcher: (url: string) => axios.get(url).then((r) => r.data),
+            }}
+          >
+            {children}
+          </SWRConfig>
         </SocketProvider>
       </AuthenGuard>
     </SessionProvider>

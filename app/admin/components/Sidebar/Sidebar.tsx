@@ -39,8 +39,14 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
-  const [socketIncomingOrder, _emitSocketIncomingOrder] = useSocket('admin-incoming-order', '');
-  const [socketOverridedOrder, _emitSocketOverridedOrder] = useSocket('override-order', '');
+  const [socketIncomingOrder, _emitSocketIncomingOrder] = useSocket(
+    'admin-incoming-order',
+    '',
+  );
+  const [socketOverridedOrder, _emitSocketOverridedOrder] = useSocket(
+    'override-order',
+    '',
+  );
   const [socketVoidOrder, _emitSocketVoidOrder] = useSocket('void-order', '');
 
   const router = useRouter();
@@ -85,11 +91,11 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
     if (socketOverridedOrder) {
       setSingleOrder(socketOverridedOrder);
     }
-    
+
     if (socketVoidOrder) {
       setSingleOrder(socketVoidOrder);
     }
-  }, [socketIncomingOrder, socketOverridedOrder, socketVoidOrder])
+  }, [socketIncomingOrder, socketOverridedOrder, socketVoidOrder]);
 
   useEffect(() => {
     handleSinglePrint();
@@ -175,9 +181,9 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   if (mdDown) {
     return (
       <Box sx={{ m: 1 }}>
-          <IconButton onClick={() => setIsNavOpen(true)}>
-            <MenuIcon />
-          </IconButton>
+        <IconButton onClick={() => setIsNavOpen(true)}>
+          <MenuIcon />
+        </IconButton>
         {/* <Box
           display="flex"
           alignItems="center"

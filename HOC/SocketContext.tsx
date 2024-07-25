@@ -3,14 +3,15 @@ import { io } from 'socket.io-client';
 
 const SocketContext = createContext(null);
 
+export const apiUrl: any = process.env.NEXT_PUBLIC_API_URL;
 export const SocketProvider = ({ children }: any) => {
   const socket: any = useRef(null);
 
   useEffect(() => {
     // Initialize the socket connection
-    socket.current = io('http://localhost:3000', {
-        path: '/api/socket',
-      });
+    socket.current = io(apiUrl, {
+      path: '/api/socket',
+    });
 
     socket.current.on('connect', () => {
       console.log('Connected to socket.io server');
@@ -29,7 +30,7 @@ export const SocketProvider = ({ children }: any) => {
 
   return (
     <SocketContext.Provider value={socket.current}>
-        {children}
+      {children}
     </SocketContext.Provider>
-  )
+  );
 };

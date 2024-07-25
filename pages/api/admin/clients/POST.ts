@@ -1,7 +1,7 @@
 import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {

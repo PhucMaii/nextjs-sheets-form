@@ -86,7 +86,10 @@ const loginUser = async (credentials: any) => {
   if (!user) {
     throw new Error('User does not Exist');
   }
-  const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+  const isPasswordValid = await bcrypt.compare(
+    credentials.password,
+    user.password,
+  );
   if (!isPasswordValid) {
     throw new Error('Incorrect Credentials');
   }
@@ -109,7 +112,10 @@ const loginDriver = async (credentials: any) => {
   if (!driver) {
     throw new Error('Driver name does not Exist');
   }
-  const isPasswordValid = await bcrypt.compare(credentials.password, driver.password);
+  const isPasswordValid = await bcrypt.compare(
+    credentials.password,
+    driver.password,
+  );
   if (!isPasswordValid) {
     throw new Error('Incorrect Credentials');
   }

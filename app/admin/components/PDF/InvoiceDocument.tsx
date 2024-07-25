@@ -30,9 +30,9 @@ const styles = StyleSheet.create({
   bottomSubtitle: {
     display: 'flex',
     // justifyContent: 'center',
-    // alignItems:"center", 
-    textAlign: "center",
-    marginTop: 20
+    // alignItems:"center",
+    textAlign: 'center',
+    marginTop: 20,
   },
   table: {
     display: 'flex',
@@ -109,7 +109,6 @@ const InvoiceDocument: React.FC<IProps> = ({
   const ordersPerPage = 25;
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
-
   return (
     <Document>
       {[...Array(totalPages)].map((_, pageIndex) => (
@@ -179,10 +178,7 @@ const InvoiceDocument: React.FC<IProps> = ({
               ))}
           </View>
           <View style={styles.bottomSubtitle}>
-            <Text style={styles.h2}>  
-            {sendChequeMsg}
-            </Text>
-          
+            <Text style={styles.h2}>{sendChequeMsg}</Text>
           </View>
         </Page>
       ))}

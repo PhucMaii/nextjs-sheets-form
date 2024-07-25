@@ -47,10 +47,10 @@ export default function AuthenGuard({ children }: any) {
 
   useEffect(() => {
     if (user) {
-      connectSocket(session?.user.id)
+      connectSocket(session?.user.id);
     }
-    console.log({session, user})
-  }, [session, user])
+    console.log({ session, user });
+  }, [session, user]);
 
   useEffect(() => {
     if (

@@ -46,7 +46,6 @@ export default async function DELETE(
         );
 
         io.emit('admin-delete-order', deletedOrder);
-
       }
     } else if (orderId) {
       const existingOrder = await prisma.orders.findUnique({

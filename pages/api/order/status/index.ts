@@ -135,7 +135,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       totalPrice: total,
       category: userCategory,
       isVoid: true,
-    }
+    };
 
     await pusherServer.trigger('void-order', 'incoming-order', {
       ...existingUser,

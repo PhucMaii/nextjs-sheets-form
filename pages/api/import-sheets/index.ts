@@ -152,7 +152,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ...newOrder,
       totalPrice,
       category: userCategory,
-    })
+    });
 
     // Generate object of quantity, price, and totalPrice
     const orderDetails = body;

@@ -146,5 +146,5 @@ Unit 1 - 6420 Beresford Street Burnaby,
 British Columbia V5E 1B6, Canada
 if we are unable to collect it in person.
 Thank you for your cooperation.
-  `
-}
+  `;
+};

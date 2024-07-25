@@ -34,8 +34,8 @@ export const mainItems = [
   'RICE NOODLE',
   'LIQUID EGG',
   'EGG PLANT',
-  'LIME'
-]
+  'LIME',
+];
 
 export const officiallyStartDate = new Date('01/01/2024');
 
@@ -47,7 +47,6 @@ Burnaby, British Columbia V5E 1B6, Canada
 if we are unable to collect it in person.
 Thank you for your cooperation. *
 `;
-
 
 export const days = [
   'Sunday',

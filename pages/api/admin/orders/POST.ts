@@ -42,7 +42,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           'admin-schedule-order',
           'pre-order',
           hasClientOrder,
-        );        
+        );
         console.log({ alreadyOrder: scheduleOrder });
         io.emit('admin-pre-order', scheduleOrder);
         continue;

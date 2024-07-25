@@ -23,7 +23,7 @@ const UserContextAPI = ({ children }: { children: ReactNode }) => {
     },
   );
 
-  console.log({session})
+  console.log({ session });
 
   return (
     <UserContext.Provider value={{ user: user?.data, mutate, isValidating }}>

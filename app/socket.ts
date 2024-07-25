@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client';
 
 export const socket = io({
-    path: '/api/socket'
+  path: '/api/socket',
 });

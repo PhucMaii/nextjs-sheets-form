@@ -1,10 +1,4 @@
-import {
-  Badge,
-  Box,
-  IconButton,
-  Menu,
-  Typography,
-} from '@mui/material';
+import { Badge, Box, IconButton, Menu, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { ILocalNoti } from '@/hooks/useLocalStorage';

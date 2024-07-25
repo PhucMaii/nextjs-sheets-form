@@ -126,7 +126,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       totalPrice: total,
       category: userCategory,
       isReplacement: true,
-    }
+    };
 
     await pusherServer.trigger('override-order', 'incoming-order', {
       items: itemList,
@@ -136,7 +136,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       category: userCategory,
       isReplacement: true,
     });
-    io.emit('override-order', overridedOrder)
+    io.emit('override-order', overridedOrder);
 
     return res.status(200).json({
       message: 'Override Order Successfully',

@@ -1,4 +1,5 @@
 import { UserContext } from '@/app/context/UserContextAPI';
+import { apiUrl } from '@/HOC/SocketContext';
 import { useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
@@ -9,7 +10,7 @@ const useSocket = (receivingMsg: string, sendingMsg: string) => {
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    const socket = io('http://localhost:3000', {
+    const socket = io(apiUrl, {
       path: '/api/socket',
     });
 
@@ -35,7 +36,7 @@ const useSocket = (receivingMsg: string, sendingMsg: string) => {
     }
   };
 
-  return [ changes, emitChange ];
+  return [changes, emitChange];
 };
 
 export default useSocket;

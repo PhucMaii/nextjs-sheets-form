@@ -100,14 +100,13 @@ const useManifest = (
   const getItemsManifest = () => {
     const items = orderPrint.map((order: Order) => {
       return order?.items.map((item: any) => {
-          return {
-            ...item,
-            routeId: order.routeId,
-            client: order.clientName,
-            user: order.user,
-          };
-        }
-      );
+        return {
+          ...item,
+          routeId: order.routeId,
+          client: order.clientName,
+          user: order.user,
+        };
+      });
     });
 
     // If order print is undefined
