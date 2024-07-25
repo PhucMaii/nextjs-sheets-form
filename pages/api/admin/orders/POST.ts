@@ -6,6 +6,7 @@ import { checkHasClientOrder } from '../../import-sheets';
 import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
+import { getSocketInstance } from '../../utils/socketManager';
 
 interface BodyTypes {
   deliveryDate: string;
@@ -15,6 +16,7 @@ interface BodyTypes {
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { deliveryDate, scheduleOrderList } = req.body as BodyTypes;
+    const io = getSocketInstance(res);
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];
@@ -27,6 +29,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           scheduleOrder,
         );
         console.log({ zeroTotalPrice: scheduleOrder });
+        io.emit('admin-pre-order', scheduleOrder);
         continue;
       }
       // Check has user order for today, if yes then skip that client
@@ -39,8 +42,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           'admin-schedule-order',
           'pre-order',
           hasClientOrder,
-        );
+        );        
         console.log({ alreadyOrder: scheduleOrder });
+        io.emit('admin-pre-order', scheduleOrder);
         continue;
       }
 
@@ -61,6 +65,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       updatedOrderList.push(newOrder);
 
       await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
+      io.emit('admin-pre-order', newOrder);
       console.log({ successful: scheduleOrder });
     }
 

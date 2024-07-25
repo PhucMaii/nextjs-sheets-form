@@ -1,6 +1,5 @@
 import { Server as HTTPServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { NextApiResponseWithSocket } from '../socket';
 
 let io: any;
 
@@ -12,6 +11,6 @@ export const initializeSocket = (server: HTTPServer) => {
   return io;
 };
 
-export const getSocketInstance = (res: NextApiResponseWithSocket) => {
+export const getSocketInstance = (res: any) => {
     return res.socket.server.io;
 };

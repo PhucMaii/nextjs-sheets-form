@@ -1,20 +1,18 @@
 // import { google } from 'googleapis';
-import { NextApiRequest } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { sendEmail } from '../utils/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
-// import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
-import { NextApiResponseWithSocket } from '../socket';
 import { getSocketInstance } from '../utils/socketManager';
 
 interface RequestQuery {
   userId?: string;
 }
 
-const handler = async (req: NextApiRequest, res: NextApiResponseWithSocket) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
     return res.status(500).send('Only Post method allowed');
   }

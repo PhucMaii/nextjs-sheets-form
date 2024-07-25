@@ -5,6 +5,7 @@ import { authOptions } from '../auth/[...nextauth]';
 import { pusherServer } from '@/app/pusher';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../utils/email';
+import { getSocketInstance } from '../utils/socketManager';
 
 interface BodyProps {
   deliveryDate: string;
@@ -16,6 +17,7 @@ interface BodyProps {
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
+    const io = getSocketInstance(res);
 
     const body = req.body as BodyProps;
 
@@ -117,6 +119,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       htmlTemplate,
     );
 
+    const overridedOrder = {
+      items: itemList,
+      ...existingUser,
+      ...newOrder,
+      totalPrice: total,
+      category: userCategory,
+      isReplacement: true,
+    }
+
     await pusherServer.trigger('override-order', 'incoming-order', {
       items: itemList,
       ...existingUser,
@@ -125,6 +136,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       category: userCategory,
       isReplacement: true,
     });
+    io.emit('override-order', overridedOrder)
 
     return res.status(200).json({
       message: 'Override Order Successfully',

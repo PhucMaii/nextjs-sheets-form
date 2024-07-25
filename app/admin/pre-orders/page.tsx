@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -80,7 +81,14 @@ export default function ScheduledOrderPage() {
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
-  const [changes, emitChange ] = useSocket('update-preOrder-page', 'change-preOrder-page') 
+  const [changes, emitChange] = useSocket(
+    'update-preOrder-page',
+    'change-preOrder-page',
+  );
+  const [socketPreOrder, _emitSocketPreOrder] = useSocket(
+    'admin-pre-order',
+    '',
+  );
 
   const { clientList } = useClients(days[dayIndex]);
   const { driverList } = useDrivers();
@@ -102,7 +110,7 @@ export default function ScheduledOrderPage() {
         mutate(changes.mutate);
       }
     }
-  }, [changes])
+  }, [changes]);
 
   useEffect(() => {
     if (routes.length > 0) {
@@ -122,9 +130,25 @@ export default function ScheduledOrderPage() {
     }
   }, [preOrderProgress]);
 
-  useEffect(() => {
-    pusherClient.subscribe('admin-schedule-order');
+  // useEffect(() => {
+  //   pusherClient.subscribe('admin-schedule-order');
 
+  //   const handleReceiveOrder = (incomingOrder: Order) => {
+  //     const sameIdOrder = createdOrders.some(
+  //       (order: Order) => order.id === incomingOrder.id,
+  //     );
+
+  //     if (!sameIdOrder) {
+  //       setCreatedOrders((prevOrders) => [...prevOrders, incomingOrder]);
+  //     }
+  //   };
+  //   pusherClient.bind('pre-order', handleReceiveOrder);
+
+  //   return () => {
+  //     pusherClient.unsubscribe('admin-schedule-order');
+  //   };
+  // }, []);
+  useEffect(() => {
     const handleReceiveOrder = (incomingOrder: Order) => {
       const sameIdOrder = createdOrders.some(
         (order: Order) => order.id === incomingOrder.id,
@@ -134,12 +158,10 @@ export default function ScheduledOrderPage() {
         setCreatedOrders((prevOrders) => [...prevOrders, incomingOrder]);
       }
     };
-    pusherClient.bind('pre-order', handleReceiveOrder);
-
-    return () => {
-      pusherClient.unsubscribe('admin-schedule-order');
-    };
-  }, []);
+    if (socketPreOrder) {
+      handleReceiveOrder(socketPreOrder);
+    }
+  }, [socketPreOrder]);
 
   useEffect(() => {
     if (selectedOrders.length > 0) {
@@ -198,8 +220,8 @@ export default function ScheduledOrderPage() {
       setBaseOrderList(newBaseOrderList);
       emitChange({
         orderList: newBaseOrderList,
-        baseOrderList: newBaseOrderList
-      })
+        baseOrderList: newBaseOrderList,
+      });
     } else {
       const newOrderList = orderList.map((order: ScheduledOrder) => {
         if (order.id === newOrder.id) {
@@ -219,8 +241,8 @@ export default function ScheduledOrderPage() {
       setBaseOrderList(newBaseOrderList);
       emitChange({
         orderList: newOrderList,
-        baseOrderList: newBaseOrderList
-      })
+        baseOrderList: newBaseOrderList,
+      });
     }
   };
 
@@ -316,8 +338,8 @@ export default function ScheduledOrderPage() {
 
       mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
       emitChange({
-        mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`
-      })
+        mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`,
+      });
 
       const newRoutes = routes.filter((route: IRoutes) => {
         return route.id !== targetRoute.id;
@@ -352,8 +374,8 @@ export default function ScheduledOrderPage() {
       const orderData = await fetchOrders();
       emitChange({
         orderList: orderData,
-        baseOrderList: orderData
-      })
+        baseOrderList: orderData,
+      });
 
       setNotification({
         on: true,
@@ -395,7 +417,7 @@ export default function ScheduledOrderPage() {
       setBaseOrderList(response.data.data);
       setOrderList(response.data.data);
       setIsLoading(false);
-      return response.data.data
+      return response.data.data;
     } catch (error: any) {
       console.log('Fail to fetch orders: ', error);
       setNotification({
@@ -444,8 +466,8 @@ export default function ScheduledOrderPage() {
     mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
     emitChange({
       routes: [...routes, targetRoute],
-      mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`
-    })
+      mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`,
+    });
   };
 
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
@@ -464,7 +486,7 @@ export default function ScheduledOrderPage() {
     emitChange({
       baseOrderList: newBaseOrderList,
       orderList: newOrderList,
-    })
+    });
   };
 
   const handleSelectOrder = (e: any, targetOrder: ScheduledOrder) => {
@@ -515,7 +537,7 @@ export default function ScheduledOrderPage() {
     emitChange({
       baseOrderList: newBaseOrderList,
       orderList: newOrderList,
-    })
+    });
   };
 
   const handleUpdateRouteUI = (targetRoute: IRoutes) => {
@@ -528,13 +550,13 @@ export default function ScheduledOrderPage() {
 
     mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
     emitChange({
-      mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`
-    })
+      mutate: `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`,
+    });
 
     setRoutes(newRoutes);
     emitChange({
       routes: newRoutes,
-    })
+    });
   };
 
   const saveOrderArrangement = async () => {
@@ -572,7 +594,7 @@ export default function ScheduledOrderPage() {
       emitChange({
         orderList: orderData,
         baseOrderList: orderData,
-      })
+      });
 
       setIsSavingArrangement(false);
       setNotification({

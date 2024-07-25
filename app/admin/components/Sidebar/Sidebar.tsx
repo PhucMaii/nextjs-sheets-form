@@ -11,7 +11,7 @@ import {
   Toolbar,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { tabs } from '../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
@@ -21,11 +21,11 @@ import { blueGrey } from '@mui/material/colors';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
-import { pusherClient } from '@/app/pusher';
+// import { pusherClient } from '@/app/pusher';
 import { primaryColor } from '@/theme/color';
 import useLocalStorage, { ILocalNoti } from '@/hooks/useLocalStorage';
-import NotificationBadge from '../Notifications/NotificationBadge';
-import { UserContext } from '@/app/context/UserContextAPI';
+// import NotificationBadge from '../Notifications/NotificationBadge';
+import useSocket from '@/hooks/useSocket';
 
 interface PropTypes {
   children: ReactNode;
@@ -38,8 +38,11 @@ const url = process.env.NEXT_PUBLIC_WEB_URL;
 export default function Sidebar({ children, noMargin }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [orders, setOrders] = useState<Order[]>([]);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
+  const [socketIncomingOrder, _emitSocketIncomingOrder] = useSocket('admin-incoming-order', '');
+  const [socketOverridedOrder, _emitSocketOverridedOrder] = useSocket('override-order', '');
+  const [socketVoidOrder, _emitSocketVoidOrder] = useSocket('void-order', '');
+
   const router = useRouter();
   const pathname: any = usePathname();
 
@@ -51,28 +54,42 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   const allPrintRef: any = useRef();
 
   // Subscribe admin whenever they logged in
+  // useEffect(() => {
+  //   pusherClient.subscribe('admin');
+  //   pusherClient.subscribe('override-order');
+  //   pusherClient.subscribe('void-order');
+
+  //   pusherClient.bind('incoming-order', (order: Order) => {
+  //     setSingleOrder(order);
+
+  //     const newLocalNoti: ILocalNoti = {
+  //       title: 'Order Placed Successfully',
+  //       description: `${order.clientName} placed an order for ${order.deliveryDate} at ${order.orderTime}`,
+  //     };
+
+  //     setLocalNotifications([...localNotifications, newLocalNoti]);
+  //   });
+
+  //   return () => {
+  //     pusherClient.unsubscribe('admin');
+  //     pusherClient.unsubscribe('override-order');
+  //     pusherClient.unsubscribe('void-order');
+  //   };
+  // }, []);
+
   useEffect(() => {
-    pusherClient.subscribe('admin');
-    pusherClient.subscribe('override-order');
-    pusherClient.subscribe('void-order');
+    if (socketIncomingOrder) {
+      setSingleOrder(socketIncomingOrder);
+    }
 
-    pusherClient.bind('incoming-order', (order: Order) => {
-      setSingleOrder(order);
-
-      const newLocalNoti: ILocalNoti = {
-        title: 'Order Placed Successfully',
-        description: `${order.clientName} placed an order for ${order.deliveryDate} at ${order.orderTime}`,
-      };
-
-      setLocalNotifications([...localNotifications, newLocalNoti]);
-    });
-
-    return () => {
-      pusherClient.unsubscribe('admin');
-      pusherClient.unsubscribe('override-order');
-      pusherClient.unsubscribe('void-order');
-    };
-  }, []);
+    if (socketOverridedOrder) {
+      setSingleOrder(socketOverridedOrder);
+    }
+    
+    if (socketVoidOrder) {
+      setSingleOrder(socketVoidOrder);
+    }
+  }, [socketIncomingOrder, socketOverridedOrder, socketVoidOrder])
 
   useEffect(() => {
     handleSinglePrint();
@@ -158,20 +175,20 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   if (mdDown) {
     return (
       <Box sx={{ m: 1 }}>
-        <Box
+          <IconButton onClick={() => setIsNavOpen(true)}>
+            <MenuIcon />
+          </IconButton>
+        {/* <Box
           display="flex"
           alignItems="center"
           justifyContent="space-between"
           mb={1}
         >
-          <IconButton onClick={() => setIsNavOpen(true)}>
-            <MenuIcon />
-          </IconButton>
           <NotificationBadge
             localNoti={localNotifications}
             setLocalNoti={setLocalNotifications}
           />
-        </Box>
+        </Box> */}
         <Box display="flex">
           <Drawer
             sx={{
@@ -225,12 +242,12 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
           gap={2}
         >
           {printComponents}
-          <Box display="flex" justifyContent="right">
+          {/* <Box display="flex" justifyContent="right">
             <NotificationBadge
               localNoti={localNotifications}
               setLocalNoti={setLocalNotifications}
             />
-          </Box>
+          </Box> */}
           {children}
         </Box>
       </Box>

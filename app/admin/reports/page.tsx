@@ -54,7 +54,6 @@ import { days, limitOrderHour } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
-import { pusherClient } from '@/app/pusher';
 import {
   convertDeliveryDateStringToDate,
   filterDateRangeOrders,
@@ -108,24 +107,43 @@ export default function ReportPage() {
   const { routes, mutate } = useRoutes(days[currentDate.getDay()]);
   const { clientList } = useClients();
   const { subCategories } = useSubCategories();
-  const [ changes, emitChange ] = useSocket('update-report-page', 'change-report-page');
+  const [changes, emitChange] = useSocket(
+    'update-report-page',
+    'change-report-page',
+  );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [socketDeleteOrder, _emitSocketDeleteOrder] = useSocket(
+    'admin-delete-order',
+    '',
+  );
+
+  // useEffect(() => {
+  //   pusherClient.subscribe('admin-delete-order');
+
+  //   pusherClient.bind('delete-order', (deletedOrder: Order) => {
+  //     setNotification({
+  //       on: true,
+  //       type: 'success',
+  //       message: `Order ${deletedOrder.id} deleted successfully`,
+  //     });
+  //     setDeletedOrder(deletedOrder);
+  //   });
+
+  //   return () => {
+  //     pusherClient.unsubscribe('admin-delete-order');
+  //   };
+  // }, []);
 
   useEffect(() => {
-    pusherClient.subscribe('admin-delete-order');
-
-    pusherClient.bind('delete-order', (deletedOrder: Order) => {
+    if (socketDeleteOrder) {
       setNotification({
         on: true,
         type: 'success',
-        message: `Order ${deletedOrder.id} deleted successfully`,
+        message: `Order ${socketDeleteOrder.id} deleted successfully`,
       });
-      setDeletedOrder(deletedOrder);
-    });
-
-    return () => {
-      pusherClient.unsubscribe('admin-delete-order');
-    };
-  }, []);
+      setDeletedOrder(socketDeleteOrder);
+    }
+  }, [socketDeleteOrder]);
 
   useEffect(() => {
     if (changes) {
@@ -133,9 +151,9 @@ export default function ReportPage() {
         setUnpaidOrders(changes.unpaidOrders);
       }
       setClientOrders(changes.clientOrders);
-      setBaseClientOrders(changes.baseClientOrders)
+      setBaseClientOrders(changes.baseClientOrders);
     }
-  })
+  });
 
   useEffect(() => {
     if (deletedOrder) {
@@ -258,8 +276,8 @@ export default function ReportPage() {
       return {
         unpaidOrders: newUnpaidOrders,
         clientOrders: orderData,
-        baseClientOrders: orderData
-      }
+        baseClientOrders: orderData,
+      };
     } catch (error: any) {
       console.log('Fail to fetch client orders: ', error);
       setNotification({
@@ -378,8 +396,8 @@ export default function ReportPage() {
     emitChange({
       baseClientOrders: newBaseOrderList,
       clientOrders: newOrderList,
-      unpaidOrders: newUnpaidOrders
-    })
+      unpaidOrders: newUnpaidOrders,
+    });
   };
 
   const handleDeleteSelectedOrders = async () => {

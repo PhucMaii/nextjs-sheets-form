@@ -1,5 +1,6 @@
 import { Order } from '@/app/admin/orders/page';
 import { pusherServer } from '@/app/pusher';
+import { getSocketInstance } from '@/pages/api/utils/socketManager';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -14,6 +15,7 @@ export default async function DELETE(
 ) {
   try {
     const prisma = new PrismaClient();
+    const io = getSocketInstance(res);
 
     const { orderId, orderList } = req.body as BodyTypes;
 
@@ -42,6 +44,9 @@ export default async function DELETE(
           'delete-order',
           deletedOrder,
         );
+
+        io.emit('admin-delete-order', deletedOrder);
+
       }
     } else if (orderId) {
       const existingOrder = await prisma.orders.findUnique({

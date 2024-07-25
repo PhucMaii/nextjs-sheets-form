@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../../utils/email';
+import { getSocketInstance } from '../../utils/socketManager';
 
 interface BodyTypes {
   orderId: number;
@@ -21,6 +22,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const prisma = new PrismaClient();
+    const io = getSocketInstance(res);
+
     const { orderId, updatedStatus }: BodyTypes = req.body;
 
     const session: any = await getServerSession(req, res, authOptions);
@@ -125,6 +128,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       htmlTemplate,
     );
 
+    const voidOrder = {
+      ...existingUser,
+      ...existingOrder,
+      items: itemList,
+      totalPrice: total,
+      category: userCategory,
+      isVoid: true,
+    }
+
     await pusherServer.trigger('void-order', 'incoming-order', {
       ...existingUser,
       ...existingOrder,
@@ -133,6 +145,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       category: userCategory,
       isVoid: true,
     });
+
+    io.emit('void-order', voidOrder);
 
     return res.status(200).json({
       data: updatedOrder,

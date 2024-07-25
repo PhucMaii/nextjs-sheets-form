@@ -27,7 +27,6 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
-import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/add/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
@@ -117,7 +116,7 @@ export default function Orders() {
   const [tabIndex, setTabIndex] = useState<number>(0);
   const [ changes, emitChange ] = useSocket('update-order' , 'change-order'); // synchronize tabs
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [ socketIncomingOrder, _emitIncomingOrder ] = useSocket('admin-incoming-order' , 'change-order');
+  const [ socketIncomingOrder, _emitIncomingOrder ] = useSocket('admin-incoming-order' , '');
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
 
@@ -135,7 +134,7 @@ export default function Orders() {
 
   useEffect(() => {
     if (socketIncomingOrder) {
-      console.log({socketIncomingOrder})
+      setIncomingOrder(socketIncomingOrder);
     }
   }, [socketIncomingOrder])
 
@@ -157,23 +156,23 @@ export default function Orders() {
     }
   }, [baseOrderData]);
 
-  // Subscribe admin whenever they logged in
-  useEffect(() => {
-    pusherClient.subscribe('admin');
-    pusherClient.subscribe('override-order');
-    pusherClient.subscribe('void-order');
+  // // Subscribe admin whenever they logged in
+  // useEffect(() => {
+  //   pusherClient.subscribe('admin');
+  //   pusherClient.subscribe('override-order');
+  //   pusherClient.subscribe('void-order');
 
-    pusherClient.bind('incoming-order', (order: Order) => {
-      setIncomingOrder(order);
-    });
+  //   pusherClient.bind('incoming-order', (order: Order) => {
+  //     setIncomingOrder(order);
+  //   });
    
-    return () => {
-      pusherClient.unsubscribe('admin');
-      pusherClient.unsubscribe('override-order');
-      pusherClient.unsubscribe('void-order');
+  //   return () => {
+  //     pusherClient.unsubscribe('admin');
+  //     pusherClient.unsubscribe('override-order');
+  //     pusherClient.unsubscribe('void-order');
 
-    };
-  }, [date]);
+  //   };
+  // }, [date]);
 
   useEffect(() => {
     if (debouncedKeywords) {
