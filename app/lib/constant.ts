@@ -21,6 +21,22 @@ import {
   warningColor,
 } from '../../theme/color';
 
+export const mainItems = [
+  'BEAN 10 LB',
+  'BEAN 5 LB',
+  'BASIL',
+  'BEAN 24X1 LB',
+  'SOYA 10 LBS',
+  'SOYA 5 LBS',
+  'SOYA 24X1 LB',
+  'MUSHROOM',
+  'JUMBO EGG',
+  'RICE NOODLE',
+  'LIQUID EGG',
+  'EGG PLANT',
+  'LIME'
+]
+
 export const officiallyStartDate = new Date('01/01/2024');
 
 export const sendChequeMsg = `
