@@ -9,6 +9,7 @@ import ReactPDF from '@react-pdf/renderer';
 import React from 'react';
 import { Order } from '@/app/admin/orders/page';
 import nodemailer from 'nodemailer';
+import DebtOrders from '@/app/admin/components/PDF/DebtOrders';
 
 const emailHandler = async (
   email: string,
@@ -89,13 +90,18 @@ export const sendInvoiceThroughEmail = async (
   debtData: any,
   sortDebtKeys: any,
 ) => {
-  const element: any = React.createElement(InvoiceDocument, {
+  const invoiceElement: any = React.createElement(InvoiceDocument, {
     client,
     orders,
-    debtData,
+    debtData: debtData.overview,
     sortDebtKeys,
   });
-  const pdfStream = await ReactPDF.renderToStream(element);
+  const debtOrdersElement: any = React.createElement(DebtOrders, {
+    debtOrders: debtData.debtOrders,
+  });
+
+  const invoicePdfStream = await ReactPDF.renderToStream(invoiceElement);
+  const debtOrdersPdfStream = await ReactPDF.renderToStream(debtOrdersElement);
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -109,13 +115,18 @@ export const sendInvoiceThroughEmail = async (
 
   const mailOptions: any = {
     from: process.env.NODEMAILER_EMAIL,
-    to: client.email,
+    to: 'binmaiforwork@gmail.com',
     subject: 'Invoice from Supreme Sprouts Ltd.',
     text: invoiceEmail,
     attachments: [
       {
         filename: `${client.clientName}-invoice.pdf`,
-        content: pdfStream,
+        content: invoicePdfStream,
+        contentType: 'application/pdf',
+      },
+      {
+        filename: `${client.clientName}-debt-orders.pdf`,
+        content: debtOrdersPdfStream,
         contentType: 'application/pdf',
       },
     ],
@@ -146,5 +157,5 @@ Unit 1 - 6420 Beresford Street Burnaby,
 British Columbia V5E 1B6, Canada
 if we are unable to collect it in person.
 Thank you for your cooperation.
-  `
-}
+  `;
+};

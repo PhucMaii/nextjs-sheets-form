@@ -33,13 +33,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const formattedEndDate = new Date(endDate);
 
-    const incompletedOrders = await prisma.orders.findMany({
+    const incompletedOrders: any = await prisma.orders.findMany({
       where: {
         userId: client.id,
         status: {
           in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
         },
       },
+      include: {
+        items: true,
+        user: true,
+      }
+    });
+
+    const ordersWithItemTotalPrice = incompletedOrders.map((order: Order) => {
+      const items = order.items.map((item: any) => {
+        const totalPrice = item.price * item.quantity;
+        return {...item, totalPrice }
+      });
+      return {...order, items};
     });
 
     // Group order by mm/yyyy
@@ -50,7 +62,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const sortedDebtByMonth = sortKeys(debtData);
 
-    await sendInvoiceThroughEmail(client, orders, debtData, sortedDebtByMonth);
+    await sendInvoiceThroughEmail(client, orders, {overview: debtData, debtOrders: ordersWithItemTotalPrice}, sortedDebtByMonth);
     return res.status(200).json({
       message: 'Send Invoice Successfully',
     });
