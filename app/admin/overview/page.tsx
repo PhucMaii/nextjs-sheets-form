@@ -39,12 +39,14 @@ export default function Overview() {
 
   const fetchOverviewData = async () => {
     try {
+      console.log({dateRange});
       setIsFetching(true);
       const returnData = await fetchData(
         `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
         setNotification,
       );
 
+      console.log({customerInDebt: returnData.customersInDebt})
       setOverviewData(returnData.overviewData);
       setRevenueData(returnData.reports);
       setBeansproutsData(returnData.beansprouts);

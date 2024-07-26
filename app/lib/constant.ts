@@ -37,7 +37,7 @@ export const mainItems = [
   'LIME'
 ]
 
-export const officiallyStartDate = new Date('01/01/2024');
+export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (0 = January)
 
 export const sendChequeMsg = `
 * Please send your payment by cheque to:

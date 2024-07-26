@@ -594,7 +594,7 @@ export default function ReportPage() {
           open={isOpenBillPrintModal}
           onClose={() => setIsOpenBillPrintModal(false)}
           routes={routes || []}
-          orderList={clientOrders}
+          orderList={selectedOrders.length > 0 ? selectedOrders : clientOrders}
           day={datePicker}
         />
       )}

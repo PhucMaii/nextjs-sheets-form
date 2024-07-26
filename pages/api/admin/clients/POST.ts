@@ -1,7 +1,7 @@
 import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
-import { hash } from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {
@@ -43,7 +43,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const newPassword = await hash(contactNumber, 12);
+    const newPassword = await bcrypt.hash(contactNumber, 12);
     const addresss = await generateLatLng(deliveryAddress);
 
     const newClient = await prisma.user.create({

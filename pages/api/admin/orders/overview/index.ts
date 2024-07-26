@@ -1,4 +1,5 @@
-import { officiallyStartDate } from '@/app/lib/constant';
+import { Order } from '@/app/admin/orders/page';
+// import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { sortByDeliveryDate } from '@/pages/api/utils/date';
@@ -19,6 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
     const prisma = new PrismaClient();
+    const officiallyStartDate = new Date(2024, 0, 1);
 
     const { startDate, endDate }: IQuery = req.query;
 
@@ -131,10 +133,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const BKPercentage = (BKRevenue / revenue) * 100;
     const PPPercentage = (PPRevenue / revenue) * 100;
 
-    const customersInDebt = await getCustomersInDebt(
+    // Calculate customers in debt
+    const debtRange = generateListOfDateString(
       officiallyStartDate,
       formattedEndDate,
     );
+    const debtOrders: any = await prisma.orders.findMany({
+      where: {
+        status: {
+          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+        },
+        deliveryDate: {
+          in: debtRange,
+        },
+      },
+      include: {
+        items: true,
+        user: true,
+      },
+    });
+    const customersInDebt = getCustomersInDebt(debtOrders);
 
     return res.status(200).json({
       data: {
@@ -246,24 +264,8 @@ const getLastMonthRevenue = async (
   return formatLengthRevenue;
 };
 
-const getCustomersInDebt = async (startDate: Date, endDate: Date) => {
-  const prisma = new PrismaClient();
-  const datesInRange = generateListOfDateString(startDate, endDate);
-  const ordersInRange = await prisma.orders.findMany({
-    where: {
-      status: {
-        in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
-      },
-      deliveryDate: {
-        in: datesInRange,
-      },
-    },
-    include: {
-      items: true,
-      user: true,
-    },
-  });
-  const customersInDebt = ordersInRange.reduce((acc: any, order: any) => {
+const getCustomersInDebt = (debtOrders: Order[]) => {
+  const customersInDebt = debtOrders.reduce((acc: any, order: any) => {
     if (order.user.role === USER_ROLE.ADMIN) {
       return acc;
     }
