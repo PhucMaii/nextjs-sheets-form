@@ -16,13 +16,14 @@ import ManifestTable from '../components/Tables/ManifestTable';
 import CustomersInDebt from '../components/Tables/CustomersInDebt';
 import LoadingModal from '../components/Modals/LoadingModal';
 import BSOverview from '../components/BSOverview';
+import useLocalStorage from '@/hooks/useLocalStorage';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isFetching, setIsFetching] = useState<boolean>(true);
-  const [isMinify, setIsMinify] = useState<boolean>(false);
+  // const [isMinify, setIsMinify] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -30,6 +31,7 @@ export default function Overview() {
   });
   const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
+  const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
 
   useEffect(() => {
     if (dateRange) {

@@ -39,11 +39,10 @@ export const InvoicePrint = forwardRef(
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
     const { debtData, sortDebtKeys } = useApiDebtData(client.id, endMonth);
-    console.log({ debtData, sortDebtKeys });
 
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);
-    const ordersPerPage = 18;
+    const ordersPerPage = 15;
     const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
     return (
