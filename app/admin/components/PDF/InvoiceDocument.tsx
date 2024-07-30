@@ -33,7 +33,6 @@ const InvoiceDocument: React.FC<IProps> = ({
   const ordersPerPage = 25;
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
-
   return (
     <Document>
       {[...Array(totalPages)].map((_, pageIndex) => (
@@ -103,10 +102,7 @@ const InvoiceDocument: React.FC<IProps> = ({
               ))}
           </View>
           <View style={styles.bottomSubtitle}>
-            <Text style={styles.h2}>  
-            {sendChequeMsg}
-            </Text>
-          
+            <Text style={styles.h2}>{sendChequeMsg}</Text>
           </View>
         </Page>
       ))}

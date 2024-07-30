@@ -29,7 +29,7 @@ export default function SearchModal({
   onClose,
   orders,
   handleUpdateStatus,
-  handleUpdateItem
+  handleUpdateItem,
 }: IProps) {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);

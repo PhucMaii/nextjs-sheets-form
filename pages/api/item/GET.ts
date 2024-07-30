@@ -7,14 +7,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
     const session: any = await getServerSession(req, res, authOptions);
+    const { userId } = req.query;
 
-    if (!session) {
+    if (!session && !userId) {
       return res.status(401).json({ error: 'You are not authenticated' });
     }
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        id: Number(session.user.id),
+        id: userId ? Number(userId) : Number(session.user.id),
       },
     });
 

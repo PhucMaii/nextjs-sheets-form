@@ -19,9 +19,9 @@ interface PropTypes {
   routes: IRoutes[];
 }
 
-const BorderRightTableCell = styled(TableCell) `
+const BorderRightTableCell = styled(TableCell)`
   border: 1px solid grey;
-`
+`;
 
 export const ManifestPrint = forwardRef(
   ({ manifest, routes }: PropTypes, ref: any) => {
@@ -64,94 +64,97 @@ export const ManifestPrint = forwardRef(
                     Driver: {targetRoute.driver?.name}
                   </Typography>
                   <Divider sx={{ my: 2 }} />
-                  
-                  <Table sx={{ mx: 2 }}>
-                  <TableHead>
-                    <TableRow>
-                      <BorderRightTableCell align="center"></BorderRightTableCell>
-                      {sortedItems.length > 0 &&
-                        sortedItems.map((item: string, index: number) => {
-                          const { summary } = manifest[routeId];
-                          console.log({summary});
-                          if (summary[item] === 0) {
-                            return null;
-                          }
-                          return (
-                            <>
-                              <BorderRightTableCell
-                                align="center"
-                                sx={{ fontSize: 20 }}
-                                key={index}
-                              >
-                                {item === "MUSHROOM" ? 'MUSH ROOM' : item} ({summary[item] || 0})
-                              </BorderRightTableCell>
-                            </>
-                          );
-                        })}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {manifest[routeId].details.map(
-                      (user: any, index: number) => {
-                        const { summary } = manifest[routeId];
-                        return (
-                          <TableRow key={index}>
-                            <BorderRightTableCell
-                              align="center"
-                              sx={{
-                                fontSize: 20,
-                                maxWidth: '120px',
-                              }}
-                            >
-                              {user.user.clientName}
-                            </BorderRightTableCell>
-                            {sortedItems.map((item: string, index: number) => {
-                              const itemQuantity = user[item];
-                              if (summary[item] === 0) {
-                                return null;
-                              }
 
-                              if (!itemQuantity || itemQuantity === 0) {
-                                return (
-                                  <BorderRightTableCell
-                                    align="center"
-                                    key={index}
-                                  ></BorderRightTableCell>
-                                );
-                              }
-                              // Ensure the value is renderable
-                              if (typeof itemQuantity === 'object') {
-                                console.error(
-                                  `Invalid value to render for key ${item}: `,
-                                  itemQuantity,
-                                );
-                                return (
-                                  <BorderRightTableCell
-                                    key={itemQuantity}
-                                    align="center"
-                                    sx={{ fontSize: 20 }}
-                                  >
-                                    [Object]
-                                  </BorderRightTableCell>
-                                );
-                              }
-                              // console.log({userName: user.user.clientName, item: user[item]})
-                              return (
+                  <Table sx={{ mx: 2 }}>
+                    <TableHead>
+                      <TableRow>
+                        <BorderRightTableCell align="center"></BorderRightTableCell>
+                        {sortedItems.length > 0 &&
+                          sortedItems.map((item: string, index: number) => {
+                            const { summary } = manifest[routeId];
+                            console.log({ summary });
+                            if (summary[item] === 0) {
+                              return null;
+                            }
+                            return (
+                              <>
                                 <BorderRightTableCell
                                   align="center"
                                   sx={{ fontSize: 20 }}
                                   key={index}
                                 >
-                                  {itemQuantity}
+                                  {item === 'MUSHROOM' ? 'MUSH ROOM' : item} (
+                                  {summary[item] || 0})
                                 </BorderRightTableCell>
-                              );
-                            })}
-                          </TableRow>
-                        );
-                      },
-                    )}
-                  </TableBody>
-                </Table>
+                              </>
+                            );
+                          })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {manifest[routeId].details.map(
+                        (user: any, index: number) => {
+                          const { summary } = manifest[routeId];
+                          return (
+                            <TableRow key={index}>
+                              <BorderRightTableCell
+                                align="center"
+                                sx={{
+                                  fontSize: 20,
+                                  maxWidth: '120px',
+                                }}
+                              >
+                                {user.user.clientName}
+                              </BorderRightTableCell>
+                              {sortedItems.map(
+                                (item: string, index: number) => {
+                                  const itemQuantity = user[item];
+                                  if (summary[item] === 0) {
+                                    return null;
+                                  }
+
+                                  if (!itemQuantity || itemQuantity === 0) {
+                                    return (
+                                      <BorderRightTableCell
+                                        align="center"
+                                        key={index}
+                                      ></BorderRightTableCell>
+                                    );
+                                  }
+                                  // Ensure the value is renderable
+                                  if (typeof itemQuantity === 'object') {
+                                    console.error(
+                                      `Invalid value to render for key ${item}: `,
+                                      itemQuantity,
+                                    );
+                                    return (
+                                      <BorderRightTableCell
+                                        key={itemQuantity}
+                                        align="center"
+                                        sx={{ fontSize: 20 }}
+                                      >
+                                        [Object]
+                                      </BorderRightTableCell>
+                                    );
+                                  }
+                                  // console.log({userName: user.user.clientName, item: user[item]})
+                                  return (
+                                    <BorderRightTableCell
+                                      align="center"
+                                      sx={{ fontSize: 20 }}
+                                      key={index}
+                                    >
+                                      {itemQuantity}
+                                    </BorderRightTableCell>
+                                  );
+                                },
+                              )}
+                            </TableRow>
+                          );
+                        },
+                      )}
+                    </TableBody>
+                  </Table>
                   {index < Object.keys(manifest).length - 1 && (
                     <div className="page-break"></div>
                   )}

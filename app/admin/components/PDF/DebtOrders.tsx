@@ -62,7 +62,7 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
                     gap: 10,
                     alignItems: 'center',
                     marginBottom: 10,
-                    flexWrap: 'wrap'
+                    flexWrap: 'wrap',
                   }}
                 >
                   <Text style={styles.subtitle}>{field}:</Text>

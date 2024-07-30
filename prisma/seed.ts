@@ -172,12 +172,12 @@ async function main() {
   // })
   await prisma.item.updateMany({
     where: {
-      name: 'BEAN 24X1'
+      name: 'BEAN 24X1',
     },
     data: {
-      name: 'BEAN 24X1 LB'
-    }
-  })
+      name: 'BEAN 24X1 LB',
+    },
+  });
 }
 
 main()

@@ -34,8 +34,8 @@ export const mainItems = [
   'RICE NOODLE',
   'LIQUID EGG',
   'EGG PLANT',
-  'LIME'
-]
+  'LIME',
+];
 
 export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (0 = January)
 
@@ -47,7 +47,6 @@ Burnaby, British Columbia V5E 1B6, Canada
 if we are unable to collect it in person.
 Thank you for your cooperation. *
 `;
-
 
 export const days = [
   'Sunday',
@@ -124,9 +123,14 @@ export const driverTabs = [
     path: '/driver/overview',
   },
   {
-    name: 'Orders',
+    name: 'Bills',
     icon: ReceiptLongIcon,
     path: '/driver/orders',
+  },
+  {
+    name: 'Order',
+    icon: AddBoxIcon,
+    path: '/driver/place-order',
   },
   // {
   //   name: 'Message',
