@@ -57,6 +57,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return route.day === day;
     });
 
+    if (!targetRoute) {
+      return res.status(400).json({
+        data: {
+          driver: existingDriver,
+          deliveryOrders: [],
+          manifest: {},
+          codAmount: 0,
+        },
+      })
+    }
+
     const userIds = targetRoute?.clients.map((userRoute: UserRoute) => {
       return userRoute.userId;
     });
