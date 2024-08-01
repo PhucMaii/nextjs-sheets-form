@@ -138,20 +138,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       officiallyStartDate,
       formattedEndDate,
     );
-    const debtOrders: any = await prisma.orders.findMany({
-      where: {
-        status: {
-          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+
+    let debtOrders: any = [];
+    const debtFetchSize = 1000;
+    let debtFetchSkip = 0;
+    const trueCondition = true;
+
+    while(trueCondition) {
+      const fetchedDebtOrders: any = await prisma.orders.findMany({
+        where: {
+          status: {
+            in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+          },
+          deliveryDate: {
+            in: debtRange,
+          },
         },
-        deliveryDate: {
-          in: debtRange,
+        include: {
+          items: true,
+          user: true,
         },
-      },
-      include: {
-        items: true,
-        user: true,
-      },
-    });
+        take: debtFetchSize,
+        skip: debtFetchSkip,
+      });
+
+      if (fetchedDebtOrders.length === 0) break;
+
+      debtOrders = debtOrders.concat(fetchedDebtOrders);
+      debtFetchSkip += fetchedDebtOrders.length;
+    }
+
     const customersInDebt = getCustomersInDebt(debtOrders);
 
     return res.status(200).json({
