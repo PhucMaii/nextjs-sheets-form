@@ -43,6 +43,7 @@ interface PropTypes extends ModalProps {
     newTotalPrice: number,
   ) => void;
   subcategories: SubCategory[];
+  mutateOrders: any;
 }
 
 export default function EditPrice({
@@ -53,6 +54,7 @@ export default function EditPrice({
   order,
   handleUpdatePriceUI,
   subcategories,
+  mutateOrders,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [itemList, setItemList] = useState<OrderedItems[]>([]);
@@ -150,11 +152,15 @@ export default function EditPrice({
         return;
       }
 
+      // Optimistic UI Update
       handleUpdatePriceUI(
         updateOption === UpdateOption.CREATE ? response.data.data : order,
         itemList,
         totalPrice,
       );
+
+      // Update Real Data
+      mutateOrders();
 
       setNotification({
         on: true,

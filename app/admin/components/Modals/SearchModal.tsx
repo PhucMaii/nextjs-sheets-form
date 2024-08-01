@@ -13,7 +13,7 @@ import { blueGrey } from '@mui/material/colors';
 interface IProps extends ModalProps {
   baseOrderList: Order[];
   setNotification: Dispatch<SetStateAction<Notification>>;
-  updateUI: (targetOrder: Order) => void;
+  handleUpdateStatusUI: (targetOrder: Order) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
   handleUpdatePriceUI: (
     targetOrder: Order,
@@ -28,6 +28,7 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  mutateOrders: any;
 }
 
 export default function SearchModal({
@@ -35,13 +36,14 @@ export default function SearchModal({
   onClose,
   baseOrderList,
   setNotification,
-  updateUI,
+  handleUpdateStatusUI,
   handleUpdateDateUI,
   handleUpdatePriceUI,
   selectedOrders,
   handleSelectOrder,
   subcategories,
   handleUpdateItem,
+  mutateOrders
 }: IProps) {
   //   const [currentPage, setCurrentPage] = useState<number>(1);
   const [returnOrders, setReturnOrders] = useState<Order[]>([]);
@@ -110,13 +112,14 @@ export default function SearchModal({
                   key={index}
                   order={order}
                   setNotification={setNotification}
-                  updateUI={updateUI}
+                  handleUpdateStatusUI={handleUpdateStatusUI}
                   handleUpdateDateUI={handleUpdateDateUI}
                   handleUpdatePriceUI={handleUpdatePriceUI}
                   selectedOrders={selectedOrders}
                   handleSelectOrder={handleSelectOrder}
                   subcategories={subcategories || []}
                   handleUpdateItem={handleUpdateItem}
+                  mutateOrders={mutateOrders}
                 />
               );
             })

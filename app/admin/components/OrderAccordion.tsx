@@ -38,7 +38,7 @@ import OrderDetails from './Modals/OrderDetails';
 interface PropTypes {
   order: Order;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  updateUI: (targetOrder: Order) => void;
+  handleUpdateStatusUI: (targetOrder: Order) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
   handleUpdatePriceUI: (
     targetOrder: Order,
@@ -53,18 +53,20 @@ interface PropTypes {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  mutateOrders: any;
 }
 
 const OrderAccordion = ({
   order,
   setNotification,
-  updateUI,
+  handleUpdateStatusUI,
   handleUpdateDateUI,
   handleUpdatePriceUI,
   handleSelectOrder,
   selectedOrders,
   subcategories,
   handleUpdateItem,
+  mutateOrders
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -112,7 +114,12 @@ const OrderAccordion = ({
         ...order,
         status,
       });
-      updateUI(response.data.data);
+      
+      // Optimistic Data Update
+      handleUpdateStatusUI(response.data.data);
+
+      // Update Real Data
+      mutateOrders();
       setNotification({
         on: true,
         type: 'success',
@@ -236,6 +243,7 @@ const OrderAccordion = ({
         order={order}
         setNotification={setNotification}
         handleUpdateDateUI={handleUpdateDateUI}
+        mutateOrders={mutateOrders}
       />
       <EditPrice
         open={isOpenEditPrice}
@@ -244,6 +252,7 @@ const OrderAccordion = ({
         setNotification={setNotification}
         order={order}
         handleUpdatePriceUI={handleUpdatePriceUI}
+        mutateOrders={mutateOrders}
         subcategories={subcategories}
       />
       <OrderDetails

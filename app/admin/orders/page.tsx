@@ -44,7 +44,9 @@ import useDebounce from '@/hooks/useDebounce';
 import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
-import LoadingModal from '../components/Modals/LoadingModal';
+// import LoadingModal from '../components/Modals/LoadingModal';
+import useSWR from 'swr';
+import { fetcher } from '@/HOC/AuthenGuard';
 
 interface Category {
   id: number;
@@ -100,8 +102,8 @@ export default function Orders() {
     ORDER_STATUS.NONE,
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true);
+  // const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
@@ -119,6 +121,14 @@ export default function Orders() {
   const totalPosition: any = useRef();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+  const {
+    data: orders,
+    mutate,
+    isValidating,
+  } = useSWR(`${API_URL.ORDER}?date=${date}&status=${currentStatus}`, fetcher, {
+    refreshInterval: 1000,
+  });
+
   const { clientList } = useClients();
   const { subCategories } = useSubCategories();
 
@@ -126,6 +136,19 @@ export default function Orders() {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
   }, []);
+
+  useEffect(() => {
+    // Initial Loading
+    if (isFirstLoading && !isValidating) {
+      setIsFirstLoading(false);
+    }
+  }, [isValidating, isFirstLoading]);
+
+  useEffect(() => {
+    if (orders) {
+      initializeOrder();
+    }
+  }, [orders, date, currentStatus]);
 
   useEffect(() => {
     setSelectedOrders([]);
@@ -148,6 +171,7 @@ export default function Orders() {
 
     pusherClient.bind('incoming-order', (order: Order) => {
       setIncomingOrder(order);
+      mutate();
     });
 
     return () => {
@@ -215,9 +239,9 @@ export default function Orders() {
     }
   }, [incomingOrder]);
 
-  useEffect(() => {
-    fetchOrders();
-  }, [date, currentStatus]);
+  // useEffect(() => {
+  //   fetchOrders();
+  // }, [date, currentStatus]);
 
   const addOrder = async (
     clientValue: UserType | null,
@@ -280,30 +304,40 @@ export default function Orders() {
     }
   };
 
-  const fetchOrders = async (): Promise<void> => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
-      );
-
-      if (response.data.error) {
-        setIsLoading(false);
-        return;
-      }
-
-      setPages(Math.ceil(response.data.data.length / orderPerPage));
-      setBaseOrderData(response.data.data);
-      setIsLoading(false);
-      setCurrentPage(1);
-    } catch (error: any) {
-      console.log('Fail to fetch orders: ', error);
-      setIsLoading(false);
-      return;
-    }
+  const initializeOrder = () => {
+    setPages(Math.ceil(orders.data / orderPerPage));
+    setBaseOrderData(orders.data);
+    setCurrentPage(1);
   };
 
+  // const fetchOrders = async (): Promise<void> => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
+  //     );
+
+  //     if (response.data.error) {
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     setPages(Math.ceil(response.data.data.length / orderPerPage));
+  //     setBaseOrderData(response.data.data);
+  //     setIsLoading(false);
+  //     setCurrentPage(1);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch orders: ', error);
+  //     setIsLoading(false);
+  //     return;
+  //   }
+  // };
+
   const generateOrderData = (orderList = baseOrderData) => {
+    if (!orderList || orderList.length === 0) {
+      setOrderData([]);
+      return;
+    }
     const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
     setPages(newNumberOfPages);
     setOrderData(
@@ -340,7 +374,11 @@ export default function Orders() {
         return;
       }
 
+      // Optimistic uupdate
       handleUpdateUISingleOrder(order, response.data.data);
+
+      // Mutate to update real data
+      mutate();
 
       setNotification({
         on: true,
@@ -383,7 +421,7 @@ export default function Orders() {
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     try {
-      setIsUpdating(true);
+      // setIsUpdating(true);
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status,
         updatedOrders: selectedOrders,
@@ -395,16 +433,17 @@ export default function Orders() {
           type: 'error',
           message: response.data.error,
         });
-        setIsUpdating(false);
+        // setIsUpdating(false);
         return;
       }
-      await fetchOrders();
+
+      mutate();
       setNotification({
         on: true,
         type: 'success',
         message: response.data.message,
       });
-      setIsUpdating(false);
+      // setIsUpdating(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
       setNotification({
@@ -412,7 +451,7 @@ export default function Orders() {
         type: 'error',
         message: 'Something went wrong: ' + error.response.data.error,
       });
-      setIsUpdating(false);
+      // setIsUpdating(false);
     }
   };
 
@@ -462,7 +501,7 @@ export default function Orders() {
     setDate(formattedDate);
   };
 
-  const handleMarkSingleCompletedUI = (targetOrder: Order): void => {
+  const handleUpdateStatusUI = (targetOrder: Order): void => {
     let newOrders = [];
     if (tabIndex !== 0 && targetOrder.status !== currentStatus) {
       newOrders = baseOrderData.filter((order) => order.id !== targetOrder.id);
@@ -680,7 +719,7 @@ export default function Orders() {
 
   return (
     <Sidebar>
-      <LoadingModal open={isUpdating} />
+      {/* <LoadingModal open={isUpdating} /> */}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
@@ -704,7 +743,8 @@ export default function Orders() {
         onClose={() => setIsSearchModalOpen(false)}
         baseOrderList={baseOrderData}
         setNotification={setNotification}
-        updateUI={handleMarkSingleCompletedUI}
+        handleUpdateStatusUI={handleUpdateStatusUI}
+        mutateOrders={mutate}
         handleUpdateDateUI={handleUpdateDateUI}
         handleUpdatePriceUI={handleUpdatePriceUI}
         selectedOrders={selectedOrders}
@@ -712,7 +752,7 @@ export default function Orders() {
         subcategories={subCategories || []}
         handleUpdateItem={handleUpdateItem}
       />
-      {isLoading ? (
+      {isFirstLoading ? (
         <>
           {uppperContent}
           <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
@@ -734,7 +774,7 @@ export default function Orders() {
                       key={index}
                       order={order}
                       setNotification={setNotification}
-                      updateUI={handleMarkSingleCompletedUI}
+                      handleUpdateStatusUI={handleUpdateStatusUI}
                       // updateUIItem={handleUpdateUISingleOrder}
                       handleUpdateDateUI={handleUpdateDateUI}
                       handleUpdatePriceUI={handleUpdatePriceUI}
@@ -742,6 +782,7 @@ export default function Orders() {
                       handleSelectOrder={handleSelectOrder}
                       subcategories={subCategories || []}
                       handleUpdateItem={handleUpdateItem}
+                      mutateOrders={mutate}
                     />
                   );
                 }}

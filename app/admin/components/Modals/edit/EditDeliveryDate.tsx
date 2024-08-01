@@ -27,6 +27,7 @@ interface PropTypes extends ModalProps {
   isPreOrder?: boolean;
   scheduleOrderList?: ScheduledOrder[];
   progress?: number;
+  mutateOrders?: any;
 }
 
 export default function EditDeliveryDate({
@@ -39,6 +40,7 @@ export default function EditDeliveryDate({
   isPreOrder,
   scheduleOrderList,
   progress,
+  mutateOrders
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
@@ -89,7 +91,7 @@ export default function EditDeliveryDate({
   };
 
   const handleUpdateDate = async () => {
-    if (!order || !handleUpdateDateUI) {
+    if (!order || !handleUpdateDateUI || !mutateOrders) {
       return;
     }
     try {
@@ -109,7 +111,11 @@ export default function EditDeliveryDate({
         return;
       }
 
+      // Optimistic UI Update
       handleUpdateDateUI(order.id, updatedDate);
+
+      // Update Real Data
+      mutateOrders();
       setIsLoading(false);
       setNotification({
         on: true,
