@@ -77,6 +77,12 @@ const useManifest = (
     const sortedOrderByRoutes = [];
     for (const selectedRoute of selectedRoutes) {
       const sortedUserIds = userRoute.data[selectedRoute.id];
+
+      // If that route does not have any orders
+      if (!sortedUserIds) {
+        setOrderPrint([]);
+        continue;
+      }
       const routeOrders = orderByRoutes.filter((order: Order) => {
         return order.routeId === selectedRoute.id;
       });
@@ -85,6 +91,7 @@ const useManifest = (
       const orderIdIndexMap: any = new Map(
         sortedUserIds.map((id: string, index: number) => [id, index]),
       );
+      
       // Sort users based on the index positions in index map
       routeOrders.sort(
         (orderA: Order, orderB: Order) =>

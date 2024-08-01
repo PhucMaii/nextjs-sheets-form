@@ -13,7 +13,7 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
   }
   // Convert inches to points (1 inch = 72 points)
   const pageWidth = 2.83 * 72; // 2.83 inches (~72mm width)
-  const pageHeight = 8 * 72; // 8 inches height (arbitrary length, adjust as needed)
+  // const pageHeight = 8 * 72; // 8 inches height (arbitrary length, adjust as needed)
 
   return (
     <Document>
@@ -32,7 +32,7 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
 
         return (
           <Page
-            size={{ width: pageWidth, height: pageHeight }}
+            size={{ width: pageWidth }}
             style={styles.page}
             key={index}
           >
@@ -74,35 +74,35 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
             </View>
 
             <Text style={styles.subtitle}>Order Details:</Text>
-            <View style={[styles.table, { marginTop: 10 }]}>
+            <View style={[styles.tableNoBorder, { marginTop: 10 }]}>
               <View style={styles.tableRow}>
-                <View style={styles.tableCol}>
+                <View style={styles.tableColNoBorder}>
                   <Text style={{ margin: 5, fontSize: 8 }}>Item</Text>
                 </View>
-                <View style={styles.tableCol}>
+                <View style={styles.tableColNoBorder}>
                   <Text style={{ margin: 5, fontSize: 8 }}>No. Items</Text>
                 </View>
-                <View style={styles.tableCol}>
+                <View style={styles.tableColNoBorder}>
                   <Text style={{ margin: 5, fontSize: 8 }}>Unit Price</Text>
                 </View>
-                <View style={styles.tableCol}>
+                <View style={styles.tableColNoBorder}>
                   <Text style={{ margin: 5, fontSize: 8 }}>Total Price</Text>
                 </View>
               </View>
               {order.items.map((item) => (
                 <View key={item.id} style={styles.tableRow}>
-                  <View style={styles.tableCol}>
+                  <View style={styles.tableColNoBorder}>
                     <Text style={{ margin: 5, fontSize: 8 }}>{item.name}</Text>
                   </View>
-                  <View style={styles.tableCol}>
+                  <View style={styles.tableColNoBorder}>
                     <Text style={{ margin: 5, fontSize: 8 }}>
                       {item.quantity}
                     </Text>
                   </View>
-                  <View style={styles.tableCol}>
+                  <View style={styles.tableColNoBorder}>
                     <Text style={{ margin: 5, fontSize: 8 }}>{item.price}</Text>
                   </View>
-                  <View style={styles.tableCol}>
+                  <View style={styles.tableColNoBorder}>
                     <Text style={{ margin: 5, fontSize: 8 }}>
                       {item.totalPrice?.toFixed(2)}
                     </Text>

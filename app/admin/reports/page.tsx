@@ -483,7 +483,6 @@ export default function ReportPage() {
       </Menu>
     </Box>
   );
-  console.log({ email: clientValue?.email });
 
   const statusDropdown = (
     <Box

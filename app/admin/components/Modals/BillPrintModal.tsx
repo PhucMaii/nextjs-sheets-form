@@ -6,6 +6,8 @@ import {
   Divider,
   FormControlLabel,
   FormGroup,
+  Menu,
+  MenuItem,
   Modal,
   Radio,
   RadioGroup,
@@ -23,6 +25,9 @@ import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import { ManifestPrint } from '../Printing/ManifestPrint';
 import useManifest from '@/hooks/useManifest';
+import { SummaryManifest } from '../Printing/SummaryManifest';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import { DropdownItemContainer } from '../../orders/styled';
 
 interface PropTypes extends ModalProps {
   routes: IRoutes[];
@@ -42,18 +47,27 @@ export default function BillPrintModal({
   orderList,
   day,
 }: PropTypes) {
+  const [manifestAnchor, setManifestAnchor] = useState<HTMLElement | null>(
+    null,
+  );
+  const openManifest = Boolean(manifestAnchor);
   const [billPrintOption, setBillPrintOption] = useState<BILL_PRINT_OPTION>(
     BILL_PRINT_OPTION.NONE,
   );
   const [selectedRoutes, setSelectedRoutes] = useState<IRoutes[]>([]);
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
+  const summaryManifest: any = useRef();
   const { orderPrint, itemManifest, setItemManifest, nonVoidOrders } =
     useManifest(orderList, routes, selectedRoutes, day);
 
   useEffect(() => {
     setSelectedRoutes([]);
   }, [day]);
+
+  const handleCloseAnchor = () => {
+    setManifestAnchor(null);
+  };
 
   const handleSelectRoute = (e: any, targetRoute: IRoutes) => {
     const isRouteExisted = selectedRoutes.find((route: IRoutes) => {
@@ -75,8 +89,12 @@ export default function BillPrintModal({
     content: () => billPrint.current,
   });
 
-  const handlePrintManifest = useReactToPrint({
+  const handlePrintManifestDetails = useReactToPrint({
     content: () => manifestPrint.current,
+  });
+
+  const handlePrintManifestSummary = useReactToPrint({
+    content: () => summaryManifest.current,
   });
 
   const handleSelectAll = () => {
@@ -87,6 +105,51 @@ export default function BillPrintModal({
       setSelectedRoutes(routes);
     }
   };
+
+  const manifestPrintButton = (
+    <Box
+      display="flex"
+      justifyContent="flex-end"
+      alignItems="center"
+      gap={2}
+      width="100%"
+    >
+      <Button
+        aria-controls={openManifest ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openManifest ? 'true' : undefined}
+        disabled={selectedRoutes.length === 0}
+        onClick={(e) => setManifestAnchor(e.currentTarget)}
+        endIcon={<ArrowDownwardIcon />}
+        variant="outlined"
+      >
+        <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
+          <PrintIcon />
+          <Typography>Manifest</Typography>
+        </Box>
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={manifestAnchor}
+        open={openManifest}
+        onClose={handleCloseAnchor}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem onClick={handlePrintManifestSummary}>
+          <DropdownItemContainer display="flex" gap={2}>
+            <Typography>Summary</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem onClick={handlePrintManifestDetails}>
+          <DropdownItemContainer display="flex" gap={2}>
+            <Typography>Details</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -106,6 +169,13 @@ export default function BillPrintModal({
             manifest={itemManifest}
             routes={routes}
             ref={manifestPrint}
+          />
+        </div>
+        <div style={{ display: 'none' }}>
+          <SummaryManifest
+            manifest={itemManifest}
+            routes={routes}
+            ref={summaryManifest}
           />
         </div>
         <ModalHead
@@ -134,8 +204,8 @@ export default function BillPrintModal({
         </RadioGroup>
         <Divider />
         <Box display="flex" justifyContent="right">
-          <Button
-            onClick={handlePrintManifest}
+          {/* <Button
+            onClick={handlePrintManifestDetails}
             disabled={
               billPrintOption === BILL_PRINT_OPTION.NONE ||
               selectedRoutes.length === 0
@@ -152,7 +222,8 @@ export default function BillPrintModal({
               <PrintIcon />
               <Typography>Manifest</Typography>
             </Box>
-          </Button>
+          </Button> */}
+          {manifestPrintButton}
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center">
           {billPrintOption === BILL_PRINT_OPTION.NONE ? (

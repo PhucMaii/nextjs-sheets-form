@@ -12,21 +12,37 @@ import {
 import React, { forwardRef } from 'react';
 import './print.css';
 import styled from 'styled-components';
-import { mainItems } from '@/app/lib/constant';
+import { mainItems, productColors } from '@/app/lib/constant';
+import { grey } from '@mui/material/colors';
 
 interface PropTypes {
   manifest: any;
   routes: IRoutes[];
 }
 
-const BorderRightTableCell = styled(TableCell)`
-  border: 1px solid grey;
+interface TableCellProps {
+  $isSelected?: boolean;
+  $productColor?: string;
+}
+
+const BorderRightTableCell = styled(TableCell)<TableCellProps>`
+  border: 1px solid ${grey[100]};
+  background-color: ${(props) =>
+    props.$isSelected ? props?.$productColor : 'white'} !important;
+  padding: 2px;
 `;
 
 export const ManifestPrint = forwardRef(
   ({ manifest, routes }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
-      return;
+      // return;
+      return (
+        <div ref={ref}>
+          <Box sx={{ width: '100%', height: '100%', mr: 4 }}>
+            <Typography variant="h4">No Orders Available</Typography>
+          </Box>
+        </div>
+      );
     }
 
     // Display the beansprouts first then other items
@@ -37,8 +53,8 @@ export const ManifestPrint = forwardRef(
     // };
 
     return (
-      <div ref={ref}>
-        <Box sx={{ width: '100%', height: '100%', mr: 4 }}>
+      <div ref={ref} className='print-container'>
+        <Box sx={{ width: '100%', height: '100%' }}>
           {/* Loop through route */}
           {Object.keys(manifest).length > 0 &&
             Object.keys(manifest).map((routeId: string, index: number) => {
@@ -72,7 +88,6 @@ export const ManifestPrint = forwardRef(
                         {sortedItems.length > 0 &&
                           sortedItems.map((item: string, index: number) => {
                             const { summary } = manifest[routeId];
-                            console.log({ summary });
                             if (summary[item] === 0) {
                               return null;
                             }
@@ -80,11 +95,10 @@ export const ManifestPrint = forwardRef(
                               <>
                                 <BorderRightTableCell
                                   align="center"
-                                  sx={{ fontSize: 20 }}
+                                  sx={{ fontSize: 18, fontWeight: 'bold' }}
                                   key={index}
                                 >
-                                  {item === 'MUSHROOM' ? 'MUSH ROOM' : item} (
-                                  {summary[item] || 0})
+                                  {item === 'MUSHROOM' ? 'MUSH ROOM' : item}
                                 </BorderRightTableCell>
                               </>
                             );
@@ -95,16 +109,22 @@ export const ManifestPrint = forwardRef(
                       {manifest[routeId].details.map(
                         (user: any, index: number) => {
                           const { summary } = manifest[routeId];
+                          const clientName = user.user.clientName
+                            .split('-')
+                            .slice(0, 1)
+                            .join(' ');
                           return (
                             <TableRow key={index}>
                               <BorderRightTableCell
-                                align="center"
+                                // align="center"
                                 sx={{
-                                  fontSize: 20,
-                                  maxWidth: '120px',
+                                  fontSize: 18,
+                                  width: '150px',
+                                  height: '30px !important',
+                                  fontWeight: 'bold',
                                 }}
                               >
-                                {user.user.clientName}
+                                {clientName}
                               </BorderRightTableCell>
                               {sortedItems.map(
                                 (item: string, index: number) => {
@@ -137,12 +157,14 @@ export const ManifestPrint = forwardRef(
                                       </BorderRightTableCell>
                                     );
                                   }
-                                  // console.log({userName: user.user.clientName, item: user[item]})
+
                                   return (
                                     <BorderRightTableCell
                                       align="center"
                                       sx={{ fontSize: 20 }}
                                       key={index}
+                                      $isSelected={itemQuantity > 0}
+                                      $productColor={productColors[index]}
                                     >
                                       {itemQuantity}
                                     </BorderRightTableCell>

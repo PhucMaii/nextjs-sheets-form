@@ -35,6 +35,11 @@ export const styles = StyleSheet.create({
     borderColor: grey[200],
     marginBottom: 20,
   },
+  tableNoBorder: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginBottom: 20,
+  },
   tableRow: {
     flexDirection: 'row',
   },
@@ -43,6 +48,9 @@ export const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderWidth: 1,
     borderColor: grey[200],
+  },
+  tableColNoBorder: {
+    width: '33%',
   },
   tableCell: {
     margin: 5,
