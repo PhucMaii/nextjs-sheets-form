@@ -8,7 +8,6 @@ import dayjs from 'dayjs';
 import { limitOrderHour } from '@/app/lib/constant';
 import { formatDateChanged, YYYYMMDDFormat } from '@/app/utils/time';
 import { Notification, OrderedItems, UserType } from '@/app/utils/type';
-import useSWR from 'swr';
 import { API_URL } from '@/app/utils/enum';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { grey } from '@mui/material/colors';
@@ -18,6 +17,7 @@ import moment from 'moment';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import NotificationPopup from '@/app/admin/components/Notification';
+import { SWRFetchData } from '@/app/utils/db';
 
 export default function PlaceOrder() {
   const [deliveryDate, setDeliveryDate] = useState<string>(() => {
@@ -40,10 +40,10 @@ export default function PlaceOrder() {
   });
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
 
-  const { data: clientList } = useSWR(`${API_URL.DRIVER}/clients`);
-  const { data: items, isValidating } = useSWR(
-    `${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`,
-  );
+  // Data Fetching
+  const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [items, mutateItems, isValidating] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`)
 
   useEffect(() => {
     if (items) {
