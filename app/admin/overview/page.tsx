@@ -1,9 +1,9 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import NotificationPopup from '../components/Notification';
 import { Notification } from '@/app/utils/type';
-import { Box, Grid, Skeleton, Switch, Typography } from '@mui/material';
+import { Box, Button, Grid, Skeleton, Switch, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import OverviewData from '../components/OverviewData';
@@ -17,13 +17,16 @@ import LoadingModal from '../components/Modals/LoadingModal';
 import BSOverview from '../components/BSOverview';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { SWRFetchData } from '@/app/utils/db';
+import DebtCustomers from '../components/Printing/DebtCustomers';
+import { useReactToPrint } from 'react-to-print';
+import PrintIcon from '@mui/icons-material/Print';
+
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isFetching, setIsFetching] = useState<boolean>(true);
-  // const [isMinify, setIsMinify] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -31,14 +34,13 @@ export default function Overview() {
   });
   const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
+  
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
 
+  // Printing Ref
+  const printDetbCustomersRef: any = useRef();
+
   // Data Fetching
-  // const { data: overview } = useSWR(
-  //   `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-  //   fetcher,
-  //   { refreshInterval: 1000 },
-  // );
   const [ overview ] = SWRFetchData(
     `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
@@ -58,6 +60,10 @@ export default function Overview() {
     setCustomersInDebt(overviewFetchedData.customersInDebt);
     setIsFetching(false);
   };
+
+  const handlePrintCustomersInDebt = useReactToPrint({
+    content: () => printDetbCustomersRef.current
+  })
 
   // const fetchOverviewData = async () => {
   //   try {
@@ -85,6 +91,9 @@ export default function Overview() {
 
   return (
     <Sidebar>
+      <div style={{ display: 'none' }}>
+        <DebtCustomers debtCustomers={customersInDebt} ref={printDetbCustomersRef} />
+      </div>
       <LoadingModal open={isFetching} />
       <NotificationPopup
         notification={notification}
@@ -170,9 +179,17 @@ export default function Overview() {
           <ManifestTable manifest={overviewData?.manifest || null} />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h5" fontWeight="bold" sx={{ my: 2 }}>
-            Customers in debt
-          </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h5" fontWeight="bold" sx={{ my: 2 }}>
+              Customers in debt
+            </Typography>
+            <Button onClick={handlePrintCustomersInDebt}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <PrintIcon />
+                <Typography>Print</Typography>
+              </Box>
+            </Button>
+          </Box>
           <CustomersInDebt customersInDebt={customersInDebt} />
         </Grid>
       </Grid>
