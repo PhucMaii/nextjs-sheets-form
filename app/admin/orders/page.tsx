@@ -35,8 +35,6 @@ import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import moment from 'moment';
 import { statusTabs } from '@/app/lib/constant';
-import useClients from '@/hooks/fetch/useClients';
-import useSubCategories from '@/hooks/fetch/useSubCategories';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import SearchModal from '../components/Modals/SearchModal';
@@ -44,7 +42,6 @@ import useDebounce from '@/hooks/useDebounce';
 import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
-// import LoadingModal from '../components/Modals/LoadingModal';
 import useSWR from 'swr';
 import { fetcher } from '@/HOC/AuthenGuard';
 
@@ -117,10 +114,13 @@ export default function Orders() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [tabIndex, setTabIndex] = useState<number>(0);
+
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+  // Data Fetching
   const {
     data: orders,
     mutate,
@@ -128,9 +128,12 @@ export default function Orders() {
   } = useSWR(`${API_URL.ORDER}?date=${date}&status=${currentStatus}`, fetcher, {
     refreshInterval: 1000,
   });
-
-  const { clientList } = useClients();
-  const { subCategories } = useSubCategories();
+  const { data: clients } = useSWR(API_URL.CLIENTS, fetcher, {
+    refreshInterval: 1000,
+  });
+  const { data: subCategories } = useSWR(API_URL.SUBCATEGORIES, fetcher, {
+    refreshInterval: 1000,
+  });
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -733,7 +736,7 @@ export default function Orders() {
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
-        clientList={clientList || []}
+        clientList={clients?.data || []}
         setNotification={setNotification}
         currentDate={date}
         createOrder={addOrder}
@@ -749,7 +752,7 @@ export default function Orders() {
         handleUpdatePriceUI={handleUpdatePriceUI}
         selectedOrders={selectedOrders}
         handleSelectOrder={handleSelectOrder}
-        subcategories={subCategories || []}
+        subcategories={subCategories?.data || []}
         handleUpdateItem={handleUpdateItem}
       />
       {isFirstLoading ? (

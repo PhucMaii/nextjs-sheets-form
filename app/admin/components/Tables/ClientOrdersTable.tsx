@@ -32,6 +32,7 @@ interface PropTypes {
   handleSelectOrder: (e: any, order: Order) => void;
   handleSelectAll: () => void;
   subCategories: SubCategory[];
+  mutateOrders: any;
 }
 
 const ClientOrdersTable = ({
@@ -43,6 +44,7 @@ const ClientOrdersTable = ({
   handleSelectOrder,
   handleSelectAll,
   subCategories,
+  mutateOrders,
 }: PropTypes) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const windowDimensions = useWindowDimensions();
@@ -65,7 +67,12 @@ const ClientOrdersTable = ({
         return;
       }
 
+      // Optimistic UI Update
       handleUpdateOrderUI({ ...order, status: updatedStatus });
+
+      // Update Real Data
+      mutateOrders();
+
       setNotification({
         on: true,
         type: 'success',
@@ -98,7 +105,12 @@ const ClientOrdersTable = ({
         return;
       }
 
+      // Optimistic UI Update
       handleDeleteOrderUI(order);
+
+      // Update Real Data
+      mutateOrders();
+      
       setNotification({
         on: true,
         type: 'success',

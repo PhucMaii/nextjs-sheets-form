@@ -60,9 +60,8 @@ import {
   filterDateRangeOrders,
 } from '@/pages/api/utils/date';
 import BillPrintModal from '../components/Modals/BillPrintModal';
-import useRoutes from '@/hooks/fetch/useRoutes';
-import useClients from '@/hooks/fetch/useClients';
-import useSubCategories from '@/hooks/fetch/useSubCategories';
+import useSWR from 'swr';
+import { fetcher } from '@/HOC/AuthenGuard';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -99,14 +98,34 @@ export default function ReportPage() {
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
 
+  // Data Fetching
   const currentDate = convertDeliveryDateStringToDate(datePicker);
-  const { routes, mutate } = useRoutes(days[currentDate.getDay()]);
-  const { clientList } = useClients();
-  const { subCategories } = useSubCategories();
+  const { data: orders, mutate: mutateOrders } = useSWR(
+    !clientValue
+      ? ''
+      : clientValue?.clientName === 'All Clients'
+        ? `${API_URL.CLIENTS}/orders?deliveryDate=${datePicker}`
+        : `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
+    fetcher,
+    { refreshInterval: 1000 },
+  );
+  const { data: routes, mutate: mutateRoutes } = useSWR(
+    `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
+    fetcher,
+    { refreshInterval: 1000 },
+  );
+  const { data: clients } = useSWR(API_URL.CLIENTS, fetcher, {
+    refreshInterval: 1000,
+  });
+  const { data: subCategories } = useSWR(API_URL.SUBCATEGORIES, fetcher, {
+    refreshInterval: 1000,
+  });
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');
@@ -150,17 +169,17 @@ export default function ReportPage() {
   }, [clientOrders]);
 
   useEffect(() => {
-    if (clientValue && (dateRange.length > 0 || datePicker)) {
-      fetchClientOrders();
+    if (orders && clientValue && (dateRange.length > 0 || datePicker)) {
+      initializeOrders();
     } else {
       setClientOrders([]);
       setBaseClientOrders([]);
     }
-  }, [clientValue, dateRange, datePicker]);
+  }, [clientValue, dateRange, datePicker, orders?.data]);
 
   useEffect(() => {
     if (datePicker) {
-      mutate();
+      mutateRoutes();
     }
   }, [datePicker]);
 
@@ -200,59 +219,81 @@ export default function ReportPage() {
     setTotalBill(bill);
   };
 
-  const fetchClientOrders = async () => {
-    try {
-      setIsFetching(true);
-      let response;
-      if (clientValue?.clientName === 'All Clients') {
-        response = await axios.get(
-          `${API_URL.CLIENTS}/orders?deliveryDate=${datePicker}`,
-        );
-      } else {
-        response = await axios.get(
-          `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
-        );
-      }
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsFetching(false);
-        return;
-      }
-
-      let orderData: any = response.data.data;
-      if (clientValue?.clientName !== 'All Clients') {
-        orderData = filterDateRangeOrders(
-          response.data.data,
-          dateRange[0],
-          dateRange[1],
-        );
-      }
-
-      const newUnpaidOrders = orderData.filter((order: Order) => {
-        return (
-          order.status === ORDER_STATUS.DELIVERED ||
-          order.status === ORDER_STATUS.INCOMPLETED
-        );
-      });
-      setUnpaidOrders(newUnpaidOrders);
-      setClientOrders(orderData);
-      setBaseClientOrders(orderData);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('Fail to fetch client orders: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch client orders: ' + error,
-      });
-      setIsFetching(false);
+  const initializeOrders = () => {
+    let orderData = orders.data;
+    if (clientValue?.clientName !== 'All Clients') {
+      orderData = filterDateRangeOrders(
+        orders.data,
+        dateRange[0],
+        dateRange[1],
+      );
     }
+
+    const newUnpaidOrders = orderData.filter((order: Order) => {
+      return (
+        order.status === ORDER_STATUS.DELIVERED ||
+        order.status === ORDER_STATUS.INCOMPLETED
+      );
+    });
+    setUnpaidOrders(newUnpaidOrders);
+    setClientOrders(orderData);
+    setBaseClientOrders(orderData);
+    setIsFetching(false);
   };
+
+  // const fetchClientOrders = async () => {
+  //   try {
+  //     setIsFetching(true);
+  //     let response;
+  //     if (clientValue?.clientName === 'All Clients') {
+  //       response = await axios.get(
+  //         `${API_URL.CLIENTS}/orders?deliveryDate=${datePicker}`,
+  //       );
+  //     } else {
+  //       response = await axios.get(
+  //         `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
+  //       );
+  //     }
+
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       setIsFetching(false);
+  //       return;
+  //     }
+
+  //     let orderData: any = response.data.data;
+  //     if (clientValue?.clientName !== 'All Clients') {
+  //       orderData = filterDateRangeOrders(
+  //         response.data.data,
+  //         dateRange[0],
+  //         dateRange[1],
+  //       );
+  //     }
+
+  //     const newUnpaidOrders = orderData.filter((order: Order) => {
+  //       return (
+  //         order.status === ORDER_STATUS.DELIVERED ||
+  //         order.status === ORDER_STATUS.INCOMPLETED
+  //       );
+  //     });
+  //     setUnpaidOrders(newUnpaidOrders);
+  //     setClientOrders(orderData);
+  //     setBaseClientOrders(orderData);
+  //     setIsFetching(false);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch client orders: ', error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'Fail to fetch client orders: ' + error,
+  //     });
+  //     setIsFetching(false);
+  //   }
+  // };
 
   const handleCloseActionsAnchor = () => {
     setActionButtonAnchor(null);
@@ -377,7 +418,8 @@ export default function ReportPage() {
         status,
         updatedOrders: selectedOrders,
       });
-      await fetchClientOrders();
+
+      mutateOrders();
 
       setNotification({
         on: true,
@@ -592,7 +634,7 @@ export default function ReportPage() {
         <BillPrintModal
           open={isOpenBillPrintModal}
           onClose={() => setIsOpenBillPrintModal(false)}
-          routes={routes || []}
+          routes={routes?.data || []}
           orderList={selectedOrders.length > 0 ? selectedOrders : clientOrders}
           day={datePicker}
         />
@@ -627,7 +669,7 @@ export default function ReportPage() {
                 clientName: 'All Clients',
                 deliveryAddress: '',
               },
-              ...clientList,
+              ...(clients?.data || []),
             ] as UserType[]
           }
           getOptionLabel={(option) => {
@@ -729,7 +771,8 @@ export default function ReportPage() {
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               handleSelectAll={handleSelectAll}
-              subCategories={subCategories}
+              subCategories={subCategories?.data || []}
+              mutateOrders={mutateOrders}
             />
           ) : (
             <ErrorComponent errorText="No Order Available" />
