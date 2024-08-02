@@ -4,12 +4,11 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import NotificationPopup from '../components/Notification';
 import { ICategory, IItem, Notification } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
-import useCategories from '@/hooks/fetch/useCategories';
 import { Category } from '@prisma/client';
 import CategorySidebar from '../components/Sidebar/CategorySidebar';
 import EditIcon from '@mui/icons-material/Edit';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { fetchData } from '@/app/utils/db';
+import { SWRFetchData } from '@/app/utils/db';
 import {
   Box,
   Button,
@@ -23,7 +22,6 @@ import useDebounce from '@/hooks/useDebounce';
 import { ShadowSection } from '../reports/styled';
 import { SplashScreen } from '@/HOC/AuthenGuard';
 import axios from 'axios';
-import useSubCategories from '@/hooks/fetch/useSubCategories';
 import AddItem from '../components/Modals/add/AddItem';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import EditCategory from '../components/Modals/edit/EditCategory';
@@ -49,36 +47,38 @@ export default function ItemPage() {
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
-  const { categories, mutate } = useCategories();
-  const { subCategories, isLoading } = useSubCategories();
+  // Data Fetching
+  const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
+  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
-    categories[0],
+    categories?.data[0],
   );
+  const [itemsResponse, mutateItems] = SWRFetchData(currentCategory ? `${API_URL.ITEM}?categoryId=${currentCategory?.id}` : '');
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   useEffect(() => {
-    if (categories.length > 0 && !currentCategory) {
-      setCurrentCategory(categories[0]);
+    if (categories?.data.length > 0 && !currentCategory) {
+      setCurrentCategory(categories?.data[0]);
     }
 
-    if (categories.length > 0 && currentCategory) {
+    if (categories?.data.length > 0 && currentCategory) {
       let targetIndex = 0;
-      categories.forEach((category: Category, index: number) => {
+      categories?.data.forEach((category: Category, index: number) => {
         if (category.id === currentCategory.id) {
           targetIndex = index;
           return;
         }
       });
-      setCurrentCategory(categories[targetIndex]);
+      setCurrentCategory(categories?.data[targetIndex]);
     }
   }, [categories]);
 
   useEffect(() => {
-    if (categories.length > 0 && currentCategory) {
-      fetchItems();
+    if (itemsResponse && categories?.data.length > 0 && currentCategory) {
+      initializeItems();
     }
-  }, [categories, currentCategory]);
+  }, [categories, currentCategory, itemsResponse]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -116,16 +116,11 @@ export default function ItemPage() {
     return true;
   };
 
-  const fetchItems = async () => {
-    setIsFetching(true);
-    const itemData = await fetchData(
-      `${API_URL.ITEM}?categoryId=${currentCategory.id}`,
-      setNotification,
-    );
-    setItems(itemData);
-    setBaseItems(itemData);
+  const initializeItems = () => {
+    setItems(itemsResponse?.data);
+    setBaseItems(itemsResponse?.data);
     setIsFetching(false);
-  };
+  }
 
   const handleAddItem = async (newItem: IItem) => {
     try {
@@ -144,7 +139,11 @@ export default function ItemPage() {
         return;
       }
 
+      // Optimistic UI Update
       handleAddItemUI(response.data.data);
+
+      // Update Real Data
+      mutateItems();
 
       setNotification({
         on: true,
@@ -182,7 +181,7 @@ export default function ItemPage() {
         return;
       }
 
-      mutate();
+      mutateCategories();
       setNotification({
         on: true,
         type: 'success',
@@ -213,7 +212,11 @@ export default function ItemPage() {
         return;
       }
 
+      // Optimistic UI Update
       handleDeleteItemUI(targetItem);
+
+      // Update Real Data
+      mutateItems();
 
       setNotification({
         on: true,
@@ -265,7 +268,7 @@ export default function ItemPage() {
         return;
       }
 
-      mutate();
+      mutateCategories();
 
       setNotification({
         on: true,
@@ -297,7 +300,12 @@ export default function ItemPage() {
         return;
       }
 
+      // Optimistic UI Update
       handleUpdateItemUI(response.data.data);
+
+      // Update Real Data
+      mutateItems();
+      
       setNotification({
         on: true,
         type: 'success',
@@ -349,7 +357,8 @@ export default function ItemPage() {
         return;
       }
 
-      await fetchItems();
+      // await fetchItems();
+      mutateItems();
 
       setIsSavingArrangement(false);
       setNotification({
@@ -377,7 +386,7 @@ export default function ItemPage() {
       <AddItem
         open={isAddItem}
         onClose={() => setIsAddItem(false)}
-        subCategories={subCategories}
+        subCategories={subCategories?.data || []}
         categoryId={currentCategory?.id}
         addItem={handleAddItem}
       />
@@ -399,7 +408,7 @@ export default function ItemPage() {
       />
       <CategorySidebar
         currentCategory={currentCategory}
-        categories={categories}
+        categories={categories?.data || []}
         handleChangeTab={switchCurrentCategory}
         isNavOpen={isCategorySidebarOpen}
         setIsNavOpen={setIsCategorySidebarOpen}
@@ -458,7 +467,7 @@ export default function ItemPage() {
               </LoadingButton>
             </Grid>
           </Grid>
-          {isFetching || isLoading ? (
+          {isFetching ? (
             <SplashScreen />
           ) : (
             <Reorder.Group
@@ -484,7 +493,7 @@ export default function ItemPage() {
                       handleUpdateItem={handleUpdateItem}
                       handleDeleteItem={handleDeleteItem}
                       setNotification={setNotification}
-                      subCategories={subCategories}
+                      subCategories={subCategories?.data || []}
                     />
                     <Divider />
                   </Reorder.Item>
