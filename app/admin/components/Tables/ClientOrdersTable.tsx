@@ -110,7 +110,7 @@ const ClientOrdersTable = ({
 
       // Update Real Data
       mutateOrders();
-      
+
       setNotification({
         on: true,
         type: 'success',
@@ -266,4 +266,9 @@ const ClientOrdersTable = ({
   );
 };
 
-export default memo(ClientOrdersTable);
+export default memo(ClientOrdersTable, (prev, next) => {
+  return (
+    prev.clientOrders === next.clientOrders &&
+    prev.selectedOrders === next.selectedOrders
+  )
+});

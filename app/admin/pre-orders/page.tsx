@@ -46,13 +46,12 @@ import { mutate } from 'swr';
 import { UserRoute } from '@prisma/client';
 import EditRoute from '../components/Modals/edit/EditRoute';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
-import useClients from '@/hooks/fetch/useClients';
-import useDrivers from '@/hooks/fetch/useDrivers';
 import ScheduleOrder from '../components/Reorder/ScheduleOrder';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import { insertInSortedIdArray } from '@/app/utils/array';
+import { SWRFetchData } from '@/app/utils/db';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -80,19 +79,29 @@ export default function ScheduledOrderPage() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const { clientList } = useClients(days[dayIndex]);
-  const { driverList } = useDrivers();
+  // Data Fetching
+  const [routesResponse] = SWRFetchData(`${API_URL.ROUTES}?day=${days[dayIndex]}`);
+
+  const clientIds = routesResponse?.data[routeIndex].clients?.map(
+    (userRoute: UserRoute) => {
+      return userRoute.userId;
+    },
+  );
+  const [orders, mutateOrders] = SWRFetchData(`${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`);
+  const [drivers] = SWRFetchData(API_URL.ADMIN_DRIVERS);
+  const [clients, mutateClients] = SWRFetchData(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   useEffect(() => {
-    if (routes.length > 0) {
-      fetchOrders();
+    if (orders && routes.length > 0) {
+      // fetchOrders();
+      initializeOrders();
     } else {
       setOrderList([]);
       setIsLoading(false);
     }
-  }, [routes, routeIndex]);
+  }, [routes, routeIndex, orders]);
 
   useEffect(() => {
     if (preOrderProgress === 100) {
@@ -146,8 +155,10 @@ export default function ScheduledOrderPage() {
   }, [createdOrders]);
 
   useEffect(() => {
-    fetchRoutes();
-  }, [dayIndex]);
+    if (routesResponse) {
+      initializeRoutes();
+    }
+  }, [dayIndex, routesResponse]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -287,7 +298,8 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+      // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+      mutateClients();
 
       const newRoutes = routes.filter((route: IRoutes) => {
         return route.id !== targetRoute.id;
@@ -319,7 +331,7 @@ export default function ScheduledOrderPage() {
       const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
         data: { scheduleOrderList: selectedOrders },
       });
-      await fetchOrders();
+      mutateOrders();
 
       setNotification({
         on: true,
@@ -331,82 +343,93 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const fetchOrders = async (newRoutes: IRoutes[] = routes) => {
-    try {
-      setIsLoading(true);
-      if (routes.length === 0) {
-        setOrderList([]);
-        setIsLoading(false);
-        return;
-      }
-      const clientIds = newRoutes[routeIndex].clients?.map(
-        (userRoute: UserRoute) => {
-          return userRoute.userId;
-        },
-      );
-      const response = await axios.get(
-        `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds}`,
-      );
+  const initializeOrders = () => {
+    setBaseOrderList(orders?.data);
+    setOrderList(orders?.data);
+  }
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsLoading(false);
-        return;
-      }
+  // const fetchOrders = async (newRoutes: IRoutes[] = routes) => {
+  //   try {
+  //     setIsLoading(true);
+  //     if (routes.length === 0) {
+  //       setOrderList([]);
+  //       setIsLoading(false);
+  //       return;
+  //     }
+  //     const clientIds = newRoutes[routeIndex].clients?.map(
+  //       (userRoute: UserRoute) => {
+  //         return userRoute.userId;
+  //       },
+  //     );
+  //     const response = await axios.get(
+  //       `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds}`,
+  //     );
 
-      setBaseOrderList(response.data.data);
-      setOrderList(response.data.data);
-      setIsLoading(false);
-    } catch (error: any) {
-      console.log('Fail to fetch orders: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch orders: ' + error,
-      });
-      setIsLoading(false);
-    }
-  };
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       setIsLoading(false);
+  //       return;
+  //     }
 
-  const fetchRoutes = async () => {
-    try {
-      setIsFetchingRoute(true);
-      setRoutes([]);
-      const response = await axios.get(
-        `${API_URL.ROUTES}?day=${days[dayIndex]}`,
-      );
+  //     setBaseOrderList(response.data.data);
+  //     setOrderList(response.data.data);
+  //     setIsLoading(false);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch orders: ', error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'Fail to fetch orders: ' + error,
+  //     });
+  //     setIsLoading(false);
+  //   }
+  // };
 
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsFetchingRoute(false);
-        return;
-      }
+  const initializeRoutes = () => {
+    setRoutes(routesResponse?.data);
+    setIsFetchingRoute(false);
+  }
 
-      setIsFetchingRoute(false);
-      setRoutes(response.data.data);
-      return response.data.data; // for fetch orders
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setIsFetchingRoute(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
-    }
-  };
+  // const fetchRoutes = async () => {
+  //   try {
+  //     setIsFetchingRoute(true);
+  //     setRoutes([]);
+  //     const response = await axios.get(
+  //       `${API_URL.ROUTES}?day=${days[dayIndex]}`,
+  //     );
+
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       setIsFetchingRoute(false);
+  //       return;
+  //     }
+
+  //     setIsFetchingRoute(false);
+  //     setRoutes(response.data.data);
+  //     return response.data.data; // for fetch orders
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //     setIsFetchingRoute(false);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'There was an error: ' + error,
+  //     });
+  //   }
+  // };
 
   const handleAddRouteUI = (targetRoute: IRoutes) => {
     setRoutes([...routes, targetRoute]);
-    mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+    // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+    mutateClients();
   };
 
   const handleDeleteOrderUI = (deletedOrder: ScheduledOrder) => {
@@ -479,7 +502,8 @@ export default function ScheduledOrderPage() {
       return route;
     });
 
-    mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+    // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+    mutateClients();
 
     setRoutes(newRoutes);
   };
@@ -514,8 +538,18 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      const newRoutes = await fetchRoutes();
-      await fetchOrders(newRoutes);
+      
+      // const newRoutes = await fetchRoutes();
+      
+      // await fetchOrders(newRoutes);
+      // mutateOrders();
+      const clientIds = routes[routeIndex].clients?.map(
+        (userRoute: UserRoute) => {
+          return userRoute.userId;
+        },
+      );
+  
+      mutate(`${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`)
 
       setIsSavingArrangement(false);
       setNotification({
@@ -546,7 +580,7 @@ export default function ScheduledOrderPage() {
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
-        clientList={clientList.clientList || []}
+        clientList={clients?.data?.clientList || []}
         setNotification={setNotification}
         createScheduledOrder={createScheduledOrder}
       />
@@ -554,9 +588,9 @@ export default function ScheduledOrderPage() {
         open={isAddRouteOpen}
         onClose={() => setIsAddRouteOpen(false)}
         day={days[dayIndex]}
-        driverList={driverList || []}
-        clientList={clientList.clientList || []}
-        disabledClientList={clientList.existedUserRoute || []}
+        driverList={drivers?.data || []}
+        clientList={clients?.data?.clientList || []}
+        disabledClientList={clients?.data?.existedUserRoute || []}
         setNotification={setNotification}
         handleAddRouteUI={handleAddRouteUI}
       />
@@ -579,8 +613,8 @@ export default function ScheduledOrderPage() {
         <EditRoute
           open={isEditRouteOpen}
           onClose={() => setIsEditRouteOpen(false)}
-          driverList={driverList || []}
-          clientList={clientList.clientList || []}
+          driverList={drivers?.data || []}
+          clientList={clients?.data?.clientList || []}
           day={days[dayIndex]}
           handleUpdateRouteUI={handleUpdateRouteUI}
           setNotification={setNotification}

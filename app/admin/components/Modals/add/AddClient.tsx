@@ -25,6 +25,7 @@ interface PropTypes extends ModalProps {
   subCategories: SubCategory[];
   setNotification: Dispatch<SetStateAction<Notification>>;
   handleAddClientUI: (newClient: UserType) => void;
+  mutateClients: any;
 }
 
 export default function AddClient({
@@ -34,6 +35,7 @@ export default function AddClient({
   subCategories,
   setNotification,
   handleAddClientUI,
+  mutateClients,
 }: PropTypes) {
   const [deliveryAddress, setDeliveryAddress] = useState<any>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
@@ -109,8 +111,12 @@ export default function AddClient({
         return;
       }
 
+      // Optimistic UI Update
       handleAddClientUI(response.data.data);
 
+      // Update Real Data
+      mutateClients();
+      
       setNotification({
         on: true,
         type: 'success',

@@ -33,8 +33,7 @@ import SingleFieldUpdate, {
   SingleFieldUpdateProps,
 } from '../components/Modals/edit/SingleFieldUpdate';
 import AddClient from '../components/Modals/add/AddClient';
-import useSubCategories from '@/hooks/fetch/useSubCategories';
-import useCategories from '@/hooks/fetch/useCategories';
+import { SWRFetchData } from '@/app/utils/db';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -62,13 +61,16 @@ export default function ClientsPage() {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const { subCategories } = useSubCategories();
-  const { categories } = useCategories();
+  // Data Fetching
+  const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);
+  const [categories] = SWRFetchData(API_URL.CATEGORIES);
+  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
-    handleFetchAllUsers();
-    // handleFetchAllCategories();
-  }, []);
+    if (clients) {
+      initializeClients();
+    }
+  }, [clients]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -124,34 +126,40 @@ export default function ClientsPage() {
     setActionButtonAnchor(null);
   };
 
-  const handleFetchAllUsers = async () => {
-    setIsFetching(true);
-    try {
-      const response = await axios.get(API_URL.CLIENTS);
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsFetching(false);
-        return;
-      }
-
-      setClientList(response.data.data);
-      setBaseClientList(response.data.data);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('Fail to fetch all users: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch all users: ' + error,
-      });
-      setIsFetching(false);
-    }
+  const initializeClients = () => {
+    setClientList(clients?.data);
+    setBaseClientList(clients?.data);
+    setIsFetching(false);
   };
+
+  // const handleFetchAllUsers = async () => {
+  //   setIsFetching(true);
+  //   try {
+  //     const response = await axios.get(API_URL.CLIENTS);
+
+  //     if (response.data.error) {
+  //       setNotification({
+  //         on: true,
+  //         type: 'error',
+  //         message: response.data.error,
+  //       });
+  //       setIsFetching(false);
+  //       return;
+  //     }
+
+  //     setClientList(response.data.data);
+  //     setBaseClientList(response.data.data);
+  //     setIsFetching(false);
+  //   } catch (error: any) {
+  //     console.log('Fail to fetch all users: ', error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: 'Fail to fetch all users: ' + error,
+  //     });
+  //     setIsFetching(false);
+  //   }
+  // };
 
   const handleChangeClients = (clientId: number, updatedData: any) => {
     const newClientList = baseClientList.map((client: UserType) => {
@@ -192,22 +200,25 @@ export default function ClientsPage() {
         return;
       }
 
-      const newClientList = baseClientList.map((client: UserType) => {
-        const targetClient = response.data.data.find(
-          (findClient: UserType) => findClient.id === client.id,
-        );
+      // const newClientList = baseClientList.map((client: UserType) => {
+      //   const targetClient = response.data.data.find(
+      //     (findClient: UserType) => findClient.id === client.id,
+      //   );
 
-        if (targetClient) {
-          return targetClient;
-        }
-        return client;
-      });
+      //   if (targetClient) {
+      //     return targetClient;
+      //   }
+      //   return client;
+      // });
+
+      // setClientList(newClientList);
+      // setBaseClientList(newClientList);
+      mutateClients();
 
       // reset after update successfully
-      setClientList(newClientList);
-      setBaseClientList(newClientList);
       setSelectedClients([]);
       handleCloseAnchor();
+
       setNotification({
         on: true,
         type: 'success',
@@ -250,7 +261,11 @@ export default function ClientsPage() {
         return;
       }
 
+      // Optimistic UI Update
       handleChangeClients(userId, response.data.data);
+      
+      // Update Real Data
+      mutateClients();
       setNotification({
         on: true,
         type: 'success',
@@ -379,10 +394,11 @@ export default function ClientsPage() {
       <AddClient
         open={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
-        categories={categories}
-        subCategories={subCategories}
+        categories={categories?.data || []}
+        subCategories={subCategories?.data || []}
         setNotification={setNotification}
         handleAddClientUI={handleAddClientUI}
+        mutateClients={mutateClients}
       />
       <SingleFieldUpdate
         open={singleFieldUpdateProps.open}
@@ -454,7 +470,7 @@ export default function ClientsPage() {
         </Grid>
         {clientList.length > 0 ? (
           <ClientsTable
-            categories={categories}
+            categories={categories?.data || []}
             clients={clientList}
             handleUpdateClient={handleUpdateClient}
             handleDeleteClientUI={handleDeleteClientUI}
@@ -462,7 +478,8 @@ export default function ClientsPage() {
             selectedClients={selectedClients}
             handleSelectClient={handleSelectClient}
             handleSelectAll={handleSelectAll}
-            subCategories={subCategories}
+            subCategories={subCategories?.data || []}
+            mutateClients={mutateClients}
           />
         ) : (
           <ErrorComponent errorText="No User Found" />

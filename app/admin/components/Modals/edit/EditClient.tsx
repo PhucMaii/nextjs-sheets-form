@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -22,11 +22,11 @@ interface PropTypes {
   handleUpdateClient: (userId: number, updatedData: any) => void;
 }
 
-export default function EditClient({
+const EditClient = ({
   client,
   categories,
   handleUpdateClient,
-}: PropTypes) {
+}: PropTypes)  => {
   const [deliveryAddress, setDeliveryAddress] = useState<any>({
     description: client.deliveryAddress,
   });
@@ -44,6 +44,12 @@ export default function EditClient({
       setUpdatedClient({ ...updatedClient, [key]: value });
     }
   };
+
+  useEffect(() => {
+    if (client?.clientId === '00100') {
+      console.log(isOpen, client.clientId);
+    }
+  }, [client])
 
   return (
     <>
@@ -156,3 +162,5 @@ export default function EditClient({
     </>
   );
 }
+
+export default memo(EditClient);

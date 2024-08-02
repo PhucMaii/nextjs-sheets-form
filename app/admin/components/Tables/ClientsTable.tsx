@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, memo, SetStateAction } from 'react';
 import StatusText from '../StatusText';
 import { API_URL } from '@/app/utils/enum';
 import { Notification, UserType } from '@/app/utils/type';
@@ -33,6 +33,7 @@ interface PropTypes {
   handleSelectClient: (e: any, targetClient: UserType) => void;
   handleSelectAll: () => void;
   subCategories: SubCategory[];
+  mutateClients: any;
 }
 
 const ClientsTable = ({
@@ -45,8 +46,10 @@ const ClientsTable = ({
   handleSelectClient,
   handleSelectAll,
   subCategories,
+  mutateClients,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
+  console.log('re-render');
 
   const handleDeleteClient = async (client: UserType) => {
     try {
@@ -63,7 +66,12 @@ const ClientsTable = ({
         return;
       }
 
+      // Optimistic UI Update
       handleDeleteClientUI(client.id);
+
+      // Update Real Data
+      mutateClients();
+
       setNotification({
         on: true,
         type: 'success',
@@ -247,4 +255,6 @@ const ClientsTable = ({
   );
 };
 
-export default ClientsTable;
+export default memo(ClientsTable, (prev, next) => {
+  return (prev.clients === next.clients && prev.selectedClients === next.selectedClients);
+});
