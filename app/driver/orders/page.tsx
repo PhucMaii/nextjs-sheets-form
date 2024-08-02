@@ -27,6 +27,7 @@ import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import { primary, success } from '@/theme/color';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import SearchModal from '../components/Modals/SearchModal';
+import { SWRFetchData } from '@/app/utils/db';
 
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
@@ -93,36 +94,24 @@ export default function OrdersPage() {
   const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
 
+  const date = new Date();
+  const today = YYYYMMDDFormat(date);
+  const [ordersResponse, mutateOrders] = SWRFetchData(
+    `${API_URL.DRIVER_ORDERS}?deliveryDate=${
+      currentTab === 'Today' ? today : datePicker
+    }`,
+  );
+
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
   }, []);
 
   useEffect(() => {
-    fetchOrders();
-  }, [currentTab, datePicker]);
-
-  useEffect(() => {
-    if (orders && orders.length > 0) {
-      if (currentTab === 'Delivered') {
-        const newDeliveredOrders = orders.filter((order: Order) => {
-          return (
-            order.status === ORDER_STATUS.DELIVERED ||
-            order.status === ORDER_STATUS.COMPLETED
-          );
-        });
-        setDisplayOrders(newDeliveredOrders);
-      } else {
-        const newOrders = filterOrderByStatus(
-          orders,
-          currentTab === 'Today'
-            ? ORDER_STATUS.INCOMPLETED
-            : ORDER_STATUS.COMPLETED,
-        );
-        setDisplayOrders(newOrders);
-      }
+    if (ordersResponse) {
+      initializeOrders();
     }
-  }, [orders]);
+  }, [currentTab, datePicker, ordersResponse]);
 
   const deliveredOrders = useMemo(() => {
     if (orders.length === 0) {
@@ -184,39 +173,27 @@ export default function OrdersPage() {
     setDatePicker(formattedDate);
   };
 
-  const fetchOrders = async () => {
-    try {
-      setIsFetching(true);
-      const date = new Date();
-      const today = YYYYMMDDFormat(date);
-      const response = await axios.get(
-        `${API_URL.DRIVER_ORDERS}?deliveryDate=${
-          currentTab === 'Today' ? today : datePicker
-        }`,
-      );
-
-      if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setIsFetching(false);
-        return;
-      }
-
-      setOrders(response.data.data.deliveryOrders);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
+  const initializeOrders = () => {
+    setOrders(ordersResponse?.data.deliveryOrders);
+    if (currentTab === 'Delivered') {
+      const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter((order: Order) => {
+        return (
+          order.status === ORDER_STATUS.DELIVERED ||
+          order.status === ORDER_STATUS.COMPLETED
+        );
       });
-      setIsFetching(false);
+      setDisplayOrders(newDeliveredOrders);
+    } else {
+      const newOrders = filterOrderByStatus(
+        ordersResponse?.data.deliveryOrders,
+        currentTab === 'Today'
+          ? ORDER_STATUS.INCOMPLETED
+          : ORDER_STATUS.COMPLETED,
+      );
+      setDisplayOrders(newOrders);
     }
-  };
+    setIsFetching(false);
+  }
 
   const handleUpdateStatus = async (
     orderId: number,
@@ -237,7 +214,11 @@ export default function OrdersPage() {
         return;
       }
 
+      // Optimistic UI Update
       handleUpdateStatusUI(response.data.data);
+
+      // Update Real Data
+      mutateOrders();
 
       setNotification({
         on: true,
@@ -286,7 +267,11 @@ export default function OrdersPage() {
         return;
       }
 
+      // Optimistic UI Update
       handleUpdateUIItem(order, response.data.data);
+
+      // Update Real Data
+      mutateOrders();
 
       setNotification({
         on: true,
@@ -329,7 +314,6 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
-      {/* <a href="https://www.google.com/maps/dir/?api=1&destination=37.7749,-122.4194" target="_blank">Open in Google Maps</a> */}
       <NotificationPopup
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}

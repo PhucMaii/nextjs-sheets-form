@@ -1,30 +1,37 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import OverviewCard from '@/app/admin/components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import { primaryColor } from '@/theme/color';
-import useSWR from 'swr';
 import { API_URL } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import ManifestTable from '@/app/admin/components/Tables/ManifestTable';
-import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import StatusText from '@/app/admin/components/StatusText';
+import { SWRFetchData } from '@/app/utils/db';
 
 export default function OverviewPage() {
+  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true); 
   const date = new Date();
   const today = YYYYMMDDFormat(date);
-  const { data: orders, isValidating } = useSWR(
-    `${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`,
-  );
+
+  // Data Fetching
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [orders, mutate, isValidating] = SWRFetchData(`${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`);
+
+  useEffect(() => {
+    if (isFirstLoading && !isValidating) {
+      setIsFirstLoading(false);
+    }
+  }, [isFirstLoading, isValidating]);
 
   return (
     <Sidebar>
-      <LoadingModal open={isValidating} />
+      {/* <LoadingModal open={isValidating} /> */}
       <Typography variant="h5" fontWeight="bold">
         Welcome back, {orders?.data.driver.name || ''}
       </Typography>
@@ -54,7 +61,7 @@ export default function OverviewPage() {
           />
         </Grid>
       </Grid>
-      {isValidating ? (
+      {isFirstLoading ? (
         <Skeleton
           variant="rounded"
           sx={{ width: '100% !important', height: '390px !important' }}
