@@ -1,6 +1,8 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Notification } from './type';
 import axios from 'axios';
+import useSWR from 'swr';
+import { fetcher } from '@/HOC/AuthenGuard';
 
 export const fetchData = async (
   api: string,
@@ -26,4 +28,12 @@ export const fetchData = async (
       message: 'There was an error: ' + error.response.data.error,
     });
   }
+};
+
+export const SWRFetchData = (api: string) => {
+  const { data, mutate, isValidating } = useSWR(api, fetcher, {
+    refreshInterval: 1000,
+  });
+
+  return [ data, mutate, isValidating ];
 };

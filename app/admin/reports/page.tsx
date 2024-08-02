@@ -60,8 +60,7 @@ import {
   filterDateRangeOrders,
 } from '@/pages/api/utils/date';
 import BillPrintModal from '../components/Modals/BillPrintModal';
-import useSWR from 'swr';
-import { fetcher } from '@/HOC/AuthenGuard';
+import { SWRFetchData } from '@/app/utils/db';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -100,32 +99,24 @@ export default function ReportPage() {
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
-  
+
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
 
   // Data Fetching
   const currentDate = convertDeliveryDateStringToDate(datePicker);
-  const { data: orders, mutate: mutateOrders } = useSWR(
+  const [orders, mutateOrders] = SWRFetchData(
     !clientValue
       ? ''
       : clientValue?.clientName === 'All Clients'
         ? `${API_URL.CLIENTS}/orders?deliveryDate=${datePicker}`
         : `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
-    fetcher,
-    { refreshInterval: 1000 },
   );
-  const { data: routes, mutate: mutateRoutes } = useSWR(
+  const [routes, mutateRoutes] = SWRFetchData(
     `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
-    fetcher,
-    { refreshInterval: 1000 },
   );
-  const { data: clients } = useSWR(API_URL.CLIENTS, fetcher, {
-    refreshInterval: 1000,
-  });
-  const { data: subCategories } = useSWR(API_URL.SUBCATEGORIES, fetcher, {
-    refreshInterval: 1000,
-  });
+  const [clients] = SWRFetchData(API_URL.CLIENTS);
+  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');

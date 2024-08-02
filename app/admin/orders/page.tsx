@@ -42,8 +42,7 @@ import useDebounce from '@/hooks/useDebounce';
 import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
-import useSWR from 'swr';
-import { fetcher } from '@/HOC/AuthenGuard';
+import { SWRFetchData } from '@/app/utils/db';
 
 interface Category {
   id: number;
@@ -121,19 +120,11 @@ export default function Orders() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   // Data Fetching
-  const {
-    data: orders,
-    mutate,
-    isValidating,
-  } = useSWR(`${API_URL.ORDER}?date=${date}&status=${currentStatus}`, fetcher, {
-    refreshInterval: 1000,
-  });
-  const { data: clients } = useSWR(API_URL.CLIENTS, fetcher, {
-    refreshInterval: 1000,
-  });
-  const { data: subCategories } = useSWR(API_URL.SUBCATEGORIES, fetcher, {
-    refreshInterval: 1000,
-  });
+  const [orders, mutate, isValidating] = SWRFetchData(
+    `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
+  );
+  const [clients] = SWRFetchData(API_URL.CLIENTS);
+  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();

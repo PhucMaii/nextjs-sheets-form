@@ -7,7 +7,6 @@ import { Box, Grid, Skeleton, Switch, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import OverviewData from '../components/OverviewData';
-import { fetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
@@ -17,6 +16,7 @@ import CustomersInDebt from '../components/Tables/CustomersInDebt';
 import LoadingModal from '../components/Modals/LoadingModal';
 import BSOverview from '../components/BSOverview';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import { SWRFetchData } from '@/app/utils/db';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
@@ -33,37 +33,55 @@ export default function Overview() {
   const [revenueData, setRevenueData] = useState<any>();
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
 
+  // Data Fetching
+  // const { data: overview } = useSWR(
+  //   `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  //   fetcher,
+  //   { refreshInterval: 1000 },
+  // );
+  const [ overview ] = SWRFetchData(
+    `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  );
+
   useEffect(() => {
-    if (dateRange) {
-      fetchOverviewData();
+    if (overview && dateRange) {
+      // fetchOverviewData();
+      initializeOverviewData();
     }
-  }, [dateRange]);
+  }, [overview, dateRange]);
 
-  const fetchOverviewData = async () => {
-    try {
-      console.log({ dateRange });
-      setIsFetching(true);
-      const returnData = await fetchData(
-        `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-        setNotification,
-      );
-
-      console.log({ customerInDebt: returnData.customersInDebt });
-      setOverviewData(returnData.overviewData);
-      setRevenueData(returnData.reports);
-      setBeansproutsData(returnData.beansprouts);
-      setCustomersInDebt(returnData.customersInDebt);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
-      setIsFetching(false);
-    }
+  const initializeOverviewData = () => {
+    const overviewFetchedData = overview.data;
+    setOverviewData(overviewFetchedData.overviewData);
+    setRevenueData(overviewFetchedData.reports);
+    setBeansproutsData(overviewFetchedData.beansprouts);
+    setCustomersInDebt(overviewFetchedData.customersInDebt);
+    setIsFetching(false);
   };
+
+  // const fetchOverviewData = async () => {
+  //   try {
+  //     setIsFetching(true);
+  //     const returnData = await fetchData(
+  //       `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  //       setNotification,
+  //     );
+
+  //     setOverviewData(returnData.overviewData);
+  //     setRevenueData(returnData.reports);
+  //     setBeansproutsData(returnData.beansprouts);
+  //     setCustomersInDebt(returnData.customersInDebt);
+  //     setIsFetching(false);
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //     setNotification({
+  //       on: true,
+  //       type: 'error',
+  //       message: error.response.data.error,
+  //     });
+  //     setIsFetching(false);
+  //   }
+  // };
 
   return (
     <Sidebar>
