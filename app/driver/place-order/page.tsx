@@ -12,7 +12,6 @@ import { API_URL } from '@/app/utils/enum';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { grey } from '@mui/material/colors';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
-import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import moment from 'moment';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
@@ -43,7 +42,7 @@ export default function PlaceOrder() {
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [items, mutateItems, isValidating] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`)
+  const [items, mutateItems] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`)
 
   useEffect(() => {
     if (items) {
@@ -193,9 +192,7 @@ export default function PlaceOrder() {
             />
           </LocalizationProvider>
         </Box>
-        {isValidating ? (
-          <LoadingComponent />
-        ) : selectedClient ? (
+        {selectedClient ? (
           <>
             {itemList.length > 0 &&
               itemList.map((item: any, index: number) => {
