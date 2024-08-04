@@ -154,9 +154,10 @@ export default function ReportPage() {
     if (clientOrders.length > 0) {
       calculateTotalBill();
     } else {
+      // Reset Display Data
       setTotalBill(0);
+      setSelectedOrders([]);
     }
-    setSelectedOrders([]);
   }, [clientOrders]);
 
   useEffect(() => {
