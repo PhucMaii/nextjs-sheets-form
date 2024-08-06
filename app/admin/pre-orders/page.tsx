@@ -654,7 +654,8 @@ export default function ScheduledOrderPage() {
             aria-label="basic tabs"
             value={dayIndex}
             onChange={(e, newValue: number) => switchDay(newValue)}
-            variant="fullWidth"
+            variant={mdDown ? "scrollable" : "fullWidth"}
+            scrollButtons="auto"
           >
             {days &&
               days.map((day: string, index: number) => {

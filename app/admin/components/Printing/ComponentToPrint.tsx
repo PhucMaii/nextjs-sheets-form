@@ -66,20 +66,20 @@ export const ComponentToPrint = forwardRef(
                   ? 'VOID ORDER'
                   : ''}
             </Typography>
-            <Typography variant="h5" fontWeight="bold">
+            <Typography variant="h4" fontWeight="bold">
               SUPREME SPROUTS LTD
             </Typography>
-            <Typography textAlign="center" variant="h6">
+            <Typography textAlign="center" variant="h5">
               1-6420 Beresford Street, Burnaby, BC, V5E 1B3
             </Typography>
-            <Typography variant="h6">
+            <Typography variant="h5">
               778 789 1060
               <br />
               709 989 6000
             </Typography>
           </Box>
           <Divider sx={{ my: 3 }} />
-          <Grid container alignItems="center" rowGap={3} mb={2}>
+          <Grid container alignItems="center" rowGap={2} mb={2}>
             {orderFields &&
               Object.keys(orderFields).map(
                 (orderField: string, index: number) => {

@@ -89,7 +89,12 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
                   <Text style={{ margin: 5, fontSize: 8 }}>Total Price</Text>
                 </View>
               </View>
-              {order.items.map((item) => (
+              {order.items.map((item) => {
+                if (item.quantity === 0) {
+                  return null;
+                }
+                
+                return (
                 <View key={item.id} style={styles.tableRow}>
                   <View style={styles.tableColNoBorder}>
                     <Text style={{ margin: 5, fontSize: 8 }}>{item.name}</Text>
@@ -108,7 +113,7 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
                     </Text>
                   </View>
                 </View>
-              ))}
+              )})}
             </View>
             <View style={styles.flex_between}>
               <Text style={styles.subtitle}>Total:</Text>
