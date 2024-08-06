@@ -31,12 +31,13 @@ model User {
   sheetName          String  @db.VarChar(255)
   role               String  @db.VarChar(255)
 
-  category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory    SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  preference     UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
-  Orders         Orders[]
-  scheduleOrders ScheduleOrders[]
-  routes         UserRoute[]
+  category            Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory         SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  preference          UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
+  Orders              Orders[]
+  scheduleOrders      ScheduleOrders[]
+  routes              UserRoute[]
+  unavailableDayRange DayRange[]
 }
 
 model Category {
@@ -128,4 +129,12 @@ model UserRoute {
   route   Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
 
   @@id([userId, routeId])
+}
+
+model DayRange {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime
+  endDate   DateTime
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
