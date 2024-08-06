@@ -54,7 +54,11 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
   const totalBill = useMemo(() => {
     return openBill.length > 0
       ? openBill.reduce((acc: number, order: Order) => {
+        if (order.status === ORDER_STATUS.INCOMPLETED || order.status === ORDER_STATUS.DELIVERED) {
           return acc + order.totalPrice;
+        }
+
+        return acc;
         }, 0)
       : 0;
   }, [openBill]);

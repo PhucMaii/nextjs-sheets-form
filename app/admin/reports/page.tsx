@@ -233,60 +233,6 @@ export default function ReportPage() {
     setIsFetching(false);
   };
 
-  // const fetchClientOrders = async () => {
-  //   try {
-  //     setIsFetching(true);
-  //     let response;
-  //     if (clientValue?.clientName === 'All Clients') {
-  //       response = await axios.get(
-  //         `${API_URL.CLIENTS}/orders?deliveryDate=${datePicker}`,
-  //       );
-  //     } else {
-  //       response = await axios.get(
-  //         `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
-  //       );
-  //     }
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       setIsFetching(false);
-  //       return;
-  //     }
-
-  //     let orderData: any = response.data.data;
-  //     if (clientValue?.clientName !== 'All Clients') {
-  //       orderData = filterDateRangeOrders(
-  //         response.data.data,
-  //         dateRange[0],
-  //         dateRange[1],
-  //       );
-  //     }
-
-  //     const newUnpaidOrders = orderData.filter((order: Order) => {
-  //       return (
-  //         order.status === ORDER_STATUS.DELIVERED ||
-  //         order.status === ORDER_STATUS.INCOMPLETED
-  //       );
-  //     });
-  //     setUnpaidOrders(newUnpaidOrders);
-  //     setClientOrders(orderData);
-  //     setBaseClientOrders(orderData);
-  //     setIsFetching(false);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch client orders: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch client orders: ' + error,
-  //     });
-  //     setIsFetching(false);
-  //   }
-  // };
-
   const handleCloseActionsAnchor = () => {
     setActionButtonAnchor(null);
   };
