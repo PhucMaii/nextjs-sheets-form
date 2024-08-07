@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { Dispatch, memo, SetStateAction, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,26 +11,27 @@ import {
   Typography,
 } from '@mui/material';
 import { BoxModal } from '../styled';
-import { UserType } from '@/app/utils/type';
+import { Notification, UserType } from '@/app/utils/type';
 import { Category } from '@prisma/client';
 import AutoCompleteAddress from '../../AutoCompleteAddress';
 import { LoadingButton } from '@mui/lab';
+import UnavailableRange from '../UnavailableRange';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 
 interface PropTypes {
   client: UserType;
   categories: Category[];
   handleUpdateClient: (userId: number, updatedData: any) => void;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-const EditClient = ({
-  client,
-  categories,
-  handleUpdateClient,
-}: PropTypes)  => {
+const EditClient = ({ client, categories, handleUpdateClient, setNotification }: PropTypes) => {
   const [deliveryAddress, setDeliveryAddress] = useState<any>({
     description: client.deliveryAddress,
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isUnavailableRangeOpen, setIsUnavailableRangeOpen] =
+    useState<boolean>(false);
   const [updatedClient, setUpdatedClient] = useState<UserType>(client);
 
   const handleOnChangeClient = (key: string, value: any) => {
@@ -49,10 +50,16 @@ const EditClient = ({
     if (client?.clientId === '00100') {
       console.log(isOpen, client.clientId);
     }
-  }, [client])
+  }, [client]);
 
   return (
     <>
+      <UnavailableRange
+        currentUser={client}
+        open={isUnavailableRangeOpen}
+        onClose={() => setIsUnavailableRangeOpen(false)}
+        setNotification={setNotification}
+      />
       <Button
         onClick={(e: any) => {
           e.stopPropagation();
@@ -86,6 +93,19 @@ const EditClient = ({
           </Box>
           <Divider />
           <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} textAlign="right">
+              <Button
+                variant="outlined"
+                onClick={() => setIsUnavailableRangeOpen(true)}
+              >
+                <Box display="flex" gap={1} alignItems="center">
+                  <ScheduleIcon />
+                  <Typography variant="subtitle1">
+                    Set Unavailable Days
+                  </Typography>
+                </Box>
+              </Button>
+            </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="h6">Client Id:</Typography>
             </Grid>
@@ -161,6 +181,6 @@ const EditClient = ({
       </Modal>
     </>
   );
-}
+};
 
 export default memo(EditClient);

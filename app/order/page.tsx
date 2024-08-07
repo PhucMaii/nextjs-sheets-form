@@ -4,7 +4,7 @@ import { Notification } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import FadeIn from '@/HOC/FadeIn';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, FLAG_ORDER_TYPE } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -21,6 +21,7 @@ import useSWR from 'swr';
 import NotificationPopup from '../admin/components/Notification';
 import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
+import OrderOnVacationModal from '../admin/components/Modals/OrderOnVacationModal';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -42,11 +43,14 @@ export default function OrderForm() {
     useState<boolean>(false);
   const [isOverrideOrderOpen, setIsOverrideOrderOpen] =
     useState<boolean>(false);
+  const [isOrderOnVacationOpen, setIsOrderOnVacationOpen] =
+    useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
     message: '',
   });
+  const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   let today: any = dayjs();
@@ -56,6 +60,12 @@ export default function OrderForm() {
 
   const minDate = today.startOf('day');
   const { data: items, isValidating } = useSWR(API_URL.CLIENT_ITEM);
+
+  useEffect(() => {
+    if (unavailableRange) {
+      setIsOrderOnVacationOpen(true);
+    }
+  }, [unavailableRange])
 
   useEffect(() => {
     if (items) {
@@ -85,7 +95,10 @@ export default function OrderForm() {
     });
   };
 
-  const handleSubmit = async (e: MouseEvent) => {
+  const handleSubmit = async (
+    e: MouseEvent,
+    isCheckUnavailableRange: boolean = true,
+  ) => {
     e.preventDefault();
     const checkUserHasInput = handleCheckUserHasInput();
     if (!checkUserHasInput) {
@@ -108,6 +121,7 @@ export default function OrderForm() {
         ['DELIVERY DATE']: deliveryDate,
         ['NOTE']: note,
         orderTime: `${timeString} ${dateString}`,
+        isCheckUnavailableRange,
       };
 
       for (const item of itemList) {
@@ -122,7 +136,12 @@ export default function OrderForm() {
           type: 'warning',
           message: response.data.warning,
         });
-        setLastOrder(response.data.data);
+
+        if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
+          setLastOrder(response.data.data);
+        } else {
+          setUnavailableRange(response.data.data.unavailableRange);
+        }
         setIsButtonLoading(false);
         return;
       }
@@ -194,6 +213,16 @@ export default function OrderForm() {
             lastOrder={lastOrder}
             deliveryDate={deliveryDate}
             setNotification={setNotification}
+          />
+        )}
+        {unavailableRange && (
+          <OrderOnVacationModal
+            clientName={clientName}
+            open={isOrderOnVacationOpen}
+            onClose={() => setIsOrderOnVacationOpen(false)}
+            startDate={new Date(unavailableRange[0])}
+            endDate={new Date(unavailableRange[1])}
+            handleContinueOrder={(e: any) => handleSubmit(e, false)}
           />
         )}
         <div className="w-full mx-auto pb-6">

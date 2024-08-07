@@ -1,6 +1,7 @@
 export enum API_URL {
   ADMIN = '/api/admin',
   USER = '/api/user',
+  DRIVER = '/api/drivers',
   SIGNUP = '/api/signup',
   FORM = '/api/form',
   SHEETS = '/api/sheets',
@@ -17,7 +18,6 @@ export enum API_URL {
   SUBCATEGORIES = '/api/admin/subcategories',
   ROUTES = '/api/admin/routes',
   ADMIN_DRIVERS = '/api/admin/drivers',
-  DRIVER = '/api/drivers',
   DRIVER_ORDERS = '/api/drivers/orders',
 }
 
@@ -49,9 +49,7 @@ export enum USER_ROLE {
   ADMIN = 'admin',
 }
 
-// export enum SUB_CATEGORIES {
-//   BK='B.K',
-//   PP='P.P',
-//   JUMBO_EGG = 'JUMBO EGG',
-//   EXTRA_LARGE_EGG = 'EXTRA LARGE EGG'
-// }
+export enum FLAG_ORDER_TYPE {
+  ALREADY_ORDER = 'already order',
+  VACATION_ORDER = 'vacation order',
+}
