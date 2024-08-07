@@ -1,11 +1,15 @@
 import { AlertColor } from '@mui/material';
-import { Category, Driver, Route, User, UserRoute } from '@prisma/client';
+import { Category, DayRange, Driver, Route, User, UserRoute } from '@prisma/client';
 import { Session } from 'next-auth';
 
 export interface BSData {
   quantity: number;
   revenue: number;
   percentage: number;
+}
+
+export interface IDayRange extends DayRange {
+  
 }
 export interface Notification {
   on: boolean;

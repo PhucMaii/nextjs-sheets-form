@@ -207,7 +207,7 @@ const ClientsTable = ({
             />
             <EditClient
               client={client}
-              // setNotification={setNotification}
+              setNotification={setNotification}
               categories={categories}
               handleUpdateClient={handleUpdateClient}
             />
