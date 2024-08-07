@@ -4,9 +4,10 @@ import { sendEmail } from '../utils/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { FLAG_ORDER_TYPE, ORDER_STATUS } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
+import { convertDeliveryDateStringToDate } from '../utils/date';
 
 interface RequestQuery {
   userId?: string;
@@ -20,6 +21,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
     const { userId } = req.query as RequestQuery;
+    const body: any = req.body;
+    const isCheckUnavailableRange = body?.isCheckUnavailableRange;
 
     let id = userId;
 
@@ -37,14 +40,41 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         id: Number(id),
       },
+      include: {
+        unavailableDayRange: true,
+      },
     });
 
     if (!existingUser) {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }
 
+    // Check is delivery date in client's vacation range
+
+    if (isCheckUnavailableRange) {
+      const deliveryDate = convertDeliveryDateStringToDate(
+        body['DELIVERY DATE'],
+      );
+      for (const dayRange of existingUser.unavailableDayRange) {
+        if (
+          deliveryDate >= dayRange.startDate ||
+          deliveryDate <= dayRange.endDate
+        ) {
+          return res.status(200).json({
+            warning: `Client ${
+              existingUser.clientName
+            } has request time off from ${dayRange.startDate.toDateString()} to ${dayRange.endDate.toDateString()}`,
+            data: {
+              unavailableRange: [dayRange.startDate, dayRange.endDate],
+              client: existingUser,
+            },
+            flag: FLAG_ORDER_TYPE.VACATION_ORDER,
+          });
+        }
+      }
+    }
+
     // Check has user ordered for target delivery date yet
-    const body: any = req.body;
     const userOrder = await checkHasClientOrder(
       existingUser.id,
       body['DELIVERY DATE'],
@@ -54,6 +84,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(200).json({
         warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
         data: userOrder,
+        flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
       });
     }
 

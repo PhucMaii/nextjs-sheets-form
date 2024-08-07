@@ -17,7 +17,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { API_URL, ORDER_STATUS } from '../../utils/enum';
+import { API_URL, FLAG_ORDER_TYPE, ORDER_STATUS } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
@@ -99,7 +99,6 @@ export default function Orders() {
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true);
-  // const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
@@ -233,15 +232,12 @@ export default function Orders() {
     }
   }, [incomingOrder]);
 
-  // useEffect(() => {
-  //   fetchOrders();
-  // }, [date, currentStatus]);
-
   const addOrder = async (
     clientValue: UserType | null,
     deliveryDate: string,
     note: string,
     itemList: any,
+    isCheckUnavailableRange: boolean = true,
   ) => {
     try {
       const currentDate = new Date();
@@ -253,6 +249,7 @@ export default function Orders() {
         ['DELIVERY DATE']: deliveryDate,
         ['NOTE']: note,
         orderTime: `${timeString} ${dateString}`,
+        isCheckUnavailableRange,
       };
 
       for (const item of itemList) {
@@ -274,12 +271,16 @@ export default function Orders() {
       }
 
       if (response.data.warning) {
-        setNotification({
-          on: true,
-          type: 'warning',
-          message: response.data.warning,
-        });
-        return;
+        if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
+          setNotification({
+            on: true,
+            type: 'warning',
+            message: response.data.warning,
+          });
+          return;
+        } else {
+          return response;
+        }
       }
 
       setNotification({
@@ -303,29 +304,6 @@ export default function Orders() {
     setBaseOrderData(orders.data);
     setCurrentPage(1);
   };
-
-  // const fetchOrders = async (): Promise<void> => {
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await axios.get(
-  //       `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
-  //     );
-
-  //     if (response.data.error) {
-  //       setIsLoading(false);
-  //       return;
-  //     }
-
-  //     setPages(Math.ceil(response.data.data.length / orderPerPage));
-  //     setBaseOrderData(response.data.data);
-  //     setIsLoading(false);
-  //     setCurrentPage(1);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch orders: ', error);
-  //     setIsLoading(false);
-  //     return;
-  //   }
-  // };
 
   const generateOrderData = (orderList = baseOrderData) => {
     if (!orderList || orderList.length === 0) {

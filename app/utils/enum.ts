@@ -49,9 +49,7 @@ export enum USER_ROLE {
   ADMIN = 'admin',
 }
 
-// export enum SUB_CATEGORIES {
-//   BK='B.K',
-//   PP='P.P',
-//   JUMBO_EGG = 'JUMBO EGG',
-//   EXTRA_LARGE_EGG = 'EXTRA LARGE EGG'
-// }
+export enum FLAG_ORDER_TYPE {
+  ALREADY_ORDER = 'already order',
+  VACATION_ORDER = 'vacation order',
+}
