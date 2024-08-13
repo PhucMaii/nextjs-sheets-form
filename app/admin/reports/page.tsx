@@ -61,6 +61,7 @@ import {
 } from '@/pages/api/utils/date';
 import BillPrintModal from '../components/Modals/BillPrintModal';
 import { SWRFetchData } from '@/app/utils/db';
+import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -100,8 +101,10 @@ export default function ReportPage() {
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+  // Printing Refs
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
+  const weeklyPrint: any = useRef();
 
   // Data Fetching
   const currentDate = convertDeliveryDateStringToDate(datePicker);
@@ -283,6 +286,10 @@ export default function ReportPage() {
     content: () => billPrint.current,
   });
 
+  const handleWeeklyPrint = useReactToPrint({
+    content: () => weeklyPrint.current
+  })
+
   const handleSelectOrder = (e: any, targetOrder: Order) => {
     e.preventDefault();
     const selectedOrder = selectedOrders.find((order: Order) => {
@@ -435,6 +442,14 @@ export default function ReportPage() {
       >
         <MenuItem
           onClick={() => {
+            handleWeeklyPrint();
+            handleCloseStatementAnchor();
+          }}
+        >
+          Weekly
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
             handleInvoicePrint();
             handleCloseStatementAnchor();
           }}
@@ -560,6 +575,14 @@ export default function ReportPage() {
           orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
           endDate={dateRange[0]}
           ref={invoicePrint}
+        />
+      </div>
+      <div style={{ display: 'none' }}>
+        <WeeklyStatement
+          client={clientValue}
+          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+          endDate={dateRange[0]}
+          ref={weeklyPrint}
         />
       </div>
       <div style={{ display: 'none' }}>
