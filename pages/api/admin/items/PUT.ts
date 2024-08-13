@@ -83,6 +83,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
+    // Update Item
     const newUpdatedItem = await prisma.item.update({
       where: {
         id: updatedItem.id,
@@ -102,6 +103,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Update schedule order items
+    const responseUpdate = await updateAllScheduleOrderItems(existingItem, updatedItem);
+
+    if (!responseUpdate.ok) {
+      return res.status(500).json({
+        error: responseUpdate.error
+      })
+    }
+
     return res.status(200).json({
       data: newUpdatedItem,
       message: 'Item Updated Successfully',
@@ -113,3 +123,48 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+const updateAllScheduleOrderItems = async (
+  oldItem: any,
+  updatedItem: any,
+) => {
+  try {
+    const prisma = new PrismaClient();
+
+    // Find all users that has same categoryId
+    const userList = await prisma.user.findMany({
+      where: {
+        categoryId: oldItem.categoryId,
+      },
+      include: {
+        scheduleOrders: true,
+      },
+    });
+
+    // Use 2 loops - O(n ^ 2) to update all items that qualified for update
+    for (const user of userList) {
+      for (const scheduleOrder of user.scheduleOrders) {
+        if (scheduleOrder) {
+          await prisma.orderedItems.updateMany({
+            where: {
+              scheduledOrderId: scheduleOrder.id,
+              name: oldItem.name,
+            },
+            data: {
+              name: updatedItem.name,
+              price: updatedItem.price,
+            },
+          });
+        }
+      }
+    }
+
+    return { ok: true}
+  } catch (error: any) {
+    console.log(
+      'Internal Server Error from update schedule order items: ',
+      error,
+    );
+    return {ok: false, error};
+  }
+};
