@@ -37,10 +37,10 @@ const useManifest = (
   }, [orderList, userRoute]);
 
   useEffect(() => {
-    if (routes.length > 0) {
+    if (routes.length > 0 && userRoute) {
       getClientRoutes();
     }
-  }, [orderList, routes, selectedRoutes]);
+  }, [orderList, routes, selectedRoutes, userRoute]);
 
   useEffect(() => {
     if (orderPrint.length > 0) {
@@ -71,16 +71,18 @@ const useManifest = (
       return relatedRoutes;
     });
 
+    
     const orderByRoutes = _.orderBy(clientRoutes.flat(), ['routeId'], ['asc']);
-
+    
     // Arrange as user route
     const sortedOrderByRoutes = [];
     for (const selectedRoute of selectedRoutes) {
       // Handle error
-      if (!selectedRoute) {
-        setOrderPrint([]);
-        continue;
-      }
+      // if (!selectedRoute) {
+      //   setOrderPrint([]);
+      //   continue;
+      // }
+
       const sortedUserIds = userRoute.data[selectedRoute.id];
 
       // If that route does not have any orders

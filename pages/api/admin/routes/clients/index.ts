@@ -63,21 +63,29 @@ export default async function handler(
     }, {});
 
     const sortedUserIds: any = {};
+    const routeListInTargetDay = Object.keys(routeListWithUserId);
 
     // Loop run O(n ^ 3) - Need to optimize
     for (const scheduleOrder of scheduleOrders) {
       // Find the right route of the schedule order owner
       const clientRoute: any = scheduleOrder.user.routes.find(
         (route: UserRoute) => {
-          const targetRoute = Object.keys(routeListWithUserId).find(
+          const targetRoute = routeListInTargetDay.find(
             (id: string) => {
               return route.routeId === Number(id);
             },
           );
 
-          return targetRoute;
+          // if route id is included in target route list, then return route          
+          if (targetRoute) {
+            return route;
+          }
         },
       );
+
+      if (!clientRoute) {
+        continue;
+      }
 
       if (!sortedUserIds[clientRoute.routeId]) {
         sortedUserIds[clientRoute.routeId] = [scheduleOrder.userId];
