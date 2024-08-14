@@ -76,6 +76,11 @@ const useManifest = (
     // Arrange as user route
     const sortedOrderByRoutes = [];
     for (const selectedRoute of selectedRoutes) {
+      // Handle error
+      if (!selectedRoute) {
+        setOrderPrint([]);
+        continue;
+      }
       const sortedUserIds = userRoute.data[selectedRoute.id];
 
       // If that route does not have any orders
