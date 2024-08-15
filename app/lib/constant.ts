@@ -29,11 +29,11 @@ export const mainItems = [
   'SOYA 10 LBS',
   'SOYA 5 LBS',
   'SOYA 24X1 LB',
-  'MUSHROOM',
+  'WHITE MUSHROOM',
   'JUMBO EGG',
   'RICE NOODLE',
   'LIQUID EGG',
-  'EGG PLANT',
+  'EGGPLANTS 30 LB',
   'LIME NO. 1',
 ];
 

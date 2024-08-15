@@ -170,14 +170,37 @@ async function main() {
   //   data: [
   //   ]
   // })
-  await prisma.item.updateMany({
-    where: {
-      name: 'BEAN 24X1',
-    },
-    data: {
-      name: 'BEAN 24X1 LB',
-    },
-  });
+
+  // const scheduleOrders = await prisma.scheduleOrders.findMany({
+  //   include:{
+  //     items: true,
+  //     user: true,
+  //   }
+  // });
+  // const items = await prisma.item.findMany();
+
+  // // Loop through schedule order and item
+  // for (const scheduleOrder of scheduleOrders) {
+  //   for (const item of scheduleOrder.items) {
+  //     // Find the target item with same categoryId and name
+  //     const targetItem = items.find((baseItem) => {
+  //       return baseItem.categoryId === scheduleOrder.user.categoryId && item.name === baseItem.name
+  //     });
+
+  //     // Then update it.
+  //     if (targetItem) {
+  //       await prisma.orderedItems.update({
+  //         where: {
+  //           id: item.id,
+  //         },
+  //         data: {
+  //           price: item.price
+  //         }
+  //       })
+  //     }
+      
+  //   }
+  // }
 }
 
 main()
