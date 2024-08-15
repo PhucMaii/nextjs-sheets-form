@@ -573,7 +573,7 @@ export default function ReportPage() {
         <InvoicePrint
           client={clientValue}
           orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          endDate={dateRange[0]}
+          endDate={dateRange[1]}
           ref={invoicePrint}
         />
       </div>
@@ -581,7 +581,7 @@ export default function ReportPage() {
         <WeeklyStatement
           client={clientValue}
           orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          endDate={dateRange[0]}
+          endDate={dateRange[1]}
           ref={weeklyPrint}
         />
       </div>
