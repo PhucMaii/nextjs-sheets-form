@@ -29,13 +29,14 @@ import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 
-interface PropTypes {
+interface IProps {
   order: ScheduledOrder;
   setNotification: Dispatch<SetStateAction<Notification>>;
   handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
   handleDeleteOrderUI: (targetOrder: ScheduledOrder) => void;
   routes: IRoutes[];
   routeId: number;
+  mutateOrders: any;
 }
 
 export default function EditScheduleOrder({
@@ -45,7 +46,8 @@ export default function EditScheduleOrder({
   handleDeleteOrderUI,
   routes,
   routeId,
-}: PropTypes) {
+  mutateOrders
+}: IProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<OrderedItems>({
     name: '',
@@ -219,6 +221,8 @@ export default function EditScheduleOrder({
         items: itemList,
         totalPrice,
       });
+
+      mutateOrders();
 
       setNotification({
         on: true,

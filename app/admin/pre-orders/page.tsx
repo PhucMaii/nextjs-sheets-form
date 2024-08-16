@@ -865,6 +865,7 @@ export default function ScheduledOrderPage() {
                           scheduleOrder={order}
                           handleDeleteOrderUI={handleDeleteOrderUI}
                           handleUpdateOrderUI={handleUpdateOrderUI}
+                          mutateOrders={mutateOrders}
                           selectedOrders={selectedOrders}
                           handleSelectOrder={handleSelectOrder}
                           routes={routes}

@@ -23,6 +23,7 @@ interface PropTypes {
   routeId: number;
   routes: IRoutes[];
   handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
+  mutateOrders: any;
 }
 
 export default function ScheduleOrder({
@@ -34,6 +35,7 @@ export default function ScheduleOrder({
   selectedOrders,
   routeId,
   routes,
+  mutateOrders
 }: PropTypes) {
   const [isSelected, setIsSelected] = useState<boolean>(false);
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
@@ -96,6 +98,7 @@ export default function ScheduleOrder({
         order={scheduleOrder}
         setNotification={setNotification}
         handleUpdateOrderUI={handleUpdateOrderUI}
+        mutateOrders={mutateOrders}
         handleDeleteOrderUI={handleDeleteOrderUI}
       />
     </Box>
