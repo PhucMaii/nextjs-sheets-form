@@ -179,6 +179,14 @@ export default function ScheduledOrderPage() {
     }
   }, [debouncedKeywords, baseOrderList]);
 
+  // Update current selected orders if there is any change in order list
+  useEffect(() => {
+    if (selectedOrders.length > 0) {
+      updateSelectedOrders();
+    }
+  }, [orderList]);
+
+
   const addOrderUI = (newOrder: ScheduledOrder) => {
     const hasOrderExisted = baseOrderList.some(
       (order: ScheduledOrder) => order.id === newOrder.id,
@@ -348,83 +356,28 @@ export default function ScheduledOrderPage() {
     setOrderList(orders?.data);
   }
 
-  // const fetchOrders = async (newRoutes: IRoutes[] = routes) => {
-  //   try {
-  //     setIsLoading(true);
-  //     if (routes.length === 0) {
-  //       setOrderList([]);
-  //       setIsLoading(false);
-  //       return;
-  //     }
-  //     const clientIds = newRoutes[routeIndex].clients?.map(
-  //       (userRoute: UserRoute) => {
-  //         return userRoute.userId;
-  //       },
-  //     );
-  //     const response = await axios.get(
-  //       `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds}`,
-  //     );
+  const updateSelectedOrders = () => {
+    if (selectedOrders.length > 0) {
+      const selectedIds = selectedOrders.map((order) => {
+        return order.id;
+      });
 
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       setIsLoading(false);
-  //       return;
-  //     }
+      const newSelectedOrders = [];
 
-  //     setBaseOrderList(response.data.data);
-  //     setOrderList(response.data.data);
-  //     setIsLoading(false);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch orders: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch orders: ' + error,
-  //     });
-  //     setIsLoading(false);
-  //   }
-  // };
+      for (const selectedOrder of selectedOrders) {
+        if (selectedIds.includes(selectedOrder.id)) {
+          newSelectedOrders.push(selectedOrder);
+        }
+      }
+
+      setSelectedOrders(newSelectedOrders);
+    }
+  }
 
   const initializeRoutes = () => {
     setRoutes(routesResponse?.data);
     setIsFetchingRoute(false);
   }
-
-  // const fetchRoutes = async () => {
-  //   try {
-  //     setIsFetchingRoute(true);
-  //     setRoutes([]);
-  //     const response = await axios.get(
-  //       `${API_URL.ROUTES}?day=${days[dayIndex]}`,
-  //     );
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       setIsFetchingRoute(false);
-  //       return;
-  //     }
-
-  //     setIsFetchingRoute(false);
-  //     setRoutes(response.data.data);
-  //     return response.data.data; // for fetch orders
-  //   } catch (error: any) {
-  //     console.log('There was an error: ', error);
-  //     setIsFetchingRoute(false);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'There was an error: ' + error,
-  //     });
-  //   }
-  // };
 
   const handleAddRouteUI = (targetRoute: IRoutes) => {
     setRoutes([...routes, targetRoute]);
