@@ -6,6 +6,7 @@ import { checkHasClientOrder } from '../../import-sheets';
 import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
+import { convertDeliveryDateStringToDate } from '../../utils/date';
 
 interface BodyTypes {
   deliveryDate: string;
@@ -14,6 +15,7 @@ interface BodyTypes {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const prisma = new PrismaClient();
     const { deliveryDate, scheduleOrderList } = req.body as BodyTypes;
 
     const isSendToAdmin = false;
@@ -41,6 +43,35 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           hasClientOrder,
         );
         console.log({ alreadyOrder: scheduleOrder });
+        continue;
+      }
+
+      // Check is user has time off
+      const unavailableRanges = await prisma.dayRange.findMany({
+        where: {
+          userId: scheduleOrder.userId
+        }
+      });
+
+      let trackIndex = 0;
+      for (const unavailableRange of unavailableRanges) {
+        const startDate = new Date(unavailableRange.startDate);
+        const endDate = new Date(unavailableRange.endDate);
+        const deliveryDateTypeDate = convertDeliveryDateStringToDate(deliveryDate);
+
+        if (deliveryDateTypeDate >= startDate && deliveryDateTypeDate <= endDate) {
+          break;
+        }
+        trackIndex++;
+      }
+
+      if (trackIndex < unavailableRanges.length - 1) {
+        await pusherServer.trigger(
+          'admin-schedule-order',
+          'pre-order',
+          scheduleOrder,
+        );
+        console.log({ unavailableTime: scheduleOrder });
         continue;
       }
 

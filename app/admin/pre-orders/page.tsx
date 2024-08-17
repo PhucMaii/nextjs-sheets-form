@@ -137,7 +137,7 @@ export default function ScheduledOrderPage() {
       const filteredOrderLength = createdOrders.reduce(
         (accumulator: any, currentOrder: Order) => {
           const foundItem = accumulator.find((order: Order) => {
-            return order.id === currentOrder.id;
+            return order?.id === currentOrder.id;
           });
 
           if (!foundItem) {
@@ -213,6 +213,7 @@ export default function ScheduledOrderPage() {
 
       setOrderList(newOrderList);
       setBaseOrderList(newBaseOrderList);
+      mutateOrders();
     }
   };
 
@@ -306,7 +307,6 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
       mutateClients();
 
       const newRoutes = routes.filter((route: IRoutes) => {
