@@ -66,7 +66,7 @@ export const ComponentToPrint = forwardRef(
                   ? 'VOID ORDER'
                   : ''}
             </Typography>
-            <Typography variant="h4" fontWeight="bold">
+            <Typography textAlign="center" variant="h4" fontWeight="bold">
               SUPREME SPROUTS LTD
             </Typography>
             <Typography textAlign="center" variant="h5">
