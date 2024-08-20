@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
 import { updateOrderTotalPrice } from '../../admin/orderedItems/PUT';
+import { getDriverInfo } from '../../utils/auth';
 
 interface IBody {
   id: number; // ordered item id
@@ -42,7 +43,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    await updateOrderTotalPrice(orderId, orderTotalPrice);
+    // Get driver update info
+    const driverUpdate: any = await getDriverInfo(req, res);
+
+    await updateOrderTotalPrice(orderId, orderTotalPrice, `Driver - ${driverUpdate.name}`);
 
     return res.status(200).json({
       data,

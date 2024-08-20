@@ -2,9 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true, // Improve performance
-  compiler: {
-    removeConsole: process.env.NEXT_PUBLIC_CURRENT_STATE !== 'development', // Remove console.log in production
-  },
 };
 
 const withPWA = require('next-pwa')({

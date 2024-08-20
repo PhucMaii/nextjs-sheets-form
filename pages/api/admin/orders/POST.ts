@@ -7,8 +7,7 @@ import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]';
+import { getUserInfo } from '../../utils/auth';
 
 interface BodyTypes {
   deliveryDate: string;
@@ -34,15 +33,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         continue;
       }
       // Check has user order for today, if yes then skip that client
-      const hasClientOrder = await checkHasClientOrder(
+      const existingOrder = await checkHasClientOrder(
         scheduleOrder.user.id,
         deliveryDate,
       );
-      if (hasClientOrder) {
+
+      const createdBy = existingOrder?.createdBy?.split(' - ')[0];
+      if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
-          hasClientOrder,
+          existingOrder,
         );
         console.log({ alreadyOrder: scheduleOrder });
         continue;
@@ -56,10 +57,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
 
       let trackIndex = 0;
+      const deliveryDateTypeDate = convertDeliveryDateStringToDate(deliveryDate);
       for (const unavailableRange of unavailableRanges) {
         const startDate = new Date(unavailableRange.startDate);
         const endDate = new Date(unavailableRange.endDate);
-        const deliveryDateTypeDate = convertDeliveryDateStringToDate(deliveryDate);
 
         if (deliveryDateTypeDate >= startDate && deliveryDateTypeDate <= endDate) {
           break;
@@ -67,7 +68,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         trackIndex++;
       }
 
-      if (trackIndex < unavailableRanges.length - 1) {
+      if (trackIndex <= unavailableRanges.length - 1) {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
@@ -78,25 +79,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Get person create info
-      const session: any = await getServerSession(req, res, authOptions);
-      const adminCreate = await prisma.user.findUnique({
-        where: {
-          id: session?.user.id
-        }
-      });
-
-      if (!adminCreate) {
-        return res.status(401).json({
-          error: 'You are not authenticated'
-        })
-      }
-  
-      if (adminCreate.role !== USER_ROLE.ADMIN) {
-        return res.status(401).json({
-          error: 'You are not authorized'
-        })
-      }
-  
+      const adminCreate: any = await getUserInfo(req, res);
 
       const newOrder: any = await createOrder(
         scheduleOrder.user,
