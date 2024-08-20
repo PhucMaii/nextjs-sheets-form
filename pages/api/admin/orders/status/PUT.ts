@@ -1,3 +1,4 @@
+import { getUserInfo } from '@/pages/api/utils/auth';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -6,6 +7,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { id, status, updatedOrders } = req.body as any;
 
+    const adminCreate: any = await getUserInfo(req, res);
+
+    const updateTime = new Date();
     if (id) {
       const updatedOrder = await prisma.orders.update({
         where: {
@@ -13,6 +17,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: {
           status,
+          updatedBy: `Admin - ${adminCreate.clientName}`,
+          updateTime
         },
         include: {
           items: true,

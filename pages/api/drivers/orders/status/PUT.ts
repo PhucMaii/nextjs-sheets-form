@@ -1,4 +1,5 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { getDriverInfo } from '@/pages/api/utils/auth';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -25,12 +26,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // Get driver update info
+    const driverUpdate: any = await getDriverInfo(req, res);
+    const updateTime = new Date();
+
     const updatedOrder = await prisma.orders.update({
       where: {
         id: existingOrder.id,
       },
       data: {
         status: updatedStatus,
+        updatedBy: `Driver - ${driverUpdate.name}`,
+        updateTime
       },
       include: {
         user: {

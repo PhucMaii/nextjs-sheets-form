@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generateCurrentTime } from '@/app/utils/time';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -7,6 +7,8 @@ import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]';
 
 interface BodyTypes {
   deliveryDate: string;
@@ -75,11 +77,33 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         continue;
       }
 
+      // Get person create info
+      const session: any = await getServerSession(req, res, authOptions);
+      const adminCreate = await prisma.user.findUnique({
+        where: {
+          id: session?.user.id
+        }
+      });
+
+      if (!adminCreate) {
+        return res.status(401).json({
+          error: 'You are not authenticated'
+        })
+      }
+  
+      if (adminCreate.role !== USER_ROLE.ADMIN) {
+        return res.status(401).json({
+          error: 'You are not authorized'
+        })
+      }
+  
+
       const newOrder: any = await createOrder(
         scheduleOrder.user,
         scheduleOrder.items,
         scheduleOrder.totalPrice,
         deliveryDate,
+        `Admin - ${adminCreate.clientName}`
       );
 
       await sendEmail(
@@ -112,6 +136,7 @@ const createOrder = async (
   items: OrderedItems[],
   totalPrice: number,
   deliveryDate: string,
+  createdBy: string
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -126,6 +151,7 @@ const createOrder = async (
         userId: user.id,
         totalPrice,
         orderTime,
+        createdBy
       },
     });
 

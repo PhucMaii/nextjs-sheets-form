@@ -17,7 +17,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { API_URL, FLAG_ORDER_TYPE, ORDER_STATUS } from '../../utils/enum';
+import { API_URL, FLAG_ORDER_TYPE, ORDER_STATUS, USER_ROLE } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
@@ -83,6 +83,8 @@ export interface Order {
   routeId?: number;
   route?: any;
   preference?: any;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 const orderPerPage = 10;
@@ -258,7 +260,7 @@ export default function Orders() {
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
-        submittedData,
+        {...submittedData, createdBy: USER_ROLE.ADMIN},
       );
 
       if (response.data.error) {

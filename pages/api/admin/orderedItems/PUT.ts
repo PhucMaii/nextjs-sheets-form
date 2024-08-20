@@ -8,6 +8,7 @@ import {
 } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import order from '../../order';
+import { getUserInfo } from '../../utils/auth';
 
 interface UpdatedItem {
   id: number;
@@ -154,7 +155,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    await updateOrderTotalPrice(orderId, orderTotalPrice);
+    // Get admin update info
+    const adminUpdate: any = await getUserInfo(req, res);
+    await updateOrderTotalPrice(orderId, orderTotalPrice, `Admin - ${adminUpdate.clientName}`);
 
     // First case: No update neither create new category
     if (updateOption === UpdateOption.NONE || !updateOption) {
@@ -392,16 +395,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 export const updateOrderTotalPrice = async (
   orderId: number,
   newTotalPrice: number,
+  updatedBy: string,
 ) => {
   try {
     const prisma = new PrismaClient();
 
+    const updateTime = new Date();
     await prisma.orders.update({
       where: {
         id: orderId,
       },
       data: {
         totalPrice: newTotalPrice,
+        updatedBy,
+        updateTime
       },
     });
   } catch (error: any) {

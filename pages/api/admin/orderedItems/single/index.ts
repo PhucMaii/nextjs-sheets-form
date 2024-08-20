@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { updateOrderTotalPrice } from '../PUT';
+import { getUserInfo } from '@/pages/api/utils/auth';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -11,6 +12,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
     const { id, orderId, quantity, price, orderTotalPrice } = req.body as any;
+
+    // Get admin update info
+    const adminUpdate: any = await getUserInfo(req, res);
 
     const data = await prisma.orderedItems.update({
       where: {
@@ -22,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    await updateOrderTotalPrice(orderId, orderTotalPrice);
+    await updateOrderTotalPrice(orderId, orderTotalPrice, `Admin - ${adminUpdate.clientName}`);
 
     return res.status(200).json({
       data,

@@ -1,6 +1,7 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getUserInfo } from '../../utils/auth';
 
 interface BodyPropTypes {
   orderId: number;
@@ -20,12 +21,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (status) {
       updateData.status = status;
     }
+  
+    // Get person update info
+    const adminUpdate: any = await getUserInfo(req, res);
 
+    const updateTime = new Date();
     const updatedOrder = await prisma.orders.update({
       where: {
         id: orderId,
       },
-      data: updateData,
+      data: {...updateData, updatedBy: `Admin - ${adminUpdate.clientName}`, updateTime},
     });
 
     return res.status(200).json({

@@ -4,6 +4,7 @@ import React, {
   SetStateAction,
   memo,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -34,6 +35,7 @@ import { SubCategory } from '@prisma/client';
 import { ShadowSection } from '../reports/styled';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
+import RememberMeIcon from '@mui/icons-material/RememberMe';
 
 interface PropTypes {
   order: Order;
@@ -91,6 +93,19 @@ const OrderAccordion = ({
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
   );
+
+  const latestUpdatePerson = useMemo(() => {
+    if (!order.createdBy && !order.updatedBy) {
+      return 'Unknown'
+    }
+
+    if (order.updatedBy) {
+      return order.updatedBy
+    }
+
+    return order.createdBy
+
+  }, [order])
 
   useEffect(() => {
     calculateTotalQuantity();
@@ -259,10 +274,7 @@ const OrderAccordion = ({
         open={isOpenDetails}
         onClose={() => setIsOpenDetails(false)}
         order={order}
-        // setNotification={setNotification}
-        // updateUIItem={updateUIItem}
         handleUpdateItem={handleUpdateItem}
-        // isAdmin
       />
       <ShadowSection>
         <Grid container alignItems="center" columnSpacing={1}>
@@ -272,7 +284,13 @@ const OrderAccordion = ({
               onClick={(e: any) => handleSelectOrder(e, order)}
             />
           </Grid>
-          <Grid item xs={12} md={8}>
+          <Grid item xs={2}>
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <RememberMeIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{latestUpdatePerson}</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={10} md={8}>
             <Box display="flex" alignItems="center" gap={1}>
               {order.isReplacement && (
                 <StatusText text={`Replacement by client `} type={'error'} />
@@ -282,7 +300,7 @@ const OrderAccordion = ({
               )}
             </Box>
           </Grid>
-          <Grid item xs={12} md={3.5} textAlign="right">
+          <Grid item xs={12} md={1.5} textAlign="right">
             {actions}
           </Grid>
           <Grid item xs={12}>

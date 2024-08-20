@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import { limitOrderHour } from '@/app/lib/constant';
 import { formatDateChanged, YYYYMMDDFormat } from '@/app/utils/time';
 import { Notification, OrderedItems, UserType } from '@/app/utils/type';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { grey } from '@mui/material/colors';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
@@ -79,7 +79,7 @@ export default function PlaceOrder() {
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${selectedClient?.id}`,
-        submittedData,
+        {...submittedData, createdBy: USER_ROLE.DRIVER},
       );
 
       if (response.data.error) {

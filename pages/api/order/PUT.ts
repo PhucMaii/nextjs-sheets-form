@@ -75,6 +75,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         note: body.note,
         isReplacement: true,
         updateTime: new Date(),
+        updatedBy: `Client - ${existingUser.clientId}`
       },
     });
 

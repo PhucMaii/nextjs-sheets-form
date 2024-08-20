@@ -4,7 +4,7 @@ import { sendEmail } from '../utils/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
-import { FLAG_ORDER_TYPE, ORDER_STATUS } from '@/app/utils/enum';
+import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
 import { convertDeliveryDateStringToDate } from '../utils/date';
@@ -100,6 +100,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    // Get info person create it
+    let createdBy = '';
+
+    const session: any = await getServerSession(req, res, authOptions);
+    if (body?.createdBy === USER_ROLE.DRIVER) {
+      const driverCreate: any = await prisma.driver.findUnique({
+        where: {
+          id: Number(session.user.id)
+        }
+      });
+
+      createdBy = `Driver - ${driverCreate.name}`
+    } else if (body?.createdBy === USER_ROLE.ADMIN || body?.createdBy === USER_ROLE.CLIENT ) {
+      const userCreate: any = await prisma.user.findUnique({
+        where: {
+          id: Number(session.user.id)
+        }
+      });
+
+      if (userCreate.role === USER_ROLE.ADMIN) {
+        createdBy = `Admin - ${userCreate.clientName}`
+      }
+      
+      if (userCreate.role === USER_ROLE.CLIENT) {
+        createdBy = `Client - ${userCreate.clientId}`
+      }
+    }
+
     // Initialize new order
     const newOrder = await prisma.orders.create({
       data: {
@@ -109,6 +137,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalPrice: 0,
         note: body['NOTE'],
         status: ORDER_STATUS.INCOMPLETED,
+        createdBy
       },
     });
 
@@ -189,31 +218,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Notify Email for admin
-    // const emailSendTo: any = process.env.NODEMAILER_EMAIL;
-    // const htmlTemplate: string = generateOrderTemplate(
-    //   existingUser.clientName,
-    //   existingUser.clientId,
-    //   orderDetails,
-    //   existingUser.contactNumber,
-    //   existingUser.deliveryAddress,
-    //   newOrder.id,
-    // );
-
-    // await emailHandler(
-    //   emailSendTo,
-    //   'Order Supreme Sprouts',
-    //   'Supreme Sprouts LTD',
-    //   htmlTemplate,
-    // );
-
-    // if (existingUser.email) {
-    //   await emailHandler(
-    //     existingUser.email,
-    //     'Order Supreme Sprouts',
-    //     'Supreme Sprouts LTD',
-    //     htmlTemplate,
-    //   );
-    // }
     const isSendToAdmin = true;
     await sendEmail(
       existingUser,

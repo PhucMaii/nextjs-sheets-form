@@ -90,6 +90,8 @@ model Orders {
   updateTime    DateTime?
   isReplacement Boolean?
   isVoid        Boolean?
+  createdBy     String?
+  updatedBy     String?
 
   user  User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items OrderedItems[]

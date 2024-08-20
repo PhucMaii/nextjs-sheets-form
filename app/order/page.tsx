@@ -4,7 +4,7 @@ import { Notification } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import FadeIn from '@/HOC/FadeIn';
 import axios from 'axios';
-import { API_URL, FLAG_ORDER_TYPE } from '@/app/utils/enum';
+import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -128,7 +128,7 @@ export default function OrderForm() {
         submittedData = { ...submittedData, [item.name]: item.quantity };
       }
 
-      const response = await axios.post(API_URL.IMPORT_SHEETS, submittedData);
+      const response = await axios.post(API_URL.IMPORT_SHEETS, {...submittedData, createdBy: USER_ROLE.CLIENT});
 
       if (response.data.warning) {
         setNotification({
