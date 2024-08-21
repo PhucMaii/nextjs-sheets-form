@@ -120,6 +120,7 @@ export default function AddRoute({
               selectedClients.length === 0,
           }}
           buttonLabel="ADD"
+          onClose={onClose}
         />
         <Divider />
         <Grid container spacing={2}>

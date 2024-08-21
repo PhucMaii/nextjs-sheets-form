@@ -60,6 +60,7 @@ export default function AddItem({
           buttonProps={{
             loading: isAdding,
           }}
+          onClose={onClose}
         />
         <Divider sx={{ my: 2 }} />
         <Grid

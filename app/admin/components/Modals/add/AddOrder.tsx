@@ -39,6 +39,7 @@ import { limitOrderHour } from '../../../../lib/constant';
 import moment from 'moment';
 import { infoColor } from '@/theme/color';
 import OrderOnVacationModal from '../OrderOnVacationModal';
+import ModalHead from '@/app/lib/ModalHead';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -238,21 +239,13 @@ export default function AddOrder({
           flexDirection="column"
           gap={2}
         >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="h4">Add Order</Typography>
-            <LoadingButton
-              variant="contained"
-              disabled={itemList.length === 0}
-              loading={isButtonLoading}
-              onClick={handleSubmit}
-            >
-              ADD
-            </LoadingButton>
-          </Box>
+          <ModalHead 
+            heading="Add Order"
+            buttonLabel='Add'
+            buttonProps={{loading: isButtonLoading}}
+            onClick={handleSubmit}
+            onClose={onClose}
+          />
           <Divider />
           <Box overflow="auto" maxHeight="70vh">
             <Grid

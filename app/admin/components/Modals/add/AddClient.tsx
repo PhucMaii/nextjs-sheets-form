@@ -18,7 +18,7 @@ import StatusText from '../../StatusText';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import axios from 'axios';
 import { Notification, UserType } from '@/app/utils/type';
-import { LoadingButton } from '@mui/lab';
+import ModalHead from '@/app/lib/ModalHead';
 
 interface PropTypes extends ModalProps {
   categories: Category[];
@@ -116,7 +116,7 @@ export default function AddClient({
 
       // Update Real Data
       mutateClients();
-      
+
       setNotification({
         on: true,
         type: 'success',
@@ -136,16 +136,13 @@ export default function AddClient({
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h4">Add Client</Typography>
-          <LoadingButton
-            variant="contained"
-            loading={isAdding}
-            onClick={handleAddClient}
-          >
-            ADD
-          </LoadingButton>
-        </Box>
+        <ModalHead
+          heading="Add Client"
+          buttonLabel="Add"
+          buttonProps={{ loading: isAdding }}
+          onClick={handleAddClient}
+          onClose={onClose}
+        />
         <Divider />
         <Box
           display="flex"

@@ -140,6 +140,7 @@ export default function EditRoute({
             loading: isUpdating,
           }}
           buttonLabel="EDIT"
+          onClose={onClose}
         />
         <Divider />
         <Grid container spacing={2}>

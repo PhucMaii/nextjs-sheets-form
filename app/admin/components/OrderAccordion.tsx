@@ -278,7 +278,7 @@ const OrderAccordion = ({
       />
       <ShadowSection>
         <Grid container alignItems="center" columnSpacing={1}>
-          <Grid item xs={0.5}>
+          <Grid item sm={0.5} xs={2}>
             <Checkbox
               checked={isOrderSelected}
               onClick={(e: any) => handleSelectOrder(e, order)}

@@ -64,6 +64,7 @@ export default function EditItem({
             buttonLabel="EDIT"
             onClick={updateItem}
             buttonProps={{ loading: isUpdating }}
+            onClose={() => setIsOpen(false)}
           />
           <Divider />
           <Grid container rowGap={2}>

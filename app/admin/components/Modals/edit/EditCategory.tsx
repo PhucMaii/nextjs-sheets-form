@@ -40,6 +40,7 @@ export default function EditCategory({
           buttonProps={{
             loading: isUpdating,
           }}
+          onClose={onClose}
         />
         <Divider sx={{ my: 1 }} />
         <Grid container rowGap={1}>
