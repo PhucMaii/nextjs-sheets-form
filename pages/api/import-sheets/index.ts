@@ -57,7 +57,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
       for (const dayRange of existingUser.unavailableDayRange) {
         if (
-          deliveryDate >= dayRange.startDate ||
+          deliveryDate >= dayRange.startDate &&
           deliveryDate <= dayRange.endDate
         ) {
           return res.status(200).json({

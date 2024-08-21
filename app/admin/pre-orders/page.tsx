@@ -347,25 +347,7 @@ export default function ScheduledOrderPage() {
     setBaseOrderList(orders?.data);
     setOrderList(orders?.data);
   }
-
-  const updateSelectedOrders = () => {
-    if (selectedOrders.length > 0) {
-      const selectedIds = selectedOrders.map((order) => {
-        return order.id;
-      });
-
-      const newSelectedOrders = [];
-
-      for (const selectedOrder of selectedOrders) {
-        if (selectedIds.includes(selectedOrder.id)) {
-          newSelectedOrders.push(selectedOrder);
-        }
-      }
-
-      setSelectedOrders(newSelectedOrders);
-    }
-  }
-
+  
   const initializeRoutes = () => {
     setRoutes(routesResponse?.data);
     setIsFetchingRoute(false);
