@@ -9,10 +9,12 @@ datasource db {
 }
 
 model Driver {
-  id       Int     @id @default(autoincrement())
-  name     String  @db.VarChar(255)
-  password String  @db.VarChar(255)
+  id       Int          @id @default(autoincrement())
+  name     String       @db.VarChar(255)
+  password String       @db.VarChar(255)
   routes   Route[]
+  myRooms  ChatMember[]
+  messages Message[]
 }
 
 model User {
@@ -139,4 +141,40 @@ model DayRange {
   endDate   DateTime
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime
+  messageText String
+  toDriverId  Int
+
+  driverId   Int
+  chatRoomId Int
+
+  driver   Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+}
+
+model ChatMember {
+  id       Int      @id @default(autoincrement())
+  joinedAt DateTime
+  leftAt   DateTime
+  isOwner  Boolean
+
+  driverId   Int
+  chatRoomId Int
+
+  driver   Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+}
+
+model ChatRoom {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime
+  name      String
+  createdBy Int
+
+  messages    Message[]
+  chatMembers ChatMember[]
 }
