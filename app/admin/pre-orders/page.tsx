@@ -179,14 +179,6 @@ export default function ScheduledOrderPage() {
     }
   }, [debouncedKeywords, baseOrderList]);
 
-  // Update current selected orders if there is any change in order list
-  useEffect(() => {
-    if (selectedOrders.length > 0) {
-      updateSelectedOrders();
-    }
-  }, [orderList]);
-
-
   const addOrderUI = (newOrder: ScheduledOrder) => {
     const hasOrderExisted = baseOrderList.some(
       (order: ScheduledOrder) => order.id === newOrder.id,
@@ -443,6 +435,15 @@ export default function ScheduledOrderPage() {
       return order;
     });
 
+    // Update selected orders if any
+    const newSelectedOrders = selectedOrders.map((order: ScheduledOrder) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
+    
+    setSelectedOrders(newSelectedOrders);
     setBaseOrderList(newBaseOrderList);
     setOrderList(newOrderList);
   };

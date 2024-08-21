@@ -33,14 +33,19 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         continue;
       }
       // Check has user order for today, if yes then skip that client
-      const existingOrder = await checkHasClientOrder(
+      const existingOrder: any = await checkHasClientOrder(
         scheduleOrder.user.id,
         deliveryDate,
       );
 
-      const createdBy = existingOrder?.createdBy?.split(' - ')[0];
+      let createdBy: any = '';
+      if (existingOrder?.updatedBy) {
+        createdBy = existingOrder.updatedBy.split(' - ')[0].toLowerCase().trim();
+      } else {
+        createdBy = existingOrder?.createdBy.split(' - ')[0].toLowerCase().trim();
+      }
 
-      if (createdBy === 'Client' || createdBy === 'Driver') {
+      if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
@@ -83,7 +88,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const adminCreate: any = await getUserInfo(req, res);
 
       // If admin override order of admin create
-      if (createdBy === 'Admin') {
+      if (createdBy === USER_ROLE.ADMIN) {
         // Delete old order and create new order
         await prisma.orders.delete({
           where: {
@@ -110,7 +115,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       updatedOrderList.push(newOrder);
 
       await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
-      console.log({ successful: scheduleOrder });
+      console.log({ successful: scheduleOrder, items: scheduleOrder.items });
     }
 
     return res.status(201).json({
