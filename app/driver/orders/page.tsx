@@ -157,7 +157,7 @@ export default function OrdersPage() {
       return acc;
     }, 0);
 
-    return amount;
+    return amount.toFixed(2);
   }, [orders]);
 
   const filterOrderByStatus = (orderList: Order[], status: ORDER_STATUS) => {
