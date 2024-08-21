@@ -21,7 +21,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (status) {
       updateData.status = status;
     }
-  
+
     // Get person update info
     const adminUpdate: any = await getUserInfo(req, res);
 
@@ -30,7 +30,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       where: {
         id: orderId,
       },
-      data: {...updateData, updatedBy: `Admin - ${adminUpdate.clientName}`, updateTime},
+      data: {
+        ...updateData,
+        updatedBy: `Admin - ${adminUpdate.clientName}`,
+        updateTime,
+      },
     });
 
     return res.status(200).json({

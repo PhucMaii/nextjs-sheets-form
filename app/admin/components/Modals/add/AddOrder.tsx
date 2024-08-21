@@ -50,7 +50,7 @@ interface PropTypes extends ModalProps {
     deliveryDate: string,
     note: string,
     itemList: IItem[],
-    isCheckUnavailableRange?: boolean
+    isCheckUnavailableRange?: boolean,
   ) => Promise<any>;
   createScheduledOrder?: (userId: number, items: IItem[]) => Promise<void>;
 }
@@ -80,7 +80,7 @@ export default function AddOrder({
     if (unavailableRange) {
       setIsOrderOnVacationOpen(true);
     }
-  }, [unavailableRange])
+  }, [unavailableRange]);
 
   useEffect(() => {
     if (currentDate) {
@@ -199,7 +199,12 @@ export default function AddOrder({
     setIsButtonLoading(true);
     try {
       if (createOrder) {
-        const response: any = await createOrder(clientValue, deliveryDate, note, itemList);
+        const response: any = await createOrder(
+          clientValue,
+          deliveryDate,
+          note,
+          itemList,
+        );
         if (response && response.data.warning) {
           setUnavailableRange(response.data.data.unavailableRange);
         }
@@ -229,7 +234,9 @@ export default function AddOrder({
           clientName={clientValue?.clientName || ''}
           startDate={new Date(unavailableRange[0])}
           endDate={new Date(unavailableRange[1])}
-          handleContinueOrder={async () => await createOrder(clientValue, deliveryDate, note, itemList, false)}
+          handleContinueOrder={async () =>
+            await createOrder(clientValue, deliveryDate, note, itemList, false)
+          }
         />
       )}
       <Modal open={open} onClose={onClose}>
@@ -239,10 +246,10 @@ export default function AddOrder({
           flexDirection="column"
           gap={2}
         >
-          <ModalHead 
+          <ModalHead
             heading="Add Order"
-            buttonLabel='Add'
-            buttonProps={{loading: isButtonLoading}}
+            buttonLabel="Add"
+            buttonProps={{ loading: isButtonLoading }}
             onClick={handleSubmit}
             onClose={onClose}
           />

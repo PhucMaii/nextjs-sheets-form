@@ -40,9 +40,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
       let createdBy: any = '';
       if (existingOrder?.updatedBy) {
-        createdBy = existingOrder.updatedBy.split(' - ')[0].toLowerCase().trim();
+        createdBy = existingOrder.updatedBy
+          .split(' - ')[0]
+          .toLowerCase()
+          .trim();
       } else {
-        createdBy = existingOrder?.createdBy.split(' - ')[0].toLowerCase().trim();
+        createdBy = existingOrder?.createdBy
+          .split(' - ')[0]
+          .toLowerCase()
+          .trim();
       }
 
       if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
@@ -58,17 +64,21 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       // Check is user has time off
       const unavailableRanges = await prisma.dayRange.findMany({
         where: {
-          userId: scheduleOrder.userId
-        }
+          userId: scheduleOrder.userId,
+        },
       });
 
       let trackIndex = 0;
-      const deliveryDateTypeDate = convertDeliveryDateStringToDate(deliveryDate);
+      const deliveryDateTypeDate =
+        convertDeliveryDateStringToDate(deliveryDate);
       for (const unavailableRange of unavailableRanges) {
         const startDate = new Date(unavailableRange.startDate);
         const endDate = new Date(unavailableRange.endDate);
 
-        if (deliveryDateTypeDate >= startDate && deliveryDateTypeDate <= endDate) {
+        if (
+          deliveryDateTypeDate >= startDate &&
+          deliveryDateTypeDate <= endDate
+        ) {
           break;
         }
         trackIndex++;
@@ -92,8 +102,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         // Delete old order and create new order
         await prisma.orders.delete({
           where: {
-            id: existingOrder?.id
-          }
+            id: existingOrder?.id,
+          },
         });
       }
 
@@ -102,7 +112,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         scheduleOrder.items,
         scheduleOrder.totalPrice,
         deliveryDate,
-        `Admin - ${adminCreate.clientName}`
+        `Admin - ${adminCreate.clientName}`,
       );
 
       await sendEmail(
@@ -135,7 +145,7 @@ const createOrder = async (
   items: OrderedItems[],
   totalPrice: number,
   deliveryDate: string,
-  createdBy: string
+  createdBy: string,
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -150,7 +160,7 @@ const createOrder = async (
         userId: user.id,
         totalPrice,
         orderTime,
-        createdBy
+        createdBy,
       },
     });
 

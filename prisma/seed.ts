@@ -170,7 +170,6 @@ async function main() {
   //   data: [
   //   ]
   // })
-
   // const scheduleOrders = await prisma.scheduleOrders.findMany({
   //   include:{
   //     items: true,
@@ -178,7 +177,6 @@ async function main() {
   //   }
   // });
   // const items = await prisma.item.findMany();
-
   // // Loop through schedule order and item
   // for (const scheduleOrder of scheduleOrders) {
   //   for (const item of scheduleOrder.items) {
@@ -186,7 +184,6 @@ async function main() {
   //     const targetItem = items.find((baseItem) => {
   //       return baseItem.categoryId === scheduleOrder.user.categoryId && item.name === baseItem.name
   //     });
-
   //     // Then update it.
   //     if (targetItem) {
   //       await prisma.orderedItems.update({
@@ -198,7 +195,6 @@ async function main() {
   //         }
   //       })
   //     }
-      
   //   }
   // }
 }

@@ -176,11 +176,17 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
             {content}
           </Drawer>
           <Box width="100%">
-            <Box display="flex" width="100%" flexDirection="column" gap={2} m={2} sx={{overflowX: 'hidden'}}>
+            <Box
+              display="flex"
+              width="100%"
+              flexDirection="column"
+              gap={2}
+              m={2}
+              sx={{ overflowX: 'hidden' }}
+            >
               {printComponents}
               {children}
             </Box>
-
           </Box>
         </Box>
       </>

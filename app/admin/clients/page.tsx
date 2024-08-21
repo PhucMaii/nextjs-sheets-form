@@ -263,7 +263,7 @@ export default function ClientsPage() {
 
       // Optimistic UI Update
       handleChangeClients(userId, response.data.data);
-      
+
       // Update Real Data
       mutateClients();
       setNotification({

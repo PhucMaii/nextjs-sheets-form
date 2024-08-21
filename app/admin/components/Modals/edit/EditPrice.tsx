@@ -205,16 +205,17 @@ export default function EditPrice({
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Edit Price</Typography>
           <Box display="flex" alignItems="center" gap={1}>
-          <Button variant="outlined" onClick={onClose}>Cancel</Button>
-          <LoadingButton
-            variant="contained"
-            loadingIndicator="Saving..."
-            loading={isLoading}
-            onClick={handleUpdatePrice}
-          >
-            Save
-          </LoadingButton>
-
+            <Button variant="outlined" onClick={onClose}>
+              Cancel
+            </Button>
+            <LoadingButton
+              variant="contained"
+              loadingIndicator="Saving..."
+              loading={isLoading}
+              onClick={handleUpdatePrice}
+            >
+              Save
+            </LoadingButton>
           </Box>
         </Box>
         <UpdateChoiceSelection

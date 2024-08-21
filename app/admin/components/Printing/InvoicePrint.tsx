@@ -38,7 +38,11 @@ export const InvoicePrint = forwardRef(
 
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
-    const { debtData, sortDebtKeys } = useApiDebtData(client.id, endMonth, orders);
+    const { debtData, sortDebtKeys } = useApiDebtData(
+      client.id,
+      endMonth,
+      orders,
+    );
 
     const today = new Date();
     const todayString = YYYYMMDDFormat(today);

@@ -163,8 +163,8 @@ export const ComponentToPrint = forwardRef(
                 textAlign="center"
                 sx={{ fontSize: printFontSize - 5 }}
               >
-                * As of Sept 1st, we will no longer providing Premier Pacific Beansprouts.
-                Please ask your driver for more details *
+                * As of Sept 1st, we will no longer providing Premier Pacific
+                Beansprouts. Please ask your driver for more details *
               </Typography>
             </Grid>
           </Grid>

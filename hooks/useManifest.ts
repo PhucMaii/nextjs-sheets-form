@@ -71,9 +71,8 @@ const useManifest = (
       return relatedRoutes;
     });
 
-    
     const orderByRoutes = _.orderBy(clientRoutes.flat(), ['routeId'], ['asc']);
-    
+
     // Arrange as user route
     const sortedOrderByRoutes = [];
     for (const selectedRoute of selectedRoutes) {
@@ -98,7 +97,7 @@ const useManifest = (
       const orderIdIndexMap: any = new Map(
         sortedUserIds.map((id: string, index: number) => [id, index]),
       );
-      
+
       // Sort users based on the index positions in index map
       routeOrders.sort(
         (orderA: Order, orderB: Order) =>

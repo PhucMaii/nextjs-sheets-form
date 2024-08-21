@@ -144,7 +144,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let debtFetchSkip = 0;
     const trueCondition = true;
 
-    while(trueCondition) {
+    while (trueCondition) {
       const fetchedDebtOrders: any = await prisma.orders.findMany({
         where: {
           status: {

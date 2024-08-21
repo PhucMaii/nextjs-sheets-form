@@ -176,12 +176,14 @@ export default function OrdersPage() {
   const initializeOrders = () => {
     setOrders(ordersResponse?.data.deliveryOrders);
     if (currentTab === 'Delivered') {
-      const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter((order: Order) => {
-        return (
-          order.status === ORDER_STATUS.DELIVERED ||
-          order.status === ORDER_STATUS.COMPLETED
-        );
-      });
+      const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter(
+        (order: Order) => {
+          return (
+            order.status === ORDER_STATUS.DELIVERED ||
+            order.status === ORDER_STATUS.COMPLETED
+          );
+        },
+      );
       setDisplayOrders(newDeliveredOrders);
     } else {
       const newOrders = filterOrderByStatus(
@@ -193,7 +195,7 @@ export default function OrdersPage() {
       setDisplayOrders(newOrders);
     }
     setIsFetching(false);
-  }
+  };
 
   const handleUpdateStatus = async (
     orderId: number,

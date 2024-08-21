@@ -104,12 +104,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Update schedule order items
-    const responseUpdate = await updateAllScheduleOrderItems(existingItem, updatedItem);
+    const responseUpdate = await updateAllScheduleOrderItems(
+      existingItem,
+      updatedItem,
+    );
 
     if (!responseUpdate.ok) {
       return res.status(500).json({
-        error: responseUpdate.error
-      })
+        error: responseUpdate.error,
+      });
     }
 
     return res.status(200).json({
@@ -124,10 +127,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const updateAllScheduleOrderItems = async (
-  oldItem: any,
-  updatedItem: any,
-) => {
+const updateAllScheduleOrderItems = async (oldItem: any, updatedItem: any) => {
   try {
     const prisma = new PrismaClient();
 
@@ -159,12 +159,12 @@ const updateAllScheduleOrderItems = async (
       }
     }
 
-    return { ok: true}
+    return { ok: true };
   } catch (error: any) {
     console.log(
       'Internal Server Error from update schedule order items: ',
       error,
     );
-    return {ok: false, error};
+    return { ok: false, error };
   }
 };

@@ -1,4 +1,10 @@
-import React, { Dispatch, memo, SetStateAction, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import {
   Box,
   Button,
@@ -25,7 +31,12 @@ interface PropTypes {
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-const EditClient = ({ client, categories, handleUpdateClient, setNotification }: PropTypes) => {
+const EditClient = ({
+  client,
+  categories,
+  handleUpdateClient,
+  setNotification,
+}: PropTypes) => {
   const [deliveryAddress, setDeliveryAddress] = useState<any>({
     description: client.deliveryAddress,
   });

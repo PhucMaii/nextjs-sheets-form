@@ -43,7 +43,7 @@ export default function SearchModal({
   handleSelectOrder,
   subcategories,
   handleUpdateItem,
-  mutateOrders
+  mutateOrders,
 }: IProps) {
   //   const [currentPage, setCurrentPage] = useState<number>(1);
   const [returnOrders, setReturnOrders] = useState<Order[]>([]);

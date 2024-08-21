@@ -15,13 +15,15 @@ import StatusText from '@/app/admin/components/StatusText';
 import { SWRFetchData } from '@/app/utils/db';
 
 export default function OverviewPage() {
-  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true); 
+  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true);
   const date = new Date();
   const today = YYYYMMDDFormat(date);
 
   // Data Fetching
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [orders, mutate, isValidating] = SWRFetchData(`${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`);
+  const [orders, mutate, isValidating] = SWRFetchData(
+    `${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`,
+  );
 
   useEffect(() => {
     if (isFirstLoading && !isValidating) {

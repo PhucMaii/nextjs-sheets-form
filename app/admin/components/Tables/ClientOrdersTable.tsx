@@ -270,5 +270,5 @@ export default memo(ClientOrdersTable, (prev, next) => {
   return (
     prev.clientOrders === next.clientOrders &&
     prev.selectedOrders === next.selectedOrders
-  )
+  );
 });

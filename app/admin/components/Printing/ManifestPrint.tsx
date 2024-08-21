@@ -53,7 +53,7 @@ export const ManifestPrint = forwardRef(
     // };
 
     return (
-      <div ref={ref} className='print-container'>
+      <div ref={ref} className="print-container">
         <Box sx={{ width: '100%', height: '100%' }}>
           {/* Loop through route */}
           {Object.keys(manifest).length > 0 &&

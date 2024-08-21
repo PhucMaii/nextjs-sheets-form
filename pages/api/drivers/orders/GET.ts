@@ -65,7 +65,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           manifest: {},
           codAmount: 0,
         },
-      })
+      });
     }
 
     const userIds = targetRoute?.clients.map((userRoute: UserRoute) => {
