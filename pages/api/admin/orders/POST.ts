@@ -39,7 +39,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       );
 
       const createdBy = existingOrder?.createdBy?.split(' - ')[0];
-      if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
+
+      if (createdBy === 'Client' || createdBy === 'Driver') {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
@@ -80,6 +81,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
       // Get person create info
       const adminCreate: any = await getUserInfo(req, res);
+
+      // If admin override order of admin create
+      if (createdBy === 'Admin') {
+        // Delete old order and create new order
+        await prisma.orders.delete({
+          where: {
+            id: existingOrder?.id
+          }
+        });
+      }
 
       const newOrder: any = await createOrder(
         scheduleOrder.user,
