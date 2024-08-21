@@ -158,7 +158,7 @@ export default function Sidebar({ children }: IProps) {
                 />
               );
             })}
-            <BottomNavigationAction
+            {/* <BottomNavigationAction
               label="Sign out"
               onClick={() =>
                 signOut({
@@ -166,7 +166,7 @@ export default function Sidebar({ children }: IProps) {
                 })
               }
               icon={<LogoutIcon sx={{ color: blueGrey[800] }} />}
-            />
+            /> */}
           </BottomNavigation>
         </Paper>
       </>

@@ -155,7 +155,7 @@ export default function PlaceOrder() {
         notification={notification}
         onClose={() => setNotification({ ...notification, on: false })}
       />
-      <Typography variant="h4" textAlign="center">
+      <Typography variant="h6" textAlign="center">
         Place Order
       </Typography>
       <ShadowSection
