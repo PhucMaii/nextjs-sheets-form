@@ -37,7 +37,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       data: {
         status: updatedStatus,
         updatedBy: `Driver - ${driverUpdate.name}`,
-        updateTime
+        updateTime,
+        isVoid: updatedStatus === ORDER_STATUS.VOID && true
       },
       include: {
         user: {
