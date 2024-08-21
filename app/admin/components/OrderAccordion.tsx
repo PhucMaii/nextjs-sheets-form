@@ -296,7 +296,7 @@ const OrderAccordion = ({
                 <StatusText text={`Replacement by client `} type={'error'} />
               )}
               {order.isVoid && (
-                <StatusText text={`Void by client `} type={'error'} />
+                <StatusText text={`Void by ${order?.updatedBy || 'client'} `} type={'error'} />
               )}
             </Box>
           </Grid>

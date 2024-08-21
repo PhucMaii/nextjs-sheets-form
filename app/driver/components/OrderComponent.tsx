@@ -13,6 +13,7 @@ import ConfirmModal from './Modals/ConfirmModal';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
 import { OrderedItems } from '@/app/utils/type';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface IProps {
   order: Order;
@@ -100,16 +101,32 @@ export default function OrderComponent({
             <PreviewIcon color="primary" />
           </IconButton>
         </Grid>
-        <Grid item xs={7}>
+        <Grid item xs={5}>
           <StatusText text={statusText.text} type={statusText.type} />
         </Grid>
-        <Grid item xs={4} textAlign="right">
+        <Grid item xs={6} textAlign="right">
           <Box
             display="flex"
             justifyContent="flex-end"
             alignItems="center"
             gap={1}
+            width="100%"
           >
+            <Fab
+              sx={{ zIndex: 0 }}
+              onClick={() =>
+                setConfirmModalProps({
+                  on: true,
+                  heading: `Are you sure to void order for ${order.clientName}`,
+                  color: 'error',
+                  updatedStatus: ORDER_STATUS.VOID,
+                })
+              }
+              color="error"
+              size="small"
+            >
+              <DeleteIcon />
+            </Fab>
             {order.status === ORDER_STATUS.INCOMPLETED && (
               <Fab
                 sx={{ zIndex: 0 }}
