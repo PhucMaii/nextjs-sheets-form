@@ -41,9 +41,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       let createdBy: any = '';
       if (existingOrder?.updatedBy) {
         createdBy = existingOrder.updatedBy.split(' - ')[0].toLowerCase().trim();
-      } else {
+      } else if (existingOrder?.createdBy) {
         createdBy = existingOrder?.createdBy.split(' - ')[0].toLowerCase().trim();
       }
+      console.log({existingOrder, createdBy}, 'existingOrder');
 
       if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
         await pusherServer.trigger(
