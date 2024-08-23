@@ -11,6 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import './print.css'
 
 export const printFontSize = 28;
 export const ComponentToPrint = forwardRef(
