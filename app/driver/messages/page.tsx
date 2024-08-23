@@ -1,7 +1,7 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Grid, IconButton, Typography } from '@mui/material';
-import MessageSummary from '../components/MessageRoom';
+import MessageRoomCard from '../components/MessageRoomCard';
 import AddIcon from '@mui/icons-material/Add';
 
 export default function MessagesPage() {
@@ -22,10 +22,10 @@ export default function MessagesPage() {
       </Grid>
 
       <Box display="flex" flexDirection="column" gap={2} marginTop={2}>
-        <MessageSummary />
-        <MessageSummary />
-        <MessageSummary />
-        <MessageSummary />
+        <MessageRoomCard />
+        <MessageRoomCard />
+        <MessageRoomCard />
+        <MessageRoomCard />
       </Box>
     </Sidebar>
   );

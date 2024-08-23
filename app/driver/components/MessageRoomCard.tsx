@@ -5,7 +5,7 @@ import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
-export default function MessageRoom() {
+export default function MessageRoomCard() {
   const router = useRouter();
   return (
     <Grid

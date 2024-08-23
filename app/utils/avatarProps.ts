@@ -32,6 +32,7 @@ export function stringAvatar(
   return {
     sx: {
       bgcolor: stringToColor(name),
+      borderColor: stringToColor(name),
       ...avatarSize,
     },
     children: displayName,
