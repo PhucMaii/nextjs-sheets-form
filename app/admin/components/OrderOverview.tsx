@@ -1,31 +1,31 @@
-import { blueGrey } from '@mui/material/colors';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Order } from '../orders/page';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { Box, MenuItem, Select, Typography } from '@mui/material';
+import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import TodayIcon from '@mui/icons-material/Today';
+import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
 import useRoutes from '@/hooks/fetch/useRoutes';
 import { days } from '@/app/lib/constant';
 import { IRoutes } from '@/app/utils/type';
 import { UserRoute } from '@prisma/client';
-import { primaryColor } from '@/theme/color';
+import { primary, primaryColor } from '@/theme/color';
 
 interface IProps {
   baseOrderData: Order[];
+  allRouteOrderData: Order[];
+  lastWeekOrderData: Order[];
   currentDate: string;
 }
 
-export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
+export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWeekOrderData, currentDate }: IProps) {
   const date = new Date(currentDate);
   const { routes } = useRoutes(days[date.getDay()]);
   const [currentRoute, setCurrentRoute] = useState<number>(0);
   const [orderData, setOrderData] = useState<Order[]>(baseOrderData || []);
-
-  const titleColor = blueGrey[50];
-  const dataColor = 'white';
 
   useEffect(() => {
     if (baseOrderData) {
@@ -41,6 +41,30 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
       setOrderData(baseOrderData);
     }
   }, [currentRoute]);
+
+  const todayTotalGross = useMemo(() => {
+    return allRouteOrderData.length > 0
+    ? allRouteOrderData.reduce((acc: number, order: Order) => {
+      if (order.status !== ORDER_STATUS.VOID) {
+        return acc + order.totalPrice;
+      }
+
+      return acc;
+      }, 0)
+    : 0;
+  }, [allRouteOrderData]);
+
+  const lastWeekTotalGross = useMemo(() => {
+    return lastWeekOrderData.length > 0
+    ? lastWeekOrderData.reduce((acc: number, order: Order) => {
+      if (order.status !== ORDER_STATUS.VOID) {
+        return acc + order.totalPrice;
+      }
+
+      return acc;
+      }, 0)
+    : 0;
+  }, [lastWeekOrderData]);
 
   const openBill = useMemo(() => {
     return orderData.filter((order: Order) => {
@@ -99,7 +123,8 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
   };
 
   return (
-    <ShadowSection sx={{ backgroundColor: `${primaryColor} !important` }}>
+    <ShadowSection sx={{ backgroundColor: 'white !important' }}>
+      {/* Select Routes */}
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Select
           label="Routes"
@@ -118,130 +143,167 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
             })}
         </Select>
       </Box>
-      <Box
+
+      <Grid
+        container
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        flexWrap="wrap"
-        gap={2}
+        rowGap={2}
       >
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <RequestQuoteIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+        {/* Total Gross Section */}
+        <Grid item md={3.9} xs={12} display="flex" flexDirection="column" gap={2} sx={{backgroundColor: primary.lightest, padding: 5, borderRadius: 5}}>
+            <Typography variant='h5'>Total Gross</Typography>
+          <Box display="flex" justifyContent="space-between" gap={4} alignItems="center">
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
             >
-              Bill
-            </Typography>
-          </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {openBill.length}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Open Bill
-          </Typography>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <AttachMoneyIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+              <Box display="flex" gap={1} alignItems="center">
+                <DateRangeIcon />
+                <Typography
+                  variant="subtitle2"
+                >
+                  Last Week
+                </Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {lastWeekTotalGross.toFixed(2)}
+              </Typography>
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
             >
-              Balance Due
-            </Typography>
+              <Box display="flex" gap={1} alignItems="center">
+                <TodayIcon />
+                <Typography
+                  variant="subtitle1"
+                >
+                  Today
+                </Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {todayTotalGross.toFixed(2)}
+              </Typography>
+            </Box>
           </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {totalBill.toFixed(2)}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Balance due
-          </Typography>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
-            >
-              COD ($)
-            </Typography>
-          </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {codBill.toFixed(2)}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Bill
-          </Typography>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
-            >
-              COD
-            </Typography>
-          </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {codOrders.length}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Orders
-          </Typography>
-        </Box>
-      </Box>
+        </Grid>
+
+        {/* Track Bills Section */}
+        <Grid item xs={12} md={3.9} display="flex" flexDirection="column" gap={2} sx={{backgroundColor: primary.lightest, padding: 5, borderRadius: 5}}>
+            <Typography variant='h5'>Current Bills</Typography>
+            <Box display="flex" justifyContent="space-between" gap={4} alignItems="center">
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                gap={1.5}
+              >
+                <Box display="flex" gap={1} alignItems="center">
+                  <RequestQuoteIcon />
+                  <Typography
+                    variant="subtitle2"
+                  >
+                    Open Bill
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h4"
+                  fontWeight="bold"
+                  sx={{ color: `${primaryColor} !important` }}
+                >
+                  {openBill.length}
+                </Typography>
+              </Box>
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                gap={1.5}
+              >
+                <Box display="flex" gap={1} alignItems="center">
+                  <AttachMoneyIcon />
+                  <Typography
+                    variant="subtitle1"
+                  >
+                    Balance Due
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h4"
+                  fontWeight="bold"
+                  sx={{ color: `${primaryColor} !important` }}
+                >
+                  {totalBill.toFixed(2)}
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+
+        {/* COD Section */}
+        <Grid item xs={12} md={3.9} display="flex" flexDirection="column" gap={2} sx={{backgroundColor: primary.lightest, padding: 5, borderRadius: 5}}>
+          <Typography variant='h5'>COD</Typography>
+            <Box display="flex" justifyContent="space-between" gap={4} alignItems="center">
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                gap={1.5}
+              >
+                <Box display="flex" gap={1} alignItems="center">
+                  <CalendarTodayIcon />
+                  <Typography
+                    variant="subtitle1"
+                  >
+                    Bills
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h4"
+                  fontWeight="bold"
+                  sx={{ color: `${primaryColor} !important` }}
+                >
+                  {codOrders.length}
+                </Typography>
+              </Box>
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                gap={1.5}
+              >
+                <Box display="flex" gap={1} alignItems="center">
+                  <AttachMoneyIcon />
+                  <Typography
+                    variant="subtitle1"
+                  >
+                    Amount
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h4"
+                  fontWeight="bold"
+                  sx={{ color: `${primaryColor} !important` }}
+                >
+                  {codBill.toFixed(2)}
+                </Typography>
+              </Box>
+            </Box>
+        </Grid>
+      </Grid>
     </ShadowSection>
   );
 }

@@ -26,7 +26,7 @@ import NotificationPopup from '../components/Notification';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
+import { formatDateChanged, generateRecommendDate, YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/add/AddOrder';
@@ -43,6 +43,7 @@ import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import { SWRFetchData } from '@/app/utils/db';
+import { getSameDateLastWeek } from '@/pages/api/utils/date';
 
 interface Category {
   id: number;
@@ -123,6 +124,13 @@ export default function Orders() {
   // Data Fetching
   const [orders, mutate, isValidating] = SWRFetchData(
     `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
+  );
+
+  const sameDateLastWeek = getSameDateLastWeek(date);
+  const stringifyDate = YYYYMMDDFormat(sameDateLastWeek);
+
+  const [lastWeekOrders] = SWRFetchData(
+    `${API_URL.ORDER}?date=${stringifyDate}&status=${currentStatus}`,
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
   const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
@@ -606,7 +614,7 @@ export default function Orders() {
           </LocalizationProvider>
         </FormControl>
       </Box>
-      <OrderOverview baseOrderData={baseOrderData} currentDate={date} />
+      <OrderOverview baseOrderData={baseOrderData} allRouteOrderData={orders ? orders.data : []} lastWeekOrderData={lastWeekOrders ? lastWeekOrders.data : []} currentDate={date} />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={12} md={10.5}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

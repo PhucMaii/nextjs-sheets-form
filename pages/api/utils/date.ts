@@ -42,3 +42,11 @@ export const sortByDeliveryDate = (orders: Order[]): any => {
 
   return sortedOrders;
 };
+
+export const getSameDateLastWeek = (currentDate: string | Date) => {
+  const sameDateLastWeek: Date = new Date(currentDate);
+
+  // Subtract 7 days
+  sameDateLastWeek.setDate(sameDateLastWeek.getDate() - 7);
+  return sameDateLastWeek;
+} 
