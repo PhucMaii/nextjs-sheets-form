@@ -18,6 +18,7 @@ import { grey } from '@mui/material/colors';
 interface PropTypes {
   manifest: any;
   routes: IRoutes[];
+  currentDate: string;
 }
 
 interface TableCellProps {
@@ -33,7 +34,7 @@ const BorderRightTableCell = styled(TableCell)<TableCellProps>`
 `;
 
 export const ManifestPrint = forwardRef(
-  ({ manifest, routes }: PropTypes, ref: any) => {
+  ({ manifest, routes, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
       // return;
       return (
@@ -44,13 +45,6 @@ export const ManifestPrint = forwardRef(
         </div>
       );
     }
-
-    // Display the beansprouts first then other items
-    // const customSortKeys = (keys: string[]): any => {
-    //   const beanKeys = keys.filter((key) => key.includes('BEAN')).sort();
-    //   const otherKeys = keys.filter((key) => !key.includes('BEAN')).sort();
-    //   return [...beanKeys, ...otherKeys];
-    // };
 
     return (
       <div ref={ref} className='print-container'>
@@ -65,10 +59,6 @@ export const ManifestPrint = forwardRef(
                 return null;
               }
 
-              // sort the item for each route then loop through it
-              // const sortedItems: any = customSortKeys(
-              //   Object.keys(manifest[routeId].summary),
-              // );
               const sortedItems = [...mainItems];
 
               return (
@@ -76,9 +66,12 @@ export const ManifestPrint = forwardRef(
                   <Typography variant="h4" textAlign="center" m={2}>
                     {targetRoute.name}
                   </Typography>
-                  <Typography variant="h5" m={2}>
-                    Driver: {targetRoute.driver?.name}
-                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" m={2}>
+                    <Typography variant="h5">
+                      Driver: {targetRoute.driver?.name}
+                    </Typography>
+                    <Typography>{currentDate}</Typography>
+                  </Box>
                   <Divider sx={{ my: 2 }} />
 
                   <Table sx={{ mx: 2 }}>

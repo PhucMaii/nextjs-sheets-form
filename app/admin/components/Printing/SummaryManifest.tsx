@@ -15,10 +15,11 @@ import './print.css';
 interface PropTypes {
   manifest: any;
   routes: IRoutes[];
+  currentDate: string;
 }
 
 export const SummaryManifest = forwardRef(
-  ({ manifest, routes }: PropTypes, ref: any) => {
+  ({ manifest, routes, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
       // return;
       return (
@@ -59,9 +60,12 @@ export const SummaryManifest = forwardRef(
                   <Typography variant="h4" textAlign="center" m={2}>
                     {targetRoute.name}
                   </Typography>
-                  <Typography variant="h5" m={2}>
-                    Driver: {targetRoute.driver?.name}
-                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" m={2}>
+                    <Typography variant="h5" m={2}>
+                      Driver: {targetRoute.driver?.name}
+                    </Typography>
+                    <Typography>{currentDate}</Typography>
+                  </Box>
 
                   {/* Manifest Table */}
                   <Table>
