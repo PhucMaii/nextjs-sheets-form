@@ -12,7 +12,7 @@ import {
 import React, { forwardRef } from 'react';
 import './print.css';
 import styled from 'styled-components';
-import { mainItems, productColors } from '@/app/lib/constant';
+import { productColors } from '@/app/lib/constant';
 import { grey } from '@mui/material/colors';
 
 interface PropTypes {
@@ -48,7 +48,7 @@ export const ManifestPrint = forwardRef(
 
     return (
       <div ref={ref} className='print-container'>
-        <Box sx={{ width: '100%', height: '100%' }}>
+        <Box sx={{ width: '90%', height: '100%' }}>
           {/* Loop through route */}
           {Object.keys(manifest).length > 0 &&
             Object.keys(manifest).map((routeId: string, index: number) => {
@@ -59,7 +59,37 @@ export const ManifestPrint = forwardRef(
                 return null;
               }
 
-              const sortedItems = [...mainItems];
+              // const sortedItems = [...mainItems];
+              console.log({routeId, manifest});
+
+              const generateItemNames = () => {
+                const itemNameList: string[] = [];
+                const currentManifest = manifest[routeId].details;
+                for (const item of currentManifest) {
+                  const itemNames: string[] = Object.keys(item);
+                  for (const itemName of itemNames) {
+                    if (itemName === 'user') {
+                      continue;
+                    }
+
+                    if (itemNameList.includes(itemName)) {
+                      continue;
+                    }
+
+                    if (item[itemName] === 0) {
+                      continue;
+                    }
+
+                    itemNameList.push(itemName);
+                  }
+                }
+
+                return itemNameList;
+              }
+
+              const sortedItems = generateItemNames();
+              const columnWidthPercentage = Math.floor(sortedItems.length / 100) * 100 - 1;
+              // console.log(columnWidth, 'column width');
 
               return (
                 <>
@@ -88,10 +118,10 @@ export const ManifestPrint = forwardRef(
                               <>
                                 <BorderRightTableCell
                                   align="center"
-                                  sx={{ fontSize: 18, fontWeight: 'bold' }}
+                                  sx={{ padding: 2, fontSize: 18, fontWeight: 'bold', width: `${columnWidthPercentage}%` }}
                                   key={index}
                                 >
-                                  {item === 'MUSHROOM' ? 'MUSH ROOM' : item}
+                                  {item}
                                 </BorderRightTableCell>
                               </>
                             );
@@ -112,7 +142,7 @@ export const ManifestPrint = forwardRef(
                                 // align="center"
                                 sx={{
                                   fontSize: 18,
-                                  width: '150px',
+                                  // width: '150px',
                                   height: '30px !important',
                                   fontWeight: 'bold',
                                 }}
