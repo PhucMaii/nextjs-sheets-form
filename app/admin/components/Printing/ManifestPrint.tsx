@@ -139,10 +139,15 @@ export const ManifestPrint = forwardRef(
                       {manifest[routeId].details.map(
                         (user: any, index: number) => {
                           const { summary } = manifest[routeId];
-                          const clientName = user.user.clientName
+                          let clientName = user.user.clientName
                             .split('-')
-                            .slice(0, 1)
-                            .join(' ');
+                            .slice(0, 2).join(' - ');
+
+                            console.log(clientName?.split(' - ')[1]);
+                          if (clientName?.split(' - ')[1] == ' C.O.D ' || clientName?.split(' - ')[1] == ' MONTHLY ' || clientName?.split(' - ')[1] == ' W.C.O.D ') {
+                            clientName = clientName.split(' - ')[0];
+                          }
+                          
                           return (
                             <TableRow key={index}>
                               <BorderRightTableCell
