@@ -12,8 +12,9 @@ import {
 import React, { forwardRef } from 'react';
 import './print.css';
 import styled from 'styled-components';
-import { productColors } from '@/app/lib/constant';
+import { mainItems, productColors } from '@/app/lib/constant';
 import { grey } from '@mui/material/colors';
+import { sortedItemKeys } from '@/app/utils/array';
 
 interface PropTypes {
   manifest: any;
@@ -59,12 +60,13 @@ export const ManifestPrint = forwardRef(
                 return null;
               }
 
-              // const sortedItems = [...mainItems];
-              console.log({routeId, manifest});
-
               const generateItemNames = () => {
                 const itemNameList: string[] = [];
+
+                // Get all items with its quantity in format: {itemName: quantity}
                 const currentManifest = manifest[routeId].details;
+
+                // Loop through all items and get its key = name
                 for (const item of currentManifest) {
                   const itemNames: string[] = Object.keys(item);
                   for (const itemName of itemNames) {
@@ -80,6 +82,10 @@ export const ManifestPrint = forwardRef(
                       continue;
                     }
 
+                    if (itemName.includes('KONGNAMUL')) {
+                      continue;
+                    }
+
                     itemNameList.push(itemName);
                   }
                 }
@@ -87,9 +93,10 @@ export const ManifestPrint = forwardRef(
                 return itemNameList;
               }
 
-              const sortedItems = generateItemNames();
-              const columnWidthPercentage = Math.floor(sortedItems.length / 100) * 100 - 1;
-              // console.log(columnWidth, 'column width');
+              const items = generateItemNames();
+              const sortedItems = sortedItemKeys(items, mainItems);
+
+              const columnWidthPercentage = Math.floor(items.length / 100) * 100 - 1;
 
               return (
                 <>
@@ -164,6 +171,7 @@ export const ManifestPrint = forwardRef(
                                       ></BorderRightTableCell>
                                     );
                                   }
+
                                   // Ensure the value is renderable
                                   if (typeof itemQuantity === 'object') {
                                     console.error(
@@ -176,7 +184,7 @@ export const ManifestPrint = forwardRef(
                                         align="center"
                                         sx={{ fontSize: 20 }}
                                       >
-                                        [Object]
+                                        NaN
                                       </BorderRightTableCell>
                                     );
                                   }

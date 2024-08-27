@@ -135,20 +135,35 @@ const useManifest = (
     );
 
     for (const itemRoute in groupItemRoutes) {
+      const KONGNAMUL_SOYA_10LB = groupItemRoutes[itemRoute].find((item: IItem) => item.name === 'KONGNAMUL - SOYA 10 LB') || 0;
+      const KONGNAMUL_SOYA_5LB = groupItemRoutes[itemRoute].find((item: IItem) => item.name.includes('KONGNAMUL - SOYA 5 LB')) || 0;
+
       const manifestItem = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem) => {
           const { name, subCategory } = item;
 
-          let itemKey = name;
+          let itemKey = name.includes('KONGNAMUL') ? name.split(' - ')[1] : name;
           if (subCategory) {
             itemKey = `${name}-${subCategory.name}`;
+          }
+
+          // If soya exists then skip it
+          if (acc[itemKey] && itemKey.includes('SOYA')) {
+            return acc;
           }
 
           if (!acc[itemKey]) {
             acc[itemKey] = 0;
           }
-
-          acc[itemKey] = acc[itemKey] + item.quantity;
+ 
+          // Handle SOYA
+          if (name === 'SOYA 5 LB') {
+            acc[itemKey] = acc[itemKey] + item.quantity + KONGNAMUL_SOYA_5LB.quantity;
+          } else if (name === 'SOYA 10 LB') {
+            acc[itemKey] = acc[itemKey] + item.quantity + KONGNAMUL_SOYA_10LB.quantity;
+          } else {
+            acc[itemKey] = acc[itemKey] + item.quantity;
+          }
           return acc;
         },
         {},
@@ -160,9 +175,10 @@ const useManifest = (
           if (!user) {
             return acc;
           }
-
+          
           const { subCategory } = item;
-          let itemKey = name;
+
+          let itemKey = name.includes('KONGNAMUL') ? name.split(' - ')[1] : name;
           if (subCategory) {
             itemKey = `${name}-${subCategory.name}`;
           }

@@ -8,199 +8,50 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // const users = await generateUsers();
-  // const adminPassword = await hash('admin123', 12);
-  // await prisma.user.createMany({
-  //   data: [
-  //     ...users,
-  //     // {
-  //     //   clientId: '1',
-  //     //   clientName: 'Admin 1',
-  //     //   sheetName: 'Admin 1',
-  //     //   deliveryAddress: '1-6420 Beresford Street, Burnaby, BC, V5E 1B3',
-  //     //   contactNumber: '7787891060',
-  //     //   categoryId: 1,
-  //     //   password: adminPassword,
-  //     //   role: 'admin',
-  //     // },
-  //   ],
-  // });
-  // for (const user of users) {
-  //   const password = await hash(user.contactNumber, 12);
-  //   await prisma.user.update({
-  //     where: {
-  //       clientId: user.clientId,
-  //     },
-  //     data: {
-  //       password,
-  //     },
-  //   });
-  // }
-  // await prisma.category.createMany({
-  //   data: [
-  //     {
-  //       name: 'Wholesale', // id: 1
-  //     },
-  //     {
-  //       name: 'Wholesale - Terminal', // id: 2
-  //     },
-  //     {
-  //       name: 'Wholesale - Consumer Produce', // id: 3
-  //     },
-  //     {
-  //       name: 'Wholesale - Dafa Natural Foods', // id: 4
-  //     },
-  //     {
-  //       name: 'Wholesale - Super Save Produce', // id: 5
-  //     },
-  //     {
-  //       name: 'Wholesale - Standard Trading', // id 6
-  //     },
-  //     {
-  //       name: 'Wholesale - Freeman', // id 7
-  //     },
-  //     {
-  //       name: 'Wholesale - Doli', // id 8
-  //     },
-  //     {
-  //       name: 'Special Client - MIXED', // id 9
-  //     },
-  //     {
-  //       name: 'Retail - B.K', // id 10
-  //     },
-  //     {
-  //       name: 'Retail - P.P', // id 11
-  //     },
-  //     {
-  //       name: 'Retail - Thai Basil', // id 12
-  //     },
-  //   ],
-  // });
-  // await prisma.item.createMany({
-  //   data: [...items],
-  // });
-  // await prisma.form.createMany({
-  //   data: [
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 1,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 2,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 3,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 4,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 5,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 6,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 7,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 8,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 9,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 10,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 11,
-  //     },
-  //     {
-  //       formName: 'Order Form',
-  //       categoryId: 12,
-  //     },
-  //   ],
-  // });
-  // await prisma.input.createMany({
-  //   data: [...inputs],
-  // });
-  // const driverPassword = await hash('driver123', 12);
-  // const driverList = [
-  //   {
-  //     name: 'NATHAN',
-  //     password: driverPassword
-  //   },
-  //   {
-  //     name: 'NGUYEN',
-  //     password: driverPassword
-  //   },
-  //   {
-  //     name: 'PETER',
-  //     password: driverPassword
-  //   },
-  //   {
-  //     name: 'TONY',
-  //     password: driverPassword
-  //   },
-  //   {
-  //     name: 'BAO BAO',
-  //     password: driverPassword
-  //   },
-  // ];
-  // await prisma.driver.createMany({
-  //   data: driverList
-  // })
-  // const routes = [
-  //   {
-  //     day: 'Sunday',
-  //     driverId:
-  //   }
-  // ]
-  // await prisma.route.createMany({
-  //   data: [
-  //   ]
-  // })
+  // Soya 10 LB
+  await prisma.item.updateMany({
+    where: {
+      name: {
+        in: ['BEAN 10LB', 'BEAN-10LB', 'BEANS 10LBS', 'BEANS 10 LB', ]
+      }
+    },
+    data: {
+      name: 'BEAN 10 LB'
+    }
+  })
 
-  // const scheduleOrders = await prisma.scheduleOrders.findMany({
-  //   include:{
-  //     items: true,
-  //     user: true,
-  //   }
-  // });
-  // const items = await prisma.item.findMany();
+  // Soya 5 LB
+  await prisma.item.updateMany({
+    where: {
+      name: {
+        in: ['BEANSPROUTS 24 x 1 LB', 'BEAN 24X1']
+      }
+    },
+    data: {
+      name: 'BEAN 24X1 LB'
+    }
+  });
 
-  // // Loop through schedule order and item
-  // for (const scheduleOrder of scheduleOrders) {
-  //   for (const item of scheduleOrder.items) {
-  //     // Find the target item with same categoryId and name
-  //     const targetItem = items.find((baseItem) => {
-  //       return baseItem.categoryId === scheduleOrder.user.categoryId && item.name === baseItem.name
-  //     });
+  // Soya 24X1 LB
+  await prisma.item.updateMany({
+    where: {
+      name: {
+        in: ['BEANSPROUTS 5 X 1 LB']
+      }
+    },
+    data: {
+      name: 'BEAN 5X1 LB'
+    }
+  });
 
-  //     // Then update it.
-  //     if (targetItem) {
-  //       await prisma.orderedItems.update({
-  //         where: {
-  //           id: item.id,
-  //         },
-  //         data: {
-  //           price: item.price
-  //         }
-  //       })
-  //     }
-      
-  //   }
-  // }
+  await prisma.item.updateMany({
+    where: {
+      name: 'BEANSPROUTS 10 X 8 OZ'
+    },
+    data: {
+      name: 'BEAN 10X8 OZ'
+    }
+  });
 }
 
 main()
