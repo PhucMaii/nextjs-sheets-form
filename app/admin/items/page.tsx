@@ -28,6 +28,7 @@ import EditCategory from '../components/Modals/edit/EditCategory';
 import { Reorder } from 'framer-motion';
 import Item from '../components/Reorder/Item';
 import { LoadingButton } from '@mui/lab';
+import { UPDATE_OPTION } from '../components/Modals/edit/EditItem';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -285,10 +286,11 @@ export default function ItemPage() {
     }
   };
 
-  const handleUpdateItem = async (updatedItem: IItem) => {
+  const handleUpdateItem = async (updatedItem: IItem, updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY) => {
     try {
       const response = await axios.put(API_URL.ITEM, {
         updatedItem,
+        updateOption
       });
 
       if (response.data.error) {

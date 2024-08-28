@@ -1,15 +1,17 @@
+import { UPDATE_OPTION } from '@/app/admin/components/Modals/edit/EditItem';
 import { Item, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   updatedItem: Item;
+  updateOption: UPDATE_OPTION
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { updatedItem }: IBody = req.body;
+    const { updatedItem, updateOption = UPDATE_OPTION.CURRENT_CATEGORY }: IBody = req.body;
 
     if (
       !updatedItem.id ||
@@ -103,8 +105,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Update PRICE all items has same name
+    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+      await prisma.item.updateMany({
+        where: {
+          name: existingItem.name
+        },
+        data: {
+          price: updatedItem.price,
+          name: updatedItem.name,
+        }
+      })
+    }
+
     // Update schedule order items
-    const responseUpdate = await updateAllScheduleOrderItems(existingItem, updatedItem);
+    const responseUpdate = await updateAllScheduleOrderItems(existingItem, updatedItem, updateOption);
 
     if (!responseUpdate.ok) {
       return res.status(500).json({
@@ -127,9 +142,28 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 const updateAllScheduleOrderItems = async (
   oldItem: any,
   updatedItem: any,
+  updateOption: UPDATE_OPTION
 ) => {
   try {
     const prisma = new PrismaClient();
+
+    // if update all item same name
+    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+      await prisma.orderedItems.updateMany({
+        where: {
+          scheduledOrderId: {
+            not: null
+          },
+          name: oldItem.name 
+        },
+        data: {
+          name: updatedItem.name,
+          price: updatedItem.price
+        }
+      });
+
+      return {ok: true}
+    }
 
     // Find all users that has same categoryId
     const userList = await prisma.user.findMany({

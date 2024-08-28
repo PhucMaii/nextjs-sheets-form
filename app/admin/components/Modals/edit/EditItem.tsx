@@ -20,10 +20,10 @@ import { SubCategory } from '@prisma/client';
 interface IProps {
   targetItem: IItem;
   subCategories: SubCategory[];
-  handleUpdateItem: (updatedItem: IItem) => Promise<void>;
+  handleUpdateItem: (updatedItem: IItem, updateOption: UPDATE_OPTION) => Promise<void>;
 }
 
-enum UPDATE_OPTION {
+export enum UPDATE_OPTION {
   CURRENT_CATEGORY = 'current category',
   ALL_ITEMS_SAME_NAME = 'all items same name'
 }
@@ -53,7 +53,7 @@ export default function EditItem({
       name: updatedItem.name.toUpperCase(),
     };
     setIsUpdating(true);
-    await handleUpdateItem(newUpdatedItem);
+    await handleUpdateItem(newUpdatedItem, updateOption);
     setIsUpdating(false);
   };
 
