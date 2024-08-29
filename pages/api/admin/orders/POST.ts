@@ -67,7 +67,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const deliveryDateTypeDate = convertDeliveryDateStringToDate(deliveryDate);
       for (const unavailableRange of unavailableRanges) {
         const startDate = new Date(unavailableRange.startDate);
+        startDate.setHours(0, 0, 0, 0);
         const endDate = new Date(unavailableRange.endDate);
+        endDate.setDate(endDate.getDate() - 1);
 
         if (deliveryDateTypeDate >= startDate && deliveryDateTypeDate <= endDate) {
           break;
