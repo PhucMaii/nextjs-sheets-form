@@ -359,21 +359,23 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // Update schedule order accordingly
       const requireUpdateOrders = existingCategory.users
         .map((user: any) => {
-          // return user.scheduleOrders.map((scheduleOrder: ScheduledOrder) => {
-          //   return { ...scheduleOrder, subCategoryId: user.subCategoryId };
-          // });
-          return user.scheduledOrders;
-        })
-        .flat();
-
-      for (const scheduleOrder of requireUpdateOrders) {
-        await updateScheduleOrderItems(
-          updatedItems,
-          scheduleOrder,
-          // scheduleOrder.subCategoryId,
-          // userSubCategoryId,
-          userId,
-        );
+          return user.scheduleOrders.map((scheduleOrder: any) => {
+            return scheduleOrder;
+          })
+        }).flat()
+      
+      if (requireUpdateOrders && requireUpdateOrders.length > 0) {
+        for (const scheduleOrder of requireUpdateOrders) {
+          if (scheduleOrder) {
+            await updateScheduleOrderItems(
+              updatedItems,
+              scheduleOrder,
+              // scheduleOrder.subCategoryId,
+              // userSubCategoryId,
+              userId,
+            );
+          }
+        }
       }
 
       return res.status(200).json({
@@ -452,6 +454,7 @@ const generateScheduleOrderItems = (
 ) => {
   const newItems = updatedItems.map((newItem: UpdatedItem) => {
     const { name, price, quantity } = newItem;
+
     const existingItem = scheduleOrder.items.find(
       (item: OrderedItems) => item.name === newItem.name,
     );

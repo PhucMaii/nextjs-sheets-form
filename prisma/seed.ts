@@ -8,50 +8,19 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Soya 10 LB
-  await prisma.item.updateMany({
-    where: {
-      name: {
-        in: ['BEAN 10LB', 'BEAN-10LB', 'BEANS 10LBS', 'BEANS 10 LB'],
-      },
-    },
+  // Remove subcategory for user
+  await prisma.user.updateMany({
     data: {
-      name: 'BEAN 10 LB',
-    },
+      subCategoryId: null
+    }
   });
 
-  // Soya 5 LB
+  // Remove subcategory for items
   await prisma.item.updateMany({
-    where: {
-      name: {
-        in: ['BEANSPROUTS 24 x 1 LB', 'BEAN 24X1'],
-      },
-    },
     data: {
-      name: 'BEAN 24X1 LB',
-    },
-  });
-
-  // Soya 24X1 LB
-  await prisma.item.updateMany({
-    where: {
-      name: {
-        in: ['BEANSPROUTS 5 X 1 LB'],
-      },
-    },
-    data: {
-      name: 'BEAN 5X1 LB',
-    },
-  });
-
-  await prisma.item.updateMany({
-    where: {
-      name: 'BEANSPROUTS 10 X 8 OZ',
-    },
-    data: {
-      name: 'BEAN 10X8 OZ',
-    },
-  });
+      subCategoryId: null
+    }
+  })
 }
 
 main()
