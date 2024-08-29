@@ -50,15 +50,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Check is delivery date in client's vacation range
-
     if (isCheckUnavailableRange) {
       const deliveryDate = convertDeliveryDateStringToDate(
         body['DELIVERY DATE'],
       );
       for (const dayRange of existingUser.unavailableDayRange) {
+        const startDate = new Date(dayRange.startDate);
+        const endDate = new Date(dayRange.endDate);
+
         if (
-          deliveryDate >= dayRange.startDate &&
-          deliveryDate <= dayRange.endDate
+          deliveryDate >= startDate &&
+          deliveryDate <= endDate
         ) {
           return res.status(200).json({
             warning: `Client ${
