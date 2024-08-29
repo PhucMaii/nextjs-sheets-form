@@ -1,22 +1,12 @@
-import {
-  Divider,
-  Grid,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Divider, Grid, Modal, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { ModalProps } from '../type';
 import { IItem } from '@/app/utils/type';
-import { SubCategory } from '@prisma/client';
 
 interface IProps extends ModalProps {
   categoryId: number;
-  subCategories: SubCategory[];
   addItem: (newItem: IItem) => Promise<void>;
 }
 
@@ -24,7 +14,6 @@ export default function AddItem({
   open,
   onClose,
   categoryId,
-  subCategories,
   addItem,
 }: IProps) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
@@ -33,7 +22,7 @@ export default function AddItem({
     name: '',
     price: 0,
     categoryId,
-    subCategoryId: null,
+    // subCategoryId: null,
     availability: true,
   });
 
@@ -95,10 +84,10 @@ export default function AddItem({
               type="number"
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          {/* <Grid item xs={12} md={6}>
             <Typography variant="h6">Subcategory:</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
+          </Grid> */}
+          {/* <Grid item xs={12} md={6}>
             <Select
               fullWidth
               disabled={!newItem.name.toLowerCase().includes('bean')}
@@ -110,7 +99,6 @@ export default function AddItem({
                 })
               }
             >
-              {/* <MenuItem value={null || undefined}>N/A</MenuItem> */}
               {subCategories &&
                 [...subCategories, { name: 'N/A', id: 0 }].map(
                   (subCategory: SubCategory | any) => {
@@ -122,7 +110,7 @@ export default function AddItem({
                   },
                 )}
             </Select>
-          </Grid>
+          </Grid> */}
         </Grid>
       </BoxModal>
     </Modal>

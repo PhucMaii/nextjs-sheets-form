@@ -33,21 +33,18 @@ import { errorColor } from '@/theme/color';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../../UpdateChoiceSelection';
-import { SubCategory } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   order: Order;
   handleUpdateOrderUI: (updatedOrder: Order) => void;
   setNotification: Dispatch<SetStateAction<Notification>>;
-  subCategories: SubCategory[];
 }
 
 export default function EditReportOrder({
   order,
   handleUpdateOrderUI,
   setNotification,
-  subCategories,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -60,7 +57,6 @@ export default function EditReportOrder({
     quantity: 0,
     totalPrice: 0,
   });
-  const [subCategoryId, setSubCategoryId] = useState<number>(0);
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
@@ -103,9 +99,6 @@ export default function EditReportOrder({
         totalPrice,
         name: newItemName,
       };
-      if (subCategoryId > 0) {
-        newItemData.subCategoryId = subCategoryId;
-      }
       setItemList([...itemList, newItemData]);
       setNewItem({
         id: -1,
@@ -167,7 +160,7 @@ export default function EditReportOrder({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.categoryId,
-        userSubCategoryId: order.subCategoryId,
+        // userSubCategoryId: order.subCategoryId,
       });
 
       if (response.data.error) {
@@ -389,7 +382,7 @@ export default function EditReportOrder({
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <FormControl fullWidth>
                   <InputLabel id="subcategory-label">Subcategory</InputLabel>
                   <Select
@@ -411,7 +404,7 @@ export default function EditReportOrder({
                       })}
                   </Select>
                 </FormControl>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12}>
                 <Button fullWidth variant="contained" onClick={addNewItem}>
                   + Add

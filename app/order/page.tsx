@@ -65,7 +65,7 @@ export default function OrderForm() {
     if (unavailableRange) {
       setIsOrderOnVacationOpen(true);
     }
-  }, [unavailableRange])
+  }, [unavailableRange]);
 
   useEffect(() => {
     if (items) {
@@ -128,7 +128,10 @@ export default function OrderForm() {
         submittedData = { ...submittedData, [item.name]: item.quantity };
       }
 
-      const response = await axios.post(API_URL.IMPORT_SHEETS, {...submittedData, createdBy: USER_ROLE.CLIENT});
+      const response = await axios.post(API_URL.IMPORT_SHEETS, {
+        ...submittedData,
+        createdBy: USER_ROLE.CLIENT,
+      });
 
       if (response.data.warning) {
         setNotification({

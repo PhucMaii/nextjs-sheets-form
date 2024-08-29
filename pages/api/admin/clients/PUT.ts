@@ -18,7 +18,7 @@ interface BodyTypes {
   orderType?: ORDER_TYPE;
   paymentType?: PAYMENT_TYPE;
   categoryId?: number;
-  subCategoryId?: number;
+  // subCategoryId?: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -33,7 +33,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryId,
       orderType,
       paymentType,
-      subCategoryId,
+      // subCategoryId,
     }: BodyTypes = req.body;
 
     const existingUser = await prisma.user.findUnique({
@@ -64,9 +64,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateFields.categoryId = categoryId;
     }
 
-    if (subCategoryId) {
-      updateFields.subCategoryId = subCategoryId;
-    }
+    // if (subCategoryId) {
+    //   updateFields.subCategoryId = subCategoryId;
+    // }
 
     // If user don't input any updated data
     if (Object.keys(updateFields).length === 0 && !orderType && !paymentType) {

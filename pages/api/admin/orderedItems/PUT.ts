@@ -9,6 +9,7 @@ import {
 import { NextApiRequest, NextApiResponse } from 'next';
 import order from '../../order';
 import { getUserInfo } from '../../utils/auth';
+import { useRootElementName } from '@mui/base';
 
 interface UpdatedItem {
   id: number;
@@ -17,7 +18,7 @@ interface UpdatedItem {
   quantity: number;
   orderId: number;
   totalPrice: number;
-  subCategoryId?: number;
+  // subCategoryId?: number;
 }
 
 export enum UpdateOption {
@@ -34,7 +35,7 @@ interface BodyType {
   categoryName?: string;
   userId: number;
   userCategoryId: number;
-  userSubCategoryId: number;
+  // userSubCategoryId: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -49,7 +50,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryName,
       userId,
       userCategoryId,
-      userSubCategoryId,
+      // userSubCategoryId,
     } = updatedData as BodyType;
 
     // Bad cases
@@ -157,7 +158,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
-    await updateOrderTotalPrice(orderId, orderTotalPrice, `Admin - ${adminUpdate.clientName}`);
+    await updateOrderTotalPrice(
+      orderId,
+      orderTotalPrice,
+      `Admin - ${adminUpdate.clientName}`,
+    );
 
     // First case: No update neither create new category
     if (updateOption === UpdateOption.NONE || !updateOption) {
@@ -183,7 +188,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const formattedUpdatedItems = await formatUpdatedItems(
         newCategory.id,
         updatedItems,
-        userSubCategoryId,
+        // userSubCategoryId,
       );
 
       // create new items
@@ -217,8 +222,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           await updateScheduleOrderItems(
             updatedItems,
             scheduleOrder,
-            userSubCategoryId,
-            userSubCategoryId,
+            // userSubCategoryId,
+            // userSubCategoryId,
             userId,
           );
         }
@@ -254,34 +259,27 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       let fetchCondition: any = { categoryId: userCategoryId };
 
-      if (userSubCategoryId) {
-        fetchCondition.subCategoryId = userSubCategoryId;
-      }
+      // if (userSubCategoryId) {
+      //   fetchCondition.subCategoryId = userSubCategoryId;
+      // }
 
       // Get beansprouts based on subcateogry id if it is provided
-      const beansprouts = await prisma.item.findMany({
-        where: fetchCondition,
-      });
+      // const beansprouts = await prisma.item.findMany({
+      //   where: fetchCondition,
+      // });
 
       // Get the rest of items
       const itemList = await prisma.item.findMany({
         where: {
           categoryId: userCategoryId,
-          subCategoryId: null,
+          // subCategoryId: null,
         },
       });
 
-      let baseItemList = [...itemList, ...beansprouts];
+      let baseItemList = [...itemList];
 
       for (const item of updatedItems) {
-        if (!item.subCategoryId) {
-          fetchCondition = { categoryId: userCategoryId };
-        } else {
-          fetchCondition = {
-            categoryId: userCategoryId,
-            subCategoryId: userSubCategoryId,
-          };
-        }
+        fetchCondition = { categoryId: userCategoryId };
         const existingItem = await prisma.item.findFirst({
           where: {
             name: item.name,
@@ -291,12 +289,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         const updateFields: any = { price: item.price };
 
-        if (
-          item.subCategoryId &&
-          item.subCategoryId !== existingItem?.subCategoryId
-        ) {
-          updateFields.subCategoryId = item.subCategoryId;
-        }
+        // if (
+        //   item.subCategoryId &&
+        //   item.subCategoryId !== existingItem?.subCategoryId
+        // ) {
+        //   updateFields.subCategoryId = item.subCategoryId;
+        // }
 
         if (existingItem) {
           const updatedItem = await prisma.item.update({
@@ -317,7 +315,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               name: item.name,
               categoryId: userCategoryId,
               price: item.price,
-              subCategoryId: item.subCategoryId,
+              // subCategoryId: item.subCategoryId,
               availability: true,
             },
           });
@@ -361,9 +359,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // Update schedule order accordingly
       const requireUpdateOrders = existingCategory.users
         .map((user: any) => {
-          return user.scheduleOrders.map((scheduleOrder: ScheduledOrder) => {
-            return { ...scheduleOrder, subCategoryId: user.subCategoryId };
-          });
+          // return user.scheduleOrders.map((scheduleOrder: ScheduledOrder) => {
+          //   return { ...scheduleOrder, subCategoryId: user.subCategoryId };
+          // });
+          return user.scheduledOrders;
         })
         .flat();
 
@@ -371,8 +370,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         await updateScheduleOrderItems(
           updatedItems,
           scheduleOrder,
-          scheduleOrder.subCategoryId,
-          userSubCategoryId,
+          // scheduleOrder.subCategoryId,
+          // userSubCategoryId,
           userId,
         );
       }
@@ -408,7 +407,7 @@ export const updateOrderTotalPrice = async (
       data: {
         totalPrice: newTotalPrice,
         updatedBy,
-        updateTime
+        updateTime,
       },
     });
   } catch (error: any) {
@@ -419,19 +418,19 @@ export const updateOrderTotalPrice = async (
 const formatUpdatedItems = async (
   categoryId: number = 0,
   updatedItems: any,
-  subcategoryId: number = 0,
+  // subcategoryId: number = 0,
 ) => {
   const formattedUpdatedItems = await Promise.all(
     updatedItems.map(async (item: UpdatedItem) => {
-      if (item?.subCategoryId && item.subCategoryId === subcategoryId) {
-        return {
-          name: item.name,
-          price: item.price,
-          categoryId: categoryId,
-          subCategoryId: item.subCategoryId,
-          availability: true,
-        };
-      }
+      // if (item?.subCategoryId && item.subCategoryId === subcategoryId) {
+      //   return {
+      //     name: item.name,
+      //     price: item.price,
+      //     categoryId: categoryId,
+      //     subCategoryId: item.subCategoryId,
+      //     availability: true,
+      //   };
+      // }
       return {
         name: item.name,
         price: item.price,
@@ -447,8 +446,8 @@ const formatUpdatedItems = async (
 const generateScheduleOrderItems = (
   updatedItems: UpdatedItem[],
   scheduleOrder: any,
-  subCategoryId: number | null,
-  baseSubCategoryId: number | null, // categoryId of the client update this category
+  // subCategoryId: number | null,
+  // baseSubCategoryId: number | null, // categoryId of the client update this category
   userId: number,
 ) => {
   const newItems = updatedItems.map((newItem: UpdatedItem) => {
@@ -457,26 +456,26 @@ const generateScheduleOrderItems = (
       (item: OrderedItems) => item.name === newItem.name,
     );
 
+    // if (existingItem) {
     if (existingItem) {
-      if (!existingItem.name.includes('BEAN')) {
-        return {
-          name,
-          price,
-          quantity: existingItem.quantity,
-          scheduledOrderId: scheduleOrder.id,
-        };
-      }
-
-      // if item is beansprouts and different subCategoryId => use the existing price
-      if (subCategoryId !== baseSubCategoryId) {
-        return {
-          name,
-          price: existingItem.price,
-          quantity: existingItem.quantity,
-          scheduledOrderId: scheduleOrder.id,
-        };
-      }
+      return {
+        name,
+        price,
+        quantity: existingItem.quantity,
+        scheduledOrderId: scheduleOrder.id,
+      };
     }
+
+    // // if item is beansprouts and different subCategoryId => use the existing price
+    // if (subCategoryId !== baseSubCategoryId) {
+    //   return {
+    //     name,
+    //     price: existingItem.price,
+    //     quantity: existingItem.quantity,
+    //     scheduledOrderId: scheduleOrder.id,
+    //   };
+    // }
+    // }
 
     return {
       name,
@@ -492,8 +491,8 @@ const generateScheduleOrderItems = (
 const updateScheduleOrderItems = async (
   updatedItems: UpdatedItem[],
   scheduleOrder: any,
-  subCategoryId: number | null,
-  baseSubCategoryId: number | null,
+  // subCategoryId: number | null,
+  // baseSubCategoryId: number | null,
   userId: number,
 ) => {
   const prisma = new PrismaClient();
@@ -501,8 +500,8 @@ const updateScheduleOrderItems = async (
   const newItems: any = generateScheduleOrderItems(
     updatedItems,
     scheduleOrder,
-    subCategoryId,
-    baseSubCategoryId,
+    // subCategoryId,
+    // baseSubCategoryId,
     userId,
   );
 

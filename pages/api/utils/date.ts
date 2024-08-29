@@ -49,4 +49,4 @@ export const getSameDateLastWeek = (currentDate: string | Date) => {
   // Subtract 7 days
   sameDateLastWeek.setDate(sameDateLastWeek.getDate() - 7);
   return sameDateLastWeek;
-} 
+};

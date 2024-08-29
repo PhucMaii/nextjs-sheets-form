@@ -59,7 +59,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           include: {
             routes: true,
-            subCategory: true,
+            // subCategory: true,
             preference: true,
           },
         });
@@ -72,9 +72,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             isAutoPrint: order.isAutoPrint,
           };
 
-          if (item.name.includes('BEAN')) {
-            return { ...returnData, subCategoryId: user.subCategoryId };
-          }
+          // if (item.name.includes('BEAN')) {
+          //   return { ...returnData, subCategoryId: user.subCategoryId };
+          // }
           return returnData;
         });
 

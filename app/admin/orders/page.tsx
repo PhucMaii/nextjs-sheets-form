@@ -17,7 +17,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { API_URL, FLAG_ORDER_TYPE, ORDER_STATUS, USER_ROLE } from '../../utils/enum';
+import {
+  API_URL,
+  FLAG_ORDER_TYPE,
+  ORDER_STATUS,
+  USER_ROLE,
+} from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
@@ -26,7 +31,11 @@ import NotificationPopup from '../components/Notification';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { formatDateChanged, generateRecommendDate, YYYYMMDDFormat } from '@/app/utils/time';
+import {
+  formatDateChanged,
+  generateRecommendDate,
+  YYYYMMDDFormat,
+} from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/add/AddOrder';
@@ -56,7 +65,7 @@ export interface Item {
   price: number;
   quantity: number;
   totalPrice: number;
-  subCategoryId?: number;
+  // subCategoryId?: number;
 }
 
 export interface Order {
@@ -79,8 +88,6 @@ export interface Order {
   status: ORDER_STATUS;
   isReplacement?: boolean;
   isVoid?: boolean;
-  subCategoryId?: number;
-  subCategory?: any;
   routeId?: number;
   route?: any;
   preference?: any;
@@ -133,7 +140,7 @@ export default function Orders() {
     `${API_URL.ORDER}?date=${stringifyDate}&status=${currentStatus}`,
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
-  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
+  // const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -268,7 +275,7 @@ export default function Orders() {
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
-        {...submittedData, createdBy: USER_ROLE.ADMIN},
+        { ...submittedData, createdBy: USER_ROLE.ADMIN },
       );
 
       if (response.data.error) {
@@ -614,7 +621,12 @@ export default function Orders() {
           </LocalizationProvider>
         </FormControl>
       </Box>
-      <OrderOverview baseOrderData={baseOrderData} allRouteOrderData={orders ? orders.data : []} lastWeekOrderData={lastWeekOrders ? lastWeekOrders.data : []} currentDate={date} />
+      <OrderOverview
+        baseOrderData={baseOrderData}
+        allRouteOrderData={orders ? orders.data : []}
+        lastWeekOrderData={lastWeekOrders ? lastWeekOrders.data : []}
+        currentDate={date}
+      />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={12} md={10.5}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -731,7 +743,7 @@ export default function Orders() {
         handleUpdatePriceUI={handleUpdatePriceUI}
         selectedOrders={selectedOrders}
         handleSelectOrder={handleSelectOrder}
-        subcategories={subCategories?.data || []}
+        // subcategories={subCategories?.data || []}
         handleUpdateItem={handleUpdateItem}
       />
       {isFirstLoading ? (
@@ -762,7 +774,6 @@ export default function Orders() {
                       handleUpdatePriceUI={handleUpdatePriceUI}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
-                      subcategories={subCategories || []}
                       handleUpdateItem={handleUpdateItem}
                       mutateOrders={mutate}
                     />

@@ -42,7 +42,9 @@ export default function PlaceOrder() {
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [items, mutateItems] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`)
+  const [items, mutateItems] = SWRFetchData(
+    `${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`,
+  );
 
   useEffect(() => {
     if (items) {
@@ -79,7 +81,7 @@ export default function PlaceOrder() {
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${selectedClient?.id}`,
-        {...submittedData, createdBy: USER_ROLE.DRIVER},
+        { ...submittedData, createdBy: USER_ROLE.DRIVER },
       );
 
       if (response.data.error) {

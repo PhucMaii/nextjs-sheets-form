@@ -21,7 +21,6 @@ import DebtCustomers from '../components/Printing/DebtCustomers';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 
-
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
@@ -34,14 +33,14 @@ export default function Overview() {
   });
   const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
-  
+
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();
 
   // Data Fetching
-  const [ overview ] = SWRFetchData(
+  const [overview] = SWRFetchData(
     `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
@@ -62,8 +61,8 @@ export default function Overview() {
   };
 
   const handlePrintCustomersInDebt = useReactToPrint({
-    content: () => printDetbCustomersRef.current
-  })
+    content: () => printDetbCustomersRef.current,
+  });
 
   // const fetchOverviewData = async () => {
   //   try {
@@ -92,7 +91,10 @@ export default function Overview() {
   return (
     <Sidebar>
       <div style={{ display: 'none' }}>
-        <DebtCustomers debtCustomers={customersInDebt} ref={printDetbCustomersRef} />
+        <DebtCustomers
+          debtCustomers={customersInDebt}
+          ref={printDetbCustomersRef}
+        />
       </div>
       <LoadingModal open={isFetching} />
       <NotificationPopup
@@ -179,7 +181,11 @@ export default function Overview() {
           <ManifestTable manifest={overviewData?.manifest || null} />
         </Grid>
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="h5" fontWeight="bold" sx={{ my: 2 }}>
               Customers in debt
             </Typography>

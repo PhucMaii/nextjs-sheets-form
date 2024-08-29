@@ -50,11 +50,12 @@ export default function ItemPage() {
 
   // Data Fetching
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
-  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories?.data[0],
   );
-  const [itemsResponse, mutateItems] = SWRFetchData(currentCategory ? `${API_URL.ITEM}?categoryId=${currentCategory?.id}` : '');
+  const [itemsResponse, mutateItems] = SWRFetchData(
+    currentCategory ? `${API_URL.ITEM}?categoryId=${currentCategory?.id}` : '',
+  );
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
@@ -86,10 +87,7 @@ export default function ItemPage() {
       const newItems = baseItems.filter((item: IItem) => {
         if (
           item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) ||
-          item.price == parseInt(debouncedKeywords) ||
-          item?.subCategory?.name
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
+          item.price == parseInt(debouncedKeywords)
         ) {
           return true;
         }
@@ -121,7 +119,7 @@ export default function ItemPage() {
     setItems(itemsResponse?.data);
     setBaseItems(itemsResponse?.data);
     setIsFetching(false);
-  }
+  };
 
   const handleAddItem = async (newItem: IItem) => {
     try {
@@ -286,11 +284,14 @@ export default function ItemPage() {
     }
   };
 
-  const handleUpdateItem = async (updatedItem: IItem, updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY) => {
+  const handleUpdateItem = async (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
+  ) => {
     try {
       const response = await axios.put(API_URL.ITEM, {
         updatedItem,
-        updateOption
+        updateOption,
       });
 
       if (response.data.error) {
@@ -307,7 +308,7 @@ export default function ItemPage() {
 
       // Update Real Data
       mutateItems();
-      
+
       setNotification({
         on: true,
         type: 'success',
@@ -388,7 +389,6 @@ export default function ItemPage() {
       <AddItem
         open={isAddItem}
         onClose={() => setIsAddItem(false)}
-        subCategories={subCategories?.data || []}
         categoryId={currentCategory?.id}
         addItem={handleAddItem}
       />
@@ -495,7 +495,6 @@ export default function ItemPage() {
                       handleUpdateItem={handleUpdateItem}
                       handleDeleteItem={handleDeleteItem}
                       setNotification={setNotification}
-                      subCategories={subCategories?.data || []}
                     />
                     <Divider />
                   </Reorder.Item>

@@ -35,7 +35,7 @@ export default function ScheduleOrder({
   selectedOrders,
   routeId,
   routes,
-  mutateOrders
+  mutateOrders,
 }: PropTypes) {
   const [isSelected, setIsSelected] = useState<boolean>(false);
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));

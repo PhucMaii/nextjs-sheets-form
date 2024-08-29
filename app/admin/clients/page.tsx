@@ -64,7 +64,7 @@ export default function ClientsPage() {
   // Data Fetching
   const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);
   const [categories] = SWRFetchData(API_URL.CATEGORIES);
-  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
+  // const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     if (clients) {
@@ -131,35 +131,6 @@ export default function ClientsPage() {
     setBaseClientList(clients?.data);
     setIsFetching(false);
   };
-
-  // const handleFetchAllUsers = async () => {
-  //   setIsFetching(true);
-  //   try {
-  //     const response = await axios.get(API_URL.CLIENTS);
-
-  //     if (response.data.error) {
-  //       setNotification({
-  //         on: true,
-  //         type: 'error',
-  //         message: response.data.error,
-  //       });
-  //       setIsFetching(false);
-  //       return;
-  //     }
-
-  //     setClientList(response.data.data);
-  //     setBaseClientList(response.data.data);
-  //     setIsFetching(false);
-  //   } catch (error: any) {
-  //     console.log('Fail to fetch all users: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: 'Fail to fetch all users: ' + error,
-  //     });
-  //     setIsFetching(false);
-  //   }
-  // };
 
   const handleChangeClients = (clientId: number, updatedData: any) => {
     const newClientList = baseClientList.map((client: UserType) => {
@@ -263,7 +234,7 @@ export default function ClientsPage() {
 
       // Optimistic UI Update
       handleChangeClients(userId, response.data.data);
-      
+
       // Update Real Data
       mutateClients();
       setNotification({
@@ -395,7 +366,7 @@ export default function ClientsPage() {
         open={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
         categories={categories?.data || []}
-        subCategories={subCategories?.data || []}
+        // subCategories={subCategories?.data || []}
         setNotification={setNotification}
         handleAddClientUI={handleAddClientUI}
         mutateClients={mutateClients}
@@ -478,7 +449,7 @@ export default function ClientsPage() {
             selectedClients={selectedClients}
             handleSelectClient={handleSelectClient}
             handleSelectAll={handleSelectAll}
-            subCategories={subCategories?.data || []}
+            // subCategories={subCategories?.data || []}
             mutateClients={mutateClients}
           />
         ) : (

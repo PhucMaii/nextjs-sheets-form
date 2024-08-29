@@ -3,11 +3,9 @@ import {
   Divider,
   FormControlLabel,
   Grid,
-  MenuItem,
   Modal,
   Radio,
   RadioGroup,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -15,34 +13,30 @@ import React, { useEffect, useState } from 'react';
 import ModalHead from '@/app/lib/ModalHead';
 import { BoxModal } from '../styled';
 import { IItem } from '@/app/utils/type';
-import { SubCategory } from '@prisma/client';
 
 interface IProps {
   targetItem: IItem;
-  subCategories: SubCategory[];
-  handleUpdateItem: (updatedItem: IItem, updateOption: UPDATE_OPTION) => Promise<void>;
+  handleUpdateItem: (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION,
+  ) => Promise<void>;
 }
 
 export enum UPDATE_OPTION {
   CURRENT_CATEGORY = 'current category',
-  ALL_ITEMS_SAME_NAME = 'all items same name'
+  ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-export default function EditItem({
-  targetItem,
-  subCategories,
-  handleUpdateItem,
-}: IProps) {
+export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
-  const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(UPDATE_OPTION.CURRENT_CATEGORY);
+  const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(
+    UPDATE_OPTION.CURRENT_CATEGORY,
+  );
 
   useEffect(() => {
     if (Object.keys(targetItem).length > 0) {
-      if (!targetItem.subCategoryId) {
-        setUpdatedItem({ ...targetItem, subCategoryId: -1 });
-      }
       setUpdatedItem(targetItem);
     }
   }, [targetItem]);
@@ -121,10 +115,10 @@ export default function EditItem({
                 }
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            {/* <Grid item xs={12} md={6}>
               <Typography variant="h6">Subcategory:</Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
+            </Grid> */}
+            {/* <Grid item xs={12} md={6}>
               <Select
                 fullWidth
                 disabled={!updatedItem.name.toLowerCase().includes('bean')}
@@ -147,7 +141,7 @@ export default function EditItem({
                     },
                   )}
               </Select>
-            </Grid>
+            </Grid> */}
           </Grid>
         </BoxModal>
       </Modal>

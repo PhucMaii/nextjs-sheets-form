@@ -80,16 +80,22 @@ export default function ScheduledOrderPage() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   // Data Fetching
-  const [routesResponse] = SWRFetchData(`${API_URL.ROUTES}?day=${days[dayIndex]}`);
+  const [routesResponse] = SWRFetchData(
+    `${API_URL.ROUTES}?day=${days[dayIndex]}`,
+  );
 
   const clientIds = routesResponse?.data[routeIndex].clients?.map(
     (userRoute: UserRoute) => {
       return userRoute.userId;
     },
   );
-  const [orders, mutateOrders] = SWRFetchData(`${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`);
+  const [orders, mutateOrders] = SWRFetchData(
+    `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
+  );
   const [drivers] = SWRFetchData(API_URL.ADMIN_DRIVERS);
-  const [clients, mutateClients] = SWRFetchData(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+  const [clients, mutateClients] = SWRFetchData(
+    `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`,
+  );
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -346,12 +352,12 @@ export default function ScheduledOrderPage() {
   const initializeOrders = () => {
     setBaseOrderList(orders?.data);
     setOrderList(orders?.data);
-  }
-  
+  };
+
   const initializeRoutes = () => {
     setRoutes(routesResponse?.data);
     setIsFetchingRoute(false);
-  }
+  };
 
   const handleAddRouteUI = (targetRoute: IRoutes) => {
     setRoutes([...routes, targetRoute]);
@@ -424,7 +430,7 @@ export default function ScheduledOrderPage() {
       }
       return order;
     });
-    
+
     setSelectedOrders(newSelectedOrders);
     setBaseOrderList(newBaseOrderList);
     setOrderList(newOrderList);
@@ -474,9 +480,8 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      
       // const newRoutes = await fetchRoutes();
-      
+
       // await fetchOrders(newRoutes);
       // mutateOrders();
       const clientIds = routes[routeIndex].clients?.map(
@@ -484,8 +489,10 @@ export default function ScheduledOrderPage() {
           return userRoute.userId;
         },
       );
-  
-      mutate(`${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`)
+
+      mutate(
+        `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
+      );
 
       setIsSavingArrangement(false);
       setNotification({
@@ -590,7 +597,7 @@ export default function ScheduledOrderPage() {
             aria-label="basic tabs"
             value={dayIndex}
             onChange={(e, newValue: number) => switchDay(newValue)}
-            variant={mdDown ? "scrollable" : "fullWidth"}
+            variant={mdDown ? 'scrollable' : 'fullWidth'}
             scrollButtons="auto"
           >
             {days &&

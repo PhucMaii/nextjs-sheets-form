@@ -18,7 +18,7 @@ import { Notification, UserType } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
-import { Category, SubCategory } from '@prisma/client';
+import { Category } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditClient from '../Modals/edit/EditClient';
@@ -32,7 +32,7 @@ interface PropTypes {
   selectedClients: UserType[];
   handleSelectClient: (e: any, targetClient: UserType) => void;
   handleSelectAll: () => void;
-  subCategories: SubCategory[];
+  // subCategories: SubCategory[];
   mutateClients: any;
 }
 
@@ -45,11 +45,10 @@ const ClientsTable = ({
   selectedClients,
   handleSelectClient,
   handleSelectAll,
-  subCategories,
+  // subCategories,
   mutateClients,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
-  console.log('re-render');
 
   const handleDeleteClient = async (client: UserType) => {
     try {
@@ -112,9 +111,9 @@ const ClientsTable = ({
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Category</Typography>
         </TableCell>
-        <TableCell variant="head" style={{ width: 120 }}>
+        {/* <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Subcategory</Typography>
-        </TableCell>
+        </TableCell> */}
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Contact Number</Typography>
         </TableCell>
@@ -178,7 +177,7 @@ const ClientsTable = ({
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
         <TableCell>{client.category.name}</TableCell>
-        <TableCell>
+        {/* <TableCell>
           <Select
             value={client.subCategoryId || 'N/A'}
             onChange={(e) => {
@@ -195,7 +194,7 @@ const ClientsTable = ({
                 );
               })}
           </Select>
-        </TableCell>
+        </TableCell> */}
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
         <TableCell>
@@ -256,5 +255,8 @@ const ClientsTable = ({
 };
 
 export default memo(ClientsTable, (prev, next) => {
-  return (prev.clients === next.clients && prev.selectedClients === next.selectedClients);
+  return (
+    prev.clients === next.clients &&
+    prev.selectedClients === next.selectedClients
+  );
 });

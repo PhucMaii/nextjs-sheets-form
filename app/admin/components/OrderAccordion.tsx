@@ -31,7 +31,6 @@ import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
 import EditPrice from './Modals/edit/EditPrice';
 import StatusText, { COLOR_TYPE } from './StatusText';
 import { ComponentToPrint } from './Printing/ComponentToPrint';
-import { SubCategory } from '@prisma/client';
 import { ShadowSection } from '../reports/styled';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
@@ -49,7 +48,6 @@ interface PropTypes {
   ) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
-  subcategories: SubCategory[];
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
@@ -66,9 +64,8 @@ const OrderAccordion = ({
   handleUpdatePriceUI,
   handleSelectOrder,
   selectedOrders,
-  subcategories,
   handleUpdateItem,
-  mutateOrders
+  mutateOrders,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -96,16 +93,15 @@ const OrderAccordion = ({
 
   const latestUpdatePerson = useMemo(() => {
     if (!order.createdBy && !order.updatedBy) {
-      return 'Unknown'
+      return 'Unknown';
     }
 
     if (order.updatedBy) {
-      return order.updatedBy
+      return order.updatedBy;
     }
 
-    return order.createdBy
-
-  }, [order])
+    return order.createdBy;
+  }, [order]);
 
   useEffect(() => {
     calculateTotalQuantity();
@@ -129,7 +125,7 @@ const OrderAccordion = ({
         ...order,
         status,
       });
-      
+
       // Optimistic Data Update
       handleUpdateStatusUI(response.data.data);
 
@@ -268,7 +264,6 @@ const OrderAccordion = ({
         order={order}
         handleUpdatePriceUI={handleUpdatePriceUI}
         mutateOrders={mutateOrders}
-        subcategories={subcategories}
       />
       <OrderDetails
         open={isOpenDetails}
@@ -296,7 +291,10 @@ const OrderAccordion = ({
                 <StatusText text={`Replacement by client `} type={'error'} />
               )}
               {order.isVoid && (
-                <StatusText text={`Void by ${order?.updatedBy || 'client'} `} type={'error'} />
+                <StatusText
+                  text={`Void by ${order?.updatedBy || 'client'} `}
+                  type={'error'}
+                />
               )}
             </Box>
           </Grid>

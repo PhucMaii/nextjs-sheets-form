@@ -119,7 +119,7 @@ export default function ReportPage() {
     `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
-  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
+  // const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');
@@ -287,8 +287,8 @@ export default function ReportPage() {
   });
 
   const handleWeeklyPrint = useReactToPrint({
-    content: () => weeklyPrint.current
-  })
+    content: () => weeklyPrint.current,
+  });
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
     e.preventDefault();
@@ -732,7 +732,7 @@ export default function ReportPage() {
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               handleSelectAll={handleSelectAll}
-              subCategories={subCategories?.data || []}
+              // subCategories={subCategories?.data || []}
               mutateOrders={mutateOrders}
             />
           ) : (

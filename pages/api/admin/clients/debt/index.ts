@@ -75,4 +75,4 @@ export const groupOrderByMMYYYY = (orders: Orders[], endMonth: string) => {
     return acc;
   }, {});
   return debtOrdersByMonth;
-}
+};

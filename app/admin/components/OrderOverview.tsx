@@ -21,7 +21,12 @@ interface IProps {
   currentDate: string;
 }
 
-export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWeekOrderData, currentDate }: IProps) {
+export default function OrderOverview({
+  baseOrderData,
+  allRouteOrderData,
+  lastWeekOrderData,
+  currentDate,
+}: IProps) {
   const date = new Date(currentDate);
   const { routes } = useRoutes(days[date.getDay()]);
   const [currentRoute, setCurrentRoute] = useState<number>(0);
@@ -44,26 +49,26 @@ export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWe
 
   const todayTotalGross = useMemo(() => {
     return allRouteOrderData.length > 0
-    ? allRouteOrderData.reduce((acc: number, order: Order) => {
-      if (order.status !== ORDER_STATUS.VOID) {
-        return acc + order.totalPrice;
-      }
+      ? allRouteOrderData.reduce((acc: number, order: Order) => {
+          if (order.status !== ORDER_STATUS.VOID) {
+            return acc + order.totalPrice;
+          }
 
-      return acc;
-      }, 0)
-    : 0;
+          return acc;
+        }, 0)
+      : 0;
   }, [allRouteOrderData]);
 
   const lastWeekTotalGross = useMemo(() => {
     return lastWeekOrderData.length > 0
-    ? lastWeekOrderData.reduce((acc: number, order: Order) => {
-      if (order.status !== ORDER_STATUS.VOID) {
-        return acc + order.totalPrice;
-      }
+      ? lastWeekOrderData.reduce((acc: number, order: Order) => {
+          if (order.status !== ORDER_STATUS.VOID) {
+            return acc + order.totalPrice;
+          }
 
-      return acc;
-      }, 0)
-    : 0;
+          return acc;
+        }, 0)
+      : 0;
   }, [lastWeekOrderData]);
 
   const openBill = useMemo(() => {
@@ -78,11 +83,14 @@ export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWe
   const totalBill = useMemo(() => {
     return openBill.length > 0
       ? openBill.reduce((acc: number, order: Order) => {
-        if (order.status === ORDER_STATUS.INCOMPLETED || order.status === ORDER_STATUS.DELIVERED) {
-          return acc + order.totalPrice;
-        }
+          if (
+            order.status === ORDER_STATUS.INCOMPLETED ||
+            order.status === ORDER_STATUS.DELIVERED
+          ) {
+            return acc + order.totalPrice;
+          }
 
-        return acc;
+          return acc;
         }, 0)
       : 0;
   }, [openBill]);
@@ -152,9 +160,26 @@ export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWe
         rowGap={2}
       >
         {/* Total Gross Section */}
-        <Grid item md={3.9} xs={12} display="flex" flexDirection="column" gap={2} sx={{backgroundColor: primary.lightest, padding: 5, borderRadius: 5}}>
-            <Typography variant='h5'>Total Gross</Typography>
-          <Box display="flex" justifyContent="space-between" gap={4} alignItems="center">
+        <Grid
+          item
+          md={3.9}
+          xs={12}
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          sx={{
+            backgroundColor: primary.lightest,
+            padding: 5,
+            borderRadius: 5,
+          }}
+        >
+          <Typography variant="h5">Total Gross</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            gap={4}
+            alignItems="center"
+          >
             <Box
               display="flex"
               flexDirection="column"
@@ -163,11 +188,7 @@ export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWe
             >
               <Box display="flex" gap={1} alignItems="center">
                 <DateRangeIcon />
-                <Typography
-                  variant="subtitle2"
-                >
-                  Last Week
-                </Typography>
+                <Typography variant="subtitle2">Last Week</Typography>
               </Box>
               <Typography
                 variant="h4"
@@ -185,11 +206,7 @@ export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWe
             >
               <Box display="flex" gap={1} alignItems="center">
                 <TodayIcon />
-                <Typography
-                  variant="subtitle1"
-                >
-                  Today
-                </Typography>
+                <Typography variant="subtitle1">Today</Typography>
               </Box>
               <Typography
                 variant="h4"
@@ -203,105 +220,123 @@ export default function OrderOverview({ baseOrderData, allRouteOrderData, lastWe
         </Grid>
 
         {/* Track Bills Section */}
-        <Grid item xs={12} md={3.9} display="flex" flexDirection="column" gap={2} sx={{backgroundColor: primary.lightest, padding: 5, borderRadius: 5}}>
-            <Typography variant='h5'>Current Bills</Typography>
-            <Box display="flex" justifyContent="space-between" gap={4} alignItems="center">
-              <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-                gap={1.5}
-              >
-                <Box display="flex" gap={1} alignItems="center">
-                  <RequestQuoteIcon />
-                  <Typography
-                    variant="subtitle2"
-                  >
-                    Open Bill
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="h4"
-                  fontWeight="bold"
-                  sx={{ color: `${primaryColor} !important` }}
-                >
-                  {openBill.length}
-                </Typography>
+        <Grid
+          item
+          xs={12}
+          md={3.9}
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          sx={{
+            backgroundColor: primary.lightest,
+            padding: 5,
+            borderRadius: 5,
+          }}
+        >
+          <Typography variant="h5">Current Bills</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            gap={4}
+            alignItems="center"
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <RequestQuoteIcon />
+                <Typography variant="subtitle2">Open Bill</Typography>
               </Box>
-              <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-                gap={1.5}
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
               >
-                <Box display="flex" gap={1} alignItems="center">
-                  <AttachMoneyIcon />
-                  <Typography
-                    variant="subtitle1"
-                  >
-                    Balance Due
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="h4"
-                  fontWeight="bold"
-                  sx={{ color: `${primaryColor} !important` }}
-                >
-                  {totalBill.toFixed(2)}
-                </Typography>
-              </Box>
+                {openBill.length}
+              </Typography>
             </Box>
-          </Grid>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <AttachMoneyIcon />
+                <Typography variant="subtitle1">Balance Due</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {totalBill.toFixed(2)}
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
 
         {/* COD Section */}
-        <Grid item xs={12} md={3.9} display="flex" flexDirection="column" gap={2} sx={{backgroundColor: primary.lightest, padding: 5, borderRadius: 5}}>
-          <Typography variant='h5'>COD</Typography>
-            <Box display="flex" justifyContent="space-between" gap={4} alignItems="center">
-              <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-                gap={1.5}
-              >
-                <Box display="flex" gap={1} alignItems="center">
-                  <CalendarTodayIcon />
-                  <Typography
-                    variant="subtitle1"
-                  >
-                    Bills
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="h4"
-                  fontWeight="bold"
-                  sx={{ color: `${primaryColor} !important` }}
-                >
-                  {codOrders.length}
-                </Typography>
+        <Grid
+          item
+          xs={12}
+          md={3.9}
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          sx={{
+            backgroundColor: primary.lightest,
+            padding: 5,
+            borderRadius: 5,
+          }}
+        >
+          <Typography variant="h5">COD</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            gap={4}
+            alignItems="center"
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <CalendarTodayIcon />
+                <Typography variant="subtitle1">Bills</Typography>
               </Box>
-              <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-                gap={1.5}
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
               >
-                <Box display="flex" gap={1} alignItems="center">
-                  <AttachMoneyIcon />
-                  <Typography
-                    variant="subtitle1"
-                  >
-                    Amount
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="h4"
-                  fontWeight="bold"
-                  sx={{ color: `${primaryColor} !important` }}
-                >
-                  {codBill.toFixed(2)}
-                </Typography>
-              </Box>
+                {codOrders.length}
+              </Typography>
             </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <AttachMoneyIcon />
+                <Typography variant="subtitle1">Amount</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {codBill.toFixed(2)}
+              </Typography>
+            </Box>
+          </Box>
         </Grid>
       </Grid>
     </ShadowSection>

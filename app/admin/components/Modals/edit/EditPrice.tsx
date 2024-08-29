@@ -7,10 +7,8 @@ import {
   Grid,
   IconButton,
   InputLabel,
-  MenuItem,
   Modal,
   OutlinedInput,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -30,7 +28,6 @@ import { Order } from '../../../orders/page';
 import { errorColor } from '@/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../../UpdateChoiceSelection';
-import { SubCategory } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
@@ -42,7 +39,6 @@ interface PropTypes extends ModalProps {
     newItems: any[],
     newTotalPrice: number,
   ) => void;
-  subcategories: SubCategory[];
   mutateOrders: any;
 }
 
@@ -53,7 +49,6 @@ export default function EditPrice({
   setNotification,
   order,
   handleUpdatePriceUI,
-  subcategories,
   mutateOrders,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -68,7 +63,7 @@ export default function EditPrice({
     quantity: 0,
     totalPrice: 0,
   });
-  const [subcategoryId, setSubcategoryId] = useState<number>(0);
+  // const [subcategoryId, setSubcategoryId] = useState<number>(0);
 
   useEffect(() => {
     if (items) {
@@ -100,9 +95,9 @@ export default function EditPrice({
     } else {
       const totalPrice = newItem.quantity * newItem.price;
       const newItemData: any = { ...newItem, totalPrice, name: newItemName };
-      if (subcategoryId > 0) {
-        newItemData.subCategoryId = subcategoryId;
-      }
+      // if (subcategoryId > 0) {
+      //   newItemData.subCategoryId = subcategoryId;
+      // }
       setItemList([...itemList, newItemData]);
       setNewItem({
         name: '',
@@ -112,7 +107,7 @@ export default function EditPrice({
       });
     }
 
-    setSubcategoryId(0);
+    // setSubcategoryId(0);
   };
 
   const calculateNewTotalPrice = () => {
@@ -139,7 +134,7 @@ export default function EditPrice({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.category.id,
-        userSubCategoryId: order.subCategoryId,
+        // userSubCategoryId: order.subCategoryId,
       });
 
       if (response.data.error) {
@@ -205,16 +200,17 @@ export default function EditPrice({
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Edit Price</Typography>
           <Box display="flex" alignItems="center" gap={1}>
-          <Button variant="outlined" onClick={onClose}>Cancel</Button>
-          <LoadingButton
-            variant="contained"
-            loadingIndicator="Saving..."
-            loading={isLoading}
-            onClick={handleUpdatePrice}
-          >
-            Save
-          </LoadingButton>
-
+            <Button variant="outlined" onClick={onClose}>
+              Cancel
+            </Button>
+            <LoadingButton
+              variant="contained"
+              loadingIndicator="Saving..."
+              loading={isLoading}
+              onClick={handleUpdatePrice}
+            >
+              Save
+            </LoadingButton>
           </Box>
         </Box>
         <UpdateChoiceSelection
@@ -265,7 +261,7 @@ export default function EditPrice({
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <FormControl fullWidth>
                 <InputLabel id="subcategory-label">Subcategory</InputLabel>
                 <Select
@@ -287,7 +283,7 @@ export default function EditPrice({
                     })}
                 </Select>
               </FormControl>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12}>
               <Button fullWidth onClick={addNewItem} variant="contained">
                 Add

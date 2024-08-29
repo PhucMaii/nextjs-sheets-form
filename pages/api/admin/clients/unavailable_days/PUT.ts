@@ -33,7 +33,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       startDate,
       endDate,
       userId,
-      updatedRangeId
+      updatedRangeId,
     );
     if (!isRangeValid.isValid) {
       return res.status(400).json({

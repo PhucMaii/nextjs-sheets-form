@@ -107,24 +107,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (body?.createdBy === USER_ROLE.DRIVER) {
       const driverCreate: any = await prisma.driver.findUnique({
         where: {
-          id: Number(session.user.id)
-        }
+          id: Number(session.user.id),
+        },
       });
 
-      createdBy = `Driver - ${driverCreate.name}`
-    } else if (body?.createdBy === USER_ROLE.ADMIN || body?.createdBy === USER_ROLE.CLIENT ) {
+      createdBy = `Driver - ${driverCreate.name}`;
+    } else if (
+      body?.createdBy === USER_ROLE.ADMIN ||
+      body?.createdBy === USER_ROLE.CLIENT
+    ) {
       const userCreate: any = await prisma.user.findUnique({
         where: {
-          id: Number(session.user.id)
-        }
+          id: Number(session.user.id),
+        },
       });
 
       if (userCreate.role === USER_ROLE.ADMIN) {
-        createdBy = `Admin - ${userCreate.clientName}`
+        createdBy = `Admin - ${userCreate.clientName}`;
       }
-      
+
       if (userCreate.role === USER_ROLE.CLIENT) {
-        createdBy = `Client - ${userCreate.clientId}`
+        createdBy = `Client - ${userCreate.clientId}`;
       }
     }
 
@@ -137,7 +140,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalPrice: 0,
         note: body['NOTE'],
         status: ORDER_STATUS.INCOMPLETED,
-        createdBy
+        createdBy,
       },
     });
 
@@ -149,22 +152,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         continue;
       }
 
-      let itemData = await prisma.item.findFirst({
+      const itemData = await prisma.item.findFirst({
         where: {
           name: item,
           categoryId: existingUser.categoryId,
         },
       });
 
-      if (existingUser.subCategoryId && itemData?.subCategoryId) {
-        itemData = await prisma.item.findFirst({
-          where: {
-            name: itemData.name,
-            categoryId: existingUser.categoryId,
-            subCategoryId: existingUser.subCategoryId,
-          },
-        });
-      }
+      // if (existingUser.subCategoryId && itemData?.subCategoryId) {
+      //   itemData = await prisma.item.findFirst({
+      //     where: {
+      //       name: itemData.name,
+      //       categoryId: existingUser.categoryId,
+      //       subCategoryId: existingUser.subCategoryId,
+      //     },
+      //   });
+      // }
 
       if (itemData) {
         totalPrice += itemData.price * body[item];

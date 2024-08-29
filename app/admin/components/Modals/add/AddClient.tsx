@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import AutoCompleteAddress from '../../AutoCompleteAddress';
-import { Category, SubCategory } from '@prisma/client';
+import { Category } from '@prisma/client';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
 import StatusText from '../../StatusText';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
@@ -22,7 +22,7 @@ import ModalHead from '@/app/lib/ModalHead';
 
 interface PropTypes extends ModalProps {
   categories: Category[];
-  subCategories: SubCategory[];
+  // subCategories: SubCategory[];
   setNotification: Dispatch<SetStateAction<Notification>>;
   handleAddClientUI: (newClient: UserType) => void;
   mutateClients: any;
@@ -32,7 +32,7 @@ export default function AddClient({
   open,
   onClose,
   categories,
-  subCategories,
+  // subCategories,
   setNotification,
   handleAddClientUI,
   mutateClients,
@@ -45,8 +45,8 @@ export default function AddClient({
     contactNumber: '',
     categoryId: -1,
     category: { name: '', id: -1 },
-    subCategoryId: -1,
-    subCategory: { name: '', id: -1 },
+    // subCategoryId: -1,
+    // subCategory: { name: '', id: -1 },
     preference: { orderType: '', paymentType: '' },
     role: USER_ROLE.CLIENT,
   });
@@ -57,12 +57,6 @@ export default function AddClient({
         ...newClient,
         category: value,
         categoryId: value.id,
-      });
-    } else if (key === 'subCategory') {
-      setNewClient({
-        ...newClient,
-        subCategory: value,
-        subCategoryId: value.id,
       });
     } else {
       setNewClient({ ...newClient, [key]: value });
@@ -75,7 +69,6 @@ export default function AddClient({
       newClient.clientName.trim() !== '' &&
       newClient.contactNumber.trim() !== '' &&
       newClient.categoryId > 0 &&
-      newClient.subCategoryId > 0 &&
       newClient.preference.orderType !== '' &&
       newClient.preference.paymentType !== '' &&
       Boolean(deliveryAddress?.description)
@@ -95,7 +88,7 @@ export default function AddClient({
     try {
       setIsAdding(true);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { subCategory, category, ...submittedData } = newClient;
+      const { category, ...submittedData } = newClient;
       const response = await axios.post(API_URL.CLIENTS, {
         ...submittedData,
         deliveryAddress: deliveryAddress.description,
@@ -248,7 +241,7 @@ export default function AddClient({
                 </Select>
               </Box>
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Box display="flex" flexDirection="column" gap={1}>
                 <Typography variant="h6">Subcategory:</Typography>
                 <Select
@@ -275,7 +268,7 @@ export default function AddClient({
                     ))}
                 </Select>
               </Box>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12}>
               <Box display="flex" flexDirection="column" gap={1}>
                 <Typography variant="h6">Order Type:</Typography>

@@ -70,13 +70,11 @@ export default async function handler(
       // Find the right route of the schedule order owner
       const clientRoute: any = scheduleOrder.user.routes.find(
         (route: UserRoute) => {
-          const targetRoute = routeListInTargetDay.find(
-            (id: string) => {
-              return route.routeId === Number(id);
-            },
-          );
+          const targetRoute = routeListInTargetDay.find((id: string) => {
+            return route.routeId === Number(id);
+          });
 
-          // if route id is included in target route list, then return route          
+          // if route id is included in target route list, then return route
           if (targetRoute) {
             return route;
           }

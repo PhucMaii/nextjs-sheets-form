@@ -6,7 +6,6 @@ import { BoxModal } from './styled';
 import useDebounce from '@/hooks/useDebounce';
 import OrderAccordion from '../OrderAccordion';
 import { Notification, OrderedItems } from '@/app/utils/type';
-import { SubCategory } from '@prisma/client';
 import ErrorComponent from '../ErrorComponent';
 import { blueGrey } from '@mui/material/colors';
 
@@ -22,7 +21,7 @@ interface IProps extends ModalProps {
   ) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
-  subcategories: SubCategory[];
+  // subcategories: SubCategory[];
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
@@ -41,9 +40,9 @@ export default function SearchModal({
   handleUpdatePriceUI,
   selectedOrders,
   handleSelectOrder,
-  subcategories,
+  // subcategories,
   handleUpdateItem,
-  mutateOrders
+  mutateOrders,
 }: IProps) {
   //   const [currentPage, setCurrentPage] = useState<number>(1);
   const [returnOrders, setReturnOrders] = useState<Order[]>([]);
@@ -117,7 +116,7 @@ export default function SearchModal({
                   handleUpdatePriceUI={handleUpdatePriceUI}
                   selectedOrders={selectedOrders}
                   handleSelectOrder={handleSelectOrder}
-                  subcategories={subcategories || []}
+                  // subcategories={subcategories || []}
                   handleUpdateItem={handleUpdateItem}
                   mutateOrders={mutateOrders}
                 />

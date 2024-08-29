@@ -18,7 +18,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         data: {
           status,
           updatedBy: `Admin - ${adminCreate.clientName}`,
-          updateTime
+          updateTime,
         },
         include: {
           items: true,

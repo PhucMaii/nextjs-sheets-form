@@ -48,7 +48,7 @@ export const ManifestPrint = forwardRef(
     }
 
     return (
-      <div ref={ref} className='print-container'>
+      <div ref={ref} className="print-container">
         <Box sx={{ width: '90%', height: '100%' }}>
           {/* Loop through route */}
           {Object.keys(manifest).length > 0 &&
@@ -91,19 +91,25 @@ export const ManifestPrint = forwardRef(
                 }
 
                 return itemNameList;
-              }
+              };
 
               const items = generateItemNames();
               const sortedItems = sortedItemKeys(items, mainItems);
 
-              const columnWidthPercentage = Math.floor(items.length / 100) * 100 - 1;
+              const columnWidthPercentage =
+                Math.floor(items.length / 100) * 100 - 1;
 
               return (
                 <>
                   <Typography variant="h4" textAlign="center" m={2}>
                     {targetRoute.name}
                   </Typography>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" m={2}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    m={2}
+                  >
                     <Typography variant="h5">
                       Driver: {targetRoute.driver?.name}
                     </Typography>
@@ -125,7 +131,12 @@ export const ManifestPrint = forwardRef(
                               <>
                                 <BorderRightTableCell
                                   align="center"
-                                  sx={{ padding: 2, fontSize: 18, fontWeight: 'bold', width: `${columnWidthPercentage}%` }}
+                                  sx={{
+                                    padding: 2,
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    width: `${columnWidthPercentage}%`,
+                                  }}
                                   key={index}
                                 >
                                   {item}
@@ -141,13 +152,18 @@ export const ManifestPrint = forwardRef(
                           const { summary } = manifest[routeId];
                           let clientName = user.user.clientName
                             .split('-')
-                            .slice(0, 2).join(' - ');
+                            .slice(0, 2)
+                            .join(' - ');
 
-                            console.log(clientName?.split(' - ')[1]);
-                          if (clientName?.split(' - ')[1] == ' C.O.D ' || clientName?.split(' - ')[1] == ' MONTHLY ' || clientName?.split(' - ')[1] == ' W.C.O.D ') {
+                          console.log(clientName?.split(' - ')[1]);
+                          if (
+                            clientName?.split(' - ')[1] == ' C.O.D ' ||
+                            clientName?.split(' - ')[1] == ' MONTHLY ' ||
+                            clientName?.split(' - ')[1] == ' W.C.O.D '
+                          ) {
                             clientName = clientName.split(' - ')[0];
                           }
-                          
+
                           return (
                             <TableRow key={index}>
                               <BorderRightTableCell

@@ -1,5 +1,12 @@
 import { AlertColor } from '@mui/material';
-import { Category, DayRange, Driver, Route, User, UserRoute } from '@prisma/client';
+import {
+  Category,
+  DayRange,
+  Driver,
+  Route,
+  User,
+  UserRoute,
+} from '@prisma/client';
 import { Session } from 'next-auth';
 
 export interface BSData {
@@ -8,9 +15,7 @@ export interface BSData {
   percentage: number;
 }
 
-export interface IDayRange extends DayRange {
-  
-}
+export interface IDayRange extends DayRange {}
 export interface Notification {
   on: boolean;
   type: AlertColor;
@@ -64,8 +69,8 @@ export interface UserType {
   deliveryAddress: string;
   sheetName?: string;
   categoryId?: number;
-  subCategoryId?: number;
-  subCategory?: any;
+  // subCategoryId?: number;
+  // subCategory?: any;
   category?: any;
   preference?: any;
 }
@@ -78,10 +83,10 @@ export interface IItem {
   id: number;
   name: string;
   categoryId: number;
-  subCategoryId?: number | null;
+  // subCategoryId?: number | null;
   price: number;
   quantity?: number;
-  subCategory?: any;
+  // subCategory?: any;
   availability: boolean;
   user?: User;
 }

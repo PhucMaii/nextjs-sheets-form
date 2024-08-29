@@ -101,34 +101,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Get beansprout data
     // Loop through each order, count the quantity of beansprouts if user.subCategoryId = 1 and = 2
-    let BKQuantity = 0;
-    let BKRevenue = 0;
-    let PPQuantity = 0;
-    let PPRevenue = 0;
-    let totalItems = 0;
-    for (const order of sortedThisMonthOrders) {
-      for (const item of order.items) {
-        totalItems += item.quantity;
-        if (!order.user.subCategoryId) {
-          break;
-        }
+    const BKRevenue = 0;
+    const BKQuantity = 0;
+    const PPQuantity = 0;
+    const PPRevenue = 0;
+    const totalItems = 0;
+    // for (const order of sortedThisMonthOrders) {
+    //   for (const item of order.items) {
+    //     totalItems += item.quantity;
+    //     if (!order.user.subCategoryId) {
+    //       break;
+    //     }
 
-        if (order.user.subCategoryId === 1) {
-          if (item.name.includes('BEAN')) {
-            const totalPrice =
-              Math.round(item.price * item.quantity * 100) / 100;
-            BKQuantity += item.quantity;
-            BKRevenue += totalPrice;
-          }
-        }
+    //     if (order.user.subCategoryId === 1) {
+    //       if (item.name.includes('BEAN')) {
+    //         const totalPrice =
+    //           Math.round(item.price * item.quantity * 100) / 100;
+    //         BKQuantity += item.quantity;
+    //         BKRevenue += totalPrice;
+    //       }
+    //     }
 
-        if (order.user.subCategoryId === 2) {
-          const totalPrice = Math.round(item.price * item.quantity * 100) / 100;
-          PPQuantity += item.quantity;
-          PPRevenue += totalPrice;
-        }
-      }
-    }
+    //     if (order.user.subCategoryId === 2) {
+    //       const totalPrice = Math.round(item.price * item.quantity * 100) / 100;
+    //       PPQuantity += item.quantity;
+    //       PPRevenue += totalPrice;
+    //     }
+    //   }
+    // }
 
     const BKPercentage = (BKRevenue / revenue) * 100;
     const PPPercentage = (PPRevenue / revenue) * 100;
@@ -144,7 +144,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let debtFetchSkip = 0;
     const trueCondition = true;
 
-    while(trueCondition) {
+    while (trueCondition) {
       const fetchedDebtOrders: any = await prisma.orders.findMany({
         where: {
           status: {
