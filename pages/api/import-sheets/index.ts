@@ -56,13 +56,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
       for (const dayRange of existingUser.unavailableDayRange) {
         const startDate = new Date(dayRange.startDate);
+        startDate.setHours(0, 0, 0, 0);
         const endDate = new Date(dayRange.endDate);
+        endDate.setHours(23, 59, 59, 99);
+        console.log({deliveryDate, startDate, endDate, 'deliveryDate >= startDate': deliveryDate >= startDate, 'deliveryDate <= endDate': deliveryDate <= endDate});
 
         if (
           deliveryDate >= startDate &&
           deliveryDate <= endDate
         ) {
-          return res.status(200).json({
+          return res.status(400).json({
             warning: `Client ${
               existingUser.clientName
             } has request time off from ${dayRange.startDate.toDateString()} to ${dayRange.endDate.toDateString()}`,
@@ -83,7 +86,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     if (userOrder) {
-      return res.status(200).json({
+      return res.status(400).json({
         warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
         data: userOrder,
         flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
