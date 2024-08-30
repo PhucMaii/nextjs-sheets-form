@@ -31,11 +31,7 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
         };
 
         return (
-          <Page
-            size={{ width: pageWidth }}
-            style={styles.page}
-            key={index}
-          >
+          <Page size={{ width: pageWidth }} style={styles.page} key={index}>
             {order.isReplacement && (
               <Text style={styles.h2}>REPLACEMENT ORDER</Text>
             )}
@@ -93,27 +89,32 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
                 if (item.quantity === 0) {
                   return null;
                 }
-                
+
                 return (
-                <View key={item.id} style={styles.tableRow}>
-                  <View style={styles.tableColNoBorder}>
-                    <Text style={{ margin: 5, fontSize: 8 }}>{item.name}</Text>
+                  <View key={item.id} style={styles.tableRow}>
+                    <View style={styles.tableColNoBorder}>
+                      <Text style={{ margin: 5, fontSize: 8 }}>
+                        {item.name}
+                      </Text>
+                    </View>
+                    <View style={styles.tableColNoBorder}>
+                      <Text style={{ margin: 5, fontSize: 8 }}>
+                        {item.quantity}
+                      </Text>
+                    </View>
+                    <View style={styles.tableColNoBorder}>
+                      <Text style={{ margin: 5, fontSize: 8 }}>
+                        {item.price}
+                      </Text>
+                    </View>
+                    <View style={styles.tableColNoBorder}>
+                      <Text style={{ margin: 5, fontSize: 8 }}>
+                        {item.totalPrice?.toFixed(2)}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.tableColNoBorder}>
-                    <Text style={{ margin: 5, fontSize: 8 }}>
-                      {item.quantity}
-                    </Text>
-                  </View>
-                  <View style={styles.tableColNoBorder}>
-                    <Text style={{ margin: 5, fontSize: 8 }}>{item.price}</Text>
-                  </View>
-                  <View style={styles.tableColNoBorder}>
-                    <Text style={{ margin: 5, fontSize: 8 }}>
-                      {item.totalPrice?.toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-              )})}
+                );
+              })}
             </View>
             <View style={styles.flex_between}>
               <Text style={styles.subtitle}>Total:</Text>

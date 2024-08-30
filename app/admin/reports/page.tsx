@@ -287,8 +287,8 @@ export default function ReportPage() {
   });
 
   const handleWeeklyPrint = useReactToPrint({
-    content: () => weeklyPrint.current
-  })
+    content: () => weeklyPrint.current,
+  });
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
     e.preventDefault();

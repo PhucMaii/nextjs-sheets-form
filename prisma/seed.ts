@@ -12,45 +12,45 @@ async function main() {
   await prisma.item.updateMany({
     where: {
       name: {
-        in: ['BEAN 10LB', 'BEAN-10LB', 'BEANS 10LBS', 'BEANS 10 LB', ]
-      }
+        in: ['BEAN 10LB', 'BEAN-10LB', 'BEANS 10LBS', 'BEANS 10 LB'],
+      },
     },
     data: {
-      name: 'BEAN 10 LB'
-    }
-  })
+      name: 'BEAN 10 LB',
+    },
+  });
 
   // Soya 5 LB
   await prisma.item.updateMany({
     where: {
       name: {
-        in: ['BEANSPROUTS 24 x 1 LB', 'BEAN 24X1']
-      }
+        in: ['BEANSPROUTS 24 x 1 LB', 'BEAN 24X1'],
+      },
     },
     data: {
-      name: 'BEAN 24X1 LB'
-    }
+      name: 'BEAN 24X1 LB',
+    },
   });
 
   // Soya 24X1 LB
   await prisma.item.updateMany({
     where: {
       name: {
-        in: ['BEANSPROUTS 5 X 1 LB']
-      }
+        in: ['BEANSPROUTS 5 X 1 LB'],
+      },
     },
     data: {
-      name: 'BEAN 5X1 LB'
-    }
+      name: 'BEAN 5X1 LB',
+    },
   });
 
   await prisma.item.updateMany({
     where: {
-      name: 'BEANSPROUTS 10 X 8 OZ'
+      name: 'BEANSPROUTS 10 X 8 OZ',
     },
     data: {
-      name: 'BEAN 10X8 OZ'
-    }
+      name: 'BEAN 10X8 OZ',
+    },
   });
 }
 

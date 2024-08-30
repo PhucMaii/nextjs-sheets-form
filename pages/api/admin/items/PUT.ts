@@ -4,14 +4,17 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   updatedItem: Item;
-  updateOption: UPDATE_OPTION
+  updateOption: UPDATE_OPTION;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { updatedItem, updateOption = UPDATE_OPTION.CURRENT_CATEGORY }: IBody = req.body;
+    const {
+      updatedItem,
+      updateOption = UPDATE_OPTION.CURRENT_CATEGORY,
+    }: IBody = req.body;
 
     if (
       !updatedItem.id ||
@@ -109,22 +112,26 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
       await prisma.item.updateMany({
         where: {
-          name: existingItem.name
+          name: existingItem.name,
         },
         data: {
           price: updatedItem.price,
           name: updatedItem.name,
-        }
-      })
+        },
+      });
     }
 
     // Update schedule order items
-    const responseUpdate = await updateAllScheduleOrderItems(existingItem, updatedItem, updateOption);
+    const responseUpdate = await updateAllScheduleOrderItems(
+      existingItem,
+      updatedItem,
+      updateOption,
+    );
 
     if (!responseUpdate.ok) {
       return res.status(500).json({
-        error: responseUpdate.error
-      })
+        error: responseUpdate.error,
+      });
     }
 
     return res.status(200).json({
@@ -142,7 +149,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 const updateAllScheduleOrderItems = async (
   oldItem: any,
   updatedItem: any,
-  updateOption: UPDATE_OPTION
+  updateOption: UPDATE_OPTION,
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -152,17 +159,17 @@ const updateAllScheduleOrderItems = async (
       await prisma.orderedItems.updateMany({
         where: {
           scheduledOrderId: {
-            not: null
+            not: null,
           },
-          name: oldItem.name 
+          name: oldItem.name,
         },
         data: {
           name: updatedItem.name,
-          price: updatedItem.price
-        }
+          price: updatedItem.price,
+        },
       });
 
-      return {ok: true}
+      return { ok: true };
     }
 
     // Find all users that has same categoryId
@@ -193,12 +200,12 @@ const updateAllScheduleOrderItems = async (
       }
     }
 
-    return { ok: true}
+    return { ok: true };
   } catch (error: any) {
     console.log(
       'Internal Server Error from update schedule order items: ',
       error,
     );
-    return {ok: false, error};
+    return { ok: false, error };
   }
 };

@@ -157,7 +157,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
-    await updateOrderTotalPrice(orderId, orderTotalPrice, `Admin - ${adminUpdate.clientName}`);
+    await updateOrderTotalPrice(
+      orderId,
+      orderTotalPrice,
+      `Admin - ${adminUpdate.clientName}`,
+    );
 
     // First case: No update neither create new category
     if (updateOption === UpdateOption.NONE || !updateOption) {
@@ -408,7 +412,7 @@ export const updateOrderTotalPrice = async (
       data: {
         totalPrice: newTotalPrice,
         updatedBy,
-        updateTime
+        updateTime,
       },
     });
   } catch (error: any) {

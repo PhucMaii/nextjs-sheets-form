@@ -47,7 +47,7 @@ export enum PAYMENT_TYPE {
 export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',
-  DRIVER = 'driver'
+  DRIVER = 'driver',
 }
 
 export enum FLAG_ORDER_TYPE {

@@ -46,7 +46,7 @@ export default function EditScheduleOrder({
   handleDeleteOrderUI,
   routes,
   routeId,
-  mutateOrders
+  mutateOrders,
 }: IProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<OrderedItems>({

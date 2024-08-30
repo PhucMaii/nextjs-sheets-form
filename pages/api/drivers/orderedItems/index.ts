@@ -46,7 +46,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Get driver update info
     const driverUpdate: any = await getDriverInfo(req, res);
 
-    await updateOrderTotalPrice(orderId, orderTotalPrice, `Driver - ${driverUpdate.name}`);
+    await updateOrderTotalPrice(
+      orderId,
+      orderTotalPrice,
+      `Driver - ${driverUpdate.name}`,
+    );
 
     return res.status(200).json({
       data,

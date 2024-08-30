@@ -35,5 +35,5 @@ export const SWRFetchData = (api: string) => {
     refreshInterval: 1000,
   });
 
-  return [ data, mutate, isValidating ];
+  return [data, mutate, isValidating];
 };

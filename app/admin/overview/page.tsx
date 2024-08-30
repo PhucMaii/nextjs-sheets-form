@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -21,12 +22,11 @@ import DebtCustomers from '../components/Printing/DebtCustomers';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 
-
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -34,14 +34,14 @@ export default function Overview() {
   });
   const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
-  
+
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();
 
   // Data Fetching
-  const [ overview ] = SWRFetchData(
+  const [overview, mutateOverview, isValidating] = SWRFetchData(
     `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
@@ -52,47 +52,35 @@ export default function Overview() {
     }
   }, [overview, dateRange]);
 
+
+  // Handle loading
+  useEffect(() => {
+    if (!overview && isValidating) {
+      setIsFetching(true);
+    } else {
+      setIsFetching(false)
+    }
+  }, [dateRange, overview])
+
   const initializeOverviewData = () => {
     const overviewFetchedData = overview.data;
     setOverviewData(overviewFetchedData.overviewData);
     setRevenueData(overviewFetchedData.reports);
     setBeansproutsData(overviewFetchedData.beansprouts);
     setCustomersInDebt(overviewFetchedData.customersInDebt);
-    setIsFetching(false);
   };
 
   const handlePrintCustomersInDebt = useReactToPrint({
-    content: () => printDetbCustomersRef.current
-  })
-
-  // const fetchOverviewData = async () => {
-  //   try {
-  //     setIsFetching(true);
-  //     const returnData = await fetchData(
-  //       `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-  //       setNotification,
-  //     );
-
-  //     setOverviewData(returnData.overviewData);
-  //     setRevenueData(returnData.reports);
-  //     setBeansproutsData(returnData.beansprouts);
-  //     setCustomersInDebt(returnData.customersInDebt);
-  //     setIsFetching(false);
-  //   } catch (error: any) {
-  //     console.log('There was an error: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: error.response.data.error,
-  //     });
-  //     setIsFetching(false);
-  //   }
-  // };
+    content: () => printDetbCustomersRef.current,
+  });
 
   return (
     <Sidebar>
       <div style={{ display: 'none' }}>
-        <DebtCustomers debtCustomers={customersInDebt} ref={printDetbCustomersRef} />
+        <DebtCustomers
+          debtCustomers={customersInDebt}
+          ref={printDetbCustomersRef}
+        />
       </div>
       <LoadingModal open={isFetching} />
       <NotificationPopup
@@ -179,7 +167,11 @@ export default function Overview() {
           <ManifestTable manifest={overviewData?.manifest || null} />
         </Grid>
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="h5" fontWeight="bold" sx={{ my: 2 }}>
               Customers in debt
             </Typography>

@@ -54,7 +54,9 @@ export default function ItemPage() {
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories?.data[0],
   );
-  const [itemsResponse, mutateItems] = SWRFetchData(currentCategory ? `${API_URL.ITEM}?categoryId=${currentCategory?.id}` : '');
+  const [itemsResponse, mutateItems] = SWRFetchData(
+    currentCategory ? `${API_URL.ITEM}?categoryId=${currentCategory?.id}` : '',
+  );
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
@@ -121,7 +123,7 @@ export default function ItemPage() {
     setItems(itemsResponse?.data);
     setBaseItems(itemsResponse?.data);
     setIsFetching(false);
-  }
+  };
 
   const handleAddItem = async (newItem: IItem) => {
     try {
@@ -286,11 +288,14 @@ export default function ItemPage() {
     }
   };
 
-  const handleUpdateItem = async (updatedItem: IItem, updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY) => {
+  const handleUpdateItem = async (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
+  ) => {
     try {
       const response = await axios.put(API_URL.ITEM, {
         updatedItem,
-        updateOption
+        updateOption,
       });
 
       if (response.data.error) {
@@ -307,7 +312,7 @@ export default function ItemPage() {
 
       // Update Real Data
       mutateItems();
-      
+
       setNotification({
         on: true,
         type: 'success',

@@ -11,9 +11,9 @@ interface IProps extends ModalProps {
 }
 
 export default function DateRange({
-    open,
-    onClose,
-    dateRange,
+  open,
+  onClose,
+  dateRange,
   setDateRange,
 }: IProps) {
   const [isDateFullySelected, setIsDateFullySelected] =
@@ -32,7 +32,7 @@ export default function DateRange({
   // Handle if user have selected both start date and end date
   useEffect(() => {
     if (isDateFullySelected) {
-    //   setShowDatePicker(false);
+      //   setShowDatePicker(false);
       setIsDateFullySelected(false);
     }
   }, [isDateFullySelected]);
@@ -44,16 +44,16 @@ export default function DateRange({
   };
 
   return (
-      <Dialog open={open} onClose={onClose}>
-        <DialogContent>
-          <Calendar
-            goToRangeStartOnSelect
-            allowPartialRange
-            selectRange
-            onChange={(range) => handleOnChange(range)}
-            value={dateRange}
-          />
-        </DialogContent>
-      </Dialog>
+    <Dialog open={open} onClose={onClose}>
+      <DialogContent>
+        <Calendar
+          goToRangeStartOnSelect
+          allowPartialRange
+          selectRange
+          onChange={(range) => handleOnChange(range)}
+          value={dateRange}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

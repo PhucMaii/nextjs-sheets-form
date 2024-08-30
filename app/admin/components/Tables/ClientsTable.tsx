@@ -256,5 +256,8 @@ const ClientsTable = ({
 };
 
 export default memo(ClientsTable, (prev, next) => {
-  return (prev.clients === next.clients && prev.selectedClients === next.selectedClients);
+  return (
+    prev.clients === next.clients &&
+    prev.selectedClients === next.selectedClients
+  );
 });

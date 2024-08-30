@@ -20,12 +20,15 @@ import { SubCategory } from '@prisma/client';
 interface IProps {
   targetItem: IItem;
   subCategories: SubCategory[];
-  handleUpdateItem: (updatedItem: IItem, updateOption: UPDATE_OPTION) => Promise<void>;
+  handleUpdateItem: (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION,
+  ) => Promise<void>;
 }
 
 export enum UPDATE_OPTION {
   CURRENT_CATEGORY = 'current category',
-  ALL_ITEMS_SAME_NAME = 'all items same name'
+  ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
 export default function EditItem({
@@ -36,7 +39,9 @@ export default function EditItem({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
-  const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(UPDATE_OPTION.CURRENT_CATEGORY);
+  const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(
+    UPDATE_OPTION.CURRENT_CATEGORY,
+  );
 
   useEffect(() => {
     if (Object.keys(targetItem).length > 0) {

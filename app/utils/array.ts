@@ -40,7 +40,10 @@ export const insertInSortedIdArray = (array: any[], newElement: any) => {
 //   return [...sortedMainKeys, ...otherKeys];
 // };
 
-export const sortedItemKeys = (listToSort: string[], basedSortArray: string[]) => {
+export const sortedItemKeys = (
+  listToSort: string[],
+  basedSortArray: string[],
+) => {
   return listToSort.sort((a, b) => {
     // Get the index of the current elements in the basedSortArray
     const indexA = basedSortArray.indexOf(a);
@@ -57,5 +60,5 @@ export const sortedItemKeys = (listToSort: string[], basedSortArray: string[]) =
 
     // If neither element is in the basedSortArray, sort them alphabetically
     return a.localeCompare(b);
-  })};
-
+  });
+};

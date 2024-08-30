@@ -40,7 +40,7 @@ export default function EditDeliveryDate({
   isPreOrder,
   scheduleOrderList,
   progress,
-  mutateOrders
+  mutateOrders,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {

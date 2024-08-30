@@ -60,7 +60,12 @@ export const SummaryManifest = forwardRef(
                   <Typography variant="h4" textAlign="center" m={2}>
                     {targetRoute.name}
                   </Typography>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" m={2}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    m={2}
+                  >
                     <Typography variant="h5" m={2}>
                       Driver: {targetRoute.driver?.name}
                     </Typography>
