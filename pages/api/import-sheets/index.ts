@@ -8,6 +8,7 @@ import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
 import { convertDeliveryDateStringToDate } from '../utils/date';
+import withAuthGuard from '../utils/withAuthGuard';
 
 interface RequestQuery {
   userId?: string;
@@ -50,16 +51,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Check is delivery date in client's vacation range
-
     if (isCheckUnavailableRange) {
       const deliveryDate = convertDeliveryDateStringToDate(
         body['DELIVERY DATE'],
       );
       for (const dayRange of existingUser.unavailableDayRange) {
-        if (
-          deliveryDate >= dayRange.startDate &&
-          deliveryDate <= dayRange.endDate
-        ) {
+        const startDate = new Date(dayRange.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(dayRange.endDate);
+        endDate.setDate(endDate.getDate() - 1);
+
+        if (deliveryDate >= startDate && deliveryDate <= endDate) {
           return res.status(200).json({
             warning: `Client ${
               existingUser.clientName
@@ -243,7 +245,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default withAuthGuard(handler);
 
 export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
   const prisma = new PrismaClient();

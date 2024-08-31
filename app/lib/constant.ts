@@ -14,6 +14,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import PendingIcon from '@mui/icons-material/Pending';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import BlockIcon from '@mui/icons-material/Block';
+import AppBlockingIcon from '@mui/icons-material/AppBlocking';
 import {
   errorColor,
   infoColor,
@@ -160,6 +161,11 @@ export const driverTabs = [
     name: 'Order',
     icon: AddBoxIcon,
     path: '/driver/place-order',
+  },
+  {
+    name: 'Blocking',
+    icon: AppBlockingIcon,
+    path: '/driver/blocking',
   },
   // {
   //   name: 'Message',

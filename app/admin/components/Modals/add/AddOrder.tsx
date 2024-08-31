@@ -219,7 +219,7 @@ export default function AddOrder({
       setNotification({
         on: true,
         type: 'error',
-        message: error.response.data.error,
+        message: 'There was an error: ' + error.response.data.error,
       });
       setIsButtonLoading(false);
     }

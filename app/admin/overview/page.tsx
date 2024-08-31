@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -25,7 +26,7 @@ export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -40,7 +41,7 @@ export default function Overview() {
   const printDetbCustomersRef: any = useRef();
 
   // Data Fetching
-  const [overview] = SWRFetchData(
+  const [overview, mutateOverview, isValidating] = SWRFetchData(
     `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
@@ -51,42 +52,27 @@ export default function Overview() {
     }
   }, [overview, dateRange]);
 
+
+  // Handle loading
+  useEffect(() => {
+    if (!overview && isValidating) {
+      setIsFetching(true);
+    } else {
+      setIsFetching(false)
+    }
+  }, [dateRange, overview])
+
   const initializeOverviewData = () => {
     const overviewFetchedData = overview.data;
     setOverviewData(overviewFetchedData.overviewData);
     setRevenueData(overviewFetchedData.reports);
     setBeansproutsData(overviewFetchedData.beansprouts);
     setCustomersInDebt(overviewFetchedData.customersInDebt);
-    setIsFetching(false);
   };
 
   const handlePrintCustomersInDebt = useReactToPrint({
     content: () => printDetbCustomersRef.current,
   });
-
-  // const fetchOverviewData = async () => {
-  //   try {
-  //     setIsFetching(true);
-  //     const returnData = await fetchData(
-  //       `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-  //       setNotification,
-  //     );
-
-  //     setOverviewData(returnData.overviewData);
-  //     setRevenueData(returnData.reports);
-  //     setBeansproutsData(returnData.beansprouts);
-  //     setCustomersInDebt(returnData.customersInDebt);
-  //     setIsFetching(false);
-  //   } catch (error: any) {
-  //     console.log('There was an error: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: error.response.data.error,
-  //     });
-  //     setIsFetching(false);
-  //   }
-  // };
 
   return (
     <Sidebar>

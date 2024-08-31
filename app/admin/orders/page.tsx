@@ -310,7 +310,8 @@ export default function Orders() {
       setNotification({
         on: true,
         type: 'error',
-        message: error.response.data.error,
+        message:
+          'There was an error creating order: ' + error.response.data.error,
       });
       return;
     }

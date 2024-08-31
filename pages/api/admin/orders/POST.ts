@@ -1,4 +1,4 @@
-import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateCurrentTime } from '@/app/utils/time';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -38,21 +38,21 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         deliveryDate,
       );
 
-      let createdBy: any = '';
-      if (existingOrder?.updatedBy) {
-        createdBy = existingOrder.updatedBy
-          .split(' - ')[0]
-          .toLowerCase()
-          .trim();
-      } else if (existingOrder?.createdBy) {
-        createdBy = existingOrder?.createdBy
-          .split(' - ')[0]
-          .toLowerCase()
-          .trim();
-      }
-      console.log({ existingOrder, createdBy }, 'existingOrder');
+      // let createdBy: any = '';
+      // if (existingOrder?.updatedBy) {
+      //   createdBy = existingOrder.updatedBy
+      //     .split(' - ')[0]
+      //     .toLowerCase()
+      //     .trim();
+      // } else if (existingOrder?.createdBy) {
+      //   createdBy = existingOrder?.createdBy
+      //     .split(' - ')[0]
+      //     .toLowerCase()
+      //     .trim();
+      // }
+      // console.log({ existingOrder, createdBy }, 'existingOrder');
 
-      if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
+      if (existingOrder) {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
@@ -74,7 +74,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         convertDeliveryDateStringToDate(deliveryDate);
       for (const unavailableRange of unavailableRanges) {
         const startDate = new Date(unavailableRange.startDate);
+        startDate.setHours(0, 0, 0, 0);
         const endDate = new Date(unavailableRange.endDate);
+        endDate.setDate(endDate.getDate() - 1);
 
         if (
           deliveryDateTypeDate >= startDate &&
@@ -97,16 +99,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
       // Get person create info
       const adminCreate: any = await getUserInfo(req, res);
-
-      // If admin override order of admin create
-      if (createdBy === USER_ROLE.ADMIN) {
-        // Delete old order and create new order
-        await prisma.orders.delete({
-          where: {
-            id: existingOrder?.id,
-          },
-        });
-      }
 
       const newOrder: any = await createOrder(
         scheduleOrder.user,

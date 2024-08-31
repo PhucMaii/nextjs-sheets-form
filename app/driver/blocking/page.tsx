@@ -1,58 +1,55 @@
-import {
-  Box,
-  Divider,
-  Grid,
-  Modal,
-  TextField,
-  Typography,
-} from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { ModalProps } from './type';
-import { BoxModal } from './styled';
-import DateRange from './DateRangeModal';
-import { generateMonthRange } from '@/app/utils/time';
-import AddIcon from '@mui/icons-material/Add';
+'use client';
+import React, { useEffect, useState } from 'react';
+import Sidebar from '../components/Sidebar';
+import { ShadowSection } from '@/app/admin/reports/styled';
+import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
 import { SWRFetchData } from '@/app/utils/db';
-// import { API_URL } from '@/app/utils/enum';
+import { API_URL } from '@/app/utils/enum';
 import { IDayRange, Notification, UserType } from '@/app/utils/type';
-import ErrorComponent from '../ErrorComponent';
-import axios from 'axios';
+import { generateMonthRange } from '@/app/utils/time';
 import { LoadingButton } from '@mui/lab';
-import DayRange from '../DayRange';
-
-interface IProps extends ModalProps {
-  currentUser: UserType;
-  setNotification: Dispatch<SetStateAction<Notification>>;
-}
+import AddIcon from '@mui/icons-material/Add';
+import DateRange from '@/app/admin/components/Modals/DateRangeModal';
+import axios from 'axios';
+import NotificationPopup from '@/app/admin/components/Notification';
+import DayRange from '@/app/admin/components/DayRange';
+import ErrorComponent from '@/app/admin/components/ErrorComponent';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 const apiURL = `/api/unavailable_days`;
-export default function UnavailableRange({
-  open,
-  onClose,
-  currentUser,
-  setNotification,
-}: IProps) {
+export default function BlockingPage() {
+  const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
   );
+  const [notification, setNotification] = useState<Notification>({
+    on: false,
+    type: 'info',
+    message: '',
+  });
+  const [updatedDateRange, setUpdatedDateRange] = useState<any>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
   const [targetRangeId, setTargetRangeId] = useState<number | null>(null);
-  const [updatedDateRange, setUpdatedDateRange] = useState<any>(null);
 
-  const [unavailableRanges, mutateRange] = SWRFetchData(
-    `${apiURL}?userId=${currentUser.id}`,
+  // Data Fetching
+  const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
+  const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
+    `${apiURL}?userId=${selectedClient?.id}`,
   );
 
   useEffect(() => {
-    if (!isEditing) {
-      setIsSaving(false);
+    if (selectedClient && isValidating) {
+        setIsFetching(true);
+    } else if(unavailableRanges) {
+        setIsFetching(false);
     }
-  }, [isEditing]);
-
+  }, [selectedClient, unavailableRanges]);
+  
   const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
     setTargetRangeId(updatedRange.id);
@@ -71,14 +68,26 @@ export default function UnavailableRange({
       });
       return;
     }
+
+    if (!selectedClient) {
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Please select a client.',
+      });
+      return;
+    }
     try {
       setIsAdding(true);
 
-      const response = await axios.post(apiURL, {
-        startDate: newDateRange[0],
-        endDate: newDateRange[1],
-        userId: currentUser.id,
-      });
+      const response = await axios.post(
+        apiURL,
+        {
+          startDate: newDateRange[0],
+          endDate: newDateRange[1],
+          userId: selectedClient?.id,
+        },
+      );
 
       if (response.data.error) {
         setNotification({
@@ -143,20 +152,28 @@ export default function UnavailableRange({
         on: true,
         type: 'error',
         message: 'There was an error: ' + error.response.data.error,
-      });
+      }); 
       setTargetRangeId(null);
       setIsDeleting(false);
     }
   };
 
   const handleEditRange = async (updatedRange: IDayRange) => {
+    if (!selectedClient) {
+        setNotification({
+            on: true,
+            type: 'error',
+            message: 'Please select a client'
+        })
+        return;
+    }
     setIsSaving(true);
     try {
       const response = await axios.put(apiURL, {
         updatedRangeId: updatedRange.id,
         startDate: updatedDateRange[0],
         endDate: updatedDateRange[1],
-        userId: currentUser.id,
+        userId: selectedClient?.id,
       });
 
       if (response.data.error) {
@@ -166,6 +183,7 @@ export default function UnavailableRange({
           message: response.data.error,
         });
         setIsEditing(false);
+        setIsSaving(false);
         setTargetRangeId(null);
         setUpdatedDateRange(null);
         return;
@@ -179,9 +197,9 @@ export default function UnavailableRange({
         message: response.data.message,
       });
       setIsEditing(false);
+      setIsSaving(false);
       setTargetRangeId(null);
       setUpdatedDateRange(null);
-      setIsSaving(false);
     } catch (error: any) {
       console.log('There was an error: ' + error);
       setNotification({
@@ -196,61 +214,77 @@ export default function UnavailableRange({
   };
 
   return (
-    <>
+    <Sidebar>
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
       <DateRange
         open={isSelectRangeOpen}
         onClose={() => setIsSelectRangeOpen(false)}
         dateRange={isEditing ? updatedDateRange : newDateRange}
         setDateRange={isEditing ? setUpdatedDateRange : setNewDateRange}
       />
-      <Modal open={open} onClose={onClose}>
-        <BoxModal
-          display="flex"
-          flexDirection="column"
-          gap={2}
-          overflow="auto"
-          maxHeight="80vh"
-        >
-          <Typography variant="h4">Set Unavailable Days</Typography>
-          <Divider />
-
-          {/* Add Date Range */}
-          <Typography variant="subtitle1">Add Range:</Typography>
-          <Grid container alignItems="center" gap={1}>
-            <Grid item xs={5}>
-              <TextField
-                fullWidth
-                label="From"
-                value={newDateRange ? newDateRange[0]?.toDateString() : ''}
-                onClick={() => setIsSelectRangeOpen(true)}
-              />
-            </Grid>
-            <Grid item xs={5} textAlign="right">
-              <TextField
-                fullWidth
-                label="To"
-                value={newDateRange ? newDateRange[1]?.toDateString() : ''}
-                onClick={() => setIsSelectRangeOpen(true)}
-              />
-            </Grid>
-            <Grid item xs={1} textAlign="center">
-              <LoadingButton
-                loading={isAdding}
-                loadingIndicator="Adding..."
-                onClick={handleAddRange}
-              >
-                <Box display="flex" alignItems="center" gap={1}>
-                  <AddIcon />
-                  <Typography variant="subtitle1">Add</Typography>
-                </Box>
-              </LoadingButton>
-            </Grid>
+      <Typography variant="h4" textAlign="center">
+        Set Unavailable Days
+      </Typography>
+      <ShadowSection
+        display="flex"
+        flexDirection="column"
+        gap={1}
+        justifyContent="center"
+        my={2}
+      >
+        <Typography variant="h6">Client</Typography>
+        <Autocomplete
+          options={clientList ? clientList.data : []}
+          getOptionLabel={(option) => {
+            return `${option.clientName} - ${option.clientId}`;
+          }}
+          renderInput={(params) => <TextField {...params} />}
+          value={selectedClient}
+          onChange={(e, newValue) => setSelectedClient(newValue)}
+          sx={{ width: 'auto' }}
+        />
+      </ShadowSection>
+      <ShadowSection>
+        <Typography variant="subtitle1">Add Range:</Typography>
+        <Grid container alignItems="center" gap={1} mt={2} mb={4}>
+          <Grid item xs={5}>
+            <TextField
+              fullWidth
+              label="From"
+              value={newDateRange ? newDateRange[0]?.toDateString() : ''}
+              onClick={() => setIsSelectRangeOpen(true)}
+            />
           </Grid>
-          <Divider />
+          <Grid item xs={5} textAlign="right">
+            <TextField
+              fullWidth
+              label="To"
+              value={newDateRange ? newDateRange[1]?.toDateString() : ''}
+              onClick={() => setIsSelectRangeOpen(true)}
+            />
+          </Grid>
+          <Grid item xs={1} textAlign="center">
+            <LoadingButton
+              loading={isAdding}
+              loadingIndicator="Adding..."
+              onClick={handleAddRange}
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <AddIcon />
+                <Typography variant="subtitle1">Add</Typography>
+              </Box>
+            </LoadingButton>
+          </Grid>
+        </Grid>
 
-          {/* Display Unavailable Range */}
-          <Typography variant="subtitle1">Unavailable Range:</Typography>
-          {unavailableRanges && unavailableRanges?.data.length > 0 ? (
+        <Typography variant="subtitle1">Unavailable Ranges:</Typography>
+        <Box display="flex" flexDirection="column" gap={2} mt={2}>
+          { isFetching ? (
+            <LoadingComponent />
+          ) : unavailableRanges && unavailableRanges?.data.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {
               return (
                 <DayRange
@@ -271,8 +305,8 @@ export default function UnavailableRange({
           ) : (
             <ErrorComponent errorText="No Unavailable Range Found" />
           )}
-        </BoxModal>
-      </Modal>
-    </>
+        </Box>
+      </ShadowSection>
+    </Sidebar>
   );
 }
