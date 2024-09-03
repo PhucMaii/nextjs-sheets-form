@@ -111,9 +111,6 @@ const ClientsTable = ({
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Category</Typography>
         </TableCell>
-        {/* <TableCell variant="head" style={{ width: 120 }}>
-          <Typography fontWeight="bold">Subcategory</Typography>
-        </TableCell> */}
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Contact Number</Typography>
         </TableCell>
@@ -177,24 +174,6 @@ const ClientsTable = ({
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
         <TableCell>{client.category.name}</TableCell>
-        {/* <TableCell>
-          <Select
-            value={client.subCategoryId || 'N/A'}
-            onChange={(e) => {
-              handleUpdateClient(client.id, { subCategoryId: +e.target.value });
-            }}
-          >
-            <MenuItem value={'N/A'}>N/A</MenuItem>
-            {subCategories &&
-              subCategories.map((subCategory: SubCategory, index: number) => {
-                return (
-                  <MenuItem value={subCategory.id} key={index}>
-                    {subCategory.name}
-                  </MenuItem>
-                );
-              })}
-          </Select>
-        </TableCell> */}
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
         <TableCell>

@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
-import {
-  Item,
-  OrderedItems,
-  PrismaClient,
-  User,
-  UserPreference,
-} from '@prisma/client';
+import { ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
+import { IItem } from '@/app/utils/type';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {
@@ -18,7 +13,6 @@ interface BodyTypes {
   orderType?: ORDER_TYPE;
   paymentType?: PAYMENT_TYPE;
   categoryId?: number;
-  // subCategoryId?: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -33,7 +27,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryId,
       orderType,
       paymentType,
-      // subCategoryId,
     }: BodyTypes = req.body;
 
     const existingUser = await prisma.user.findUnique({
@@ -64,10 +57,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateFields.categoryId = categoryId;
     }
 
-    // if (subCategoryId) {
-    //   updateFields.subCategoryId = subCategoryId;
-    // }
-
     // If user don't input any updated data
     if (Object.keys(updateFields).length === 0 && !orderType && !paymentType) {
       return res.status(404).json({
@@ -85,9 +74,49 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         include: {
           category: true,
           preference: true,
-          subCategory: true,
+          scheduleOrders: true
         },
       });
+
+      // update schedule order if user update to their new cateogry
+      if (updateFields.categoryId && existingUser?.categoryId !== updateFields.categoryId) {
+        // Get all items in that category
+        const newCategoryItems = await prisma.item.findMany({
+          where: {
+            categoryId: updateFields.categoryId
+          }
+        });
+        
+        if (updatedUser.scheduleOrders.length > 0) {
+          for (const scheduleOrder of updatedUser.scheduleOrders) {
+            // Replace all items to items in new category
+            await prisma.orderedItems.deleteMany({
+              where: {
+                scheduledOrderId: scheduleOrder.id
+              }
+            });
+            
+            const formatItemToOrderedItem = newCategoryItems.map((item: IItem) => {
+              return { name: item.name, quantity: 0, price: item.price, scheduledOrderId: scheduleOrder.id }
+            });
+            
+            await prisma.orderedItems.createMany({
+              data: formatItemToOrderedItem
+            });
+
+            await prisma.scheduleOrders.update({
+              where: {
+                id: scheduleOrder.id
+              },
+              data: {
+                totalPrice: 0
+              }
+            });
+          }
+        }
+      }
+
+
       if (!orderType && !paymentType) {
         return res.status(200).json({
           data: updatedUser,
