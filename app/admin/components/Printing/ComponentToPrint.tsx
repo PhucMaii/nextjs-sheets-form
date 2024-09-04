@@ -156,10 +156,10 @@ export const ComponentToPrint = forwardRef(
                 </Typography>
               </Grid>
             )}
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid> */}
+            {/* <Grid item xs={12}>
               <Typography
                 textAlign="center"
                 sx={{ fontSize: printFontSize - 5 }}
@@ -167,8 +167,13 @@ export const ComponentToPrint = forwardRef(
                 * As of Sept 1st, we will no longer providing Premier Pacific
                 Beansprouts. Please ask your driver for more details *
               </Typography>
-            </Grid>
+            </Grid> */}
           </Grid>
+          <Divider sx={{my: 3}} />
+          <Typography textAlign="right">Order by: {order.createdBy}</Typography>
+          {
+            order?.updatedBy && <Typography textAlign="right">Updated by: {order.updatedBy}</Typography>
+          }
         </Box>
       </div>
     );
