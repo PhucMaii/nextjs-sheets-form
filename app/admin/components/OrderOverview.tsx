@@ -114,10 +114,12 @@ export default function OrderOverview({
   }, [codOrders]);
 
   const filterOrderByRoute = () => {
+    // Get the route
     const targetRoute = routes.find(
       (route: IRoutes) => route.id === currentRoute,
     );
 
+    // Get clients from that route -> get orders
     const filteredOrders = targetRoute.clients
       .map((client: UserRoute) => {
         const clientOrder = baseOrderData.find(

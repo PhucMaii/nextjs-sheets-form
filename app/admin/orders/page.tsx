@@ -43,7 +43,7 @@ import ErrorComponent from '../components/ErrorComponent';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import moment from 'moment';
-import { statusTabs } from '@/app/lib/constant';
+import { days, statusTabs } from '@/app/lib/constant';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import SearchModal from '../components/Modals/SearchModal';
@@ -133,6 +133,9 @@ export default function Orders() {
     `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
   );
 
+  const selectedDate = new Date(date);
+  const [routes] = SWRFetchData(`${API_URL.ROUTES}?day=${days[selectedDate.getDay()]}`);
+
   const sameDateLastWeek = getSameDateLastWeek(date);
   const stringifyDate = YYYYMMDDFormat(sameDateLastWeek);
 
@@ -140,7 +143,6 @@ export default function Orders() {
     `${API_URL.ORDER}?date=${stringifyDate}&status=${currentStatus}`,
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
-  // const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
