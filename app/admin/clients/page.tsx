@@ -63,7 +63,7 @@ export default function ClientsPage() {
 
   // Data Fetching
   const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);
-  const [categories] = SWRFetchData(API_URL.CATEGORIES);
+  const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
   // const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
@@ -370,6 +370,7 @@ export default function ClientsPage() {
         setNotification={setNotification}
         handleAddClientUI={handleAddClientUI}
         mutateClients={mutateClients}
+        mutateCategories={mutateCategories}
       />
       <SingleFieldUpdate
         open={singleFieldUpdateProps.open}

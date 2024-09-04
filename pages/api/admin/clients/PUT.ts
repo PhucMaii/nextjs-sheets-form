@@ -116,7 +116,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
       }
 
-
       if (!orderType && !paymentType) {
         return res.status(200).json({
           data: updatedUser,
