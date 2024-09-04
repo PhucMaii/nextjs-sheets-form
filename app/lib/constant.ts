@@ -117,6 +117,11 @@ export const tabs = [
     path: '/admin/clients',
   },
   {
+    name: 'Blocking',
+    icon: AppBlockingIcon,
+    path: '/admin/blocking',
+  },
+  {
     name: 'Pre Orders',
     icon: PendingActionsIcon,
     path: '/admin/pre-orders',
