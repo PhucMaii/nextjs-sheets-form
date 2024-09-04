@@ -43,6 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         unavailableDayRange: true,
+        category: true
       },
     });
 
@@ -83,11 +84,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     if (userOrder) {
-      return res.status(200).json({
-        warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
-        data: userOrder,
-        flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
+      // return res.status(200).json({
+      //   warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
+      //   data: userOrder,
+      //   flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
+      // });
+
+      const newItems = Object.keys(body).filter((item: string) => {
+        return item !== 'DELIVERY DATE' && item !== 'NOTE';
       });
+
+      const items = userOrder.items.map((item: any) => {
+        const targetNewItem = newItems.find((newItemName: any) => item.name === newItemName);
+
+        if (targetNewItem){
+          return {...item, quantity:  body[targetNewItem]}
+        }
+
+        return item;
+      });
+
+      overrideOrder(existingUser, userOrder.id, items, body['NOTE'], `Client - ${existingUser.clientId}`);
+      return res.status(201).json({
+        message: 'Order Submitted Successfully'
+      })
     }
 
     const userCategory = await prisma.category.findUnique({
@@ -154,22 +174,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         continue;
       }
 
+      if (item === 'NOTE') {
+        continue;
+      }
+
       const itemData = await prisma.item.findFirst({
         where: {
           name: item,
           categoryId: existingUser.categoryId,
         },
       });
-
-      // if (existingUser.subCategoryId && itemData?.subCategoryId) {
-      //   itemData = await prisma.item.findFirst({
-      //     where: {
-      //       name: itemData.name,
-      //       categoryId: existingUser.categoryId,
-      //       subCategoryId: existingUser.subCategoryId,
-      //     },
-      //   });
-      // }
 
       if (itemData) {
         totalPrice += itemData.price * body[item];
@@ -269,3 +283,55 @@ export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
 
   return userOrders;
 };
+
+const overrideOrder = async (user: any, orderId: number, newItems: any, newNote: string, updatedBy: string) => {
+  const prisma = new PrismaClient();
+  try {
+    let total = 0;
+    const itemList: any = [];
+    for (const item of newItems) {
+      // Update each item
+      const newItem = await prisma.orderedItems.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          quantity: item.quantity,
+        },
+      });
+
+      // Update new total price
+      total += newItem.quantity * newItem.price;
+      itemList.push({
+        ...newItem,
+        totalPrice: newItem.quantity * newItem.price,
+      });
+    }
+
+    const updatedOrder = await prisma.orders.update({
+      where: {
+        id: orderId
+      },
+      data: {
+        totalPrice: total,
+        note: newNote,
+        isReplacement: true,
+        updateTime: new Date(),
+        updatedBy
+      }
+    });
+
+    await sendEmail(user, itemList, orderId, updatedOrder.deliveryDate, true, newNote);
+    
+    await pusherServer.trigger('override-order', 'incoming-order', {
+      items: itemList,
+      ...user,
+      ...updatedOrder,
+      totalPrice: total,
+      category: user.category,
+      isReplacement: true,
+    });
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+  }
+}
