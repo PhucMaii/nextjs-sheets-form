@@ -108,7 +108,7 @@ export default function Orders() {
     ORDER_STATUS.NONE,
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
-  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [notification, setNotification] = useState<Notification>({
@@ -150,11 +150,14 @@ export default function Orders() {
   }, []);
 
   useEffect(() => {
-    // Initial Loading
-    if (isFirstLoading && !isValidating) {
-      setIsFirstLoading(false);
+    if (isLoading && !isValidating) {
+      setIsLoading(false);
     }
-  }, [isValidating, isFirstLoading]);
+
+    if (!orders && isValidating) {
+      setIsLoading(true);
+    }
+  }, [isValidating, isLoading, date, currentStatus]);
 
   useEffect(() => {
     if (orders) {
@@ -749,7 +752,7 @@ export default function Orders() {
         // subcategories={subCategories?.data || []}
         handleUpdateItem={handleUpdateItem}
       />
-      {isFirstLoading ? (
+      {isLoading ? (
         <>
           {uppperContent}
           <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">

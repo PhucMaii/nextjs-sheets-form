@@ -8,17 +8,12 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Remove subcategory for user
-  await prisma.user.updateMany({
+  await prisma.orders.update({
+    where: {
+      id: 17757
+    },
     data: {
-      subCategoryId: null
-    }
-  });
-
-  // Remove subcategory for items
-  await prisma.item.updateMany({
-    data: {
-      subCategoryId: null
+      isReplacement: false
     }
   })
 }
