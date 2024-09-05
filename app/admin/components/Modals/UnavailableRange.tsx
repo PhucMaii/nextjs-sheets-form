@@ -40,7 +40,7 @@ export default function UnavailableRange({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
-  const [targetRangeId, setTargetRangeId] = useState<number | null>(null);
+  const [targetRange, setTargetRange] = useState<any>(null);
   const [updatedDateRange, setUpdatedDateRange] = useState<any>(null);
 
   const [unavailableRanges, mutateRange] = SWRFetchData(
@@ -55,7 +55,7 @@ export default function UnavailableRange({
 
   const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
-    setTargetRangeId(updatedRange.id);
+    setTargetRange(updatedRange);
     setUpdatedDateRange([
       new Date(updatedRange.startDate),
       new Date(updatedRange.endDate),
@@ -109,12 +109,12 @@ export default function UnavailableRange({
     }
   };
 
-  const handleDeleteRange = async (deletedId: number) => {
-    setTargetRangeId(deletedId);
+  const handleDeleteRange = async (deletedRange: any) => {
+    setTargetRange(deletedRange);
     setIsDeleting(true);
     try {
       const response = await axios.delete(
-        `${apiURL}?deletedRangeId=${deletedId}`,
+        `${apiURL}?deletedRangeId=${deletedRange.id}`,
       );
 
       if (response.data.error) {
@@ -123,7 +123,7 @@ export default function UnavailableRange({
           type: 'error',
           message: response.data.error,
         });
-        setTargetRangeId(null);
+        setTargetRange(null);
         setIsDeleting(false);
         return;
       }
@@ -135,7 +135,7 @@ export default function UnavailableRange({
         type: 'success',
         message: response.data.message,
       });
-      setTargetRangeId(null);
+      setTargetRange(null);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error:', error);
@@ -144,7 +144,7 @@ export default function UnavailableRange({
         type: 'error',
         message: 'There was an error: ' + error.response.data.error,
       });
-      setTargetRangeId(null);
+      setTargetRange(null);
       setIsDeleting(false);
     }
   };
@@ -166,7 +166,7 @@ export default function UnavailableRange({
           message: response.data.error,
         });
         setIsEditing(false);
-        setTargetRangeId(null);
+        setTargetRange(null);
         setUpdatedDateRange(null);
         return;
       }
@@ -179,7 +179,7 @@ export default function UnavailableRange({
         message: response.data.message,
       });
       setIsEditing(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
       setIsSaving(false);
     } catch (error: any) {
@@ -190,7 +190,7 @@ export default function UnavailableRange({
         message: 'There was an error: ' + error.response.data.error,
       });
       setIsEditing(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
     }
   };
@@ -257,7 +257,7 @@ export default function UnavailableRange({
                   key={index}
                   range={range}
                   updatedDateRange={updatedDateRange}
-                  targetRangeId={targetRangeId}
+                  targetRange={targetRange}
                   isEditing={isEditing}
                   isDeleting={isDeleting}
                   isSaving={isSaving}
