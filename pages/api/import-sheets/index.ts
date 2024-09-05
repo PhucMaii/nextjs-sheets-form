@@ -84,6 +84,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     if (userOrder) {
+      if (body.createdBy !== USER_ROLE.CLIENT) {
+        return res.status(200).json({
+          warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
+          data: userOrder,
+          flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
+        });
+      }
+
       const newItems = Object.keys(body).filter((item: string) => {
         return item !== 'DELIVERY DATE' && item !== 'NOTE';
       });
@@ -98,7 +106,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return item;
       });
 
-      await overrideOrder(existingUser, userOrder.id, items, body['NOTE'], `Client - ${existingUser.clientId}`);
+      const createdBy = await getCreatedBy(req, res, body.createdBy);
+      await overrideOrder(existingUser, userOrder.id, items, body['NOTE'], createdBy);
       return res.status(201).json({
         message: 'Order Submitted Successfully'
       })
@@ -117,35 +126,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     // Get info person create it
-    let createdBy = '';
+    // let createdBy = '';
 
-    const session: any = await getServerSession(req, res, authOptions);
-    if (body?.createdBy === USER_ROLE.DRIVER) {
-      const driverCreate: any = await prisma.driver.findUnique({
-        where: {
-          id: Number(session.user.id),
-        },
-      });
+    // const session: any = await getServerSession(req, res, authOptions);
+    // if (body?.createdBy === USER_ROLE.DRIVER) {
+    //   const driverCreate: any = await prisma.driver.findUnique({
+    //     where: {
+    //       id: Number(session.user.id),
+    //     },
+    //   });
 
-      createdBy = `Driver - ${driverCreate.name}`;
-    } else if (
-      body?.createdBy === USER_ROLE.ADMIN ||
-      body?.createdBy === USER_ROLE.CLIENT
-    ) {
-      const userCreate: any = await prisma.user.findUnique({
-        where: {
-          id: Number(session.user.id),
-        },
-      });
+    //   createdBy = `Driver - ${driverCreate.name}`;
+    // } else if (
+    //   body?.createdBy === USER_ROLE.ADMIN ||
+    //   body?.createdBy === USER_ROLE.CLIENT
+    // ) {
+    //   const userCreate: any = await prisma.user.findUnique({
+    //     where: {
+    //       id: Number(session.user.id),
+    //     },
+    //   });
 
-      if (userCreate.role === USER_ROLE.ADMIN) {
-        createdBy = `Admin - ${userCreate.clientName}`;
-      }
+    //   if (userCreate.role === USER_ROLE.ADMIN) {
+    //     createdBy = `Admin - ${userCreate.clientName}`;
+    //   }
 
-      if (userCreate.role === USER_ROLE.CLIENT) {
-        createdBy = `Client - ${userCreate.clientId}`;
-      }
-    }
+    //   if (userCreate.role === USER_ROLE.CLIENT) {
+    //     createdBy = `Client - ${userCreate.clientId}`;
+    //   }
+    // }
+    const createdBy = await getCreatedBy(req, res, body.createdBy);
 
     // Initialize new order
     const newOrder = await prisma.orders.create({
@@ -309,7 +319,7 @@ const overrideOrder = async (user: any, orderId: number, newItems: any, newNote:
       data: {
         totalPrice: total,
         note: newNote,
-        isReplacement: true,
+        isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
         updateTime: new Date(),
         updatedBy
       }
@@ -323,9 +333,45 @@ const overrideOrder = async (user: any, orderId: number, newItems: any, newNote:
       ...updatedOrder,
       totalPrice: total,
       category: user.category,
-      isReplacement: true,
+      isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
+}
+
+const getCreatedBy = async (req: NextApiRequest, res: NextApiResponse, createdByRole: USER_ROLE) => {
+  const prisma = new PrismaClient();
+  const session: any = await getServerSession(req, res, authOptions);
+
+  let createdBy = '';
+  
+    if (createdByRole === USER_ROLE.DRIVER) {
+      const driverCreate: any = await prisma.driver.findUnique({
+        where: {
+          id: Number(session.user.id),
+        },
+      });
+
+      createdBy = `Driver - ${driverCreate.name}`;
+    } else if (
+      createdByRole === USER_ROLE.ADMIN ||
+      createdByRole === USER_ROLE.CLIENT
+    ) {
+      const userCreate: any = await prisma.user.findUnique({
+        where: {
+          id: Number(session.user.id),
+        },
+      });
+
+      if (userCreate.role === USER_ROLE.ADMIN) {
+        createdBy = `Admin - ${userCreate.clientName}`;
+      }
+
+      if (userCreate.role === USER_ROLE.CLIENT) {
+        createdBy = `Client - ${userCreate.clientId}`;
+      }
+    }
+  
+    return createdBy;
 }
