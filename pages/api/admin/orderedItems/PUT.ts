@@ -361,9 +361,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         .map((user: any) => {
           return user.scheduleOrders.map((scheduleOrder: any) => {
             return scheduleOrder;
-          })
-        }).flat()
-      
+          });
+        })
+        .flat();
+
       if (requireUpdateOrders && requireUpdateOrders.length > 0) {
         for (const scheduleOrder of requireUpdateOrders) {
           if (scheduleOrder) {

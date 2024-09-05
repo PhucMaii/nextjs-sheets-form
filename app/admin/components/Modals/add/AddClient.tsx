@@ -58,11 +58,13 @@ export default function AddClient({
 
   useEffect(() => {
     setCategoryList(categories);
-  }, [categories])
+  }, [categories]);
 
   const handleOnChangeClient = (key: string, value: any) => {
     if (key === 'category') {
-      const targetCategory = categories.find((category: any) => category.name === value);
+      const targetCategory = categories.find(
+        (category: any) => category.name === value,
+      );
 
       // Target category not found = new category -> value is the category object
       if (!targetCategory) {
@@ -149,13 +151,13 @@ export default function AddClient({
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
-      <AddCategory
-        open={isOpenAddCategory} 
-        onClose={() => setIsOpenAdCategory(false)} 
-        setNotification={setNotification} 
-        handleOnChangeClient={handleOnChangeClient}
-        mutateCategories={mutateCategories}
-      />
+        <AddCategory
+          open={isOpenAddCategory}
+          onClose={() => setIsOpenAdCategory(false)}
+          setNotification={setNotification}
+          handleOnChangeClient={handleOnChangeClient}
+          mutateCategories={mutateCategories}
+        />
         <ModalHead
           heading="Add Client"
           buttonLabel="Add"
@@ -247,8 +249,11 @@ export default function AddClient({
               <Box display="flex" flexDirection="column" gap={1}>
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <Typography variant="h6">Category</Typography>
-                  <IconButton color='primary' onClick={() => setIsOpenAdCategory(true)}>
-                    <AddIcon/>
+                  <IconButton
+                    color="primary"
+                    onClick={() => setIsOpenAdCategory(true)}
+                  >
+                    <AddIcon />
                   </IconButton>
                 </Box>
                 <Select
@@ -267,10 +272,7 @@ export default function AddClient({
                   </MenuItem> */}
                   {categoryList.length > 0 &&
                     categoryList.map((category: Category) => (
-                      <MenuItem
-                        key={category.id}
-                        value={category.name}
-                      >
+                      <MenuItem key={category.id} value={category.name}>
                         {category.name}
                       </MenuItem>
                     ))}

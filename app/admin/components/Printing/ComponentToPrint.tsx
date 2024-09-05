@@ -169,11 +169,13 @@ export const ComponentToPrint = forwardRef(
               </Typography>
             </Grid> */}
           </Grid>
-          <Divider sx={{my: 3}} />
+          <Divider sx={{ my: 3 }} />
           <Typography textAlign="right">Order by: {order.createdBy}</Typography>
-          {
-            order?.updatedBy && <Typography textAlign="right">Updated by: {order.updatedBy}</Typography>
-          }
+          {order?.updatedBy && (
+            <Typography textAlign="right">
+              Updated by: {order.updatedBy}
+            </Typography>
+          )}
         </Box>
       </div>
     );

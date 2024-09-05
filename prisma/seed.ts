@@ -10,12 +10,12 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.orders.update({
     where: {
-      id: 17757
+      id: 17757,
     },
     data: {
-      isReplacement: false
-    }
-  })
+      isReplacement: false,
+    },
+  });
 }
 
 main()

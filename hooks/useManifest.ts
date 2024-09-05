@@ -161,7 +161,6 @@ const useManifest = (
         {},
       );
 
-
       const manifestDetail = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem, index: number) => {
           const { user, name, quantity } = item;

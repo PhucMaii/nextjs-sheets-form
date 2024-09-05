@@ -44,12 +44,12 @@ export default function BlockingPage() {
 
   useEffect(() => {
     if (selectedClient && isValidating) {
-        setIsFetching(true);
-    } else if(unavailableRanges) {
-        setIsFetching(false);
+      setIsFetching(true);
+    } else if (unavailableRanges) {
+      setIsFetching(false);
     }
   }, [selectedClient, unavailableRanges]);
-  
+
   const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
     setTargetRangeId(updatedRange.id);
@@ -80,14 +80,11 @@ export default function BlockingPage() {
     try {
       setIsAdding(true);
 
-      const response = await axios.post(
-        apiURL,
-        {
-          startDate: newDateRange[0],
-          endDate: newDateRange[1],
-          userId: selectedClient?.id,
-        },
-      );
+      const response = await axios.post(apiURL, {
+        startDate: newDateRange[0],
+        endDate: newDateRange[1],
+        userId: selectedClient?.id,
+      });
 
       if (response.data.error) {
         setNotification({
@@ -152,7 +149,7 @@ export default function BlockingPage() {
         on: true,
         type: 'error',
         message: 'There was an error: ' + error.response.data.error,
-      }); 
+      });
       setTargetRangeId(null);
       setIsDeleting(false);
     }
@@ -160,12 +157,12 @@ export default function BlockingPage() {
 
   const handleEditRange = async (updatedRange: IDayRange) => {
     if (!selectedClient) {
-        setNotification({
-            on: true,
-            type: 'error',
-            message: 'Please select a client'
-        })
-        return;
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Please select a client',
+      });
+      return;
     }
     setIsSaving(true);
     try {
@@ -282,7 +279,7 @@ export default function BlockingPage() {
 
         <Typography variant="subtitle1">Unavailable Ranges:</Typography>
         <Box display="flex" flexDirection="column" gap={2} mt={2}>
-          { isFetching ? (
+          {isFetching ? (
             <LoadingComponent />
           ) : unavailableRanges && unavailableRanges?.data.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {

@@ -43,7 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         unavailableDayRange: true,
-        category: true
+        category: true,
       },
     });
 
@@ -97,20 +97,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
       const items = userOrder.items.map((item: any) => {
-        const targetNewItem = newItems.find((newItemName: any) => item.name === newItemName);
+        const targetNewItem = newItems.find(
+          (newItemName: any) => item.name === newItemName,
+        );
 
-        if (targetNewItem){
-          return {...item, quantity:  body[targetNewItem]}
+        if (targetNewItem) {
+          return { ...item, quantity: body[targetNewItem] };
         }
 
         return item;
       });
 
       const createdBy = await getCreatedBy(req, res, body.createdBy);
-      await overrideOrder(existingUser, userOrder.id, items, body['NOTE'], createdBy);
+      await overrideOrder(
+        existingUser,
+        userOrder.id,
+        items,
+        body['NOTE'],
+        createdBy,
+      );
       return res.status(201).json({
-        message: 'Order Submitted Successfully'
-      })
+        message: 'Order Submitted Successfully',
+      });
     }
 
     const userCategory = await prisma.category.findUnique({
@@ -288,7 +296,13 @@ export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
   return userOrders;
 };
 
-const overrideOrder = async (user: any, orderId: number, newItems: any, newNote: string, updatedBy: string) => {
+const overrideOrder = async (
+  user: any,
+  orderId: number,
+  newItems: any,
+  newNote: string,
+  updatedBy: string,
+) => {
   const prisma = new PrismaClient();
   try {
     let total = 0;
@@ -314,19 +328,26 @@ const overrideOrder = async (user: any, orderId: number, newItems: any, newNote:
 
     const updatedOrder = await prisma.orders.update({
       where: {
-        id: orderId
+        id: orderId,
       },
       data: {
         totalPrice: total,
         note: newNote,
         isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
         updateTime: new Date(),
-        updatedBy
-      }
+        updatedBy,
+      },
     });
 
-    await sendEmail(user, itemList, orderId, updatedOrder.deliveryDate, true, newNote);
-    
+    await sendEmail(
+      user,
+      itemList,
+      orderId,
+      updatedOrder.deliveryDate,
+      true,
+      newNote,
+    );
+
     await pusherServer.trigger('override-order', 'incoming-order', {
       items: itemList,
       ...user,
@@ -338,40 +359,44 @@ const overrideOrder = async (user: any, orderId: number, newItems: any, newNote:
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
-}
+};
 
-const getCreatedBy = async (req: NextApiRequest, res: NextApiResponse, createdByRole: USER_ROLE) => {
+const getCreatedBy = async (
+  req: NextApiRequest,
+  res: NextApiResponse,
+  createdByRole: USER_ROLE,
+) => {
   const prisma = new PrismaClient();
   const session: any = await getServerSession(req, res, authOptions);
 
   let createdBy = '';
-  
-    if (createdByRole === USER_ROLE.DRIVER) {
-      const driverCreate: any = await prisma.driver.findUnique({
-        where: {
-          id: Number(session.user.id),
-        },
-      });
 
-      createdBy = `Driver - ${driverCreate.name}`;
-    } else if (
-      createdByRole === USER_ROLE.ADMIN ||
-      createdByRole === USER_ROLE.CLIENT
-    ) {
-      const userCreate: any = await prisma.user.findUnique({
-        where: {
-          id: Number(session.user.id),
-        },
-      });
+  if (createdByRole === USER_ROLE.DRIVER) {
+    const driverCreate: any = await prisma.driver.findUnique({
+      where: {
+        id: Number(session.user.id),
+      },
+    });
 
-      if (userCreate.role === USER_ROLE.ADMIN) {
-        createdBy = `Admin - ${userCreate.clientName}`;
-      }
+    createdBy = `Driver - ${driverCreate.name}`;
+  } else if (
+    createdByRole === USER_ROLE.ADMIN ||
+    createdByRole === USER_ROLE.CLIENT
+  ) {
+    const userCreate: any = await prisma.user.findUnique({
+      where: {
+        id: Number(session.user.id),
+      },
+    });
 
-      if (userCreate.role === USER_ROLE.CLIENT) {
-        createdBy = `Client - ${userCreate.clientId}`;
-      }
+    if (userCreate.role === USER_ROLE.ADMIN) {
+      createdBy = `Admin - ${userCreate.clientName}`;
     }
-  
-    return createdBy;
-}
+
+    if (userCreate.role === USER_ROLE.CLIENT) {
+      createdBy = `Client - ${userCreate.clientId}`;
+    }
+  }
+
+  return createdBy;
+};

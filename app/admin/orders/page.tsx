@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -26,7 +27,12 @@ import {
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
-import { Notification, OrderedItems, UserType } from '@/app/utils/type';
+import {
+  IRoutes,
+  Notification,
+  OrderedItems,
+  UserType,
+} from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -53,6 +59,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import { SWRFetchData } from '@/app/utils/db';
 import { getSameDateLastWeek } from '@/pages/api/utils/date';
+import { UserRoute } from '@prisma/client';
 
 interface Category {
   id: number;
@@ -102,6 +109,7 @@ export default function Orders() {
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
+  const [currentRoute, setCurrentRoute] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [date, setDate] = useState(() => generateRecommendDate());
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
@@ -117,6 +125,7 @@ export default function Orders() {
     message: '',
   });
   const [orderData, setOrderData] = useState<Order[]>([]);
+  const [routeOrders, setRouteOrders] = useState<Order[]>([]);
   const [pages, setPages] = useState<number>(0);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
@@ -134,7 +143,9 @@ export default function Orders() {
   );
 
   const selectedDate = new Date(date);
-  const [routes] = SWRFetchData(`${API_URL.ROUTES}?day=${days[selectedDate.getDay()]}`);
+  const [routes, _mutateRoutes, isRoutesValidating] = SWRFetchData(
+    `${API_URL.ROUTES}?day=${days[selectedDate.getDay()]}`,
+  );
 
   const sameDateLastWeek = getSameDateLastWeek(date);
   const stringifyDate = YYYYMMDDFormat(sameDateLastWeek);
@@ -150,14 +161,16 @@ export default function Orders() {
   }, []);
 
   useEffect(() => {
-    if (isLoading && !isValidating) {
-      setIsLoading(false);
-    }
+    setCurrentRoute(0);
+  }, [date]);
 
-    if (!orders && isValidating) {
+  useEffect(() => {
+    if (orders && !isValidating) {
+      setIsLoading(false);
+    } else if (!orders && isValidating) {
       setIsLoading(true);
     }
-  }, [isValidating, isLoading, date, currentStatus]);
+  }, [isValidating, date, currentStatus, currentRoute]);
 
   useEffect(() => {
     if (orders) {
@@ -177,6 +190,17 @@ export default function Orders() {
       setOrderData([]);
     }
   }, [baseOrderData]);
+
+  // Update order data based on route
+  useEffect(() => {
+    if (routes && !isRoutesValidating) {
+      generateOrderData(baseOrderData);
+    }
+
+    if (!routes && isRoutesValidating) {
+      setIsLoading(true);
+    }
+  }, [currentRoute, routes, isRoutesValidating]);
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
@@ -322,6 +346,34 @@ export default function Orders() {
     }
   };
 
+  const filterOrderByRoute = (orders: Order[]) => {
+    if (!routes || !orders || orders.length === 0) {
+      return [];
+    }
+
+    if (currentRoute === 0) {
+      return baseOrderData;
+    }
+
+    // Get the route
+    const targetRoute = routes.data.find(
+      (route: IRoutes) => route.id === currentRoute,
+    );
+
+    // Get clients from that route -> get orders
+    const filteredOrders = targetRoute.clients
+      .map((client: UserRoute) => {
+        const clientOrder = orders.find(
+          (order: Order) => order.userId === client.userId,
+        );
+        return clientOrder;
+      })
+      .filter((order: Order) => order !== undefined);
+
+    setRouteOrders(filteredOrders);
+    return filteredOrders;
+  };
+
   const initializeOrder = () => {
     setPages(Math.ceil(orders.data / orderPerPage));
     setBaseOrderData(orders.data);
@@ -333,10 +385,17 @@ export default function Orders() {
       setOrderData([]);
       return;
     }
-    const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
+
+    // If there is route selected -> filter order based on that route
+    let orders = [...orderList];
+    if (currentRoute > 0) {
+      orders = filterOrderByRoute(orderList);
+    }
+
+    const newNumberOfPages = Math.ceil(orders.length / orderPerPage);
     setPages(newNumberOfPages);
     setOrderData(
-      orderList.slice(
+      orders.slice(
         orderPerPage * currentPage - orderPerPage,
         orderPerPage * currentPage,
       ),
@@ -628,10 +687,14 @@ export default function Orders() {
         </FormControl>
       </Box>
       <OrderOverview
-        baseOrderData={baseOrderData}
+        // baseOrderData={baseOrderData}
         allRouteOrderData={orders ? orders.data : []}
         lastWeekOrderData={lastWeekOrders ? lastWeekOrders.data : []}
-        currentDate={date}
+        // currentDate={date}
+        orderData={currentRoute === 0 ? baseOrderData : routeOrders}
+        currentRoute={currentRoute}
+        setCurrentRoute={setCurrentRoute}
+        routes={routes?.data || []}
       />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={12} md={10.5}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Order } from '../orders/page';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
@@ -8,45 +8,26 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TodayIcon from '@mui/icons-material/Today';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
-import useRoutes from '@/hooks/fetch/useRoutes';
-import { days } from '@/app/lib/constant';
 import { IRoutes } from '@/app/utils/type';
-import { UserRoute } from '@prisma/client';
 import { primary, primaryColor } from '@/theme/color';
 
 interface IProps {
-  baseOrderData: Order[];
   allRouteOrderData: Order[];
   lastWeekOrderData: Order[];
-  currentDate: string;
+  orderData: Order[];
+  currentRoute: any;
+  setCurrentRoute: any;
+  routes: any;
 }
 
 export default function OrderOverview({
-  baseOrderData,
   allRouteOrderData,
   lastWeekOrderData,
-  currentDate,
+  orderData,
+  currentRoute,
+  setCurrentRoute,
+  routes,
 }: IProps) {
-  const date = new Date(currentDate);
-  const { routes } = useRoutes(days[date.getDay()]);
-  const [currentRoute, setCurrentRoute] = useState<number>(0);
-  const [orderData, setOrderData] = useState<Order[]>(baseOrderData || []);
-
-  useEffect(() => {
-    if (baseOrderData) {
-      setOrderData(baseOrderData);
-      setCurrentRoute(0);
-    }
-  }, [baseOrderData]);
-
-  useEffect(() => {
-    if (currentRoute > 0) {
-      filterOrderByRoute();
-    } else if (baseOrderData) {
-      setOrderData(baseOrderData);
-    }
-  }, [currentRoute]);
-
   const todayTotalGross = useMemo(() => {
     return allRouteOrderData.length > 0
       ? allRouteOrderData.reduce((acc: number, order: Order) => {
@@ -112,25 +93,6 @@ export default function OrderOverview({
         }, 0)
       : 0;
   }, [codOrders]);
-
-  const filterOrderByRoute = () => {
-    // Get the route
-    const targetRoute = routes.find(
-      (route: IRoutes) => route.id === currentRoute,
-    );
-
-    // Get clients from that route -> get orders
-    const filteredOrders = targetRoute.clients
-      .map((client: UserRoute) => {
-        const clientOrder = baseOrderData.find(
-          (order: Order) => order.userId === client.userId,
-        );
-        return clientOrder;
-      })
-      .filter((order: Order) => order !== undefined);
-
-    setOrderData(filteredOrders);
-  };
 
   return (
     <ShadowSection sx={{ backgroundColor: 'white !important' }}>

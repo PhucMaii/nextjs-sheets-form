@@ -173,8 +173,8 @@ const updateAllScheduleOrderItems = async (
       include: {
         scheduleOrders: {
           include: {
-            items: true
-          }
+            items: true,
+          },
         },
       },
     });
@@ -184,17 +184,21 @@ const updateAllScheduleOrderItems = async (
       for (const scheduleOrder of user.scheduleOrders) {
         if (scheduleOrder) {
           // Get the item to be updated, then subtract it from total price and add the its new price
-          const itemToBeUpdated = scheduleOrder.items.find((item: OrderedItems) => item.name === oldItem.name);
+          const itemToBeUpdated = scheduleOrder.items.find(
+            (item: OrderedItems) => item.name === oldItem.name,
+          );
 
           if (!itemToBeUpdated) {
             continue;
           }
 
-          const oldItemPrice = itemToBeUpdated?.price * itemToBeUpdated?.quantity;
+          const oldItemPrice =
+            itemToBeUpdated?.price * itemToBeUpdated?.quantity;
           const newItemPrice = updatedItem.price * itemToBeUpdated.quantity;
 
-          const newTotalPrice = scheduleOrder.totalPrice - oldItemPrice + newItemPrice;
-  
+          const newTotalPrice =
+            scheduleOrder.totalPrice - oldItemPrice + newItemPrice;
+
           await prisma.orderedItems.updateMany({
             where: {
               scheduledOrderId: scheduleOrder.id,
@@ -209,12 +213,12 @@ const updateAllScheduleOrderItems = async (
           // Update new total price
           await prisma.scheduleOrders.update({
             where: {
-              id: scheduleOrder.id
+              id: scheduleOrder.id,
             },
             data: {
-              totalPrice: newTotalPrice
-            }
-          })
+              totalPrice: newTotalPrice,
+            },
+          });
         }
       }
     }

@@ -74,43 +74,53 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         include: {
           category: true,
           preference: true,
-          scheduleOrders: true
+          scheduleOrders: true,
         },
       });
 
       // update schedule order if user update to their new cateogry
-      if (updateFields.categoryId && existingUser?.categoryId !== updateFields.categoryId) {
+      if (
+        updateFields.categoryId &&
+        existingUser?.categoryId !== updateFields.categoryId
+      ) {
         // Get all items in that category
         const newCategoryItems = await prisma.item.findMany({
           where: {
-            categoryId: updateFields.categoryId
-          }
+            categoryId: updateFields.categoryId,
+          },
         });
-        
+
         if (updatedUser.scheduleOrders.length > 0) {
           for (const scheduleOrder of updatedUser.scheduleOrders) {
             // Replace all items to items in new category
             await prisma.orderedItems.deleteMany({
               where: {
-                scheduledOrderId: scheduleOrder.id
-              }
+                scheduledOrderId: scheduleOrder.id,
+              },
             });
-            
-            const formatItemToOrderedItem = newCategoryItems.map((item: IItem) => {
-              return { name: item.name, quantity: 0, price: item.price, scheduledOrderId: scheduleOrder.id }
-            });
-            
+
+            const formatItemToOrderedItem = newCategoryItems.map(
+              (item: IItem) => {
+                return {
+                  name: item.name,
+                  quantity: 0,
+                  price: item.price,
+                  scheduledOrderId: scheduleOrder.id,
+                };
+              },
+            );
+
             await prisma.orderedItems.createMany({
-              data: formatItemToOrderedItem
+              data: formatItemToOrderedItem,
             });
 
             await prisma.scheduleOrders.update({
               where: {
-                id: scheduleOrder.id
+                id: scheduleOrder.id,
               },
               data: {
-                totalPrice: 0
-              }
+                totalPrice: 0,
+              },
             });
           }
         }

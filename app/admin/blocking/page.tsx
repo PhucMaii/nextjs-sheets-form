@@ -29,28 +29,28 @@ export default function BlockingPage() {
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
-    message: ''
+    message: '',
   });
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
   );
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
 
-   // Data Fetching
-   const [clientList] = SWRFetchData(`${API_URL.ADMIN}/clients`);
-   const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
-     `${apiURL}?userId=${selectedClient?.id}`,
-   );
+  // Data Fetching
+  const [clientList] = SWRFetchData(`${API_URL.ADMIN}/clients`);
+  const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
+    `${apiURL}?userId=${selectedClient?.id}`,
+  );
 
-   useEffect(() => {
+  useEffect(() => {
     if (selectedClient && isValidating) {
-        setIsFetching(true);
-    } else if(unavailableRanges) {
-        setIsFetching(false);
+      setIsFetching(true);
+    } else if (unavailableRanges) {
+      setIsFetching(false);
     }
   }, [selectedClient, unavailableRanges]);
 
-   const initializeEdit = (updatedRange: IDayRange) => {
+  const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
     setTargetRangeId(updatedRange.id);
     setUpdatedDateRange([
@@ -59,7 +59,7 @@ export default function BlockingPage() {
     ]);
   };
 
-   const handleAddRange = async () => {
+  const handleAddRange = async () => {
     if (!newDateRange) {
       setNotification({
         on: true,
@@ -80,14 +80,11 @@ export default function BlockingPage() {
     try {
       setIsAdding(true);
 
-      const response = await axios.post(
-        apiURL,
-        {
-          startDate: newDateRange[0],
-          endDate: newDateRange[1],
-          userId: selectedClient?.id,
-        },
-      );
+      const response = await axios.post(apiURL, {
+        startDate: newDateRange[0],
+        endDate: newDateRange[1],
+        userId: selectedClient?.id,
+      });
 
       if (response.data.error) {
         setNotification({
@@ -152,7 +149,7 @@ export default function BlockingPage() {
         on: true,
         type: 'error',
         message: 'There was an error: ' + error.response.data.error,
-      }); 
+      });
       setTargetRangeId(null);
       setIsDeleting(false);
     }
@@ -160,12 +157,12 @@ export default function BlockingPage() {
 
   const handleEditRange = async (updatedRange: IDayRange) => {
     if (!selectedClient) {
-        setNotification({
-            on: true,
-            type: 'error',
-            message: 'Please select a client'
-        })
-        return;
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'Please select a client',
+      });
+      return;
     }
     setIsSaving(true);
     try {
@@ -214,14 +211,17 @@ export default function BlockingPage() {
   };
   return (
     <Sidebar>
-      <NotificationPopup notification={notification} onClose={() => setNotification({...notification, on: false})} />
+      <NotificationPopup
+        notification={notification}
+        onClose={() => setNotification({ ...notification, on: false })}
+      />
       <DateRange
         open={isSelectRangeOpen}
         onClose={() => setIsSelectRangeOpen(false)}
         dateRange={isEditing ? updatedDateRange : newDateRange}
         setDateRange={isEditing ? setUpdatedDateRange : setNewDateRange}
       />
-      <Typography variant='h4'>Set Unavailable Date</Typography>
+      <Typography variant="h4">Set Unavailable Date</Typography>
       <ShadowSection
         display="flex"
         flexDirection="column"
@@ -276,7 +276,7 @@ export default function BlockingPage() {
 
         <Typography variant="subtitle1">Unavailable Ranges:</Typography>
         <Box display="flex" flexDirection="column" gap={2} mt={2}>
-          { isFetching ? (
+          {isFetching ? (
             <LoadingComponent />
           ) : unavailableRanges && unavailableRanges?.data.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {
@@ -302,5 +302,5 @@ export default function BlockingPage() {
         </Box>
       </ShadowSection>
     </Sidebar>
-  )
+  );
 }

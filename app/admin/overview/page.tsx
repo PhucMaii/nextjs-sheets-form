@@ -52,15 +52,14 @@ export default function Overview() {
     }
   }, [overview, dateRange]);
 
-
   // Handle loading
   useEffect(() => {
     if (!overview && isValidating) {
       setIsFetching(true);
     } else {
-      setIsFetching(false)
+      setIsFetching(false);
     }
-  }, [dateRange, overview])
+  }, [dateRange, overview]);
 
   const initializeOverviewData = () => {
     const overviewFetchedData = overview.data;
