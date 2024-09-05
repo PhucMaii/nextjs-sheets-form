@@ -84,12 +84,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     if (userOrder) {
-      // return res.status(200).json({
-      //   warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
-      //   data: userOrder,
-      //   flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
-      // });
-
       const newItems = Object.keys(body).filter((item: string) => {
         return item !== 'DELIVERY DATE' && item !== 'NOTE';
       });
@@ -104,7 +98,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return item;
       });
 
-      overrideOrder(existingUser, userOrder.id, items, body['NOTE'], `Client - ${existingUser.clientId}`);
+      await overrideOrder(existingUser, userOrder.id, items, body['NOTE'], `Client - ${existingUser.clientId}`);
       return res.status(201).json({
         message: 'Order Submitted Successfully'
       })
