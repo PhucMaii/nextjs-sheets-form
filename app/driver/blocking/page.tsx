@@ -34,7 +34,8 @@ export default function BlockingPage() {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
-  const [targetRangeId, setTargetRangeId] = useState<number | null>(null);
+  // const [targetRangeId, setTargetRange] = useState<number | null>(null);
+  const [targetRange, setTargetRange] = useState<any>(null);
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
@@ -52,7 +53,8 @@ export default function BlockingPage() {
 
   const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
-    setTargetRangeId(updatedRange.id);
+    // setTargetRange(updatedRange.id);
+    setTargetRange(updatedRange);
     setUpdatedDateRange([
       new Date(updatedRange.startDate),
       new Date(updatedRange.endDate),
@@ -115,12 +117,13 @@ export default function BlockingPage() {
     }
   };
 
-  const handleDeleteRange = async (deletedId: number) => {
-    setTargetRangeId(deletedId);
+  const handleDeleteRange = async (deletedRange: IDayRange) => {
+    // setTargetRange(deletedId);
+    setTargetRange(deletedRange);
     setIsDeleting(true);
     try {
       const response = await axios.delete(
-        `${apiURL}?deletedRangeId=${deletedId}`,
+        `${apiURL}?deletedRangeId=${deletedRange.id}`,
       );
 
       if (response.data.error) {
@@ -129,7 +132,7 @@ export default function BlockingPage() {
           type: 'error',
           message: response.data.error,
         });
-        setTargetRangeId(null);
+        setTargetRange(null);
         setIsDeleting(false);
         return;
       }
@@ -141,7 +144,7 @@ export default function BlockingPage() {
         type: 'success',
         message: response.data.message,
       });
-      setTargetRangeId(null);
+      setTargetRange(null);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error:', error);
@@ -150,7 +153,7 @@ export default function BlockingPage() {
         type: 'error',
         message: 'There was an error: ' + error.response.data.error,
       });
-      setTargetRangeId(null);
+      setTargetRange(null);
       setIsDeleting(false);
     }
   };
@@ -181,7 +184,7 @@ export default function BlockingPage() {
         });
         setIsEditing(false);
         setIsSaving(false);
-        setTargetRangeId(null);
+        setTargetRange(null);
         setUpdatedDateRange(null);
         return;
       }
@@ -195,7 +198,7 @@ export default function BlockingPage() {
       });
       setIsEditing(false);
       setIsSaving(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
     } catch (error: any) {
       console.log('There was an error: ' + error);
@@ -205,7 +208,7 @@ export default function BlockingPage() {
         message: 'There was an error: ' + error.response.data.error,
       });
       setIsEditing(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
     }
   };
@@ -288,7 +291,8 @@ export default function BlockingPage() {
                   key={index}
                   range={range}
                   updatedDateRange={updatedDateRange}
-                  targetRangeId={targetRangeId}
+                  // targetRangeId={targetRangeId}
+                  targetRange={targetRange}
                   isEditing={isEditing}
                   isDeleting={isDeleting}
                   isSaving={isSaving}

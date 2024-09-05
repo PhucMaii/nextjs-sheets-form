@@ -40,10 +40,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             routes: true,
             preference: true,
             category: true,
-          }
+          },
         },
-        items: true
-      }
+        items: true,
+      },
     });
 
     if (!orders || orders.length === 0) {
@@ -60,7 +60,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return {
           ...item,
           totalPrice,
-        }
+        };
       });
 
       return {
@@ -68,8 +68,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         items: formattedItems,
         ...order.user,
         id: order.id,
-        category: order.user.category
-      }
+        category: order.user.category,
+      };
     });
 
     return res.status(200).json({

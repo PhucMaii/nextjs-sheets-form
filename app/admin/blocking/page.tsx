@@ -1,20 +1,34 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  FormControl,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
 import NotificationPopup from '../components/Notification';
 import { IDayRange, Notification, UserType } from '@/app/utils/type';
 import { ShadowSection } from '../reports/styled';
 import { LoadingButton } from '@mui/lab';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import DayRange from '../components/DayRange';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import { generateMonthRange } from '@/app/utils/time';
+import {
+  formatDateChanged,
+  generateMonthRange,
+  generateRecommendDate,
+} from '@/app/utils/time';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import ErrorComponent from '../components/ErrorComponent';
 import DateRange from '../components/Modals/DateRangeModal';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import DayRange from '../components/DayRange';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
@@ -25,7 +39,7 @@ export default function BlockingPage() {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
-  const [targetRangeId, setTargetRangeId] = useState<number | null>(null);
+  const [targetRange, setTargetRange] = useState<any>(null);
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -34,25 +48,34 @@ export default function BlockingPage() {
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
   );
-  const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    generateRecommendDate(),
+  );
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.ADMIN}/clients`);
   const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
-    `${apiURL}?userId=${selectedClient?.id}`,
+    `${apiURL}?userId=${selectedClient?.id || 'All Clients'}&date=${selectedDate}`,
   );
 
   useEffect(() => {
-    if (selectedClient && isValidating) {
+    if (!unavailableRanges && isValidating) {
       setIsFetching(true);
     } else if (unavailableRanges) {
       setIsFetching(false);
     }
   }, [selectedClient, unavailableRanges]);
 
+  // Reset when switching
+  useEffect(() => {
+    setIsEditing(false);
+    setTargetRange(null);
+  }, [selectedClient, selectedDate]);
+
   const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
-    setTargetRangeId(updatedRange.id);
+    setTargetRange(updatedRange);
     setUpdatedDateRange([
       new Date(updatedRange.startDate),
       new Date(updatedRange.endDate),
@@ -115,12 +138,17 @@ export default function BlockingPage() {
     }
   };
 
-  const handleDeleteRange = async (deletedId: number) => {
-    setTargetRangeId(deletedId);
+  const handleDateChange = (e: any) => {
+    const formattedDate = formatDateChanged(e);
+    setSelectedDate(formattedDate);
+  };
+
+  const handleDeleteRange = async (deletedRange: any) => {
+    setTargetRange(deletedRange)
     setIsDeleting(true);
     try {
       const response = await axios.delete(
-        `${apiURL}?deletedRangeId=${deletedId}`,
+        `${apiURL}?deletedRangeId=${deletedRange.id}`,
       );
 
       if (response.data.error) {
@@ -129,7 +157,7 @@ export default function BlockingPage() {
           type: 'error',
           message: response.data.error,
         });
-        setTargetRangeId(null);
+        setTargetRange(null);
         setIsDeleting(false);
         return;
       }
@@ -141,7 +169,7 @@ export default function BlockingPage() {
         type: 'success',
         message: response.data.message,
       });
-      setTargetRangeId(null);
+      setTargetRange(null);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error:', error);
@@ -150,7 +178,7 @@ export default function BlockingPage() {
         type: 'error',
         message: 'There was an error: ' + error.response.data.error,
       });
-      setTargetRangeId(null);
+      setTargetRange(null);
       setIsDeleting(false);
     }
   };
@@ -170,7 +198,7 @@ export default function BlockingPage() {
         updatedRangeId: updatedRange.id,
         startDate: updatedDateRange[0],
         endDate: updatedDateRange[1],
-        userId: selectedClient?.id,
+        userId: updatedRange.userId,
       });
 
       if (response.data.error) {
@@ -181,7 +209,7 @@ export default function BlockingPage() {
         });
         setIsEditing(false);
         setIsSaving(false);
-        setTargetRangeId(null);
+        setTargetRange(null);
         setUpdatedDateRange(null);
         return;
       }
@@ -195,7 +223,7 @@ export default function BlockingPage() {
       });
       setIsEditing(false);
       setIsSaving(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
     } catch (error: any) {
       console.log('There was an error: ' + error);
@@ -205,7 +233,7 @@ export default function BlockingPage() {
         message: 'There was an error: ' + error.response.data.error,
       });
       setIsEditing(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
     }
   };
@@ -221,7 +249,23 @@ export default function BlockingPage() {
         dateRange={isEditing ? updatedDateRange : newDateRange}
         setDateRange={isEditing ? setUpdatedDateRange : setNewDateRange}
       />
-      <Typography variant="h4">Set Unavailable Date</Typography>
+      <Box
+        display="flex"
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography variant="h4">Set Unavailable Date</Typography>
+        <FormControl>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              value={dayjs(selectedDate)}
+              onChange={handleDateChange}
+              label="Date"
+            />
+          </LocalizationProvider>
+        </FormControl>
+      </Box>
       <ShadowSection
         display="flex"
         flexDirection="column"
@@ -229,21 +273,34 @@ export default function BlockingPage() {
         justifyContent="center"
         my={2}
       >
-        <Typography variant="h6">Client</Typography>
+        <Typography variant="h6" color="grey" sx={{mb: 2}}>Client</Typography>
         <Autocomplete
-          options={clientList ? clientList.data : []}
+          options={
+            [
+              {
+                clientId: '',
+                clientName: 'All Clients',
+                deliveryAddress: '',
+              },
+              ...(clientList?.data || []),
+            ] as UserType[]
+          }
           getOptionLabel={(option) => {
+            if (option.clientName === 'All Clients') {
+              return option.clientName;
+            }
+
             return `${option.clientName} - ${option.clientId}`;
           }}
-          renderInput={(params) => <TextField {...params} />}
+          renderInput={(params) => <TextField {...params} label="Client" />}
           value={selectedClient}
           onChange={(e, newValue) => setSelectedClient(newValue)}
           sx={{ width: 'auto' }}
         />
       </ShadowSection>
       <ShadowSection>
-        <Typography variant="subtitle1">Add Range:</Typography>
-        <Grid container alignItems="center" gap={1} mt={2} mb={4}>
+        <Typography variant="subtitle1" color="grey">Add Range:</Typography>
+        <Grid container alignItems="center" gap={1} mt={3} mb={4}>
           <Grid item xs={5}>
             <TextField
               fullWidth
@@ -274,18 +331,49 @@ export default function BlockingPage() {
           </Grid>
         </Grid>
 
-        <Typography variant="subtitle1">Unavailable Ranges:</Typography>
+        <Typography variant="subtitle1" color="grey">Unavailable Ranges:</Typography>
         <Box display="flex" flexDirection="column" gap={2} mt={2}>
           {isFetching ? (
             <LoadingComponent />
-          ) : unavailableRanges && unavailableRanges?.data.length > 0 ? (
+          ) : unavailableRanges &&
+            selectedClient?.clientName === 'All Clients' &&
+            Object.keys(unavailableRanges.data).length > 0 ? (
+            Object.keys(unavailableRanges.data).map(
+              (targetClient: string, clientIndex: number) => {
+                return (
+                  <>
+                    <Typography key={clientIndex} sx={{mt: 2}}>{targetClient}</Typography>
+                    {unavailableRanges.data[targetClient].map(
+                      (range: any, rangeIndex: number) => {
+                        return (
+                          <DayRange
+                            key={rangeIndex}
+                            range={range}
+                            updatedDateRange={updatedDateRange}
+                            targetRange={targetRange}
+                            isEditing={isEditing}
+                            isDeleting={isDeleting}
+                            isSaving={isSaving}
+                            initializeEdit={initializeEdit}
+                            handleEditRange={handleEditRange}
+                            handleDeleteRange={handleDeleteRange}
+                            setIsSelectRangeOpen={setIsSelectRangeOpen}
+                          />
+                        );
+                      },
+                    )}
+                  </>
+                );
+              },
+            )
+          ) : unavailableRanges?.data.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {
               return (
                 <DayRange
                   key={index}
                   range={range}
                   updatedDateRange={updatedDateRange}
-                  targetRangeId={targetRangeId}
+                  targetRange={targetRange}
                   isEditing={isEditing}
                   isDeleting={isDeleting}
                   isSaving={isSaving}

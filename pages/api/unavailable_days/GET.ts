@@ -1,19 +1,36 @@
-import { PrismaClient } from '@prisma/client';
+import { DayRange, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   userId?: string;
+  date?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId }: IQuery = req.query;
+    const { userId, date }: IQuery = req.query;
 
     if (!userId) {
       return res.status(404).json({
         error: 'User Id Is Missing',
+      });
+    }
+
+    if (userId === 'All Clients' && date) {
+      const allRanges = await prisma.dayRange.findMany({
+        include: {
+          user: true,
+        },
+      });
+
+      // Formatted Range By Client For Result
+      const filteredRange = filterRangeByDate(date, allRanges);
+
+      return res.status(200).json({
+        data: filteredRange,
+        message: 'Fetch Unavailable Days Ranges Successfully',
       });
     }
 
@@ -33,6 +50,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         userId: existingUser.id,
       },
+      include: {
+        user: true
+      }
     });
 
     return res.status(200).json({
@@ -46,3 +66,27 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
+  const selectedDate = new Date(date);
+
+  // Filter range that include the selected date
+  const rangesInDate = rangeList.filter((range: DayRange) => {
+    return selectedDate >= range.startDate && selectedDate <= range.endDate;
+  });
+
+  // Format return result by client
+  const formattedResult = rangesInDate.reduce((acc: any, range: any) => {
+    const key = `${range.user.clientName} - ${range.user.clientId}`;
+
+    if (!acc[key]) {
+      acc[key] = [range];
+    } else {
+      acc[key] = [...acc[key], range];
+    }
+
+    return acc;
+  }, {});
+
+  return formattedResult;
+};
