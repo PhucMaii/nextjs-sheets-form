@@ -140,3 +140,10 @@ model DayRange {
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Announcement {
+  id    Int @id @default(autoincrement())
+  updatedBy String
+  updatedAt DateTime
+  announcement String
+}

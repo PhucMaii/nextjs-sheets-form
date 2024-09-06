@@ -8,12 +8,11 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.orders.update({
-    where: {
-      id: 17757,
-    },
+  await prisma.announcement.create({
     data: {
-      isReplacement: false,
+      announcement: '',
+      updatedAt: new Date(),
+      updatedBy: 'Admin - Admin Test',
     },
   });
 }

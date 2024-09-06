@@ -6,6 +6,7 @@ import { settingsTabs } from '@/app/lib/constant';
 import { blueGrey } from '@mui/material/colors';
 import EditProfile from '../components/EditProfile';
 import ErrorComponent from '../components/ErrorComponent';
+import Announcement from '../components/Announcement';
 
 export default function SettingsPage() {
   const [tabIndex, setTabIndex] = useState<number>(0);
@@ -44,6 +45,8 @@ export default function SettingsPage() {
       </Box>
       {tabIndex === 0 ? (
         <EditProfile />
+      ) : tabIndex === 1 ? (
+        <Announcement />
       ) : (
         <ErrorComponent errorText="Page Coming Soon" />
       )}

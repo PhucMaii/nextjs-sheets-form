@@ -12,6 +12,8 @@ import {
   Typography,
 } from '@mui/material';
 import './print.css';
+import { SWRFetchData } from '@/app/utils/db';
+import { API_URL } from '@/app/utils/enum';
 
 export const printFontSize = 28;
 export const ComponentToPrint = forwardRef(
@@ -19,6 +21,8 @@ export const ComponentToPrint = forwardRef(
     if (!order) {
       return null;
     }
+
+    const [announcement] = SWRFetchData(`${API_URL.ADMIN}/announcement`);
 
     const orderDetailsTemplate = [];
     let totalPrice = 0;
@@ -156,18 +160,21 @@ export const ComponentToPrint = forwardRef(
                 </Typography>
               </Grid>
             )}
-            {/* <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-            </Grid> */}
-            {/* <Grid item xs={12}>
-              <Typography
-                textAlign="center"
-                sx={{ fontSize: printFontSize - 5 }}
-              >
-                * As of Sept 1st, we will no longer providing Premier Pacific
-                Beansprouts. Please ask your driver for more details *
-              </Typography>
-            </Grid> */}
+            {announcement?.data?.announcement && (
+              <>
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 2 }} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography
+                    textAlign="center"
+                    sx={{ fontSize: printFontSize - 5 }}
+                  >
+                    * {announcement?.data?.announcement} *
+                  </Typography>
+                </Grid>
+              </>
+            )}
           </Grid>
           <Divider sx={{ my: 3 }} />
           <Typography textAlign="right">Order by: {order.createdBy}</Typography>
