@@ -1,36 +1,33 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
 import bcrypt from 'bcryptjs';
 
 interface IBody {
   oldPassword?: string;
   newPassword?: string;
   email?: string;
+  name?: string;
+  id: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { oldPassword, newPassword, email }: IBody = req.body;
-
-    const session: any = await getServerSession(req, res, authOptions);
-
-    if (!session) {
-      return res.status(401).json({ error: 'You are not authenticated' });
-    }
+    const { oldPassword, newPassword, email, name, id }: IBody = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        id: Number(session.user.id),
+        id,
       },
     });
 
     if (!existingUser) {
-      return res.status(404).json({ error: 'User Not Found in DB' });
+      return res.status(404).json({
+        error: 'Admin Not Found',
+      });
     }
 
+    // Update Password
     if (oldPassword && newPassword) {
       const isOldPasswordMatch = await bcrypt.compare(
         oldPassword,
@@ -46,7 +43,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       await prisma.user.update({
         where: {
-          id: Number(session.user.id),
+          id,
         },
         data: {
           password: newHashedPassword,
@@ -58,13 +55,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (email) {
+    if (email && name) {
       const updatedUser = await prisma.user.update({
         where: {
           id: existingUser.id,
         },
         data: {
           email,
+          clientName: name,
         },
       });
 
@@ -78,8 +76,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       error: 'You are missing the body data',
     });
   } catch (error: any) {
+    console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Fail to update user: ' + error,
+      error: 'Internal Server Error: ' + error,
     });
   }
 }

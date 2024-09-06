@@ -7,6 +7,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
 // import MessageIcon from '@mui/icons-material/Message';
+import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
@@ -118,6 +119,11 @@ export const adminTabs = {
       icon: PeopleIcon,
       path: '/admin/clients',
     },
+    {
+      name: 'Settings',
+      icon: SettingsIcon,
+      path: '/admin/settings',
+    },
   ],
   Others: [
     {
@@ -226,6 +232,8 @@ export const driverTabs = [
     path: '/driver/account',
   },
 ];
+
+export const settingsTabs = ['General', 'Announcement'];
 
 export const statusTabs = [
   {

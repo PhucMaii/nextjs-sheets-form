@@ -156,7 +156,6 @@ export default function Orders() {
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
 
-
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
