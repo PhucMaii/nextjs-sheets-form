@@ -605,7 +605,9 @@ export default function ReportPage() {
         onClose={() => setNotification({ ...notification, on: false })}
       />
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h5" color={blueGrey[800]}>Reports</Typography>
+        <Typography variant="h5" color={blueGrey[800]}>
+          Reports
+        </Typography>
         {clientValue?.clientName === 'All Clients' ? (
           <>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -621,7 +623,9 @@ export default function ReportPage() {
         )}
       </Box>
       <ShadowSection display="flex" flexDirection="column" gap={1}>
-        <Typography variant="h6" color={blueGrey[800]} sx={{mb: 1}}>Clients</Typography>
+        <Typography variant="h6" color={blueGrey[800]} sx={{ mb: 1 }}>
+          Clients
+        </Typography>
         <Autocomplete
           options={
             [

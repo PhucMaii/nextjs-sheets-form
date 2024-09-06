@@ -156,6 +156,7 @@ export default function Orders() {
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
 
+
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - 250);
@@ -194,14 +195,8 @@ export default function Orders() {
 
   // Update order data based on route
   useEffect(() => {
-    if (routes && !isRoutesValidating) {
-      generateOrderData(baseOrderData);
-    }
-
-    if (!routes && isRoutesValidating) {
-      setIsLoading(true);
-    }
-  }, [currentRoute, routes, isRoutesValidating]);
+    generateOrderData(baseOrderData);
+  }, [currentRoute]);
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
@@ -223,7 +218,12 @@ export default function Orders() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newOrderList = baseOrderData.filter((order: Order) => {
+      let baseOrders = baseOrderData;
+
+      if (currentRoute > 0) {
+        baseOrders = filterOrderByRoute(baseOrderData);
+      }
+      const newOrderList = baseOrders.filter((order: Order) => {
         if (
           order.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
@@ -235,12 +235,13 @@ export default function Orders() {
         }
         return false;
       });
+
       setOrderData(newOrderList);
       setPages(1);
     } else {
       generateOrderData();
     }
-  }, [debouncedKeywords, baseOrderData]);
+  }, [debouncedKeywords, baseOrderData, currentRoute]);
 
   // whenever current page change and not in searching mode, then update the display data
   useEffect(() => {
@@ -671,7 +672,7 @@ export default function Orders() {
   const uppperContent = (
     <>
       <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Typography variant="h5" color={blueGrey[800]} >
+        <Typography variant="h5" color={blueGrey[800]}>
           Orders
         </Typography>
         <FormControl>

@@ -109,10 +109,16 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {Object.keys(adminTabs).map((section: string) => {
             const sectionKey = section as keyof typeof adminTabs;
-            return <>
-            <Typography variant="subtitle2" color={blueGrey[500]} sx={{width: '80%', margin:"auto"}}>{section}</Typography>
-              {
-                adminTabs[sectionKey].map((tab: any, index: number) => {
+            return (
+              <>
+                <Typography
+                  variant="subtitle2"
+                  color={blueGrey[500]}
+                  sx={{ width: '80%', margin: 'auto' }}
+                >
+                  {section}
+                </Typography>
+                {adminTabs[sectionKey].map((tab: any, index: number) => {
                   return (
                     <ListItemButtonStyled
                       $textColor={primary.main}
@@ -136,10 +142,10 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
                       <ListItemText primary={tab.name} />
                     </ListItemButtonStyled>
                   );
-                })
-              }
-              <Divider />
-            </> 
+                })}
+                <Divider />
+              </>
+            );
           })}
         </Box>
       </List>

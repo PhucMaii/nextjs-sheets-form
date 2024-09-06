@@ -256,7 +256,9 @@ export default function BlockingPage() {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Typography variant="h5" color={blueGrey[800]}>Set Unavailable Date</Typography>
+        <Typography variant="h5" color={blueGrey[800]}>
+          Set Unavailable Date
+        </Typography>
         <FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker

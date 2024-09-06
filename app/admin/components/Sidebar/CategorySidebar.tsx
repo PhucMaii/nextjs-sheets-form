@@ -62,7 +62,9 @@ export default function CategorySidebar({
               <IconButton onClick={() => setIsNavOpen(false)}>
                 <ArrowBackIcon />
               </IconButton>
-              <Typography variant="h5" color={blueGrey[800]}>Category</Typography>
+              <Typography variant="h5" color={blueGrey[800]}>
+                Category
+              </Typography>
             </Box>
             <List
               sx={{
