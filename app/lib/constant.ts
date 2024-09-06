@@ -15,6 +15,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import BlockIcon from '@mui/icons-material/Block';
 import AppBlockingIcon from '@mui/icons-material/AppBlocking';
+import SellIcon from '@mui/icons-material/Sell';
 import {
   errorColor,
   infoColor,
@@ -89,6 +90,48 @@ export const days = [
 ];
 
 export const limitOrderHour = 8;
+
+export const adminTabs = {
+  Admin: [
+    {
+      name: 'Overview',
+      icon: DashboardIcon,
+      path: '/admin/overview',
+    },
+    {
+      name: 'Orders',
+      icon: ReceiptLongIcon,
+      path: '/admin/orders',
+    },
+    {
+      name: 'Items',
+      icon: SellIcon,
+      path: '/admin/items',
+    },
+    {
+      name: 'Reports',
+      icon: ArticleIcon,
+      path: '/admin/reports',
+    },
+    {
+      name: 'Clients',
+      icon: PeopleIcon,
+      path: '/admin/clients',
+    },
+  ],
+  Others: [
+    {
+      name: 'Blocking',
+      icon: AppBlockingIcon,
+      path: '/admin/blocking',
+    },
+    {
+      name: 'Pre Orders',
+      icon: PendingActionsIcon,
+      path: '/admin/pre-orders',
+    },
+  ],
+};
 
 export const tabs = [
   {

@@ -31,7 +31,7 @@ import EmailAlert from './EmailAlert';
 import SnackbarPopup from './Snackbar/SnackbarPopup';
 import { Notification } from '@/app/utils/type';
 import { generateRecommendDate } from '@/app/utils/time';
-import { primaryColor } from '@/theme/color';
+import { primary, primaryColor } from '@/theme/color';
 
 interface PropTypes {
   children: ReactNode;
@@ -99,8 +99,8 @@ export default function Sidebar({ children }: PropTypes) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {clientTabs.map((tab, index) => (
             <ListItemButtonStyled
-              $textColor="white"
-              $bgColor={primaryColor}
+              $textColor={primary.main}
+              $bgColor={primary.lightest}
               $currentTab={currentTab === tab.path}
               key={index}
               onClick={() => handleChangeTab(tab.path)}
@@ -109,7 +109,8 @@ export default function Sidebar({ children }: PropTypes) {
                 {tab.icon && (
                   <tab.icon
                     sx={{
-                      color: currentTab === tab.path ? 'white' : blueGrey[800],
+                      color:
+                        currentTab === tab.path ? primary.main : blueGrey[600],
                     }}
                   />
                 )}

@@ -60,6 +60,7 @@ import { useReactToPrint } from 'react-to-print';
 import { SWRFetchData } from '@/app/utils/db';
 import { getSameDateLastWeek } from '@/pages/api/utils/date';
 import { UserRoute } from '@prisma/client';
+import { blueGrey } from '@mui/material/colors';
 
 interface Category {
   id: number;
@@ -670,7 +671,7 @@ export default function Orders() {
   const uppperContent = (
     <>
       <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Typography variant="h4" fontWeight="bold">
+        <Typography variant="h5" color={blueGrey[800]} >
           Orders
         </Typography>
         <FormControl>

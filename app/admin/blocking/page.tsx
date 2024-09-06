@@ -29,6 +29,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import DayRange from '../components/DayRange';
+import { blueGrey } from '@mui/material/colors';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
@@ -144,7 +145,7 @@ export default function BlockingPage() {
   };
 
   const handleDeleteRange = async (deletedRange: any) => {
-    setTargetRange(deletedRange)
+    setTargetRange(deletedRange);
     setIsDeleting(true);
     try {
       const response = await axios.delete(
@@ -255,7 +256,7 @@ export default function BlockingPage() {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Typography variant="h4">Set Unavailable Date</Typography>
+        <Typography variant="h5" color={blueGrey[800]}>Set Unavailable Date</Typography>
         <FormControl>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
@@ -273,7 +274,9 @@ export default function BlockingPage() {
         justifyContent="center"
         my={2}
       >
-        <Typography variant="h6" color="grey" sx={{mb: 2}}>Client</Typography>
+        <Typography variant="h6" color="grey" sx={{ mb: 2 }}>
+          Client
+        </Typography>
         <Autocomplete
           options={
             [
@@ -299,7 +302,9 @@ export default function BlockingPage() {
         />
       </ShadowSection>
       <ShadowSection>
-        <Typography variant="subtitle1" color="grey">Add Range:</Typography>
+        <Typography variant="subtitle1" color="grey">
+          Add Range:
+        </Typography>
         <Grid container alignItems="center" gap={1} mt={3} mb={4}>
           <Grid item xs={5}>
             <TextField
@@ -322,7 +327,9 @@ export default function BlockingPage() {
               loading={isAdding}
               loadingIndicator="Adding..."
               onClick={handleAddRange}
-              disabled={!selectedClient || selectedClient?.clientName === 'All Clients'}
+              disabled={
+                !selectedClient || selectedClient?.clientName === 'All Clients'
+              }
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <AddIcon />
@@ -332,7 +339,9 @@ export default function BlockingPage() {
           </Grid>
         </Grid>
 
-        <Typography variant="subtitle1" color="grey">Unavailable Ranges:</Typography>
+        <Typography variant="subtitle1" color="grey">
+          Unavailable Ranges:
+        </Typography>
         <Box display="flex" flexDirection="column" gap={2} mt={2}>
           {isFetching ? (
             <LoadingComponent />
@@ -343,7 +352,9 @@ export default function BlockingPage() {
               (targetClient: string, clientIndex: number) => {
                 return (
                   <>
-                    <Typography key={clientIndex} sx={{mt: 2}}>{targetClient}</Typography>
+                    <Typography key={clientIndex} sx={{ mt: 2 }}>
+                      {targetClient}
+                    </Typography>
                     {unavailableRanges.data[targetClient].map(
                       (range: any, rangeIndex: number) => {
                         return (

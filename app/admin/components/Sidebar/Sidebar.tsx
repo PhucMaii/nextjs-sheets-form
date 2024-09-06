@@ -3,17 +3,19 @@
 import {
   Box,
   Button,
+  Divider,
   Drawer,
   IconButton,
   List,
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Typography,
   useMediaQuery,
 } from '@mui/material';
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-import { tabs } from '../../../lib/constant';
+import { adminTabs, tabs } from '../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -22,7 +24,7 @@ import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
-import { primaryColor } from '@/theme/color';
+import { primary, primaryColor } from '@/theme/color';
 
 interface PropTypes {
   children: ReactNode;
@@ -105,26 +107,40 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         aria-labelledby="nested-list-subheader"
       >
         <Box display="flex" flexDirection="column" rowGap={2}>
-          {tabs.map((tab, index) => (
-            <ListItemButtonStyled
-              $textColor="white"
-              $bgColor={primaryColor}
-              $currentTab={currentTab === tab.path}
-              key={index}
-              onClick={() => handleChangeTab(tab.path)}
-            >
-              <ListItemIcon>
-                {tab.icon && (
-                  <tab.icon
-                    sx={{
-                      color: currentTab === tab.path ? 'white' : blueGrey[800],
-                    }}
-                  />
-                )}
-              </ListItemIcon>
-              <ListItemText primary={tab.name} />
-            </ListItemButtonStyled>
-          ))}
+          {Object.keys(adminTabs).map((section: string) => {
+            const sectionKey = section as keyof typeof adminTabs;
+            return <>
+            <Typography variant="subtitle2" color={blueGrey[500]} sx={{width: '80%', margin:"auto"}}>{section}</Typography>
+              {
+                adminTabs[sectionKey].map((tab: any, index: number) => {
+                  return (
+                    <ListItemButtonStyled
+                      $textColor={primary.main}
+                      $bgColor={primary.lightest}
+                      $currentTab={currentTab === tab.path}
+                      key={index}
+                      onClick={() => handleChangeTab(tab.path)}
+                    >
+                      <ListItemIcon>
+                        {tab.icon && (
+                          <tab.icon
+                            sx={{
+                              color:
+                                currentTab === tab.path
+                                  ? primary.main
+                                  : blueGrey[600],
+                            }}
+                          />
+                        )}
+                      </ListItemIcon>
+                      <ListItemText primary={tab.name} />
+                    </ListItemButtonStyled>
+                  );
+                })
+              }
+              <Divider />
+            </> 
+          })}
         </Box>
       </List>
 

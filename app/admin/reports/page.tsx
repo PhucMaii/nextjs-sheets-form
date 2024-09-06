@@ -29,7 +29,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { blue } from '@mui/material/colors';
+import { blue, blueGrey } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
@@ -605,7 +605,7 @@ export default function ReportPage() {
         onClose={() => setNotification({ ...notification, on: false })}
       />
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h4">Reports</Typography>
+        <Typography variant="h5" color={blueGrey[800]}>Reports</Typography>
         {clientValue?.clientName === 'All Clients' ? (
           <>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -621,7 +621,7 @@ export default function ReportPage() {
         )}
       </Box>
       <ShadowSection display="flex" flexDirection="column" gap={1}>
-        <Typography variant="h6">Clients</Typography>
+        <Typography variant="h6" color={blueGrey[800]} sx={{mb: 1}}>Clients</Typography>
         <Autocomplete
           options={
             [

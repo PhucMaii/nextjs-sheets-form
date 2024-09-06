@@ -51,8 +51,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         userId: existingUser.id,
       },
       include: {
-        user: true
-      }
+        user: true,
+      },
     });
 
     return res.status(200).json({

@@ -29,6 +29,7 @@ import { Reorder } from 'framer-motion';
 import Item from '../components/Reorder/Item';
 import { LoadingButton } from '@mui/lab';
 import { UPDATE_OPTION } from '../components/Modals/edit/EditItem';
+import { blueGrey } from '@mui/material/colors';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -418,7 +419,7 @@ export default function ItemPage() {
         <Grid container alignItems="center">
           <Grid item xs={12} md={10}>
             <Box display="flex" gap={1} alignItems="center">
-              <Typography variant="h6">
+              <Typography variant="h6" color={blueGrey[800]}>
                 {currentCategory?.name} ( {currentCategory?.users?.length}{' '}
                 clients )
               </Typography>
