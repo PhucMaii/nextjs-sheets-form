@@ -72,7 +72,9 @@ const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
 
   // Filter range that include the selected date
   const rangesInDate = rangeList.filter((range: DayRange) => {
-    return selectedDate >= range.startDate && selectedDate <= range.endDate;
+    const endDate = new Date(range.endDate);
+    endDate.setDate(range.endDate.getDate() - 1);
+    return selectedDate >= range.startDate && selectedDate <= endDate;
   });
 
   // Format return result by client

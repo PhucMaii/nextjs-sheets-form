@@ -38,20 +38,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         deliveryDate,
       );
 
-      // let createdBy: any = '';
-      // if (existingOrder?.updatedBy) {
-      //   createdBy = existingOrder.updatedBy
-      //     .split(' - ')[0]
-      //     .toLowerCase()
-      //     .trim();
-      // } else if (existingOrder?.createdBy) {
-      //   createdBy = existingOrder?.createdBy
-      //     .split(' - ')[0]
-      //     .toLowerCase()
-      //     .trim();
-      // }
-      // console.log({ existingOrder, createdBy }, 'existingOrder');
-
       if (existingOrder) {
         await pusherServer.trigger(
           'admin-schedule-order',
@@ -118,7 +104,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       updatedOrderList.push(newOrder);
 
       await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
-      console.log({ successful: scheduleOrder, items: scheduleOrder.items });
+      console.log({ successful: scheduleOrder });
     }
 
     return res.status(201).json({
