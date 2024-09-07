@@ -90,7 +90,7 @@ export const days = [
   'Saturday',
 ];
 
-export const limitOrderHour = 8;
+export const limitOrderHour = 7;
 
 export const adminTabs = {
   Admin: [
