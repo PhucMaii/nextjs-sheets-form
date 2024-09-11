@@ -89,7 +89,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedStartDate,
     );
 
-    const manifest = generateManifest(sortedThisMonthOrders);
+    const manifest = generateManifest(sortedThisMonthOrders, revenue);
 
     const overviewData = {
       manifest,
@@ -106,29 +106,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const PPQuantity = 0;
     const PPRevenue = 0;
     const totalItems = 0;
-    // for (const order of sortedThisMonthOrders) {
-    //   for (const item of order.items) {
-    //     totalItems += item.quantity;
-    //     if (!order.user.subCategoryId) {
-    //       break;
-    //     }
-
-    //     if (order.user.subCategoryId === 1) {
-    //       if (item.name.includes('BEAN')) {
-    //         const totalPrice =
-    //           Math.round(item.price * item.quantity * 100) / 100;
-    //         BKQuantity += item.quantity;
-    //         BKRevenue += totalPrice;
-    //       }
-    //     }
-
-    //     if (order.user.subCategoryId === 2) {
-    //       const totalPrice = Math.round(item.price * item.quantity * 100) / 100;
-    //       PPQuantity += item.quantity;
-    //       PPRevenue += totalPrice;
-    //     }
-    //   }
-    // }
 
     const BKPercentage = (BKRevenue / revenue) * 100;
     const PPPercentage = (PPRevenue / revenue) * 100;
@@ -205,20 +182,47 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-export const generateManifest = (orders: any) => {
+export const generateManifest = (orders: any, revenue: number = 0) => {
   const itemList = orders.flatMap((order: any) => {
     return order.items;
   });
 
+  if (revenue === 0) {
+    const manifest = itemList.reduce((acc: any, item: any) => {
+      const key = item.name;
+
+      if (!acc[key]) {
+        acc[key] = item.quantity;
+        return acc;
+      }
+
+      acc[key] += item.quantity;
+      return acc;
+    }, {});
+    return manifest;
+  }
+
   const manifest = itemList.reduce((acc: any, item: any) => {
     const key = item.name;
+    const itemPrice = item.quantity * item.price;
 
     if (!acc[key]) {
-      acc[key] = item.quantity;
+      const percentageTake = (itemPrice / revenue) * 100;
+      acc[key] = {
+        quantity: item.quantity,
+        price: itemPrice,
+        percentage: percentageTake.toFixed(2),
+      };
       return acc;
     }
 
-    acc[key] += item.quantity;
+    const newTotalPrice = acc[key].price + itemPrice;
+    const newPercentageTake = (newTotalPrice / revenue) * 100;
+    acc[key] = {
+      quantity: acc[key].quantity + item.quantity,
+      price: newTotalPrice,
+      percentage: newPercentageTake.toFixed(2),
+    };
     return acc;
   }, {});
 
@@ -242,17 +246,6 @@ const getLastMonthRevenue = async (
   );
   lastMonthEnd.setDate(0);
 
-  // const sortedThisMonthOrders = filterDateRangeOrders(
-  //   orders,
-  //   lastMonthStart,
-  //   lastMonthEnd,
-  // );
-  // const revenueByDate = revenueGroupByDeliveryDate(sortedThisMonthOrders);
-  // const formatLengthRevenue = revenueByDate.values.slice(
-  //   0,
-  //   thisMonthRevenue.length,
-  // );
-  // return formatLengthRevenue;
   const datesInRange = generateListOfDateString(lastMonthStart, lastMonthEnd);
   const orders: any = await prisma.orders.findMany({
     where: {
