@@ -107,6 +107,8 @@ export interface ScheduledOrder {
   items: OrderedItems[];
   user: UserType;
   day: string;
+  alreadyOrder?: boolean;
+  blocked?: boolean;
 }
 
 export interface IRoutes extends Route {

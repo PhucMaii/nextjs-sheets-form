@@ -13,6 +13,7 @@ import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import EditScheduleOrder from '../Modals/edit/EditScheduleOrder';
+import { green, grey } from '@mui/material/colors';
 
 interface PropTypes {
   selectedOrders: ScheduledOrder[];
@@ -25,6 +26,11 @@ interface PropTypes {
   handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
   mutateOrders: any;
 }
+
+const PreOrderColor = {
+  ALREADY_ORDER: green[50] as string,
+  BLOCKED: grey[200] as string
+} as const
 
 export default function ScheduleOrder({
   scheduleOrder,
@@ -105,7 +111,17 @@ export default function ScheduleOrder({
   );
 
   return (
-    <Paper elevation={0} sx={{ py: 2 }}>
+    <Paper
+      elevation={0}
+      sx={{
+        py: 2,
+        backgroundColor: scheduleOrder?.alreadyOrder
+          ? PreOrderColor.ALREADY_ORDER
+          : scheduleOrder?.blocked
+            ? PreOrderColor.BLOCKED
+            : '',
+      }}
+    >
       <Grid container alignItems="center" spacing={1}>
         <Grid item md={1}>
           <Checkbox

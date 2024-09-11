@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { SplashScreen } from '@/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
@@ -17,7 +17,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { days } from '@/app/lib/constant';
+import { days, limitOrderHour } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import ReceiptIcon from '@mui/icons-material/Receipt';
@@ -52,6 +52,7 @@ import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import { insertInSortedIdArray } from '@/app/utils/array';
 import { SWRFetchData } from '@/app/utils/db';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -77,8 +78,21 @@ export default function ScheduledOrderPage() {
   const [routes, setRoutes] = useState<IRoutes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+  const recommendDate = useMemo(() => {
+    // format initial date
+    const dateObj = new Date();
+    // if current hour is greater limit hour, then recommend the next day
+    if (dateObj.getHours() >= limitOrderHour) {
+      dateObj.setDate(dateObj.getDate() + 1);
+    }
+
+    const formattedDate = YYYYMMDDFormat(dateObj);
+
+    return { day: days[dateObj.getDay()], deliveryDate: formattedDate };
+  }, []);
   // Data Fetching
   const [routesResponse] = SWRFetchData(
     `${API_URL.ROUTES}?day=${days[dayIndex]}`,
@@ -90,7 +104,7 @@ export default function ScheduledOrderPage() {
     },
   );
   const [orders, mutateOrders] = SWRFetchData(
-    `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
+    `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}&deliveryDate=${recommendDate.day === days[dayIndex] ? recommendDate.deliveryDate : ''}`,
   );
   const [drivers] = SWRFetchData(API_URL.ADMIN_DRIVERS);
   const [clients, mutateClients] = SWRFetchData(
@@ -214,6 +228,8 @@ export default function ScheduledOrderPage() {
       mutateOrders();
     }
   };
+
+  console.log(orders?.data, 'order');
 
   const calculateTotalBill = useCallback((): string => {
     const totalPrice = orderList.reduce(
@@ -606,7 +622,7 @@ export default function ScheduledOrderPage() {
                   <Tab
                     key={index}
                     id={`simple-tab-${index}`}
-                    label={day}
+                    label={`${day} ${recommendDate.day === day ? '•' : ''}`}
                     aria-controls={`tabpanel-${index}`}
                     value={index}
                   />
