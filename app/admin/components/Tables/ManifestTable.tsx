@@ -1,4 +1,5 @@
 'use client';
+import { minifyNumber } from '@/app/utils/number';
 import {
   Paper,
   Table,
@@ -12,11 +13,12 @@ import React, { useMemo, useState } from 'react';
 
 interface IProps {
   manifest: any;
+  isMinify: boolean;
 }
 
 const rowsPerPage = 10;
 
-export default function ManifestTable({ manifest }: IProps) {
+export default function ManifestTable({ manifest, isMinify }: IProps) {
   const [page, setPage] = useState<number>(0);
   const sortedManifestKey = useMemo(() => {
     if (!manifest) {
@@ -24,9 +26,9 @@ export default function ManifestTable({ manifest }: IProps) {
     }
 
     return Object.keys(manifest)
-      .filter((item: string) => manifest[item] > 0)
+      .filter((item: string) => manifest[item].quantity > 0)
       .sort(
-        (item1: string, item2: string) => manifest[item2] - manifest[item1],
+        (item1: string, item2: string) => manifest[item2].quantity - manifest[item1].quantity,
       );
   }, [manifest]);
 
@@ -39,6 +41,8 @@ export default function ManifestTable({ manifest }: IProps) {
         <TableHead>
           <TableRow>
             <TableCell>Item</TableCell>
+            <TableCell align="right">Revenue ($)</TableCell>
+            <TableCell align="right">Revenue (%)</TableCell>
             <TableCell align="right">Quantity</TableCell>
           </TableRow>
         </TableHead>
@@ -50,7 +54,9 @@ export default function ManifestTable({ manifest }: IProps) {
                 return (
                   <TableRow key={index}>
                     <TableCell>{item}</TableCell>
-                    <TableCell align="right">{manifest[item]}</TableCell>
+                    <TableCell align="right">${isMinify ? minifyNumber(manifest[item].price) : manifest[item].price.toFixed(2)}</TableCell>
+                    <TableCell align="right">{manifest[item].percentage} %</TableCell>
+                    <TableCell align="right">{manifest[item].quantity}</TableCell>
                   </TableRow>
                 );
               })}

@@ -163,7 +163,7 @@ export default function Overview() {
             </Typography>
             <Typography variant="subtitle2">Delivered Items</Typography>
           </Box>
-          <ManifestTable manifest={overviewData?.manifest || null} />
+          <ManifestTable isMinify={isMinify} manifest={overviewData?.manifest || null} />
         </Grid>
         <Grid item xs={12}>
           <Box
