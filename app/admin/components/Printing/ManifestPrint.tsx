@@ -155,7 +155,6 @@ export const ManifestPrint = forwardRef(
                             .slice(0, 2)
                             .join(' - ');
 
-                          console.log(clientName?.split(' - ')[1]);
                           if (
                             clientName?.split(' - ')[1] == ' C.O.D ' ||
                             clientName?.split(' - ')[1] == ' MONTHLY ' ||

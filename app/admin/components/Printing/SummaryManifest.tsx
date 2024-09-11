@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import './print.css';
+import { sortedItemKeys } from '@/app/utils/array';
 
 interface PropTypes {
   manifest: any;
@@ -31,13 +32,6 @@ export const SummaryManifest = forwardRef(
       );
     }
 
-    // Display the beansprouts first then other items
-    const customSortKeys = (keys: string[]): any => {
-      const mainKeys = keys.filter((key) => mainItems.includes(key));
-      const otherKeys = keys.filter((key) => !mainItems.includes(key));
-      return [...mainKeys, ...otherKeys];
-    };
-
     return (
       <div ref={ref}>
         <Box sx={{ width: '100%', height: '100%', marginRight: 10 }}>
@@ -51,8 +45,9 @@ export const SummaryManifest = forwardRef(
                 return null;
               }
 
-              const sortedItems: any = customSortKeys(
+              const sortedItems: any = sortedItemKeys(
                 Object.keys(manifest[routeId].summary),
+                mainItems,
               );
 
               return (

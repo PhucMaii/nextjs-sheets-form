@@ -29,8 +29,8 @@ interface PropTypes {
 
 const PreOrderColor = {
   ALREADY_ORDER: green[50] as string,
-  BLOCKED: grey[200] as string
-} as const
+  BLOCKED: grey[200] as string,
+} as const;
 
 export default function ScheduleOrder({
   scheduleOrder,
