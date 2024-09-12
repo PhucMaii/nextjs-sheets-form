@@ -10,6 +10,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
 import { IRoutes } from '@/app/utils/type';
 import { primary, primaryColor } from '@/theme/color';
+import { days } from '@/app/lib/constant';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -18,6 +19,7 @@ interface IProps {
   currentRoute: any;
   setCurrentRoute: any;
   routes: any;
+  currentDate: string;
 }
 
 export default function OrderOverview({
@@ -27,7 +29,24 @@ export default function OrderOverview({
   currentRoute,
   setCurrentRoute,
   routes,
+  currentDate,
 }: IProps) {
+  const wcodDay = useMemo(() => {
+    const date = new Date(currentDate);
+    const dayIndex = date.getDay();
+
+    return Object.values(PAYMENT_TYPE).find((paymentType: string) => {
+      if (!paymentType.includes('WCOD')) {
+        return false;
+      }
+
+      const day = paymentType.split(' - ')[1];
+      return day === days[dayIndex];
+    });
+  }, [currentDate]);
+
+  console.log(wcodDay, 'wcod day');
+
   const todayTotalGross = useMemo(() => {
     return allRouteOrderData.length > 0
       ? allRouteOrderData.reduce((acc: number, order: Order) => {
@@ -126,8 +145,9 @@ export default function OrderOverview({
         {/* Total Gross Section */}
         <Grid
           item
-          md={3.9}
-          xs={12}
+          lg={3.9}
+          md={5.9}
+          sm={12}
           display="flex"
           flexDirection="column"
           gap={2}
@@ -186,8 +206,9 @@ export default function OrderOverview({
         {/* Track Bills Section */}
         <Grid
           item
-          xs={12}
-          md={3.9}
+          sm={12}
+          lg={3.9}
+          md={5.9}
           display="flex"
           flexDirection="column"
           gap={2}
@@ -246,8 +267,9 @@ export default function OrderOverview({
         {/* COD Section */}
         <Grid
           item
-          xs={12}
-          md={3.9}
+          sm={12}
+          lg={3.9}
+          md={5.9}
           display="flex"
           flexDirection="column"
           gap={2}

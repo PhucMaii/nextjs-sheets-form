@@ -691,7 +691,7 @@ export default function Orders() {
         // baseOrderData={baseOrderData}
         allRouteOrderData={orders ? orders.data : []}
         lastWeekOrderData={lastWeekOrders ? lastWeekOrders.data : []}
-        // currentDate={date}
+        currentDate={date}
         orderData={currentRoute === 0 ? baseOrderData : routeOrders}
         currentRoute={currentRoute}
         setCurrentRoute={setCurrentRoute}
