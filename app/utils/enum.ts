@@ -42,6 +42,13 @@ export enum PAYMENT_TYPE {
   MONTHLY = 'MONTHLY',
   COD = 'COD',
   WCOD = 'WCOD',
+  WCOD_SUN = 'WCOD - Sunday',
+  WCOD_MON = 'WCOD - Monday',
+  WCOD_TUE = 'WCOD - Tuesday',
+  WCOD_WED = 'WCOD - Wednesday',
+  WCOD_THU = 'WCOD - Thursday',
+  WCOD_FRI = 'WCOD - Friday',
+  WCOD_SAT = 'WCOD - Saturday',
 }
 
 export enum USER_ROLE {
