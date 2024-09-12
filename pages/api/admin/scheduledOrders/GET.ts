@@ -1,6 +1,7 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { DayRange, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { normalizeDate } from '../../utils/date';
 
 interface QueryTypes {
   day?: string;
@@ -66,7 +67,7 @@ const getClientsPreOrderInfo = async (
 ) => {
   try {
     const prisma = new PrismaClient();
-    const formattedDate = new Date(deliveryDate);
+    const formattedDate = normalizeDate(new Date(deliveryDate));
 
     const clientOrdersOnThatDay = await prisma.orders.findMany({
       where: {
@@ -108,9 +109,11 @@ const getClientsPreOrderInfo = async (
 
     // Filter range that includes delivery date only
     const filteredRange = blockingRange.filter((range: DayRange) => {
-      const endDate = new Date(range.endDate);
-      endDate.setDate(range.endDate.getDate() - 1);
-      return range.startDate <= formattedDate && endDate >= formattedDate;
+      const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
+      const normalizedEndDate = normalizeDate(range.endDate);
+      
+      normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+      return normalizedStartDate <= formattedDate && normalizedEndDate >= formattedDate;
     });
 
     // Loop through range and add user who get blocked to the formattedClients list

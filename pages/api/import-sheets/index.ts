@@ -7,7 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { pusherServer } from '@/app/pusher';
-import { convertDeliveryDateStringToDate } from '../utils/date';
+import { normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 
 interface RequestQuery {
@@ -53,16 +53,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Check is delivery date in client's vacation range
     if (isCheckUnavailableRange) {
-      const deliveryDate = convertDeliveryDateStringToDate(
-        body['DELIVERY DATE'],
-      );
+      const deliveryDate = normalizeDate(new Date(body['DELIVERY DATE']));
       for (const dayRange of existingUser.unavailableDayRange) {
-        const startDate = new Date(dayRange.startDate);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(dayRange.endDate);
-        endDate.setDate(endDate.getDate() - 1);
+        const normalizedStartDate = normalizeDate(dayRange.startDate);
+        const normalizedEndDate = normalizeDate(dayRange.endDate);
 
-        if (deliveryDate >= startDate && deliveryDate <= endDate) {
+        normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+        if (
+          deliveryDate >= normalizedStartDate &&
+          deliveryDate <= normalizedEndDate
+        ) {
           return res.status(200).json({
             warning: `Client ${
               existingUser.clientName

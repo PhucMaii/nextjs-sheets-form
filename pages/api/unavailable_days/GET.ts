@@ -1,5 +1,6 @@
 import { DayRange, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { normalizeDate } from '../utils/date';
 
 interface IQuery {
   userId?: string;
@@ -68,13 +69,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
-  const selectedDate = new Date(date);
-
+  const selectedDate = normalizeDate(new Date(date));
   // Filter range that include the selected date
   const rangesInDate = rangeList.filter((range: DayRange) => {
-    const endDate = new Date(range.endDate);
-    endDate.setDate(range.endDate.getDate() - 1);
-    return selectedDate >= range.startDate && selectedDate <= endDate;
+    const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
+    const normalizedEndDate = normalizeDate(range.endDate);
+
+    normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+    return selectedDate >= normalizedStartDate && selectedDate <= normalizedEndDate;
   });
 
   // Format return result by client

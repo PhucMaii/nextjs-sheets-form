@@ -6,7 +6,7 @@ import { checkHasClientOrder } from '../../import-sheets';
 import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
-import { convertDeliveryDateStringToDate } from '../../utils/date';
+import { normalizeDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
 
 interface BodyTypes {
@@ -56,17 +56,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
 
       let trackIndex = 0;
-      const deliveryDateTypeDate =
-        convertDeliveryDateStringToDate(deliveryDate);
+      const deliveryDateTypeDate = normalizeDate(new Date(deliveryDate));
       for (const unavailableRange of unavailableRanges) {
-        const startDate = new Date(unavailableRange.startDate);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(unavailableRange.endDate);
-        endDate.setDate(endDate.getDate() - 1);
+        const normalizedStartDate = normalizeDate(unavailableRange.startDate);
+        const normalizedEndDate = normalizeDate(unavailableRange.endDate);
 
+        normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
         if (
-          deliveryDateTypeDate >= startDate &&
-          deliveryDateTypeDate <= endDate
+          deliveryDateTypeDate >= normalizedStartDate &&
+          deliveryDateTypeDate <= normalizedEndDate
         ) {
           break;
         }
