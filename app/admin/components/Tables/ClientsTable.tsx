@@ -99,7 +99,7 @@ const ClientsTable = ({
         <TableCell variant="head" style={{ width: 150 }}>
           <Typography fontWeight="bold">Order Type</Typography>
         </TableCell>
-        <TableCell variant="head" style={{ width: 150 }}>
+        <TableCell variant="head" style={{ width: 200 }}>
           <Typography fontWeight="bold">Payment Type</Typography>
         </TableCell>
         <TableCell variant="head" style={{ width: 100 }}>

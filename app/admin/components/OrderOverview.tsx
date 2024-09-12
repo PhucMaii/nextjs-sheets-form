@@ -45,8 +45,6 @@ export default function OrderOverview({
     });
   }, [currentDate]);
 
-  console.log(wcodDay, 'wcod day');
-
   const todayTotalGross = useMemo(() => {
     return allRouteOrderData.length > 0
       ? allRouteOrderData.reduce((acc: number, order: Order) => {
@@ -97,8 +95,12 @@ export default function OrderOverview({
 
   const codOrders = useMemo(() => {
     return orderData.filter((order: Order) => {
+      if (order.clientName === 'Test Account') {
+        console.log(order, 'order');
+      }
       return (
-        order?.preference?.paymentType === PAYMENT_TYPE.COD &&
+        (order?.preference?.paymentType === PAYMENT_TYPE.COD ||
+        order?.preference?.paymentType === wcodDay) &&
         order.status !== ORDER_STATUS.VOID &&
         order.status !== ORDER_STATUS.COMPLETED
       );
