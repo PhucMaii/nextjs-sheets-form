@@ -35,13 +35,11 @@ export default function ManifestTable({ manifest, isMinify, isAdmin }: IProps) {
         );
     } else {
       return Object.keys(manifest)
-      .filter((item: string) => manifest[item] > 0)
-      .sort(
-        (item1: string, item2: string) =>
-          manifest[item2] - manifest[item1],
-      ); 
+        .filter((item: string) => manifest[item] > 0)
+        .sort(
+          (item1: string, item2: string) => manifest[item2] - manifest[item1],
+        );
     }
-
   }, [manifest]);
 
   const handleChangePage = (event: any, newPage: any) => {

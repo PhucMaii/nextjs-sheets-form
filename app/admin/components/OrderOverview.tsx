@@ -97,7 +97,7 @@ export default function OrderOverview({
     return orderData.filter((order: Order) => {
       return (
         (order?.preference?.paymentType === PAYMENT_TYPE.COD ||
-        order?.preference?.paymentType === wcodDay) &&
+          order?.preference?.paymentType === wcodDay) &&
         order.status !== ORDER_STATUS.VOID &&
         order.status !== ORDER_STATUS.COMPLETED
       );

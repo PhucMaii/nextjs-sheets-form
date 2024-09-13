@@ -76,7 +76,9 @@ const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
     const normalizedEndDate = normalizeDate(range.endDate);
 
     normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
-    return selectedDate >= normalizedStartDate && selectedDate <= normalizedEndDate;
+    return (
+      selectedDate >= normalizedStartDate && selectedDate <= normalizedEndDate
+    );
   });
 
   // Format return result by client

@@ -18,7 +18,7 @@ interface PropTypes {
 export default function DeleteModal({
   targetObj,
   handleDelete,
-  includedButton,
+  includedButton = false,
   open,
   handleCloseModal,
 }: PropTypes) {

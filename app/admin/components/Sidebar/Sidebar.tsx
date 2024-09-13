@@ -93,7 +93,7 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
 
   const content = (
     <>
-      <Toolbar sx={{ mt: 4 }}>
+      <Toolbar sx={{ mt: 6 }}>
         <img
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
           alt="Supreme Sprouts Logo"
@@ -102,7 +102,7 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
       </Toolbar>
 
       <List
-        sx={{ width: '100%', maxWidth: 300, bgcolor: 'background', mt: 2 }}
+        sx={{ width: '100%', maxWidth: 300, bgcolor: 'background', mt: 4 }}
         component="nav"
         aria-labelledby="nested-list-subheader"
       >

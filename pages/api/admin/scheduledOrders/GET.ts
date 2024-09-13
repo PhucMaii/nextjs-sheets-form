@@ -111,9 +111,12 @@ const getClientsPreOrderInfo = async (
     const filteredRange = blockingRange.filter((range: DayRange) => {
       const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
       const normalizedEndDate = normalizeDate(range.endDate);
-      
+
       normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
-      return normalizedStartDate <= formattedDate && normalizedEndDate >= formattedDate;
+      return (
+        normalizedStartDate <= formattedDate &&
+        normalizedEndDate >= formattedDate
+      );
     });
 
     // Loop through range and add user who get blocked to the formattedClients list

@@ -119,3 +119,7 @@ export interface IRoutes extends Route {
 export interface IUserRoutes extends UserRoute {
   user: UserType;
 }
+
+export interface IDriver extends Driver {
+  routes: IRoutes[];
+}

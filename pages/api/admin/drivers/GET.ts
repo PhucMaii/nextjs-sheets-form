@@ -5,7 +5,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const drivers = await prisma.driver.findMany();
+    const drivers = await prisma.driver.findMany({
+      include: {
+        routes: true,
+      },
+    });
 
     return res.status(200).json({
       data: drivers,

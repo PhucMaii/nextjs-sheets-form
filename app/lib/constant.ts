@@ -115,14 +115,21 @@ export const adminTabs = {
       path: '/admin/reports',
     },
     {
+      name: 'Settings',
+      icon: SettingsIcon,
+      path: '/admin/settings',
+    },
+  ],
+  Manage: [
+    {
       name: 'Clients',
       icon: PeopleIcon,
       path: '/admin/clients',
     },
     {
-      name: 'Settings',
-      icon: SettingsIcon,
-      path: '/admin/settings',
+      name: 'Drivers',
+      icon: LocalShippingIcon,
+      path: '/admin/drivers',
     },
   ],
   Others: [
