@@ -1,16 +1,18 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { Box, Button, Tab, Tabs, Typography } from '@mui/material';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { blueGrey } from '@mui/material/colors';
 import { ShadowSection } from '../reports/styled';
 import DriverTable from '../components/Tables/DriverTable';
-import ErrorComponent from '../components/ErrorComponent';
 import { Notification } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
 import AddDriver from '../components/Modals/add/AddDriver';
+import useSelectDate from '@/hooks/useSelectDate';
+import TodayRoute from '../components/TodayRoute';
+import { days } from '@/app/lib/constant';
 
 export default function DriverManagement() {
   const [notification, setNotification] = useState<Notification>({
@@ -21,7 +23,20 @@ export default function DriverManagement() {
   const [isOpenAddDriver, setIsOpenAddDriver] = useState<boolean>(false);
   const [tabIndex, setTabIndex] = useState<number>(0);
 
+  // Custom Hooks
+  const { date, SelectDate } = useSelectDate();
+
+  const dayIndex = useMemo(() => {
+    const selectedDate = new Date(date);
+    return selectedDate.getDay();
+  }, [date]);
+
+  // Data Fetching
   const [drivers, mutateDrivers] = SWRFetchData(`${API_URL.ADMIN}/drivers`);
+  const [orders] = SWRFetchData(
+    `${API_URL.ORDER}?date=${date}&status=${ORDER_STATUS.NONE}`,
+  );
+  const [routes] = SWRFetchData(`${API_URL.ROUTES}?day=${days[dayIndex]}`);
 
   return (
     <Sidebar>
@@ -52,7 +67,11 @@ export default function DriverManagement() {
               aria-controls={`tabpanel-0`}
               value={0}
             />
-            <Tab label="Today Route" aria-controls={`tabpanel-0`} value={1} />
+            <Tab
+              label={`Today Route (${days[dayIndex].slice(0, 3)})`}
+              aria-controls={`tabpanel-0`}
+              value={1}
+            />
           </Tabs>
         </Box>
 
@@ -73,7 +92,16 @@ export default function DriverManagement() {
             />
           </>
         ) : (
-          <ErrorComponent errorText="Coming Soon" />
+          <>
+            <Box display="flex" justifyContent="flex-end" m={2}>
+              {SelectDate}
+            </Box>
+            <TodayRoute
+              orderData={orders?.data || []}
+              routes={routes?.data || []}
+              date={date}
+            />
+          </>
         )}
       </ShadowSection>
     </Sidebar>

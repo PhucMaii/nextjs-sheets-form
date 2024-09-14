@@ -75,7 +75,7 @@ export default function EditDriver({
             buttonLabel="Save"
             onClick={handleEditDriver}
             onClose={() => setIsOpenModal(false)}
-            buttonProps={{loading: isEditing}}
+            buttonProps={{ loading: isEditing }}
           />
           <Divider sx={{ my: 2 }} />
 

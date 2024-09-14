@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Order } from '../orders/page';
-import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
+import { ORDER_STATUS } from '@/app/utils/enum';
 import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
@@ -10,7 +10,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
 import { IRoutes } from '@/app/utils/type';
 import { primary, primaryColor } from '@/theme/color';
-import { days } from '@/app/lib/constant';
+import useCODAndWCOD from '@/hooks/useCODAndWCOD';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -31,19 +31,10 @@ export default function OrderOverview({
   routes,
   currentDate,
 }: IProps) {
-  const wcodDay = useMemo(() => {
-    const date = new Date(currentDate);
-    const dayIndex = date.getDay();
-
-    return Object.values(PAYMENT_TYPE).find((paymentType: string) => {
-      if (!paymentType.includes('WCOD')) {
-        return false;
-      }
-
-      const day = paymentType.split(' - ')[1];
-      return day === days[dayIndex];
-    });
-  }, [currentDate]);
+  const { uncollectedCODOrders, uncollectedCODBill } = useCODAndWCOD(
+    orderData,
+    currentDate,
+  );
 
   const todayTotalGross = useMemo(() => {
     return allRouteOrderData.length > 0
@@ -92,25 +83,6 @@ export default function OrderOverview({
         }, 0)
       : 0;
   }, [openBill]);
-
-  const codOrders = useMemo(() => {
-    return orderData.filter((order: Order) => {
-      return (
-        (order?.preference?.paymentType === PAYMENT_TYPE.COD ||
-          order?.preference?.paymentType === wcodDay) &&
-        order.status !== ORDER_STATUS.VOID &&
-        order.status !== ORDER_STATUS.COMPLETED
-      );
-    });
-  }, [orderData]);
-
-  const codBill = useMemo(() => {
-    return codOrders.length > 0
-      ? codOrders.reduce((acc: number, order: Order) => {
-          return acc + order.totalPrice;
-        }, 0)
-      : 0;
-  }, [codOrders]);
 
   return (
     <ShadowSection sx={{ backgroundColor: 'white !important' }}>
@@ -300,7 +272,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {codOrders.length}
+                {uncollectedCODOrders.length}
               </Typography>
             </Box>
             <Box
@@ -318,7 +290,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {codBill.toFixed(2)}
+                {uncollectedCODBill.toFixed(2)}
               </Typography>
             </Box>
           </Box>

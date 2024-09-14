@@ -31,19 +31,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const sameDriverName = await prisma.driver.findFirst({
-        where: {
-          name: updatedName,
-          id: {
-            not: driverId
-          }
+      where: {
+        name: updatedName,
+        id: {
+          not: driverId,
         },
-      });
+      },
+    });
 
-      if (sameDriverName) {
-        return res.status(400).json({
-          error: 'Driver Name Existed Already',
-        });
-      }
+    if (sameDriverName) {
+      return res.status(400).json({
+        error: 'Driver Name Existed Already',
+      });
+    }
 
     const updatedDriver = await prisma.driver.update({
       where: {
