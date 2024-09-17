@@ -1,51 +1,27 @@
 import { Order } from '@/app/admin/orders/page';
-import { days } from '@/app/lib/constant';
-import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import axios from 'axios';
+import { fetchWcodOrders } from '@/app/utils/db';
+import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
+import { getWCODDay } from '@/app/utils/time';
 import { useEffect, useMemo, useState } from 'react';
 
 // Current date is in MM/DD/YYYY format
 const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
   const [wcod, setWcod] = useState<any>(null);
 
-  const wcodDay = useMemo(() => {
-    const date = new Date(selectedDate);
-    const dayIndex = date.getDay();
-
-    return Object.values(PAYMENT_TYPE).find((paymentType: string) => {
-      if (!paymentType.includes('WCOD')) {
-        return false;
-      }
-
-      const day = paymentType.split(' - ')[1];
-      return day === days[dayIndex];
-    });
+  const wcodDay: any = useMemo(() => {
+    const day = getWCODDay(selectedDate);
+    return day;
   }, [selectedDate, orderList]);
 
   useEffect(() => {
     if (orderList.length > 0 && wcodDay) {
-      fetchWcodOrders();
+      handleFetchWCOD();
     }
-  }, [wcodDay]);
+  }, [orderList, wcodDay]);
 
-  const fetchWcodOrders = async () => {
-    try {
-      const clientIds = orderList.filter((order: Order) => {
-        return order?.user?.preference?.paymentType === wcodDay
-      }).map((order: Order) => order.userId);
-
-      const response = await axios.get(
-        `${API_URL.ADMIN}/wcod?clientIdList=${[...clientIds]}&date=${selectedDate}`,
-      );
-
-      if (response.data.error) {
-        return;
-      }
-
-      setWcod(response.data.data);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-    }
+  const handleFetchWCOD = async () => {
+      const wcodResponse = await fetchWcodOrders(orderList, selectedDate, wcodDay);
+      setWcod(wcodResponse);
   }
 
   const uncollectedCODOrders = useMemo(() => {

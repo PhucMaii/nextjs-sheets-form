@@ -6,19 +6,56 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Order } from '../orders/page';
 import { UserRoute } from '@prisma/client';
-import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { days } from '@/app/lib/constant';
+import { ORDER_STATUS } from '@/app/utils/enum';
+import { Notification } from '@/app/utils/type';
+import { SplashScreen } from '@/HOC/AuthenGuard';
+import { getCODData } from '@/app/utils/array';
 
 interface IProps {
   orderData: any;
   routes: any; // all routes in that day
   date: string;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-export default function TodayRoute({ orderData, routes, date }: IProps) {
+export default function TodayRoute({ orderData, routes, date, setNotification }: IProps) {
+  const [routeData, setRouteData] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (orderData.length > 0 && routes.length > 0) {
+      getRouteData();
+    }
+  }, [orderData, routes]);
+
+
+  const getRouteData = async () => {
+    setIsLoading(true);
+    try {
+      const newRouteData = [];
+      for (const route of routes) {
+        const routeOrders = filterOrderByRoute(route);
+        const analysisOrders = await getCODData(routeOrders, date);
+        
+        newRouteData.push({...analysisOrders, driverId: route.driverId, driverName: route.driver.name});
+      }
+
+      setRouteData(newRouteData);
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      setNotification({
+        on: true,
+        type: 'error',
+        message: 'There was an error: ' + error
+      });
+      setIsLoading(false);
+    }
+  }
+
   const filterOrderByRoute = (targetRoute: any) => {
     if (routes.length === 0 || !targetRoute || orderData.length === 0) {
       return [];
@@ -41,80 +78,9 @@ export default function TodayRoute({ orderData, routes, date }: IProps) {
     return filteredOrders;
   };
 
-  const analyzeOrders = (routeOrders: Order[]) => {
-    if (!routeOrders || routeOrders.length === 0) {
-      return {};
-    }
-
-    const selectedDate = new Date(date);
-    const dayIndex = selectedDate.getDay();
-
-    const wcodDay = Object.values(PAYMENT_TYPE).find((paymentType: string) => {
-      if (!paymentType.includes('WCOD')) {
-        return false;
-      }
-
-      const day = paymentType.split(' - ')[1];
-      return day === days[dayIndex];
-    });
-
-    const deliveredOrders = routeOrders.filter((order: Order) => {
-      return (
-        order.status === ORDER_STATUS.DELIVERED ||
-        order.status === ORDER_STATUS.COMPLETED
-      );
-    });
-
-    const codOrders = routeOrders.filter((order: Order) => {
-      return (
-        (order?.preference?.paymentType === PAYMENT_TYPE.COD ||
-          order?.preference?.paymentType === wcodDay) &&
-        order.status !== ORDER_STATUS.VOID
-      );
-    });
-
-    const codBill = codOrders.reduce((acc: number, order: Order) => {
-      return acc + order.totalPrice;
-    }, 0);
-
-    const codCollectedOrders = routeOrders.filter((order: Order) => {
-      return (
-        (order?.preference?.paymentType === PAYMENT_TYPE.COD ||
-          order?.preference?.paymentType === wcodDay) &&
-        order.status === ORDER_STATUS.COMPLETED
-      );
-    });
-
-    const codCollectedBill = codCollectedOrders.reduce(
-      (acc: number, order: Order) => {
-        return acc + order.totalPrice;
-      },
-      0,
-    );
-
-    const codUncollectedOrders = routeOrders.filter((order: Order) => {
-      return (
-        (order?.preference?.paymentType === PAYMENT_TYPE.COD ||
-          order?.preference?.paymentType === wcodDay) &&
-        (order.status === ORDER_STATUS.DELIVERED ||
-          order.status === ORDER_STATUS.INCOMPLETED)
-      );
-    });
-
-    const codUncollectedBill = codUncollectedOrders.reduce(
-      (acc: number, order: Order) => {
-        return acc + order.totalPrice;
-      },
-      0,
-    );
-
-    return {
-      delivered: deliveredOrders,
-      codBill,
-      codCollectedBill,
-      codUncollectedBill,
-    };
-  };
+  if (isLoading) {
+    return <SplashScreen />
+  }
 
   return (
       <TableContainer>
@@ -123,33 +89,31 @@ export default function TodayRoute({ orderData, routes, date }: IProps) {
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Name</TableCell>
-              <TableCell>Delivery Orders</TableCell>
               <TableCell>Delivered</TableCell>
+              <TableCell>Delivery Orders</TableCell>
               <TableCell>Collected Money</TableCell>
               <TableCell>Uncollected Money</TableCell>
               <TableCell>COD + WCOD Amount</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {routes.length > 0 &&
-              routes.map((route: any, index: number) => {
-                const routeOrders: any = filterOrderByRoute(route);
-                const analysisOrders: any = analyzeOrders(routeOrders);
+            {routeData.length > 0 &&
+              routeData.map((route: any, index: number) => {
                 return (
                   <TableRow key={index}>
                     <TableCell>{route.driverId}</TableCell>
-                    <TableCell>{route.driver.name}</TableCell>
-                    <TableCell>{routeOrders?.length || 0}</TableCell>
+                    <TableCell>{route.driverName}</TableCell>
                     <TableCell>
-                      {analysisOrders?.delivered?.length || 0}
+                      {route?.delivered?.length || 0}
+                    </TableCell>
+                    <TableCell>{route?.orders?.length || 0}</TableCell>
+                    <TableCell>
+                      ${route?.collectedCODBill || 0}
                     </TableCell>
                     <TableCell>
-                      ${analysisOrders?.codCollectedBill || 0}
+                      ${route?.uncollectedCODBill || 0}
                     </TableCell>
-                    <TableCell>
-                      ${analysisOrders?.codUncollectedBill || 0}
-                    </TableCell>
-                    <TableCell>${analysisOrders?.codBill || 0}</TableCell>
+                    <TableCell>${route?.codBill || 0}</TableCell>
                   </TableRow>
                 );
               })}

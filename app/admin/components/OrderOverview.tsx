@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Order } from '../orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
@@ -10,7 +10,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
 import { IRoutes } from '@/app/utils/type';
 import { primary, primaryColor } from '@/theme/color';
-import useCODAndWCOD from '@/hooks/useCODAndWCOD';
+import { getCODData } from '@/app/utils/array';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -31,10 +31,18 @@ export default function OrderOverview({
   routes,
   currentDate,
 }: IProps) {
-  const { uncollectedCODOrders, uncollectedCODBill } = useCODAndWCOD(
-    orderData,
-    currentDate,
-  );
+  const [codData, setCodData] = useState<any>();
+
+  useEffect(() => {
+    if (orderData && orderData.length > 0) {
+      handleGetCODData();
+    }
+  }, [orderData, currentDate]);
+
+  const handleGetCODData = async () => {
+    const analysisCODOrders = await getCODData(orderData, currentDate);
+    setCodData(analysisCODOrders);
+  }
 
   const todayTotalGross = useMemo(() => {
     return allRouteOrderData.length > 0
@@ -272,7 +280,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {uncollectedCODOrders.length}
+                {codData?.uncollectedCODOrders?.length || 0}
               </Typography>
             </Box>
             <Box
@@ -290,7 +298,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {uncollectedCODBill.toFixed(2)}
+                {codData?.uncollectedCODBill?.toFixed(2) || 0}
               </Typography>
             </Box>
           </Box>

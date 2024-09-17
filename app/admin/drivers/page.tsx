@@ -100,6 +100,7 @@ export default function DriverManagement() {
               orderData={orders?.data || []}
               routes={routes?.data || []}
               date={date}
+              setNotification={setNotification}
             />
           </>
         )}

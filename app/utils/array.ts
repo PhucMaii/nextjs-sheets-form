@@ -1,3 +1,8 @@
+import { Order } from "../admin/orders/page";
+import { fetchWcodOrders } from "./db";
+import { ORDER_STATUS, PAYMENT_TYPE } from "./enum";
+import { getWCODDay } from "./time";
+
 // Utility function to group items by a key
 export const groupBy = (array: any[], key: (item: any) => any) => {
   return array.reduce((result, item) => {
@@ -32,14 +37,6 @@ export const insertInSortedIdArray = (array: any[], newElement: any) => {
   return result;
 };
 
-// export const customSortItemKeys = (keys: string[]): any => {
-//   const mainKeys = mainItems.map((key) => keys.includes(key)).filter;
-//   // const sortedMainKeys = mainItems.map((key) => mainKeys.includes(key));
-
-//   const otherKeys = keys.filter((key) => !mainItems.includes(key));
-//   return [...sortedMainKeys, ...otherKeys];
-// };
-
 export const sortedItemKeys = (
   listToSort: string[],
   basedSortArray: string[],
@@ -61,4 +58,80 @@ export const sortedItemKeys = (
     // If neither element is in the basedSortArray, sort them alphabetically
     return a.localeCompare(b);
   });
+};
+
+export const getCODData = async (routeOrders: Order[], date: string) => {
+  if (!routeOrders || routeOrders.length === 0) {
+    return {};
+  }
+  
+  const wcodDay: any = getWCODDay(date);
+  const wcodResponse = await fetchWcodOrders(routeOrders, date, wcodDay);
+
+  const orders = [...routeOrders];
+
+  if (wcodResponse) {
+    orders.push(...wcodResponse.wcodOrders);
+  }
+
+  const deliveredOrders = orders.filter((order: Order) => {
+    return (
+      order.status === ORDER_STATUS.DELIVERED ||
+      order.status === ORDER_STATUS.COMPLETED
+    );
+  });
+
+  const codOrders = orders.filter((order: Order) => {
+    return (
+      (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD ||
+        order?.user?.preference?.paymentType === wcodDay) &&
+      order.status !== ORDER_STATUS.VOID
+    );
+  });
+
+  const codBill = codOrders.reduce((acc: number, order: Order) => {
+    return acc + order.totalPrice;
+  }, 0);
+
+  const collectedCODOrders = orders.filter((order: Order) => {
+    return (
+      (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD ||
+        order?.user?.preference?.paymentType === wcodDay) &&
+      order.status === ORDER_STATUS.COMPLETED
+    );
+  });
+
+  const collectedCODBill = collectedCODOrders.reduce(
+    (acc: number, order: Order) => {
+      return acc + order.totalPrice;
+    },
+    0,
+  );
+
+  const uncollectedCODOrders = orders.filter((order: Order) => {
+    return (
+      (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD ||
+        order?.user?.preference?.paymentType === wcodDay) &&
+      (order.status === ORDER_STATUS.DELIVERED ||
+        order.status === ORDER_STATUS.INCOMPLETED)
+    );
+  });
+
+  const uncollectedCODBill = uncollectedCODOrders.reduce(
+    (acc: number, order: Order) => {
+      return acc + order.totalPrice;
+    },
+    0,
+  );
+
+  return {
+    orders,
+    delivered: deliveredOrders,
+    codOrders,
+    codBill,
+    collectedCODBill,
+    uncollectedCODBill,
+    collectedCODOrders,
+    uncollectedCODOrders
+  };
 };
