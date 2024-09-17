@@ -5,6 +5,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  CircularProgress,
   Grid,
   Menu,
   MenuItem,
@@ -86,6 +87,8 @@ export default function ReportPage() {
     return formattedDate;
   });
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
+  const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
+  const [isSendAndPrintLoading, setIsSendAndPrintLoading] = useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
@@ -378,6 +381,7 @@ export default function ReportPage() {
 
   const handleSendInvoice = async () => {
     try {
+      
       const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
         client: clientValue,
         orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
@@ -390,6 +394,7 @@ export default function ReportPage() {
           type: 'error',
           message: response.data.error,
         });
+
         return;
       }
 
@@ -397,13 +402,13 @@ export default function ReportPage() {
         on: true,
         type: 'success',
         message: response.data.message,
-      });
+      })
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
         on: true,
         type: 'error',
-        message: error.response.data.error,
+        message: 'There was an error: ' + error.response.data.error,
       });
     }
   };
@@ -458,22 +463,26 @@ export default function ReportPage() {
         </MenuItem>
         <MenuItem
           disabled={!clientValue?.email || false}
-          onClick={() => {
-            handleSendInvoice();
-            handleCloseStatementAnchor();
+          onClick={async () => {
+            setIsSendLoading(true)
+            await handleSendInvoice();
+            setIsSendLoading(false)
+            // handleCloseStatementAnchor();
           }}
         >
-          Send to client
+          {isSendLoading ? <CircularProgress size={20} /> : 'Send to client'}
         </MenuItem>
         <MenuItem
           disabled={!clientValue?.email || false}
-          onClick={() => {
+          onClick={async () => {
+            setIsSendAndPrintLoading(true);
             handleInvoicePrint();
-            handleSendInvoice();
-            handleCloseStatementAnchor();
+            await handleSendInvoice();
+            setIsSendAndPrintLoading(false);
+            // handleCloseStatementAnchor();
           }}
         >
-          Print and Send
+          {isSendAndPrintLoading ? <CircularProgress size={20} /> : 'Print and Send'}
         </MenuItem>
       </Menu>
     </Box>
@@ -569,6 +578,7 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
+      {/* {isSendLoading && <SplashScreen />} */}
       <div style={{ display: 'none' }}>
         <InvoicePrint
           client={clientValue}
@@ -727,7 +737,7 @@ export default function ReportPage() {
             >
               <LoadingComponent />
             </Box>
-          ) : clientOrders.length > 0 ? (
+          ) : clientOrders.length > 0 ? ( 
             <ClientOrdersTable
               handleDeleteOrderUI={handleDeleteOrderUI}
               handleUpdateOrderUI={handleUpdateOrderUI}
