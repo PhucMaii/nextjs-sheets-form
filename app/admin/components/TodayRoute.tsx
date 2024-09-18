@@ -108,12 +108,12 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
                     </TableCell>
                     <TableCell>{route?.orders?.length || 0}</TableCell>
                     <TableCell>
-                      ${route?.collectedCODBill || 0}
+                      ${route?.collectedCODBill?.toFixed(2) || 0}
                     </TableCell>
                     <TableCell>
-                      ${route?.uncollectedCODBill || 0}
+                      ${route?.uncollectedCODBill.toFixed(2) || 0}
                     </TableCell>
-                    <TableCell>${route?.codBill || 0}</TableCell>
+                    <TableCell>${route?.codBill.toFixed(2) || 0}</TableCell>
                   </TableRow>
                 );
               })}
