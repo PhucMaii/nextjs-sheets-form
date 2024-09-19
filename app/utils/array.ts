@@ -1,7 +1,7 @@
-import { Order } from "../admin/orders/page";
-import { fetchWcodOrders } from "./db";
-import { ORDER_STATUS, PAYMENT_TYPE } from "./enum";
-import { getWCODDay } from "./time";
+import { Order } from '../admin/orders/page';
+import { fetchWcodOrders } from './db';
+import { ORDER_STATUS, PAYMENT_TYPE } from './enum';
+import { getWCODDay } from './time';
 
 // Utility function to group items by a key
 export const groupBy = (array: any[], key: (item: any) => any) => {
@@ -64,7 +64,7 @@ export const getCODData = async (routeOrders: Order[], date: string) => {
   if (!routeOrders || routeOrders.length === 0) {
     return {};
   }
-  
+
   const wcodDay: any = getWCODDay(date);
   const wcodResponse = await fetchWcodOrders(routeOrders, date, wcodDay);
 
@@ -132,6 +132,6 @@ export const getCODData = async (routeOrders: Order[], date: string) => {
     collectedCODBill,
     uncollectedCODBill,
     collectedCODOrders,
-    uncollectedCODOrders
+    uncollectedCODOrders,
   };
 };

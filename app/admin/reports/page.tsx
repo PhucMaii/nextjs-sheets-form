@@ -35,8 +35,6 @@ import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import {
-  YYYYMMDDFormat,
-  formatDateChanged,
   generateMonthRange,
 } from '@/app/utils/time';
 import { useReactToPrint } from 'react-to-print';
@@ -48,10 +46,7 @@ import {
   successColor,
   warningColor,
 } from '@/theme/color';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import { days, limitOrderHour } from '@/app/lib/constant';
+import { days } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
@@ -63,6 +58,7 @@ import {
 import BillPrintModal from '../components/Modals/BillPrintModal';
 import { SWRFetchData } from '@/app/utils/db';
 import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
+import useSelectDate from '@/hooks/useSelectDate';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -76,19 +72,10 @@ export default function ReportPage() {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [datePicker, setDatePicker] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
-      dateObj.setDate(dateObj.getDate() + 1);
-    }
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
   const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
-  const [isSendAndPrintLoading, setIsSendAndPrintLoading] = useState<boolean>(false);
+  const [isSendAndPrintLoading, setIsSendAndPrintLoading] =
+    useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
@@ -109,6 +96,8 @@ export default function ReportPage() {
   const billPrint: any = useRef();
   const weeklyPrint: any = useRef();
 
+  const { date: datePicker, SelectDate } = useSelectDate();
+
   // Data Fetching
   const currentDate = convertDeliveryDateStringToDate(datePicker);
   const [orders, mutateOrders] = SWRFetchData(
@@ -122,7 +111,6 @@ export default function ReportPage() {
     `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
-  // const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');
@@ -247,10 +235,10 @@ export default function ReportPage() {
     setStatementAnchor(null);
   };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setDatePicker(formattedDate);
-  };
+  // const handleDateChange = (e: any) => {
+  //   const formattedDate = formatDateChanged(e);
+  //   setDatePicker(formattedDate);
+  // };
 
   const handleDeleteOrderUI = (deletedOrder: Order) => {
     // update base order list
@@ -381,7 +369,6 @@ export default function ReportPage() {
 
   const handleSendInvoice = async () => {
     try {
-      
       const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
         client: clientValue,
         orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
@@ -402,7 +389,7 @@ export default function ReportPage() {
         on: true,
         type: 'success',
         message: response.data.message,
-      })
+      });
     } catch (error: any) {
       console.log('There was an error: ', error);
       setNotification({
@@ -464,9 +451,9 @@ export default function ReportPage() {
         <MenuItem
           disabled={!clientValue?.email || false}
           onClick={async () => {
-            setIsSendLoading(true)
+            setIsSendLoading(true);
             await handleSendInvoice();
-            setIsSendLoading(false)
+            setIsSendLoading(false);
             // handleCloseStatementAnchor();
           }}
         >
@@ -482,7 +469,11 @@ export default function ReportPage() {
             // handleCloseStatementAnchor();
           }}
         >
-          {isSendAndPrintLoading ? <CircularProgress size={20} /> : 'Print and Send'}
+          {isSendAndPrintLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            'Print and Send'
+          )}
         </MenuItem>
       </Menu>
     </Box>
@@ -620,13 +611,7 @@ export default function ReportPage() {
         </Typography>
         {clientValue?.clientName === 'All Clients' ? (
           <>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Date"
-                value={dayjs(datePicker)}
-                onChange={handleDateChange}
-              />
-            </LocalizationProvider>
+            {SelectDate}
           </>
         ) : (
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
@@ -737,7 +722,7 @@ export default function ReportPage() {
             >
               <LoadingComponent />
             </Box>
-          ) : clientOrders.length > 0 ? ( 
+          ) : clientOrders.length > 0 ? (
             <ClientOrdersTable
               handleDeleteOrderUI={handleDeleteOrderUI}
               handleUpdateOrderUI={handleUpdateOrderUI}

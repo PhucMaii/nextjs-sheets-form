@@ -67,11 +67,11 @@ export const generate7DaysBefore = (deliveryDate: string) => {
   // Because the current date bill is already add in total price, so do not push it into array
   const dayList = [];
 
-  while(currentDate < endDate) {
+  while (currentDate < endDate) {
     const currentDateString = YYYYMMDDFormat(currentDate);
     dayList.push(currentDateString);
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
   return dayList;
-}
+};

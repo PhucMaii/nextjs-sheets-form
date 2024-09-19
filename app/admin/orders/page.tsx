@@ -7,7 +7,6 @@ import {
   Button,
   Checkbox,
   Fab,
-  FormControl,
   FormControlLabel,
   Grid,
   Menu,
@@ -34,14 +33,7 @@ import {
   UserType,
 } from '@/app/utils/type';
 import NotificationPopup from '../components/Notification';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import {
-  formatDateChanged,
-  generateRecommendDate,
-  YYYYMMDDFormat,
-} from '@/app/utils/time';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/add/AddOrder';
@@ -61,6 +53,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import { getSameDateLastWeek } from '@/pages/api/utils/date';
 import { UserRoute } from '@prisma/client';
 import { blueGrey } from '@mui/material/colors';
+import useSelectDate from '@/hooks/useSelectDate';
 
 interface Category {
   id: number;
@@ -112,7 +105,7 @@ export default function Orders() {
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [currentRoute, setCurrentRoute] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [date, setDate] = useState(() => generateRecommendDate());
+  // const [date, setDate] = useState(() => generateRecommendDate());
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.NONE,
   );
@@ -137,6 +130,7 @@ export default function Orders() {
   const totalPosition: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const { date, SelectDate } = useSelectDate();
 
   // Data Fetching
   const [orders, mutate, isValidating] = SWRFetchData(
@@ -550,12 +544,6 @@ export default function Orders() {
     }
   };
 
-  const handleDateChange = (e: any): void => {
-    const formattedDate: string = formatDateChanged(e);
-
-    setDate(formattedDate);
-  };
-
   const handleUpdateStatusUI = (targetOrder: Order): void => {
     let newOrders = [];
     if (tabIndex !== 0 && targetOrder.status !== currentStatus) {
@@ -674,18 +662,7 @@ export default function Orders() {
         <Typography variant="h5" color={blueGrey[800]}>
           Orders
         </Typography>
-        <FormControl>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Date Filter"
-              value={dayjs(date)}
-              onChange={(e: any) => handleDateChange(e)}
-              sx={{
-                borderRadius: 2,
-              }}
-            />
-          </LocalizationProvider>
-        </FormControl>
+        {SelectDate}
       </Box>
       <OrderOverview
         // baseOrderData={baseOrderData}

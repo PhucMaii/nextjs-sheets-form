@@ -20,9 +20,13 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
   }, [orderList, wcodDay]);
 
   const handleFetchWCOD = async () => {
-      const wcodResponse = await fetchWcodOrders(orderList, selectedDate, wcodDay);
-      setWcod(wcodResponse);
-  }
+    const wcodResponse = await fetchWcodOrders(
+      orderList,
+      selectedDate,
+      wcodDay,
+    );
+    setWcod(wcodResponse);
+  };
 
   const uncollectedCODOrders = useMemo(() => {
     const orders = [...orderList];
@@ -91,10 +95,10 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
 
   const codBill = useMemo(() => {
     return codOrders.length > 0
-        ? codOrders.reduce((acc: number, order: Order) => {
-            return acc + order.totalPrice;
-          }, 0)
-        : 0;
+      ? codOrders.reduce((acc: number, order: Order) => {
+          return acc + order.totalPrice;
+        }, 0)
+      : 0;
   }, [codOrders]);
 
   return {

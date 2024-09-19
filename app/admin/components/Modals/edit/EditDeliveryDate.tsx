@@ -36,7 +36,6 @@ export default function EditDeliveryDate({
   order,
   setNotification,
   handleUpdateDateUI,
-  // handlePreOrder,
   isPreOrder,
   scheduleOrderList,
   progress,

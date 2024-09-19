@@ -40,12 +40,18 @@ export const SWRFetchData = (api: string) => {
   return [data, mutate, isValidating];
 };
 
-export const fetchWcodOrders = async (orderList: any, selectedDate: string, wcodDay: string) => {
+export const fetchWcodOrders = async (
+  orderList: any,
+  selectedDate: string,
+  wcodDay: string,
+) => {
   try {
-    const clientIds = orderList.filter((order: Order) => {
-      return order?.user?.preference?.paymentType === wcodDay
-    }).map((order: Order) => order.userId);
-    
+    const clientIds = orderList
+      .filter((order: Order) => {
+        return order?.user?.preference?.paymentType === wcodDay;
+      })
+      .map((order: Order) => order.userId);
+
     if (clientIds.length === 0) {
       return null;
     }
@@ -63,4 +69,4 @@ export const fetchWcodOrders = async (orderList: any, selectedDate: string, wcod
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
-}
+};

@@ -21,7 +21,12 @@ interface IProps {
   setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
-export default function TodayRoute({ orderData, routes, date, setNotification }: IProps) {
+export default function TodayRoute({
+  orderData,
+  routes,
+  date,
+  setNotification,
+}: IProps) {
   const [routeData, setRouteData] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -38,8 +43,12 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
       for (const route of routes) {
         const routeOrders = filterOrderByRoute(route);
         const analysisOrders = await getCODData(routeOrders, date);
-        
-        newRouteData.push({...analysisOrders, driverId: route.driverId, driverName: route.driver.name});
+
+        newRouteData.push({
+          ...analysisOrders,
+          driverId: route.driverId,
+          driverName: route.driver.name,
+        });
       }
 
       setRouteData(newRouteData);
@@ -49,11 +58,11 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
       setNotification({
         on: true,
         type: 'error',
-        message: 'There was an error: ' + error
+        message: 'There was an error: ' + error,
       });
       setIsLoading(false);
     }
-  }
+  };
 
   const filterOrderByRoute = (targetRoute: any) => {
     if (routes.length === 0 || !targetRoute || orderData.length === 0) {
@@ -78,44 +87,45 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
   };
 
   return (
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Delivered</TableCell>
-              <TableCell>Delivery Orders</TableCell>
-              <TableCell>Collected Money</TableCell>
-              <TableCell>Uncollected Money</TableCell>
-              <TableCell>COD + WCOD Amount</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {isLoading ? (
-                <LoadingComponent />
-            ) : routeData.length > 0 ?
-              routeData.map((route: any, index: number) => {
-                return (
-                  <TableRow key={index}>
-                    <TableCell>{route.driverId}</TableCell>
-                    <TableCell>{route.driverName}</TableCell>
-                    <TableCell>
-                      {route?.delivered?.length || 0}
-                    </TableCell>
-                    <TableCell>{route?.orders?.length || 0}</TableCell>
-                    <TableCell>
-                      ${route?.collectedCODBill?.toFixed(2) || 0}
-                    </TableCell>
-                    <TableCell>
-                      ${route?.uncollectedCODBill?.toFixed(2) || 0}
-                    </TableCell>
-                    <TableCell>${route?.codBill?.toFixed(2) || 0}</TableCell>
-                  </TableRow>
-                );
-              }) : (<></>)}
-          </TableBody>
-        </Table>
-      </TableContainer>
+    <TableContainer>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Delivered</TableCell>
+            <TableCell>Delivery Orders</TableCell>
+            <TableCell>Collected Money</TableCell>
+            <TableCell>Uncollected Money</TableCell>
+            <TableCell>COD + WCOD Amount</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {isLoading ? (
+            <LoadingComponent />
+          ) : routeData.length > 0 ? (
+            routeData.map((route: any, index: number) => {
+              return (
+                <TableRow key={index}>
+                  <TableCell>{route.driverId}</TableCell>
+                  <TableCell>{route.driverName}</TableCell>
+                  <TableCell>{route?.delivered?.length || 0}</TableCell>
+                  <TableCell>{route?.orders?.length || 0}</TableCell>
+                  <TableCell>
+                    ${route?.collectedCODBill?.toFixed(2) || 0}
+                  </TableCell>
+                  <TableCell>
+                    ${route?.uncollectedCODBill?.toFixed(2) || 0}
+                  </TableCell>
+                  <TableCell>${route?.codBill?.toFixed(2) || 0}</TableCell>
+                </TableRow>
+              );
+            })
+          ) : (
+            <></>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

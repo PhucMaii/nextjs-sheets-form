@@ -1,7 +1,20 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Order } from '../orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { Box, Grid, IconButton, MenuItem, Select, Typography } from '@mui/material';
+import {
+  Box,
+  Grid,
+  IconButton,
+  MenuItem,
+  Select,
+  Typography,
+} from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -48,7 +61,7 @@ export default function OrderOverview({
   const handleGetCODData = async () => {
     const analysisCODOrders = await getCODData(orderData, currentDate);
     setCodData(analysisCODOrders);
-  }
+  };
 
   const todayTotalGross = useMemo(() => {
     return allRouteOrderData.length > 0
@@ -100,8 +113,8 @@ export default function OrderOverview({
 
   return (
     <ShadowSection sx={{ backgroundColor: 'white !important' }}>
-      <WCODInfo 
-        open={isOpenWCODInfo} 
+      <WCODInfo
+        open={isOpenWCODInfo}
         onClose={() => setIsOpenWCODInfo(false)}
         orderData={orderData}
         routes={routes}
@@ -274,7 +287,10 @@ export default function OrderOverview({
         >
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="h5">COD + WCOD</Typography>
-            <IconButton sx={{color: blueGrey[300]}} onClick={() => setIsOpenWCODInfo(true)}>
+            <IconButton
+              sx={{ color: blueGrey[300] }}
+              onClick={() => setIsOpenWCODInfo(true)}
+            >
               <HelpOutlineIcon />
             </IconButton>
           </Box>

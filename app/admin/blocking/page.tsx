@@ -4,7 +4,6 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Autocomplete,
   Box,
-  FormControl,
   Grid,
   TextField,
   Typography,
@@ -17,19 +16,15 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import {
-  formatDateChanged,
   generateMonthRange,
-  generateRecommendDate,
 } from '@/app/utils/time';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import ErrorComponent from '../components/ErrorComponent';
 import DateRange from '../components/Modals/DateRangeModal';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 import DayRange from '../components/DayRange';
 import { blueGrey } from '@mui/material/colors';
+import useSelectDate from '@/hooks/useSelectDate';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
@@ -50,9 +45,10 @@ export default function BlockingPage() {
     generateMonthRange(),
   );
   const [selectedClient, setSelectedClient] = useState<any>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    generateRecommendDate(),
-  );
+  // const [selectedDate, setSelectedDate] = useState<string>(
+  //   generateRecommendDate(),
+  // );
+  const { date: selectedDate, SelectDate } = useSelectDate();
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.ADMIN}/clients`);
@@ -139,10 +135,10 @@ export default function BlockingPage() {
     }
   };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setSelectedDate(formattedDate);
-  };
+  // const handleDateChange = (e: any) => {
+  //   const formattedDate = formatDateChanged(e);
+  //   setSelectedDate(formattedDate);
+  // };
 
   const handleDeleteRange = async (deletedRange: any) => {
     setTargetRange(deletedRange);
@@ -259,15 +255,7 @@ export default function BlockingPage() {
         <Typography variant="h5" color={blueGrey[800]}>
           Set Unavailable Date
         </Typography>
-        <FormControl>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              value={dayjs(selectedDate)}
-              onChange={handleDateChange}
-              label="Date"
-            />
-          </LocalizationProvider>
-        </FormControl>
+        {SelectDate}
       </Box>
       <ShadowSection
         display="flex"

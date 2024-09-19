@@ -11,11 +11,11 @@ async function main() {
   await prisma.user.updateMany({
     where: {
       clientId: {
-        in: ['00123', '00157', '00240']
-      }
+        in: ['00123', '00157', '00240'],
+      },
     },
     data: {
-      email: 'sweetfhui@gmail.com'
+      email: 'sweetfhui@gmail.com',
     },
   });
 }

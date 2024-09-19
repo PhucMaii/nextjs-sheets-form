@@ -96,4 +96,4 @@ export const getWCODDay = (date: string) => {
   });
 
   return wcodDay;
-}
+};

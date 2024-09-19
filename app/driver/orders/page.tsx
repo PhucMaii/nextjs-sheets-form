@@ -14,11 +14,8 @@ import { ShadowSection } from '@/app/admin/reports/styled';
 import { Notification, OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
 import NotificationPopup from '@/app/admin/components/Notification';
 import { Virtuoso } from 'react-virtuoso';
@@ -28,6 +25,7 @@ import { primary, success } from '@/theme/color';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
+import useSelectDate from '@/hooks/useSelectDate';
 
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
@@ -77,12 +75,6 @@ const tabs = ['Today', 'Delivered', 'Paid'];
 const totalYPosition = 250;
 export default function OrdersPage() {
   const [currentTab, setCurrentTab] = useState<string>('Today');
-  const [datePicker, setDatePicker] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification>({
@@ -96,6 +88,9 @@ export default function OrdersPage() {
 
   const date = new Date();
   const today = YYYYMMDDFormat(date);
+
+  const { date: datePicker, SelectDate} = useSelectDate();
+
   const [ordersResponse, mutateOrders] = SWRFetchData(
     `${API_URL.DRIVER_ORDERS}?deliveryDate=${
       currentTab === 'Today' ? today : datePicker
@@ -168,10 +163,10 @@ export default function OrdersPage() {
     return filteredOrders;
   };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setDatePicker(formattedDate);
-  };
+  // const handleDateChange = (e: any) => {
+  //   const formattedDate = formatDateChanged(e);
+  //   setDatePicker(formattedDate);
+  // };
 
   const initializeOrders = () => {
     setOrders(ordersResponse?.data.deliveryOrders);
@@ -368,13 +363,7 @@ export default function OrdersPage() {
       </Box>
       {currentTab !== 'Today' && (
         <Box display="flex" justifyContent="flex-end" my={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Date"
-              value={dayjs(datePicker)}
-              onChange={handleDateChange}
-            />
-          </LocalizationProvider>
+          {SelectDate}
         </Box>
       )}
       <Grid container my={2} spacing={2}>

@@ -2,11 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Autocomplete, Box, TextField, Typography } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import { limitOrderHour } from '@/app/lib/constant';
-import { formatDateChanged, YYYYMMDDFormat } from '@/app/utils/time';
 import { Notification, OrderedItems, UserType } from '@/app/utils/type';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { ShadowSection } from '@/app/admin/reports/styled';
@@ -17,18 +12,9 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import NotificationPopup from '@/app/admin/components/Notification';
 import { SWRFetchData } from '@/app/utils/db';
+import useSelectDate from '@/hooks/useSelectDate';
 
 export default function PlaceOrder() {
-  const [deliveryDate, setDeliveryDate] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
-      dateObj.setDate(dateObj.getDate() + 1);
-    }
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
   const [itemList, setItemList] = useState<OrderedItems[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [note, setNote] = useState<string>('');
@@ -38,6 +24,8 @@ export default function PlaceOrder() {
     message: '',
   });
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
+
+  const { date: deliveryDate, SelectDate } = useSelectDate();
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
@@ -146,10 +134,10 @@ export default function PlaceOrder() {
     });
   };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setDeliveryDate(formattedDate);
-  };
+  // const handleDateChange = (e: any) => {
+  //   const formattedDate = formatDateChanged(e);
+  //   setDeliveryDate(formattedDate);
+  // };
 
   return (
     <Sidebar>
@@ -185,14 +173,15 @@ export default function PlaceOrder() {
           <Typography fontWeight="bold" variant="subtitle1">
             DELIVERY DATE
           </Typography>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               disablePast
               value={dayjs(deliveryDate)}
               onChange={handleDateChange}
               sx={{ width: '100%' }}
             />
-          </LocalizationProvider>
+          </LocalizationProvider> */}
+          {SelectDate}
         </Box>
         {selectedClient ? (
           <>

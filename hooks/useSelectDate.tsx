@@ -5,8 +5,8 @@ import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time'; // Assuming this utility exists
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-const useSelectDate = () => {
-  const [date, setDate] = useState(() => generateRecommendDate());
+const useSelectDate = (providedDate?: string) => {
+  const [date, setDate] = useState(providedDate || generateRecommendDate());
 
   const handleDateChange = (e: any): void => {
     const formattedDate: string = formatDateChanged(e);
