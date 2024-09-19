@@ -67,7 +67,15 @@ export default function ScheduledOrderPage() {
     useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
-  const [dayIndex, setDayIndex] = useState<number>(0);
+  const [dayIndex, setDayIndex] = useState<number>(() => {
+    const dateObj = new Date();
+    // if current hour is greater limit hour, then recommend the next day
+    if (dateObj.getHours() >= limitOrderHour) {
+      dateObj.setDate(dateObj.getDate() + 1);
+    }
+    
+    return dateObj.getDay();
+  });
   const [routeIndex, setRouteIndex] = useState<number>(0);
   const [routes, setRoutes] = useState<IRoutes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
