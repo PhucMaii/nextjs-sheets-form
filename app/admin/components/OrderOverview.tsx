@@ -1,16 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import { Order } from '../orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
+import { Box, Grid, IconButton, MenuItem, Select, Typography } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TodayIcon from '@mui/icons-material/Today';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
-import { IRoutes } from '@/app/utils/type';
+import { IRoutes, Notification } from '@/app/utils/type';
 import { primary, primaryColor } from '@/theme/color';
 import { getCODData } from '@/app/utils/array';
+// import InfoIcon from '@mui/icons-material/Info';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import WCODInfo from './Modals/WCODInfo';
+import { blueGrey } from '@mui/material/colors';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -20,6 +24,7 @@ interface IProps {
   setCurrentRoute: any;
   routes: any;
   currentDate: string;
+  setNotification: Dispatch<SetStateAction<Notification>>;
 }
 
 export default function OrderOverview({
@@ -32,6 +37,7 @@ export default function OrderOverview({
   currentDate,
 }: IProps) {
   const [codData, setCodData] = useState<any>();
+  const [isOpenWCODInfo, setIsOpenWCODInfo] = useState<boolean>(false);
 
   useEffect(() => {
     if (orderData && orderData.length > 0) {
@@ -94,6 +100,14 @@ export default function OrderOverview({
 
   return (
     <ShadowSection sx={{ backgroundColor: 'white !important' }}>
+      <WCODInfo 
+        open={isOpenWCODInfo} 
+        onClose={() => setIsOpenWCODInfo(false)}
+        orderData={orderData}
+        routes={routes}
+        date={currentDate}
+        setNotification={() => {}}
+      />
       {/* Select Routes */}
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Select
@@ -258,7 +272,12 @@ export default function OrderOverview({
             borderRadius: 5,
           }}
         >
-          <Typography variant="h5">COD + WCOD</Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="h5">COD + WCOD</Typography>
+            <IconButton sx={{color: blueGrey[300]}} onClick={() => setIsOpenWCODInfo(true)}>
+              <HelpOutlineIcon />
+            </IconButton>
+          </Box>
           <Box
             display="flex"
             justifyContent="space-between"

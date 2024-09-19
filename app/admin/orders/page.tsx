@@ -696,6 +696,7 @@ export default function Orders() {
         currentRoute={currentRoute}
         setCurrentRoute={setCurrentRoute}
         routes={routes?.data || []}
+        setNotification={setNotification}
       />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={12} md={10.5}>

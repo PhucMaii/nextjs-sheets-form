@@ -11,8 +11,8 @@ import { Order } from '../orders/page';
 import { UserRoute } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { Notification } from '@/app/utils/type';
-import { SplashScreen } from '@/HOC/AuthenGuard';
 import { getCODData } from '@/app/utils/array';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 interface IProps {
   orderData: any;
@@ -30,7 +30,6 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
       getRouteData();
     }
   }, [orderData, routes]);
-
 
   const getRouteData = async () => {
     setIsLoading(true);
@@ -78,10 +77,6 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
     return filteredOrders;
   };
 
-  if (isLoading) {
-    return <SplashScreen />
-  }
-
   return (
       <TableContainer>
         <Table>
@@ -97,7 +92,9 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
             </TableRow>
           </TableHead>
           <TableBody>
-            {routeData.length > 0 &&
+            {isLoading ? (
+                <LoadingComponent />
+            ) : routeData.length > 0 ?
               routeData.map((route: any, index: number) => {
                 return (
                   <TableRow key={index}>
@@ -111,12 +108,12 @@ export default function TodayRoute({ orderData, routes, date, setNotification }:
                       ${route?.collectedCODBill?.toFixed(2) || 0}
                     </TableCell>
                     <TableCell>
-                      ${route?.uncollectedCODBill.toFixed(2) || 0}
+                      ${route?.uncollectedCODBill?.toFixed(2) || 0}
                     </TableCell>
-                    <TableCell>${route?.codBill.toFixed(2) || 0}</TableCell>
+                    <TableCell>${route?.codBill?.toFixed(2) || 0}</TableCell>
                   </TableRow>
                 );
-              })}
+              }) : (<></>)}
           </TableBody>
         </Table>
       </TableContainer>
