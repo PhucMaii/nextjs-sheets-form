@@ -2,8 +2,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import NotificationPopup from '../components/Notification';
-import { Notification } from '@/app/utils/type';
 import { Box, Button, Grid, Skeleton, Switch, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
@@ -21,21 +19,18 @@ import { SWRFetchData } from '@/app/utils/db';
 import DebtCustomers from '../components/Printing/DebtCustomers';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
+import useNotification from '@/hooks/useNotification';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
 
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
+  const { showNotification, NotificationComp} = useNotification();
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();
@@ -47,7 +42,6 @@ export default function Overview() {
 
   useEffect(() => {
     if (overview && dateRange) {
-      // fetchOverviewData();
       initializeOverviewData();
     }
   }, [overview, dateRange]);
@@ -82,10 +76,7 @@ export default function Overview() {
         />
       </div>
       <LoadingModal open={isFetching} />
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Grid container columnSpacing={2} alignItems="center" rowGap={2}>
         <Grid item xs={12} textAlign="right">
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />

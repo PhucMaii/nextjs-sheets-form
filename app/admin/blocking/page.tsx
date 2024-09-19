@@ -1,23 +1,14 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import {
-  Autocomplete,
-  Box,
-  Grid,
-  TextField,
-  Typography,
-} from '@mui/material';
-import NotificationPopup from '../components/Notification';
-import { IDayRange, Notification, UserType } from '@/app/utils/type';
+import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
+import { IDayRange, UserType } from '@/app/utils/type';
 import { ShadowSection } from '../reports/styled';
 import { LoadingButton } from '@mui/lab';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import {
-  generateMonthRange,
-} from '@/app/utils/time';
+import { generateMonthRange } from '@/app/utils/time';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import ErrorComponent from '../components/ErrorComponent';
@@ -25,6 +16,7 @@ import DateRange from '../components/Modals/DateRangeModal';
 import DayRange from '../components/DayRange';
 import { blueGrey } from '@mui/material/colors';
 import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
@@ -36,19 +28,14 @@ export default function BlockingPage() {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
   const [targetRange, setTargetRange] = useState<any>(null);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
   );
   const [selectedClient, setSelectedClient] = useState<any>(null);
-  // const [selectedDate, setSelectedDate] = useState<string>(
-  //   generateRecommendDate(),
-  // );
+
+  // Custom Hooks
   const { date: selectedDate, SelectDate } = useSelectDate();
+  const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.ADMIN}/clients`);
@@ -81,20 +68,12 @@ export default function BlockingPage() {
 
   const handleAddRange = async () => {
     if (!newDateRange) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'No Day Range Selected',
-      });
+      showNotification('error', 'No Day Range Selected');
       return;
     }
 
     if (!selectedClient) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please select a client.',
-      });
+      showNotification('error', 'Please select a client.');
       return;
     }
     try {
@@ -107,38 +86,24 @@ export default function BlockingPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsAdding(false);
     }
   };
-
-  // const handleDateChange = (e: any) => {
-  //   const formattedDate = formatDateChanged(e);
-  //   setSelectedDate(formattedDate);
-  // };
 
   const handleDeleteRange = async (deletedRange: any) => {
     setTargetRange(deletedRange);
@@ -149,11 +114,7 @@ export default function BlockingPage() {
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setTargetRange(null);
         setIsDeleting(false);
         return;
@@ -161,20 +122,15 @@ export default function BlockingPage() {
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setTargetRange(null);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error:', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setTargetRange(null);
       setIsDeleting(false);
     }
@@ -182,11 +138,7 @@ export default function BlockingPage() {
 
   const handleEditRange = async (updatedRange: IDayRange) => {
     if (!selectedClient) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please select a client',
-      });
+      showNotification('error', 'Please select a client');
       return;
     }
     setIsSaving(true);
@@ -199,11 +151,7 @@ export default function BlockingPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsEditing(false);
         setIsSaving(false);
         setTargetRange(null);
@@ -213,22 +161,17 @@ export default function BlockingPage() {
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsEditing(false);
       setIsSaving(false);
       setTargetRange(null);
       setUpdatedDateRange(null);
     } catch (error: any) {
       console.log('There was an error: ' + error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsEditing(false);
       setTargetRange(null);
       setUpdatedDateRange(null);
@@ -236,10 +179,7 @@ export default function BlockingPage() {
   };
   return (
     <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <DateRange
         open={isSelectRangeOpen}
         onClose={() => setIsSelectRangeOpen(false)}

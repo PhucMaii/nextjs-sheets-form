@@ -1,5 +1,6 @@
 'use clients';
 import {
+  AlertColor,
   Box,
   Checkbox,
   MenuItem,
@@ -11,10 +12,10 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, memo, SetStateAction } from 'react';
+import React, { memo } from 'react';
 import StatusText from '../StatusText';
 import { API_URL } from '@/app/utils/enum';
-import { Notification, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import { orderTypes, paymentTypes } from '@/app/lib/constant';
@@ -28,11 +29,10 @@ interface PropTypes {
   clients: UserType[];
   handleUpdateClient: (userId: number, updatedData: any) => void;
   handleDeleteClientUI: (clientId: number) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   selectedClients: UserType[];
   handleSelectClient: (e: any, targetClient: UserType) => void;
   handleSelectAll: () => void;
-  // subCategories: SubCategory[];
   mutateClients: any;
 }
 
@@ -41,11 +41,10 @@ const ClientsTable = ({
   clients,
   handleUpdateClient,
   handleDeleteClientUI,
-  setNotification,
+  showNotification,
   selectedClients,
   handleSelectClient,
   handleSelectAll,
-  // subCategories,
   mutateClients,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
@@ -57,11 +56,7 @@ const ClientsTable = ({
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -71,19 +66,10 @@ const ClientsTable = ({
       // Update Real Data
       mutateClients();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to delete order: ' + error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to delete order: ' + error,
-      });
-      return;
+      showNotification('error', 'Fail to delete order: ' + error);
     }
   };
 
@@ -185,7 +171,7 @@ const ClientsTable = ({
             />
             <EditClient
               client={client}
-              setNotification={setNotification}
+              showNotification={showNotification}
               categories={categories}
               handleUpdateClient={handleUpdateClient}
             />
@@ -239,3 +225,4 @@ export default memo(ClientsTable, (prev, next) => {
     prev.selectedClients === next.selectedClients
   );
 });
+

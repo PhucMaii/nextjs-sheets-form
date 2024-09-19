@@ -1,6 +1,5 @@
 'use client';
 import React, { MouseEvent, useEffect, useState } from 'react';
-import { Notification } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import FadeIn from '@/HOC/FadeIn';
 import axios from 'axios';
@@ -22,6 +21,7 @@ import NotificationPopup from '../admin/components/Notification';
 import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
 import OrderOnVacationModal from '../admin/components/Modals/OrderOnVacationModal';
+import useNotification from '@/hooks/useNotification';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -45,12 +45,9 @@ export default function OrderForm() {
     useState<boolean>(false);
   const [isOrderOnVacationOpen, setIsOrderOnVacationOpen] =
     useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
+
+  const { showNotification, notification, closeNotification } = useNotification();
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   let today: any = dayjs();
@@ -102,11 +99,7 @@ export default function OrderForm() {
     e.preventDefault();
     const checkUserHasInput = handleCheckUserHasInput();
     if (!checkUserHasInput) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please enter your order',
-      });
+      showNotification('error', 'Please enter your order');
       return;
     }
 
@@ -134,11 +127,7 @@ export default function OrderForm() {
       });
 
       if (response.data.warning) {
-        setNotification({
-          on: true,
-          type: 'warning',
-          message: response.data.warning,
-        });
+        showNotification('warning', response.data.warning);
 
         if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
           setLastOrder(response.data.data);
@@ -149,19 +138,11 @@ export default function OrderForm() {
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsButtonLoading(false);
     } catch (error: any) {
       console.log(error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
       setIsButtonLoading(false);
     }
   };
@@ -197,7 +178,7 @@ export default function OrderForm() {
       <Sidebar>
         <NotificationPopup
           notification={notification}
-          onClose={() => setNotification({ ...notification, on: false })}
+          onClose={closeNotification}
           anchorOrigin={{
             vertical: 'top',
             horizontal: 'right',
@@ -215,7 +196,7 @@ export default function OrderForm() {
             currentNote={note}
             lastOrder={lastOrder}
             deliveryDate={deliveryDate}
-            setNotification={setNotification}
+            showNotification={showNotification}
           />
         )}
         {unavailableRange && (

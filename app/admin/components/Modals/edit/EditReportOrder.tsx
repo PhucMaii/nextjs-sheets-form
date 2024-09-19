@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -14,9 +15,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, {
-  Dispatch,
   Fragment,
-  SetStateAction,
   useEffect,
   useState,
 } from 'react';
@@ -28,7 +27,7 @@ import { Item, Order } from '../../../orders/page';
 import { formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { OrderedItems } from '@/app/utils/type';
 import { errorColor } from '@/theme/color';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
@@ -38,13 +37,13 @@ import { LoadingButton } from '@mui/lab';
 interface PropTypes {
   order: Order;
   handleUpdateOrderUI: (updatedOrder: Order) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function EditReportOrder({
   order,
   handleUpdateOrderUI,
-  setNotification,
+  showNotification,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -76,20 +75,12 @@ export default function EditReportOrder({
     );
 
     if (newItem.name.trim() === '') {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Is Missing',
-      });
+      showNotification('error', 'Item Name Is Missing');
       return;
     }
 
     if (hasNameExisted) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Existed Already',
-      });
+      showNotification('error', 'Item Name Existed Already');
     } else {
       const totalPrice = newItem.quantity * newItem.price;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -165,11 +156,7 @@ export default function EditReportOrder({
 
       if (response.data.error) {
         setIsSubmitting(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -179,20 +166,12 @@ export default function EditReportOrder({
         totalPrice,
       });
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
       setIsSubmitting(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update item: ' + error,
-      });
+      showNotification('error', 'Fail to update item: ' + error);
     }
   };
 
@@ -207,22 +186,12 @@ export default function EditReportOrder({
         });
 
         if (orderUpdateResponse.data.error) {
-          setNotification({
-            on: true,
-            type: 'error',
-            message:
-              'Fail to update date and status: ' +
-              orderUpdateResponse.data.error,
-          });
+          showNotification('error', 'Fail to update date and status: ' + orderUpdateResponse.data.error);
           setIsSubmitting(false);
           return;
         }
       } else {
-        setNotification({
-          on: true,
-          type: 'warning',
-          message: 'None of fields has updated yet',
-        });
+        showNotification('warning', 'None of fields has updated yet');
       }
 
       handleUpdateOrderUI({
@@ -230,20 +199,12 @@ export default function EditReportOrder({
         deliveryDate: updatedDate,
         status,
       });
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Update Order Successfully',
-      });
+      showNotification('success', 'Update Order Successfully');
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('Fail to update order: ', error);
       setIsSubmitting(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update order: ' + error,
-      });
+      showNotification('error', 'Fail to update order: ' + error);
     }
   };
 
@@ -382,29 +343,6 @@ export default function EditReportOrder({
                   />
                 </FormControl>
               </Grid>
-              {/* <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="subcategory-label">Subcategory</InputLabel>
-                  <Select
-                    disabled={
-                      !newItem.name.toLowerCase().includes('bean') &&
-                      !newItem.name.toLowerCase().includes('egg')
-                    }
-                    value={subCategoryId}
-                    onChange={(e) => setSubCategoryId(+e.target.value)}
-                  >
-                    <MenuItem value={0}>-- Choose a subcategory --</MenuItem>
-                    {subCategories &&
-                      subCategories.map((subcategory: SubCategory) => {
-                        return (
-                          <MenuItem key={subcategory.id} value={subcategory.id}>
-                            {subcategory.name}
-                          </MenuItem>
-                        );
-                      })}
-                  </Select>
-                </FormControl>
-              </Grid> */}
               <Grid item xs={12}>
                 <Button fullWidth variant="contained" onClick={addNewItem}>
                   + Add

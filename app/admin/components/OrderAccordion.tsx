@@ -1,7 +1,5 @@
 'use client';
 import React, {
-  Dispatch,
-  SetStateAction,
   memo,
   useEffect,
   useMemo,
@@ -9,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  AlertColor,
   Box,
   Button,
   Checkbox,
@@ -25,7 +24,7 @@ import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
 import EditPrice from './Modals/edit/EditPrice';
@@ -38,7 +37,7 @@ import RememberMeIcon from '@mui/icons-material/RememberMe';
 
 interface PropTypes {
   order: Order;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleUpdateStatusUI: (targetOrder: Order) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
   handleUpdatePriceUI: (
@@ -58,7 +57,7 @@ interface PropTypes {
 
 const OrderAccordion = ({
   order,
-  setNotification,
+  showNotification,
   handleUpdateStatusUI,
   handleUpdateDateUI,
   handleUpdatePriceUI,
@@ -131,11 +130,7 @@ const OrderAccordion = ({
 
       // Update Real Data
       mutateOrders();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message)
       setIsMarkButtonDisabled(false);
     } catch (error) {
       console.log('Fail to mark as completed: ', error);
@@ -252,7 +247,7 @@ const OrderAccordion = ({
         open={isEditDateOpen}
         onClose={() => setIsEditDateOpen(false)}
         order={order}
-        setNotification={setNotification}
+        showNotification={showNotification}
         handleUpdateDateUI={handleUpdateDateUI}
         mutateOrders={mutateOrders}
       />
@@ -260,7 +255,7 @@ const OrderAccordion = ({
         open={isOpenEditPrice}
         onClose={() => setIsOpenEditPrice(false)}
         items={order.items}
-        setNotification={setNotification}
+        showNotification={showNotification}
         order={order}
         handleUpdatePriceUI={handleUpdatePriceUI}
         mutateOrders={mutateOrders}

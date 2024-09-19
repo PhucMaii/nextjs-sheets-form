@@ -1,8 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import NotificationPopup from '../components/Notification';
-import { ICategory, IItem, Notification } from '@/app/utils/type';
+import { ICategory, IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import { Category } from '@prisma/client';
 import CategorySidebar from '../components/Sidebar/CategorySidebar';
@@ -30,6 +29,7 @@ import Item from '../components/Reorder/Item';
 import { LoadingButton } from '@mui/lab';
 import { UPDATE_OPTION } from '../components/Modals/edit/EditItem';
 import { blueGrey } from '@mui/material/colors';
+import useNotification from '@/hooks/useNotification';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -42,12 +42,9 @@ export default function ItemPage() {
   const [items, setItems] = useState<IItem[]>([]);
   const [isSavingArrangement, setIsSavingArrangement] =
     useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const { showNotification, NotificationComp} = useNotification();
 
   // Data Fetching
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
@@ -106,11 +103,7 @@ export default function ItemPage() {
       newItem.price < 0 ||
       !newItem.categoryId
     ) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Your input data is invalid',
-      });
+      showNotification('error', 'Your input data is invalid');
       return false;
     }
     return true;
@@ -131,11 +124,7 @@ export default function ItemPage() {
       const response = await axios.post(API_URL.ITEM, { newItem });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -145,19 +134,10 @@ export default function ItemPage() {
       // Update Real Data
       mutateItems();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
-      return;
+      showNotification('error', error.response.data.error);
     }
   };
 
@@ -173,27 +153,15 @@ export default function ItemPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       mutateCategories();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
     }
   };
 
@@ -204,11 +172,7 @@ export default function ItemPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -218,18 +182,10 @@ export default function ItemPage() {
       // Update Real Data
       mutateItems();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
     }
   };
 
@@ -244,11 +200,7 @@ export default function ItemPage() {
 
   const handleUpdateCategoryName = async (newName: string) => {
     if (newName.trim() === '') {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Must Not Be Blank',
-      });
+      showNotification('error', 'Item Name Must Not Be Blank');
       return;
     }
     try {
@@ -260,28 +212,16 @@ export default function ItemPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       mutateCategories();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
     }
   };
 
@@ -296,11 +236,7 @@ export default function ItemPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -310,18 +246,10 @@ export default function ItemPage() {
       // Update Real Data
       mutateItems();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
     }
   };
 
@@ -352,31 +280,20 @@ export default function ItemPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
+
         setIsSavingArrangement(false);
+
         return;
       }
 
-      // await fetchItems();
       mutateItems();
 
       setIsSavingArrangement(false);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error in rearrangement: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error in rearrangement: ' + error,
-      });
+      showNotification('error', 'There was an error in rearrangement: ' + error);
       setIsSavingArrangement(false);
     }
   };
@@ -387,6 +304,10 @@ export default function ItemPage() {
 
   return (
     <Sidebar noMargin>
+  /**
+   * Switch the current category to the new category.
+   * @param newCategory The new category.
+   */
       <AddItem
         open={isAddItem}
         onClose={() => setIsAddItem(false)}
@@ -405,10 +326,7 @@ export default function ItemPage() {
         updateCategory={handleUpdateCategoryName}
         currentName={currentCategory?.name}
       />
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <CategorySidebar
         currentCategory={currentCategory}
         categories={categories?.data || []}
@@ -495,7 +413,7 @@ export default function ItemPage() {
                       item={item}
                       handleUpdateItem={handleUpdateItem}
                       handleDeleteItem={handleDeleteItem}
-                      setNotification={setNotification}
+                      showNotification={showNotification}
                     />
                     <Divider />
                   </Reorder.Item>

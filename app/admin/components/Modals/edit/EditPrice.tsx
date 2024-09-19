@@ -1,5 +1,6 @@
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { OrderedItems } from '@/app/utils/type';
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -13,9 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, {
-  Dispatch,
   Fragment,
-  SetStateAction,
   useEffect,
   useState,
 } from 'react';
@@ -32,7 +31,7 @@ import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   order: Order;
   handleUpdatePriceUI: (
     targetOrder: Order,
@@ -46,7 +45,7 @@ export default function EditPrice({
   open,
   onClose,
   items,
-  setNotification,
+  showNotification,
   order,
   handleUpdatePriceUI,
   mutateOrders,
@@ -78,20 +77,12 @@ export default function EditPrice({
     );
 
     if (newItem.name.trim() === '') {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Is Missing',
-      });
+      showNotification('error', 'Item Name Is Missing');
       return;
     }
 
     if (hasNameExisted) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Existed Already',
-      });
+      showNotification('error', 'Item Name Existed Already');
     } else {
       const totalPrice = newItem.quantity * newItem.price;
       const newItemData: any = { ...newItem, totalPrice, name: newItemName };
@@ -139,11 +130,7 @@ export default function EditPrice({
 
       if (response.data.error) {
         setIsLoading(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -157,19 +144,14 @@ export default function EditPrice({
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update price: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'Fail to update price: ' + error.response.data.error,
+      );
       setIsLoading(false);
     }
   };

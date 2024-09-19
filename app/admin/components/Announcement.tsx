@@ -18,10 +18,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import EditAnnouncement from './Modals/edit/EditAnnouncement';
-import { Notification } from '@/app/utils/type';
-import NotificationPopup from './Notification';
-import axios from 'axios';
 import { UserContext } from '@/app/context/UserContextAPI';
+import axios from 'axios';
+import useNotification from '@/hooks/useNotification';
 
 const orderFieldsExample: any = {
   Invoice: 1,
@@ -33,14 +32,8 @@ const orderFieldsExample: any = {
 
 export default function Announcement() {
   const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
-  const [notificaiton, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
-
-  // Context
   const { user } = useContext(UserContext);
+  const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
   const [announcement, mutateAnnouncement] = SWRFetchData(
@@ -57,37 +50,22 @@ export default function Announcement() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       mutateAnnouncement();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to save update: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Internal Server Error: ' + error,
-      });
+      showNotification('error', 'Internal Server Error: ' + error.response.data.error);
     }
   };
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" mx={2}>
-      <NotificationPopup
-        notification={notificaiton}
-        onClose={() => setNotification({ ...notificaiton, on: false })}
-      />
+      {NotificationComp}
       <EditAnnouncement
         open={isOpenEdit}
         onClose={() => setIsOpenEdit(false)}
@@ -245,3 +223,5 @@ export default function Announcement() {
     </Box>
   );
 }
+
+

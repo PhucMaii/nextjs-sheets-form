@@ -15,10 +15,9 @@ import {
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import { blue } from '@mui/material/colors';
-import { Notification, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
-import NotificationPopup from '../components/Notification';
 import ClientsTable from '../components/Tables/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { ShadowSection } from '../reports/styled';
@@ -34,6 +33,7 @@ import SingleFieldUpdate, {
 } from '../components/Modals/edit/SingleFieldUpdate';
 import AddClient from '../components/Modals/add/AddClient';
 import { SWRFetchData } from '@/app/utils/db';
+import useNotification from '@/hooks/useNotification';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -52,19 +52,17 @@ export default function ClientsPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isAddClientOpen, setIsAddClientOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  
+  
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+    const {showNotification, NotificationComp} = useNotification();
+
 
   // Data Fetching
   const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
-  // const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     if (clients) {
@@ -163,56 +161,27 @@ export default function ClientsPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
-      // const newClientList = baseClientList.map((client: UserType) => {
-      //   const targetClient = response.data.data.find(
-      //     (findClient: UserType) => findClient.id === client.id,
-      //   );
-
-      //   if (targetClient) {
-      //     return targetClient;
-      //   }
-      //   return client;
-      // });
-
-      // setClientList(newClientList);
-      // setBaseClientList(newClientList);
       mutateClients();
 
       // reset after update successfully
       setSelectedClients([]);
       handleCloseAnchor();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to update client: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update client: ' + error,
-      });
+      showNotification('error', 'Fail to update client: ' + error);
       return;
     }
   };
 
   const handleUpdateClient = async (userId: number, updatedData: object) => {
     if (Object.keys(updatedData).length === 0) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please provide at least 1 updated data',
-      });
+      showNotification('error', 'Please provide at least 1 updated data');
       return;
     }
     try {
@@ -223,11 +192,7 @@ export default function ClientsPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsUpdating(false);
         return;
       }
@@ -237,19 +202,11 @@ export default function ClientsPage() {
 
       // Update Real Data
       mutateClients();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsUpdating(false);
     } catch (error: any) {
       console.log('Fail to update client preference: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update client preference: ' + error,
-      });
+      showNotification('error', 'Fail to update client preference: ' + error);
       setIsUpdating(false);
     }
   };
@@ -367,7 +324,7 @@ export default function ClientsPage() {
         onClose={() => setIsAddClientOpen(false)}
         categories={categories?.data || []}
         // subCategories={subCategories?.data || []}
-        setNotification={setNotification}
+        showNotification={showNotification}
         handleAddClientUI={handleAddClientUI}
         mutateClients={mutateClients}
         mutateCategories={mutateCategories}
@@ -386,10 +343,7 @@ export default function ClientsPage() {
         handleUpdate={handleBulkUpdate}
         updatedField={singleFieldUpdateProps.updatedField}
       />
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} md={4}>
           <OverviewCard
@@ -446,7 +400,7 @@ export default function ClientsPage() {
             clients={clientList}
             handleUpdateClient={handleUpdateClient}
             handleDeleteClientUI={handleDeleteClientUI}
-            setNotification={setNotification}
+            showNotification={showNotification}
             selectedClients={selectedClients}
             handleSelectClient={handleSelectClient}
             handleSelectAll={handleSelectAll}

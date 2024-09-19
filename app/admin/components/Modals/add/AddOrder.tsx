@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { ModalProps } from '../type';
 import {
+  AlertColor,
   Autocomplete,
   Box,
   Divider,
@@ -19,7 +20,7 @@ import {
 } from '@mui/material';
 import { BoxModal } from '../styled';
 import { LoadingButton } from '@mui/lab';
-import { IItem, Notification, UserType } from '@/app/utils/type';
+import { IItem, UserType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -29,16 +30,13 @@ import { OrderedItems } from '@prisma/client';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import {
-  formatDateChanged,
-  generateRecommendDate,
-} from '@/app/utils/time';
+import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   currentDate?: string;
   createOrder?: (
     clientValue: UserType | null,
@@ -54,7 +52,7 @@ export default function AddOrder({
   open,
   onClose,
   clientList,
-  setNotification,
+  showNotification,
   currentDate,
   createOrder,
   createScheduledOrder,
@@ -99,11 +97,7 @@ export default function AddOrder({
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsButtonLoading(false);
         return;
       }
@@ -129,11 +123,7 @@ export default function AddOrder({
       setIsButtonLoading(false);
     } catch (error: any) {
       console.log('Fail to copy from last order: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to copy from last order: ' + error,
-      });
+      showNotification('error', 'Fail to copy from last order: ' + error);
       setIsButtonLoading(false);
     }
   };
@@ -146,11 +136,7 @@ export default function AddOrder({
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsFetching(false);
         return;
       }
@@ -164,11 +150,10 @@ export default function AddOrder({
     } catch (error: any) {
       console.log('Fail to fetch client items: ', error);
       setIsFetching(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to copy from last order: ' + error,
-      });
+      showNotification(
+        'error',
+        'Fail to copy from last order: ' + error,
+      );
     }
   };
 
@@ -211,11 +196,10 @@ export default function AddOrder({
       setIsButtonLoading(false);
     } catch (error: any) {
       console.log(error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsButtonLoading(false);
     }
   };

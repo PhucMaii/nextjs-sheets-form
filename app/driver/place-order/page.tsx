@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Autocomplete, Box, TextField, Typography } from '@mui/material';
-import { Notification, OrderedItems, UserType } from '@/app/utils/type';
+import { OrderedItems, UserType } from '@/app/utils/type';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { grey } from '@mui/material/colors';
@@ -10,21 +10,17 @@ import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import moment from 'moment';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
-import NotificationPopup from '@/app/admin/components/Notification';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 export default function PlaceOrder() {
   const [itemList, setItemList] = useState<OrderedItems[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [note, setNote] = useState<string>('');
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
 
+  const { showNotification, NotificationComp } = useNotification();
   const { date: deliveryDate, SelectDate } = useSelectDate();
 
   // Data Fetching
@@ -43,11 +39,7 @@ export default function PlaceOrder() {
   const addOrder = async () => {
     const isInputValid = handleCheckUserHasInput();
     if (!isInputValid) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please Enter Quantity for Items',
-      });
+      showNotification('error', 'Please Enter Quantity for Items');
       return;
     }
     setIsSubmitting(true);
@@ -73,37 +65,21 @@ export default function PlaceOrder() {
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       if (response.data.warning) {
-        setNotification({
-          on: true,
-          type: 'warning',
-          message: response.data.warning,
-        });
+        showNotification('warning', response.data.warning);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: `Placed Order Successfully for ${selectedClient?.clientName}`,
-      });
+      showNotification('success', `Placed Order Successfully for ${selectedClient?.clientName}`);
 
       setIsSubmitting(false);
     } catch (error: any) {
       console.log(error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
       setIsSubmitting(false);
       return;
     }
@@ -134,17 +110,9 @@ export default function PlaceOrder() {
     });
   };
 
-  // const handleDateChange = (e: any) => {
-  //   const formattedDate = formatDateChanged(e);
-  //   setDeliveryDate(formattedDate);
-  // };
-
   return (
     <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Typography variant="h4" textAlign="center">
         Place Order
       </Typography>
@@ -173,14 +141,6 @@ export default function PlaceOrder() {
           <Typography fontWeight="bold" variant="subtitle1">
             DELIVERY DATE
           </Typography>
-          {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              disablePast
-              value={dayjs(deliveryDate)}
-              onChange={handleDateChange}
-              sx={{ width: '100%' }}
-            />
-          </LocalizationProvider> */}
           {SelectDate}
         </Box>
         {selectedClient ? (

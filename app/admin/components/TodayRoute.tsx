@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Table,
   TableBody,
   TableCell,
@@ -6,11 +7,10 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Order } from '../orders/page';
 import { UserRoute } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { Notification } from '@/app/utils/type';
 import { getCODData } from '@/app/utils/array';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
@@ -18,14 +18,14 @@ interface IProps {
   orderData: any;
   routes: any; // all routes in that day
   date: string;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function TodayRoute({
   orderData,
   routes,
   date,
-  setNotification,
+  showNotification,
 }: IProps) {
   const [routeData, setRouteData] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,11 +55,7 @@ export default function TodayRoute({
       setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
+      showNotification('error', 'There was an error: ' + error);
       setIsLoading(false);
     }
   };
@@ -129,3 +125,4 @@ export default function TodayRoute({
     </TableContainer>
   );
 }
+

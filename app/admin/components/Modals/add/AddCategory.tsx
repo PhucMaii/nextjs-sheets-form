@@ -1,14 +1,13 @@
-import { Divider, Modal, TextField } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { AlertColor, Divider, Modal, TextField } from '@mui/material';
+import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { Notification } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleOnChangeClient: any;
   mutateCategories: any;
 }
@@ -16,7 +15,7 @@ interface IProps extends ModalProps {
 export default function AddCategory({
   open,
   onClose,
-  setNotification,
+  showNotification,
   handleOnChangeClient,
   mutateCategories,
 }: IProps) {
@@ -31,11 +30,7 @@ export default function AddCategory({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsCreating(false);
         return;
       }
@@ -43,19 +38,14 @@ export default function AddCategory({
       handleOnChangeClient('category', response.data.data);
       mutateCategories();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsCreating(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Internal Server Error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'Internal Server Error: ' + error.response.data.error,
+      );
       setIsCreating(false);
     }
   };
@@ -88,3 +78,4 @@ export default function AddCategory({
     </Modal>
   );
 }
+

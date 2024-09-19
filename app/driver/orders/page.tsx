@@ -11,13 +11,12 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
-import NotificationPopup from '@/app/admin/components/Notification';
 import { Virtuoso } from 'react-virtuoso';
 import OrderComponent from '../components/OrderComponent';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
@@ -26,6 +25,7 @@ import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
@@ -77,11 +77,6 @@ export default function OrdersPage() {
   const [currentTab, setCurrentTab] = useState<string>('Today');
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [orders, setOrders] = useState<Order[]>([]);
   const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
@@ -89,7 +84,8 @@ export default function OrdersPage() {
   const date = new Date();
   const today = YYYYMMDDFormat(date);
 
-  const { date: datePicker, SelectDate} = useSelectDate();
+  const { showNotification, NotificationComp } = useNotification();
+  const { date: datePicker, SelectDate } = useSelectDate();
 
   const [ordersResponse, mutateOrders] = SWRFetchData(
     `${API_URL.DRIVER_ORDERS}?deliveryDate=${
@@ -203,11 +199,7 @@ export default function OrdersPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -217,18 +209,10 @@ export default function OrdersPage() {
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
     }
   };
 
@@ -256,11 +240,7 @@ export default function OrdersPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -270,18 +250,10 @@ export default function OrdersPage() {
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Update Item Successfully',
-      });
+      showNotification('success', 'Update Item Successfully');
     } catch (error: any) {
       console.log('Fail to update order items: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update order items: ' + error,
-      });
+      showNotification('error', 'Fail to update order items: ' + error);
     }
   };
 
@@ -311,10 +283,7 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <LoadingModal open={isFetching} />
       <SearchModal
         open={isSearchModalOpen}

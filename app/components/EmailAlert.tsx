@@ -1,25 +1,25 @@
 import {
   Alert,
+  AlertColor,
   Box,
   TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
 import axios from 'axios';
-import React, { Dispatch, SetStateAction, useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { API_URL } from '../utils/enum';
-import { Notification } from '../utils/type';
 import { LoadingButton } from '@mui/lab';
 import { UserContext } from '../context/UserContextAPI';
 
 interface PropTypes {
   setIsOpenSnackbar: (bool: boolean) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function EmailAlert({
   setIsOpenSnackbar,
-  setNotification,
+  showNotification,
 }: PropTypes) {
   const [email, setEmail] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -33,11 +33,7 @@ export default function EmailAlert({
       const response = await axios.put(API_URL.USER, { email });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsSubmitting(false);
         return;
       }
@@ -45,18 +41,10 @@ export default function EmailAlert({
       setIsSubmitting(false);
       setIsOpenSnackbar(false);
       mutate();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to subscribe email: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to subscribe email: ' + error,
-      });
+      showNotification('error', 'Fail to subscribe email: ' + error);
       setIsSubmitting(false);
     }
   };

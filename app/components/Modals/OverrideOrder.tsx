@@ -1,9 +1,8 @@
-import { Box, Button, Divider, Grid, Modal, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { AlertColor, Box, Button, Divider, Grid, Modal, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { Item, Order } from '@/app/admin/orders/page';
 import { BoxModal } from '../../admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
-import { Notification } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { LoadingButton } from '@mui/lab';
@@ -13,7 +12,7 @@ interface PropTypes extends ModalProps {
   currentNote: string;
   lastOrder: Order;
   deliveryDate: string;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 export default function OverrideOrder({
   open,
@@ -22,7 +21,7 @@ export default function OverrideOrder({
   currentNote,
   lastOrder,
   deliveryDate,
-  setNotification,
+  showNotification,
 }: PropTypes) {
   const [isOverriding, setIsOverriding] = useState<boolean>(false);
 
@@ -45,28 +44,16 @@ export default function OverrideOrder({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsOverriding(false);
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsOverriding(false);
       onClose();
     } catch (error: any) {
       console.log('Fail to override order: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to override order: ' + error,
-      });
+      showNotification('error', 'Fail to override order: ' + error);
       setIsOverriding(false);
     }
   };

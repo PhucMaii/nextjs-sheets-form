@@ -1,23 +1,23 @@
-import { Box, Button, Modal, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { AlertColor, Box, Button, Modal, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import { errorColor } from '@/theme/color';
 import { grey } from '@mui/material/colors';
 import { LoadingButton } from '@mui/lab';
 import ErrorIcon from '@mui/icons-material/Error';
-import { IDriver, Notification } from '@/app/utils/type';
+import { IDriver } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
 interface IProps {
   driver: IDriver;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   mutateDrivers: any;
 }
 
 export default function DeleteDriver({
   driver,
-  setNotification,
+  showNotification,
   mutateDrivers,
 }: IProps) {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -31,29 +31,20 @@ export default function DeleteDriver({
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsDeleting(false);
         return;
       }
 
       mutateDrivers();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsDeleting(false);
     }
   };
@@ -110,3 +101,4 @@ export default function DeleteDriver({
     </>
   );
 }
+

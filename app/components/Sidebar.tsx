@@ -28,10 +28,9 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailAlert from './EmailAlert';
-import SnackbarPopup from './Snackbar/SnackbarPopup';
-import { Notification } from '@/app/utils/type';
 import { generateRecommendDate } from '@/app/utils/time';
-import { primary, primaryColor } from '@/theme/color';
+import { primary } from '@/theme/color';
+import useNotification from '@/hooks/useNotification';
 
 interface PropTypes {
   children: ReactNode;
@@ -41,14 +40,10 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
 
   const router = useRouter();
   const pathname: any = usePathname();
+  const { showNotification, NotificationComp } = useNotification();
 
   const { user, isValidating } = useContext(UserContext);
   const orderDate = generateRecommendDate();
@@ -77,12 +72,7 @@ export default function Sidebar({ children }: PropTypes) {
 
   const content = (
     <>
-      <SnackbarPopup
-        open={notification.on}
-        onClose={() => setNotification({ ...notification, on: false })}
-        type={notification.type}
-        message={notification.message}
-      />
+      {NotificationComp}
       <Toolbar sx={{ mt: 4 }}>
         <img
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
@@ -159,7 +149,7 @@ export default function Sidebar({ children }: PropTypes) {
             <div>
               <EmailAlert
                 setIsOpenSnackbar={setIsOpenSnackbar}
-                setNotification={setNotification}
+                showNotification={showNotification}
               />
             </div>
           </Snackbar>
@@ -234,7 +224,7 @@ export default function Sidebar({ children }: PropTypes) {
             {isOpenSnackbar && (
               <EmailAlert
                 setIsOpenSnackbar={setIsOpenSnackbar}
-                setNotification={setNotification}
+                showNotification={showNotification}
               />
             )}
             <Box
@@ -275,7 +265,7 @@ export default function Sidebar({ children }: PropTypes) {
           {isOpenSnackbar && (
             <EmailAlert
               setIsOpenSnackbar={setIsOpenSnackbar}
-              setNotification={setNotification}
+              showNotification={showNotification}
             />
           )}
           <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>

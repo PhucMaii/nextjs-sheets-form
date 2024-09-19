@@ -1,9 +1,9 @@
 'use client';
-import { Box, IconButton, Modal, Switch, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { AlertColor, Box, IconButton, Modal, Switch, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { IItem, Notification } from '@/app/utils/type';
+import { IItem } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import LoadingModal from '../LoadingModal';
@@ -20,13 +20,13 @@ const ShadowSectionStyled = styled(ShadowSection)`
 interface IProps {
   item: IItem;
   handleUpdateItem: (targetItem: IItem) => Promise<void>;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function EditItemAvailability({
   item,
   handleUpdateItem,
-  setNotification,
+  showNotification,
 }: IProps) {
   const [availability, setAvailability] = useState<boolean>(item.availability);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -54,31 +54,19 @@ export default function EditItemAvailability({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsUpdating(false);
         setAvailability(!availability);
         setIsOpen(false);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsOpen(false);
       setIsUpdating(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
       setAvailability(!availability);
       setIsUpdating(false);
       setIsOpen(false);

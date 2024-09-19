@@ -1,6 +1,4 @@
 import React, {
-  Dispatch,
-  SetStateAction,
   useEffect,
   useMemo,
   useState,
@@ -8,6 +6,7 @@ import React, {
 import { Order } from '../orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import {
+  AlertColor,
   Box,
   Grid,
   IconButton,
@@ -21,10 +20,9 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TodayIcon from '@mui/icons-material/Today';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
-import { IRoutes, Notification } from '@/app/utils/type';
+import { IRoutes } from '@/app/utils/type';
 import { primary, primaryColor } from '@/theme/color';
 import { getCODData } from '@/app/utils/array';
-// import InfoIcon from '@mui/icons-material/Info';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import WCODInfo from './Modals/WCODInfo';
 import { blueGrey } from '@mui/material/colors';
@@ -37,7 +35,7 @@ interface IProps {
   setCurrentRoute: any;
   routes: any;
   currentDate: string;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function OrderOverview({
@@ -48,6 +46,7 @@ export default function OrderOverview({
   setCurrentRoute,
   routes,
   currentDate,
+  showNotification,
 }: IProps) {
   const [codData, setCodData] = useState<any>();
   const [isOpenWCODInfo, setIsOpenWCODInfo] = useState<boolean>(false);
@@ -119,7 +118,7 @@ export default function OrderOverview({
         orderData={orderData}
         routes={routes}
         date={currentDate}
-        setNotification={() => {}}
+        showNotification={showNotification}
       />
       {/* Select Routes */}
       <Box display="flex" justifyContent="flex-end" mb={2}>

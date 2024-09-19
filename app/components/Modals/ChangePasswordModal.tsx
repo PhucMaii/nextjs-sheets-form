@@ -7,9 +7,9 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import { Notification } from '@/app/utils/type';
 import Alert from '../Alert';
 import FadeIn from '@/HOC/FadeIn';
+import useNotification from '@/hooks/useNotification';
 
 interface PropTypes {
   isOpen: boolean;
@@ -24,11 +24,7 @@ interface FormValues {
 
 export default function ChangePasswordModal({ isOpen, onClose }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
+  const { notification, showNotification, closeNotification } = useNotification();
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -51,28 +47,16 @@ export default function ChangePasswordModal({ isOpen, onClose }: PropTypes) {
         const response = await axios.put(API_URL.USER, submittedData);
 
         if (response.data.error) {
-          setNotification({
-            on: true,
-            type: 'error',
-            message: response.data.error,
-          });
+          showNotification('error', response.data.error);
           setIsLoading(false);
           return;
         }
 
-        setNotification({
-          on: true,
-          type: 'success',
-          message: response.data.message,
-        });
+        showNotification('success', response.data.message);
         setIsLoading(false);
       } catch (error: any) {
         console.log('Fail to update user password: ', error);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: error.response.data.error,
-        });
+        showNotification('error', error.response.data.error);
         setIsLoading(false);
       }
     },
@@ -91,7 +75,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: PropTypes) {
           {notification.on && (
             <Alert
               notification={notification}
-              onClose={() => setNotification({ ...notification, on: false })}
+              onClose={closeNotification}
             />
           )}
           <Input<string>

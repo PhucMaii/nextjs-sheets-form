@@ -1,15 +1,14 @@
-import { Modal, Typography } from '@mui/material';
+import { AlertColor, Modal, Typography } from '@mui/material';
 import { BoxModal } from './styled';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { ModalProps } from './type';
 import TodayRoute from '../TodayRoute';
-import { Notification } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
   orderData: any;
   routes: any;
   date: string;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function WCODInfo({
@@ -18,7 +17,7 @@ export default function WCODInfo({
   orderData,
   routes,
   date,
-  setNotification,
+  showNotification,
 }: IProps) {
   return (
     <Modal open={open} onClose={onClose}>
@@ -30,7 +29,7 @@ export default function WCODInfo({
           orderData={orderData}
           routes={routes}
           date={date}
-          setNotification={setNotification}
+          showNotification={showNotification}
         />
       </BoxModal>
     </Modal>

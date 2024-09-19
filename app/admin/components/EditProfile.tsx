@@ -13,20 +13,14 @@ import { blueGrey } from '@mui/material/colors';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { UserContext } from '@/app/context/UserContextAPI';
 import { LoadingButton } from '@mui/lab';
-import { Notification } from '@/app/utils/type';
-import NotificationPopup from './Notification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import useNotification from '@/hooks/useNotification';
 
 export default function EditProfile() {
   const [email, setEmail] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [passwordGroup, setPasswordGroup] = useState<any>({
     oldPassword: '',
     newPassword: '',
@@ -36,6 +30,8 @@ export default function EditProfile() {
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+
+  const { showNotification, NotificationComp } = useNotification();
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
@@ -82,28 +78,16 @@ export default function EditProfile() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsSubmitting(false);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('Fail to update client email: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update client email: ' + error,
-      });
+      showNotification('error', 'Fail to update client email: ' + error);
       setIsSubmitting(false);
     }
   };
@@ -111,11 +95,7 @@ export default function EditProfile() {
   const handleUpdatePassword = async () => {
     const { isValid, message } = checkPasswordInput();
     if (!isValid) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message,
-      });
+      showNotification('error', message);
       return;
     }
 
@@ -126,38 +106,23 @@ export default function EditProfile() {
       const response = await axios.put(API_URL.USER, submittedData);
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsSubmitting(false);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('Fail to update user password: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
       setIsSubmitting(false);
     }
   };
 
   return (
     <>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       {/* Geenral Information */}
       <ShadowSection display="flex" flexDirection="column" gap={2}>
         <Typography variant="h6" color={blueGrey[800]} sx={{ mb: 2 }}>
@@ -293,3 +258,4 @@ export default function EditProfile() {
     </>
   );
 }
+

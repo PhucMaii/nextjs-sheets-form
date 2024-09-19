@@ -9,13 +9,14 @@ import {
   TextField,
   Typography,
   Checkbox,
+  AlertColor,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { Driver } from '@prisma/client';
-import { IUserRoutes, Notification, IRoutes, UserType } from '@/app/utils/type';
+import { IUserRoutes, IRoutes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import axios from 'axios';
@@ -26,7 +27,7 @@ interface IEditRouteModal extends ModalProps {
   driverList: Driver[];
   clientList: UserType[];
   day: string;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleUpdateRouteUI: (targetRoute: IRoutes) => void;
 }
 
@@ -45,7 +46,7 @@ export default function EditRoute({
   driverList,
   clientList,
   day,
-  setNotification,
+  showNotification,
   handleUpdateRouteUI,
 }: IEditRouteModal) {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -71,11 +72,7 @@ export default function EditRoute({
 
   const updateRoute = async () => {
     if (updatedRoute.name.trim() === '' || updatedRoute.driverId === -1) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Invalid name or driver',
-      });
+      showNotification('error', 'Invalid name or driver');
       return;
     }
     try {
@@ -96,30 +93,18 @@ export default function EditRoute({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsUpdating(false);
         return;
       }
 
       handleUpdateRouteUI(response.data.data);
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsUpdating(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification('error', 'There was an error: ' + error.response.data.error);
       setIsUpdating(false);
     }
   };

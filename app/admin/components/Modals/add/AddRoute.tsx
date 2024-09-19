@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { Driver } from '@prisma/client';
 import {
@@ -12,10 +12,11 @@ import {
   TextField,
   Typography,
   Checkbox,
+  AlertColor,
 } from '@mui/material';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { Notification, IRoutes, UserType } from '@/app/utils/type';
+import { IRoutes, UserType } from '@/app/utils/type';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import axios from 'axios';
@@ -26,7 +27,7 @@ interface PropTypes extends ModalProps {
   driverList: Driver[];
   clientList: UserType[];
   disabledClientList: UserType[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleAddRouteUI: (targetRoute: IRoutes) => void;
 }
 
@@ -37,7 +38,7 @@ export default function AddRoute({
   driverList,
   clientList,
   disabledClientList,
-  setNotification,
+  showNotification,
   handleAddRouteUI,
 }: PropTypes) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
@@ -55,11 +56,7 @@ export default function AddRoute({
       newRoute.name.trim() === '' ||
       selectedClients.length === 0
     ) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please fill out all blanks',
-      });
+      showNotification('error', 'Please fill out all blanks');
       return;
     }
     try {
@@ -72,30 +69,18 @@ export default function AddRoute({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
 
       handleAddRouteUI(response.data.data);
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error,
-      });
+      showNotification('error', 'There was an error: ' + error);
       setIsAdding(false);
     }
   };

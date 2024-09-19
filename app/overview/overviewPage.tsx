@@ -2,13 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { limitOrderHour } from '../lib/constant';
 import { Order } from '../admin/orders/page';
-import { Notification, UserType } from '../utils/type';
+import { UserType } from '../utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '../utils/enum';
 import { YYYYMMDDFormat, generateMonthRange } from '../utils/time';
 import Sidebar from '../components/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
-import NotificationPopup from '../admin/components/Notification';
 import { Box, Divider, Grid, IconButton, Typography } from '@mui/material';
 import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -19,6 +18,7 @@ import OrderAccordion from '../components/OrderAccordion';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import useNotification from '@/hooks/useNotification';
 
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
@@ -32,15 +32,12 @@ export default function MainPage() {
     }
     return false;
   });
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [userOrder, setUserOrder] = useState<Order | null>(null);
   const [thisMonthOrders, setThisMonthOrders] = useState<Order[]>([]);
   const [totalBill, setTotalBill] = useState<number>(0);
+  
   const router: any = useRouter();
+  const { showNotification, NotificationComp } = useNotification();
 
   const dateRange = generateMonthRange();
 
@@ -79,11 +76,7 @@ export default function MainPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -91,20 +84,12 @@ export default function MainPage() {
         return order.id !== orderId;
       });
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setUserOrder(null);
       setThisMonthOrders(newThisMonthOrders);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to delete the order: ' + error,
-      });
+      showNotification('error', 'Fail to delete the order: ' + error);
     }
   };
 
@@ -157,10 +142,7 @@ export default function MainPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Box
         sx={{
           backgroundColor: blueGrey[800],
@@ -204,7 +186,7 @@ export default function MainPage() {
         <OrderAccordion
           handleDeleteOrder={handleDeleteOrder}
           order={userOrder}
-          setNotification={setNotification}
+          showNotification={showNotification}
           handleUpdateOrderUI={handleUpdateOrderUI}
           isEdit
         />

@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -13,12 +14,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, Fragment, SetStateAction, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { BoxModal } from '../styled';
 import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import {
-  Notification,
   OrderedItems,
   IRoutes,
   ScheduledOrder,
@@ -31,7 +31,7 @@ import { LoadingButton } from '@mui/lab';
 
 interface IProps {
   order: ScheduledOrder;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
   handleDeleteOrderUI: (targetOrder: ScheduledOrder) => void;
   routes: IRoutes[];
@@ -42,7 +42,7 @@ interface IProps {
 export default function EditScheduleOrder({
   order,
   handleUpdateOrderUI,
-  setNotification,
+  showNotification,
   handleDeleteOrderUI,
   routes,
   routeId,
@@ -77,20 +77,12 @@ export default function EditScheduleOrder({
     );
 
     if (newItem.name.trim() === '') {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Is Missing',
-      });
+      showNotification('error', 'Item Name Is Missing');
       return;
     }
 
     if (hasNameExisted) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Existed Already',
-      });
+      showNotification('error', 'Item Name Existed Already');
     } else {
       const totalPrice = newItem.quantity * newItem.price;
       setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
@@ -150,11 +142,7 @@ export default function EditScheduleOrder({
 
   const switchRoute = async () => {
     if (newRouteId === routeId) {
-      setNotification({
-        on: true,
-        type: 'warning',
-        message: 'Route Has Not Been Changed',
-      });
+      showNotification('warning', 'Route Has Not Been Changed');
       return;
     }
     try {
@@ -167,30 +155,18 @@ export default function EditScheduleOrder({
 
       if (response.data.error) {
         setIsSubmitting(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       handleDeleteOrderUI(order);
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
       setIsSubmitting(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update item: ' + error,
-      });
+      showNotification('error', 'Fail to update item: ' + error);
     }
   };
 
@@ -208,11 +184,7 @@ export default function EditScheduleOrder({
 
       if (response.data.error) {
         setIsSubmitting(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -224,20 +196,12 @@ export default function EditScheduleOrder({
 
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
       setIsSubmitting(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update item: ' + error,
-      });
+      showNotification('error', 'Fail to update item: ' + error);
     }
   };
 

@@ -1,11 +1,11 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 import { BoxModal } from '@/app/admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Item, Order } from '@/app/admin/orders/page';
 import { infoColor } from '@/theme/color';
-import { Notification } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -20,7 +20,7 @@ import { API_URL } from '@/app/utils/enum';
 
 interface PropTypes extends ModalProps {
   order: Order;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleUpdateOrderUI: (updatedOrder: Order) => void;
 }
 
@@ -28,7 +28,7 @@ export default function EditOrder({
   open,
   onClose,
   order,
-  setNotification,
+  showNotification,
   handleUpdateOrderUI,
 }: PropTypes) {
   const [itemList, setItemList] = useState<Item[]>(
@@ -62,29 +62,17 @@ export default function EditOrder({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsOverriding(false);
       }
 
       handleUpdateOrderUI(response.data.data);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsOverriding(false);
       onClose();
     } catch (error: any) {
       console.log('Fail to override order: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to override order: ' + error,
-      });
+      showNotification('error', 'Fail to override order: ' + error);
       setIsOverriding(false);
     }
   };

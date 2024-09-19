@@ -54,6 +54,7 @@ import { getSameDateLastWeek } from '@/pages/api/utils/date';
 import { UserRoute } from '@prisma/client';
 import { blueGrey } from '@mui/material/colors';
 import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 interface Category {
   id: number;
@@ -113,11 +114,6 @@ export default function Orders() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [routeOrders, setRouteOrders] = useState<Order[]>([]);
   const [pages, setPages] = useState<number>(0);
@@ -131,6 +127,7 @@ export default function Orders() {
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const { date, SelectDate } = useSelectDate();
+  const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
   const [orders, mutate, isValidating] = SWRFetchData(
@@ -303,40 +300,26 @@ export default function Orders() {
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       if (response.data.warning) {
         if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
-          setNotification({
-            on: true,
-            type: 'warning',
-            message: response.data.warning,
-          });
+          showNotification('warning', response.data.warning);
           return;
         } else {
           return response;
         }
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log(error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message:
-          'There was an error creating order: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error creating order: ' + error.response.data.error,
+      );
       return;
     }
   };
@@ -415,11 +398,7 @@ export default function Orders() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -429,18 +408,13 @@ export default function Orders() {
       // Mutate to update real data
       mutate();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Update Item Successfully',
-      });
+      showNotification('success', 'Update Item Successfully');
     } catch (error: any) {
       console.log('Fail to update order items: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update order items: ' + error,
-      });
+      showNotification(
+        'error',
+        'Fail to update order items: ' + error.response.data.error,
+      );
     }
   };
 
@@ -477,29 +451,20 @@ export default function Orders() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         // setIsUpdating(false);
         return;
       }
 
       mutate();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       // setIsUpdating(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Something went wrong: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'Something went wrong: ' + error.response.data.error,
+      );
       // setIsUpdating(false);
     }
   };
@@ -673,7 +638,7 @@ export default function Orders() {
         currentRoute={currentRoute}
         setCurrentRoute={setCurrentRoute}
         routes={routes?.data || []}
-        setNotification={setNotification}
+        showNotification={showNotification}
       />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={12} md={10.5}>
@@ -762,10 +727,7 @@ export default function Orders() {
   return (
     <Sidebar>
       {/* <LoadingModal open={isUpdating} /> */}
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <div style={{ display: 'none' }}>
         <AllPrint
           orders={selectedOrders.length > 0 ? selectedOrders : orderData}
@@ -776,7 +738,7 @@ export default function Orders() {
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
         clientList={clients?.data || []}
-        setNotification={setNotification}
+        showNotification={showNotification}
         currentDate={date}
         createOrder={addOrder}
       />
@@ -784,7 +746,7 @@ export default function Orders() {
         open={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         baseOrderList={baseOrderData}
-        setNotification={setNotification}
+        showNotification={showNotification}
         handleUpdateStatusUI={handleUpdateStatusUI}
         mutateOrders={mutate}
         handleUpdateDateUI={handleUpdateDateUI}
@@ -815,9 +777,8 @@ export default function Orders() {
                     <OrderAccordion
                       key={index}
                       order={order}
-                      setNotification={setNotification}
+                      showNotification={showNotification}
                       handleUpdateStatusUI={handleUpdateStatusUI}
-                      // updateUIItem={handleUpdateUISingleOrder}
                       handleUpdateDateUI={handleUpdateDateUI}
                       handleUpdatePriceUI={handleUpdatePriceUI}
                       selectedOrders={selectedOrders}

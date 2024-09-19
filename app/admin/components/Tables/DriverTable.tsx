@@ -1,5 +1,6 @@
-import { IDriver, Notification } from '@/app/utils/type';
+import { IDriver } from '@/app/utils/type';
 import {
+  AlertColor,
   Box,
   Table,
   TableBody,
@@ -7,19 +8,19 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import EditDriver from '../Modals/edit/EditDriver';
 import DeleteDriver from '../Modals/delete/DeleteDriver';
 
 interface IProps {
   drivers: IDriver[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   mutateDrivers: any;
 }
 
 export default function DriverTable({
   drivers,
-  setNotification,
+  showNotification,
   mutateDrivers,
 }: IProps) {
   return (
@@ -44,12 +45,12 @@ export default function DriverTable({
                   <Box display="flex" flexDirection="row" gap={1}>
                     <DeleteDriver
                       driver={driver}
-                      setNotification={setNotification}
+                      showNotification={showNotification}
                       mutateDrivers={mutateDrivers}
                     />
                     <EditDriver
                       driver={driver}
-                      setNotification={setNotification}
+                      showNotification={showNotification}
                       mutateDrivers={mutateDrivers}
                     />
                   </Box>

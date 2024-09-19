@@ -14,10 +14,9 @@ import {
   Typography,
 } from '@mui/material';
 import { ShadowSection } from './styled';
-import { Notification, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
-import NotificationPopup from '../components/Notification';
 import { Order } from '../orders/page';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -34,9 +33,7 @@ import { blue, blueGrey } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import {
-  generateMonthRange,
-} from '@/app/utils/time';
+import { generateMonthRange } from '@/app/utils/time';
 import { useReactToPrint } from 'react-to-print';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
 import { DropdownItemContainer } from '../orders/styled';
@@ -59,6 +56,7 @@ import BillPrintModal from '../components/Modals/BillPrintModal';
 import { SWRFetchData } from '@/app/utils/db';
 import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -80,16 +78,12 @@ export default function ReportPage() {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
     useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const { showNotification, NotificationComp } = useNotification();
 
   // Printing Refs
   const invoicePrint: any = useRef();
@@ -116,11 +110,7 @@ export default function ReportPage() {
     pusherClient.subscribe('admin-delete-order');
 
     pusherClient.bind('delete-order', (deletedOrder: Order) => {
-      setNotification({
-        on: true,
-        type: 'success',
-        message: `Order ${deletedOrder.id} deleted successfully`,
-      });
+      showNotification('success', `Order ${deletedOrder.id} deleted successfully`);
       setDeletedOrder(deletedOrder);
     });
 
@@ -338,11 +328,7 @@ export default function ReportPage() {
         data: { orderList: selectedOrders },
       });
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
     }
@@ -357,11 +343,7 @@ export default function ReportPage() {
 
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
     }
@@ -376,27 +358,14 @@ export default function ReportPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-
+        showNotification('error', response.data.error);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification('error', 'There was an error: ' + error.response.data.error);
     }
   };
 
@@ -569,7 +538,7 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
-      {/* {isSendLoading && <SplashScreen />} */}
+      {NotificationComp}
       <div style={{ display: 'none' }}>
         <InvoicePrint
           client={clientValue}
@@ -601,18 +570,12 @@ export default function ReportPage() {
           day={datePicker}
         />
       )}
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5" color={blueGrey[800]}>
           Reports
         </Typography>
         {clientValue?.clientName === 'All Clients' ? (
-          <>
-            {SelectDate}
-          </>
+          <>{SelectDate}</>
         ) : (
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
         )}
@@ -727,7 +690,7 @@ export default function ReportPage() {
               handleDeleteOrderUI={handleDeleteOrderUI}
               handleUpdateOrderUI={handleUpdateOrderUI}
               clientOrders={clientOrders}
-              setNotification={setNotification}
+              showNotification={showNotification}
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               handleSelectAll={handleSelectAll}

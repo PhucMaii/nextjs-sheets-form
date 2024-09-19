@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Divider,
   Grid,
@@ -6,15 +7,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import DateRange from './DateRangeModal';
 import { generateMonthRange } from '@/app/utils/time';
 import AddIcon from '@mui/icons-material/Add';
 import { SWRFetchData } from '@/app/utils/db';
-// import { API_URL } from '@/app/utils/enum';
-import { IDayRange, Notification, UserType } from '@/app/utils/type';
+import { IDayRange, UserType } from '@/app/utils/type';
 import ErrorComponent from '../ErrorComponent';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
@@ -22,7 +22,7 @@ import DayRange from '../DayRange';
 
 interface IProps extends ModalProps {
   currentUser: UserType;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 const apiURL = `/api/unavailable_days`;
@@ -30,7 +30,7 @@ export default function UnavailableRange({
   open,
   onClose,
   currentUser,
-  setNotification,
+  showNotification,
 }: IProps) {
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
@@ -64,11 +64,7 @@ export default function UnavailableRange({
 
   const handleAddRange = async () => {
     if (!newDateRange) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'No Day Range Selected',
-      });
+      showNotification('error', 'No Day Range Selected');
       return;
     }
     try {
@@ -81,30 +77,18 @@ export default function UnavailableRange({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification('error', 'There was an error: ' + error.response.data.error);
       setIsAdding(false);
     }
   };
@@ -118,11 +102,7 @@ export default function UnavailableRange({
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setTargetRange(null);
         setIsDeleting(false);
         return;
@@ -130,20 +110,12 @@ export default function UnavailableRange({
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setTargetRange(null);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error:', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification('error', 'There was an error: ' + error.response.data.error);
       setTargetRange(null);
       setIsDeleting(false);
     }
@@ -160,11 +132,7 @@ export default function UnavailableRange({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsEditing(false);
         setTargetRange(null);
         setUpdatedDateRange(null);
@@ -173,22 +141,14 @@ export default function UnavailableRange({
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsEditing(false);
       setTargetRange(null);
       setUpdatedDateRange(null);
       setIsSaving(false);
     } catch (error: any) {
       console.log('There was an error: ' + error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification('error', 'There was an error: ' + error.response.data.error);
       setIsEditing(false);
       setTargetRange(null);
       setUpdatedDateRange(null);
@@ -276,3 +236,4 @@ export default function UnavailableRange({
     </>
   );
 }
+

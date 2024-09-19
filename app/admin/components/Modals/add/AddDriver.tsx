@@ -1,21 +1,20 @@
-import { Divider, Grid, Modal, TextField, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { AlertColor, Divider, Grid, Modal, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { Notification } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   mutateDrivers: any;
 }
 
 export default function AddDriver({
   open,
   onClose,
-  setNotification,
+  showNotification,
   mutateDrivers,
 }: IProps) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
@@ -32,30 +31,18 @@ export default function AddDriver({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
 
       mutateDrivers();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: `There was an error ${error.response.data.error}`,
-      });
+      showNotification('error', `There was an error ${error.response.data.error}`);
       setIsAdding(false);
     }
   };
@@ -103,3 +90,4 @@ export default function AddDriver({
     </Modal>
   );
 }
+

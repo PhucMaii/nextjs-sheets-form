@@ -7,24 +7,19 @@ import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { blueGrey } from '@mui/material/colors';
 import { ShadowSection } from '../reports/styled';
 import DriverTable from '../components/Tables/DriverTable';
-import { Notification } from '@/app/utils/type';
-import NotificationPopup from '../components/Notification';
 import AddDriver from '../components/Modals/add/AddDriver';
 import useSelectDate from '@/hooks/useSelectDate';
 import TodayRoute from '../components/TodayRoute';
 import { days } from '@/app/lib/constant';
+import useNotification from '@/hooks/useNotification';
 
 export default function DriverManagement() {
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [isOpenAddDriver, setIsOpenAddDriver] = useState<boolean>(false);
   const [tabIndex, setTabIndex] = useState<number>(0);
 
   // Custom Hooks
   const { date, SelectDate } = useSelectDate();
+  const { showNotification, NotificationComp} = useNotification();
 
   const dayIndex = useMemo(() => {
     const selectedDate = new Date(date);
@@ -43,13 +38,10 @@ export default function DriverManagement() {
       <AddDriver
         open={isOpenAddDriver}
         onClose={() => setIsOpenAddDriver(false)}
-        setNotification={setNotification}
+        showNotification={showNotification}
         mutateDrivers={mutateDrivers}
       />
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Typography variant="h5" color={blueGrey[800]}>
         Driver Management
       </Typography>
@@ -87,7 +79,7 @@ export default function DriverManagement() {
             </Box>
             <DriverTable
               drivers={drivers?.data || []}
-              setNotification={setNotification}
+              showNotification={showNotification}
               mutateDrivers={mutateDrivers}
             />
           </>
@@ -100,7 +92,8 @@ export default function DriverManagement() {
               orderData={orders?.data || []}
               routes={routes?.data || []}
               date={date}
-              setNotification={setNotification}
+              showNotification={showNotification}
+
             />
           </>
         )}

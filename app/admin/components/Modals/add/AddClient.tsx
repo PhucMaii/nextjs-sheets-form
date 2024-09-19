@@ -1,7 +1,8 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import {
+  AlertColor,
   Box,
   Divider,
   Grid,
@@ -18,7 +19,7 @@ import { orderTypes, paymentTypes } from '@/app/lib/constant';
 import StatusText from '../../StatusText';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import axios from 'axios';
-import { Notification, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import ModalHead from '@/app/lib/ModalHead';
 import AddCategory from './AddCategory';
 import AddIcon from '@mui/icons-material/Add';
@@ -26,8 +27,7 @@ import AddIcon from '@mui/icons-material/Add';
 interface PropTypes extends ModalProps {
   categories: Category[];
   mutateCategories: any;
-  // subCategories: SubCategory[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleAddClientUI: (newClient: UserType) => void;
   mutateClients: any;
 }
@@ -38,7 +38,7 @@ export default function AddClient({
   categories,
   mutateCategories,
   // subCategories,
-  setNotification,
+  showNotification,
   handleAddClientUI,
   mutateClients,
 }: PropTypes) {
@@ -100,11 +100,7 @@ export default function AddClient({
   const handleAddClient = async () => {
     const isFormValid = handleCheckAllInput();
     if (!isFormValid) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Please fill out all fields',
-      });
+      showNotification('error', 'Please fill out all fields');
       return;
     }
     try {
@@ -117,11 +113,7 @@ export default function AddClient({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
@@ -132,20 +124,12 @@ export default function AddClient({
       // Update Real Data
       mutateClients();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsAdding(false);
     } catch (error: any) {
       console.log('Fail to add client: ', error);
       setIsAdding(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to add client: ' + error,
-      });
+      showNotification('error', 'Fail to add client: ' + error);
     }
   };
   return (
@@ -154,7 +138,7 @@ export default function AddClient({
         <AddCategory
           open={isOpenAddCategory}
           onClose={() => setIsOpenAdCategory(false)}
-          setNotification={setNotification}
+          showNotification={showNotification}
           handleOnChangeClient={handleOnChangeClient}
           mutateCategories={mutateCategories}
         />

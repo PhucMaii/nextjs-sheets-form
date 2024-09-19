@@ -36,11 +36,6 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: IProps) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
 
   const router = useRouter();
   const pathname: any = usePathname();
@@ -63,12 +58,6 @@ export default function Sidebar({ children }: IProps) {
 
   const content = (
     <>
-      <SnackbarPopup
-        open={notification.on}
-        onClose={() => setNotification({ ...notification, on: false })}
-        type={notification.type}
-        message={notification.message}
-      />
       <Toolbar sx={{ mt: 4 }}>
         <img
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
