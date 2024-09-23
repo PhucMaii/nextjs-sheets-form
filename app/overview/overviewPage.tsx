@@ -17,7 +17,6 @@ import { blue, blueGrey } from '@mui/material/colors';
 import OrderAccordion from '../components/OrderAccordion';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
-import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import useNotification from '@/hooks/useNotification';
 
 export default function MainPage() {
@@ -46,7 +45,7 @@ export default function MainPage() {
   const endDate = dateRange[1];
   endDate.setDate(today.getDate() + 2);
 
-  const { data: clientOrders, isValidating } = useSWR(API_URL.CLIENT_ORDER);
+  const { data: clientOrders, isValidating } = useSWR(`${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`);
 
   useEffect(() => {
     if (clientOrders) {
@@ -104,17 +103,9 @@ export default function MainPage() {
       return order.deliveryDate === formattedDate;
     });
 
-    const monthRange = generateMonthRange();
-
-    const filterMonthOrders = filterDateRangeOrders(
-      clientOrders.data.userOrders,
-      monthRange[0],
-      monthRange[1],
-    );
-
     setClient(clientOrders.data.user);
     setUserOrder({ ...clientOrders.data.user, ...orderToday });
-    setThisMonthOrders(filterMonthOrders);
+    setThisMonthOrders(clientOrders.data.userOrders);
   };
 
   const handleUpdateOrderUI = (updatedOrder: Order) => {
@@ -152,7 +143,7 @@ export default function MainPage() {
           borderRadius: 2,
         }}
       >
-        <Typography variant="h4">Hello, {client?.clientName} !</Typography>
+        <Typography variant="h5">Hello, {client?.clientName} !</Typography>
       </Box>
       <Grid container spacing={2} my={2}>
         <Grid item xs={12}>

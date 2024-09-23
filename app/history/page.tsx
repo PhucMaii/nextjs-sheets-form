@@ -34,7 +34,6 @@ import {
 import { blue, blueGrey } from '@mui/material/colors';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import useSWR from 'swr';
 import ErrorComponent from '../admin/components/ErrorComponent';
 
@@ -56,7 +55,7 @@ export default function HistoryPage() {
   const totalPositionRef: any = useRef(null);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  const { data: orderData, isValidating } = useSWR(API_URL.CLIENT_ORDER);
+  const { data: orderData, isValidating } = useSWR(`${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -100,14 +99,8 @@ export default function HistoryPage() {
   };
 
   const initializeOrders = () => {
-    const filteredOrders: any = filterDateRangeOrders(
-      orderData.data.userOrders,
-      dateRange[0],
-      dateRange[1],
-    );
-
-    setClientOrders(filteredOrders);
-    setBaseClientOrders(filteredOrders);
+    setClientOrders(orderData.data.userOrders);
+    setBaseClientOrders(orderData.data.userOrders);
   };
 
   const resetOrders = () => {
