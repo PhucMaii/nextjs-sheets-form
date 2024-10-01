@@ -18,11 +18,7 @@ import React, { Fragment, useState } from 'react';
 import { BoxModal } from '../styled';
 import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
-import {
-  OrderedItems,
-  IRoutes,
-  ScheduledOrder,
-} from '@/app/utils/type';
+import { OrderedItems, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { errorColor } from '@/theme/color';
 import { API_URL } from '@/app/utils/enum';

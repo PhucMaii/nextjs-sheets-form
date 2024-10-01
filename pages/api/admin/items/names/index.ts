@@ -1,30 +1,25 @@
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-interface IQuery {
-  categoryId?: string;
-}
-
-export default async function GET(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
-    const { categoryId }: IQuery = req.query;
-
-    if (!categoryId) {
+    if (req.method !== 'GET') {
       return res.status(404).json({
-        error: 'Category id is missing',
+        error: 'Your method is not supported',
       });
     }
 
+    const prisma = new PrismaClient();
+
     const items = await prisma.item.findMany({
-      where: {
-        categoryId: Number(categoryId),
-      },
+      distinct: ['name'],
     });
 
+    const itemNames = items.map((item) => item.name);
+
     return res.status(200).json({
-      data: items,
+      data: itemNames,
       message: 'Fetch Items Successfully',
     });
   } catch (error: any) {
@@ -33,4 +28,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       error: 'Internal Server Error: ' + error,
     });
   }
-}
+};
+
+export default withAdminAuthGuard(handler);

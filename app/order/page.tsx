@@ -47,7 +47,8 @@ export default function OrderForm() {
     useState<boolean>(false);
   const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
 
-  const { showNotification, notification, closeNotification } = useNotification();
+  const { showNotification, notification, closeNotification } =
+    useNotification();
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   let today: any = dayjs();

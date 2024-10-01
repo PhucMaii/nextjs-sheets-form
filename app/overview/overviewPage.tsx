@@ -34,7 +34,7 @@ export default function MainPage() {
   const [userOrder, setUserOrder] = useState<Order | null>(null);
   const [thisMonthOrders, setThisMonthOrders] = useState<Order[]>([]);
   const [totalBill, setTotalBill] = useState<number>(0);
-  
+
   const router: any = useRouter();
   const { showNotification, NotificationComp } = useNotification();
 
@@ -45,7 +45,9 @@ export default function MainPage() {
   const endDate = dateRange[1];
   endDate.setDate(today.getDate() + 2);
 
-  const { data: clientOrders, isValidating } = useSWR(`${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`);
+  const { data: clientOrders, isValidating } = useSWR(
+    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  );
 
   useEffect(() => {
     if (clientOrders) {

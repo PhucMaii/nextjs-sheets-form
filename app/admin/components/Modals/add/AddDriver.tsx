@@ -1,4 +1,11 @@
-import { AlertColor, Divider, Grid, Modal, TextField, Typography } from '@mui/material';
+import {
+  AlertColor,
+  Divider,
+  Grid,
+  Modal,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
@@ -42,7 +49,10 @@ export default function AddDriver({
       setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', `There was an error ${error.response.data.error}`);
+      showNotification(
+        'error',
+        `There was an error ${error.response.data.error}`,
+      );
       setIsAdding(false);
     }
   };
@@ -90,4 +100,3 @@ export default function AddDriver({
     </Modal>
   );
 }
-

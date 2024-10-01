@@ -30,7 +30,7 @@ export default function Overview() {
   const [revenueData, setRevenueData] = useState<any>();
 
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
-  const { showNotification, NotificationComp} = useNotification();
+  const { showNotification, NotificationComp } = useNotification();
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();

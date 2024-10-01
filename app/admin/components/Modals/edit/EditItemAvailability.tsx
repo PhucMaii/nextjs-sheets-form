@@ -1,5 +1,12 @@
 'use client';
-import { AlertColor, Box, IconButton, Modal, Switch, Typography } from '@mui/material';
+import {
+  AlertColor,
+  Box,
+  IconButton,
+  Modal,
+  Switch,
+  Typography,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ShadowSection } from '@/app/admin/reports/styled';

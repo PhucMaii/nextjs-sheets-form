@@ -55,7 +55,9 @@ export default function HistoryPage() {
   const totalPositionRef: any = useRef(null);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  const { data: orderData, isValidating } = useSWR(`${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`);
+  const { data: orderData, isValidating } = useSWR(
+    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  );
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();

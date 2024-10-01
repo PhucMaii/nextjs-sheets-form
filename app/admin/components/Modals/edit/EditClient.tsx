@@ -1,8 +1,4 @@
-import React, {
-  memo,
-  useEffect,
-  useState,
-} from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -34,7 +30,7 @@ const EditClient = ({
   client,
   categories,
   handleUpdateClient,
-  showNotification
+  showNotification,
 }: PropTypes) => {
   const [deliveryAddress, setDeliveryAddress] = useState<any>({
     description: client.deliveryAddress,
@@ -194,4 +190,3 @@ const EditClient = ({
 };
 
 export default memo(EditClient);
-

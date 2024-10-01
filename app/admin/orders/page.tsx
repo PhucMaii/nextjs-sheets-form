@@ -26,11 +26,7 @@ import {
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
-import {
-  IRoutes,
-  OrderedItems,
-  UserType,
-} from '@/app/utils/type';
+import { IRoutes, OrderedItems, UserType } from '@/app/utils/type';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
@@ -656,7 +652,9 @@ export default function Orders() {
                       icon={<statusTab.icon />}
                       id={`simple-tab-${index}`}
                       label={`${statusTab.name} ${
-                        tabIndex === index ? `(${currentRoute === 0 ? baseOrderData.length : routeOrders.length})` : ''
+                        tabIndex === index
+                          ? `(${currentRoute === 0 ? baseOrderData.length : routeOrders.length})`
+                          : ''
                       } `}
                       aria-controls={`tabpanel-${index}`}
                       value={index}

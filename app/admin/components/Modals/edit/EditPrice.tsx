@@ -13,11 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, {
-  Fragment,
-  useEffect,
-  useState,
-} from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import axios from 'axios';

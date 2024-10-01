@@ -59,7 +59,10 @@ export default function Announcement() {
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to save update: ', error);
-      showNotification('error', 'Internal Server Error: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'Internal Server Error: ' + error.response.data.error,
+      );
     }
   };
 
@@ -223,5 +226,3 @@ export default function Announcement() {
     </Box>
   );
 }
-
-
