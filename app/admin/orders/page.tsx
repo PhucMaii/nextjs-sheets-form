@@ -28,11 +28,9 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import { AllPrint } from '../components/Printing/AllPrint';
 import {
   IRoutes,
-  Notification,
   OrderedItems,
   UserType,
 } from '@/app/utils/type';
-import NotificationPopup from '../components/Notification';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
@@ -658,7 +656,7 @@ export default function Orders() {
                       icon={<statusTab.icon />}
                       id={`simple-tab-${index}`}
                       label={`${statusTab.name} ${
-                        tabIndex === index ? `(${baseOrderData.length})` : ''
+                        tabIndex === index ? `(${currentRoute === 0 ? baseOrderData.length : routeOrders.length})` : ''
                       } `}
                       aria-controls={`tabpanel-${index}`}
                       value={index}
