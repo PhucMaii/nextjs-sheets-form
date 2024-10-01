@@ -44,7 +44,7 @@ export default function ItemPage() {
     useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
-  const { showNotification, NotificationComp} = useNotification();
+  const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
@@ -98,6 +98,7 @@ export default function ItemPage() {
   }, [debouncedKeywords]);
 
   const checkIsNewItemValid = (newItem: IItem) => {
+    console.log(newItem, 'new item');
     if (
       newItem.name.trim() === '' ||
       newItem.price < 0 ||
@@ -293,7 +294,10 @@ export default function ItemPage() {
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error in rearrangement: ', error);
-      showNotification('error', 'There was an error in rearrangement: ' + error);
+      showNotification(
+        'error',
+        'There was an error in rearrangement: ' + error,
+      );
       setIsSavingArrangement(false);
     }
   };

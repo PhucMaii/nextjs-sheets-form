@@ -104,7 +104,10 @@ export default function EditRoute({
       setIsUpdating(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', 'There was an error: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsUpdating(false);
     }
   };

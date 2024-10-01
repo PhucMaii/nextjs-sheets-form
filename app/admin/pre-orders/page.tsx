@@ -24,11 +24,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
-import {
-  OrderedItems,
-  IRoutes,
-  ScheduledOrder,
-} from '@/app/utils/type';
+import { OrderedItems, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/add/AddOrder';
@@ -73,15 +69,15 @@ export default function ScheduledOrderPage() {
     if (dateObj.getHours() >= limitOrderHour) {
       dateObj.setDate(dateObj.getDate() + 1);
     }
-    
+
     return dateObj.getDay();
   });
   const [routeIndex, setRouteIndex] = useState<number>(0);
   const [routes, setRoutes] = useState<IRoutes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  
-  const {showNotification, NotificationComp} = useNotification();
+
+  const { showNotification, NotificationComp } = useNotification();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const recommendDate = useMemo(() => {
@@ -323,7 +319,10 @@ export default function ScheduledOrderPage() {
       setIsDeleteModalOpen(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', 'There was an error: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
     }
   };
 
@@ -485,7 +484,10 @@ export default function ScheduledOrderPage() {
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error in rearrangement: ', error);
-      showNotification('error', 'There was an error in rearrangement: ' + error);
+      showNotification(
+        'error',
+        'There was an error in rearrangement: ' + error,
+      );
       setIsSavingArrangement(false);
     }
   };

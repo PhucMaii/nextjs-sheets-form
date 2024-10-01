@@ -74,7 +74,10 @@ export default function PlaceOrder() {
         return;
       }
 
-      showNotification('success', `Placed Order Successfully for ${selectedClient?.clientName}`);
+      showNotification(
+        'success',
+        `Placed Order Successfully for ${selectedClient?.clientName}`,
+      );
 
       setIsSubmitting(false);
     } catch (error: any) {

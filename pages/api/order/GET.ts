@@ -28,7 +28,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         category: true,
-      }
+      },
     });
 
     if (!existingUser) {
@@ -40,7 +40,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     formattedEndDate.setDate(formattedEndDate.getDate() + 1);
 
-    const dateList = generateListOfDateString(formattedStartDate, formattedEndDate);
+    const dateList = generateListOfDateString(
+      formattedStartDate,
+      formattedEndDate,
+    );
 
     const userOrders: any = await prisma.orders.findMany({
       where: {
@@ -54,7 +57,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         deliveryDate: {
           in: dateList,
-        }
+        },
       },
       include: {
         items: true,
@@ -70,8 +73,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return { ...item, totalPrice };
       });
 
-      return { ...order, items, ...existingUser, category: existingUser.category, id: order.id };
-    } )
+      return {
+        ...order,
+        items,
+        ...existingUser,
+        category: existingUser.category,
+        id: order.id,
+      };
+    });
 
     return res.status(200).json({
       data: {

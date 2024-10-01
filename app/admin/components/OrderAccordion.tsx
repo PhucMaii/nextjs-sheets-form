@@ -1,11 +1,5 @@
 'use client';
-import React, {
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -130,7 +124,7 @@ const OrderAccordion = ({
 
       // Update Real Data
       mutateOrders();
-      showNotification('success', response.data.message)
+      showNotification('success', response.data.message);
       setIsMarkButtonDisabled(false);
     } catch (error) {
       console.log('Fail to mark as completed: ', error);

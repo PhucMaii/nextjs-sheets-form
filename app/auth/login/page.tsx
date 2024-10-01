@@ -69,7 +69,10 @@ export default function LoginPage() {
         }, 1000);
       } catch (error: any) {
         console.log('Fail to sign in: ', error);
-        showNotification('error', 'Your client id and/or password are not correct');
+        showNotification(
+          'error',
+          'Your client id and/or password are not correct',
+        );
         setIsLoading(false);
       }
     },

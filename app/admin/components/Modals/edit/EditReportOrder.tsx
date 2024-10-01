@@ -14,11 +14,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, {
-  Fragment,
-  useEffect,
-  useState,
-} from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -186,7 +182,10 @@ export default function EditReportOrder({
         });
 
         if (orderUpdateResponse.data.error) {
-          showNotification('error', 'Fail to update date and status: ' + orderUpdateResponse.data.error);
+          showNotification(
+            'error',
+            'Fail to update date and status: ' + orderUpdateResponse.data.error,
+          );
           setIsSubmitting(false);
           return;
         }

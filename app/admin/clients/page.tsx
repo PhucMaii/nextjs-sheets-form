@@ -54,11 +54,9 @@ export default function ClientsPage() {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  
-  
-  const debouncedKeywords = useDebounce(searchKeywords, 1000);
-    const {showNotification, NotificationComp} = useNotification();
 
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
   const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);

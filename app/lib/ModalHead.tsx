@@ -19,7 +19,9 @@ export default function ModalHead({
 }: IModalHead) {
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Typography variant="h4">{heading}</Typography>
+      <Typography variant="h4" fontWeight={500}>
+        {heading}
+      </Typography>
       <Box display="flex" alignItems="center" gap={1}>
         <Button variant="outlined" onClick={onClose}>
           Cancel

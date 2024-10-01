@@ -225,4 +225,3 @@ export default memo(ClientsTable, (prev, next) => {
     prev.selectedClients === next.selectedClients
   );
 });
-

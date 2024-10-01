@@ -110,7 +110,10 @@ export default function ReportPage() {
     pusherClient.subscribe('admin-delete-order');
 
     pusherClient.bind('delete-order', (deletedOrder: Order) => {
-      showNotification('success', `Order ${deletedOrder.id} deleted successfully`);
+      showNotification(
+        'success',
+        `Order ${deletedOrder.id} deleted successfully`,
+      );
       setDeletedOrder(deletedOrder);
     });
 
@@ -365,7 +368,10 @@ export default function ReportPage() {
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', 'There was an error: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
     }
   };
 

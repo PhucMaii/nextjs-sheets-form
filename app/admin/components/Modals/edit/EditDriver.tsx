@@ -16,7 +16,7 @@ import { API_URL } from '@/app/utils/enum';
 
 interface IProps {
   driver: IDriver;
-  showNotification: (type: AlertColor, message: string) => void,
+  showNotification: (type: AlertColor, message: string) => void;
   mutateDrivers: any;
 }
 
@@ -84,4 +84,3 @@ export default function EditDriver({
     </>
   );
 }
-

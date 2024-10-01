@@ -24,7 +24,8 @@ interface FormValues {
 
 export default function ChangePasswordModal({ isOpen, onClose }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { notification, showNotification, closeNotification } = useNotification();
+  const { notification, showNotification, closeNotification } =
+    useNotification();
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -73,10 +74,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: PropTypes) {
             Change Password
           </h1>
           {notification.on && (
-            <Alert
-              notification={notification}
-              onClose={closeNotification}
-            />
+            <Alert notification={notification} onClose={closeNotification} />
           )}
           <Input<string>
             className={`text-left m-0 p-0 w-80 ${

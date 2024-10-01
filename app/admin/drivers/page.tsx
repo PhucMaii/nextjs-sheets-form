@@ -19,7 +19,7 @@ export default function DriverManagement() {
 
   // Custom Hooks
   const { date, SelectDate } = useSelectDate();
-  const { showNotification, NotificationComp} = useNotification();
+  const { showNotification, NotificationComp } = useNotification();
 
   const dayIndex = useMemo(() => {
     const selectedDate = new Date(date);
@@ -93,7 +93,6 @@ export default function DriverManagement() {
               routes={routes?.data || []}
               date={date}
               showNotification={showNotification}
-
             />
           </>
         )}

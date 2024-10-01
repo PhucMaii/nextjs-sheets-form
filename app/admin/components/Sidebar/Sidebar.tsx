@@ -13,7 +13,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { adminTabs, tabs } from '../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
@@ -107,10 +107,10 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         aria-labelledby="nested-list-subheader"
       >
         <Box display="flex" flexDirection="column" rowGap={2}>
-          {Object.keys(adminTabs).map((section: string) => {
+          {Object.keys(adminTabs).map((section: string, index: number) => {
             const sectionKey = section as keyof typeof adminTabs;
             return (
-              <>
+              <Fragment key={index}>
                 <Typography
                   variant="subtitle2"
                   color={blueGrey[500]}
@@ -144,7 +144,7 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
                   );
                 })}
                 <Divider />
-              </>
+              </Fragment>
             );
           })}
         </Box>

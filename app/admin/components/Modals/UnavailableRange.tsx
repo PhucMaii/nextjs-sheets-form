@@ -88,7 +88,10 @@ export default function UnavailableRange({
       setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', 'There was an error: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsAdding(false);
     }
   };
@@ -115,7 +118,10 @@ export default function UnavailableRange({
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error:', error);
-      showNotification('error', 'There was an error: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setTargetRange(null);
       setIsDeleting(false);
     }
@@ -148,7 +154,10 @@ export default function UnavailableRange({
       setIsSaving(false);
     } catch (error: any) {
       console.log('There was an error: ' + error);
-      showNotification('error', 'There was an error: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsEditing(false);
       setTargetRange(null);
       setUpdatedDateRange(null);
@@ -236,4 +245,3 @@ export default function UnavailableRange({
     </>
   );
 }
-

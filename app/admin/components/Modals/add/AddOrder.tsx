@@ -150,10 +150,7 @@ export default function AddOrder({
     } catch (error: any) {
       console.log('Fail to fetch client items: ', error);
       setIsFetching(false);
-      showNotification(
-        'error',
-        'Fail to copy from last order: ' + error,
-      );
+      showNotification('error', 'Fail to copy from last order: ' + error);
     }
   };
 
