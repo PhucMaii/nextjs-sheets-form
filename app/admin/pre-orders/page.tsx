@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { SplashScreen } from '@/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
@@ -17,20 +17,14 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { days } from '@/app/lib/constant';
+import { days, limitOrderHour } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
-import {
-  Notification,
-  OrderedItems,
-  IRoutes,
-  ScheduledOrder,
-} from '@/app/utils/type';
-import NotificationPopup from '../components/Notification';
+import { OrderedItems, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/add/AddOrder';
@@ -52,6 +46,8 @@ import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import { insertInSortedIdArray } from '@/app/utils/array';
 import { SWRFetchData } from '@/app/utils/db';
+import { YYYYMMDDFormat } from '@/app/utils/time';
+import useNotification from '@/hooks/useNotification';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -66,19 +62,36 @@ export default function ScheduledOrderPage() {
   const [isSavingArrangement, setIsSavingArrangement] =
     useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
-  const [dayIndex, setDayIndex] = useState<number>(0);
+  const [dayIndex, setDayIndex] = useState<number>(() => {
+    const dateObj = new Date();
+    // if current hour is greater limit hour, then recommend the next day
+    if (dateObj.getHours() >= limitOrderHour) {
+      dateObj.setDate(dateObj.getDate() + 1);
+    }
+
+    return dateObj.getDay();
+  });
   const [routeIndex, setRouteIndex] = useState<number>(0);
   const [routes, setRoutes] = useState<IRoutes[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<ScheduledOrder[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const { showNotification, NotificationComp } = useNotification();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+  const recommendDate = useMemo(() => {
+    // format initial date
+    const dateObj = new Date();
+    // if current hour is greater limit hour, then recommend the next day
+    if (dateObj.getHours() >= limitOrderHour) {
+      dateObj.setDate(dateObj.getDate() + 1);
+    }
+
+    const formattedDate = YYYYMMDDFormat(dateObj);
+
+    return { day: days[dateObj.getDay()], deliveryDate: formattedDate };
+  }, []);
   // Data Fetching
   const [routesResponse] = SWRFetchData(
     `${API_URL.ROUTES}?day=${days[dayIndex]}`,
@@ -90,7 +103,7 @@ export default function ScheduledOrderPage() {
     },
   );
   const [orders, mutateOrders] = SWRFetchData(
-    `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
+    `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}&deliveryDate=${recommendDate.day === days[dayIndex] ? recommendDate.deliveryDate : ''}`,
   );
   const [drivers] = SWRFetchData(API_URL.ADMIN_DRIVERS);
   const [clients, mutateClients] = SWRFetchData(
@@ -215,6 +228,8 @@ export default function ScheduledOrderPage() {
     }
   };
 
+  console.log(orders?.data, 'order');
+
   const calculateTotalBill = useCallback((): string => {
     const totalPrice = orderList.reduce(
       (acc: number, order: ScheduledOrder) => {
@@ -265,27 +280,15 @@ export default function ScheduledOrderPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       addOrderUI(response.data.data);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to create scheduled order: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to create scheduled order: ' + error,
-      });
+      showNotification('error', 'Fail to create scheduled order: ' + error);
       return;
     }
   };
@@ -297,11 +300,7 @@ export default function ScheduledOrderPage() {
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -316,19 +315,14 @@ export default function ScheduledOrderPage() {
       }
 
       setRoutes(newRoutes);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsDeleteModalOpen(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
     }
   };
 
@@ -339,11 +333,7 @@ export default function ScheduledOrderPage() {
       });
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to delete selected orders: ', error);
     }
@@ -471,11 +461,7 @@ export default function ScheduledOrderPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsSavingArrangement(false);
         return;
       }
@@ -495,18 +481,13 @@ export default function ScheduledOrderPage() {
       );
 
       setIsSavingArrangement(false);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error in rearrangement: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error in rearrangement: ' + error,
-      });
+      showNotification(
+        'error',
+        'There was an error in rearrangement: ' + error,
+      );
       setIsSavingArrangement(false);
     }
   };
@@ -519,12 +500,13 @@ export default function ScheduledOrderPage() {
 
   return (
     <Sidebar>
+      {NotificationComp}
       <LoadingModal open={isSavingArrangement} />
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
         clientList={clients?.data?.clientList || []}
-        setNotification={setNotification}
+        showNotification={showNotification}
         createScheduledOrder={createScheduledOrder}
       />
       <AddRoute
@@ -534,7 +516,7 @@ export default function ScheduledOrderPage() {
         driverList={drivers?.data || []}
         clientList={clients?.data?.clientList || []}
         disabledClientList={clients?.data?.existedUserRoute || []}
-        setNotification={setNotification}
+        showNotification={showNotification}
         handleAddRouteUI={handleAddRouteUI}
       />
       <DeleteModal
@@ -547,7 +529,7 @@ export default function ScheduledOrderPage() {
         open={isPreOrderOpen}
         onClose={() => setIsPreOrderOpen(false)}
         isPreOrder
-        setNotification={setNotification}
+        showNotification={showNotification}
         // handlePreOrder={handlePreOrder}
         progress={preOrderProgress}
         scheduleOrderList={selectedOrders}
@@ -560,14 +542,10 @@ export default function ScheduledOrderPage() {
           clientList={clients?.data?.clientList || []}
           day={days[dayIndex]}
           handleUpdateRouteUI={handleUpdateRouteUI}
-          setNotification={setNotification}
+          showNotification={showNotification}
           route={routes[routeIndex]}
         />
       )}
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} md={4}>
           <OverviewCard
@@ -606,7 +584,7 @@ export default function ScheduledOrderPage() {
                   <Tab
                     key={index}
                     id={`simple-tab-${index}`}
-                    label={day}
+                    label={`${day} ${recommendDate.day === day ? '•' : ''}`}
                     aria-controls={`tabpanel-${index}`}
                     value={index}
                   />
@@ -813,7 +791,7 @@ export default function ScheduledOrderPage() {
                           handleSelectOrder={handleSelectOrder}
                           routes={routes}
                           routeId={routes[routeIndex]?.id || -1}
-                          setNotification={setNotification}
+                          showNotification={showNotification}
                         />
                         <Divider />
                       </Reorder.Item>

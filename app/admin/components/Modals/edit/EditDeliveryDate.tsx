@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Divider,
   FormControl,
@@ -6,13 +7,13 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { Order } from '../../../orders/page';
-import { Notification, ScheduledOrder } from '@/app/utils/type';
+import { ScheduledOrder } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
@@ -21,7 +22,7 @@ import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   order?: Order;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleUpdateDateUI?: (orderId: number, updatedDate: string) => void;
   // handlePreOrder?: (deliveryDate: string) => void;
   isPreOrder?: boolean;
@@ -34,9 +35,8 @@ export default function EditDeliveryDate({
   open,
   onClose,
   order,
-  setNotification,
+  showNotification,
   handleUpdateDateUI,
-  // handlePreOrder,
   isPreOrder,
   scheduleOrderList,
   progress,
@@ -65,28 +65,16 @@ export default function EditDeliveryDate({
 
       if (response.data.error) {
         setIsLoading(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       setIsLoading(false);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to update date: ', error);
       setIsLoading(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update date: ' + error,
-      });
+      showNotification('error', 'Fail to update date: ' + error);
     }
   };
 
@@ -103,11 +91,7 @@ export default function EditDeliveryDate({
 
       if (response.data.error) {
         setIsLoading(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -117,20 +101,12 @@ export default function EditDeliveryDate({
       // Update Real Data
       mutateOrders();
       setIsLoading(false);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       onClose();
     } catch (error: any) {
       console.log('Fail to update date: ', error);
       setIsLoading(false);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update date: ' + error,
-      });
+      showNotification('error', 'Fail to update date: ' + error);
     }
   };
 

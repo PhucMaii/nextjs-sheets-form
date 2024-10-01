@@ -1,0 +1,64 @@
+import { IDriver } from '@/app/utils/type';
+import {
+  AlertColor,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import React from 'react';
+import EditDriver from '../Modals/edit/EditDriver';
+import DeleteDriver from '../Modals/delete/DeleteDriver';
+
+interface IProps {
+  drivers: IDriver[];
+  showNotification: (type: AlertColor, message: string) => void;
+  mutateDrivers: any;
+}
+
+export default function DriverTable({
+  drivers,
+  showNotification,
+  mutateDrivers,
+}: IProps) {
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>ID</TableCell>
+          <TableCell>Name</TableCell>
+          <TableCell>Total Routes</TableCell>
+          <TableCell></TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {drivers.length > 0 &&
+          drivers.map((driver: IDriver, index: number) => {
+            return (
+              <TableRow key={index}>
+                <TableCell>{driver.id}</TableCell>
+                <TableCell>{driver.name}</TableCell>
+                <TableCell>{driver.routes.length}</TableCell>
+                <TableCell>
+                  <Box display="flex" flexDirection="row" gap={1}>
+                    <DeleteDriver
+                      driver={driver}
+                      showNotification={showNotification}
+                      mutateDrivers={mutateDrivers}
+                    />
+                    <EditDriver
+                      driver={driver}
+                      showNotification={showNotification}
+                      mutateDrivers={mutateDrivers}
+                    />
+                  </Box>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+      </TableBody>
+    </Table>
+  );
+}

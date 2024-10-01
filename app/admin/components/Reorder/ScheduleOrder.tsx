@@ -1,5 +1,6 @@
-import { IRoutes, Notification, ScheduledOrder } from '@/app/utils/type';
+import { IRoutes, ScheduledOrder } from '@/app/utils/type';
 import {
+  AlertColor,
   Box,
   Checkbox,
   Grid,
@@ -7,18 +8,19 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DeleteScheduleOrder from '../Modals/delete/DeleteScheduleOrder';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import EditScheduleOrder from '../Modals/edit/EditScheduleOrder';
+import { green, grey } from '@mui/material/colors';
 
 interface PropTypes {
   selectedOrders: ScheduledOrder[];
   handleSelectOrder: (e: any, order: ScheduledOrder) => void;
   scheduleOrder: ScheduledOrder;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleDeleteOrderUI: (deletedOrder: ScheduledOrder) => void;
   routeId: number;
   routes: IRoutes[];
@@ -26,11 +28,16 @@ interface PropTypes {
   mutateOrders: any;
 }
 
+const PreOrderColor = {
+  ALREADY_ORDER: green[50] as string,
+  BLOCKED: grey[200] as string,
+} as const;
+
 export default function ScheduleOrder({
   scheduleOrder,
   handleDeleteOrderUI,
   handleUpdateOrderUI,
-  setNotification,
+  showNotification,
   handleSelectOrder,
   selectedOrders,
   routeId,
@@ -62,27 +69,15 @@ export default function ScheduleOrder({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       handleDeleteOrderUI(order);
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to delete order: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to delete order: ' + error,
-      });
+      showNotification('error', 'Fail to delete order: ' + error);
     }
   };
 
@@ -96,7 +91,7 @@ export default function ScheduleOrder({
         routeId={routeId}
         routes={routes}
         order={scheduleOrder}
-        setNotification={setNotification}
+        showNotification={showNotification}
         handleUpdateOrderUI={handleUpdateOrderUI}
         mutateOrders={mutateOrders}
         handleDeleteOrderUI={handleDeleteOrderUI}
@@ -105,7 +100,17 @@ export default function ScheduleOrder({
   );
 
   return (
-    <Paper elevation={0} sx={{ py: 2 }}>
+    <Paper
+      elevation={0}
+      sx={{
+        py: 2,
+        backgroundColor: scheduleOrder?.alreadyOrder
+          ? PreOrderColor.ALREADY_ORDER
+          : scheduleOrder?.blocked
+            ? PreOrderColor.BLOCKED
+            : '',
+      }}
+    >
       <Grid container alignItems="center" spacing={1}>
         <Grid item md={1}>
           <Checkbox

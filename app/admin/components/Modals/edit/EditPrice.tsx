@@ -1,5 +1,6 @@
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { OrderedItems } from '@/app/utils/type';
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -7,20 +8,12 @@ import {
   Grid,
   IconButton,
   InputLabel,
-  MenuItem,
   Modal,
   OutlinedInput,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
-import React, {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import axios from 'axios';
@@ -30,19 +23,17 @@ import { Order } from '../../../orders/page';
 import { errorColor } from '@/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../../UpdateChoiceSelection';
-import { SubCategory } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes extends ModalProps {
   items: OrderedItems[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   order: Order;
   handleUpdatePriceUI: (
     targetOrder: Order,
     newItems: any[],
     newTotalPrice: number,
   ) => void;
-  subcategories: SubCategory[];
   mutateOrders: any;
 }
 
@@ -50,10 +41,9 @@ export default function EditPrice({
   open,
   onClose,
   items,
-  setNotification,
+  showNotification,
   order,
   handleUpdatePriceUI,
-  subcategories,
   mutateOrders,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -68,7 +58,7 @@ export default function EditPrice({
     quantity: 0,
     totalPrice: 0,
   });
-  const [subcategoryId, setSubcategoryId] = useState<number>(0);
+  // const [subcategoryId, setSubcategoryId] = useState<number>(0);
 
   useEffect(() => {
     if (items) {
@@ -83,26 +73,18 @@ export default function EditPrice({
     );
 
     if (newItem.name.trim() === '') {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Is Missing',
-      });
+      showNotification('error', 'Item Name Is Missing');
       return;
     }
 
     if (hasNameExisted) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Item Name Existed Already',
-      });
+      showNotification('error', 'Item Name Existed Already');
     } else {
       const totalPrice = newItem.quantity * newItem.price;
       const newItemData: any = { ...newItem, totalPrice, name: newItemName };
-      if (subcategoryId > 0) {
-        newItemData.subCategoryId = subcategoryId;
-      }
+      // if (subcategoryId > 0) {
+      //   newItemData.subCategoryId = subcategoryId;
+      // }
       setItemList([...itemList, newItemData]);
       setNewItem({
         name: '',
@@ -112,7 +94,7 @@ export default function EditPrice({
       });
     }
 
-    setSubcategoryId(0);
+    // setSubcategoryId(0);
   };
 
   const calculateNewTotalPrice = () => {
@@ -139,16 +121,12 @@ export default function EditPrice({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.category.id,
-        userSubCategoryId: order.subCategoryId,
+        // userSubCategoryId: order.subCategoryId,
       });
 
       if (response.data.error) {
         setIsLoading(false);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -162,19 +140,14 @@ export default function EditPrice({
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update price: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'Fail to update price: ' + error.response.data.error,
+      );
       setIsLoading(false);
     }
   };
@@ -266,7 +239,7 @@ export default function EditPrice({
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <FormControl fullWidth>
                 <InputLabel id="subcategory-label">Subcategory</InputLabel>
                 <Select
@@ -288,7 +261,7 @@ export default function EditPrice({
                     })}
                 </Select>
               </FormControl>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12}>
               <Button fullWidth onClick={addNewItem} variant="contained">
                 Add

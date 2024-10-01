@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import {
-  Alert,
   BottomNavigation,
   BottomNavigationAction,
   Box,
@@ -12,9 +11,7 @@ import {
   ListItemIcon,
   ListItemText,
   Paper,
-  Snackbar,
   Toolbar,
-  Typography,
   useMediaQuery,
 } from '@mui/material';
 import React, { ReactNode, useContext, useEffect, useState } from 'react';
@@ -22,15 +19,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
-import { clientTabs, driverTabs } from '@/app/lib/constant';
+import { driverTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
-import CloseIcon from '@mui/icons-material/Close';
 import { Notification } from '@/app/utils/type';
 import { generateRecommendDate } from '@/app/utils/time';
-import { primaryColor } from '@/theme/color';
-import EmailAlert from '@/app/components/EmailAlert';
+import { primary, primaryColor } from '@/theme/color';
 import SnackbarPopup from '@/app/components/Snackbar/SnackbarPopup';
 
 interface IProps {
@@ -41,11 +36,6 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: IProps) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
 
   const router = useRouter();
   const pathname: any = usePathname();
@@ -68,12 +58,6 @@ export default function Sidebar({ children }: IProps) {
 
   const content = (
     <>
-      <SnackbarPopup
-        open={notification.on}
-        onClose={() => setNotification({ ...notification, on: false })}
-        type={notification.type}
-        message={notification.message}
-      />
       <Toolbar sx={{ mt: 4 }}>
         <img
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
@@ -90,8 +74,8 @@ export default function Sidebar({ children }: IProps) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {driverTabs.map((tab, index) => (
             <ListItemButtonStyled
-              $textColor="white"
-              $bgColor={primaryColor}
+              $textColor={primary.main}
+              $bgColor={primary.lightest}
               $currentTab={currentTab === tab.path}
               key={index}
               onClick={() => handleChangeTab(tab.path)}
@@ -100,7 +84,8 @@ export default function Sidebar({ children }: IProps) {
                 {tab.icon && (
                   <tab.icon
                     sx={{
-                      color: currentTab === tab.path ? 'white' : blueGrey[800],
+                      color:
+                        currentTab === tab.path ? primary.main : blueGrey[600],
                     }}
                   />
                 )}

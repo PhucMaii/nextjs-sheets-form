@@ -1,5 +1,6 @@
 'use clients';
 import {
+  AlertColor,
   Box,
   Checkbox,
   MenuItem,
@@ -10,28 +11,25 @@ import {
   TableCell,
   TableRow,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
 import EditReportOrder from '../Modals/edit/EditReportOrder';
-import { Notification } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import axios from 'axios';
 import LoadingModal from '../Modals/LoadingModal';
 import DeleteModal from '../Modals/delete/DeleteModal';
-import { SubCategory } from '@prisma/client';
 
 interface PropTypes {
   clientOrders: Order[];
   handleUpdateOrderUI: (updatedOrder: Order) => void;
   handleDeleteOrderUI: (deletedOrder: Order) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, order: Order) => void;
   handleSelectAll: () => void;
-  subCategories: SubCategory[];
   mutateOrders: any;
 }
 
@@ -39,11 +37,11 @@ const ClientOrdersTable = ({
   clientOrders,
   handleUpdateOrderUI,
   handleDeleteOrderUI,
-  setNotification,
+  showNotification,
   selectedOrders,
   handleSelectOrder,
   handleSelectAll,
-  subCategories,
+  // subCategories,
   mutateOrders,
 }: PropTypes) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -58,11 +56,7 @@ const ClientOrdersTable = ({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsLoading(false);
         return;
       }
@@ -73,19 +67,11 @@ const ClientOrdersTable = ({
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsLoading(false);
     } catch (error: any) {
       console.log('Fail to update status: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update status: ' + error,
-      });
+      showNotification('error', 'Fail to update status: ' + error);
       setIsLoading(false);
     }
   };
@@ -97,11 +83,7 @@ const ClientOrdersTable = ({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -111,18 +93,10 @@ const ClientOrdersTable = ({
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to delete order: ' + error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to delete order: ' + error,
-      });
+      showNotification('error', 'Fail to delete order: ' + error);
     }
   };
 
@@ -214,9 +188,9 @@ const ClientOrdersTable = ({
               handleDelete={handleDeleteOrder}
             />
             <EditReportOrder
-              subCategories={subCategories}
+              // subCategories={subCategories}
               order={order}
-              setNotification={setNotification}
+              showNotification={showNotification}
               handleUpdateOrderUI={handleUpdateOrderUI}
             />
           </Box>

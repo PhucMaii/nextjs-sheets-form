@@ -1,11 +1,6 @@
-import React, {
-  Dispatch,
-  memo,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -17,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { BoxModal } from '../styled';
-import { Notification, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import { Category } from '@prisma/client';
 import AutoCompleteAddress from '../../AutoCompleteAddress';
 import { LoadingButton } from '@mui/lab';
@@ -28,14 +23,14 @@ interface PropTypes {
   client: UserType;
   categories: Category[];
   handleUpdateClient: (userId: number, updatedData: any) => void;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 const EditClient = ({
   client,
   categories,
   handleUpdateClient,
-  setNotification,
+  showNotification,
 }: PropTypes) => {
   const [deliveryAddress, setDeliveryAddress] = useState<any>({
     description: client.deliveryAddress,
@@ -69,7 +64,7 @@ const EditClient = ({
         currentUser={client}
         open={isUnavailableRangeOpen}
         onClose={() => setIsUnavailableRangeOpen(false)}
-        setNotification={setNotification}
+        showNotification={showNotification}
       />
       <Button
         onClick={(e: any) => {

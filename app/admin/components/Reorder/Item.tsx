@@ -1,25 +1,22 @@
-import { IItem, Notification } from '@/app/utils/type';
-import { Box, Grid, Paper, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction } from 'react';
+import { IItem } from '@/app/utils/type';
+import { AlertColor, Box, Grid, Paper, Typography } from '@mui/material';
+import React from 'react';
 import EditItemAvailability from '../Modals/edit/EditItemAvailability';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditItem from '../Modals/edit/EditItem';
-import { SubCategory } from '@prisma/client';
 
 interface IProps {
   item: IItem;
   handleDeleteItem: (targetItem: IItem) => Promise<void>;
   handleUpdateItem: (updatedItem: IItem) => Promise<void>;
-  subCategories: SubCategory[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function Item({
   item,
   handleUpdateItem,
   handleDeleteItem,
-  setNotification,
-  subCategories,
+  showNotification,
 }: IProps) {
   return (
     <Paper elevation={0} sx={{ py: 2 }}>
@@ -27,7 +24,7 @@ export default function Item({
         <Grid item lg={1} md={12}>
           <EditItemAvailability
             item={item}
-            setNotification={setNotification}
+            showNotification={showNotification}
             handleUpdateItem={handleUpdateItem}
           />
         </Grid>
@@ -37,9 +34,6 @@ export default function Item({
         <Grid item md={2}>
           <Typography variant="subtitle1">${item.price.toFixed(2)}</Typography>
         </Grid>
-        <Grid item md={2}>
-          <Typography variant="subtitle1">{item?.subCategory?.name}</Typography>
-        </Grid>
         <Grid item md={3} xs={12}>
           <Box display="flex" gap={1}>
             <DeleteModal
@@ -47,11 +41,7 @@ export default function Item({
               handleDelete={handleDeleteItem}
               includedButton
             />
-            <EditItem
-              targetItem={item}
-              subCategories={subCategories}
-              handleUpdateItem={handleUpdateItem}
-            />
+            <EditItem targetItem={item} handleUpdateItem={handleUpdateItem} />
           </Box>
         </Grid>
       </Grid>

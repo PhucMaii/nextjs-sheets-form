@@ -1,4 +1,5 @@
 import { Order } from '@/app/admin/orders/page';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 export const convertDeliveryDateStringToDate = (deliveryDate: string) => {
   const parts = deliveryDate.split('/');
@@ -41,4 +42,36 @@ export const sortByDeliveryDate = (orders: Order[]): any => {
   });
 
   return sortedOrders;
+};
+
+export const getSameDateLastWeek = (currentDate: string | Date) => {
+  const sameDateLastWeek: Date = new Date(currentDate);
+
+  // Subtract 7 days
+  sameDateLastWeek.setDate(sameDateLastWeek.getDate() - 7);
+  return sameDateLastWeek;
+};
+
+export const normalizeDate = (date: Date) => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+export const generate7DaysBefore = (deliveryDate: string) => {
+  const currentDate = new Date(deliveryDate);
+  const endDate = new Date(deliveryDate);
+
+  currentDate.setDate(currentDate.getDate() - 6);
+
+  // Because the current date bill is already add in total price, so do not push it into array
+  const dayList = [];
+
+  while (currentDate < endDate) {
+    const currentDateString = YYYYMMDDFormat(currentDate);
+    dayList.push(currentDateString);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dayList;
 };

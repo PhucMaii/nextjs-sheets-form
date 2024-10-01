@@ -12,10 +12,9 @@ import {
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import { Notification } from '@/app/utils/type';
-import NotificationPopup from '@/app/admin/components/Notification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import useNotification from '@/hooks/useNotification';
 
 export default function AccountPage() {
   const [passwordGroup, setPasswordGroup] = useState<any>({
@@ -23,17 +22,13 @@ export default function AccountPage() {
     newPassword: '',
     confirmPassword: '',
   });
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
 
+  const { showNotification, NotificationComp } = useNotification();
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const checkPasswordInput = () => {
@@ -62,11 +57,7 @@ export default function AccountPage() {
   const handleUpdatePassword = async () => {
     const { isValid, message } = checkPasswordInput();
     if (!isValid) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message,
-      });
+      showNotification('error', message);
       return;
     }
     try {
@@ -76,37 +67,25 @@ export default function AccountPage() {
       const response = await axios.put(API_URL.DRIVER, submittedData);
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsSubmitting(false);
         return;
       }
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsSubmitting(false);
     }
   };
 
   return (
     <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Typography variant="h5" textAlign="center">
         Account
       </Typography>

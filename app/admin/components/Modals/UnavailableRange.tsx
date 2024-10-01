@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Divider,
   Grid,
@@ -6,30 +7,30 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import DateRange from './DateRangeModal';
 import { generateMonthRange } from '@/app/utils/time';
 import AddIcon from '@mui/icons-material/Add';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
-import { IDayRange, Notification, UserType } from '@/app/utils/type';
+import { IDayRange, UserType } from '@/app/utils/type';
 import ErrorComponent from '../ErrorComponent';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
+import DayRange from '../DayRange';
 
 interface IProps extends ModalProps {
   currentUser: UserType;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
-const apiURL = `${API_URL.ADMIN}/clients/unavailable_days`;
+const apiURL = `/api/unavailable_days`;
 export default function UnavailableRange({
   open,
   onClose,
   currentUser,
-  setNotification,
+  showNotification,
 }: IProps) {
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
@@ -39,7 +40,7 @@ export default function UnavailableRange({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
-  const [targetRangeId, setTargetRangeId] = useState<number | null>(null);
+  const [targetRange, setTargetRange] = useState<any>(null);
   const [updatedDateRange, setUpdatedDateRange] = useState<any>(null);
 
   const [unavailableRanges, mutateRange] = SWRFetchData(
@@ -54,7 +55,7 @@ export default function UnavailableRange({
 
   const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
-    setTargetRangeId(updatedRange.id);
+    setTargetRange(updatedRange);
     setUpdatedDateRange([
       new Date(updatedRange.startDate),
       new Date(updatedRange.endDate),
@@ -63,11 +64,7 @@ export default function UnavailableRange({
 
   const handleAddRange = async () => {
     if (!newDateRange) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'No Day Range Selected',
-      });
+      showNotification('error', 'No Day Range Selected');
       return;
     }
     try {
@@ -80,70 +77,52 @@ export default function UnavailableRange({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsAdding(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsAdding(false);
     }
   };
 
-  const handleDeleteRange = async (deletedId: number) => {
-    setTargetRangeId(deletedId);
+  const handleDeleteRange = async (deletedRange: any) => {
+    setTargetRange(deletedRange);
     setIsDeleting(true);
     try {
       const response = await axios.delete(
-        `${apiURL}?deletedRangeId=${deletedId}`,
+        `${apiURL}?deletedRangeId=${deletedRange.id}`,
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
-        setTargetRangeId(null);
+        showNotification('error', response.data.error);
+        setTargetRange(null);
         setIsDeleting(false);
         return;
       }
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
-      setTargetRangeId(null);
+      showNotification('success', response.data.message);
+      setTargetRange(null);
       setIsDeleting(false);
     } catch (error: any) {
       console.log('There was an error:', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
-      setTargetRangeId(null);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
+      setTargetRange(null);
       setIsDeleting(false);
     }
   };
@@ -159,36 +138,28 @@ export default function UnavailableRange({
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsEditing(false);
-        setTargetRangeId(null);
+        setTargetRange(null);
         setUpdatedDateRange(null);
         return;
       }
 
       mutateRange();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsEditing(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
+      setIsSaving(false);
     } catch (error: any) {
       console.log('There was an error: ' + error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'There was an error: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
       setIsEditing(false);
-      setTargetRangeId(null);
+      setTargetRange(null);
       setUpdatedDateRange(null);
     }
   };
@@ -250,81 +221,20 @@ export default function UnavailableRange({
           <Typography variant="subtitle1">Unavailable Range:</Typography>
           {unavailableRanges && unavailableRanges?.data.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {
-              console.log({ validDate: updatedDateRange });
               return (
-                <Grid container alignItems="center" gap={1} key={index}>
-                  <Grid item xs={4.5}>
-                    <TextField
-                      fullWidth
-                      label="From"
-                      value={
-                        updatedDateRange &&
-                        targetRangeId === range.id &&
-                        isEditing
-                          ? updatedDateRange[0]?.toDateString()
-                          : new Date(range.startDate).toDateString()
-                      }
-                      onClick={() => setIsSelectRangeOpen(true)}
-                      disabled={
-                        targetRangeId !== range.id ||
-                        !isEditing ||
-                        !updatedDateRange
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={4.5} textAlign="right">
-                    <TextField
-                      disabled={
-                        targetRangeId !== range.id ||
-                        !isEditing ||
-                        !updatedDateRange
-                      }
-                      fullWidth
-                      label="To"
-                      value={
-                        updatedDateRange &&
-                        targetRangeId === range.id &&
-                        isEditing
-                          ? updatedDateRange[1]?.toDateString()
-                          : new Date(range.endDate).toDateString()
-                      }
-                      onClick={() => setIsSelectRangeOpen(true)}
-                    />
-                  </Grid>
-                  <Grid item xs={2} textAlign="center">
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <LoadingButton
-                        loading={targetRangeId === range.id && isSaving}
-                        loadingIndicator="Saving..."
-                        onClick={() => {
-                          if (
-                            targetRangeId !== range.id ||
-                            !isEditing ||
-                            !updatedDateRange
-                          ) {
-                            initializeEdit(range);
-                          } else {
-                            handleEditRange(range);
-                          }
-                        }}
-                      >
-                        {targetRangeId !== range.id ||
-                        !isEditing ||
-                        !updatedDateRange
-                          ? 'EDIT'
-                          : 'SAVE'}
-                      </LoadingButton>
-                      <LoadingButton
-                        color="error"
-                        onClick={() => handleDeleteRange(range.id)}
-                        loading={targetRangeId === range.id && isDeleting}
-                        loadingIndicator="Deleting..."
-                      >
-                        Delete
-                      </LoadingButton>
-                    </Box>
-                  </Grid>
-                </Grid>
+                <DayRange
+                  key={index}
+                  range={range}
+                  updatedDateRange={updatedDateRange}
+                  targetRange={targetRange}
+                  isEditing={isEditing}
+                  isDeleting={isDeleting}
+                  isSaving={isSaving}
+                  initializeEdit={initializeEdit}
+                  handleEditRange={handleEditRange}
+                  handleDeleteRange={handleDeleteRange}
+                  setIsSelectRangeOpen={setIsSelectRangeOpen}
+                />
               );
             })
           ) : (

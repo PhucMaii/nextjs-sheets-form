@@ -3,6 +3,8 @@ import { Notification } from './type';
 import axios from 'axios';
 import useSWR from 'swr';
 import { fetcher } from '@/HOC/AuthenGuard';
+import { API_URL } from './enum';
+import { Order } from '../admin/orders/page';
 
 export const fetchData = async (
   api: string,
@@ -36,4 +38,35 @@ export const SWRFetchData = (api: string) => {
   });
 
   return [data, mutate, isValidating];
+};
+
+export const fetchWcodOrders = async (
+  orderList: any,
+  selectedDate: string,
+  wcodDay: string,
+) => {
+  try {
+    const clientIds = orderList
+      .filter((order: Order) => {
+        return order?.user?.preference?.paymentType === wcodDay;
+      })
+      .map((order: Order) => order.userId);
+
+    if (clientIds.length === 0) {
+      return null;
+    }
+
+    const response = await axios.get(
+      `${API_URL.ADMIN}/wcod?clientIdList=${[...clientIds]}&date=${selectedDate}`,
+    );
+
+    if (response.data.error) {
+      console.log(response.data.error);
+      return null;
+    }
+
+    return response.data.data;
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+  }
 };

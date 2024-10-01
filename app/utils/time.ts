@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
-import { limitOrderHour } from '../lib/constant';
+import { days, limitOrderHour } from '../lib/constant';
 import moment from 'moment';
+import { PAYMENT_TYPE } from './enum';
 
 export const YYYYMMDDFormat = (date: Date) => {
   const month = date.getMonth() + 1;
@@ -78,5 +79,21 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return dates;
+  return dates.slice(0, dates.length - 1);
+};
+
+export const getWCODDay = (date: string) => {
+  const selectedDate = new Date(date);
+  const dayIndex = selectedDate.getDay();
+
+  const wcodDay = Object.values(PAYMENT_TYPE).find((paymentType: string) => {
+    if (!paymentType.includes('WCOD')) {
+      return false;
+    }
+
+    const day = paymentType.split(' - ')[1];
+    return day === days[dayIndex];
+  });
+
+  return wcodDay;
 };

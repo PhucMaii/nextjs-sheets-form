@@ -1,6 +1,6 @@
 import { IItem } from '@/app/utils/type';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { Item, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -36,14 +36,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const formattedNewItems = updatedItemList.map((item: IItem): Item => {
+    const formattedNewItems = updatedItemList.map((item: IItem): any => {
       return {
         id: item.id,
         name: item.name,
         price: item.price,
         availability: item.availability,
         categoryId: item.categoryId,
-        subCategoryId: item?.subCategoryId || null,
       };
     });
 

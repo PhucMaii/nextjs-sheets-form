@@ -5,6 +5,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  CircularProgress,
   Grid,
   Menu,
   MenuItem,
@@ -13,10 +14,9 @@ import {
   Typography,
 } from '@mui/material';
 import { ShadowSection } from './styled';
-import { Notification, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
-import NotificationPopup from '../components/Notification';
 import { Order } from '../orders/page';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -29,15 +29,11 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { blue } from '@mui/material/colors';
+import { blue, blueGrey } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import {
-  YYYYMMDDFormat,
-  formatDateChanged,
-  generateMonthRange,
-} from '@/app/utils/time';
+import { generateMonthRange } from '@/app/utils/time';
 import { useReactToPrint } from 'react-to-print';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
 import { DropdownItemContainer } from '../orders/styled';
@@ -47,10 +43,7 @@ import {
   successColor,
   warningColor,
 } from '@/theme/color';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import { days, limitOrderHour } from '@/app/lib/constant';
+import { days } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllPrint } from '../components/Printing/AllPrint';
@@ -62,6 +55,8 @@ import {
 import BillPrintModal from '../components/Modals/BillPrintModal';
 import { SWRFetchData } from '@/app/utils/db';
 import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
+import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -75,36 +70,27 @@ export default function ReportPage() {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [datePicker, setDatePicker] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
-      dateObj.setDate(dateObj.getDate() + 1);
-    }
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
+  const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
+  const [isSendAndPrintLoading, setIsSendAndPrintLoading] =
+    useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
     useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const { showNotification, NotificationComp } = useNotification();
 
   // Printing Refs
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
   const weeklyPrint: any = useRef();
+
+  const { date: datePicker, SelectDate } = useSelectDate();
 
   // Data Fetching
   const currentDate = convertDeliveryDateStringToDate(datePicker);
@@ -119,17 +105,15 @@ export default function ReportPage() {
     `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
-  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     pusherClient.subscribe('admin-delete-order');
 
     pusherClient.bind('delete-order', (deletedOrder: Order) => {
-      setNotification({
-        on: true,
-        type: 'success',
-        message: `Order ${deletedOrder.id} deleted successfully`,
-      });
+      showNotification(
+        'success',
+        `Order ${deletedOrder.id} deleted successfully`,
+      );
       setDeletedOrder(deletedOrder);
     });
 
@@ -244,10 +228,10 @@ export default function ReportPage() {
     setStatementAnchor(null);
   };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setDatePicker(formattedDate);
-  };
+  // const handleDateChange = (e: any) => {
+  //   const formattedDate = formatDateChanged(e);
+  //   setDatePicker(formattedDate);
+  // };
 
   const handleDeleteOrderUI = (deletedOrder: Order) => {
     // update base order list
@@ -347,11 +331,7 @@ export default function ReportPage() {
         data: { orderList: selectedOrders },
       });
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
     }
@@ -366,11 +346,7 @@ export default function ReportPage() {
 
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
     }
@@ -385,26 +361,17 @@ export default function ReportPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
     }
   };
 
@@ -458,22 +425,30 @@ export default function ReportPage() {
         </MenuItem>
         <MenuItem
           disabled={!clientValue?.email || false}
-          onClick={() => {
-            handleSendInvoice();
-            handleCloseStatementAnchor();
+          onClick={async () => {
+            setIsSendLoading(true);
+            await handleSendInvoice();
+            setIsSendLoading(false);
+            // handleCloseStatementAnchor();
           }}
         >
-          Send to client
+          {isSendLoading ? <CircularProgress size={20} /> : 'Send to client'}
         </MenuItem>
         <MenuItem
           disabled={!clientValue?.email || false}
-          onClick={() => {
+          onClick={async () => {
+            setIsSendAndPrintLoading(true);
             handleInvoicePrint();
-            handleSendInvoice();
-            handleCloseStatementAnchor();
+            await handleSendInvoice();
+            setIsSendAndPrintLoading(false);
+            // handleCloseStatementAnchor();
           }}
         >
-          Print and Send
+          {isSendAndPrintLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            'Print and Send'
+          )}
         </MenuItem>
       </Menu>
     </Box>
@@ -569,6 +544,7 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
+      {NotificationComp}
       <div style={{ display: 'none' }}>
         <InvoicePrint
           client={clientValue}
@@ -600,28 +576,20 @@ export default function ReportPage() {
           day={datePicker}
         />
       )}
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h4">Reports</Typography>
+        <Typography variant="h5" color={blueGrey[800]}>
+          Reports
+        </Typography>
         {clientValue?.clientName === 'All Clients' ? (
-          <>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Date"
-                value={dayjs(datePicker)}
-                onChange={handleDateChange}
-              />
-            </LocalizationProvider>
-          </>
+          <>{SelectDate}</>
         ) : (
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
         )}
       </Box>
       <ShadowSection display="flex" flexDirection="column" gap={1}>
-        <Typography variant="h6">Clients</Typography>
+        <Typography variant="h6" color={blueGrey[800]} sx={{ mb: 1 }}>
+          Clients
+        </Typography>
         <Autocomplete
           options={
             [
@@ -728,11 +696,11 @@ export default function ReportPage() {
               handleDeleteOrderUI={handleDeleteOrderUI}
               handleUpdateOrderUI={handleUpdateOrderUI}
               clientOrders={clientOrders}
-              setNotification={setNotification}
+              showNotification={showNotification}
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               handleSelectAll={handleSelectAll}
-              subCategories={subCategories?.data || []}
+              // subCategories={subCategories?.data || []}
               mutateOrders={mutateOrders}
             />
           ) : (

@@ -11,7 +11,7 @@ interface BodyTypes {
   deliveryAddress: string;
   role: USER_ROLE;
   categoryId: number;
-  subCategoryId: number;
+  // subCategoryId: number;
   preference: any;
 }
 
@@ -27,7 +27,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       deliveryAddress,
       role,
       categoryId,
-      subCategoryId,
+      // subCategoryId,
       preference,
     } = req.body as BodyTypes;
 
@@ -55,7 +55,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         deliveryAddress,
         role,
         categoryId,
-        subCategoryId,
+        // subCategoryId,
         password: newPassword,
         deliveryAddressLat: addresss.latitude,
         deliveryAddressLng: addresss.longitude,

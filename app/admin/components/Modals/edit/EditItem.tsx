@@ -1,10 +1,11 @@
 import {
   Button,
   Divider,
+  FormControlLabel,
   Grid,
-  MenuItem,
   Modal,
-  Select,
+  Radio,
+  RadioGroup,
   TextField,
   Typography,
 } from '@mui/material';
@@ -12,28 +13,30 @@ import React, { useEffect, useState } from 'react';
 import ModalHead from '@/app/lib/ModalHead';
 import { BoxModal } from '../styled';
 import { IItem } from '@/app/utils/type';
-import { SubCategory } from '@prisma/client';
 
 interface IProps {
   targetItem: IItem;
-  subCategories: SubCategory[];
-  handleUpdateItem: (updatedItem: IItem) => Promise<void>;
+  handleUpdateItem: (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION,
+  ) => Promise<void>;
 }
 
-export default function EditItem({
-  targetItem,
-  subCategories,
-  handleUpdateItem,
-}: IProps) {
+export enum UPDATE_OPTION {
+  CURRENT_CATEGORY = 'current category',
+  ALL_ITEMS_SAME_NAME = 'all items same name',
+}
+
+export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
+  const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(
+    UPDATE_OPTION.CURRENT_CATEGORY,
+  );
 
   useEffect(() => {
     if (Object.keys(targetItem).length > 0) {
-      if (!targetItem.subCategoryId) {
-        setUpdatedItem({ ...targetItem, subCategoryId: -1 });
-      }
       setUpdatedItem(targetItem);
     }
   }, [targetItem]);
@@ -44,7 +47,7 @@ export default function EditItem({
       name: updatedItem.name.toUpperCase(),
     };
     setIsUpdating(true);
-    await handleUpdateItem(newUpdatedItem);
+    await handleUpdateItem(newUpdatedItem, updateOption);
     setIsUpdating(false);
   };
 
@@ -66,6 +69,22 @@ export default function EditItem({
             buttonProps={{ loading: isUpdating }}
             onClose={() => setIsOpen(false)}
           />
+          <RadioGroup
+            row
+            value={updateOption}
+            onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
+          >
+            <FormControlLabel
+              value={UPDATE_OPTION.CURRENT_CATEGORY}
+              control={<Radio />}
+              label="Only current category"
+            />
+            <FormControlLabel
+              value={UPDATE_OPTION.ALL_ITEMS_SAME_NAME}
+              control={<Radio />}
+              label="All items same name"
+            />
+          </RadioGroup>
           <Divider />
           <Grid container rowGap={2}>
             <Grid item xs={12} md={6}>
@@ -96,10 +115,10 @@ export default function EditItem({
                 }
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            {/* <Grid item xs={12} md={6}>
               <Typography variant="h6">Subcategory:</Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
+            </Grid> */}
+            {/* <Grid item xs={12} md={6}>
               <Select
                 fullWidth
                 disabled={!updatedItem.name.toLowerCase().includes('bean')}
@@ -122,7 +141,7 @@ export default function EditItem({
                     },
                   )}
               </Select>
-            </Grid>
+            </Grid> */}
           </Grid>
         </BoxModal>
       </Modal>

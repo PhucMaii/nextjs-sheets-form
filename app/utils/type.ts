@@ -69,8 +69,8 @@ export interface UserType {
   deliveryAddress: string;
   sheetName?: string;
   categoryId?: number;
-  subCategoryId?: number;
-  subCategory?: any;
+  // subCategoryId?: number;
+  // subCategory?: any;
   category?: any;
   preference?: any;
 }
@@ -83,10 +83,10 @@ export interface IItem {
   id: number;
   name: string;
   categoryId: number;
-  subCategoryId?: number | null;
+  // subCategoryId?: number | null;
   price: number;
   quantity?: number;
-  subCategory?: any;
+  // subCategory?: any;
   availability: boolean;
   user?: User;
 }
@@ -107,6 +107,8 @@ export interface ScheduledOrder {
   items: OrderedItems[];
   user: UserType;
   day: string;
+  alreadyOrder?: boolean;
+  blocked?: boolean;
 }
 
 export interface IRoutes extends Route {
@@ -116,4 +118,8 @@ export interface IRoutes extends Route {
 
 export interface IUserRoutes extends UserRoute {
   user: UserType;
+}
+
+export interface IDriver extends Driver {
+  routes: IRoutes[];
 }

@@ -1,4 +1,5 @@
 'use client';
+import { minifyNumber } from '@/app/utils/number';
 import {
   Paper,
   Table,
@@ -12,33 +13,52 @@ import React, { useMemo, useState } from 'react';
 
 interface IProps {
   manifest: any;
+  isMinify?: boolean;
+  isAdmin?: boolean;
 }
 
 const rowsPerPage = 10;
 
-export default function ManifestTable({ manifest }: IProps) {
+export default function ManifestTable({ manifest, isMinify, isAdmin }: IProps) {
   const [page, setPage] = useState<number>(0);
   const sortedManifestKey = useMemo(() => {
     if (!manifest) {
       return null;
     }
 
-    return Object.keys(manifest)
-      .filter((item: string) => manifest[item] > 0)
-      .sort(
-        (item1: string, item2: string) => manifest[item2] - manifest[item1],
-      );
+    if (isAdmin) {
+      return Object.keys(manifest)
+        .filter((item: string) => manifest[item].quantity > 0)
+        .sort(
+          (item1: string, item2: string) =>
+            manifest[item2].quantity - manifest[item1].quantity,
+        );
+    } else {
+      return Object.keys(manifest)
+        .filter((item: string) => manifest[item] > 0)
+        .sort(
+          (item1: string, item2: string) => manifest[item2] - manifest[item1],
+        );
+    }
   }, [manifest]);
 
   const handleChangePage = (event: any, newPage: any) => {
     setPage(newPage);
   };
+
+  console.log(manifest, 'manifest');
   return (
     <Paper elevation={0}>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>Item</TableCell>
+            {isAdmin && (
+              <>
+                <TableCell align="right">Revenue ($)</TableCell>
+                <TableCell align="right">Revenue (%)</TableCell>
+              </>
+            )}
             <TableCell align="right">Quantity</TableCell>
           </TableRow>
         </TableHead>
@@ -50,7 +70,22 @@ export default function ManifestTable({ manifest }: IProps) {
                 return (
                   <TableRow key={index}>
                     <TableCell>{item}</TableCell>
-                    <TableCell align="right">{manifest[item]}</TableCell>
+                    {isAdmin && (
+                      <>
+                        <TableCell align="right">
+                          $
+                          {isMinify
+                            ? minifyNumber(manifest[item].price)
+                            : manifest[item].price.toFixed(2)}
+                        </TableCell>
+                        <TableCell align="right">
+                          {manifest[item].percentage} %
+                        </TableCell>
+                      </>
+                    )}
+                    <TableCell align="right">
+                      {isAdmin ? manifest[item].quantity : manifest[item]}
+                    </TableCell>
                   </TableRow>
                 );
               })}

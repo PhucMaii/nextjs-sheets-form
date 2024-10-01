@@ -32,26 +32,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    if (item.name.includes('BEAN')) {
-      await prisma.item.updateMany({
-        where: {
-          name: item.name,
-          subCategoryId: item.subCategoryId,
-        },
-        data: {
-          availability,
-        },
-      });
-    } else {
-      await prisma.item.updateMany({
-        where: {
-          name: item.name,
-        },
-        data: {
-          availability,
-        },
-      });
-    }
+    // if (item.name.includes('BEAN')) {
+    //   await prisma.item.updateMany({
+    //     where: {
+    //       name: item.name,
+    //       subCategoryId: item.subCategoryId,
+    //     },
+    //     data: {
+    //       availability,
+    //     },
+    //   });
+    // } else {
+    await prisma.item.updateMany({
+      where: {
+        name: item.name,
+      },
+      data: {
+        availability,
+      },
+    });
+    // }
 
     return res.status(200).json({
       message: 'Item Availability Updated Successfully',

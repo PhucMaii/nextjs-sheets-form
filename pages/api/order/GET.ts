@@ -3,10 +3,22 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { generateListOfDateString } from '@/app/utils/time';
+
+interface IQuery {
+  startDate?: string;
+  endDate?: string;
+}
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
+
+    const { startDate, endDate }: IQuery = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(404).json({ error: 'Missing required parameters' });
+    }
 
     const session: any = await getServerSession(req, res, authOptions);
 
@@ -14,11 +26,24 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         id: Number(session?.user?.id),
       },
+      include: {
+        category: true,
+      },
     });
 
     if (!existingUser) {
       return res.status(401).json({ error: 'User Not Found' });
     }
+
+    const formattedStartDate = new Date(startDate);
+    const formattedEndDate = new Date(endDate);
+
+    formattedEndDate.setDate(formattedEndDate.getDate() + 1);
+
+    const dateList = generateListOfDateString(
+      formattedStartDate,
+      formattedEndDate,
+    );
 
     const userOrders: any = await prisma.orders.findMany({
       where: {
@@ -30,6 +55,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             ORDER_STATUS.DELIVERED,
           ],
         },
+        deliveryDate: {
+          in: dateList,
+        },
       },
       include: {
         items: true,
@@ -39,54 +67,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const newOrders = await Promise.all(
-      userOrders.map(async (order: any) => {
-        const items = await prisma.orderedItems.findMany({
-          where: {
-            orderId: order.id,
-          },
-        });
+    const newOrders = userOrders.map((order: any) => {
+      const items = order.items.map((item: any) => {
+        const totalPrice = item.quantity * item.price;
+        return { ...item, totalPrice };
+      });
 
-        const newItems = items.map((item: any) => {
-          const totalPrice = item.quantity * item.price;
-          return { ...item, totalPrice, isAutoPrint: order.isAutoPrint };
-        });
-
-        // get user
-        const user: any = await prisma.user.findUnique({
-          where: {
-            id: order.userId,
-          },
-        });
-
-        const category = await prisma.category.findUnique({
-          where: {
-            id: user.categoryId,
-          },
-        });
-
-        return {
-          ...order,
-          items: newItems,
-          ...user,
-          id: order.id,
-          category,
-        };
-      }),
-    );
-
-    // if (!startDate || !endDate) {
-    //   return res.status(200).json({
-    //     data: newOrders,
-    //     message: 'Fetch User Orders Successfully',
-    //   });
-    // }
-
-    // const filteredDateRangeOrders = filterDateRangeOrders(
-    //   newOrders,
-    //   startDate,
-    //   endDate,
-    // );
+      return {
+        ...order,
+        items,
+        ...existingUser,
+        category: existingUser.category,
+        id: order.id,
+      };
+    });
 
     return res.status(200).json({
       data: {

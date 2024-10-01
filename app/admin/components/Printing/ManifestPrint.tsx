@@ -14,10 +14,12 @@ import './print.css';
 import styled from 'styled-components';
 import { mainItems, productColors } from '@/app/lib/constant';
 import { grey } from '@mui/material/colors';
+import { sortedItemKeys } from '@/app/utils/array';
 
 interface PropTypes {
   manifest: any;
   routes: IRoutes[];
+  currentDate: string;
 }
 
 interface TableCellProps {
@@ -33,7 +35,7 @@ const BorderRightTableCell = styled(TableCell)<TableCellProps>`
 `;
 
 export const ManifestPrint = forwardRef(
-  ({ manifest, routes }: PropTypes, ref: any) => {
+  ({ manifest, routes, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
       // return;
       return (
@@ -45,16 +47,9 @@ export const ManifestPrint = forwardRef(
       );
     }
 
-    // Display the beansprouts first then other items
-    // const customSortKeys = (keys: string[]): any => {
-    //   const beanKeys = keys.filter((key) => key.includes('BEAN')).sort();
-    //   const otherKeys = keys.filter((key) => !key.includes('BEAN')).sort();
-    //   return [...beanKeys, ...otherKeys];
-    // };
-
     return (
       <div ref={ref} className="print-container">
-        <Box sx={{ width: '100%', height: '100%' }}>
+        <Box sx={{ width: '90%', height: '100%' }}>
           {/* Loop through route */}
           {Object.keys(manifest).length > 0 &&
             Object.keys(manifest).map((routeId: string, index: number) => {
@@ -65,20 +60,61 @@ export const ManifestPrint = forwardRef(
                 return null;
               }
 
-              // sort the item for each route then loop through it
-              // const sortedItems: any = customSortKeys(
-              //   Object.keys(manifest[routeId].summary),
-              // );
-              const sortedItems = [...mainItems];
+              const generateItemNames = () => {
+                const itemNameList: string[] = [];
+
+                // Get all items with its quantity in format: {itemName: quantity}
+                const currentManifest = manifest[routeId].details;
+
+                // Loop through all items and get its key = name
+                for (const item of currentManifest) {
+                  const itemNames: string[] = Object.keys(item);
+                  for (const itemName of itemNames) {
+                    if (itemName === 'user') {
+                      continue;
+                    }
+
+                    if (itemNameList.includes(itemName)) {
+                      continue;
+                    }
+
+                    if (item[itemName] === 0) {
+                      continue;
+                    }
+
+                    if (itemName.includes('KONGNAMUL')) {
+                      continue;
+                    }
+
+                    itemNameList.push(itemName);
+                  }
+                }
+
+                return itemNameList;
+              };
+
+              const items = generateItemNames();
+              const sortedItems = sortedItemKeys(items, mainItems);
+
+              const columnWidthPercentage =
+                Math.floor(items.length / 100) * 100 - 1;
 
               return (
                 <>
                   <Typography variant="h4" textAlign="center" m={2}>
                     {targetRoute.name}
                   </Typography>
-                  <Typography variant="h5" m={2}>
-                    Driver: {targetRoute.driver?.name}
-                  </Typography>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    m={2}
+                  >
+                    <Typography variant="h5">
+                      Driver: {targetRoute.driver?.name}
+                    </Typography>
+                    <Typography>{currentDate}</Typography>
+                  </Box>
                   <Divider sx={{ my: 2 }} />
 
                   <Table sx={{ mx: 2 }}>
@@ -95,10 +131,15 @@ export const ManifestPrint = forwardRef(
                               <>
                                 <BorderRightTableCell
                                   align="center"
-                                  sx={{ fontSize: 18, fontWeight: 'bold' }}
+                                  sx={{
+                                    padding: 2,
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    width: `${columnWidthPercentage}%`,
+                                  }}
                                   key={index}
                                 >
-                                  {item === 'MUSHROOM' ? 'MUSH ROOM' : item}
+                                  {item}
                                 </BorderRightTableCell>
                               </>
                             );
@@ -109,22 +150,31 @@ export const ManifestPrint = forwardRef(
                       {manifest[routeId].details.map(
                         (user: any, index: number) => {
                           const { summary } = manifest[routeId];
-                          const clientName = user.user.clientName
+                          let clientName = user.user.clientName
                             .split('-')
-                            .slice(0, 1)
-                            .join(' ');
+                            .slice(0, 2)
+                            .join(' - ');
+
+                          if (
+                            clientName?.split(' - ')[1] == ' C.O.D ' ||
+                            clientName?.split(' - ')[1] == ' MONTHLY ' ||
+                            clientName?.split(' - ')[1] == ' W.C.O.D '
+                          ) {
+                            clientName = clientName.split(' - ')[0];
+                          }
+
                           return (
                             <TableRow key={index}>
                               <BorderRightTableCell
                                 // align="center"
                                 sx={{
                                   fontSize: 18,
-                                  width: '150px',
+                                  // width: '150px',
                                   height: '30px !important',
                                   fontWeight: 'bold',
                                 }}
                               >
-                                {clientName}
+                                {clientName} - {user.user.clientId}
                               </BorderRightTableCell>
                               {sortedItems.map(
                                 (item: string, index: number) => {
@@ -141,6 +191,7 @@ export const ManifestPrint = forwardRef(
                                       ></BorderRightTableCell>
                                     );
                                   }
+
                                   // Ensure the value is renderable
                                   if (typeof itemQuantity === 'object') {
                                     console.error(
@@ -153,7 +204,7 @@ export const ManifestPrint = forwardRef(
                                         align="center"
                                         sx={{ fontSize: 20 }}
                                       >
-                                        [Object]
+                                        NaN
                                       </BorderRightTableCell>
                                     );
                                   }

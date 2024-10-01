@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -6,7 +7,6 @@ import {
   Button,
   Checkbox,
   Fab,
-  FormControl,
   FormControlLabel,
   Grid,
   Menu,
@@ -26,12 +26,8 @@ import {
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
-import { Notification, OrderedItems, UserType } from '@/app/utils/type';
-import NotificationPopup from '../components/Notification';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
+import { IRoutes, OrderedItems, UserType } from '@/app/utils/type';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/add/AddOrder';
@@ -39,7 +35,7 @@ import ErrorComponent from '../components/ErrorComponent';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import moment from 'moment';
-import { statusTabs } from '@/app/lib/constant';
+import { days, statusTabs } from '@/app/lib/constant';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import SearchModal from '../components/Modals/SearchModal';
@@ -48,6 +44,11 @@ import OrderOverview from '../components/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import { SWRFetchData } from '@/app/utils/db';
+import { getSameDateLastWeek } from '@/pages/api/utils/date';
+import { UserRoute } from '@prisma/client';
+import { blueGrey } from '@mui/material/colors';
+import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 interface Category {
   id: number;
@@ -60,7 +61,7 @@ export interface Item {
   price: number;
   quantity: number;
   totalPrice: number;
-  subCategoryId?: number;
+  // subCategoryId?: number;
 }
 
 export interface Order {
@@ -83,8 +84,6 @@ export interface Order {
   status: ORDER_STATUS;
   isReplacement?: boolean;
   isVoid?: boolean;
-  subCategoryId?: number;
-  subCategory?: any;
   routeId?: number;
   route?: any;
   preference?: any;
@@ -99,21 +98,18 @@ export default function Orders() {
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
+  const [currentRoute, setCurrentRoute] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [date, setDate] = useState(() => generateRecommendDate());
+  // const [date, setDate] = useState(() => generateRecommendDate());
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.NONE,
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
-  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [orderData, setOrderData] = useState<Order[]>([]);
+  const [routeOrders, setRouteOrders] = useState<Order[]>([]);
   const [pages, setPages] = useState<number>(0);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
@@ -124,13 +120,26 @@ export default function Orders() {
   const totalPosition: any = useRef();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const { date, SelectDate } = useSelectDate();
+  const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
   const [orders, mutate, isValidating] = SWRFetchData(
     `${API_URL.ORDER}?date=${date}&status=${currentStatus}`,
   );
+
+  const selectedDate = new Date(date);
+  const [routes, _mutateRoutes, isRoutesValidating] = SWRFetchData(
+    `${API_URL.ROUTES}?day=${days[selectedDate.getDay()]}`,
+  );
+
+  const sameDateLastWeek = getSameDateLastWeek(date);
+  const stringifyDate = YYYYMMDDFormat(sameDateLastWeek);
+
+  const [lastWeekOrders] = SWRFetchData(
+    `${API_URL.ORDER}?date=${stringifyDate}&status=${currentStatus}`,
+  );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
-  const [subCategories] = SWRFetchData(API_URL.SUBCATEGORIES);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -138,11 +147,16 @@ export default function Orders() {
   }, []);
 
   useEffect(() => {
-    // Initial Loading
-    if (isFirstLoading && !isValidating) {
-      setIsFirstLoading(false);
+    setCurrentRoute(0);
+  }, [date]);
+
+  useEffect(() => {
+    if (orders && !isValidating) {
+      setIsLoading(false);
+    } else if (!orders && isValidating) {
+      setIsLoading(true);
     }
-  }, [isValidating, isFirstLoading]);
+  }, [isValidating, date, currentStatus, currentRoute]);
 
   useEffect(() => {
     if (orders) {
@@ -162,6 +176,11 @@ export default function Orders() {
       setOrderData([]);
     }
   }, [baseOrderData]);
+
+  // Update order data based on route
+  useEffect(() => {
+    generateOrderData(baseOrderData);
+  }, [currentRoute]);
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
@@ -183,7 +202,12 @@ export default function Orders() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newOrderList = baseOrderData.filter((order: Order) => {
+      let baseOrders = baseOrderData;
+
+      if (currentRoute > 0) {
+        baseOrders = filterOrderByRoute(baseOrderData);
+      }
+      const newOrderList = baseOrders.filter((order: Order) => {
         if (
           order.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
@@ -195,12 +219,13 @@ export default function Orders() {
         }
         return false;
       });
+
       setOrderData(newOrderList);
       setPages(1);
     } else {
       generateOrderData();
     }
-  }, [debouncedKeywords, baseOrderData]);
+  }, [debouncedKeywords, baseOrderData, currentRoute]);
 
   // whenever current page change and not in searching mode, then update the display data
   useEffect(() => {
@@ -269,41 +294,56 @@ export default function Orders() {
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
       if (response.data.warning) {
         if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
-          setNotification({
-            on: true,
-            type: 'warning',
-            message: response.data.warning,
-          });
+          showNotification('warning', response.data.warning);
           return;
         } else {
           return response;
         }
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log(error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'There was an error creating order: ' + error.response.data.error,
+      );
       return;
     }
+  };
+
+  const filterOrderByRoute = (orders: Order[]) => {
+    if (!routes || !orders || orders.length === 0) {
+      return [];
+    }
+
+    if (currentRoute === 0) {
+      return baseOrderData;
+    }
+
+    // Get the route
+    const targetRoute = routes.data.find(
+      (route: IRoutes) => route.id === currentRoute,
+    );
+
+    // Get clients from that route -> get orders
+    const filteredOrders = targetRoute.clients
+      .map((client: UserRoute) => {
+        const clientOrder = orders.find(
+          (order: Order) => order.userId === client.userId,
+        );
+        return clientOrder;
+      })
+      .filter((order: Order) => order !== undefined);
+
+    setRouteOrders(filteredOrders);
+    return filteredOrders;
   };
 
   const initializeOrder = () => {
@@ -317,10 +357,17 @@ export default function Orders() {
       setOrderData([]);
       return;
     }
-    const newNumberOfPages = Math.ceil(orderList.length / orderPerPage);
+
+    // If there is route selected -> filter order based on that route
+    let orders = [...orderList];
+    if (currentRoute > 0) {
+      orders = filterOrderByRoute(orderList);
+    }
+
+    const newNumberOfPages = Math.ceil(orders.length / orderPerPage);
     setPages(newNumberOfPages);
     setOrderData(
-      orderList.slice(
+      orders.slice(
         orderPerPage * currentPage - orderPerPage,
         orderPerPage * currentPage,
       ),
@@ -345,11 +392,7 @@ export default function Orders() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -359,18 +402,13 @@ export default function Orders() {
       // Mutate to update real data
       mutate();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Update Item Successfully',
-      });
+      showNotification('success', 'Update Item Successfully');
     } catch (error: any) {
       console.log('Fail to update order items: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update order items: ' + error,
-      });
+      showNotification(
+        'error',
+        'Fail to update order items: ' + error.response.data.error,
+      );
     }
   };
 
@@ -407,29 +445,20 @@ export default function Orders() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         // setIsUpdating(false);
         return;
       }
 
       mutate();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       // setIsUpdating(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Something went wrong: ' + error.response.data.error,
-      });
+      showNotification(
+        'error',
+        'Something went wrong: ' + error.response.data.error,
+      );
       // setIsUpdating(false);
     }
   };
@@ -472,12 +501,6 @@ export default function Orders() {
     } else {
       setSelectedOrders(orderData);
     }
-  };
-
-  const handleDateChange = (e: any): void => {
-    const formattedDate: string = formatDateChanged(e);
-
-    setDate(formattedDate);
   };
 
   const handleUpdateStatusUI = (targetOrder: Order): void => {
@@ -595,23 +618,22 @@ export default function Orders() {
   const uppperContent = (
     <>
       <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Typography variant="h4" fontWeight="bold">
+        <Typography variant="h5" color={blueGrey[800]}>
           Orders
         </Typography>
-        <FormControl>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Date Filter"
-              value={dayjs(date)}
-              onChange={(e: any) => handleDateChange(e)}
-              sx={{
-                borderRadius: 2,
-              }}
-            />
-          </LocalizationProvider>
-        </FormControl>
+        {SelectDate}
       </Box>
-      <OrderOverview baseOrderData={baseOrderData} currentDate={date} />
+      <OrderOverview
+        // baseOrderData={baseOrderData}
+        allRouteOrderData={orders ? orders.data : []}
+        lastWeekOrderData={lastWeekOrders ? lastWeekOrders.data : []}
+        currentDate={date}
+        orderData={currentRoute === 0 ? baseOrderData : routeOrders}
+        currentRoute={currentRoute}
+        setCurrentRoute={setCurrentRoute}
+        routes={routes?.data || []}
+        showNotification={showNotification}
+      />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={12} md={10.5}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -630,7 +652,9 @@ export default function Orders() {
                       icon={<statusTab.icon />}
                       id={`simple-tab-${index}`}
                       label={`${statusTab.name} ${
-                        tabIndex === index ? `(${baseOrderData.length})` : ''
+                        tabIndex === index
+                          ? `(${currentRoute === 0 ? baseOrderData.length : routeOrders.length})`
+                          : ''
                       } `}
                       aria-controls={`tabpanel-${index}`}
                       value={index}
@@ -699,10 +723,7 @@ export default function Orders() {
   return (
     <Sidebar>
       {/* <LoadingModal open={isUpdating} /> */}
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <div style={{ display: 'none' }}>
         <AllPrint
           orders={selectedOrders.length > 0 ? selectedOrders : orderData}
@@ -713,7 +734,7 @@ export default function Orders() {
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
         clientList={clients?.data || []}
-        setNotification={setNotification}
+        showNotification={showNotification}
         currentDate={date}
         createOrder={addOrder}
       />
@@ -721,17 +742,17 @@ export default function Orders() {
         open={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         baseOrderList={baseOrderData}
-        setNotification={setNotification}
+        showNotification={showNotification}
         handleUpdateStatusUI={handleUpdateStatusUI}
         mutateOrders={mutate}
         handleUpdateDateUI={handleUpdateDateUI}
         handleUpdatePriceUI={handleUpdatePriceUI}
         selectedOrders={selectedOrders}
         handleSelectOrder={handleSelectOrder}
-        subcategories={subCategories?.data || []}
+        // subcategories={subCategories?.data || []}
         handleUpdateItem={handleUpdateItem}
       />
-      {isFirstLoading ? (
+      {isLoading ? (
         <>
           {uppperContent}
           <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
@@ -752,14 +773,12 @@ export default function Orders() {
                     <OrderAccordion
                       key={index}
                       order={order}
-                      setNotification={setNotification}
+                      showNotification={showNotification}
                       handleUpdateStatusUI={handleUpdateStatusUI}
-                      // updateUIItem={handleUpdateUISingleOrder}
                       handleUpdateDateUI={handleUpdateDateUI}
                       handleUpdatePriceUI={handleUpdatePriceUI}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
-                      subcategories={subCategories || []}
                       handleUpdateItem={handleUpdateItem}
                       mutateOrders={mutate}
                     />

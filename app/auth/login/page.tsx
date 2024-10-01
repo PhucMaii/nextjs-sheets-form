@@ -1,9 +1,8 @@
 'use client';
 import FadeIn from '@/HOC/FadeIn';
 import LoginAndRegisterGuard from '@/HOC/LoginAndRegisterGuard';
-import NotificationPopup from '@/app/admin/components/Notification';
 import { API_URL } from '@/app/utils/enum';
-import { Notification } from '@/app/utils/type';
+import useNotification from '@/hooks/useNotification';
 import { LoadingButton } from '@mui/lab';
 import { Box, Paper, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
@@ -24,12 +23,8 @@ interface FormValues {
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const router = useRouter();
+  const { showNotification, NotificationComp } = useNotification();
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -58,20 +53,12 @@ export default function LoginPage() {
         const userData = response.data.data;
 
         if (user && user.error) {
-          setNotification({
-            on: true,
-            type: 'error',
-            message: user.error,
-          });
+          showNotification('error', user.error);
           setIsLoading(false);
           return;
         }
 
-        setNotification({
-          on: true,
-          type: 'success',
-          message: 'Login Successful',
-        });
+        showNotification('success', 'Login Successful');
         setIsLoading(false);
         setTimeout(() => {
           if (userData.role === 'client') {
@@ -82,11 +69,10 @@ export default function LoginPage() {
         }, 1000);
       } catch (error: any) {
         console.log('Fail to sign in: ', error);
-        setNotification({
-          on: true,
-          type: 'error',
-          message: 'Your client id and/or password are not correct',
-        });
+        showNotification(
+          'error',
+          'Your client id and/or password are not correct',
+        );
         setIsLoading(false);
       }
     },
@@ -103,10 +89,7 @@ export default function LoginPage() {
           height="100vh"
           gap={2}
         >
-          <NotificationPopup
-            notification={notification}
-            onClose={() => setNotification({ ...notification, on: false })}
-          />
+          {NotificationComp}
           <Paper elevation={8} sx={{ borderRadius: 3 }}>
             <Box display="flex" gap={2} m={4} alignItems="center">
               <Image

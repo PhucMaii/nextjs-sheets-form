@@ -168,6 +168,7 @@ export default function BillPrintModal({
           <ManifestPrint
             manifest={itemManifest}
             routes={routes}
+            currentDate={day}
             ref={manifestPrint}
           />
         </div>
@@ -176,6 +177,7 @@ export default function BillPrintModal({
             manifest={itemManifest}
             routes={routes}
             ref={summaryManifest}
+            currentDate={day}
           />
         </div>
         <ModalHead

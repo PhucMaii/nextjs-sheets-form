@@ -1,5 +1,5 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
+import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestQuery {
@@ -34,6 +34,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: 'desc', // If updateTime is the same, sort by id in ascending order
         },
       ],
+      include: {
+        user: {
+          include: {
+            routes: true,
+            preference: true,
+            category: true,
+          },
+        },
+        items: true,
+      },
     });
 
     if (!orders || orders.length === 0) {
@@ -43,56 +53,24 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // Format the return result
-    const newOrders = await Promise.all(
-      orders.map(async (order: any) => {
-        const items = await prisma.orderedItems.findMany({
-          where: {
-            orderId: order.id,
-          },
-        });
-
-        // get user
-        const user: any = await prisma.user.findUnique({
-          where: {
-            id: order.userId,
-          },
-          include: {
-            routes: true,
-            subCategory: true,
-            preference: true,
-          },
-        });
-
-        const newItems = items.map((item: any) => {
-          const totalPrice = item.quantity * item.price;
-          const returnData: any = {
-            ...item,
-            totalPrice,
-            isAutoPrint: order.isAutoPrint,
-          };
-
-          if (item.name.includes('BEAN')) {
-            return { ...returnData, subCategoryId: user.subCategoryId };
-          }
-          return returnData;
-        });
-
-        const category = await prisma.category.findUnique({
-          where: {
-            id: user.categoryId,
-          },
-        });
-
+    // Format return result
+    const newOrders = orders.map((order: any) => {
+      const formattedItems = order.items.map((item: OrderedItems) => {
+        const totalPrice = item.quantity * item.price;
         return {
-          ...order,
-          items: newItems,
-          ...user,
-          id: order.id,
-          category,
+          ...item,
+          totalPrice,
         };
-      }),
-    );
+      });
+
+      return {
+        ...order,
+        items: formattedItems,
+        ...order.user,
+        id: order.id,
+        category: order.user.category,
+      };
+    });
 
     return res.status(200).json({
       message: 'Fetch All Orders Successfully',

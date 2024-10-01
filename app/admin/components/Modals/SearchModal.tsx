@@ -1,18 +1,17 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { Order } from '../../orders/page';
-import { Box, Modal, TextField, Typography } from '@mui/material';
+import { AlertColor, Box, Modal, TextField, Typography } from '@mui/material';
 import { BoxModal } from './styled';
 import useDebounce from '@/hooks/useDebounce';
 import OrderAccordion from '../OrderAccordion';
-import { Notification, OrderedItems } from '@/app/utils/type';
-import { SubCategory } from '@prisma/client';
+import { OrderedItems } from '@/app/utils/type';
 import ErrorComponent from '../ErrorComponent';
 import { blueGrey } from '@mui/material/colors';
 
 interface IProps extends ModalProps {
   baseOrderList: Order[];
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleUpdateStatusUI: (targetOrder: Order) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
   handleUpdatePriceUI: (
@@ -22,7 +21,7 @@ interface IProps extends ModalProps {
   ) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
-  subcategories: SubCategory[];
+  // subcategories: SubCategory[];
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
@@ -35,13 +34,13 @@ export default function SearchModal({
   open,
   onClose,
   baseOrderList,
-  setNotification,
+  showNotification,
   handleUpdateStatusUI,
   handleUpdateDateUI,
   handleUpdatePriceUI,
   selectedOrders,
   handleSelectOrder,
-  subcategories,
+  // subcategories,
   handleUpdateItem,
   mutateOrders,
 }: IProps) {
@@ -111,13 +110,12 @@ export default function SearchModal({
                 <OrderAccordion
                   key={index}
                   order={order}
-                  setNotification={setNotification}
+                  showNotification={showNotification}
                   handleUpdateStatusUI={handleUpdateStatusUI}
                   handleUpdateDateUI={handleUpdateDateUI}
                   handleUpdatePriceUI={handleUpdatePriceUI}
                   selectedOrders={selectedOrders}
                   handleSelectOrder={handleSelectOrder}
-                  subcategories={subcategories || []}
                   handleUpdateItem={handleUpdateItem}
                   mutateOrders={mutateOrders}
                 />

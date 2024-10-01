@@ -1,46 +1,86 @@
-import { blueGrey } from '@mui/material/colors';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Order } from '../orders/page';
-import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { Box, MenuItem, Select, Typography } from '@mui/material';
+import { ORDER_STATUS } from '@/app/utils/enum';
+import {
+  AlertColor,
+  Box,
+  Grid,
+  IconButton,
+  MenuItem,
+  Select,
+  Typography,
+} from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import TodayIcon from '@mui/icons-material/Today';
+import DateRangeIcon from '@mui/icons-material/DateRange';
 import { ShadowSection } from '../reports/styled';
-import useRoutes from '@/hooks/fetch/useRoutes';
-import { days } from '@/app/lib/constant';
 import { IRoutes } from '@/app/utils/type';
-import { UserRoute } from '@prisma/client';
-import { primaryColor } from '@/theme/color';
+import { primary, primaryColor } from '@/theme/color';
+import { getCODData } from '@/app/utils/array';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import WCODInfo from './Modals/WCODInfo';
+import { blueGrey } from '@mui/material/colors';
 
 interface IProps {
-  baseOrderData: Order[];
+  allRouteOrderData: Order[];
+  lastWeekOrderData: Order[];
+  orderData: Order[];
+  currentRoute: any;
+  setCurrentRoute: any;
+  routes: any;
   currentDate: string;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
-  const date = new Date(currentDate);
-  const { routes } = useRoutes(days[date.getDay()]);
-  const [currentRoute, setCurrentRoute] = useState<number>(0);
-  const [orderData, setOrderData] = useState<Order[]>(baseOrderData || []);
-
-  const titleColor = blueGrey[50];
-  const dataColor = 'white';
-
-  useEffect(() => {
-    if (baseOrderData) {
-      setOrderData(baseOrderData);
-      setCurrentRoute(0);
-    }
-  }, [baseOrderData]);
+export default function OrderOverview({
+  allRouteOrderData,
+  lastWeekOrderData,
+  orderData,
+  currentRoute,
+  setCurrentRoute,
+  routes,
+  currentDate,
+  showNotification,
+}: IProps) {
+  const [codData, setCodData] = useState<any>();
+  const [isOpenWCODInfo, setIsOpenWCODInfo] = useState<boolean>(false);
 
   useEffect(() => {
-    if (currentRoute > 0) {
-      filterOrderByRoute();
-    } else if (baseOrderData) {
-      setOrderData(baseOrderData);
+    if (orderData && orderData.length > 0) {
+      handleGetCODData();
     }
-  }, [currentRoute]);
+  }, [orderData, currentDate]);
+
+  const handleGetCODData = async () => {
+    const analysisCODOrders = await getCODData(orderData, currentDate);
+    setCodData(analysisCODOrders);
+  };
+
+  const todayTotalGross = useMemo(() => {
+    return allRouteOrderData.length > 0
+      ? allRouteOrderData.reduce((acc: number, order: Order) => {
+          if (order.status !== ORDER_STATUS.VOID) {
+            return acc + order.totalPrice;
+          }
+
+          return acc;
+        }, 0)
+      : 0;
+  }, [allRouteOrderData]);
+
+  const lastWeekTotalGross = useMemo(() => {
+    return lastWeekOrderData.length > 0
+      ? lastWeekOrderData.reduce((acc: number, order: Order) => {
+          if (order.status !== ORDER_STATUS.VOID) {
+            return acc + order.totalPrice;
+          }
+
+          return acc;
+        }, 0)
+      : 0;
+  }, [lastWeekOrderData]);
 
   const openBill = useMemo(() => {
     return orderData.filter((order: Order) => {
@@ -66,43 +106,17 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
       : 0;
   }, [openBill]);
 
-  const codOrders = useMemo(() => {
-    return orderData.filter((order: Order) => {
-      return (
-        order?.preference?.paymentType === PAYMENT_TYPE.COD &&
-        order.status !== ORDER_STATUS.VOID &&
-        order.status !== ORDER_STATUS.COMPLETED
-      );
-    });
-  }, [orderData]);
-
-  const codBill = useMemo(() => {
-    return codOrders.length > 0
-      ? codOrders.reduce((acc: number, order: Order) => {
-          return acc + order.totalPrice;
-        }, 0)
-      : 0;
-  }, [codOrders]);
-
-  const filterOrderByRoute = () => {
-    const targetRoute = routes.find(
-      (route: IRoutes) => route.id === currentRoute,
-    );
-
-    const filteredOrders = targetRoute.clients
-      .map((client: UserRoute) => {
-        const clientOrder = baseOrderData.find(
-          (order: Order) => order.userId === client.userId,
-        );
-        return clientOrder;
-      })
-      .filter((order: Order) => order !== undefined);
-
-    setOrderData(filteredOrders);
-  };
-
   return (
-    <ShadowSection sx={{ backgroundColor: `${primaryColor} !important` }}>
+    <ShadowSection sx={{ backgroundColor: 'white !important' }}>
+      <WCODInfo
+        open={isOpenWCODInfo}
+        onClose={() => setIsOpenWCODInfo(false)}
+        orderData={orderData}
+        routes={routes}
+        date={currentDate}
+        showNotification={showNotification}
+      />
+      {/* Select Routes */}
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Select
           label="Routes"
@@ -115,136 +129,211 @@ export default function OrderOverview({ baseOrderData, currentDate }: IProps) {
             routes.map((route: IRoutes) => {
               return (
                 <MenuItem key={route.id} value={route.id}>
-                  {route.name}
+                  {route.name} - {route?.driver?.name}
                 </MenuItem>
               );
             })}
         </Select>
       </Box>
-      <Box
+
+      <Grid
+        container
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        flexWrap="wrap"
-        gap={2}
+        rowGap={2}
       >
-        <Box
+        {/* Total Gross Section */}
+        <Grid
+          item
+          lg={3.9}
+          md={5.9}
+          sm={12}
           display="flex"
           flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
+          gap={2}
+          sx={{
+            backgroundColor: primary.lightest,
+            padding: 5,
+            borderRadius: 5,
+          }}
         >
-          <Box display="flex" gap={1} alignItems="center">
-            <RequestQuoteIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+          <Typography variant="h5">Total Gross</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            gap={4}
+            alignItems="center"
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
             >
-              Bill
-            </Typography>
+              <Box display="flex" gap={1} alignItems="center">
+                <DateRangeIcon />
+                <Typography variant="subtitle2">Last Week</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {lastWeekTotalGross.toFixed(2)}
+              </Typography>
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <TodayIcon />
+                <Typography variant="subtitle1">Today</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {todayTotalGross.toFixed(2)}
+              </Typography>
+            </Box>
           </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {openBill.length}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Open Bill
-          </Typography>
-        </Box>
-        <Box
+        </Grid>
+
+        {/* Track Bills Section */}
+        <Grid
+          item
+          sm={12}
+          lg={3.9}
+          md={5.9}
           display="flex"
           flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
+          gap={2}
+          sx={{
+            backgroundColor: primary.lightest,
+            padding: 5,
+            borderRadius: 5,
+          }}
         >
-          <Box display="flex" gap={1} alignItems="center">
-            <AttachMoneyIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+          <Typography variant="h5">Current Bills</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            gap={4}
+            alignItems="center"
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
             >
-              Balance Due
-            </Typography>
+              <Box display="flex" gap={1} alignItems="center">
+                <RequestQuoteIcon />
+                <Typography variant="subtitle2">Open Bill</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {openBill.length}
+              </Typography>
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <AttachMoneyIcon />
+                <Typography variant="subtitle1">Balance Due</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {totalBill.toFixed(2)}
+              </Typography>
+            </Box>
           </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {totalBill.toFixed(2)}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Balance due
-          </Typography>
-        </Box>
-        <Box
+        </Grid>
+
+        {/* COD Section */}
+        <Grid
+          item
+          sm={12}
+          lg={3.9}
+          md={5.9}
           display="flex"
           flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
+          gap={2}
+          sx={{
+            backgroundColor: primary.lightest,
+            padding: 5,
+            borderRadius: 5,
+          }}
         >
-          <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="h5">COD + WCOD</Typography>
+            <IconButton
+              sx={{ color: blueGrey[300] }}
+              onClick={() => setIsOpenWCODInfo(true)}
             >
-              COD ($)
-            </Typography>
+              <HelpOutlineIcon />
+            </IconButton>
           </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            gap={4}
+            alignItems="center"
           >
-            {codBill.toFixed(2)}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Bill
-          </Typography>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          gap={1.5}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <CalendarTodayIcon sx={{ color: `${dataColor} !important` }} />
-            <Typography
-              variant="subtitle1"
-              sx={{ color: `${titleColor} !important`, fontWeight: 700 }}
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
             >
-              COD
-            </Typography>
+              <Box display="flex" gap={1} alignItems="center">
+                <CalendarTodayIcon />
+                <Typography variant="subtitle1">Bills</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {codData?.uncollectedCODOrders?.length || 0}
+              </Typography>
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <AttachMoneyIcon />
+                <Typography variant="subtitle1">Amount</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {codData?.uncollectedCODBill?.toFixed(2) || 0}
+              </Typography>
+            </Box>
           </Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ color: `${dataColor} !important` }}
-          >
-            {codOrders.length}
-          </Typography>
-          <Typography
-            variant="subtitle2"
-            sx={{ color: `${titleColor} !important` }}
-          >
-            Orders
-          </Typography>
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
     </ShadowSection>
   );
 }

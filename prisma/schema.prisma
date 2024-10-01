@@ -178,3 +178,9 @@ model ChatRoom {
   messages    Message[]
   chatMembers ChatMember[]
 }
+model Announcement {
+  id    Int @id @default(autoincrement())
+  updatedBy String
+  updatedAt DateTime
+  announcement String
+}

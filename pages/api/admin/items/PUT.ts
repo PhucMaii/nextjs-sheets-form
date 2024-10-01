@@ -1,15 +1,20 @@
-import { Item, PrismaClient } from '@prisma/client';
+import { UPDATE_OPTION } from '@/app/admin/components/Modals/edit/EditItem';
+import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   updatedItem: Item;
+  updateOption: UPDATE_OPTION;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { updatedItem }: IBody = req.body;
+    const {
+      updatedItem,
+      updateOption = UPDATE_OPTION.CURRENT_CATEGORY,
+    }: IBody = req.body;
 
     if (
       !updatedItem.id ||
@@ -34,10 +39,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // * BAD CASE: Item name existed already in that category
-    if (
-      !updatedItem.name.includes('BEAN') &&
-      existingItem.name !== updatedItem.name
-    ) {
+    if (existingItem.name !== updatedItem.name) {
       // Check is new name valid
       const itemSameName = await prisma.item.findMany({
         where: {
@@ -55,33 +57,33 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // * BAD CASE: Beansprouts name and subcategoryId existed already in that category
     // If updated item is beansprouts => check is subcategory id valid
-    if (updatedItem.name.includes('BEAN')) {
-      if (!updatedItem.subCategoryId) {
-        return res.status(404).json({
-          error: 'Subcategory required if item is beansprouts',
-        });
-      }
+    // if (updatedItem.name.includes('BEAN')) {
+    //   if (!updatedItem.subCategoryId) {
+    //     return res.status(404).json({
+    //       error: 'Subcategory required if item is beansprouts',
+    //     });
+    //   }
 
-      const itemSameNameAndSubCategory = await prisma.item.findMany({
-        where: {
-          name: updatedItem.name,
-          categoryId: updatedItem.categoryId,
-          subCategoryId: updatedItem.subCategoryId,
-        },
-      });
+    //   const itemSameNameAndSubCategory = await prisma.item.findMany({
+    //     where: {
+    //       name: updatedItem.name,
+    //       categoryId: updatedItem.categoryId,
+    //       subCategoryId: updatedItem.subCategoryId,
+    //     },
+    //   });
 
-      if (itemSameNameAndSubCategory.length !== 0) {
-        const isNotValid = itemSameNameAndSubCategory.some(
-          (item: Item) => item.id !== updatedItem.id,
-        );
+    //   if (itemSameNameAndSubCategory.length !== 0) {
+    //     const isNotValid = itemSameNameAndSubCategory.some(
+    //       (item: Item) => item.id !== updatedItem.id,
+    //     );
 
-        if (isNotValid) {
-          return res.status(500).json({
-            error: `Item with name ${updatedItem.name} and subcategory id ${updatedItem.subCategoryId} existed already`,
-          });
-        }
-      }
-    }
+    //     if (isNotValid) {
+    //       return res.status(500).json({
+    //         error: `Item with name ${updatedItem.name} and subcategory id ${updatedItem.subCategoryId} existed already`,
+    //       });
+    //     }
+    //   }
+    // }
 
     // Update Item
     const newUpdatedItem = await prisma.item.update({
@@ -92,10 +94,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         name: updatedItem.name,
         price: updatedItem.price,
         categoryId: updatedItem.categoryId,
-        subCategoryId:
-          updatedItem.subCategoryId && updatedItem.subCategoryId > 0
-            ? updatedItem.subCategoryId
-            : null,
         availability: updatedItem.availability,
       },
       include: {
@@ -103,10 +101,24 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Update PRICE all items has same name
+    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+      await prisma.item.updateMany({
+        where: {
+          name: existingItem.name,
+        },
+        data: {
+          price: updatedItem.price,
+          name: updatedItem.name,
+        },
+      });
+    }
+
     // Update schedule order items
     const responseUpdate = await updateAllScheduleOrderItems(
       existingItem,
       updatedItem,
+      updateOption,
     );
 
     if (!responseUpdate.ok) {
@@ -127,9 +139,31 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const updateAllScheduleOrderItems = async (oldItem: any, updatedItem: any) => {
+const updateAllScheduleOrderItems = async (
+  oldItem: any,
+  updatedItem: any,
+  updateOption: UPDATE_OPTION,
+) => {
   try {
     const prisma = new PrismaClient();
+
+    // if update all item same name
+    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+      await prisma.orderedItems.updateMany({
+        where: {
+          scheduledOrderId: {
+            not: null,
+          },
+          name: oldItem.name,
+        },
+        data: {
+          name: updatedItem.name,
+          price: updatedItem.price,
+        },
+      });
+
+      return { ok: true };
+    }
 
     // Find all users that has same categoryId
     const userList = await prisma.user.findMany({
@@ -137,7 +171,11 @@ const updateAllScheduleOrderItems = async (oldItem: any, updatedItem: any) => {
         categoryId: oldItem.categoryId,
       },
       include: {
-        scheduleOrders: true,
+        scheduleOrders: {
+          include: {
+            items: true,
+          },
+        },
       },
     });
 
@@ -145,6 +183,22 @@ const updateAllScheduleOrderItems = async (oldItem: any, updatedItem: any) => {
     for (const user of userList) {
       for (const scheduleOrder of user.scheduleOrders) {
         if (scheduleOrder) {
+          // Get the item to be updated, then subtract it from total price and add the its new price
+          const itemToBeUpdated = scheduleOrder.items.find(
+            (item: OrderedItems) => item.name === oldItem.name,
+          );
+
+          if (!itemToBeUpdated) {
+            continue;
+          }
+
+          const oldItemPrice =
+            itemToBeUpdated?.price * itemToBeUpdated?.quantity;
+          const newItemPrice = updatedItem.price * itemToBeUpdated.quantity;
+
+          const newTotalPrice =
+            scheduleOrder.totalPrice - oldItemPrice + newItemPrice;
+
           await prisma.orderedItems.updateMany({
             where: {
               scheduledOrderId: scheduleOrder.id,
@@ -153,6 +207,16 @@ const updateAllScheduleOrderItems = async (oldItem: any, updatedItem: any) => {
             data: {
               name: updatedItem.name,
               price: updatedItem.price,
+            },
+          });
+
+          // Update new total price
+          await prisma.scheduleOrders.update({
+            where: {
+              id: scheduleOrder.id,
+            },
+            data: {
+              totalPrice: newTotalPrice,
             },
           });
         }

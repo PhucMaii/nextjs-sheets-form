@@ -12,13 +12,12 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { ShadowSection } from '../admin/reports/styled';
-import { Notification } from '../utils/type';
 import axios from 'axios';
 import { API_URL } from '../utils/enum';
 import { useSession } from 'next-auth/react';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import NotificationPopup from '../admin/components/Notification';
+import useNotification from '@/hooks/useNotification';
 
 export default function AccountPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
@@ -29,14 +28,11 @@ export default function AccountPage() {
     newPassword: '',
     confirmPassword: '',
   });
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { showNotification, NotificationComp } = useNotification();
 
   const { data: session }: any = useSession();
 
@@ -75,11 +71,7 @@ export default function AccountPage() {
       );
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsFetching(false);
         return;
       }
@@ -88,11 +80,8 @@ export default function AccountPage() {
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client email: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to fetch client email: ' + error,
-      });
+
+      showNotification('error', 'Fail to fetch client email: ' + error);
       setIsFetching(false);
     }
   };
@@ -107,28 +96,17 @@ export default function AccountPage() {
       const response = await axios.put(API_URL.USER, { email });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsSubmitting(false);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('Fail to update client email: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update client email: ' + error,
-      });
+
+      showNotification('error', 'Fail to update client email: ' + error);
       setIsSubmitting(false);
     }
   };
@@ -136,11 +114,7 @@ export default function AccountPage() {
   const handleUpdatePassword = async () => {
     const { isValid, message } = checkPasswordInput();
     if (!isValid) {
-      setNotification({
-        on: true,
-        type: 'error',
-        message,
-      });
+      showNotification('error', message);
       return;
     }
 
@@ -151,28 +125,17 @@ export default function AccountPage() {
       const response = await axios.put(API_URL.USER, submittedData);
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         setIsSubmitting(false);
         return;
       }
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {
       console.log('Fail to update user password: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+
+      showNotification('error', error.response.data.error);
       setIsSubmitting(false);
     }
   };
@@ -187,10 +150,7 @@ export default function AccountPage() {
 
   return (
     <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Typography variant="h4">Account</Typography>
       <ShadowSection display="flex" flexDirection="column" gap={2} mt={2}>
         <Typography variant="h5" fontWeight="bold">

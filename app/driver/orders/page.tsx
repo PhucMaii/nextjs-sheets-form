@@ -11,16 +11,12 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
-import NotificationPopup from '@/app/admin/components/Notification';
 import { Virtuoso } from 'react-virtuoso';
 import OrderComponent from '../components/OrderComponent';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
@@ -28,6 +24,8 @@ import { primary, success } from '@/theme/color';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
+import useSelectDate from '@/hooks/useSelectDate';
+import useNotification from '@/hooks/useNotification';
 
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
@@ -77,25 +75,18 @@ const tabs = ['Today', 'Delivered', 'Paid'];
 const totalYPosition = 250;
 export default function OrdersPage() {
   const [currentTab, setCurrentTab] = useState<string>('Today');
-  const [datePicker, setDatePicker] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [orders, setOrders] = useState<Order[]>([]);
   const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
 
   const date = new Date();
   const today = YYYYMMDDFormat(date);
+
+  const { showNotification, NotificationComp } = useNotification();
+  const { date: datePicker, SelectDate } = useSelectDate();
+
   const [ordersResponse, mutateOrders] = SWRFetchData(
     `${API_URL.DRIVER_ORDERS}?deliveryDate=${
       currentTab === 'Today' ? today : datePicker
@@ -168,10 +159,10 @@ export default function OrdersPage() {
     return filteredOrders;
   };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setDatePicker(formattedDate);
-  };
+  // const handleDateChange = (e: any) => {
+  //   const formattedDate = formatDateChanged(e);
+  //   setDatePicker(formattedDate);
+  // };
 
   const initializeOrders = () => {
     setOrders(ordersResponse?.data.deliveryOrders);
@@ -208,11 +199,7 @@ export default function OrdersPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -222,18 +209,10 @@ export default function OrdersPage() {
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: error.response.data.error,
-      });
+      showNotification('error', error.response.data.error);
     }
   };
 
@@ -261,11 +240,7 @@ export default function OrdersPage() {
       });
 
       if (response.data.error) {
-        setNotification({
-          on: true,
-          type: 'error',
-          message: response.data.error,
-        });
+        showNotification('error', response.data.error);
         return;
       }
 
@@ -275,18 +250,10 @@ export default function OrdersPage() {
       // Update Real Data
       mutateOrders();
 
-      setNotification({
-        on: true,
-        type: 'success',
-        message: 'Update Item Successfully',
-      });
+      showNotification('success', 'Update Item Successfully');
     } catch (error: any) {
       console.log('Fail to update order items: ', error);
-      setNotification({
-        on: true,
-        type: 'error',
-        message: 'Fail to update order items: ' + error,
-      });
+      showNotification('error', 'Fail to update order items: ' + error);
     }
   };
 
@@ -316,10 +283,7 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <LoadingModal open={isFetching} />
       <SearchModal
         open={isSearchModalOpen}
@@ -368,13 +332,7 @@ export default function OrdersPage() {
       </Box>
       {currentTab !== 'Today' && (
         <Box display="flex" justifyContent="flex-end" my={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Date"
-              value={dayjs(datePicker)}
-              onChange={handleDateChange}
-            />
-          </LocalizationProvider>
+          {SelectDate}
         </Box>
       )}
       <Grid container my={2} spacing={2}>

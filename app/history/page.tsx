@@ -21,7 +21,6 @@ import { generateMonthRange } from '../utils/time';
 import { Order } from '../admin/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';
 import { API_URL, ORDER_STATUS } from '../utils/enum';
-import { Notification } from '../utils/type';
 import OrderAccordion from '../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
@@ -33,10 +32,8 @@ import {
   warningColor,
 } from '../../theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
-import NotificationPopup from '../admin/components/Notification';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import useSWR from 'swr';
 import ErrorComponent from '../admin/components/ErrorComponent';
 
@@ -51,11 +48,6 @@ export default function HistoryPage() {
   const [filterOptions, setFilterOptions] = useState<ORDER_STATUS | string>(
     'All',
   );
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
@@ -63,7 +55,9 @@ export default function HistoryPage() {
   const totalPositionRef: any = useRef(null);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  const { data: orderData, isValidating } = useSWR(API_URL.CLIENT_ORDER);
+  const { data: orderData, isValidating } = useSWR(
+    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  );
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -107,14 +101,8 @@ export default function HistoryPage() {
   };
 
   const initializeOrders = () => {
-    const filteredOrders: any = filterDateRangeOrders(
-      orderData.data.userOrders,
-      dateRange[0],
-      dateRange[1],
-    );
-
-    setClientOrders(filteredOrders);
-    setBaseClientOrders(filteredOrders);
+    setClientOrders(orderData.data.userOrders);
+    setBaseClientOrders(orderData.data.userOrders);
   };
 
   const resetOrders = () => {
@@ -223,10 +211,6 @@ export default function HistoryPage() {
 
   return (
     <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
       <Grid
         container
         columnSpacing={2}

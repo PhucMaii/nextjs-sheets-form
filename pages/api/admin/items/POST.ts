@@ -1,5 +1,5 @@
 import { IItem } from '@/app/utils/type';
-import { Item, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -24,10 +24,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name: newItem.name,
         categoryId: newItem.categoryId,
-        subCategoryId:
-          newItem.subCategoryId && newItem.subCategoryId > 0
-            ? newItem.subCategoryId
-            : null,
         price: newItem.price,
         availability: newItem?.availability || true,
       },
@@ -53,51 +49,51 @@ const checkIsItemValid = async (newItem: IItem) => {
     const prisma = new PrismaClient();
 
     // * BAD CASE
-    if (!newItem.name.includes('BEAN')) {
-      // Check is new name valid
-      const itemSameName = await prisma.item.findMany({
-        where: {
-          name: newItem.name,
-          categoryId: newItem.categoryId,
-        },
-      });
+    // if (!newItem.name.includes('BEAN')) {
+    // Check is new name valid
+    const itemSameName = await prisma.item.findMany({
+      where: {
+        name: newItem.name,
+        categoryId: newItem.categoryId,
+      },
+    });
 
-      if (itemSameName.length > 0) {
-        return { check: false, message: 'Item Name Already Existed' };
-      }
+    if (itemSameName.length > 0) {
+      return { check: false, message: 'Item Name Already Existed' };
     }
+    // }
 
     // * BAD CASE
     // If updated item is beansprouts => check is subcategory id valid
-    if (newItem.name.includes('BEAN')) {
-      if (!newItem.subCategoryId) {
-        return {
-          check: false,
-          message: 'Subcategory required if item is beansprouts',
-        };
-      }
+    // if (newItem.name.includes('BEAN')) {
+    //   if (!newItem.subCategoryId) {
+    //     return {
+    //       check: false,
+    //       message: 'Subcategory required if item is beansprouts',
+    //     };
+    //   }
 
-      const itemSameNameAndSubCategory = await prisma.item.findMany({
-        where: {
-          name: newItem.name,
-          categoryId: newItem.categoryId,
-          subCategoryId: newItem.subCategoryId,
-        },
-      });
+    //   const itemSameNameAndSubCategory = await prisma.item.findMany({
+    //     where: {
+    //       name: newItem.name,
+    //       categoryId: newItem.categoryId,
+    //       subCategoryId: newItem.subCategoryId,
+    //     },
+    //   });
 
-      if (itemSameNameAndSubCategory.length !== 0) {
-        const isNotValid = itemSameNameAndSubCategory.some(
-          (item: Item) => item.id !== newItem.id,
-        );
+    //   if (itemSameNameAndSubCategory.length !== 0) {
+    //     const isNotValid = itemSameNameAndSubCategory.some(
+    //       (item: Item) => item.id !== newItem.id,
+    //     );
 
-        if (isNotValid) {
-          return {
-            check: false,
-            message: `Item with name ${newItem.name} and subcategory id ${newItem.subCategoryId} existed already`,
-          };
-        }
-      }
-    }
+    //     if (isNotValid) {
+    //       return {
+    //         check: false,
+    //         message: `Item with name ${newItem.name} and subcategory id ${newItem.subCategoryId} existed already`,
+    //       };
+    //     }
+    //   }
+    // }
 
     return { check: true };
   } catch (error: any) {

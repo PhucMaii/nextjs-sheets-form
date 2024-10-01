@@ -4,9 +4,8 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import LoopIcon from '@mui/icons-material/Loop';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
-import { blue } from '@mui/material/colors';
 import { Grid } from '@mui/material';
-import { primaryColor } from '@/theme/color';
+import { primary, primaryColor } from '@/theme/color';
 import { minifyNumber } from '@/app/utils/number';
 
 interface IProps {
@@ -45,9 +44,9 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
         <OverviewCard
           icon={<ReceiptLongIcon sx={{ color: primaryColor, fontSize: 50 }} />}
           text="Total Orders"
-          backgroundColor={primaryColor}
-          iconBackground={blue[50]}
-          textColor="white"
+          backgroundColor={primary.lightest}
+          // iconBackground={primary}
+          textColor={primary.main}
           value={overviewData?.numberOfOrders || 0}
         />
       </Grid>
@@ -55,9 +54,9 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
         <OverviewCard
           icon={<AttachMoneyIcon sx={{ color: primaryColor, fontSize: 50 }} />}
           text="Revenue"
-          backgroundColor={primaryColor}
-          iconBackground={blue[50]}
-          textColor="white"
+          backgroundColor={primary.lightest}
+          // iconBackground={blue[50]}
+          textColor={primary.main}
           value={revenue}
         />
       </Grid>
@@ -65,9 +64,9 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
         <OverviewCard
           icon={<LoopIcon sx={{ color: primaryColor, fontSize: 50 }} />}
           text="Ongoing Orders"
-          backgroundColor={primaryColor}
-          iconBackground={blue[50]}
-          textColor="white"
+          backgroundColor={primary.lightest}
+          // iconBackground={blue[50]}
+          textColor={primary.main}
           value={overviewData?.ongoingOrders || 0}
         />
       </Grid>
@@ -75,9 +74,9 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
         <OverviewCard
           icon={<MoneyOffIcon sx={{ color: primaryColor, fontSize: 50 }} />}
           text="Unpaid Amount"
-          backgroundColor={primaryColor}
-          iconBackground={blue[50]}
-          textColor="white"
+          backgroundColor={primary.lightest}
+          // iconBackground={blue[50]}
+          textColor={primary.main}
           value={unpaidAmount}
         />
       </Grid>

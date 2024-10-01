@@ -1,4 +1,4 @@
-import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateCurrentTime } from '@/app/utils/time';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -6,7 +6,7 @@ import { checkHasClientOrder } from '../../import-sheets';
 import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
-import { convertDeliveryDateStringToDate } from '../../utils/date';
+import { normalizeDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
 
 interface BodyTypes {
@@ -38,20 +38,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         deliveryDate,
       );
 
-      let createdBy: any = '';
-      if (existingOrder?.updatedBy) {
-        createdBy = existingOrder.updatedBy
-          .split(' - ')[0]
-          .toLowerCase()
-          .trim();
-      } else {
-        createdBy = existingOrder?.createdBy
-          .split(' - ')[0]
-          .toLowerCase()
-          .trim();
-      }
-
-      if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
+      if (existingOrder) {
         await pusherServer.trigger(
           'admin-schedule-order',
           'pre-order',
@@ -69,15 +56,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
 
       let trackIndex = 0;
-      const deliveryDateTypeDate =
-        convertDeliveryDateStringToDate(deliveryDate);
+      const deliveryDateTypeDate = normalizeDate(new Date(deliveryDate));
       for (const unavailableRange of unavailableRanges) {
-        const startDate = new Date(unavailableRange.startDate);
-        const endDate = new Date(unavailableRange.endDate);
+        const normalizedStartDate = normalizeDate(unavailableRange.startDate);
+        const normalizedEndDate = normalizeDate(unavailableRange.endDate);
 
+        normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
         if (
-          deliveryDateTypeDate >= startDate &&
-          deliveryDateTypeDate <= endDate
+          deliveryDateTypeDate >= normalizedStartDate &&
+          deliveryDateTypeDate <= normalizedEndDate
         ) {
           break;
         }
@@ -97,16 +84,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       // Get person create info
       const adminCreate: any = await getUserInfo(req, res);
 
-      // If admin override order of admin create
-      if (createdBy === USER_ROLE.ADMIN) {
-        // Delete old order and create new order
-        await prisma.orders.delete({
-          where: {
-            id: existingOrder?.id,
-          },
-        });
-      }
-
       const newOrder: any = await createOrder(
         scheduleOrder.user,
         scheduleOrder.items,
@@ -125,7 +102,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       updatedOrderList.push(newOrder);
 
       await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
-      console.log({ successful: scheduleOrder, items: scheduleOrder.items });
+      console.log({ successful: scheduleOrder });
     }
 
     return res.status(201).json({

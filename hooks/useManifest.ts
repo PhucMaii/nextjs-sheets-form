@@ -134,14 +134,22 @@ const useManifest = (
     );
 
     for (const itemRoute in groupItemRoutes) {
+      // const KONGNAMUL_SOYA_10LB =
+      //   groupItemRoutes[itemRoute].find(
+      //     (item: IItem) => item.name === 'KONGNAMUL - SOYA 10 LB',
+      //   ) || 0;
+      // const KONGNAMUL_SOYA_5LB =
+      //   groupItemRoutes[itemRoute].find((item: IItem) =>
+      //     item.name.includes('KONGNAMUL - SOYA 5 LB'),
+      //   ) || 0;
+
       const manifestItem = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem) => {
-          const { name, subCategory } = item;
+          const { name } = item;
 
-          let itemKey = name;
-          if (subCategory) {
-            itemKey = `${name}-${subCategory.name}`;
-          }
+          const itemKey = name.includes('KONGNAMUL')
+            ? name.split(' - ')[1]
+            : name;
 
           if (!acc[itemKey]) {
             acc[itemKey] = 0;
@@ -160,11 +168,9 @@ const useManifest = (
             return acc;
           }
 
-          const { subCategory } = item;
-          let itemKey = name;
-          if (subCategory) {
-            itemKey = `${name}-${subCategory.name}`;
-          }
+          const itemKey = name.includes('KONGNAMUL')
+            ? name.split(' - ')[1]
+            : name;
 
           // Beginning of new customer
           if (

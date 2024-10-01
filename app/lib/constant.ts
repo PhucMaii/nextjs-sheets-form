@@ -6,7 +6,8 @@ import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
-import MessageIcon from '@mui/icons-material/Message';
+// import MessageIcon from '@mui/icons-material/Message';
+import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
@@ -14,6 +15,8 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import PendingIcon from '@mui/icons-material/Pending';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import BlockIcon from '@mui/icons-material/Block';
+import AppBlockingIcon from '@mui/icons-material/AppBlocking';
+import SellIcon from '@mui/icons-material/Sell';
 import {
   errorColor,
   infoColor,
@@ -26,8 +29,8 @@ export const mainItems = [
   'BEAN 5 LB',
   'BASIL',
   'BEAN 24X1 LB',
-  'SOYA 10 LBS',
-  'SOYA 5 LBS',
+  'SOYA 10 LB',
+  'SOYA 5 LB',
   'SOYA 24X1 LB',
   'WHITE MUSHROOM',
   'JUMBO EGG',
@@ -87,7 +90,61 @@ export const days = [
   'Saturday',
 ];
 
-export const limitOrderHour = 8;
+export const limitOrderHour = 7;
+
+export const adminTabs = {
+  Admin: [
+    {
+      name: 'Overview',
+      icon: DashboardIcon,
+      path: '/admin/overview',
+    },
+    {
+      name: 'Orders',
+      icon: ReceiptLongIcon,
+      path: '/admin/orders',
+    },
+    {
+      name: 'Items',
+      icon: SellIcon,
+      path: '/admin/items',
+    },
+    {
+      name: 'Reports',
+      icon: ArticleIcon,
+      path: '/admin/reports',
+    },
+    {
+      name: 'Settings',
+      icon: SettingsIcon,
+      path: '/admin/settings',
+    },
+  ],
+  Manage: [
+    {
+      name: 'Clients',
+      icon: PeopleIcon,
+      path: '/admin/clients',
+    },
+    {
+      name: 'Drivers',
+      icon: LocalShippingIcon,
+      path: '/admin/drivers',
+    },
+  ],
+  Others: [
+    {
+      name: 'Blocking',
+      icon: AppBlockingIcon,
+      path: '/admin/blocking',
+    },
+    {
+      name: 'Pre Orders',
+      icon: PendingActionsIcon,
+      path: '/admin/pre-orders',
+    },
+  ],
+};
 
 export const tabs = [
   {
@@ -114,6 +171,11 @@ export const tabs = [
     name: 'Clients',
     icon: PeopleIcon,
     path: '/admin/clients',
+  },
+  {
+    name: 'Blocking',
+    icon: AppBlockingIcon,
+    path: '/admin/blocking',
   },
   {
     name: 'Pre Orders',
@@ -162,16 +224,23 @@ export const driverTabs = [
     path: '/driver/place-order',
   },
   {
-    name: 'Message',
-    icon: MessageIcon,
-    path: '/driver/messages',
+    name: 'Blocking',
+    icon: AppBlockingIcon,
+    path: '/driver/blocking',
   },
+  // {
+  //   name: 'Message',
+  //   icon: MessageIcon,
+  //   path: '/driver/message',
+  // },
   {
     name: 'Account',
     icon: AccountCircleIcon,
     path: '/driver/account',
   },
 ];
+
+export const settingsTabs = ['General', 'Announcement'];
 
 export const statusTabs = [
   {
@@ -217,4 +286,11 @@ export const paymentTypes = [
   PAYMENT_TYPE.COD,
   PAYMENT_TYPE.MONTHLY,
   PAYMENT_TYPE.WCOD,
+  PAYMENT_TYPE.WCOD_MON,
+  PAYMENT_TYPE.WCOD_TUE,
+  PAYMENT_TYPE.WCOD_WED,
+  PAYMENT_TYPE.WCOD_THU,
+  PAYMENT_TYPE.WCOD_FRI,
+  PAYMENT_TYPE.WCOD_SAT,
+  PAYMENT_TYPE.WCOD_SUN,
 ];

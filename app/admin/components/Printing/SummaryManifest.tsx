@@ -11,14 +11,16 @@ import {
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import './print.css';
+import { sortedItemKeys } from '@/app/utils/array';
 
 interface PropTypes {
   manifest: any;
   routes: IRoutes[];
+  currentDate: string;
 }
 
 export const SummaryManifest = forwardRef(
-  ({ manifest, routes }: PropTypes, ref: any) => {
+  ({ manifest, routes, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
       // return;
       return (
@@ -29,13 +31,6 @@ export const SummaryManifest = forwardRef(
         </div>
       );
     }
-
-    // Display the beansprouts first then other items
-    const customSortKeys = (keys: string[]): any => {
-      const mainKeys = keys.filter((key) => mainItems.includes(key));
-      const otherKeys = keys.filter((key) => !mainItems.includes(key));
-      return [...mainKeys, ...otherKeys];
-    };
 
     return (
       <div ref={ref}>
@@ -50,8 +45,9 @@ export const SummaryManifest = forwardRef(
                 return null;
               }
 
-              const sortedItems: any = customSortKeys(
+              const sortedItems: any = sortedItemKeys(
                 Object.keys(manifest[routeId].summary),
+                mainItems,
               );
 
               return (
@@ -59,9 +55,17 @@ export const SummaryManifest = forwardRef(
                   <Typography variant="h4" textAlign="center" m={2}>
                     {targetRoute.name}
                   </Typography>
-                  <Typography variant="h5" m={2}>
-                    Driver: {targetRoute.driver?.name}
-                  </Typography>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    m={2}
+                  >
+                    <Typography variant="h5" m={2}>
+                      Driver: {targetRoute.driver?.name}
+                    </Typography>
+                    <Typography>{currentDate}</Typography>
+                  </Box>
 
                   {/* Manifest Table */}
                   <Table>

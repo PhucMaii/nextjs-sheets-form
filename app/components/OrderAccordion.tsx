@@ -2,6 +2,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -14,7 +15,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 import StatusText, { COLOR_TYPE } from '../admin/components/StatusText';
 import { Item, Order } from '../admin/orders/page';
 import { ORDER_STATUS } from '../utils/enum';
@@ -23,7 +24,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { errorColor } from '../../theme/color';
 import EditOrder from './Modals/EditOrder';
-import { Notification } from '../utils/type';
 import DeleteModal from './Modals/DeleteModal';
 import SellIcon from '@mui/icons-material/Sell';
 
@@ -31,13 +31,13 @@ interface PropTypes {
   handleDeleteOrder?: (orderId: number) => void;
   handleUpdateOrderUI?: (updatedOrder: Order) => void;
   order: Order;
-  setNotification?: Dispatch<SetStateAction<Notification>>;
+  showNotification?: (type: AlertColor, message: string) => void;
   isEdit?: boolean;
 }
 
 export default function OrderAccordion({
   order,
-  setNotification,
+  showNotification,
   handleDeleteOrder,
   handleUpdateOrderUI,
   isEdit,
@@ -65,13 +65,13 @@ export default function OrderAccordion({
       {isEdit &&
         handleUpdateOrderUI &&
         handleDeleteOrder &&
-        setNotification && (
+        showNotification && (
           <>
             <EditOrder
               open={isEditOrderOpen}
               onClose={() => setIsEditOrderOpen(false)}
               order={order}
-              setNotification={setNotification}
+              showNotification={showNotification}
               handleUpdateOrderUI={handleUpdateOrderUI}
             />
             <DeleteModal

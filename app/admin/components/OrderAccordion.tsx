@@ -1,14 +1,7 @@
 'use client';
-import React, {
-  Dispatch,
-  SetStateAction,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AlertColor,
   Box,
   Button,
   Checkbox,
@@ -25,13 +18,12 @@ import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
-import { Notification, OrderedItems } from '@/app/utils/type';
+import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
 import EditPrice from './Modals/edit/EditPrice';
 import StatusText, { COLOR_TYPE } from './StatusText';
 import { ComponentToPrint } from './Printing/ComponentToPrint';
-import { SubCategory } from '@prisma/client';
 import { ShadowSection } from '../reports/styled';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
@@ -39,7 +31,7 @@ import RememberMeIcon from '@mui/icons-material/RememberMe';
 
 interface PropTypes {
   order: Order;
-  setNotification: Dispatch<SetStateAction<Notification>>;
+  showNotification: (type: AlertColor, message: string) => void;
   handleUpdateStatusUI: (targetOrder: Order) => void;
   handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
   handleUpdatePriceUI: (
@@ -49,7 +41,6 @@ interface PropTypes {
   ) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
-  subcategories: SubCategory[];
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
@@ -60,13 +51,12 @@ interface PropTypes {
 
 const OrderAccordion = ({
   order,
-  setNotification,
+  showNotification,
   handleUpdateStatusUI,
   handleUpdateDateUI,
   handleUpdatePriceUI,
   handleSelectOrder,
   selectedOrders,
-  subcategories,
   handleUpdateItem,
   mutateOrders,
 }: PropTypes) => {
@@ -134,11 +124,7 @@ const OrderAccordion = ({
 
       // Update Real Data
       mutateOrders();
-      setNotification({
-        on: true,
-        type: 'success',
-        message: response.data.message,
-      });
+      showNotification('success', response.data.message);
       setIsMarkButtonDisabled(false);
     } catch (error) {
       console.log('Fail to mark as completed: ', error);
@@ -255,7 +241,7 @@ const OrderAccordion = ({
         open={isEditDateOpen}
         onClose={() => setIsEditDateOpen(false)}
         order={order}
-        setNotification={setNotification}
+        showNotification={showNotification}
         handleUpdateDateUI={handleUpdateDateUI}
         mutateOrders={mutateOrders}
       />
@@ -263,11 +249,10 @@ const OrderAccordion = ({
         open={isOpenEditPrice}
         onClose={() => setIsOpenEditPrice(false)}
         items={order.items}
-        setNotification={setNotification}
+        showNotification={showNotification}
         order={order}
         handleUpdatePriceUI={handleUpdatePriceUI}
         mutateOrders={mutateOrders}
-        subcategories={subcategories}
       />
       <OrderDetails
         open={isOpenDetails}

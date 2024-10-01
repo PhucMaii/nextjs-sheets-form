@@ -1,8 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import NotificationPopup from '../components/Notification';
-import { Notification } from '@/app/utils/type';
 import { Box, Button, Grid, Skeleton, Switch, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
@@ -20,36 +19,41 @@ import { SWRFetchData } from '@/app/utils/db';
 import DebtCustomers from '../components/Printing/DebtCustomers';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
+import useNotification from '@/hooks/useNotification';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [isFetching, setIsFetching] = useState<boolean>(true);
-  const [notification, setNotification] = useState<Notification>({
-    on: false,
-    type: 'info',
-    message: '',
-  });
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
 
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
+  const { showNotification, NotificationComp } = useNotification();
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();
 
   // Data Fetching
-  const [overview] = SWRFetchData(
+  const [overview, _mutateOverview, isValidating] = SWRFetchData(
     `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   useEffect(() => {
     if (overview && dateRange) {
-      // fetchOverviewData();
       initializeOverviewData();
     }
   }, [overview, dateRange]);
+
+  // Handle loading
+  useEffect(() => {
+    if (!overview && isValidating) {
+      setIsFetching(true);
+    } else {
+      setIsFetching(false);
+    }
+  }, [dateRange, overview]);
 
   const initializeOverviewData = () => {
     const overviewFetchedData = overview.data;
@@ -57,36 +61,11 @@ export default function Overview() {
     setRevenueData(overviewFetchedData.reports);
     setBeansproutsData(overviewFetchedData.beansprouts);
     setCustomersInDebt(overviewFetchedData.customersInDebt);
-    setIsFetching(false);
   };
 
   const handlePrintCustomersInDebt = useReactToPrint({
     content: () => printDetbCustomersRef.current,
   });
-
-  // const fetchOverviewData = async () => {
-  //   try {
-  //     setIsFetching(true);
-  //     const returnData = await fetchData(
-  //       `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-  //       setNotification,
-  //     );
-
-  //     setOverviewData(returnData.overviewData);
-  //     setRevenueData(returnData.reports);
-  //     setBeansproutsData(returnData.beansprouts);
-  //     setCustomersInDebt(returnData.customersInDebt);
-  //     setIsFetching(false);
-  //   } catch (error: any) {
-  //     console.log('There was an error: ', error);
-  //     setNotification({
-  //       on: true,
-  //       type: 'error',
-  //       message: error.response.data.error,
-  //     });
-  //     setIsFetching(false);
-  //   }
-  // };
 
   return (
     <Sidebar>
@@ -97,10 +76,7 @@ export default function Overview() {
         />
       </div>
       <LoadingModal open={isFetching} />
-      <NotificationPopup
-        notification={notification}
-        onClose={() => setNotification({ ...notification, on: false })}
-      />
+      {NotificationComp}
       <Grid container columnSpacing={2} alignItems="center" rowGap={2}>
         <Grid item xs={12} textAlign="right">
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
@@ -178,7 +154,11 @@ export default function Overview() {
             </Typography>
             <Typography variant="subtitle2">Delivered Items</Typography>
           </Box>
-          <ManifestTable manifest={overviewData?.manifest || null} />
+          <ManifestTable
+            isMinify={isMinify}
+            manifest={overviewData?.manifest || null}
+            isAdmin
+          />
         </Grid>
         <Grid item xs={12}>
           <Box
