@@ -84,33 +84,6 @@ export default function AddItem({
               type="number"
             />
           </Grid>
-          {/* <Grid item xs={12} md={6}>
-            <Typography variant="h6">Subcategory:</Typography>
-          </Grid> */}
-          {/* <Grid item xs={12} md={6}>
-            <Select
-              fullWidth
-              disabled={!newItem.name.toLowerCase().includes('bean')}
-              value={newItem?.subCategoryId}
-              onChange={(e: any) =>
-                setNewItem({
-                  ...newItem,
-                  subCategoryId: +e.target.value,
-                })
-              }
-            >
-              {subCategories &&
-                [...subCategories, { name: 'N/A', id: 0 }].map(
-                  (subCategory: SubCategory | any) => {
-                    return (
-                      <MenuItem value={subCategory.id} key={subCategory.id}>
-                        {subCategory.name}
-                      </MenuItem>
-                    );
-                  },
-                )}
-            </Select>
-          </Grid> */}
         </Grid>
       </BoxModal>
     </Modal>
