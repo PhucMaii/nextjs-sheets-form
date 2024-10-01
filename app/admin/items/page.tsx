@@ -304,10 +304,6 @@ export default function ItemPage() {
 
   return (
     <Sidebar noMargin>
-  /**
-   * Switch the current category to the new category.
-   * @param newCategory The new category.
-   */
       <AddItem
         open={isAddItem}
         onClose={() => setIsAddItem(false)}
