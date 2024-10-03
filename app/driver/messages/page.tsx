@@ -1,12 +1,26 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Grid, IconButton, Typography } from '@mui/material';
 import MessageRoomCard from '../components/MessageRoomCard';
 import AddIcon from '@mui/icons-material/Add';
+import AddRoom from '../components/Modals/AddRoom';
+import useNotification from '@/hooks/useNotification';
 
 export default function MessagesPage() {
+  const [isOpenAddRoom, setIsOpenAddRoom] = useState<boolean>(false);
+
+  const {showNotification, NotificationComp} = useNotification();
+
   return (
     <Sidebar>
+      {NotificationComp}
+      <AddRoom 
+        showNotification={showNotification} 
+        open={isOpenAddRoom} 
+        onClose={() => setIsOpenAddRoom(false)} 
+      />
       <Grid container alignItems="center">
         <Grid item xs={4}></Grid>
         <Grid item xs={4} textAlign="center">
@@ -15,7 +29,7 @@ export default function MessagesPage() {
           </Typography>
         </Grid>
         <Grid item xs={4} textAlign="right">
-          <IconButton color="primary">
+          <IconButton onClick={() => setIsOpenAddRoom(true)} color="primary">
             <AddIcon fontSize="large" />
           </IconButton>
         </Grid>

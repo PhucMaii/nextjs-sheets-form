@@ -6,7 +6,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
-// import MessageIcon from '@mui/icons-material/Message';
+import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import { ORDER_STATUS, ORDER_TYPE, PAYMENT_TYPE } from '../utils/enum';
@@ -177,6 +177,7 @@ export const tabs = [
     icon: AppBlockingIcon,
     path: '/admin/blocking',
   },
+  
   {
     name: 'Pre Orders',
     icon: PendingActionsIcon,
@@ -228,11 +229,11 @@ export const driverTabs = [
     icon: AppBlockingIcon,
     path: '/driver/blocking',
   },
-  // {
-  //   name: 'Message',
-  //   icon: MessageIcon,
-  //   path: '/driver/message',
-  // },
+  {
+    name: 'Message',
+    icon: MessageIcon,
+    path: '/driver/messages',
+  },
   {
     name: 'Account',
     icon: AccountCircleIcon,

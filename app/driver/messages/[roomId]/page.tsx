@@ -25,7 +25,7 @@ export default function ChatRoomPage() {
   const router = useRouter();
 
   return (
-    <Box sx={{overflow: 'hidden'}}>
+    <Box sx={{overflow: 'hidden', cursor: 'pointer'}}>
       <Grid
         container
         alignItems="center"
