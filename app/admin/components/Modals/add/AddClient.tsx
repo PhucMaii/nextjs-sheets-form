@@ -23,6 +23,7 @@ import { UserType } from '@/app/utils/type';
 import ModalHead from '@/app/lib/ModalHead';
 import AddCategory from './AddCategory';
 import AddIcon from '@mui/icons-material/Add';
+import moment from 'moment';
 
 interface PropTypes extends ModalProps {
   categories: Category[];
@@ -107,9 +108,15 @@ export default function AddClient({
       setIsAdding(true);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { category, ...submittedData } = newClient;
+
+      const currentDate = new Date();
+      const dateString = moment(currentDate).format('YYYY-MM-DD');
+      const timeString = moment(currentDate).format('HH:mm:ss');
+      
       const response = await axios.post(API_URL.CLIENTS, {
         ...submittedData,
         deliveryAddress: deliveryAddress.description,
+        createdAt: `${timeString} ${dateString}`
       });
 
       if (response.data.error) {

@@ -13,6 +13,7 @@ interface BodyTypes {
   categoryId: number;
   // subCategoryId: number;
   preference: any;
+  createdAt: string;
 }
 
 const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
@@ -29,6 +30,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       categoryId,
       // subCategoryId,
       preference,
+      createdAt
     } = req.body as BodyTypes;
 
     const existingClientId = await prisma.user.findUnique({
@@ -59,6 +61,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         password: newPassword,
         deliveryAddressLat: addresss.latitude,
         deliveryAddressLng: addresss.longitude,
+        createdAt,
       },
     });
 
