@@ -61,3 +61,9 @@ export enum FLAG_ORDER_TYPE {
   ALREADY_ORDER = 'already order',
   VACATION_ORDER = 'vacation order',
 }
+
+export enum FILTER_TYPE {
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  YEARLY = 'yearly',
+}

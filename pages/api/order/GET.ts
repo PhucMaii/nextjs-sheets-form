@@ -38,7 +38,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const formattedStartDate = new Date(startDate);
     const formattedEndDate = new Date(endDate);
 
-    formattedEndDate.setDate(formattedEndDate.getDate() + 1);
+    // formattedEndDate.setDate(formattedEndDate.getDate() + 1);
 
     const dateList = generateListOfDateString(
       formattedStartDate,

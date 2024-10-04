@@ -98,8 +98,8 @@ export default function ReportPage() {
     !clientValue
       ? ''
       : clientValue?.clientName === 'All Clients'
-        ? `${API_URL.CLIENTS}/orders?deliveryDate=${datePicker}`
-        : `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
+        ? `${API_URL.ADMIN}/clients/orders?deliveryDate=${datePicker}`
+        : `${API_URL.ADMIN}/clients/orders?userId=${clientValue?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
   const [routes, mutateRoutes] = SWRFetchData(
     `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,

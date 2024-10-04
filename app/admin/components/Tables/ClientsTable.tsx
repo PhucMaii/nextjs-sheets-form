@@ -34,6 +34,7 @@ interface PropTypes {
   handleSelectClient: (e: any, targetClient: UserType) => void;
   handleSelectAll: () => void;
   mutateClients: any;
+  handleDirectToDetails: any;
 }
 
 const ClientsTable = ({
@@ -46,6 +47,7 @@ const ClientsTable = ({
   handleSelectClient,
   handleSelectAll,
   mutateClients,
+  handleDirectToDetails,
 }: PropTypes) => {
   const windowDimensions = useWindowDimensions();
 
@@ -198,6 +200,7 @@ const ClientsTable = ({
           aria-checked={isClientSelected}
           selected={isClientSelected}
           sx={{ cursor: 'pointer' }}
+          onClick={() => handleDirectToDetails(item)}
           {...props}
         />
       );

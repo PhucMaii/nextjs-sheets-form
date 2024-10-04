@@ -9,7 +9,7 @@ export const DynamicApexCharts = dynamic(() => import('react-apexcharts'), {
 interface IProps {
   timeSeries: string[]; // list of delivery date
   thisMonthData: number[];
-  lastMonthData: number[];
+  lastMonthData?: number[];
 }
 
 export default function AreaChart({
@@ -22,11 +22,15 @@ export default function AreaChart({
       name: 'Current Month',
       data: thisMonthData,
     },
-    {
+  ];
+
+  if (lastMonthData) {
+    series.push({
       name: 'Last Month',
       data: lastMonthData,
-    },
-  ];
+    });
+  }
+  
   const options: ApexOptions = {
     chart: {
       height: 350,

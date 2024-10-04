@@ -46,7 +46,6 @@ export default function ManifestTable({ manifest, isMinify, isAdmin }: IProps) {
     setPage(newPage);
   };
 
-  console.log(manifest, 'manifest');
   return (
     <Paper elevation={0}>
       <Table>

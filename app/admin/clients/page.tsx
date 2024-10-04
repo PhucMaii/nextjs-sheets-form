@@ -34,6 +34,7 @@ import SingleFieldUpdate, {
 import AddClient from '../components/Modals/add/AddClient';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
+import ClientDetails from '../components/Clients/ClientDetails';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -52,6 +53,7 @@ export default function ClientsPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isAddClientOpen, setIsAddClientOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [selectedDetailsClient, setSelectedDetailedClient] = useState<any>(null);
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
@@ -86,6 +88,10 @@ export default function ClientsPage() {
       setClientList(baseClientList);
     }
   }, [debouncedKeywords, baseClientList]);
+
+  const directToClientDetails = (clientData: any) => {
+    setSelectedDetailedClient(clientData);
+  };
 
   const numberOfUserUsingApp = useCallback(() => {
     const totalUserUsingApp = baseClientList.filter((client: UserType) => {
@@ -305,6 +311,17 @@ export default function ClientsPage() {
     </Box>
   );
 
+  if (selectedDetailsClient) {
+    return (
+      <Sidebar noMargin>
+        <ClientDetails
+          clientData={selectedDetailsClient}
+          onClose={() => setSelectedDetailedClient(null)}
+        />
+      </Sidebar>
+    );
+  }
+
   if (isFetching) {
     return (
       <Sidebar>
@@ -404,6 +421,7 @@ export default function ClientsPage() {
             handleSelectAll={handleSelectAll}
             // subCategories={subCategories?.data || []}
             mutateClients={mutateClients}
+            handleDirectToDetails={directToClientDetails}
           />
         ) : (
           <ErrorComponent errorText="No User Found" />
