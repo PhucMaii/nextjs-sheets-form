@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material';
 import React, { useMemo } from 'react';
-import OverviewCard from './OverviewCard/OverviewCard';
+import OverviewCard from '../OverviewCard/OverviewCard';
 import { primary } from '@/theme/color';
 import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
@@ -68,8 +68,8 @@ export default function ClientOrderOverview({clientOrders, startDate, endDate}: 
 
   return (
     <Grid container spacing={2}>
-        <Grid item xs={6} md={3}>
-            <OverviewCard 
+        <Grid item xs={12} sm={6} md={3}>
+            <OverviewCard
                 icon={<ReceiptLongIcon fontSize='large' color={'primary'}/>}
                 text="Average Orders"
                 value={averageOrders}
@@ -77,7 +77,7 @@ export default function ClientOrderOverview({clientOrders, startDate, endDate}: 
                 textColor={primary.main}
             />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
             <OverviewCard 
                 icon={<PriceChangeIcon fontSize='large' color={'primary'}/>}
                 text="Average Spend"
@@ -86,7 +86,7 @@ export default function ClientOrderOverview({clientOrders, startDate, endDate}: 
                 textColor={primary.main}
             />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
             <OverviewCard 
                 icon={<PaidIcon fontSize='large' color={'primary'}/>}
                 text="Paid Amount"
@@ -95,7 +95,7 @@ export default function ClientOrderOverview({clientOrders, startDate, endDate}: 
                 textColor={primary.main}
             />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
             <OverviewCard 
                 icon={<MoneyOffIcon fontSize='large' color={'primary'}/>}
                 text="Unpaid Amount"

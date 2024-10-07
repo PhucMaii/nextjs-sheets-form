@@ -1,6 +1,6 @@
 import { Box, Grid } from '@mui/material'
 import React, { useMemo } from 'react'
-import ClientOrderOverview from '../ClientOrderOverview'
+import ClientOrderOverview from './ClientOrderOverview'
 import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date'
 import { generateListOfDateString } from '@/app/utils/time'
 import AreaChart from '../Charts/AreaChart'
