@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -9,6 +9,7 @@ import {
   Fab,
   FormControlLabel,
   Grid,
+  IconButton,
   Menu,
   MenuItem,
   Pagination,
@@ -21,13 +22,14 @@ import {
   API_URL,
   FLAG_ORDER_TYPE,
   ORDER_STATUS,
+  PAYMENT_TYPE,
   USER_ROLE,
 } from '../../utils/enum';
-import axios from 'axios';
+import axios, { formToJSON } from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { IRoutes, OrderedItems, UserType } from '@/app/utils/type';
-import { YYYYMMDDFormat } from '@/app/utils/time';
+import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
 import AddOrder from '../components/Modals/add/AddOrder';
@@ -46,7 +48,8 @@ import { useReactToPrint } from 'react-to-print';
 import { SWRFetchData } from '@/app/utils/db';
 import { getSameDateLastWeek } from '@/pages/api/utils/date';
 import { UserRoute } from '@prisma/client';
-import { blueGrey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
+import TuneIcon from '@mui/icons-material/Tune';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 
@@ -97,14 +100,16 @@ export default function Orders() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
+  const [filterAnchor, setFilterAnchor] = useState<null | HTMLElement>(null);
+  const openFilter = Boolean(filterAnchor);
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [currentRoute, setCurrentRoute] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  // const [date, setDate] = useState(() => generateRecommendDate());
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.NONE,
   );
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
+  const [filterOptions, setFilterOptions] = useState<PAYMENT_TYPE[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
@@ -122,6 +127,11 @@ export default function Orders() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const { date, SelectDate } = useSelectDate();
   const { showNotification, NotificationComp } = useNotification();
+
+  const wcodDay: any = useMemo(() => {
+    const day = getWCODDay(date);
+    return day;
+  }, [date]);
 
   // Data Fetching
   const [orders, mutate, isValidating] = SWRFetchData(
@@ -177,11 +187,6 @@ export default function Orders() {
     }
   }, [baseOrderData]);
 
-  // Update order data based on route
-  useEffect(() => {
-    generateOrderData(baseOrderData);
-  }, [currentRoute]);
-
   // Subscribe admin whenever they logged in
   useEffect(() => {
     pusherClient.subscribe('admin');
@@ -230,7 +235,7 @@ export default function Orders() {
   // whenever current page change and not in searching mode, then update the display data
   useEffect(() => {
     generateOrderData();
-  }, [currentPage]);
+  }, [currentRoute, currentPage, filterOptions]);
 
   useEffect(() => {
     setCurrentStatus(statusTabs[tabIndex].value);
@@ -361,9 +366,12 @@ export default function Orders() {
     // If there is route selected -> filter order based on that route
     let orders = [...orderList];
     if (currentRoute > 0) {
-      orders = filterOrderByRoute(orderList);
+      orders = filterOrderByRoute(orders);
     }
 
+    if (filterOptions.length > 0) {
+      orders = filterByPaymentType(orders, filterOptions);
+    }
     const newNumberOfPages = Math.ceil(orders.length / orderPerPage);
     setPages(newNumberOfPages);
     setOrderData(
@@ -536,6 +544,21 @@ export default function Orders() {
     });
 
     setBaseOrderData(newOrders);
+  };
+
+  const filterByPaymentType = (orderList: Order[], type: PAYMENT_TYPE[]) => {
+    setFilterOptions(type);
+    if (!orderList || orderList.length === 0 || type.length === 0) {
+      generateOrderData();
+      return baseOrderData;
+    }
+
+    const newOrders = orderList.filter((order: Order) => {
+      console.log(order.user.preference.paymentType, 'payment type', type);
+      return type.includes(order.user.preference.paymentType);
+    });
+
+    return newOrders;
   };
 
   const actionDropdown = (
@@ -714,7 +737,66 @@ export default function Orders() {
           />
         </Grid>
         <Grid item xs={6} textAlign="right">
-          {actionDropdown}
+          <Box display="flex" gap={1}>
+            {actionDropdown}
+            <Box gap={2}>
+              <IconButton onClick={(e) => setFilterAnchor(e.currentTarget)}>
+                <TuneIcon />
+              </IconButton>
+
+              <Menu
+                id="filter-menu"
+                anchorEl={filterAnchor}
+                open={openFilter}
+                onClose={() => setFilterAnchor(null)}
+                MenuListProps={{
+                  'aria-labelledby': 'basic-button',
+                }}
+              >
+                <MenuItem
+                  style={{
+                    backgroundColor:
+                      filterOptions.length === 0 ? grey[200] : '#ffffff',
+                  }}
+                  onClick={() => setFilterOptions([])}
+                >
+                  <Typography>All</Typography>
+                </MenuItem>
+                <MenuItem
+                  style={{
+                    backgroundColor:
+                      filterOptions.length === 1 &&
+                      filterOptions[0] === PAYMENT_TYPE.COD
+                        ? grey[200]
+                        : '#ffffff',
+                  }}
+                  onClick={() => setFilterOptions([PAYMENT_TYPE.COD])}
+                >
+                  <Typography>COD</Typography>
+                </MenuItem>
+                <MenuItem
+                  style={{
+                    backgroundColor:
+                      filterOptions.length === 1 && filterOptions[0] === wcodDay
+                        ? grey[200]
+                        : '#ffffff',
+                  }}
+                  onClick={() => setFilterOptions([wcodDay])}
+                >
+                  <Typography>{wcodDay}</Typography>
+                </MenuItem>
+                <MenuItem
+                  style={{
+                    backgroundColor:
+                      filterOptions.length === 2 ? grey[200] : '#ffffff',
+                  }}
+                  onClick={() => setFilterOptions([PAYMENT_TYPE.COD, wcodDay])}
+                >
+                  <Typography>COD + {wcodDay}</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
+          </Box>
         </Grid>
       </Grid>
     </>

@@ -112,11 +112,11 @@ export default function AddClient({
       const currentDate = new Date();
       const dateString = moment(currentDate).format('YYYY-MM-DD');
       const timeString = moment(currentDate).format('HH:mm:ss');
-      
+
       const response = await axios.post(API_URL.CLIENTS, {
         ...submittedData,
         deliveryAddress: deliveryAddress.description,
-        createdAt: `${timeString} ${dateString}`
+        createdAt: `${timeString} ${dateString}`,
       });
 
       if (response.data.error) {

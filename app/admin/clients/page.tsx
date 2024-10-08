@@ -53,7 +53,8 @@ export default function ClientsPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isAddClientOpen, setIsAddClientOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [selectedDetailsClient, setSelectedDetailedClient] = useState<any>(null);
+  const [selectedDetailsClient, setSelectedDetailedClient] =
+    useState<any>(null);
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 

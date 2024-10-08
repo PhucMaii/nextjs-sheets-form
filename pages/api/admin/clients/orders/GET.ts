@@ -13,12 +13,12 @@ interface RequestQuery {
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { userId, deliveryDate, startDate, endDate } = req.query as RequestQuery;
+    const { userId, deliveryDate, startDate, endDate } =
+      req.query as RequestQuery;
 
     // Check if there is no userId, then fetch all orders with specific delivery date
     let userOrders: any = [];
     if (userId && !isNaN(Number(userId))) {
-
       if (!startDate || !endDate) {
         return res.status(400).json({
           error: 'Start Date and End Date are required',
@@ -36,7 +36,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           userId: Number(userId),
           deliveryDate: {
             in: listOfDateString,
-          }
+          },
         },
         include: {
           items: true,

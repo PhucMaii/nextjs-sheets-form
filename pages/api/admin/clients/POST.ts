@@ -30,7 +30,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       categoryId,
       // subCategoryId,
       preference,
-      createdAt
+      createdAt,
     } = req.body as BodyTypes;
 
     const existingClientId = await prisma.user.findUnique({

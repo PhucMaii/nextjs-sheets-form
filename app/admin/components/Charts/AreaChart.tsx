@@ -30,7 +30,7 @@ export default function AreaChart({
       data: lastMonthData,
     });
   }
-  
+
   const options: ApexOptions = {
     chart: {
       height: 350,
