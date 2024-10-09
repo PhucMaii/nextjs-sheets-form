@@ -132,7 +132,7 @@ export default function ScheduledOrderPage() {
   }, [preOrderProgress]);
 
   useEffect(() => {
-    pusherClient.subscribe('admin-schedule-order');
+    pusherClient?.subscribe('admin-schedule-order');
 
     const handleReceiveOrder = (incomingOrder: Order) => {
       const sameIdOrder = createdOrders.some(
@@ -143,10 +143,10 @@ export default function ScheduledOrderPage() {
         setCreatedOrders((prevOrders) => [...prevOrders, incomingOrder]);
       }
     };
-    pusherClient.bind('pre-order', handleReceiveOrder);
+    pusherClient?.bind('pre-order', handleReceiveOrder);
 
     return () => {
-      pusherClient.unsubscribe('admin-schedule-order');
+      pusherClient?.unsubscribe('admin-schedule-order');
     };
   }, []);
 

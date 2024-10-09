@@ -118,7 +118,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       htmlTemplate,
     );
 
-    await pusherServer.trigger('override-order', 'incoming-order', {
+    await pusherServer?.trigger('override-order', 'incoming-order', {
       items: itemList,
       ...existingUser,
       ...newOrder,

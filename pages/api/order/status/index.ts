@@ -125,7 +125,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       htmlTemplate,
     );
 
-    await pusherServer.trigger('void-order', 'incoming-order', {
+    await pusherServer?.trigger('void-order', 'incoming-order', {
       ...existingUser,
       ...existingOrder,
       items: itemList,

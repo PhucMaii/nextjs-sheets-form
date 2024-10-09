@@ -24,7 +24,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     for (const scheduleOrder of scheduleOrderList) {
       if (scheduleOrder.totalPrice === 0) {
-        await pusherServer.trigger(
+        await pusherServer?.trigger(
           'admin-schedule-order',
           'pre-order',
           scheduleOrder,
@@ -39,7 +39,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       );
 
       if (existingOrder) {
-        await pusherServer.trigger(
+        await pusherServer?.trigger(
           'admin-schedule-order',
           'pre-order',
           existingOrder,
@@ -72,7 +72,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
 
       if (trackIndex <= unavailableRanges.length - 1) {
-        await pusherServer.trigger(
+        await pusherServer?.trigger(
           'admin-schedule-order',
           'pre-order',
           scheduleOrder,
@@ -101,7 +101,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       );
       updatedOrderList.push(newOrder);
 
-      await pusherServer.trigger('admin-schedule-order', 'pre-order', newOrder);
+      await pusherServer?.trigger('admin-schedule-order', 'pre-order', newOrder);
       console.log({ successful: scheduleOrder });
     }
 

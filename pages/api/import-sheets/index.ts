@@ -228,7 +228,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    await pusherServer.trigger('admin', 'incoming-order', {
+    await pusherServer?.trigger('admin', 'incoming-order', {
       items: itemList,
       ...existingUser,
       ...newOrder,
@@ -348,7 +348,7 @@ const overrideOrder = async (
       newNote,
     );
 
-    await pusherServer.trigger('override-order', 'incoming-order', {
+    await pusherServer?.trigger('override-order', 'incoming-order', {
       items: itemList,
       ...user,
       ...updatedOrder,

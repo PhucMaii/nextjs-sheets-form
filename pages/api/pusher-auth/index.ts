@@ -29,7 +29,7 @@ export default async function handler(
   };
 
   try {
-    const auth = await pusherServer.authorizeChannel(
+    const auth = await pusherServer?.authorizeChannel(
       socketId,
       channelName,
       presenceData,

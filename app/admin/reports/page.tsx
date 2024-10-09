@@ -107,9 +107,9 @@ export default function ReportPage() {
   const [clients] = SWRFetchData(API_URL.CLIENTS);
 
   useEffect(() => {
-    pusherClient.subscribe('admin-delete-order');
+    pusherClient?.subscribe('admin-delete-order');
 
-    pusherClient.bind('delete-order', (deletedOrder: Order) => {
+    pusherClient?.bind('delete-order', (deletedOrder: Order) => {
       showNotification(
         'success',
         `Order ${deletedOrder.id} deleted successfully`,
@@ -118,7 +118,7 @@ export default function ReportPage() {
     });
 
     return () => {
-      pusherClient.unsubscribe('admin-delete-order');
+      pusherClient?.unsubscribe('admin-delete-order');
     };
   }, []);
 

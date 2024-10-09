@@ -46,18 +46,18 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
-    pusherClient.subscribe('admin');
-    pusherClient.subscribe('override-order');
-    pusherClient.subscribe('void-order');
+    pusherClient?.subscribe('admin');
+    pusherClient?.subscribe('override-order');
+    pusherClient?.subscribe('void-order');
 
-    pusherClient.bind('incoming-order', (order: Order) => {
+    pusherClient?.bind('incoming-order', (order: Order) => {
       setSingleOrder(order);
     });
 
     return () => {
-      pusherClient.unsubscribe('admin');
-      pusherClient.unsubscribe('override-order');
-      pusherClient.unsubscribe('void-order');
+      pusherClient?.unsubscribe('admin');
+      pusherClient?.unsubscribe('override-order');
+      pusherClient?.unsubscribe('void-order');
     };
   }, []);
 

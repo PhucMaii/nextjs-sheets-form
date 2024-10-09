@@ -37,7 +37,7 @@ export default async function DELETE(
           },
         });
 
-        await pusherServer.trigger(
+        await pusherServer?.trigger(
           'admin-delete-order',
           'delete-order',
           deletedOrder,
