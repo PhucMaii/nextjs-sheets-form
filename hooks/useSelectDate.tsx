@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time'; // Assuming this utility exists
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-const useSelectDate = (providedDate?: string) => {
+const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
   const [date, setDate] = useState(providedDate || generateRecommendDate());
 
   const handleDateChange = (e: any): void => {
@@ -15,7 +15,7 @@ const useSelectDate = (providedDate?: string) => {
   };
 
   const SelectDate = (
-    <FormControl>
+    <FormControl fullWidth={fullWidth}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
           label="Date Filter"
@@ -29,7 +29,7 @@ const useSelectDate = (providedDate?: string) => {
     </FormControl>
   );
 
-  return { date, SelectDate };
+  return { date, SelectDate } as { date: string; SelectDate: JSX.Element };
 };
 
 export default useSelectDate;

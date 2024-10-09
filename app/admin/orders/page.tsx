@@ -52,6 +52,7 @@ import { blueGrey, grey } from '@mui/material/colors';
 import TuneIcon from '@mui/icons-material/Tune';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
+import { filterByRoute } from '@/app/utils/array';
 
 interface Category {
   id: number;
@@ -338,14 +339,7 @@ export default function Orders() {
     );
 
     // Get clients from that route -> get orders
-    const filteredOrders = targetRoute.clients
-      .map((client: UserRoute) => {
-        const clientOrder = orders.find(
-          (order: Order) => order.userId === client.userId,
-        );
-        return clientOrder;
-      })
-      .filter((order: Order) => order !== undefined);
+    const filteredOrders: any = filterByRoute(orders, targetRoute);
 
     setRouteOrders(filteredOrders);
     return filteredOrders;
