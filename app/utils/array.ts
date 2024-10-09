@@ -1,3 +1,4 @@
+import { UserRoute } from '@prisma/client';
 import { Order } from '../admin/orders/page';
 import { fetchWcodOrders } from './db';
 import { ORDER_STATUS, PAYMENT_TYPE } from './enum';
@@ -134,4 +135,18 @@ export const getCODData = async (routeOrders: Order[], date: string) => {
     collectedCODOrders,
     uncollectedCODOrders,
   };
+};
+
+export const filterByRoute = (orders: Order[], currentRoute: any) => {
+  // Get clients from that route -> get orders
+  const filteredOrders = currentRoute?.clients
+    .map((client: UserRoute) => {
+      const clientOrder = orders.find(
+        (order: Order) => order.userId === client.userId,
+      );
+      return clientOrder;
+    })
+    .filter((order: Order) => order !== undefined);
+
+  return filteredOrders;
 };
