@@ -23,7 +23,8 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import WCODInfo from './Modals/WCODInfo';
 import { blueGrey } from '@mui/material/colors';
 import AddIcon from '@mui/icons-material/Add';
-import AddTempCOD from './Modals/add/AddTempCOD';
+import AddTempCOD from './Modals/AddTempCod/AddTempCOD';
+import ReplayIcon from '@mui/icons-material/Replay';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -58,7 +59,7 @@ export default function OrderOverview({
 
   const handleGetCODData = async () => {
     const analysisCODOrders = await getCODData(orderData, currentDate);
-    setCodData(analysisCODOrders);
+    setCodData({...analysisCODOrders, cachedData: analysisCODOrders});
   };
 
   const todayTotalGross = useMemo(() => {
@@ -333,12 +334,20 @@ export default function OrderOverview({
               <Box display="flex" gap={1} alignItems="center">
                 <AttachMoneyIcon />
                 <Typography variant="subtitle1">Amount</Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => setIsOpenAddTempCOD(true)}
-                >
-                  <AddIcon fontSize="small" />
-                </IconButton>
+                <Box display="flex" flexDirection="row" alignItems="center">
+                  <IconButton
+                    size="small"
+                    onClick={() => setCodData({...codData.cachedData, cachedData: codData.cachedData})}
+                  >
+                    <ReplayIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsOpenAddTempCOD(true)}
+                  >
+                    <AddIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               </Box>
               <Typography
                 variant="h4"

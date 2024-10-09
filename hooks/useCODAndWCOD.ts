@@ -29,7 +29,7 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
   };
 
   const uncollectedCODOrders = useMemo(() => {
-    const orders = [...orderList];
+    const orders = [...(orderList || [])];
 
     if (wcod) {
       orders.push(...wcod.wcodOrders);
@@ -54,7 +54,7 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
   }, [uncollectedCODOrders]);
 
   const collectedCODOrders = useMemo(() => {
-    const orders = [...orderList];
+    const orders = [...(orderList || [])];
 
     if (wcod) {
       orders.push(...wcod.wcodOrders);
@@ -78,7 +78,7 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
   }, [collectedCODOrders]);
 
   const codOrders = useMemo(() => {
-    const orders = orderList.filter((order: Order) => {
+    const orders = orderList?.filter((order: Order) => {
       return (
         (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD ||
           order?.user?.preference?.paymentType === wcodDay) &&

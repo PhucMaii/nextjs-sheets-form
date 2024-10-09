@@ -101,7 +101,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       );
       updatedOrderList.push(newOrder);
 
-      await pusherServer?.trigger('admin-schedule-order', 'pre-order', newOrder);
+      await pusherServer?.trigger(
+        'admin-schedule-order',
+        'pre-order',
+        newOrder,
+      );
       console.log({ successful: scheduleOrder });
     }
 
