@@ -13,7 +13,6 @@ import PieChart from '../components/Charts/PieChart';
 import ManifestTable from '../components/Tables/ManifestTable';
 import CustomersInDebt from '../components/Tables/CustomersInDebt';
 import LoadingModal from '../components/Modals/LoadingModal';
-import BSOverview from '../components/BSOverview';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { SWRFetchData } from '@/app/utils/db';
 import DebtCustomers from '../components/Printing/DebtCustomers';
@@ -132,20 +131,6 @@ export default function Overview() {
               sx={{ width: '100% !important', height: '390px !important' }}
             />
           )}
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <BSOverview
-            type="B.K"
-            beansproutsData={beansproutsData?.BK || null}
-            isMinify={isMinify}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <BSOverview
-            type="P.P"
-            beansproutsData={beansproutsData?.PP || null}
-            isMinify={isMinify}
-          />
         </Grid>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" my={2}>
