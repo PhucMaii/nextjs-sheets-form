@@ -548,8 +548,8 @@ export default function Orders() {
     }
 
     const newOrders = orderList.filter((order: Order) => {
-      console.log(order.user.preference.paymentType, 'payment type', type);
-      return type.includes(order.user.preference.paymentType);
+      console.log(order, 'preference is undefined');
+      return type.includes(order.user?.preference?.paymentType);
     });
 
     return newOrders;
