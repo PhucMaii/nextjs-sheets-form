@@ -93,6 +93,7 @@ export interface Order {
   preference?: any;
   createdBy?: string;
   updatedBy?: string;
+  previousUnpaidOrders?: {numberOfOrders: number, totalPrice: number};
 }
 
 const orderPerPage = 10;

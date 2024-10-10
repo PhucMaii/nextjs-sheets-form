@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -53,6 +53,36 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // Get previous unpaid cod orders
+    const previousUnpaidCodOrders = await prisma.orders.findMany({
+      where: {
+        status: {
+          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+        },
+        user: {
+          preference: {
+            paymentType: PAYMENT_TYPE.COD,
+          }
+        }
+      },
+      include: {
+        user: true,
+      }
+    });
+
+    // Use hashmap to store previous unpaid cod orders with client id is key
+    const previousUnpaidCodOrdersMap = previousUnpaidCodOrders.reduce((acc: any, order: any) => {
+      if (!acc[order.user.clientId]) {
+        acc[order.user.clientId] = {numberOfOrders: 1, totalPrice: order.totalPrice};
+        return acc;
+      }
+
+      const newTotalPrice = acc[order.user.clientId].totalPrice + order.totalPrice;
+      const newNumberOfOrders = acc[order.user.clientId].numberOfOrders + 1;
+      acc[order.user.clientId] = {numberOfOrders: newNumberOfOrders, totalPrice: newTotalPrice};
+      return acc;
+    }, {});
+
     // Format return result
     const newOrders = orders.map((order: any) => {
       const formattedItems = order.items.map((item: OrderedItems) => {
@@ -69,6 +99,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         ...order.user,
         id: order.id,
         category: order.user.category,
+        previousUnpaidOrders: previousUnpaidCodOrdersMap[order.user.clientId] ? previousUnpaidCodOrdersMap[order.user.clientId] : null,
       };
     });
 

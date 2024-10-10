@@ -8,7 +8,7 @@ import {
   warningBackground,
   warningText,
 } from '@/theme/color';
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 export enum COLOR_TYPE {
@@ -22,6 +22,7 @@ export enum COLOR_TYPE {
 interface PropTypes {
   text: string;
   type: string;
+  icon?: React.ReactNode;
 }
 
 interface TextColorType {
@@ -29,7 +30,7 @@ interface TextColorType {
   color: string;
 }
 
-export default function StatusText({ text, type }: PropTypes) {
+export default function StatusText({ text, type, icon }: PropTypes) {
   const [textColor, setTextColor] = useState<TextColorType>({
     backgroundColor: '',
     color: '',
@@ -67,17 +68,27 @@ export default function StatusText({ text, type }: PropTypes) {
   };
 
   return (
-    <Typography
-      sx={{
-        ...textColor,
-        borderRadius: 2,
-        textAlign: 'center',
-        py: '5px',
-        px: '10px',
-        width: 'fit-content',
-      }}
-    >
-      {text}
-    </Typography>
+    <Box display="flex" alignItems="center" gap={1} sx={{
+      ...textColor,
+      borderRadius: 2,
+      textAlign: 'center',
+      py: '5px',
+      px: '10px',
+      width: 'fit-content',
+    }}>
+      {icon}
+      <Typography
+        // sx={{
+        //   ...textColor,
+        //   borderRadius: 2,
+        //   textAlign: 'center',
+        //   py: '5px',
+        //   px: '10px',
+        //   width: 'fit-content',
+        // }}
+        >
+        {text}
+      </Typography>
+    </Box>
   );
 }
