@@ -83,7 +83,7 @@ export const ComponentToPrint = forwardRef(
               709 989 6000
             </Typography>
           </Box>
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 3, backgroundColor: 'black' }} />
           <Grid container alignItems="center" rowGap={2} mb={2}>
             {orderFields &&
               Object.keys(orderFields).map(
@@ -131,7 +131,7 @@ export const ComponentToPrint = forwardRef(
               </TableHead>
               <TableBody>{orderDetailsTemplate}</TableBody>
             </Table>
-            <Divider sx={{ mt: 3 }} />
+            <Divider sx={{ mt: 3, backgroundColor: 'black' }} />
             <Grid container>
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
@@ -154,7 +154,7 @@ export const ComponentToPrint = forwardRef(
             </Box>
             {order.note && (
               <Grid item xs={12}>
-                <Divider sx={{ mt: 1, mb: 3 }} />
+                <Divider sx={{ mt: 1, mb: 3, backgroundColor: 'black' }} />
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   <strong>NOTE:</strong> {order.note}
                 </Typography>
@@ -163,7 +163,7 @@ export const ComponentToPrint = forwardRef(
             {announcement?.data?.announcement && (
               <>
                 <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
+                  <Divider sx={{ my: 2, backgroundColor: 'black' }} />
                 </Grid>
                 <Grid item xs={12}>
                   <Typography
@@ -176,7 +176,7 @@ export const ComponentToPrint = forwardRef(
               </>
             )}
           </Grid>
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 3, backgroundColor: 'black' }} />
           <Typography textAlign="right">Order by: {order.createdBy}</Typography>
           {order?.updatedBy && (
             <Typography textAlign="right">

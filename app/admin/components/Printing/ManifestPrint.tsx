@@ -13,7 +13,6 @@ import React, { forwardRef } from 'react';
 import './print.css';
 import styled from 'styled-components';
 import { mainItems, productColors } from '@/app/lib/constant';
-import { grey } from '@mui/material/colors';
 import { sortedItemKeys } from '@/app/utils/array';
 
 interface PropTypes {
@@ -28,7 +27,7 @@ interface TableCellProps {
 }
 
 const BorderRightTableCell = styled(TableCell)<TableCellProps>`
-  border: 1px solid ${grey[100]};
+  border: 1px solid black;
   background-color: ${(props) =>
     props.$isSelected ? props?.$productColor : 'white'} !important;
   padding: 2px;
