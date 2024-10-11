@@ -17,6 +17,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import BlockIcon from '@mui/icons-material/Block';
 import AppBlockingIcon from '@mui/icons-material/AppBlocking';
 import SellIcon from '@mui/icons-material/Sell';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import {
   errorColor,
   infoColor,
@@ -105,9 +106,9 @@ export const adminTabs = {
       path: '/admin/orders',
     },
     {
-      name: 'Items',
-      icon: SellIcon,
-      path: '/admin/items',
+      name: 'C.O.D',
+      icon: PaymentsIcon,
+      path: '/admin/codBoard'
     },
     {
       name: 'Reports',
@@ -130,6 +131,11 @@ export const adminTabs = {
       name: 'Drivers',
       icon: LocalShippingIcon,
       path: '/admin/drivers',
+    },
+    {
+      name: 'Items',
+      icon: SellIcon,
+      path: '/admin/items',
     },
   ],
   Others: [

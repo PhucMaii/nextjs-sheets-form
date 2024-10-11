@@ -9,10 +9,11 @@ datasource db {
 }
 
 model Driver {
-  id       Int     @id @default(autoincrement())
-  name     String  @db.VarChar(255)
-  password String  @db.VarChar(255)
+  id       Int        @id @default(autoincrement())
+  name     String     @db.VarChar(255)
+  password String     @db.VarChar(255)
   routes   Route[]
+  CodBoard CodBoard[]
 }
 
 model User {
@@ -143,8 +144,23 @@ model DayRange {
 }
 
 model Announcement {
-  id    Int @id @default(autoincrement())
-  updatedBy String
-  updatedAt DateTime
+  id           Int      @id @default(autoincrement())
+  updatedBy    String
+  updatedAt    DateTime
   announcement String
+}
+
+model CodBoard {
+  id        Int    @id @default(autoincrement())
+  createdAt String
+  createdBy String
+  updatedAt String
+  updatedBy String
+  date      String
+  note      String
+  cash      Float
+  status    String
+  driverId  Int
+
+  driver Driver @relation(fields: [driverId], references: [id])
 }
