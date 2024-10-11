@@ -47,12 +47,12 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import { SWRFetchData } from '@/app/utils/db';
 import { getSameDateLastWeek } from '@/pages/api/utils/date';
-import { UserRoute } from '@prisma/client';
 import { blueGrey, grey } from '@mui/material/colors';
 import TuneIcon from '@mui/icons-material/Tune';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import { filterByRoute } from '@/app/utils/array';
+import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
 
 interface Category {
   id: number;
@@ -93,7 +93,7 @@ export interface Order {
   preference?: any;
   createdBy?: string;
   updatedBy?: string;
-  previousUnpaidOrders?: {numberOfOrders: number, totalPrice: number};
+  previousUnpaidOrders?: { numberOfOrders: number; totalPrice: number };
 }
 
 const orderPerPage = 10;
@@ -387,19 +387,19 @@ export default function Orders() {
     updatedItem: OrderedItems,
   ) => {
     try {
-      // const orderTotalPrice = calculateNewTotalPrice();
-      const response = await axios.put(`${API_URL.ORDERED_ITEMS}/single`, {
-        ...updatedItem,
-        orderId: order.id,
-        orderTotalPrice,
-      });
+      // const response = await axios.put(`${API_URL.ORDERED_ITEMS}/single`, {
+      //   ...updatedItem,
+      //   orderId: order.id,
+      //   orderTotalPrice,
+      // });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
+      // if (response.data.error) {
+      //   showNotification('error', response.data.error);
+      //   return;
+      // }
+      const response: any = await updateOrderedItems(orderTotalPrice, order, updatedItem, showNotification);
 
-      // Optimistic uupdate
+      // Optimistic update
       handleUpdateUISingleOrder(order, response.data.data);
 
       // Mutate to update real data
@@ -441,28 +441,26 @@ export default function Orders() {
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     try {
-      // setIsUpdating(true);
-      const response = await axios.put(API_URL.ORDER_STATUS, {
-        status,
-        updatedOrders: selectedOrders,
-      });
+      // const response = await axios.put(API_URL.ORDER_STATUS, {
+      //   status,
+      //   updatedOrders: selectedOrders,
+      // });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        // setIsUpdating(false);
-        return;
-      }
+      // if (response.data.error) {
+      //   showNotification('error', response.data.error);
+      //   return;
+      // }
 
+      // mutate();
+      // showNotification('success', response.data.message);
+      await updateStatus(status, selectedOrders, showNotification);
       mutate();
-      showNotification('success', response.data.message);
-      // setIsUpdating(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
       showNotification(
         'error',
         'Something went wrong: ' + error.response.data.error,
       );
-      // setIsUpdating(false);
     }
   };
 

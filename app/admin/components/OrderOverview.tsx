@@ -59,7 +59,7 @@ export default function OrderOverview({
 
   const handleGetCODData = async () => {
     const analysisCODOrders = await getCODData(orderData, currentDate);
-    setCodData({...analysisCODOrders, cachedData: analysisCODOrders});
+    setCodData({ ...analysisCODOrders, cachedData: analysisCODOrders });
   };
 
   const todayTotalGross = useMemo(() => {
@@ -337,7 +337,12 @@ export default function OrderOverview({
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <IconButton
                     size="small"
-                    onClick={() => setCodData({...codData.cachedData, cachedData: codData.cachedData})}
+                    onClick={() =>
+                      setCodData({
+                        ...codData.cachedData,
+                        cachedData: codData.cachedData,
+                      })
+                    }
                   >
                     <ReplayIcon fontSize="small" />
                   </IconButton>

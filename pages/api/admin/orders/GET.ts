@@ -62,26 +62,36 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         user: {
           preference: {
             paymentType: PAYMENT_TYPE.COD,
-          }
-        }
+          },
+        },
       },
       include: {
         user: true,
-      }
+      },
     });
 
     // Use hashmap to store previous unpaid cod orders with client id is key
-    const previousUnpaidCodOrdersMap = previousUnpaidCodOrders.reduce((acc: any, order: any) => {
-      if (!acc[order.user.clientId]) {
-        acc[order.user.clientId] = {numberOfOrders: 1, totalPrice: order.totalPrice};
-        return acc;
-      }
+    const previousUnpaidCodOrdersMap = previousUnpaidCodOrders.reduce(
+      (acc: any, order: any) => {
+        if (!acc[order.user.clientId]) {
+          acc[order.user.clientId] = {
+            numberOfOrders: 1,
+            totalPrice: order.totalPrice,
+          };
+          return acc;
+        }
 
-      const newTotalPrice = acc[order.user.clientId].totalPrice + order.totalPrice;
-      const newNumberOfOrders = acc[order.user.clientId].numberOfOrders + 1;
-      acc[order.user.clientId] = {numberOfOrders: newNumberOfOrders, totalPrice: newTotalPrice};
-      return acc;
-    }, {});
+        const newTotalPrice =
+          acc[order.user.clientId].totalPrice + order.totalPrice;
+        const newNumberOfOrders = acc[order.user.clientId].numberOfOrders + 1;
+        acc[order.user.clientId] = {
+          numberOfOrders: newNumberOfOrders,
+          totalPrice: newTotalPrice,
+        };
+        return acc;
+      },
+      {},
+    );
 
     // Format return result
     const newOrders = orders.map((order: any) => {
@@ -99,7 +109,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         ...order.user,
         id: order.id,
         category: order.user.category,
-        previousUnpaidOrders: previousUnpaidCodOrdersMap[order.user.clientId] ? previousUnpaidCodOrdersMap[order.user.clientId] : null,
+        previousUnpaidOrders: previousUnpaidCodOrdersMap[order.user.clientId]
+          ? previousUnpaidCodOrdersMap[order.user.clientId]
+          : null,
       };
     });
 

@@ -1,6 +1,7 @@
 import { AlertColor } from '@mui/material';
 import {
   Category,
+  CodBoard,
   DayRange,
   Driver,
   Route,
@@ -8,6 +9,7 @@ import {
   UserRoute,
 } from '@prisma/client';
 import { Session } from 'next-auth';
+import { Order } from '../admin/orders/page';
 
 export interface BSData {
   quantity: number;
@@ -122,4 +124,18 @@ export interface IUserRoutes extends UserRoute {
 
 export interface IDriver extends Driver {
   routes: IRoutes[];
+}
+
+type Cash = {
+  orders: Order[];
+  amount: number;
+};
+
+export interface IBoard extends CodBoard {
+  driver: IDriver;
+  uncollected: Cash;
+  collected: Cash;
+  boardClients: UserType[];
+  orders: Order[];
+  totalAmount: number;
 }

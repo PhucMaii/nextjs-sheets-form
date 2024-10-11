@@ -279,17 +279,19 @@ const OrderAccordion = ({
           </Grid>
           <Grid item xs={10} md={8}>
             <Box display="flex" alignItems="center" gap={1}>
-              {
-                order?.previousUnpaidOrders && (
-                  <StatusText
-                    text={`${order.previousUnpaidOrders.numberOfOrders} unpaid orders`}
-                    type={'warning'}
-                    icon={<WarningIcon color="warning" fontSize="small" />}
-                  />
-                ) 
-              }
+              {order?.previousUnpaidOrders && (
+                <StatusText
+                  text={`${order.previousUnpaidOrders.numberOfOrders} unpaid orders`}
+                  type={'warning'}
+                  icon={<WarningIcon color="warning" fontSize="small" />}
+                />
+              )}
               {order.isReplacement && (
-                <StatusText text={`Replacement by client `} type={'info'} icon={<InfoIcon color="info" fontSize="small" />} />
+                <StatusText
+                  text={`Replacement by client `}
+                  type={'info'}
+                  icon={<InfoIcon color="info" fontSize="small" />}
+                />
               )}
               {order.isVoid && (
                 <StatusText

@@ -70,7 +70,6 @@ export default function SelectRoute({
     return fitleredOrders;
   }, [currentRoute, orders]);
 
-
   const {
     uncollectedCODBill,
     collectedCODBill,
@@ -141,8 +140,10 @@ export default function SelectRoute({
           </TableRow>
         </TableBody>
       </Table>
-        
-      <Button fullWidth variant="contained" onClick={addTempCod} sx={{mt: 2}}>Add</Button>
+
+      <Button fullWidth variant="contained" onClick={addTempCod} sx={{ mt: 2 }}>
+        Add
+      </Button>
     </>
   );
 }

@@ -24,9 +24,17 @@ interface IProps {
   onClose: any;
 }
 
-export default function SelectOrder({ orders, codData, setCodData, showNotification, date, currentDate, onClose }: IProps) {
+export default function SelectOrder({
+  orders,
+  codData,
+  setCodData,
+  showNotification,
+  date,
+  currentDate,
+  onClose,
+}: IProps) {
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
-  const [totalAdd, setTotalAdd ] = useState<number>(0);
+  const [totalAdd, setTotalAdd] = useState<number>(0);
 
   const onChangeSelectOrders = (e: any, value: Order[]) => {
     const newTotal = value.reduce((acc: number, item: Order) => {
@@ -57,77 +65,80 @@ export default function SelectOrder({ orders, codData, setCodData, showNotificat
       ],
     });
     onClose();
-  }
+  };
 
   return (
     <>
-    <Box display="flex" flexDirection="column" gap={1.5} mt={2}>
-      <Typography variant="subtitle1">Route</Typography>
-      <Autocomplete
-        multiple
-        options={orders}
-        getOptionLabel={(option: Order) =>
-          `${option.clientName} - ${option.clientId}`
-        }
-        disableCloseOnSelect
-        renderOption={(props, option, { selected }) => (
-          <li {...props}>
-            <Grid container alignItems="center">
-              <Grid item xs={1}>
-                <Checkbox
-                  icon={<CheckBoxOutlineBlankIcon />}
-                  checkedIcon={<CheckBoxIcon />}
-                  style={{ marginRight: 8 }}
-                  checked={selected}
-                />
+      <Box display="flex" flexDirection="column" gap={1.5} mt={2}>
+        <Typography variant="subtitle1">Route</Typography>
+        <Autocomplete
+          multiple
+          options={orders}
+          getOptionLabel={(option: Order) =>
+            `${option.clientName} - ${option.clientId}`
+          }
+          disableCloseOnSelect
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Grid container alignItems="center">
+                <Grid item xs={1}>
+                  <Checkbox
+                    icon={<CheckBoxOutlineBlankIcon />}
+                    checkedIcon={<CheckBoxIcon />}
+                    style={{ marginRight: 8 }}
+                    checked={selected}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <StatusText
+                    text={option.status}
+                    type={
+                      option.status === ORDER_STATUS.COMPLETED
+                        ? 'success'
+                        : option.status === ORDER_STATUS.DELIVERED
+                          ? 'info'
+                          : option.status === ORDER_STATUS.INCOMPLETED
+                            ? 'warning'
+                            : option.status === ORDER_STATUS.VOID
+                              ? 'error'
+                              : 'info'
+                    }
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Box>
+                    <Typography>{option.clientName}</Typography>
+                    <Typography>{option.clientId}</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={5} textAlign={'right'}>
+                  <Typography>
+                    Total: ${option.totalPrice.toFixed(2)}
+                  </Typography>
+                </Grid>
               </Grid>
-              <Grid item xs={2}>
-                <StatusText
-                  text={option.status}
-                  type={
-                    option.status === ORDER_STATUS.COMPLETED
-                      ? 'success'
-                      : option.status === ORDER_STATUS.DELIVERED
-                        ? 'info'
-                        : option.status === ORDER_STATUS.INCOMPLETED
-                          ? 'warning'
-                          : option.status === ORDER_STATUS.VOID
-                            ? 'error'
-                            : 'info'
-                  }
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <Box>
-                  <Typography>{option.clientName}</Typography>
-                  <Typography>{option.clientId}</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={5} textAlign={'right'}>
-                  <Typography>Total: ${option.totalPrice.toFixed(2)}</Typography>
-              </Grid>
-            </Grid>
-          </li>
-        )}
-        style={{ width: '100%' }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Orders"
-            placeholder="-- Choose orders --"
-          />
-        )}
-        value={selectedOrders}
-        onChange={onChangeSelectOrders}
-      />
-    </Box>
+            </li>
+          )}
+          style={{ width: '100%' }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Orders"
+              placeholder="-- Choose orders --"
+            />
+          )}
+          value={selectedOrders}
+          onChange={onChangeSelectOrders}
+        />
+      </Box>
 
-    <Box display="flex" justifyContent="flex-end" mt={2}>
+      <Box display="flex" justifyContent="flex-end" mt={2}>
         <Typography>Total: ${totalAdd}</Typography>
-    </Box>
+      </Box>
 
-    <Button onClick={addTempCod} fullWidth variant="contained" sx={{mt: 2}}>Add</Button>
+      <Button onClick={addTempCod} fullWidth variant="contained" sx={{ mt: 2 }}>
+        Add
+      </Button>
     </>
-
   );
 }

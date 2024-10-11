@@ -97,3 +97,11 @@ export const getWCODDay = (date: string) => {
 
   return wcodDay;
 };
+
+export const getCreatedAt = () => {
+  const currentDate = new Date();
+  const dateString = moment(currentDate).format('YYYY-MM-DD');
+  const timeString = moment(currentDate).format('HH:mm:ss');
+
+  return `${timeString} ${dateString}`;
+};

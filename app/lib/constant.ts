@@ -108,7 +108,7 @@ export const adminTabs = {
     {
       name: 'C.O.D',
       icon: PaymentsIcon,
-      path: '/admin/codBoard'
+      path: '/admin/codBoard',
     },
     {
       name: 'Reports',

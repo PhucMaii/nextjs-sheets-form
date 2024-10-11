@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import React, { ReactNode } from 'react';
 import { CardStyled, IconBackground } from './styled';
 import { grey } from '@mui/material/colors';
@@ -12,6 +12,7 @@ interface PropTypes {
   backgroundColor?: string;
   textColor?: string;
   iconBackground?: string;
+  extraText?: any;
 }
 
 export default function OverviewCard({
@@ -23,6 +24,7 @@ export default function OverviewCard({
   backgroundColor,
   textColor,
   iconBackground,
+  extraText,
 }: PropTypes) {
   return (
     <CardStyled
@@ -36,13 +38,20 @@ export default function OverviewCard({
           </IconBackground>
         </Grid>
         <Grid item xs={8}>
-          <Typography
-            fontWeight="bold"
-            variant="h4"
-            sx={{ color: textColor, width: '90% !important' }}
-          >
-            {value}
-          </Typography>
+          <Box display="flex" alignItems="flex-end">
+            <Typography
+              fontWeight="bold"
+              variant="h4"
+              sx={{ color: textColor }}
+            >
+              {value}
+            </Typography>
+            {extraText && (
+              <Typography variant="h6" sx={{ color: extraText.color }}>
+                {extraText.text}
+              </Typography>
+            )}
+          </Box>
           {helperText && (
             <Typography
               fontWeight="bold"

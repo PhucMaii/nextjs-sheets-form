@@ -1,0 +1,118 @@
+import { Box, Button, Divider, Grid, Typography } from '@mui/material';
+import React from 'react';
+import { ShadowSection } from '../../reports/styled';
+import RememberMeIcon from '@mui/icons-material/RememberMe';
+import StatusText from '../StatusText';
+import CheckIcon from '@mui/icons-material/Check';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { grey } from '@mui/material/colors';
+import { IBoard } from '@/app/utils/type';
+import { COD_STATUS } from '@/app/utils/enum';
+import PendingIcon from '@mui/icons-material/Pending';
+
+interface IProps {
+  boardData: IBoard;
+  onSelect: any;
+}
+
+export default function CODBoardSummary({ boardData, onSelect }: IProps) {
+  return (
+    <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <RememberMeIcon fontSize="small" color="primary" />
+          <Typography variant="body2">{boardData.createdBy}</Typography>
+        </Box>
+        <StatusText
+          text={boardData.status}
+          type={boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'}
+          icon={
+            boardData.status === COD_STATUS.CLEARED ? (
+              <CheckIcon fontSize="small" color="success" />
+            ) : (
+              <PendingIcon fontSize="small" color="warning" />
+            )
+          }
+        />
+      </Box>
+
+      <Grid container alignItems="stretch">
+        <Grid item xs={12} md={8.9}>
+          <Box>
+            <Typography variant="h6">{boardData.driver.name}</Typography>
+            <Typography variant="body2" color={grey[500]}>
+              Delivered on: {boardData.date}
+            </Typography>
+          </Box>
+          <Divider sx={{ my: 2 }} />
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            p={2}
+            flexWrap={'wrap'}
+          >
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              <Typography variant="h5" textAlign="center">
+                ${boardData.cash}
+              </Typography>
+              <Typography variant="body2" color={grey[600]} textAlign="center">
+                Cash Input
+              </Typography>
+            </Box>
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              <Typography variant="h5" textAlign="center">
+                ${boardData.uncollected.amount}
+              </Typography>
+              <Typography variant="body2" color={grey[600]}>
+                Uncollected Amount
+              </Typography>
+            </Box>
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              <Typography variant="h5" textAlign="center">
+                ${boardData.collected.amount}
+              </Typography>
+              <Typography variant="body2" color={grey[600]}>
+                Collected Amount
+              </Typography>
+            </Box>
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              <Typography variant="h5" textAlign="center">
+                {boardData.boardClients.length}
+              </Typography>
+              <Typography variant="body2" color={grey[600]}>
+                Clients
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
+        <Grid item xs={0.1}>
+          <Divider orientation="vertical" flexItem sx={{ height: '100%' }} />
+        </Grid>
+
+        <Grid item xs={12} md={3} textAlign="center">
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={0.5}
+            justifyContent="center"
+            mb={2}
+          >
+            <Typography variant="h4" textAlign="center">
+              {boardData.uncollected.orders.length}
+            </Typography>
+            <Typography variant="body2" color={grey[600]}>
+              Uncleared Orders
+            </Typography>
+          </Box>
+          <Button variant="contained" onClick={onSelect}>
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <Typography variant="subtitle2">View details</Typography>
+              <ArrowForwardIosIcon fontSize="small" />
+            </Box>
+          </Button>
+        </Grid>
+      </Grid>
+    </ShadowSection>
+  );
+}

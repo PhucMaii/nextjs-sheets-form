@@ -31,14 +31,14 @@ export default function ModalHead({
           <Close />
         </IconButton>
       ) : (
-      <Box display="flex" alignItems="center" gap={1}>
-        <Button variant="outlined" onClick={onClose}>
-          Cancel
-        </Button>
-        <LoadingButton variant="contained" onClick={onClick} {...buttonProps}>
-          {buttonLabel}
-        </LoadingButton>
-      </Box>  
+        <Box display="flex" alignItems="center" gap={1}>
+          <Button variant="outlined" onClick={onClose}>
+            Cancel
+          </Button>
+          <LoadingButton variant="contained" onClick={onClick} {...buttonProps}>
+            {buttonLabel}
+          </LoadingButton>
+        </Box>
       )}
     </Box>
   );

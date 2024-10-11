@@ -68,25 +68,30 @@ export default function StatusText({ text, type, icon }: PropTypes) {
   };
 
   return (
-    <Box display="flex" alignItems="center" gap={1} sx={{
-      ...textColor,
-      borderRadius: 2,
-      textAlign: 'center',
-      py: '5px',
-      px: '10px',
-      width: 'fit-content',
-    }}>
+    <Box
+      display="flex"
+      alignItems="center"
+      gap={1}
+      sx={{
+        ...textColor,
+        borderRadius: 2,
+        textAlign: 'center',
+        py: '5px',
+        px: '10px',
+        width: 'fit-content',
+      }}
+    >
       {icon}
       <Typography
-        // sx={{
-        //   ...textColor,
-        //   borderRadius: 2,
-        //   textAlign: 'center',
-        //   py: '5px',
-        //   px: '10px',
-        //   width: 'fit-content',
-        // }}
-        >
+      // sx={{
+      //   ...textColor,
+      //   borderRadius: 2,
+      //   textAlign: 'center',
+      //   py: '5px',
+      //   px: '10px',
+      //   width: 'fit-content',
+      // }}
+      >
         {text}
       </Typography>
     </Box>
