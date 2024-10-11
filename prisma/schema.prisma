@@ -95,8 +95,10 @@ model Orders {
   createdBy     String?
   updatedBy     String?
 
-  user  User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items OrderedItems[]
+  user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items      OrderedItems[]
+  CodBoard   CodBoard?      @relation(fields: [codBoardId], references: [id])
+  codBoardId Int?
 }
 
 model UserPreference {
@@ -151,16 +153,17 @@ model Announcement {
 }
 
 model CodBoard {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt String
   createdBy String
-  updatedAt String
-  updatedBy String
+  updatedAt String?
+  updatedBy String?
   date      String
   note      String
   cash      Float
   status    String
   driverId  Int
+  orders    Orders[]
 
   driver Driver @relation(fields: [driverId], references: [id])
 }

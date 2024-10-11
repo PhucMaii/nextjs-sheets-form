@@ -1,11 +1,12 @@
 'use client';
 import React from 'react'
 import Sidebar from '../components/Sidebar/Sidebar'
-import { Box, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import { ShadowSection } from '../reports/styled'
 import { blueGrey } from '@mui/material/colors';
 import useSelectDate from '@/hooks/useSelectDate';
 import CODBoardSummary from '../components/CODBoardSummary';
+import AddIcon from '@mui/icons-material/Add';
 
 export default function CodBoard() {
     const { date, SelectDate } = useSelectDate('', true);
@@ -21,7 +22,15 @@ export default function CodBoard() {
         </ShadowSection>
 
         <Box>
-            <Typography variant="h6" color={blueGrey[800]}>Boards</Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6" color={blueGrey[800]}>Boards</Typography>
+                <Button variant="outlined">
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <AddIcon />
+                        <Typography variant="body2" fontWeight={600}>New Board</Typography>
+                    </Box>
+                </Button>
+            </Box>
 
             <Box display="flex" flexDirection="column" gap={1} mt={2}>
                 <CODBoardSummary />
