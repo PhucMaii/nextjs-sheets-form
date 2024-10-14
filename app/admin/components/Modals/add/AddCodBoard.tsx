@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -33,7 +33,8 @@ export default function AddCodBoard({
   currentDate,
   showNotification,
 }: IProps) {
-  const { date, SelectDate } = useSelectDate(currentDate, true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { date, setDate, SelectDate } = useSelectDate(currentDate, true);
   const [newBoard, setNewBoard] = useState<CodBoard | any>({
     driverId: -1,
     note: '',
@@ -42,16 +43,15 @@ export default function AddCodBoard({
     status: COD_STATUS.IN_PROCESS,
   });
 
-  const [drivers] = SWRFetchData(`${API_URL.ADMIN}/drivers`);
+  const [drivers] = SWRFetchData(`${API_URL.ADMIN}/drivers?date=${date}`);
   const { user } = useContext(UserContext);
 
-  // useEffect(() => {
-  //   if (newBoard.driverId > -1) {
-  //     fetchCODOrders();
-  //   };
-  // }, [newBoard]);
+  useEffect(() => {
+    setDate(currentDate);
+  }, [currentDate]);
 
   const addNewBoard = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL.ADMIN}/cod`, {
         date,
@@ -71,9 +71,13 @@ export default function AddCodBoard({
 
       showNotification('success', response.data.message);
       onClose();
+
+      setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Internal Server Error: ' + error);
+
+      setIsLoading(false);
     }
   };
 
@@ -91,7 +95,7 @@ export default function AddCodBoard({
           heading="Add Board"
           buttonLabel="Add"
           onClick={addNewBoard}
-          buttonProps={{}}
+          buttonProps={{loading: isLoading}}
           onClose={onClose}
         />
 

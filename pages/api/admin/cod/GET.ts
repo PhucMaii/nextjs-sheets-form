@@ -138,7 +138,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           date: codBoard.date,
           id: codBoard.id,
           driverId: codBoard.driverId,
-          createBy: codBoard.createdBy,
+          createdBy: codBoard.createdBy,
           orders: boardOrders,
           totalAmount,
           boardClients: Array.from(boardClients),

@@ -18,6 +18,7 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import { IBoard } from '@/app/utils/type';
 import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
 import InsertOrderToCodBoard from '../components/Modals/add/InsertOrderToCodBoard';
+import axios from 'axios';
 
 export default function CodBoard() {
   const [selectedBoard, setSelectedBoard] = useState<IBoard | null>(null);
@@ -43,6 +44,15 @@ export default function CodBoard() {
     }
   }, [codBoards]);
 
+  const handleDeleteBoard = async (boardId: number) => {
+    try {
+      await axios.delete(`${API_URL.ADMIN}/cod?id=${boardId}`);
+      mutateBoards();
+    } catch (error: any) {
+      showNotification('error', error.response.data.error);
+    }
+  };
+
   return (
     <Sidebar>
       <InsertOrderToCodBoard 
@@ -65,7 +75,6 @@ export default function CodBoard() {
           boardData={selectedBoard}
           onClose={() => setSelectedBoard(null)}
           showNotification={showNotification}
-          mutateBoards={mutateBoards}
           setIsOpenInsertOrders={setIsOpenInsertOrders}
         />
       ) : (
@@ -111,6 +120,7 @@ export default function CodBoard() {
                     key={board.id}
                     boardData={board}
                     onSelect={() => setSelectedBoard(board)}
+                    handleDeleteBoard={handleDeleteBoard}
                   />
                 ))
               ) : (

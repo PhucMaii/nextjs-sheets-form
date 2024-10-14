@@ -29,7 +29,7 @@ const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
     </FormControl>
   );
 
-  return { date, SelectDate } as { date: string; SelectDate: JSX.Element };
+  return { date, SelectDate, setDate } as { date: string; setDate: any; SelectDate: JSX.Element };
 };
 
 export default useSelectDate;

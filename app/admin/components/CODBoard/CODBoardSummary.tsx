@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, IconButton, Typography } from '@mui/material';
 import React from 'react';
 import { ShadowSection } from '../../reports/styled';
 import RememberMeIcon from '@mui/icons-material/RememberMe';
@@ -11,13 +11,15 @@ import { COD_STATUS, ORDER_STATUS } from '@/app/utils/enum';
 import PendingIcon from '@mui/icons-material/Pending';
 import useFilterOrders from '@/hooks/useFilterOrders';
 import { Order } from '../../orders/page';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 interface IProps {
   boardData: IBoard;
   onSelect: any;
+  handleDeleteBoard: any;
 }
 
-export default function CODBoardSummary({ boardData, onSelect }: IProps) {
+export default function CODBoardSummary({ boardData, onSelect, handleDeleteBoard }: IProps) {
   const uncollectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED]);
 
   const uncollectedAmount = uncollectedOrders.reduce(
@@ -36,8 +38,6 @@ export default function CODBoardSummary({ boardData, onSelect }: IProps) {
     0,
   );
 
-
-
   return (
     <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -45,17 +45,22 @@ export default function CODBoardSummary({ boardData, onSelect }: IProps) {
           <RememberMeIcon fontSize="small" color="primary" />
           <Typography variant="body2">{boardData.createdBy}</Typography>
         </Box>
-        <StatusText
-          text={boardData.status}
-          type={boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'}
-          icon={
-            boardData.status === COD_STATUS.CLEARED ? (
-              <CheckIcon fontSize="small" color="success" />
-            ) : (
-              <PendingIcon fontSize="small" color="warning" />
-            )
-          }
-        />
+        <Box display="flex" alignItems="center" gap={1}>
+          <StatusText
+            text={boardData.status}
+            type={boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'}
+            icon={
+              boardData.status === COD_STATUS.CLEARED ? (
+                <CheckIcon fontSize="small" color="success" />
+              ) : (
+                <PendingIcon fontSize="small" color="warning" />
+              )
+            }
+          />
+          <IconButton color="error" onClick={() => handleDeleteBoard(boardData.id)}>
+            <RemoveCircleIcon fontSize="large"/>
+          </IconButton>
+        </Box>
       </Box>
 
       <Grid container alignItems="stretch">

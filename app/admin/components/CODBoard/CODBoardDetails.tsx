@@ -9,32 +9,35 @@ import useDebounce from '@/hooks/useDebounce';
 import TuneIcon from '@mui/icons-material/Tune';
 import OrderAccordion from '../OrderAccordion';
 import { Order } from '../../orders/page';
-import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
-import InsertOrderToCodBoard from '../Modals/add/InsertOrderToCodBoard';
+import { updateOrderedItems } from '@/app/utils/orders';
+import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 interface IProps {
   boardData: IBoard;
   onClose: () => void;
   showNotification: any;
-  mutateBoards: any;
   setIsOpenInsertOrders: any;
 }
 
-export default function CODBoardDetails({ boardData, onClose, showNotification, mutateBoards, setIsOpenInsertOrders }: IProps) {
+export default function CODBoardDetails({ boardData, onClose, showNotification, setIsOpenInsertOrders }: IProps) {
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [orders, setOrders] = useState<{displayOrders: Order[], baseOrders: Order[]}>({displayOrders: [], baseOrders: []});
     const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
     const [searchKeywords, setSearchKeywords] = useState<string>('');
     const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-    const [orderResponse] = SWRFetchData(`${API_URL.ADMIN}/cod?id=${boardData.id}`);
-
-    console.log(orderResponse, 'order response');
+    const [orderResponse, mutateOrders] = SWRFetchData(`${API_URL.ADMIN}/cod?id=${boardData.id}`);
 
     useEffect(() => {
       if (orderResponse) {
         setOrders({displayOrders: orderResponse.data.orders, baseOrders: orderResponse.data.orders});
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
       }
     }, [orderResponse]);
 
@@ -75,21 +78,10 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
       }
     };
 
-    // const handleUpdateStatus = async (status: ORDER_STATUS, selectedOrders: Order[]) => {
-    //     try {
-    //         await updateStatus(status, selectedOrders, showNotification);
-    //         mutateBoards();
-    //     } catch (error: any) {
-    //         console.log('Internal Server Error: ', error);
-    //         showNotification('error', error.response.data.error);
-    //         return;
-    //     }
-    // }
-
     const handleUpdateOrderedItem = async (orderTotalPrice: number, order: Order, updatedItem: OrderedItems) => {
         try {
             await updateOrderedItems(orderTotalPrice, order, updatedItem, showNotification);
-            mutateBoards();
+            mutateOrders();
         } catch (error: any) {
             console.log('Internal Server Error: ', error);
             showNotification('error', error.response.data.error);
@@ -119,7 +111,7 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
 
       {/* Search Bar */}
       <Grid container alignItems="center">
-        <Grid item xs={11}>
+        <Grid item xs={9}>
             <TextField 
                 value={searchKeywords}
                 onChange={(e) => setSearchKeywords(e.target.value)}
@@ -129,9 +121,20 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
             />
         </Grid>
         <Grid item xs={1} textAlign="center">
-            <IconButton>
-                <TuneIcon />
-            </IconButton>
+            <Button>
+              <Box display="flex" alignItems="center" gap={1}>
+                <ArrowDownwardIcon fontSize="small" />
+                <Typography fontWeight="medium">Filter</Typography>
+              </Box>
+            </Button>
+        </Grid>
+        <Grid item xs={2} textAlign="center">
+            <Button color="error">
+              <Box display="flex" alignItems="center" gap={1}>
+                <RemoveCircleIcon color="error" fontSize="small" />
+                <Typography fontWeight="medium">Remove Orders</Typography>
+              </Box>
+            </Button>
         </Grid>
       </Grid>
 
@@ -145,7 +148,7 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
         </Button>
       </Box>
       {/* Orders */}
-      {
+      { isLoading ? (<LoadingComponent />) :
         orders.displayOrders.length > 0 && orders.displayOrders.map((order: Order, index: number) => (
             <OrderAccordion 
               key={index} 
@@ -154,7 +157,7 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
               handleUpdateItem={handleUpdateOrderedItem}
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
-              mutateOrders={mutateBoards}
+              mutateOrders={mutateOrders}
             />
         ))
       }
