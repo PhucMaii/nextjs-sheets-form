@@ -29,11 +29,6 @@ interface PropTypes extends ModalProps {
   items: OrderedItems[];
   showNotification: (type: AlertColor, message: string) => void;
   order: Order;
-  handleUpdatePriceUI: (
-    targetOrder: Order,
-    newItems: any[],
-    newTotalPrice: number,
-  ) => void;
   mutateOrders: any;
 }
 
@@ -43,7 +38,6 @@ export default function EditPrice({
   items,
   showNotification,
   order,
-  handleUpdatePriceUI,
   mutateOrders,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -121,7 +115,6 @@ export default function EditPrice({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.category.id,
-        // userSubCategoryId: order.subCategoryId,
       });
 
       if (response.data.error) {
@@ -129,13 +122,6 @@ export default function EditPrice({
         showNotification('error', response.data.error);
         return;
       }
-
-      // Optimistic UI Update
-      handleUpdatePriceUI(
-        updateOption === UpdateOption.CREATE ? response.data.data : order,
-        itemList,
-        totalPrice,
-      );
 
       // Update Real Data
       mutateOrders();

@@ -23,8 +23,6 @@ import { LoadingButton } from '@mui/lab';
 interface PropTypes extends ModalProps {
   order?: Order;
   showNotification: (type: AlertColor, message: string) => void;
-  handleUpdateDateUI?: (orderId: number, updatedDate: string) => void;
-  // handlePreOrder?: (deliveryDate: string) => void;
   isPreOrder?: boolean;
   scheduleOrderList?: ScheduledOrder[];
   progress?: number;
@@ -36,7 +34,6 @@ export default function EditDeliveryDate({
   onClose,
   order,
   showNotification,
-  handleUpdateDateUI,
   isPreOrder,
   scheduleOrderList,
   progress,
@@ -79,7 +76,7 @@ export default function EditDeliveryDate({
   };
 
   const handleUpdateDate = async () => {
-    if (!order || !handleUpdateDateUI || !mutateOrders) {
+    if (!order || !mutateOrders) {
       return;
     }
     try {
@@ -94,9 +91,6 @@ export default function EditDeliveryDate({
         showNotification('error', response.data.error);
         return;
       }
-
-      // Optimistic UI Update
-      handleUpdateDateUI(order.id, updatedDate);
 
       // Update Real Data
       mutateOrders();

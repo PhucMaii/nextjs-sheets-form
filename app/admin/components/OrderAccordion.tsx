@@ -35,13 +35,6 @@ import BlockIcon from '@mui/icons-material/Block';
 interface PropTypes {
   order: Order;
   showNotification: (type: AlertColor, message: string) => void;
-  handleUpdateStatusUI: (targetOrder: Order) => void;
-  handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
-  handleUpdatePriceUI: (
-    targetOrder: Order,
-    newItems: any[],
-    newTotalPrice: number,
-  ) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
   handleUpdateItem: (
@@ -55,9 +48,6 @@ interface PropTypes {
 const OrderAccordion = ({
   order,
   showNotification,
-  handleUpdateStatusUI,
-  handleUpdateDateUI,
-  handleUpdatePriceUI,
   handleSelectOrder,
   selectedOrders,
   handleUpdateItem,
@@ -121,9 +111,6 @@ const OrderAccordion = ({
         ...order,
         status,
       });
-
-      // Optimistic Data Update
-      handleUpdateStatusUI(response.data.data);
 
       // Update Real Data
       mutateOrders();
@@ -236,16 +223,15 @@ const OrderAccordion = ({
       <ClientDetailsModal
         open={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
-        deliveryAddress={order.deliveryAddress}
-        contactNumber={order.contactNumber}
-        categoryName={order.category.name}
+        deliveryAddress={order.user.deliveryAddress}
+        contactNumber={order.user.contactNumber}
+        categoryName={order.user.category.name}
       />
       <EditDeliveryDate
         open={isEditDateOpen}
         onClose={() => setIsEditDateOpen(false)}
         order={order}
         showNotification={showNotification}
-        handleUpdateDateUI={handleUpdateDateUI}
         mutateOrders={mutateOrders}
       />
       <EditPrice
@@ -254,7 +240,6 @@ const OrderAccordion = ({
         items={order.items}
         showNotification={showNotification}
         order={order}
-        handleUpdatePriceUI={handleUpdatePriceUI}
         mutateOrders={mutateOrders}
       />
       <OrderDetails
@@ -329,7 +314,7 @@ const OrderAccordion = ({
               variant="contained"
               onClick={handleOpenClientModal}
             >
-              {order.clientName}
+              {order.user.clientName}
             </Button>
           </Grid>
           <Grid item xs={12} md={3} textAlign="left" alignItems="center">

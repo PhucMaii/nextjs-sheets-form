@@ -12,13 +12,6 @@ import { blueGrey } from '@mui/material/colors';
 interface IProps extends ModalProps {
   baseOrderList: Order[];
   showNotification: (type: AlertColor, message: string) => void;
-  handleUpdateStatusUI: (targetOrder: Order) => void;
-  handleUpdateDateUI: (orderId: number, updatedDate: string) => void;
-  handleUpdatePriceUI: (
-    targetOrder: Order,
-    newItems: any[],
-    newTotalPrice: number,
-  ) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
   // subcategories: SubCategory[];
@@ -35,9 +28,6 @@ export default function SearchModal({
   onClose,
   baseOrderList,
   showNotification,
-  handleUpdateStatusUI,
-  handleUpdateDateUI,
-  handleUpdatePriceUI,
   selectedOrders,
   handleSelectOrder,
   // subcategories,
@@ -111,9 +101,6 @@ export default function SearchModal({
                   key={index}
                   order={order}
                   showNotification={showNotification}
-                  handleUpdateStatusUI={handleUpdateStatusUI}
-                  handleUpdateDateUI={handleUpdateDateUI}
-                  handleUpdatePriceUI={handleUpdatePriceUI}
                   selectedOrders={selectedOrders}
                   handleSelectOrder={handleSelectOrder}
                   handleUpdateItem={handleUpdateItem}

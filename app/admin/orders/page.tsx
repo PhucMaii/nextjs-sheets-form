@@ -387,16 +387,6 @@ export default function Orders() {
     updatedItem: OrderedItems,
   ) => {
     try {
-      // const response = await axios.put(`${API_URL.ORDERED_ITEMS}/single`, {
-      //   ...updatedItem,
-      //   orderId: order.id,
-      //   orderTotalPrice,
-      // });
-
-      // if (response.data.error) {
-      //   showNotification('error', response.data.error);
-      //   return;
-      // }
       const response: any = await updateOrderedItems(orderTotalPrice, order, updatedItem, showNotification);
 
       // Optimistic update
@@ -441,18 +431,6 @@ export default function Orders() {
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     try {
-      // const response = await axios.put(API_URL.ORDER_STATUS, {
-      //   status,
-      //   updatedOrders: selectedOrders,
-      // });
-
-      // if (response.data.error) {
-      //   showNotification('error', response.data.error);
-      //   return;
-      // }
-
-      // mutate();
-      // showNotification('success', response.data.message);
       await updateStatus(status, selectedOrders, showNotification);
       mutate();
     } catch (error: any) {
@@ -464,19 +442,19 @@ export default function Orders() {
     }
   };
 
-  const handleUpdatePriceUI = (
-    targetOrder: Order,
-    newItems: any[],
-    newTotalPrice: number,
-  ) => {
-    const newBaseOrderList = baseOrderData.map((order: Order) => {
-      if (order.id === targetOrder.id) {
-        return { ...targetOrder, totalPrice: newTotalPrice, items: newItems };
-      }
-      return order;
-    });
-    setBaseOrderData(newBaseOrderList);
-  };
+  // const handleUpdatePriceUI = (
+  //   targetOrder: Order,
+  //   newItems: any[],
+  //   newTotalPrice: number,
+  // ) => {
+  //   const newBaseOrderList = baseOrderData.map((order: Order) => {
+  //     if (order.id === targetOrder.id) {
+  //       return { ...targetOrder, totalPrice: newTotalPrice, items: newItems };
+  //     }
+  //     return order;
+  //   });
+  //   setBaseOrderData(newBaseOrderList);
+  // };
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
     e.stopPropagation();
@@ -504,20 +482,20 @@ export default function Orders() {
     }
   };
 
-  const handleUpdateStatusUI = (targetOrder: Order): void => {
-    let newOrders = [];
-    if (tabIndex !== 0 && targetOrder.status !== currentStatus) {
-      newOrders = baseOrderData.filter((order) => order.id !== targetOrder.id);
-    } else {
-      newOrders = baseOrderData.map((order) => {
-        if (order.id === targetOrder.id) {
-          return targetOrder;
-        }
-        return order;
-      });
-    }
-    setBaseOrderData(newOrders);
-  };
+  // const handleUpdateStatusUI = (targetOrder: Order): void => {
+  //   let newOrders = [];
+  //   if (tabIndex !== 0 && targetOrder.status !== currentStatus) {
+  //     newOrders = baseOrderData.filter((order) => order.id !== targetOrder.id);
+  //   } else {
+  //     newOrders = baseOrderData.map((order) => {
+  //       if (order.id === targetOrder.id) {
+  //         return targetOrder;
+  //       }
+  //       return order;
+  //     });
+  //   }
+  //   setBaseOrderData(newOrders);
+  // };
 
   const handlePrintAll = useReactToPrint({
     content: () => componentRef.current,
@@ -818,10 +796,7 @@ export default function Orders() {
         onClose={() => setIsSearchModalOpen(false)}
         baseOrderList={baseOrderData}
         showNotification={showNotification}
-        handleUpdateStatusUI={handleUpdateStatusUI}
         mutateOrders={mutate}
-        handleUpdateDateUI={handleUpdateDateUI}
-        handleUpdatePriceUI={handleUpdatePriceUI}
         selectedOrders={selectedOrders}
         handleSelectOrder={handleSelectOrder}
         // subcategories={subCategories?.data || []}
@@ -849,9 +824,6 @@ export default function Orders() {
                       key={index}
                       order={order}
                       showNotification={showNotification}
-                      handleUpdateStatusUI={handleUpdateStatusUI}
-                      handleUpdateDateUI={handleUpdateDateUI}
-                      handleUpdatePriceUI={handleUpdatePriceUI}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
                       handleUpdateItem={handleUpdateItem}

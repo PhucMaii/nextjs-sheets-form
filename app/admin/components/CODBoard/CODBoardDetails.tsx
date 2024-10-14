@@ -1,5 +1,5 @@
-import { Box, Grid, IconButton, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { Box, Button, Grid, IconButton, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IBoard, OrderedItems } from '@/app/utils/type';
 import { blueGrey } from '@mui/material/colors';
@@ -9,9 +9,9 @@ import useDebounce from '@/hooks/useDebounce';
 import TuneIcon from '@mui/icons-material/Tune';
 import OrderAccordion from '../OrderAccordion';
 import { Order } from '../../orders/page';
-import { update } from 'lodash';
 import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { set } from 'lodash';
 
 interface IProps {
   boardData: IBoard;
@@ -21,9 +21,51 @@ interface IProps {
 }
 
 export default function CODBoardDetails({ boardData, onClose, showNotification, mutateBoards }: IProps) {
+    const [displayOrders, setDisplayOrders] = useState<Order[]>(boardData?.orders || []);
+    const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
     const [searchKeywords, setSearchKeywords] = useState<string>('');
-
     const debouncedKeywords = useDebounce(searchKeywords, 1000);
+
+    useEffect(() => {
+        setDisplayOrders(boardData.orders);
+    }, []);
+
+    useEffect(() => {
+        if (debouncedKeywords) {
+            const newOrderList = boardData.orders.filter((order: Order) => {
+                if (
+                    order.user.clientId.includes(debouncedKeywords) ||
+                    debouncedKeywords == order.id.toString() ||
+                    order.user.clientName
+                        .toLowerCase()
+                        .includes(debouncedKeywords.toLowerCase())
+                ) {
+                    return true;
+                }
+                return false;
+            });
+            setDisplayOrders(newOrderList);
+        } else {
+            setDisplayOrders(boardData.orders);
+        }
+    }, [debouncedKeywords]);
+
+    const handleSelectOrder = (e: any, targetOrder: Order) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const selectedOrder = selectedOrders.find((order: Order) => {
+        return order.id === targetOrder.id;
+      });
+  
+      if (selectedOrder) {
+        const newSelectedOrders = selectedOrders.filter((order: Order) => {
+          return order.id !== targetOrder.id;
+        });
+        setSelectedOrders(newSelectedOrders);
+      } else {
+        setSelectedOrders([...selectedOrders, targetOrder]);
+      }
+    };
 
     const handleUpdateStatus = async (status: ORDER_STATUS, selectedOrders: Order[]) => {
         try {
@@ -70,7 +112,7 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
       <Grid container alignItems="center">
         <Grid item xs={11}>
             <TextField 
-                value={debouncedKeywords}
+                value={searchKeywords}
                 onChange={(e) => setSearchKeywords(e.target.value)}
                 placeholder="Search Orders..."
                 fullWidth
@@ -84,13 +126,26 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
         </Grid>
       </Grid>
 
+      <Box display="flex" justifyContent="flex-end" alignItems="center" my={1}>
+        <Button
+          variant="outlined"
+          color="primary"
+          // onClick={() => handleUpdateStatus(ORDER_STATUS.CLEARED, selectedOrders)}
+        >
+          + Insert Orders
+        </Button>
+      </Box>
       {/* Orders */}
       {
-        boardData.orders && boardData.orders.length > 0 && boardData.orders.map((order: Order, index: number) => (
+        displayOrders.length > 0 && displayOrders.map((order: Order, index: number) => (
             <OrderAccordion 
-                key={index} 
-                order={order} 
-                showNotification={showNotification}
+              key={index} 
+              order={order} 
+              showNotification={showNotification}
+              handleUpdateItem={handleUpdateOrderedItem}
+              selectedOrders={selectedOrders}
+              handleSelectOrder={handleSelectOrder}
+              mutateOrders={mutateBoards}
             />
         ))
       }

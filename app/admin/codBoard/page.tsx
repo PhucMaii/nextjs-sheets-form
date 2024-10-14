@@ -94,7 +94,7 @@ export default function CodBoard() {
             <Box display="flex" flexDirection="column" gap={1} mt={2}>
               {isLoading ? (
                 <LoadingComponent />
-              ) : codBoards ? (
+              ) : codBoards && codBoards.data.length > 0 ? (
                 codBoards?.data.map((board: any) => (
                   <CODBoardSummary
                     key={board.id}

@@ -2,7 +2,7 @@ import { days } from '@/app/lib/constant';
 import { filterByRoute } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { IRoutes } from '@/app/utils/type';
-import { Orders, PrismaClient } from '@prisma/client';
+import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -37,7 +37,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           date,
         },
         include: {
-          orders: true,
+          orders: {
+            include: {
+              items: true,
+              user: {
+                include: {
+                  preference: true,
+                  category: true,
+                  routes: true,
+                },
+              },
+            },
+          },
           driver: {
             include: {
               routes: {
@@ -73,6 +84,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         }
 
         const boardOrders = filterByRoute(codBoard.orders, driverRoute);
+        const boardOrdersWithTotalPriceItems = boardOrders.map((order: any) => {
+          const formattedItems = order.items.map((item: OrderedItems) => {
+            const totalPrice = item.quantity * item.price;
+            return {
+              ...item,
+              totalPrice,
+            };
+          });
+
+          return {
+            ...order,
+            items: formattedItems,
+          }
+        })
+
         const totalAmount = boardOrders.reduce((acc: number, order: Orders) => {
           return acc + order.totalPrice;
         }, 0);
@@ -95,7 +121,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: codBoard.id,
           driverId: codBoard.driverId,
           createBy: codBoard.createdBy,
-          orders: boardOrders,
+          orders: boardOrdersWithTotalPriceItems,
           totalAmount,
           boardClients: Array.from(boardClients),
           ...codData,
