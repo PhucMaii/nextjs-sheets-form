@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -16,11 +16,8 @@ import { SWRFetchData } from '@/app/utils/db';
 import {
   API_URL,
   COD_STATUS,
-  ORDER_STATUS,
-  PAYMENT_TYPE,
 } from '@/app/utils/enum';
 import axios from 'axios';
-import { Order } from '@/app/admin/orders/page';
 import { getCreatedAt } from '@/app/utils/time';
 import { UserContext } from '@/app/context/UserContextAPI';
 import { CodBoard } from '@prisma/client';
@@ -39,7 +36,6 @@ export default function AddCodBoard({
   const { date, SelectDate } = useSelectDate(currentDate, true);
   const [newBoard, setNewBoard] = useState<CodBoard | any>({
     driverId: -1,
-    date,
     note: '',
     cash: 0,
     orders: [],
@@ -49,18 +45,20 @@ export default function AddCodBoard({
   const [drivers] = SWRFetchData(`${API_URL.ADMIN}/drivers`);
   const { user } = useContext(UserContext);
 
-  useEffect(() => {
-    fetchCODOrders();
-  }, []);
+  // useEffect(() => {
+  //   if (newBoard.driverId > -1) {
+  //     fetchCODOrders();
+  //   };
+  // }, [newBoard]);
 
   const addNewBoard = async () => {
     try {
       const response = await axios.post(`${API_URL.ADMIN}/cod`, {
-        date: newBoard.date,
+        date,
         note: newBoard.note,
         cash: newBoard.cash,
         driverId: newBoard.driverId,
-        orders: newBoard.orders,
+        // orders: newBoard.orders,
         status: newBoard.status,
         createdAt: getCreatedAt(),
         createdBy: `Admin - ${user?.clientName}`,
@@ -76,31 +74,6 @@ export default function AddCodBoard({
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Internal Server Error: ' + error);
-    }
-  };
-
-  const fetchCODOrders = async () => {
-    try {
-      const response = await axios.get(`${API_URL.ORDER}?date=${date}`);
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      const codOrders = response.data.data.filter(
-        (order: Order) =>
-          order?.user?.preference?.paymentType === PAYMENT_TYPE.COD &&
-          order.status !== ORDER_STATUS.VOID,
-      );
-
-      setNewBoard({
-        ...newBoard,
-        orders: codOrders,
-      });
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Fail to fetch COD orders: ' + error);
     }
   };
 

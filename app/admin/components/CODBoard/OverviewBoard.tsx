@@ -8,8 +8,26 @@ import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import MoneyIcon from '@mui/icons-material/Money';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import { ORDER_STATUS } from '@/app/utils/enum';
+import { Order } from '../../orders/page';
+import useFilterOrders from '@/hooks/useFilterOrders';
 
 export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
+  const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
+    return acc + order.totalPrice;
+  }, 0)
+
+  const uncollectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED])
+
+  const uncollectedAmount = uncollectedOrders.reduce(
+    (acc: number, order: Order) => {
+      return acc + order.totalPrice;
+    },
+    0,
+  );
+
+  const collectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.COMPLETED]);
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6} md={3}>
@@ -18,9 +36,9 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           backgroundColor={primary.lightest}
           icon={<MoneyOffIcon fontSize="large" color="primary" />}
           text="Uncleared Amount"
-          value={boardData.uncollected.amount}
+          value={uncollectedAmount}
           extraText={{
-            text: `/${boardData.totalAmount}`,
+            text: `/${totalAmount}`,
             color: blueGrey[500],
           }}
         />
@@ -31,7 +49,7 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           backgroundColor={primary.lightest}
           icon={<ReceiptIcon fontSize="large" color="primary" />}
           text="Uncleared Orders"
-          value={boardData.uncollected.orders.length}
+          value={uncollectedOrders.length}
           extraText={{
             text: `/${boardData.orders.length}`,
             color: blueGrey[500],
@@ -44,7 +62,7 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           backgroundColor={primary.lightest}
           icon={<PriceCheckIcon fontSize="large" color="primary" />}
           text="Cleared Orders"
-          value={boardData.collected.orders.length}
+          value={collectedOrders.length}
           extraText={{
             text: `/${boardData.orders.length}`,
             color: blueGrey[500],

@@ -1,5 +1,7 @@
 import { Order } from '@/app/admin/orders/page';
-import { COD_STATUS } from '@/app/utils/enum';
+import { days } from '@/app/lib/constant';
+import { filterByRoute } from '@/app/utils/array';
+import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -10,7 +12,7 @@ interface IBody {
   note: string;
   cash: number;
   driverId: number;
-  orders: Order[];
+  // orders: Order[];
   skipChecked?: boolean;
 }
 
@@ -25,7 +27,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       note,
       cash,
       driverId,
-      orders,
+      // orders,
       skipChecked,
     }: IBody = req.body;
 
@@ -55,6 +57,51 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         status: COD_STATUS.IN_PROCESS,
       },
     });
+
+    const selectedDate = new Date(date);
+    const dayIndex = selectedDate.getDay();
+    const day = days[dayIndex];
+
+    const dateOrders: any = await prisma.orders.findMany({
+      where: {
+        deliveryDate: date,
+        status: {
+          not: ORDER_STATUS.VOID
+        },
+        user: {
+          preference: {
+            paymentType: PAYMENT_TYPE.COD
+          }
+        }
+      },
+      include: {
+        items: true,
+        user: {
+          include: {
+            preference: true,
+            category: true,
+            routes: true,
+          },
+        },
+      }
+    });
+
+    const selectedRoute = await prisma.route.findFirst({
+      where: {
+        day,
+        driverId
+      },
+      include: {
+        clients: {
+          include: {
+            user: true,
+          },
+        },
+      }
+    })
+
+    const orders = filterByRoute(dateOrders, selectedRoute);
+
     // Convert order list to order ids list
     const orderIds = orders.map((order: Order) => order.id);
 

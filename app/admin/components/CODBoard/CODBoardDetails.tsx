@@ -10,25 +10,33 @@ import TuneIcon from '@mui/icons-material/Tune';
 import OrderAccordion from '../OrderAccordion';
 import { Order } from '../../orders/page';
 import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
-import { ORDER_STATUS } from '@/app/utils/enum';
-import { set } from 'lodash';
+import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import InsertOrderToCodBoard from '../Modals/add/InsertOrderToCodBoard';
+import { SWRFetchData } from '@/app/utils/db';
 
 interface IProps {
   boardData: IBoard;
   onClose: () => void;
   showNotification: any;
   mutateBoards: any;
+  setIsOpenInsertOrders: any;
 }
 
-export default function CODBoardDetails({ boardData, onClose, showNotification, mutateBoards }: IProps) {
-    const [displayOrders, setDisplayOrders] = useState<Order[]>(boardData?.orders || []);
+export default function CODBoardDetails({ boardData, onClose, showNotification, mutateBoards, setIsOpenInsertOrders }: IProps) {
+    const [orders, setOrders] = useState<{displayOrders: Order[], baseOrders: Order[]}>({displayOrders: [], baseOrders: []});
     const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
     const [searchKeywords, setSearchKeywords] = useState<string>('');
     const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+    const [orderResponse] = SWRFetchData(`${API_URL.ADMIN}/cod?id=${boardData.id}`);
+
+    console.log(orderResponse, 'order response');
+
     useEffect(() => {
-        setDisplayOrders(boardData.orders);
-    }, []);
+      if (orderResponse) {
+        setOrders({displayOrders: orderResponse.data.orders, baseOrders: orderResponse.data.orders});
+      }
+    }, [orderResponse]);
 
     useEffect(() => {
         if (debouncedKeywords) {
@@ -44,9 +52,9 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
                 }
                 return false;
             });
-            setDisplayOrders(newOrderList);
+            setOrders({...orders, displayOrders: newOrderList});
         } else {
-            setDisplayOrders(boardData.orders);
+            setOrders({...orders, displayOrders: orders.baseOrders});
         }
     }, [debouncedKeywords]);
 
@@ -67,16 +75,16 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
       }
     };
 
-    const handleUpdateStatus = async (status: ORDER_STATUS, selectedOrders: Order[]) => {
-        try {
-            await updateStatus(status, selectedOrders, showNotification);
-            mutateBoards();
-        } catch (error: any) {
-            console.log('Internal Server Error: ', error);
-            showNotification('error', error.response.data.error);
-            return;
-        }
-    }
+    // const handleUpdateStatus = async (status: ORDER_STATUS, selectedOrders: Order[]) => {
+    //     try {
+    //         await updateStatus(status, selectedOrders, showNotification);
+    //         mutateBoards();
+    //     } catch (error: any) {
+    //         console.log('Internal Server Error: ', error);
+    //         showNotification('error', error.response.data.error);
+    //         return;
+    //     }
+    // }
 
     const handleUpdateOrderedItem = async (orderTotalPrice: number, order: Order, updatedItem: OrderedItems) => {
         try {
@@ -90,6 +98,7 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
     }
 
   return (
+    <>
     <Box display="flex" flexDirection="column" gap={2}>
       {/* Header */}
       <Box display="flex" alignItems="center" gap={2}>
@@ -106,7 +115,7 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
       </Box>
 
       {/* Overview Cards */}
-      <OverviewBoard boardData={boardData} />
+      <OverviewBoard boardData={{...boardData, orders: orders.baseOrders}} />
 
       {/* Search Bar */}
       <Grid container alignItems="center">
@@ -130,14 +139,14 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
         <Button
           variant="outlined"
           color="primary"
-          // onClick={() => handleUpdateStatus(ORDER_STATUS.CLEARED, selectedOrders)}
+          onClick={() => setIsOpenInsertOrders(true)}
         >
           + Insert Orders
         </Button>
       </Box>
       {/* Orders */}
       {
-        displayOrders.length > 0 && displayOrders.map((order: Order, index: number) => (
+        orders.displayOrders.length > 0 && orders.displayOrders.map((order: Order, index: number) => (
             <OrderAccordion 
               key={index} 
               order={order} 
@@ -150,5 +159,6 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
         ))
       }
     </Box>
+    </>
   );
 }

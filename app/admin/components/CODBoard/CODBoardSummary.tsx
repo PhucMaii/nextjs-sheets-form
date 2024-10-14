@@ -7,8 +7,10 @@ import CheckIcon from '@mui/icons-material/Check';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { grey } from '@mui/material/colors';
 import { IBoard } from '@/app/utils/type';
-import { COD_STATUS } from '@/app/utils/enum';
+import { COD_STATUS, ORDER_STATUS } from '@/app/utils/enum';
 import PendingIcon from '@mui/icons-material/Pending';
+import useFilterOrders from '@/hooks/useFilterOrders';
+import { Order } from '../../orders/page';
 
 interface IProps {
   boardData: IBoard;
@@ -16,6 +18,26 @@ interface IProps {
 }
 
 export default function CODBoardSummary({ boardData, onSelect }: IProps) {
+  const uncollectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED]);
+
+  const uncollectedAmount = uncollectedOrders.reduce(
+    (acc: number, order: Order) => {
+      return acc + order.totalPrice;
+    },
+    0,
+  );
+
+  const collectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.COMPLETED]);
+
+  const collectedAmount = collectedOrders.reduce(
+    (acc: number, order: Order) => {
+      return acc + order.totalPrice;
+    },
+    0,
+  );
+
+
+
   return (
     <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -62,7 +84,7 @@ export default function CODBoardSummary({ boardData, onSelect }: IProps) {
             </Box>
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography variant="h5" textAlign="center">
-                ${boardData.uncollected.amount}
+                ${uncollectedAmount}
               </Typography>
               <Typography variant="body2" color={grey[600]}>
                 Uncollected Amount
@@ -70,7 +92,7 @@ export default function CODBoardSummary({ boardData, onSelect }: IProps) {
             </Box>
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography variant="h5" textAlign="center">
-                ${boardData.collected.amount}
+                ${collectedAmount}
               </Typography>
               <Typography variant="body2" color={grey[600]}>
                 Collected Amount
@@ -99,7 +121,7 @@ export default function CODBoardSummary({ boardData, onSelect }: IProps) {
             mb={2}
           >
             <Typography variant="h4" textAlign="center">
-              {boardData.uncollected.orders.length}
+              {uncollectedOrders.length}
             </Typography>
             <Typography variant="body2" color={grey[600]}>
               Uncleared Orders

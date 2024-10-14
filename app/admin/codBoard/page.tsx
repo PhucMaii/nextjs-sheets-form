@@ -17,11 +17,13 @@ import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { IBoard } from '@/app/utils/type';
 import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
+import InsertOrderToCodBoard from '../components/Modals/add/InsertOrderToCodBoard';
 
 export default function CodBoard() {
   const [selectedBoard, setSelectedBoard] = useState<IBoard | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenAddBoard, setIsOpenAddBoard] = useState<boolean>(false);
+  const [isOpenInsertOrders, setIsOpenInsertOrders] = useState<boolean>(false);
   const { showNotification, NotificationComp } = useNotification();
 
   const today = new Date();
@@ -43,6 +45,14 @@ export default function CodBoard() {
 
   return (
     <Sidebar>
+      <InsertOrderToCodBoard 
+        open={isOpenInsertOrders} 
+        onClose={() => setIsOpenInsertOrders(false)} 
+        currentDate={date} 
+        showNotification={showNotification} 
+        boardId={selectedBoard?.id || -1}
+        mutateBoards={mutateBoards}
+      />
       {NotificationComp}
       <AddCodBoard
         open={isOpenAddBoard}
@@ -56,6 +66,7 @@ export default function CodBoard() {
           onClose={() => setSelectedBoard(null)}
           showNotification={showNotification}
           mutateBoards={mutateBoards}
+          setIsOpenInsertOrders={setIsOpenInsertOrders}
         />
       ) : (
         <>
