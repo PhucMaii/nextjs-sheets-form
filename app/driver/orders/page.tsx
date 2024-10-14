@@ -43,7 +43,7 @@ function CircularProgressWithLabel(props: any) {
         variant="determinate"
         size={120}
         value={value > 100 ? 100 : value}
-        sx={{ color: props.color['light'] }}
+        sx={{ color: props.color}}
       />
       <Box
         sx={{
@@ -61,7 +61,7 @@ function CircularProgressWithLabel(props: any) {
           variant="h6"
           component="div"
           textAlign="center"
-          color="white"
+          color={props.valueColor}
         >
           {props.currentValue} / {props.basedValue}
         </Typography>
@@ -85,7 +85,7 @@ export default function OrdersPage() {
   const today = YYYYMMDDFormat(date);
 
   const { showNotification, NotificationComp } = useNotification();
-  const { date: datePicker, SelectDate } = useSelectDate();
+  const { date: datePicker, SelectDate } = useSelectDate(today);
 
   const [ordersResponse, mutateOrders] = SWRFetchData(
     `${API_URL.DRIVER_ORDERS}?deliveryDate=${
@@ -101,8 +101,11 @@ export default function OrdersPage() {
   useEffect(() => {
     if (ordersResponse) {
       initializeOrders();
+    } else {
+      setOrders([]);
+      setDisplayOrders([]);
     }
-  }, [currentTab, datePicker, ordersResponse]);
+  }, [currentTab, ordersResponse]);
 
   const deliveredOrders = useMemo(() => {
     if (orders.length === 0) {
@@ -159,12 +162,7 @@ export default function OrdersPage() {
     return filteredOrders;
   };
 
-  // const handleDateChange = (e: any) => {
-  //   const formattedDate = formatDateChanged(e);
-  //   setDatePicker(formattedDate);
-  // };
-
-  const initializeOrders = () => {
+  const initializeOrders = () => { 
     setOrders(ordersResponse?.data.deliveryOrders);
     if (currentTab === 'Delivered') {
       const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter(
@@ -343,15 +341,16 @@ export default function OrdersPage() {
             gap={2}
             justifyContent="center"
             alignItems="center"
-            sx={{ backgroundColor: `${primary['main']} !important` }}
+            sx={{ backgroundColor: `${primary['lightest']} !important` }}
           >
-            <Typography color="primary.contrastText" variant="h6">
+            <Typography color="primary.main" variant="h6">
               Delivered
             </Typography>
             <CircularProgressWithLabel
               currentValue={deliveredOrders.length || 0}
               basedValue={orders.length || 0}
-              color={primary}
+              color={primary['main']}
+              valueColor={primary['main']}
             />
           </ShadowSection>
         </Grid>
@@ -362,15 +361,16 @@ export default function OrdersPage() {
             gap={2}
             justifyContent="center"
             alignItems="center"
-            sx={{ backgroundColor: `${success['main']} !important` }}
+            sx={{ backgroundColor: `${success['lightest']} !important` }}
           >
-            <Typography color="success.contrastText" variant="h6">
-              Collect Amount
+            <Typography color="success.main" variant="h6">
+              Collected
             </Typography>
             <CircularProgressWithLabel
               currentValue={collectedAmount}
               basedValue={codAmount}
-              color={success}
+              color={success['main']}
+              valueColor={success['main']}
             />
           </ShadowSection>
         </Grid>

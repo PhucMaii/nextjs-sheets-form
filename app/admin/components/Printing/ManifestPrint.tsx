@@ -155,9 +155,9 @@ export const ManifestPrint = forwardRef(
                             .join(' - ');
 
                           if (
-                            clientName?.split(' - ')[1] == ' C.O.D ' ||
-                            clientName?.split(' - ')[1] == ' MONTHLY ' ||
-                            clientName?.split(' - ')[1] == ' W.C.O.D '
+                            clientName?.split(' - ')[1] == ' C.O.D' ||
+                            clientName?.split(' - ')[1] == ' MONTHLY' ||
+                            clientName?.split(' - ')[1] == ' W.C.O.D'
                           ) {
                             clientName = clientName.split(' - ')[0];
                           }
@@ -173,7 +173,7 @@ export const ManifestPrint = forwardRef(
                                   fontWeight: 'bold',
                                 }}
                               >
-                                {clientName} - {user.user.clientId}
+                                {clientName} - {user?.user?.preference?.paymentType} - {user.user.clientId}
                               </BorderRightTableCell>
                               {sortedItems.map(
                                 (item: string, index: number) => {
