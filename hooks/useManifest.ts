@@ -52,22 +52,21 @@ const useManifest = (
     const selectedRoutesMap = new Map(
       selectedRoutes.map((route: IRoutes) => [route.id, route]),
     );
+
     // Attach route id in order
     const clientRoutes = nonVoidOrders.map((order: Order): any => {
       // Filter user routes to get only routes related to current given list of routes
       const relatedRoutes = order.user?.routes
         ?.filter((route: UserRoute): any => {
-          // const relatedRoute = selectedRoutes.find(
-          //   (baseRoute: IRoutes) => baseRoute.id === route.routeId,
-          // );
-          // return !!relatedRoute;
           return selectedRoutesMap.has(route.routeId);
         })
-        .map((route: UserRoute): any => ({
-          // map to attach order information
-          routeId: route.routeId,
-          ...order,
-        }));
+        .map((route: UserRoute): any => {
+          return {
+            // map to attach order information
+            routeId: route.routeId,
+            ...order,
+          }
+        });
       return relatedRoutes;
     });
 
@@ -76,11 +75,6 @@ const useManifest = (
     // Arrange as user route
     const sortedOrderByRoutes = [];
     for (const selectedRoute of selectedRoutes) {
-      // Handle error
-      // if (!selectedRoute) {
-      //   setOrderPrint([]);
-      //   continue;
-      // }
 
       const sortedUserIds = userRoute.data[selectedRoute.id];
 
@@ -134,15 +128,6 @@ const useManifest = (
     );
 
     for (const itemRoute in groupItemRoutes) {
-      // const KONGNAMUL_SOYA_10LB =
-      //   groupItemRoutes[itemRoute].find(
-      //     (item: IItem) => item.name === 'KONGNAMUL - SOYA 10 LB',
-      //   ) || 0;
-      // const KONGNAMUL_SOYA_5LB =
-      //   groupItemRoutes[itemRoute].find((item: IItem) =>
-      //     item.name.includes('KONGNAMUL - SOYA 5 LB'),
-      //   ) || 0;
-
       const manifestItem = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem) => {
           const { name } = item;
