@@ -138,14 +138,14 @@ export default function AddCodBoard({
             </Select>
           </Box>
 
-          <Box display="flex" flexDirection="column" gap={1}>
+          {/* <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">Note</Typography>
             <TextField
               placeholder="Enter note here..."
               value={newBoard?.note || ''}
               onChange={(e) => onChangeNewBoard('note', e.target.value)}
             />
-          </Box>
+          </Box> */}
         </Box>
       </BoxModal>
     </Modal>

@@ -19,9 +19,11 @@ import { IBoard } from '@/app/utils/type';
 import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
 import InsertOrderToCodBoard from '../components/Modals/add/InsertOrderToCodBoard';
 import axios from 'axios';
+import DeleteModal from '../components/Modals/delete/DeleteModal';
 
 export default function CodBoard() {
   const [selectedBoard, setSelectedBoard] = useState<IBoard | null>(null);
+  const [deleteBoard, setDeleteBoard] = useState<{isOpen: boolean; id: number}>({ isOpen: false, id: -1 });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenAddBoard, setIsOpenAddBoard] = useState<boolean>(false);
   const [isOpenInsertOrders, setIsOpenInsertOrders] = useState<boolean>(false);
@@ -46,8 +48,16 @@ export default function CodBoard() {
 
   const handleDeleteBoard = async (boardId: number) => {
     try {
-      await axios.delete(`${API_URL.ADMIN}/cod?id=${boardId}`);
+      const response = await axios.delete(`${API_URL.ADMIN}/cod?id=${boardId}`);
+
+      if (response.data.error) {  
+        showNotification('error', response.data.error);
+        return;
+      }
+      
       mutateBoards();
+      setDeleteBoard({isOpen: false, id: -1});
+      showNotification('success', response.data.message);
     } catch (error: any) {
       showNotification('error', error.response.data.error);
     }
@@ -55,6 +65,12 @@ export default function CodBoard() {
 
   return (
     <Sidebar>
+      <DeleteModal 
+        open={deleteBoard.isOpen} 
+        handleCloseModal={() => setDeleteBoard({id: -1, isOpen: false})} 
+        targetObj={deleteBoard.id}  
+        handleDelete={handleDeleteBoard} 
+      />
       <InsertOrderToCodBoard 
         open={isOpenInsertOrders} 
         onClose={() => setIsOpenInsertOrders(false)} 
@@ -120,7 +136,7 @@ export default function CodBoard() {
                     key={board.id}
                     boardData={board}
                     onSelect={() => setSelectedBoard(board)}
-                    handleDeleteBoard={handleDeleteBoard}
+                    handleDeleteBoard={() => setDeleteBoard({isOpen: true, id: board.id})}
                   />
                 ))
               ) : (

@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, IconButton, Menu, MenuItem, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Divider, FormControlLabel, Grid, IconButton, Menu, MenuItem, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IBoard, OrderedItems } from '@/app/utils/type';
@@ -24,6 +24,9 @@ import AddIcon from '@mui/icons-material/Add';
 import LoadingModal from '../Modals/LoadingModal';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import axios from 'axios';
+import useFilterOrders, { filterOrderByStatus } from '@/hooks/useFilterOrders';
+import ErrorComponent from '../ErrorComponent';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 
 interface IProps {
@@ -37,6 +40,9 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
   const [actionButtonAnchor, setActionButtonAnchor] =
   useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
+  const [filterButtonAnchor, setFilterButtonAnchor] =
+  useState<null | HTMLElement>(null);
+  const openFilterDropdown = Boolean(filterButtonAnchor);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [orders, setOrders] = useState<{displayOrders: Order[], baseOrders: Order[]}>({displayOrders: [], baseOrders: []});
@@ -106,6 +112,20 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
         }
     }
 
+    const filterOrders = (status: ORDER_STATUS) => {
+      const newOrderList = filterOrderByStatus(orders.baseOrders, [status]);
+      setOrders({...orders, displayOrders: newOrderList});
+    }
+
+    const handleSelectAll = (e: any) => {
+      e.preventDefault();
+      if (selectedOrders.length === orders.baseOrders.length) {
+        setSelectedOrders([]);
+      } else {
+        setSelectedOrders(orders.baseOrders);
+      }
+    };
+
     const handleSelectOrder = (e: any, targetOrder: Order) => {
       e.stopPropagation();
       e.preventDefault();
@@ -158,10 +178,8 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
     const actions = (
       <Box
         display="flex"
-        justifyContent="flex-end"
         alignItems="center"
         gap={2}
-        width="100%"
       >
         <Button 
           variant="outlined" 
@@ -252,6 +270,80 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
       </Box>
     )
 
+    const filter = (
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={2}
+        width="100%"
+      >
+        <IconButton color="primary" onClick={(e: any) => setFilterButtonAnchor(e.currentTarget)}>
+          <TuneIcon fontSize="medium" />
+        </IconButton>
+        
+        <Menu
+          id="basic-menu"
+          anchorEl={filterButtonAnchor}
+          open={openFilterDropdown}
+          onClose={() => setFilterButtonAnchor(null)}
+          MenuListProps={{
+            'aria-labelledby': 'basic-button',
+          }}
+        >
+        <MenuItem
+          onClick={() => {
+            filterOrders(ORDER_STATUS.COMPLETED);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <ReceiptLongIcon sx={{ color: primaryColor }} />
+            <Typography>All</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrders(ORDER_STATUS.COMPLETED);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Completed</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrders(ORDER_STATUS.DELIVERED);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <LocalShippingIcon sx={{ color: infoColor }} />
+            <Typography>Delivered</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrders(ORDER_STATUS.INCOMPLETED);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <PendingIcon sx={{ color: warningColor }} />
+            <Typography>Incompleted</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            filterOrders(ORDER_STATUS.VOID);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <BlockIcon sx={{ color: errorColor }} />
+            <Typography>Void</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        </Menu>
+      </Box>
+    )
+
   return (
     <>
     <LoadingModal open={isUpdating} />
@@ -274,7 +366,7 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
       <OverviewBoard boardData={{...boardData, orders: orders.baseOrders}} />
 
       {/* Search Bar */}
-      <Grid container alignItems="center">
+      <Grid container alignItems="center" spacing={2}>
         <Grid item xs={10}>
             <TextField 
                 value={searchKeywords}
@@ -288,17 +380,28 @@ export default function CODBoardDetails({ boardData, onClose, showNotification, 
           <Box display="flex" alignItems="center" gap={1} justifyContent="flex-end">
             {actions}
             <Divider orientation="vertical" flexItem />
-            <IconButton color="primary">
-              <TuneIcon fontSize="medium" />
-            </IconButton>
+            {filter}
           </Box>
         </Grid>
       </Grid>
+
+      <Box>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={orders.baseOrders.length === selectedOrders.length}
+                onClick={handleSelectAll}
+              />
+            }
+            label="Select All"
+          />
+       </Box>
+
       {/* Orders */}
       </Box>
       <Box display="flex" flexDirection="column" gap={2} sx={{maxHeight: '75vh', overflow: 'auto'}}>
         { isLoading ? (<LoadingComponent />) :
-          orders.displayOrders.length > 0 && orders.displayOrders.map((order: Order, index: number) => (
+          orders.displayOrders.length === 0 ? (<ErrorComponent errorText='No orders found' />) : orders.displayOrders.map((order: Order, index: number) => (
               <OrderAccordion 
                 key={index} 
                 order={order} 
