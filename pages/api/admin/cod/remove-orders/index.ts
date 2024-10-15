@@ -1,24 +1,22 @@
 import { Order } from "@/app/admin/orders/page";
-import withAdminAuthGuard from "@/pages/api/utils/withAdminAuthGuard";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
 interface IBody {
     orders: Order[];
-    boardId: number;
 }
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    if (req.method !== 'POST') {
-        return res.status(404).json({
-            error: 'Your method is not supported',
-        });
-    }
-
+export default async function DELETE(req: NextApiRequest, res: NextApiResponse) {
     try {
+        if (req.method !== 'DELETE') {
+            return res.status(404).json({
+                error: 'Your method is not supported',
+            });
+        }
+
         const prisma = new PrismaClient();
-        
-        const { orders, boardId }: IBody = req.body;
+
+        const { orders }: IBody = req.body;
 
         const orderIdList = orders.map((order: Order) => order.id);
 
@@ -29,12 +27,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 }
             },
             data: {
-                codBoardId: boardId
+                codBoardId: null
             }
         });
 
         return res.status(200).json({
-            message: 'Insert Successfully',
+            message: 'Remove Orders Successfully',
         });
     } catch (error: any) {
         console.log('Internal Server Error: ', error);
@@ -43,5 +41,3 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
     }
 }
-
-export default withAdminAuthGuard(handler);

@@ -18,6 +18,7 @@ interface IProps extends ModalProps {
 }
 
 export default function InsertOrderToCodBoard({open, onClose, currentDate, showNotification, boardId, mutateBoards}: IProps) {
+    const [isInserting, setIsInserting] = useState<boolean>(false);
     const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
     const { date, SelectDate} = useSelectDate(currentDate, true);
 
@@ -28,6 +29,7 @@ export default function InsertOrderToCodBoard({open, onClose, currentDate, showN
     };
 
     const handleInsertOrders = async () => {
+        setIsInserting(true);
         try {
             if (boardId === -1) {
                 showNotification('error', 'Please select board');
@@ -46,6 +48,7 @@ export default function InsertOrderToCodBoard({open, onClose, currentDate, showN
 
             if (response.data.error) {
                 showNotification('error', response.data.error);
+                setIsInserting(false);
                 return;
             }
 
@@ -55,16 +58,20 @@ export default function InsertOrderToCodBoard({open, onClose, currentDate, showN
             
             onClose();
             setSelectedOrders([]);
+
+            setIsInserting(false);
         } catch (error) {        
             console.log('There was an error: ', error);
             showNotification('error', 'There was an error: ' + error);
+
+            setIsInserting(false);
         }
     }
 
   return (
     <Modal open={open} onClose={onClose}>
         <BoxModal>
-            <ModalHead heading="Insert Orders" onClose={onClose} onClick={handleInsertOrders} buttonProps={{}} buttonLabel='INSERT' />
+            <ModalHead heading="Insert Orders" onClose={onClose} onClick={handleInsertOrders} buttonProps={{loading: isInserting}} buttonLabel='INSERT' />
 
             <Divider sx={{my: 2}} />
 
