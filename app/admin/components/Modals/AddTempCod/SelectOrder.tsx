@@ -1,18 +1,6 @@
 import { Order } from '@/app/admin/orders/page';
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Checkbox,
-  Grid,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import React, { useState } from 'react';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import StatusText from '../../StatusText';
-import { ORDER_STATUS } from '@/app/utils/enum';
 import OrderSearch from '../../Autocomplete/OrderSearch';
 
 interface IProps {
@@ -72,7 +60,11 @@ export default function SelectOrder({
     <>
       <Box display="flex" flexDirection="column" gap={1.5} mt={2}>
         <Typography variant="subtitle1">Route</Typography>
-        <OrderSearch orders={orders} selectedOrders={selectedOrders} onChangeSelectOrders={onChangeSelectOrders} />
+        <OrderSearch
+          orders={orders}
+          selectedOrders={selectedOrders}
+          onChangeSelectOrders={onChangeSelectOrders}
+        />
       </Box>
 
       <Box display="flex" justifyContent="flex-end" mt={2}>

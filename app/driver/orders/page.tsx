@@ -43,7 +43,7 @@ function CircularProgressWithLabel(props: any) {
         variant="determinate"
         size={120}
         value={value > 100 ? 100 : value}
-        sx={{ color: props.color}}
+        sx={{ color: props.color }}
       />
       <Box
         sx={{
@@ -162,7 +162,7 @@ export default function OrdersPage() {
     return filteredOrders;
   };
 
-  const initializeOrders = () => { 
+  const initializeOrders = () => {
     setOrders(ordersResponse?.data.deliveryOrders);
     if (currentTab === 'Delivered') {
       const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter(

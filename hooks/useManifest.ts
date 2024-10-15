@@ -65,7 +65,7 @@ const useManifest = (
             // map to attach order information
             routeId: route.routeId,
             ...order,
-          }
+          };
         });
       return relatedRoutes;
     });
@@ -75,7 +75,6 @@ const useManifest = (
     // Arrange as user route
     const sortedOrderByRoutes = [];
     for (const selectedRoute of selectedRoutes) {
-
       const sortedUserIds = userRoute.data[selectedRoute.id];
 
       // If that route does not have any orders

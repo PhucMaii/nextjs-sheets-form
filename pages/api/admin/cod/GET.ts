@@ -32,9 +32,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   routes: true,
                 },
               },
+            },
           },
         },
-      }
       });
 
       if (!codBoard) {
@@ -43,23 +43,25 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const boardOrdersWithTotalPriceItems = codBoard.orders.map((order: any) => {
-        const formattedItems = order.items.map((item: OrderedItems) => {
-          const totalPrice = item.quantity * item.price;
-          return {
-            ...item,
-            totalPrice,
-          };
-        });
+      const boardOrdersWithTotalPriceItems = codBoard.orders.map(
+        (order: any) => {
+          const formattedItems = order.items.map((item: OrderedItems) => {
+            const totalPrice = item.quantity * item.price;
+            return {
+              ...item,
+              totalPrice,
+            };
+          });
 
-        return {
-          ...order,
-          items: formattedItems,
-        }
-      })
+          return {
+            ...order,
+            items: formattedItems,
+          };
+        },
+      );
 
       return res.status(200).json({
-        data: {...codBoard, orders: boardOrdersWithTotalPriceItems},
+        data: { ...codBoard, orders: boardOrdersWithTotalPriceItems },
       });
     }
 

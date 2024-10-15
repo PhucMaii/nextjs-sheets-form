@@ -387,7 +387,12 @@ export default function Orders() {
     updatedItem: OrderedItems,
   ) => {
     try {
-      const response: any = await updateOrderedItems(orderTotalPrice, order, updatedItem, showNotification);
+      const response: any = await updateOrderedItems(
+        orderTotalPrice,
+        order,
+        updatedItem,
+        showNotification,
+      );
 
       // Optimistic update
       handleUpdateUISingleOrder(order, response.data.data);

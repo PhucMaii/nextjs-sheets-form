@@ -1,4 +1,11 @@
-import { Box, Button, Divider, Grid, IconButton, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  Grid,
+  IconButton,
+  Typography,
+} from '@mui/material';
 import React from 'react';
 import { ShadowSection } from '../../reports/styled';
 import RememberMeIcon from '@mui/icons-material/RememberMe';
@@ -19,8 +26,15 @@ interface IProps {
   handleDeleteBoard: any;
 }
 
-export default function CODBoardSummary({ boardData, onSelect, handleDeleteBoard }: IProps) {
-  const uncollectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED]);
+export default function CODBoardSummary({
+  boardData,
+  onSelect,
+  handleDeleteBoard,
+}: IProps) {
+  const uncollectedOrders = useFilterOrders(boardData.orders, [
+    ORDER_STATUS.INCOMPLETED,
+    ORDER_STATUS.DELIVERED,
+  ]);
 
   const uncollectedAmount = uncollectedOrders.reduce(
     (acc: number, order: Order) => {
@@ -29,7 +43,9 @@ export default function CODBoardSummary({ boardData, onSelect, handleDeleteBoard
     0,
   );
 
-  const collectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.COMPLETED]);
+  const collectedOrders = useFilterOrders(boardData.orders, [
+    ORDER_STATUS.COMPLETED,
+  ]);
 
   const collectedAmount = collectedOrders.reduce(
     (acc: number, order: Order) => {
@@ -48,7 +64,9 @@ export default function CODBoardSummary({ boardData, onSelect, handleDeleteBoard
         <Box display="flex" alignItems="center" gap={1}>
           <StatusText
             text={boardData.status}
-            type={boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'}
+            type={
+              boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'
+            }
             icon={
               boardData.status === COD_STATUS.CLEARED ? (
                 <CheckIcon fontSize="small" color="success" />
@@ -57,8 +75,11 @@ export default function CODBoardSummary({ boardData, onSelect, handleDeleteBoard
               )
             }
           />
-          <IconButton color="error" onClick={() => handleDeleteBoard(boardData.id)}>
-            <RemoveCircleIcon fontSize="large"/>
+          <IconButton
+            color="error"
+            onClick={() => handleDeleteBoard(boardData.id)}
+          >
+            <RemoveCircleIcon fontSize="large" />
           </IconButton>
         </Box>
       </Box>

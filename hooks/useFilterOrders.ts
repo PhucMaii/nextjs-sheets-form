@@ -2,13 +2,16 @@ import { Order } from '@/app/admin/orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { useMemo } from 'react';
 
-export const filterOrderByStatus = (orderList: Order[], statuses: ORDER_STATUS[]) => {
+export const filterOrderByStatus = (
+  orderList: Order[],
+  statuses: ORDER_STATUS[],
+) => {
   const filteredOrders = orderList.filter((order: Order) => {
     return statuses.includes(order.status);
   });
 
   return filteredOrders;
-}
+};
 
 const useFilterOrders = (orders: Order[], statuses: ORDER_STATUS[]) => {
   const filteredOrders = useMemo(() => {

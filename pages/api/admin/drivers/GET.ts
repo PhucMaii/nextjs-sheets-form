@@ -21,8 +21,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           day,
         },
         include: {
-          driver: true
-        }
+          driver: true,
+        },
       });
 
       const drivers = dayRoutes.map((route) => {

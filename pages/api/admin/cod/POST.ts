@@ -66,13 +66,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         deliveryDate: date,
         status: {
-          not: ORDER_STATUS.VOID
+          not: ORDER_STATUS.VOID,
         },
         user: {
           preference: {
-            paymentType: PAYMENT_TYPE.COD
-          }
-        }
+            paymentType: PAYMENT_TYPE.COD,
+          },
+        },
       },
       include: {
         items: true,
@@ -83,13 +83,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             routes: true,
           },
         },
-      }
+      },
     });
 
     const selectedRoute = await prisma.route.findFirst({
       where: {
         day,
-        driverId
+        driverId,
       },
       include: {
         clients: {
@@ -97,8 +97,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             user: true,
           },
         },
-      }
-    })
+      },
+    });
 
     const orders = filterByRoute(dateOrders, selectedRoute);
 

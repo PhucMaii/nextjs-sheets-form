@@ -15,9 +15,12 @@ import useFilterOrders from '@/hooks/useFilterOrders';
 export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
   const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
-  }, 0)
+  }, 0);
 
-  const uncollectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED])
+  const uncollectedOrders = useFilterOrders(boardData.orders, [
+    ORDER_STATUS.INCOMPLETED,
+    ORDER_STATUS.DELIVERED,
+  ]);
 
   const uncollectedAmount = uncollectedOrders.reduce(
     (acc: number, order: Order) => {
@@ -26,7 +29,9 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
     0,
   );
 
-  const collectedOrders = useFilterOrders(boardData.orders, [ORDER_STATUS.COMPLETED]);
+  const collectedOrders = useFilterOrders(boardData.orders, [
+    ORDER_STATUS.COMPLETED,
+  ]);
 
   return (
     <Grid container spacing={2}>

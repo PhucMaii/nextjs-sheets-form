@@ -173,7 +173,9 @@ export const ManifestPrint = forwardRef(
                                   fontWeight: 'bold',
                                 }}
                               >
-                                {clientName} - {user?.user?.preference?.paymentType} - {user.user.clientId}
+                                {clientName} -{' '}
+                                {user?.user?.preference?.paymentType} -{' '}
+                                {user.user.clientId}
                               </BorderRightTableCell>
                               {sortedItems.map(
                                 (item: string, index: number) => {

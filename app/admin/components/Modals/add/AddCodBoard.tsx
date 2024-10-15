@@ -13,10 +13,7 @@ import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
 import { SWRFetchData } from '@/app/utils/db';
-import {
-  API_URL,
-  COD_STATUS,
-} from '@/app/utils/enum';
+import { API_URL, COD_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
 import { getCreatedAt } from '@/app/utils/time';
 import { UserContext } from '@/app/context/UserContextAPI';
@@ -95,7 +92,7 @@ export default function AddCodBoard({
           heading="Add Board"
           buttonLabel="Add"
           onClick={addNewBoard}
-          buttonProps={{loading: isLoading}}
+          buttonProps={{ loading: isLoading }}
           onClose={onClose}
         />
 
