@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -38,7 +38,7 @@ const EditClient = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUnavailableRangeOpen, setIsUnavailableRangeOpen] =
     useState<boolean>(false);
-  const [updatedClient, setUpdatedClient] = useState<UserType>(client);
+  const [updatedClient, setUpdatedClient] = useState<UserType>({...client, password: '' });
 
   const handleOnChangeClient = (key: string, value: any) => {
     if (key === 'category') {
@@ -51,12 +51,6 @@ const EditClient = ({
       setUpdatedClient({ ...updatedClient, [key]: value });
     }
   };
-
-  useEffect(() => {
-    if (client?.clientId === '00100') {
-      console.log(isOpen, client.clientId);
-    }
-  }, [client]);
 
   return (
     <>
@@ -91,6 +85,8 @@ const EditClient = ({
                   deliveryAddress: deliveryAddress.description,
                   contactNumber: updatedClient.contactNumber,
                   categoryId: updatedClient.categoryId,
+                  email: updatedClient.email,
+                  password: updatedClient.password,
                 })
               }
             >
@@ -135,6 +131,33 @@ const EditClient = ({
                 value={updatedClient.clientName}
                 onChange={(e) =>
                   handleOnChangeClient('clientName', e.target.value)
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Email:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                placeholder='Enter user email...'
+                label="Email"
+                fullWidth
+                value={updatedClient?.email}
+                onChange={(e) =>
+                  handleOnChangeClient('email', e.target.value)
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Password:</Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Password"
+                fullWidth
+                value={updatedClient?.password}
+                onChange={(e) =>
+                  handleOnChangeClient('password', e.target.value)
                 }
               />
             </Grid>

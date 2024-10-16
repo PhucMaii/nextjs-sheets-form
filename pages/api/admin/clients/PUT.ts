@@ -3,6 +3,7 @@ import { ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import { IItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import bcrypt from 'bcryptjs';
 
 interface BodyTypes {
   userId: number;
@@ -13,6 +14,8 @@ interface BodyTypes {
   orderType?: ORDER_TYPE;
   paymentType?: PAYMENT_TYPE;
   categoryId?: number;
+  email?: string;
+  password?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -27,7 +30,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryId,
       orderType,
       paymentType,
+      email,
+      password,
     }: BodyTypes = req.body;
+
+    console.log(email, 'email');
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -37,20 +44,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updateFields: any = {};
 
-    if (clientId) {
-      updateFields.clientId = clientId;
-    }
+    updateFields.clientId = clientId;
+    updateFields.clientName = clientName;
+    updateFields.email = email;
+    updateFields.deliveryAddress = deliveryAddress;
+    updateFields.contactNumber = contactNumber;
 
-    if (clientName) {
-      updateFields.clientName = clientName;
-    }
-
-    if (deliveryAddress) {
-      updateFields.deliveryAddress = deliveryAddress;
-    }
-
-    if (contactNumber) {
-      updateFields.contactNumber = contactNumber;
+    if (password) {
+      updateFields.password = await bcrypt.hash(password, 12);
     }
 
     if (categoryId) {

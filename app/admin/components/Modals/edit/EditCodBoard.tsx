@@ -32,7 +32,7 @@ export default function EditCodBoard({
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedBoard, setUpdatedBoard] = useState<IBoard>(codBoard);
-  const { date, setDate, SelectDate } = useSelectDate(codBoard.date, true);
+  const { date, SelectDate } = useSelectDate(codBoard.date, true);
 
   const [drivers] = SWRFetchData(`${API_URL.ADMIN}/drivers?date=${date}`);
 

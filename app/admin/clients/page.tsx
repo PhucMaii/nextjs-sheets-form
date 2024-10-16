@@ -35,7 +35,7 @@ import AddClient from '../components/Modals/add/AddClient';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import ClientDetails from '../components/Clients/ClientDetails';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);

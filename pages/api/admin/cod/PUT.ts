@@ -1,6 +1,5 @@
 import { IBoard } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
-import { drive } from 'googleapis/build/src/apis/drive';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {

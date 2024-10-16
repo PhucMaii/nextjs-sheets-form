@@ -3,7 +3,6 @@ import { filterByRoute } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { IRoutes } from '@/app/utils/type';
 import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
-import exp from 'constants';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
