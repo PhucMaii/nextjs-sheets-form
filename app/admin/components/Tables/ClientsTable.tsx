@@ -3,6 +3,7 @@ import {
   AlertColor,
   Box,
   Checkbox,
+  IconButton,
   MenuItem,
   Paper,
   Select,
@@ -23,6 +24,7 @@ import { Category } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditClient from '../Modals/edit/EditClient';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 interface PropTypes {
   categories: Category[];
@@ -84,9 +86,10 @@ const ClientsTable = ({
             onClick={handleSelectAll}
           />
         </TableCell>
-        <TableCell variant="head" style={{ width: 150 }}>
+        <TableCell style={{width: 50}}></TableCell>
+        {/* <TableCell variant="head" style={{ width: 150 }}>
           <Typography fontWeight="bold">Order Type</Typography>
-        </TableCell>
+        </TableCell> */}
         <TableCell variant="head" style={{ width: 200 }}>
           <Typography fontWeight="bold">Payment Type</Typography>
         </TableCell>
@@ -122,7 +125,7 @@ const ClientsTable = ({
             checked={isClientSelected}
           />
         </TableCell>
-        <TableCell>
+        {/* <TableCell>
           <Select
             value={client.preference?.orderType || 'N/A'}
             onChange={(e) =>
@@ -141,6 +144,11 @@ const ClientsTable = ({
               );
             })}
           </Select>
+        </TableCell> */}
+        <TableCell align="center">
+          <IconButton color="primary" onClick={() => handleDirectToDetails(client.id)}>
+            <VisibilityIcon  />
+          </IconButton>
         </TableCell>
         <TableCell>
           <Select
@@ -200,7 +208,6 @@ const ClientsTable = ({
           aria-checked={isClientSelected}
           selected={isClientSelected}
           sx={{ cursor: 'pointer' }}
-          onClick={() => handleDirectToDetails(item)}
           {...props}
         />
       );
