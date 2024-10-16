@@ -110,7 +110,7 @@ export default function CODBoardSummary({
             </Box>
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography variant="h5" textAlign="center">
-                ${uncollectedAmount}
+                ${uncollectedAmount.toFixed(2)}
               </Typography>
               <Typography variant="body2" color={grey[600]}>
                 Uncollected Amount
@@ -118,7 +118,7 @@ export default function CODBoardSummary({
             </Box>
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography variant="h5" textAlign="center">
-                ${collectedAmount}
+                ${collectedAmount.toFixed(2)}
               </Typography>
               <Typography variant="body2" color={grey[600]}>
                 Collected Amount

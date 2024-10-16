@@ -3,6 +3,7 @@ import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 import POST from './POST';
 import GET from './GET';
 import DELETE from './DELETE';
+import PUT from './PUT';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -18,6 +19,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (req.method === 'DELETE') {
       const response = await DELETE(req, res);
+      return response;
+    }
+
+    if (req.method === 'PUT') {
+      const response = await PUT(req, res);
       return response;
     }
 

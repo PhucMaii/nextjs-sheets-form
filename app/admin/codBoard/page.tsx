@@ -20,6 +20,9 @@ import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
 import InsertOrderToCodBoard from '../components/Modals/add/InsertOrderToCodBoard';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
+import UnsettledOrders from '../components/Modals/UnsettledOrders';
+import { boolean } from 'yup';
+import { Order } from '../orders/page';
 
 export default function CodBoard() {
   const [selectedBoard, setSelectedBoard] = useState<IBoard | null>(null);

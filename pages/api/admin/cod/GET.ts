@@ -3,6 +3,7 @@ import { filterByRoute } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { IRoutes } from '@/app/utils/type';
 import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
+import exp from 'constants';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -17,11 +18,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { id, date }: IQuery = req.query;
 
     if (id) {
-      const codBoard = await prisma.codBoard.findUnique({
+      const codBoard: any = await prisma.codBoard.findUnique({
         where: {
           id: Number(id),
         },
         include: {
+          driver: true,
           orders: {
             include: {
               items: true,
@@ -60,8 +62,37 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      const uncollectedOrders = boardOrdersWithTotalPriceItems.filter(
+        (order: Orders) => {
+          return (
+            order.status !== ORDER_STATUS.COMPLETED &&
+            order.status !== ORDER_STATUS.VOID
+          );
+        },
+      );
+
+      const uncollectedAmount = uncollectedOrders.reduce(
+        (acc: number, order: Orders) => {
+          return acc + order.totalPrice;
+        },
+        0,
+      );
+
+      const cashDiff = Math.abs(codBoard.cash - uncollectedAmount);
+
+      const expectedUnpaidOrders = boardOrdersWithTotalPriceItems.filter(
+        (order: Orders) => {
+          return order.totalPrice <= cashDiff;
+        },
+      );
+
       return res.status(200).json({
-        data: { ...codBoard, orders: boardOrdersWithTotalPriceItems },
+        data: {
+          ...codBoard,
+          orders: boardOrdersWithTotalPriceItems,
+          expectedUnpaidOrders,
+          cashDiff,
+        },
       });
     }
 
