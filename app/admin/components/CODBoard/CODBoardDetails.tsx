@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IBoard, OrderedItems } from '@/app/utils/type';
-import { blueGrey, yellow } from '@mui/material/colors';
+import { blueGrey } from '@mui/material/colors';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import OverviewBoard from './OverviewBoard';
 import useDebounce from '@/hooks/useDebounce';
@@ -27,7 +27,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DropdownItemContainer } from '../../orders/styled';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+// import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
   errorColor,
   infoColor,
@@ -52,31 +52,27 @@ import EditIcon from '@mui/icons-material/Edit';
 
 interface IProps {
   boardData: IBoard;
-  // onClose: () => void;
-  setSelectedBoard: any;
+  onClose: () => void;
   showNotification: any;
   setIsOpenInsertOrders: any;
 }
 
 export default function CODBoardDetails({
   boardData,
-  setSelectedBoard,
+  onClose,
   showNotification,
   setIsOpenInsertOrders,
 }: IProps) {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
-  const [board, setBoard] = useState<IBoard>(boardData);
+  // const [board, setBoard] = useState<IBoard>(boardData);
   const [filterButtonAnchor, setFilterButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openFilterDropdown = Boolean(filterButtonAnchor);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [orders, setOrders] = useState<{
-    displayOrders: Order[];
-    baseOrders: Order[];
-  }>({ displayOrders: [], baseOrders: [] });
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isOpenEditCodBoard, setIsOpenEditCodBoard] = useState<boolean>(false);
   const [unsettledOrders, setUnsettledOrders] = useState<{
     isOpen: boolean;
@@ -89,28 +85,23 @@ export default function CODBoardDetails({
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const [boardResponse, mutateBoard] = SWRFetchData(
+  const [boardResponse, mutateBoard, isValidating] = SWRFetchData(
     `${API_URL.ADMIN}/cod?id=${boardData.id}`,
   );
 
-  console.log(boardData, 'boardData');
   useEffect(() => {
-    if (boardResponse) {
-      const { orders, ...restOfData } = boardResponse.data;
-      setOrders({
-        displayOrders: orders,
-        baseOrders: orders,
-      });
-      setBoard(restOfData);
-      setIsLoading(false);
-    } else {
+    if (isValidating && !boardResponse) {
       setIsLoading(true);
+    } else {
+      const { orders  } = boardResponse.data;
+      setOrders(orders);
+      setIsLoading(false);
     }
   }, [boardResponse, boardData]);
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newOrderList = orders.baseOrders.filter((order: Order) => {
+      const newOrderList = boardResponse?.data?.orders?.filter((order: Order) => {
         if (
           order.user.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
@@ -122,9 +113,9 @@ export default function CODBoardDetails({
         }
         return false;
       });
-      setOrders({ ...orders, displayOrders: newOrderList });
+      setOrders(newOrderList);
     } else {
-      setOrders({ ...orders, displayOrders: orders.baseOrders });
+      setOrders(boardResponse?.data?.orders);
     }
   }, [debouncedKeywords]);
 
@@ -163,16 +154,16 @@ export default function CODBoardDetails({
   };
 
   const filterOrders = (status: ORDER_STATUS) => {
-    const newOrderList = filterOrderByStatus(orders.baseOrders, [status]);
-    setOrders({ ...orders, displayOrders: newOrderList });
+    const newOrderList = filterOrderByStatus(boardResponse?.data?.orders, [status]);
+    setOrders(newOrderList);
   };
 
   const handleSelectAll = (e: any) => {
     e.preventDefault();
-    if (selectedOrders.length === orders.baseOrders.length) {
+    if (selectedOrders.length === boardResponse?.data?.orders.length) {
       setSelectedOrders([]);
     } else {
-      setSelectedOrders(orders.baseOrders);
+      setSelectedOrders(boardResponse?.data?.orders);
     }
   };
 
@@ -345,7 +336,7 @@ export default function CODBoardDetails({
       >
         <MenuItem
           onClick={() => {
-            filterOrders(ORDER_STATUS.COMPLETED);
+            setOrders(boardResponse?.data?.orders);
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -404,7 +395,7 @@ export default function CODBoardDetails({
         showNotification={showNotification}
         open={isOpenEditCodBoard}
         onClose={() => setIsOpenEditCodBoard(false)}
-        codBoard={board}
+        codBoard={boardResponse?.data || {}}
       />
       <UnsettledOrders
         open={unsettledOrders.isOpen}
@@ -421,13 +412,13 @@ export default function CODBoardDetails({
       <Box display="flex" flexDirection="column" gap={2}>
         {/* Header */}
         <Box display="flex" alignItems="center" gap={2}>
-          <IconButton onClick={() => setSelectedBoard(null)}>
+          <IconButton onClick={onClose}>
             <ArrowBackIcon fontSize="medium" />
           </IconButton>
 
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="h5" color={blueGrey[800]}>
-              {board?.driver?.name}'s Board
+              {boardResponse?.data?.driver?.name}'s Board
             </Typography>
             <AssignmentIndIcon
               fontSize="medium"
@@ -443,7 +434,7 @@ export default function CODBoardDetails({
         </Box>
 
         {/* Overview Cards */}
-        <OverviewBoard boardData={{ ...board, orders: orders.baseOrders }} />
+        <OverviewBoard boardData={{ ...boardResponse?.data, orders: boardResponse?.data?.orders || [] }} />
 
         {/* Search Bar */}
         <Grid container alignItems="center" spacing={2}>
@@ -474,14 +465,14 @@ export default function CODBoardDetails({
           <FormControlLabel
             control={
               <Checkbox
-                checked={orders.baseOrders.length === selectedOrders.length}
+                checked={boardResponse?.data?.orders.length === selectedOrders.length}
                 onClick={handleSelectAll}
               />
             }
             label="Select All"
           />
 
-          <Button
+          {/* <Button
             sx={{ color: yellow[800] }}
             onClick={() =>
               setUnsettledOrders({
@@ -494,7 +485,7 @@ export default function CODBoardDetails({
               <AutoAwesomeIcon />
               <Typography fontWeight="bold">Unsettled Orders</Typography>
             </Box>
-          </Button>
+          </Button> */}
         </Box>
 
         {/* Orders */}
@@ -507,10 +498,10 @@ export default function CODBoardDetails({
       >
         {isLoading ? (
           <LoadingComponent />
-        ) : orders.displayOrders.length === 0 ? (
+        ) : orders.length === 0 ? (
           <ErrorComponent errorText="No orders found" />
         ) : (
-          orders.displayOrders.map((order: Order, index: number) => (
+          orders.map((order: Order, index: number) => (
             <OrderAccordion
               key={index}
               order={order}

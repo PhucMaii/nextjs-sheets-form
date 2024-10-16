@@ -22,7 +22,7 @@ import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 
 export default function CodBoard() {
-  const [selectedBoard, setSelectedBoard] = useState<IBoard | null>(null);
+  const [selectedBoard, setSelectedBoard] = useState<IBoard | any>(null);
   const [deleteBoard, setDeleteBoard] = useState<{
     isOpen: boolean;
     id: number;
@@ -66,6 +66,18 @@ export default function CodBoard() {
     }
   };
 
+  if (selectedBoard) {
+    return <Sidebar>
+      <CODBoardDetails
+        boardData={selectedBoard}
+        // setSelectedBoard={setSelectedBoard}
+        onClose={() => setSelectedBoard(null)}
+        showNotification={showNotification}
+        setIsOpenInsertOrders={setIsOpenInsertOrders}
+      />
+    </Sidebar>
+  }
+
   return (
     <Sidebar>
       <DeleteModal
@@ -89,16 +101,6 @@ export default function CodBoard() {
         currentDate={date}
         showNotification={showNotification}
       />
-      {selectedBoard ? (
-        <CODBoardDetails
-          boardData={selectedBoard}
-          setSelectedBoard={setSelectedBoard}
-          // onClose={() => setSelectedBoard(null)}
-          showNotification={showNotification}
-          setIsOpenInsertOrders={setIsOpenInsertOrders}
-        />
-      ) : (
-        <>
           <Typography variant="h5" color={blueGrey[800]}>
             C.O.D Board
           </Typography>
@@ -150,8 +152,6 @@ export default function CodBoard() {
               )}
             </Box>
           </Box>
-        </>
-      )}
     </Sidebar>
   );
 }

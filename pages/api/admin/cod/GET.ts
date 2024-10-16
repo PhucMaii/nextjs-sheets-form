@@ -1,5 +1,5 @@
 import { days } from '@/app/lib/constant';
-import { filterByRoute } from '@/app/utils/array';
+import { filterByRoute, findCombinations } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { IRoutes } from '@/app/utils/type';
 import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
@@ -85,11 +85,28 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      const expectedUnpaidAmount = expectedUnpaidOrders.reduce(
+        (acc: any, order: Orders) => {
+          if (acc[order.id]) {
+            acc[order.id] = acc[order.id] + order.totalPrice;
+            return acc;
+          }
+
+          acc[order.id] = order.totalPrice;
+          return acc;
+        },
+        {},
+      );
+
+      const expectedUnpaidCombinations = findCombinations(Array.from(new Set(Object.values(expectedUnpaidAmount))), cashDiff);
+      console.log(expectedUnpaidCombinations, 'expectedUnpaidCombinations');
+
       return res.status(200).json({
         data: {
           ...codBoard,
           orders: boardOrdersWithTotalPriceItems,
           expectedUnpaidOrders,
+          expectedUnpaidCombinations,
           cashDiff,
         },
       });

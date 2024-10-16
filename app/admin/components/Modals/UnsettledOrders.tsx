@@ -36,7 +36,7 @@ export default function UnsettledOrders({
 }: IProps) {
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal display="flex" flexDirection="column">
+      <BoxModal display="flex" flexDirection="column" maxHeight="80vh">
         <Typography variant="h5" textAlign="center">
           Unsettled Orders
         </Typography>

@@ -29,7 +29,7 @@ export default function ClientDetails({ clientData, onClose }: IProps) {
     } else {
       setIsLoading(false);
     }
-  });
+  }, [orders]);
 
   return (
     <Box>

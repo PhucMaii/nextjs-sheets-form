@@ -150,3 +150,26 @@ export const filterByRoute = (orders: Order[], currentRoute: any) => {
 
   return filteredOrders;
 };
+
+export const findCombinations = (arr: number[], target: number) => {
+  const result: number[][] = [];
+
+  function backtrack(start: number, currentCombo: number[], currentSum: number) {
+    if (currentSum === target) {
+      result.push([...currentCombo]);
+    }
+
+    if (currentSum > target || start >= arr.length) {
+      return;
+    }
+
+    for (let i = start; i < arr.length; i++) {
+      currentCombo.push(arr[i]); // include the current element
+      backtrack(i + 1, currentCombo, currentSum + arr[i]); // move to the next index to avoid using the same number
+      currentCombo.pop(); // backtrack
+    }
+  }
+
+  backtrack(0, [], 0);
+  return result;
+}
