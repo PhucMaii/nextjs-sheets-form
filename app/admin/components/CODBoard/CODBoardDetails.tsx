@@ -52,14 +52,15 @@ import EditIcon from '@mui/icons-material/Edit';
 
 interface IProps {
   boardData: IBoard;
-  onClose: () => void;
+  // onClose: () => void;
+  setSelectedBoard: any;
   showNotification: any;
   setIsOpenInsertOrders: any;
 }
 
 export default function CODBoardDetails({
   boardData,
-  onClose,
+  setSelectedBoard,
   showNotification,
   setIsOpenInsertOrders,
 }: IProps) {
@@ -92,6 +93,7 @@ export default function CODBoardDetails({
     `${API_URL.ADMIN}/cod?id=${boardData.id}`,
   );
 
+  console.log(boardData, 'boardData');
   useEffect(() => {
     if (boardResponse) {
       const { orders, ...restOfData } = boardResponse.data;
@@ -104,7 +106,7 @@ export default function CODBoardDetails({
     } else {
       setIsLoading(true);
     }
-  }, [boardResponse]);
+  }, [boardResponse, boardData]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -419,7 +421,7 @@ export default function CODBoardDetails({
       <Box display="flex" flexDirection="column" gap={2}>
         {/* Header */}
         <Box display="flex" alignItems="center" gap={2}>
-          <IconButton onClick={onClose}>
+          <IconButton onClick={() => setSelectedBoard(null)}>
             <ArrowBackIcon fontSize="medium" />
           </IconButton>
 

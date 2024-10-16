@@ -145,7 +145,7 @@ const ClientsTable = ({
           </Select>
         </TableCell> */}
         <TableCell align="center">
-          <IconButton color="primary" onClick={() => handleDirectToDetails(client.id)}>
+          <IconButton color="primary" onClick={() => handleDirectToDetails(client)}>
             <VisibilityIcon  />
           </IconButton>
         </TableCell>
