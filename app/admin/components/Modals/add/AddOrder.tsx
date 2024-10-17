@@ -185,6 +185,9 @@ export default function AddOrder({
         if (response && response.data.warning) {
           setUnavailableRange(response.data.data.unavailableRange);
         }
+
+        setIsButtonLoading(false);
+        return;
       }
 
       if (createScheduledOrder && clientValue) {

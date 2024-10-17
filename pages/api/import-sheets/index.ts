@@ -234,9 +234,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     await pusherServer?.trigger('admin', 'incoming-order', {
+      ...updatedNewOrder,
       items: itemList,
       ...existingUser,
-      ...newOrder,
       totalPrice,
       category: userCategory,
     });
