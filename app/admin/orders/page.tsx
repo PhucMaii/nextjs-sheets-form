@@ -65,7 +65,6 @@ export interface Item {
   price: number;
   quantity: number;
   totalPrice: number;
-  // subCategoryId?: number;
 }
 
 export interface Order {

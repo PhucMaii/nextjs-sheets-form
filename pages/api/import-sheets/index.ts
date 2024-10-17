@@ -225,6 +225,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         items: true,
+        user: {
+          include: {
+            category: true,
+          }
+        },
       },
     });
 
