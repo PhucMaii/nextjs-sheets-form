@@ -228,8 +228,6 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  console.log(orders?.data, 'order');
-
   const calculateTotalBill = useCallback((): string => {
     const totalPrice = orderList.reduce(
       (acc: number, order: ScheduledOrder) => {
