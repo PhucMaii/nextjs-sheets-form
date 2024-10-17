@@ -65,7 +65,6 @@ export interface Item {
   price: number;
   quantity: number;
   totalPrice: number;
-  // subCategoryId?: number;
 }
 
 export interface Order {
@@ -216,9 +215,9 @@ export default function Orders() {
       }
       const newOrderList = baseOrders.filter((order: Order) => {
         if (
-          order.clientId.includes(debouncedKeywords) ||
+          order.user.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
-          order.clientName
+          order.user.clientName
             .toLowerCase()
             .includes(debouncedKeywords.toLowerCase())
         ) {
@@ -827,7 +826,7 @@ export default function Orders() {
                   return (
                     <OrderAccordion
                       key={index}
-                      order={order}
+                      order={order} 
                       showNotification={showNotification}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
