@@ -88,9 +88,7 @@ export default function OrdersPage() {
   const { date: datePicker, SelectDate } = useSelectDate(today);
 
   const [ordersResponse, mutateOrders] = SWRFetchData(
-    `${API_URL.DRIVER_ORDERS}?deliveryDate=${
-      currentTab === 'Today' ? today : datePicker
-    }`,
+    `${API_URL.DRIVER_ORDERS}?deliveryDate=${datePicker}`,
   );
 
   useEffect(() => {
@@ -328,11 +326,9 @@ export default function OrdersPage() {
             );
           })}
       </Box>
-      {currentTab !== 'Today' && (
         <Box display="flex" justifyContent="flex-end" my={2}>
           {SelectDate}
         </Box>
-      )}
       <Grid container my={2} spacing={2}>
         <Grid item xs={6}>
           <ShadowSection
