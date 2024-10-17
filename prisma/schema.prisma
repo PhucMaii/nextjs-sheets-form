@@ -168,11 +168,23 @@ model CodBoard {
   driver Driver @relation(fields: [driverId], references: [id])
 }
 
+model PaymentMethod {
+  id           Int       @id @default(autoincrement())
+  createdAt    String
+  createdBy    String
+  name         String
+  balance      Float
+  transactions Expense[]
+}
+
 model Expense {
-  id  Int   @id @default(autoincrement())
-  createdAt   String
-  createdBy   String
-  amount      Float
-  description  String
-  spentBy     String
+  id              Int    @id @default(autoincrement())
+  createdAt       String
+  createdBy       String
+  amount          Float
+  description     String
+  spentBy         String
+  paymentMethodId Int?
+
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
 }
