@@ -29,7 +29,6 @@ export default function CodBoard() {
   }>({ isOpen: false, id: -1 });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenAddBoard, setIsOpenAddBoard] = useState<boolean>(false);
-  const [isOpenInsertOrders, setIsOpenInsertOrders] = useState<boolean>(false);
   const { showNotification, NotificationComp } = useNotification();
 
   const today = new Date();
@@ -70,10 +69,8 @@ export default function CodBoard() {
     return <Sidebar>
       <CODBoardDetails
         boardData={selectedBoard}
-        // setSelectedBoard={setSelectedBoard}
         onClose={() => setSelectedBoard(null)}
         showNotification={showNotification}
-        setIsOpenInsertOrders={setIsOpenInsertOrders}
       />
     </Sidebar>
   }
@@ -85,14 +82,6 @@ export default function CodBoard() {
         handleCloseModal={() => setDeleteBoard({ id: -1, isOpen: false })}
         targetObj={deleteBoard.id}
         handleDelete={handleDeleteBoard}
-      />
-      <InsertOrderToCodBoard
-        open={isOpenInsertOrders}
-        onClose={() => setIsOpenInsertOrders(false)}
-        currentDate={date}
-        showNotification={showNotification}
-        boardId={selectedBoard?.id || -1}
-        mutateBoards={mutateBoards}
       />
       {NotificationComp}
       <AddCodBoard
