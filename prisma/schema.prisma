@@ -167,3 +167,12 @@ model CodBoard {
 
   driver Driver @relation(fields: [driverId], references: [id])
 }
+
+model Expense {
+  id  Int   @id @default(autoincrement())
+  createdAt   String
+  createdBy   String
+  amount      Float
+  description  String
+  spentBy     String
+}
