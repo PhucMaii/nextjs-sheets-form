@@ -1,12 +1,13 @@
-import { days } from '@/app/lib/constant';
-import { filterByRoute, findCombinations } from '@/app/utils/array';
+import { findCombinations } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { IRoutes } from '@/app/utils/type';
 import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { normalizeDate } from '../../utils/date';
+import { generateListOfDateString } from '@/app/utils/time';
 
 interface IQuery {
-  date?: string;
+  startDate?: string;
+  endDate?: string;
   id?: string;
 }
 
@@ -14,7 +15,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, date }: IQuery = req.query;
+    const { id, startDate, endDate }: IQuery = req.query;
 
     if (id) {
       const codBoard: any = await prisma.codBoard.findUnique({
@@ -99,7 +100,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       );
 
       const expectedUnpaidCombinations = findCombinations(Array.from(new Set(Object.values(expectedUnpaidAmount))), cashDiff);
-      console.log(expectedUnpaidCombinations, 'expectedUnpaidCombinations');
 
       return res.status(200).json({
         data: {
@@ -112,10 +112,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (date) {
+    if (startDate && endDate) {
+      const formattedStartDate = normalizeDate(new Date(startDate));
+      const formattedEndDate = normalizeDate(new Date(endDate));
+
+      const listOfDateString = generateListOfDateString(formattedStartDate, formattedEndDate);
+
       const allCodBoards: any = await prisma.codBoard.findMany({
         where: {
-          date,
+          date: {
+            in: listOfDateString,
+          },
         },
         include: {
           orders: {
@@ -142,10 +149,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      const selectedDate = new Date(date);
+      // const selectedDate = new Date(date);
 
-      const dayIndex = selectedDate.getDay();
-      const day = days[dayIndex];
+      // const dayIndex = selectedDate.getDay();
+      // const day = days[dayIndex];
 
       if (allCodBoards.length === 0) {
         return res.status(200).json({
@@ -154,29 +161,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const allBoardsWithDetails = allCodBoards.map((codBoard: any) => {
-        const driverRoute = codBoard.driver?.routes.find((route: IRoutes) => {
-          return route.day === day;
-        });
 
-        if (!driverRoute) {
-          return res.status(400).json({
-            error: 'Driver Route Not Found',
-          });
-        }
-
-        const boardOrders = filterByRoute(codBoard.orders, driverRoute);
-
-        const totalAmount = boardOrders.reduce((acc: number, order: Orders) => {
+        const totalAmount = codBoard.orders.reduce((acc: number, order: Orders) => {
           return acc + order.totalPrice;
         }, 0);
 
         const boardClients = new Set(
-          boardOrders.map((order: Orders) => {
+          codBoard.orders.map((order: Orders) => {
             return order.userId;
           }),
         );
 
-        const codData = getCODData(boardOrders);
+        const codData = getCODData(codBoard.orders);
 
         return {
           note: codBoard.note,
@@ -187,16 +183,26 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           date: codBoard.date,
           id: codBoard.id,
           driverId: codBoard.driverId,
+          orders: codBoard.orders,
           createdBy: codBoard.createdBy,
-          orders: boardOrders,
           totalAmount,
           boardClients: Array.from(boardClients),
           ...codData,
         };
       });
 
+      const mappedBoard = allBoardsWithDetails.reduce((acc: any, board: any) => {
+          if (acc[board.date]) {
+            acc[board.date] = acc[board.date].concat(board);
+            return acc;
+          }
+
+          acc[board.date] = [board];
+          return acc;
+      }, {});
+
       return res.status(200).json({
-        data: allBoardsWithDetails,
+        data: mappedBoard,
       });
     }
 

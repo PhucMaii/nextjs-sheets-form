@@ -49,19 +49,18 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import UnsettledOrders from '../Modals/UnsettledOrders';
 import EditCodBoard from '../Modals/edit/EditCodBoard';
 import EditIcon from '@mui/icons-material/Edit';
+import InsertOrderToCodBoard from '../Modals/add/InsertOrderToCodBoard';
 
 interface IProps {
   boardData: IBoard;
   onClose: () => void;
   showNotification: any;
-  setIsOpenInsertOrders: any;
 }
 
 export default function CODBoardDetails({
   boardData,
   onClose,
   showNotification,
-  setIsOpenInsertOrders,
 }: IProps) {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -72,6 +71,7 @@ export default function CODBoardDetails({
   const openFilterDropdown = Boolean(filterButtonAnchor);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isOpenInsertOrders, setIsOpenInsertOrders] = useState<boolean>(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isOpenEditCodBoard, setIsOpenEditCodBoard] = useState<boolean>(false);
   const [unsettledOrders, setUnsettledOrders] = useState<{
@@ -390,6 +390,14 @@ export default function CODBoardDetails({
 
   return (
     <>
+      <InsertOrderToCodBoard
+        open={isOpenInsertOrders}
+        onClose={() => setIsOpenInsertOrders(false)}
+        currentDate={boardData?.date}
+        showNotification={showNotification}
+        boardId={boardData?.id}
+        mutateBoards={mutateBoard}
+      />
       <EditCodBoard
         mutateBoard={mutateBoard}
         showNotification={showNotification}

@@ -195,6 +195,7 @@ export default function Orders() {
     pusherClient?.subscribe('void-order');
 
     pusherClient?.bind('incoming-order', (order: Order) => {
+      console.log(order,  'Incoming order');
       setIncomingOrder(order);
       mutate();
     });

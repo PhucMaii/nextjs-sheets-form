@@ -61,17 +61,17 @@ export default function DeleteScheduleOrder({
               variant="outlined"
               color="error"
               loading={isDeleting}
-              onClick={() => handleDeleteOrder(DELETE_OPTION.PERMANENT)}
+              onClick={() => setIsOpen(false)}
             >
-              DELETE
+              CANCEL
             </LoadingButton>
             <LoadingButton
               loading={isDeleting}
-              onClick={() => handleDeleteOrder(DELETE_OPTION.TEMPORARY)}
+              onClick={() => handleDeleteOrder(DELETE_OPTION.PERMANENT)}
               variant="contained"
               color="error"
             >
-              REMOVE FROM ROUTE
+              DELETE
             </LoadingButton>
           </Box>
         </BoxModal>

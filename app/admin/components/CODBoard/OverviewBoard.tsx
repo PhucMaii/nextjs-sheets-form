@@ -41,7 +41,7 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           backgroundColor={primary.lightest}
           icon={<MoneyOffIcon fontSize="large" color="primary" />}
           text="Uncleared Amount"
-          value={uncollectedAmount}
+          value={uncollectedAmount?.toFixed(2)}
           extraText={{
             text: `/${totalAmount}`,
             color: blueGrey[500],
