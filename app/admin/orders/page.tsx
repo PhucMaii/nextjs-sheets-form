@@ -195,7 +195,6 @@ export default function Orders() {
     pusherClient?.subscribe('void-order');
 
     pusherClient?.bind('incoming-order', (order: Order) => {
-      console.log(order,  'Incoming order');
       setIncomingOrder(order);
       mutate();
     });
@@ -218,7 +217,7 @@ export default function Orders() {
         if (
           order.user.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
-          order.user.clientName
+          order?.user?.clientName
             .toLowerCase()
             .includes(debouncedKeywords.toLowerCase())
         ) {

@@ -43,9 +43,9 @@ export default function SearchModal({
     if (debouncedKeywords) {
       const newOrderList = baseOrderList.filter((order: Order) => {
         if (
-          order.clientId.includes(debouncedKeywords) ||
+          order.user.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
-          order.clientName
+          order.user.clientName
             .toLowerCase()
             .includes(debouncedKeywords.toLowerCase())
         ) {

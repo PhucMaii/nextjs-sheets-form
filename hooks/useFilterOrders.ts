@@ -15,7 +15,7 @@ export const filterOrderByStatus = (
 
 const useFilterOrders = (orders: Order[], statuses: ORDER_STATUS[]) => {
   const filteredOrders = useMemo(() => {
-    return orders.filter((order: Order) => {
+    return orders?.filter((order: Order) => {
       return statuses.includes(order.status);
     });
   }, [orders]);
