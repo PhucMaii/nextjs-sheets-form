@@ -2,7 +2,7 @@ import { Order } from '@/app/admin/orders/page';
 // import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { sortByDeliveryDate } from '@/pages/api/utils/date';
+import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -30,8 +30,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const formattedStartDate = new Date(startDate);
-    const formattedEndDate = new Date(endDate);
+    const formattedStartDate = normalizeDate(new Date(startDate));
+    const formattedEndDate = normalizeDate(new Date(endDate));
+
+    formattedEndDate.setDate(formattedEndDate.getDate() - 1);
 
     if (formattedStartDate > formattedEndDate) {
       return res.status(404).json({
