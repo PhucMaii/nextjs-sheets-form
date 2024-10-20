@@ -93,7 +93,7 @@ export default function CODBoardDetails({
     if (isValidating && !boardResponse) {
       setIsLoading(true);
     } else {
-      const { orders  } = boardResponse.data;
+      const { orders } = boardResponse.data;
       setOrders(orders);
       setIsLoading(false);
     }
@@ -101,18 +101,20 @@ export default function CODBoardDetails({
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newOrderList = boardResponse?.data?.orders?.filter((order: Order) => {
-        if (
-          order.user.clientId.includes(debouncedKeywords) ||
-          debouncedKeywords == order.id.toString() ||
-          order.user.clientName
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
-        ) {
-          return true;
-        }
-        return false;
-      });
+      const newOrderList = boardResponse?.data?.orders?.filter(
+        (order: Order) => {
+          if (
+            order.user.clientId.includes(debouncedKeywords) ||
+            debouncedKeywords == order.id.toString() ||
+            order.user.clientName
+              .toLowerCase()
+              .includes(debouncedKeywords.toLowerCase())
+          ) {
+            return true;
+          }
+          return false;
+        },
+      );
       setOrders(newOrderList);
     } else {
       setOrders(boardResponse?.data?.orders);
@@ -154,7 +156,9 @@ export default function CODBoardDetails({
   };
 
   const filterOrders = (status: ORDER_STATUS) => {
-    const newOrderList = filterOrderByStatus(boardResponse?.data?.orders, [status]);
+    const newOrderList = filterOrderByStatus(boardResponse?.data?.orders, [
+      status,
+    ]);
     setOrders(newOrderList);
   };
 
@@ -442,7 +446,12 @@ export default function CODBoardDetails({
         </Box>
 
         {/* Overview Cards */}
-        <OverviewBoard boardData={{ ...boardResponse?.data, orders: boardResponse?.data?.orders || [] }} />
+        <OverviewBoard
+          boardData={{
+            ...boardResponse?.data,
+            orders: boardResponse?.data?.orders || [],
+          }}
+        />
 
         {/* Search Bar */}
         <Grid container alignItems="center" spacing={2}>
@@ -473,7 +482,9 @@ export default function CODBoardDetails({
           <FormControlLabel
             control={
               <Checkbox
-                checked={boardResponse?.data?.orders.length === selectedOrders.length}
+                checked={
+                  boardResponse?.data?.orders.length === selectedOrders.length
+                }
                 onClick={handleSelectAll}
               />
             }

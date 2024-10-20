@@ -223,9 +223,9 @@ const OrderAccordion = ({
       <ClientDetailsModal
         open={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
-        deliveryAddress={order?.user?.deliveryAddress || ""}
-        contactNumber={order?.user?.contactNumber || ""}
-        categoryName={order?.user?.category?.name || ""}
+        deliveryAddress={order?.user?.deliveryAddress || ''}
+        contactNumber={order?.user?.contactNumber || ''}
+        categoryName={order?.user?.category?.name || ''}
       />
       <EditDeliveryDate
         open={isEditDateOpen}

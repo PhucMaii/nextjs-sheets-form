@@ -13,6 +13,7 @@ interface PropTypes {
   textColor?: string;
   iconBackground?: string;
   extraText?: any;
+  fullHeight?: boolean;
 }
 
 export default function OverviewCard({
@@ -25,10 +26,14 @@ export default function OverviewCard({
   textColor,
   iconBackground,
   extraText,
+  fullHeight,
 }: PropTypes) {
   return (
     <CardStyled
-      sx={{ backgroundColor: backgroundColor ? backgroundColor : 'white' }}
+      sx={{
+        backgroundColor: backgroundColor ? backgroundColor : 'white',
+        height: fullHeight ? '100%' : 'auto',
+      }}
       onClick={onClick ? onClick : null}
     >
       <Grid container spacing={2} margin={'auto'}>

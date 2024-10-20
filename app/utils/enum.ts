@@ -56,6 +56,13 @@ export enum PAYMENT_TYPE {
   WCOD_SAT = 'WCOD - Saturday',
 }
 
+export enum PAYMENT_METHOD_TYPE {
+  CASH = 'CASH',
+  CREDIT = 'CREDIT',
+  DEBIT = 'DEBIT',
+  OTHER = 'OTHER',
+}
+
 export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',

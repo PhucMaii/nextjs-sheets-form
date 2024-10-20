@@ -228,11 +228,6 @@ export default function ReportPage() {
     setStatementAnchor(null);
   };
 
-  // const handleDateChange = (e: any) => {
-  //   const formattedDate = formatDateChanged(e);
-  //   setDatePicker(formattedDate);
-  // };
-
   const handleDeleteOrderUI = (deletedOrder: Order) => {
     // update base order list
     const newBaseOrderList = baseClientOrders.filter((order: Order) => {

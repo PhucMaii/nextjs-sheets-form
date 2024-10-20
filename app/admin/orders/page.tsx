@@ -195,7 +195,7 @@ export default function Orders() {
     pusherClient?.subscribe('void-order');
 
     pusherClient?.bind('incoming-order', (order: Order) => {
-      console.log(order,  'Incoming order');
+      console.log(order, 'Incoming order');
       setIncomingOrder(order);
       mutate();
     });
@@ -827,7 +827,7 @@ export default function Orders() {
                   return (
                     <OrderAccordion
                       key={index}
-                      order={order} 
+                      order={order}
                       showNotification={showNotification}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}

@@ -85,7 +85,7 @@ const ClientsTable = ({
             onClick={handleSelectAll}
           />
         </TableCell>
-        <TableCell style={{width: 50}}></TableCell>
+        <TableCell style={{ width: 50 }}></TableCell>
         {/* <TableCell variant="head" style={{ width: 150 }}>
           <Typography fontWeight="bold">Order Type</Typography>
         </TableCell> */}
@@ -145,8 +145,11 @@ const ClientsTable = ({
           </Select>
         </TableCell> */}
         <TableCell align="center">
-          <IconButton color="primary" onClick={() => handleDirectToDetails(client)}>
-            <VisibilityIcon  />
+          <IconButton
+            color="primary"
+            onClick={() => handleDirectToDetails(client)}
+          >
+            <VisibilityIcon />
           </IconButton>
         </TableCell>
         <TableCell>

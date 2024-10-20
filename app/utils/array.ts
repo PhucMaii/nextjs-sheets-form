@@ -154,7 +154,11 @@ export const filterByRoute = (orders: Order[], currentRoute: any) => {
 export const findCombinations = (arr: number[], target: number) => {
   const result: number[][] = [];
 
-  function backtrack(start: number, currentCombo: number[], currentSum: number) {
+  function backtrack(
+    start: number,
+    currentCombo: number[],
+    currentSum: number,
+  ) {
     if (currentSum === target) {
       result.push([...currentCombo]);
     }
@@ -172,4 +176,4 @@ export const findCombinations = (arr: number[], target: number) => {
 
   backtrack(0, [], 0);
   return result;
-}
+};

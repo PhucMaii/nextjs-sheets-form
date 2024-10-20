@@ -99,7 +99,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         {},
       );
 
-      const expectedUnpaidCombinations = findCombinations(Array.from(new Set(Object.values(expectedUnpaidAmount))), cashDiff);
+      const expectedUnpaidCombinations = findCombinations(
+        Array.from(new Set(Object.values(expectedUnpaidAmount))),
+        cashDiff,
+      );
 
       return res.status(200).json({
         data: {
@@ -116,7 +119,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const formattedStartDate = normalizeDate(new Date(startDate));
       const formattedEndDate = normalizeDate(new Date(endDate));
 
-      const listOfDateString = generateListOfDateString(formattedStartDate, formattedEndDate);
+      const listOfDateString = generateListOfDateString(
+        formattedStartDate,
+        formattedEndDate,
+      );
 
       const allCodBoards: any = await prisma.codBoard.findMany({
         where: {
@@ -161,10 +167,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const allBoardsWithDetails = allCodBoards.map((codBoard: any) => {
-
-        const totalAmount = codBoard.orders.reduce((acc: number, order: Orders) => {
-          return acc + order.totalPrice;
-        }, 0);
+        const totalAmount = codBoard.orders.reduce(
+          (acc: number, order: Orders) => {
+            return acc + order.totalPrice;
+          },
+          0,
+        );
 
         const boardClients = new Set(
           codBoard.orders.map((order: Orders) => {
@@ -191,7 +199,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         };
       });
 
-      const mappedBoard = allBoardsWithDetails.reduce((acc: any, board: any) => {
+      const mappedBoard = allBoardsWithDetails.reduce(
+        (acc: any, board: any) => {
           if (acc[board.date]) {
             acc[board.date] = acc[board.date].concat(board);
             return acc;
@@ -199,7 +208,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
           acc[board.date] = [board];
           return acc;
-      }, {});
+        },
+        {},
+      );
 
       return res.status(200).json({
         data: mappedBoard,

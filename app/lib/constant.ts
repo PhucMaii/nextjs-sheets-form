@@ -18,6 +18,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import AppBlockingIcon from '@mui/icons-material/AppBlocking';
 import SellIcon from '@mui/icons-material/Sell';
 import PaymentsIcon from '@mui/icons-material/Payments';
+import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import {
   errorColor,
@@ -25,7 +26,6 @@ import {
   successColor,
   warningColor,
 } from '../../theme/color';
-import {ReceiptIcon} from 'lucide-react';
 
 export const mainItems = [
   'BEAN 10 LB',
@@ -118,6 +118,11 @@ export const adminTabs = {
       path: '/admin/reports',
     },
     {
+      name: 'Transactions',
+      icon: SyncAltIcon,
+      path: '/admin/transactions',
+    },
+    {
       name: 'Settings',
       icon: SettingsIcon,
       path: '/admin/settings',
@@ -125,9 +130,9 @@ export const adminTabs = {
   ],
   Manage: [
     {
-      name: 'Expenses',
+      name: 'Cards',
       icon: PaymentIcon,
-      path: '/admin/expense',
+      path: '/admin/cards',
     },
     {
       name: 'Clients',

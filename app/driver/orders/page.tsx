@@ -326,9 +326,9 @@ export default function OrdersPage() {
             );
           })}
       </Box>
-        <Box display="flex" justifyContent="flex-end" my={2}>
-          {SelectDate}
-        </Box>
+      <Box display="flex" justifyContent="flex-end" my={2}>
+        {SelectDate}
+      </Box>
       <Grid container my={2} spacing={2}>
         <Grid item xs={6}>
           <ShadowSection

@@ -38,7 +38,10 @@ const EditClient = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUnavailableRangeOpen, setIsUnavailableRangeOpen] =
     useState<boolean>(false);
-  const [updatedClient, setUpdatedClient] = useState<UserType>({...client, password: '' });
+  const [updatedClient, setUpdatedClient] = useState<UserType>({
+    ...client,
+    password: '',
+  });
 
   const handleOnChangeClient = (key: string, value: any) => {
     if (key === 'category') {
@@ -139,13 +142,11 @@ const EditClient = ({
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
-                placeholder='Enter user email...'
+                placeholder="Enter user email..."
                 label="Email"
                 fullWidth
                 value={updatedClient?.email}
-                onChange={(e) =>
-                  handleOnChangeClient('email', e.target.value)
-                }
+                onChange={(e) => handleOnChangeClient('email', e.target.value)}
               />
             </Grid>
             <Grid item xs={12} md={6}>

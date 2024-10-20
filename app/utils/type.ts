@@ -2,8 +2,9 @@ import { AlertColor } from '@mui/material';
 import {
   Category,
   CodBoard,
-  DayRange,
   Driver,
+  Expense,
+  PaymentMethod,
   Route,
   User,
   UserRoute,
@@ -17,7 +18,6 @@ export interface BSData {
   percentage: number;
 }
 
-export interface IDayRange extends DayRange {}
 export interface Notification {
   on: boolean;
   type: AlertColor;
@@ -138,4 +138,12 @@ export interface IBoard extends CodBoard {
   boardClients: UserType[];
   orders: Order[];
   totalAmount: number;
+}
+
+export interface IExpense extends Expense {
+  paymentMethod: IPaymentMethod;
+}
+
+export interface IPaymentMethod extends PaymentMethod {
+  transactions: IExpense[];
 }
