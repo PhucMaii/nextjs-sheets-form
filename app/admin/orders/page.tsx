@@ -53,6 +53,7 @@ import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import { filterByRoute } from '@/app/utils/array';
 import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
+import { handleSearch } from '@/app/utils/search';
 
 interface Category {
   id: number;
@@ -195,6 +196,7 @@ export default function Orders() {
     pusherClient?.subscribe('void-order');
 
     pusherClient?.bind('incoming-order', (order: Order) => {
+      console.log(order, 'Incoming order');
       setIncomingOrder(order);
       mutate();
     });
@@ -213,18 +215,23 @@ export default function Orders() {
       if (currentRoute > 0) {
         baseOrders = filterOrderByRoute(baseOrderData);
       }
-      const newOrderList = baseOrders.filter((order: Order) => {
-        if (
-          order.user.clientId.includes(debouncedKeywords) ||
-          debouncedKeywords == order.id.toString() ||
-          order?.user?.clientName
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
-        ) {
-          return true;
-        }
-        return false;
-      });
+      // const newOrderList = baseOrders.filter((order: Order) => {
+      //   if (
+      //     order.user.clientId.includes(debouncedKeywords) ||
+      //     debouncedKeywords == order.id.toString() ||
+      //     order.user.clientName
+      //       .toLowerCase()
+      //       .includes(debouncedKeywords.toLowerCase())
+      //   ) {
+      //     return true;
+      //   }
+      //   return false;
+      // });
+      const newOrderList = handleSearch(debouncedKeywords, baseOrders, [
+        'id',
+        'user.clientName',
+        'user.clientId',
+      ])
 
       setOrderData(newOrderList);
       setPages(1);
