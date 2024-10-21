@@ -1,7 +1,7 @@
 import { generateListOfDateString } from "@/app/utils/time";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import { normalizeDate } from "../../utils/date";
+import { normalizeDate, sortExpenseByDate } from "../../utils/date";
 
 interface IQuery {
     startDate?: string;
@@ -33,11 +33,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                     date: {
                         in: listOfDateString
                     }
+                },
+                include: {
+                    paymentMethod: true
                 }
             });
+
+            const sortedExpensesByDate = sortExpenseByDate(expenses);
             
             return res.status(200).json({
-                data: expenses,
+                data: sortedExpensesByDate,
                 message: 'Fetch Expenses successfully',
             });
         }
@@ -48,11 +53,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                     in: listOfDateString
                 },
                 id: Number(id)
+            },
+            include: {
+                paymentMethod: true
             }
         });
+
+        const sortedExpensesByDate = sortExpenseByDate(expenses);
         
         return res.status(200).json({
-            data: expenses,
+            data: sortedExpensesByDate,
             message: 'Fetch Expenses successfully',
         });
     }  

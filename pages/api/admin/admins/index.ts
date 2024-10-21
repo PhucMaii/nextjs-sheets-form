@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import withAdminAuthGuard from "../../utils/withAdminAuthGuard";
+import { USER_ROLE } from "@/app/utils/enum";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
@@ -12,9 +13,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const admins = await prisma.user.findMany({
             where: {
-                role: 'admin'
+                role: USER_ROLE.ADMIN
             }
         });
+
+        console.log(admins)
 
         return res.status(200).json({ data: admins, message: 'Fetch Admins Successfully' });
 

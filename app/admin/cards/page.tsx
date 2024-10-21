@@ -43,6 +43,7 @@ export default function CardManagement() {
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+  const [transactions] = SWRFetchData(`${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`);
 
   useEffect(() => {
     if (currentMethodId !== -1) {
@@ -216,7 +217,7 @@ export default function CardManagement() {
                   </Typography>
 
                   {/* Recent Transactions */}
-                  <TransactionsTable />
+                  <TransactionsTable transactions={transactions?.data || []} />
                 </ShadowSection>
               </Grid>
 

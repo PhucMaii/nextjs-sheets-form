@@ -1,5 +1,6 @@
 import { Order } from '@/app/admin/orders/page';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import { Expense } from '@prisma/client';
 
 export const convertDeliveryDateStringToDate = (deliveryDate: string) => {
   const parts = deliveryDate.split('/');
@@ -42,6 +43,21 @@ export const sortByDeliveryDate = (orders: Order[]): any => {
   });
 
   return sortedOrders;
+};
+
+export const sortExpenseByDate = (expenses: Expense[]): any => {
+  const sortedExpense = expenses.sort((expenseA, expenseB) => {
+    const dateA: any = convertDeliveryDateStringToDate(
+      expenseA.date,
+    );
+    const dateB: any = convertDeliveryDateStringToDate(
+      expenseB.date,
+    );
+
+    return dateB - dateA;
+  });
+
+  return sortedExpense;
 };
 
 export const getSameDateLastWeek = (currentDate: string | Date) => {

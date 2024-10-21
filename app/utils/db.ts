@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import { fetcher } from '@/HOC/AuthenGuard';
 import { API_URL } from './enum';
 import { Order } from '../admin/orders/page';
+import { AlertColor } from '@mui/material';
 
 export const fetchData = async (
   api: string,
@@ -29,6 +30,26 @@ export const fetchData = async (
       type: 'error',
       message: 'There was an error: ' + error.response.data.error,
     });
+  }
+};
+
+export const fetchApi = async (
+  api: string,
+  showNotification: (type: AlertColor, message: string) => void,
+) => {
+  try {
+    const response = await axios.get(api);
+
+    if (response.data.error) {
+      showNotification('error', response.data.error);
+      return null;
+    }
+
+    return response.data.data;
+  } catch (error: any) {
+    console.log('There was an error: ', error);
+    showNotification('error', error.response.data.error);
+    return null;
   }
 };
 
