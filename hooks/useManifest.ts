@@ -23,6 +23,8 @@ const useManifest = (
     `${API_URL.ROUTES}/clients?day=${givenDay}`,
   );
 
+  // console.log(userRoute?.data, 'user routes from backend');
+
   // Filter void orders and sort it by user route
   const nonVoidOrders = useMemo(() => {
     if (!userRoute?.data) {
@@ -44,33 +46,36 @@ const useManifest = (
 
   useEffect(() => {
     if (orderPrint.length > 0) {
+      console.log('GET ITEM MANIFEST');
       getItemsManifest();
     }
   }, [orderPrint]);
 
   const getClientRoutes = (): any => {
     const selectedRoutesMap = new Map(
-      selectedRoutes.map((route: IRoutes) => [route.id, route]),
+      selectedRoutes.map((route: IRoutes) => [route.id, route])
     );
-
+    
     // Attach route id in order
-    const clientRoutes = nonVoidOrders.map((order: Order): any => {
-      // Filter user routes to get only routes related to current given list of routes
-      const relatedRoutes = order.user?.routes
-        ?.filter((route: UserRoute): any => {
-          return selectedRoutesMap.has(route.routeId);
-        })
-        .map((route: UserRoute): any => {
-          return {
-            // map to attach order information
-            routeId: route.routeId,
-            ...order,
-          };
-        });
-      return relatedRoutes;
-    });
+    const clientRoutes = nonVoidOrders.map((order: Order) => {
+      // Filter user routes to get only routes related to the current list of selected routes
+      const relatedRoute = order.user?.routes?.find((route: UserRoute) => 
+        selectedRoutesMap.has(route.routeId)
+      );
+    
+      // Attach the related routeId to the order, if found
+      const userRelatedRoute = { ...order, routeId: relatedRoute?.routeId };
+    
+      // Log the result for debugging
+      // console.log(relatedRoute, 'related route');
+      // console.log(userRelatedRoute, 'user related route');
+    
+      return userRelatedRoute;
+    }).filter((order: Order) => order.routeId);
+    // console.log(clientRoutes, 'client routes');
 
-    const orderByRoutes = _.orderBy(clientRoutes.flat(), ['routeId'], ['asc']);
+    const orderByRoutes = _.orderBy(clientRoutes, ['routeId'], ['asc']);
+    // console.log(orderByRoutes, 'order by routes');
 
     // Arrange as user route
     const sortedOrderByRoutes = [];
@@ -82,9 +87,6 @@ const useManifest = (
         setOrderPrint([]);
         continue;
       }
-      const routeOrders = orderByRoutes.filter((order: Order) => {
-        return order.routeId === selectedRoute.id;
-      });
 
       // Create a map for quick lookup of index positions
       const orderIdIndexMap: any = new Map(
@@ -92,13 +94,16 @@ const useManifest = (
       );
 
       // Sort users based on the index positions in index map
-      routeOrders.sort(
+      orderByRoutes.sort(
         (orderA: Order, orderB: Order) =>
           orderIdIndexMap.get(orderA.userId) -
           orderIdIndexMap.get(orderB.userId),
       );
-      sortedOrderByRoutes.push(...routeOrders);
+      sortedOrderByRoutes.push(...orderByRoutes);
     }
+
+    // console.log(orderByRoutes, 'order by routes');
+    // console.log(sortedOrderByRoutes, 'sorted order by routes');
 
     setOrderPrint(sortedOrderByRoutes);
   };
