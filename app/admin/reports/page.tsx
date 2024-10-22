@@ -57,6 +57,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
+import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -164,19 +165,25 @@ export default function ReportPage() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newOrderData = baseClientOrders.filter((order: Order) => {
-        if (
-          order.id.toString().includes(debouncedKeywords) ||
-          order.user.clientId === debouncedKeywords ||
-          order.user.clientName
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase()) ||
-          order.status.toLowerCase() === debouncedKeywords.toLowerCase()
-        ) {
-          return true;
-        }
-        return false;
-      });
+      // const newOrderData = baseClientOrders.filter((order: Order) => {
+      //   if (
+      //     order.id.toString().includes(debouncedKeywords) ||
+      //     order.user.clientId === debouncedKeywords ||
+      //     order.user.clientName
+      //       .toLowerCase()
+      //       .includes(debouncedKeywords.toLowerCase()) ||
+      //     order.status.toLowerCase() === debouncedKeywords.toLowerCase()
+      //   ) {
+      //     return true;
+      //   }
+      //   return false;
+      // });
+      const newOrderData = handleSearch(debouncedKeywords, baseClientOrders, [
+        'id',
+        'user.clientId',
+        'user.clientName',
+        'status',
+      ])
       setClientOrders(newOrderData);
     } else {
       setClientOrders(baseClientOrders);
@@ -568,6 +575,7 @@ export default function ReportPage() {
           onClose={() => setIsOpenBillPrintModal(false)}
           routes={routes?.data || []}
           orderList={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+          showNotification={showNotification}
           day={datePicker}
         />
       )}

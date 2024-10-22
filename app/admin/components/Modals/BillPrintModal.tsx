@@ -1,5 +1,6 @@
 import ModalHead from '@/app/lib/ModalHead';
 import {
+  AlertColor,
   Box,
   Button,
   Checkbox,
@@ -33,6 +34,7 @@ interface PropTypes extends ModalProps {
   routes: IRoutes[];
   orderList: Order[];
   day: string;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 enum BILL_PRINT_OPTION {
@@ -46,6 +48,7 @@ export default function BillPrintModal({
   routes,
   orderList,
   day,
+  showNotification
 }: PropTypes) {
   const [manifestAnchor, setManifestAnchor] = useState<HTMLElement | null>(
     null,
@@ -58,8 +61,8 @@ export default function BillPrintModal({
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
   const summaryManifest: any = useRef();
-  const { orderPrint, itemManifest, setItemManifest, nonVoidOrders } =
-    useManifest(orderList, routes, selectedRoutes, day);
+  const { orderPrint, itemManifest, setItemManifest, nonVoidOrders, isLoading } =
+    useManifest(orderList, selectedRoutes, day, showNotification);
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -106,6 +109,8 @@ export default function BillPrintModal({
     }
   };
 
+  console.log(isLoading)
+
   const manifestPrintButton = (
     <Box
       display="flex"
@@ -118,7 +123,7 @@ export default function BillPrintModal({
         aria-controls={openManifest ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={openManifest ? 'true' : undefined}
-        disabled={selectedRoutes.length === 0}
+        disabled={isLoading || selectedRoutes.length === 0}
         onClick={(e) => setManifestAnchor(e.currentTarget)}
         endIcon={<ArrowDownwardIcon />}
         variant="outlined"
