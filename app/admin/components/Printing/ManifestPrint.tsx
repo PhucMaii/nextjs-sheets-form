@@ -9,7 +9,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { forwardRef } from 'react';
+import React, { forwardRef, Fragment } from 'react';
 import './print.css';
 import styled from 'styled-components';
 import { mainItems, productColors } from '@/app/lib/constant';
@@ -59,11 +59,18 @@ export const ManifestPrint = forwardRef(
                 return null;
               }
 
+              if (!manifest[routeId]) {
+                return null;
+              }
               const generateItemNames = () => {
                 const itemNameList: string[] = [];
 
                 // Get all items with its quantity in format: {itemName: quantity}
-                const currentManifest = manifest[routeId].details;
+                const currentManifest = manifest[routeId]?.details;
+
+                if (!currentManifest) {
+                  return [];
+                }
 
                 // Loop through all items and get its key = name
                 for (const item of currentManifest) {
@@ -99,7 +106,7 @@ export const ManifestPrint = forwardRef(
                 Math.floor(items.length / 100) * 100 - 1;
 
               return (
-                <>
+                <Fragment key={index}>
                   <Typography variant="h4" textAlign="center" m={2}>
                     {targetRoute.name}
                   </Typography>
@@ -127,7 +134,7 @@ export const ManifestPrint = forwardRef(
                               return null;
                             }
                             return (
-                              <>
+                              <Fragment key={index}>
                                 <BorderRightTableCell
                                   align="center"
                                   sx={{
@@ -136,17 +143,16 @@ export const ManifestPrint = forwardRef(
                                     fontWeight: 'bold',
                                     width: `${columnWidthPercentage}%`,
                                   }}
-                                  key={index}
                                 >
                                   {item}
                                 </BorderRightTableCell>
-                              </>
+                              </Fragment>
                             );
                           })}
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {manifest[routeId].details.map(
+                      {manifest[routeId]?.details && manifest[routeId].details.map(
                         (user: any, index: number) => {
                           const { summary } = manifest[routeId];
                           let clientName = user.user.clientName
@@ -232,7 +238,7 @@ export const ManifestPrint = forwardRef(
                   {index < Object.keys(manifest).length - 1 && (
                     <div className="page-break"></div>
                   )}
-                </>
+                </Fragment>
               );
             })}
         </Box>

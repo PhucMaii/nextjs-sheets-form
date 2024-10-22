@@ -37,8 +37,7 @@ const useManifest = (
     const timeoutId = setTimeout(() => {
       setDebouncedSelectedRoutes(selectedRoutes);
       setIsLoading(false);
-    }, 1500);
-
+    }, 1000);
 
     return () => {
       clearTimeout(timeoutId);
@@ -97,6 +96,9 @@ const useManifest = (
       newManifest[routeId] = manifestData.itemManifest[routeId];
     });
 
+    console.log(selectedRouteIds, 'selected route ids');
+
+    console.log(newManifest, 'new manifest');
     setItemManifest(newManifest);
   }
 

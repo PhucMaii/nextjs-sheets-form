@@ -45,6 +45,10 @@ export const SummaryManifest = forwardRef(
                 return null;
               }
 
+              if (!manifest[routeId]) {
+                return null;
+              }
+
               const sortedItems: any = sortedItemKeys(
                 Object.keys(manifest[routeId].summary),
                 mainItems,
