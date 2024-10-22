@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
 import SelectDateRange from '../components/SelectDateRange';
-import { generateMonthRange } from '@/app/utils/time';
+import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import PaidIcon from '@mui/icons-material/Paid';
 import { CardStyled } from '../components/OverviewCard/styled';
@@ -27,9 +27,10 @@ import AddPaymentMethod from '../components/Modals/add/AddPaymentMethod';
 import useNotification from '@/hooks/useNotification';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, PAYMENT_METHOD_TYPE } from '@/app/utils/enum';
-import { IPaymentMethod } from '@/app/utils/type';
+import { IExpense, IPaymentMethod } from '@/app/utils/type';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ErrorComponent from '../components/ErrorComponent';
+import { normalizeDate } from '@/pages/api/utils/date';
 
 export default function CardManagement() {
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
@@ -43,7 +44,53 @@ export default function CardManagement() {
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
-  const [transactions] = SWRFetchData(`${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`);
+  const [transactions] = SWRFetchData(
+    `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
+  );
+
+  const listOfDateString = useMemo(() => {
+    const normalizedStartDate = normalizeDate(new Date(dateRange[0]));
+    const normalizedEndDate = normalizeDate(new Date(dateRange[1]));
+    const dateStringList = generateListOfDateString(
+      normalizedStartDate,
+      normalizedEndDate,
+    );
+
+    return dateStringList;
+  }, [dateRange]);
+
+  const totalExpense = useMemo(() => {
+    if (!transactions) {
+      return 0;
+    }
+
+    return transactions?.data.reduce((acc: number, transaction: IExpense) => {
+      return acc + transaction.amount;
+    }, 0);
+  }, [transactions]);
+
+  const mostUsedMethod = useMemo(() => {
+    if (!transactions) {
+      return {};
+    }
+
+    if (transactions?.data.length === 0) {
+      return {};
+    }
+
+    const mostUsed = transactions?.data.reduce((acc: any, transaction: IExpense) => {
+      if (!acc[transaction.spentBy]) {
+        acc[transaction.spentBy] = {amount: transaction.amount, count: 1};
+        return acc;
+      }
+
+      acc[transaction.spentBy].amount += transaction.amount;
+      acc[transaction.spentBy].count += 1;
+      return acc;
+    }, {});
+
+    return mostUsed;
+  }, [transactions?.data]);
 
   useEffect(() => {
     if (currentMethodId !== -1) {
@@ -136,12 +183,15 @@ export default function CardManagement() {
                         style={{ color: 'white', width: 50, height: 50 }}
                       />
                     ) : (
+                      <Box display="flex" alignItems="center" flexDirection="row">
                       <Image
                         src="/visa-image.png"
                         alt="expense"
                         width={150}
                         height={50}
                       />
+                      <Typography variant="body1" color="white" fontWeight={500}>{currentMethod?.type}</Typography>
+                      </Box>
                     )}
                   </Box>
 
@@ -179,7 +229,7 @@ export default function CardManagement() {
                     backgroundColor={blueGrey[50]}
                     icon={<PaidIcon fontSize="large" color="primary" />}
                     text="Expense"
-                    value="1000"
+                    value={totalExpense?.toFixed(2)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -193,18 +243,17 @@ export default function CardManagement() {
                       />
                     }
                     text="Transactions"
-                    value="1000"
+                    value={transactions?.data?.length || []}
                   />
                 </Grid>
               </Grid>
-            </Grid>
 
-            {/* Expense Chart */}
-            <ShadowSection mt={8}>
-              <AreaChart timeSeries={[]} thisMonthData={[]} />
-            </ShadowSection>
-
-            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                {/* Expense Chart */}
+                <ShadowSection>
+                  <AreaChart timeSeries={listOfDateString} thisMonthData={transactions?.chartData || []} />
+                </ShadowSection>
+              </Grid>
               <Grid item xs={12} md={8}>
                 <ShadowSection>
                   <Typography
@@ -220,7 +269,6 @@ export default function CardManagement() {
                   <TransactionsTable transactions={transactions?.data || []} />
                 </ShadowSection>
               </Grid>
-
               <Grid item xs={12} md={4}>
                 <ShadowSection>
                   <Typography
@@ -233,7 +281,7 @@ export default function CardManagement() {
                   </Typography>
 
                   {/* Who used it most */}
-                  <CardUsedByTable />
+                  <CardUsedByTable data={mostUsedMethod} />
                 </ShadowSection>
               </Grid>
             </Grid>

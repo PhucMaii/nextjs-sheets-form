@@ -231,7 +231,7 @@ export default function Orders() {
         'id',
         'user.clientName',
         'user.clientId',
-      ])
+      ]);
 
       setOrderData(newOrderList);
       setPages(1);

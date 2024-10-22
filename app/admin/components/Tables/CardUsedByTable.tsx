@@ -1,7 +1,11 @@
-import { Table, TableCell, TableHead, TableRow } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import React from 'react';
 
-export default function CardUsedByTable() {
+interface IProps {
+  data: any;
+}
+
+export default function CardUsedByTable({data}: IProps) {
   return (
     <Table>
       <TableHead>
@@ -11,6 +15,19 @@ export default function CardUsedByTable() {
           <TableCell>Transactions</TableCell>
         </TableRow>
       </TableHead>
+      <TableBody>
+        {
+          Object.keys(data).length > 0 && Object.keys(data).map((spentBy: string, index: number) => {
+            return (
+              <TableRow key={index}>
+                <TableCell>{spentBy}</TableCell>
+                <TableCell>${data[spentBy].amount}</TableCell>
+                <TableCell>{data[spentBy].count}</TableCell>
+              </TableRow>
+            )
+          })
+        }
+      </TableBody>
     </Table>
   );
 }

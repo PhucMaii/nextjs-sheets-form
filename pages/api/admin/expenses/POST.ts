@@ -1,49 +1,78 @@
-import { PrismaClient } from "@prisma/client";
-import { NextApiRequest, NextApiResponse } from "next";
-import { getUserInfo } from "../../utils/auth";
+import { PrismaClient } from '@prisma/client';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getUserInfo } from '../../utils/auth';
 
 interface IBody {
-    amount: number;
-    description: string;
-    createdAt: string;
-    spentBy: string;
-    date: string;
-    paymentMethodId: number;
+  amount: number;
+  description: string;
+  createdAt: string;
+  spentBy: string;
+  date: string;
+  paymentMethodId: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
-    try {
-        const prisma = new PrismaClient();
+  try {
+    const prisma = new PrismaClient();
 
-        const { createdAt, amount, description, date, spentBy, paymentMethodId }: IBody = req.body;
+    const {
+      createdAt,
+      amount,
+      description,
+      date,
+      spentBy,
+      paymentMethodId,
+    }: IBody = req.body;
 
-        const adminUser = await getUserInfo(req, res);
+    const adminUser = await getUserInfo(req, res);
 
-        if (!adminUser) {
-            return res.status(401).json({
-                error: 'Unauthorized',
-            });
-        }
-
-        const newExpense = await prisma.expense.create({
-            data: {
-                amount,
-                description,
-                createdAt,
-                createdBy: `Admin - ${adminUser.clientName}`,
-                date,
-                spentBy,
-                paymentMethodId
-            }
-        });
-
-        return res.status(201).json({
-            data: newExpense,
-            message: 'Create New Expense Successfully',
-        });
-    } catch (error: any) {
-        console.log('Internal Server Error: ', error);
-        return res.status(500).json({ error: 'Internal Server Error: ' + error });
+    if (!adminUser) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+      });
     }
 
+    const existingMethod = await prisma.paymentMethod.findUnique({
+      where: {
+        id: paymentMethodId
+      }
+    });
+
+    if (!existingMethod) {
+      return res.status(404).json({
+        error: 'Payment Method Not Found',
+      });
+    }
+
+    const newExpense = await prisma.expense.create({
+      data: {
+        amount,
+        description,
+        createdAt,
+        createdBy: `Admin - ${adminUser.clientName}`,
+        date,
+        spentBy,
+        paymentMethodId,
+      },
+    });
+
+    const newBalance = existingMethod.balance + amount;
+
+    await prisma.paymentMethod.update({
+      where: {
+        id: paymentMethodId
+      },
+      data: {
+        balance: newBalance
+      }
+    });
+
+    return res.status(201).json({
+      data: newExpense,
+      message: 'Create New Expense Successfully',
+    });
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+    return res.status(500).json({ error: 'Internal Server Error: ' + error });
+  }
 }

@@ -183,7 +183,7 @@ export default function ReportPage() {
         'user.clientId',
         'user.clientName',
         'status',
-      ])
+      ]);
       setClientOrders(newOrderData);
     } else {
       setClientOrders(baseClientOrders);

@@ -152,87 +152,88 @@ export const ManifestPrint = forwardRef(
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {manifest[routeId]?.details && manifest[routeId].details.map(
-                        (user: any, index: number) => {
-                          const { summary } = manifest[routeId];
-                          let clientName = user.user.clientName
-                            .split('-')
-                            .slice(0, 2)
-                            .join(' - ');
+                      {manifest[routeId]?.details &&
+                        manifest[routeId].details.map(
+                          (user: any, index: number) => {
+                            const { summary } = manifest[routeId];
+                            let clientName = user.user.clientName
+                              .split('-')
+                              .slice(0, 2)
+                              .join(' - ');
 
-                          if (
-                            clientName?.split(' - ')[1] == ' C.O.D' ||
-                            clientName?.split(' - ')[1] == ' MONTHLY' ||
-                            clientName?.split(' - ')[1] == ' W.C.O.D'
-                          ) {
-                            clientName = clientName.split(' - ')[0];
-                          }
+                            if (
+                              clientName?.split(' - ')[1] == ' C.O.D' ||
+                              clientName?.split(' - ')[1] == ' MONTHLY' ||
+                              clientName?.split(' - ')[1] == ' W.C.O.D'
+                            ) {
+                              clientName = clientName.split(' - ')[0];
+                            }
 
-                          return (
-                            <TableRow key={index}>
-                              <BorderRightTableCell
-                                // align="center"
-                                sx={{
-                                  fontSize: 18,
-                                  // width: '150px',
-                                  height: '30px !important',
-                                  fontWeight: 'bold',
-                                }}
-                              >
-                                {clientName} -{' '}
-                                {user?.user?.preference?.paymentType} -{' '}
-                                {user.user.clientId}
-                              </BorderRightTableCell>
-                              {sortedItems.map(
-                                (item: string, index: number) => {
-                                  const itemQuantity = user[item];
-                                  if (summary[item] === 0) {
-                                    return null;
-                                  }
+                            return (
+                              <TableRow key={index}>
+                                <BorderRightTableCell
+                                  // align="center"
+                                  sx={{
+                                    fontSize: 18,
+                                    // width: '150px',
+                                    height: '30px !important',
+                                    fontWeight: 'bold',
+                                  }}
+                                >
+                                  {clientName} -{' '}
+                                  {user?.user?.preference?.paymentType} -{' '}
+                                  {user.user.clientId}
+                                </BorderRightTableCell>
+                                {sortedItems.map(
+                                  (item: string, index: number) => {
+                                    const itemQuantity = user[item];
+                                    if (summary[item] === 0) {
+                                      return null;
+                                    }
 
-                                  if (!itemQuantity || itemQuantity === 0) {
+                                    if (!itemQuantity || itemQuantity === 0) {
+                                      return (
+                                        <BorderRightTableCell
+                                          align="center"
+                                          key={index}
+                                        ></BorderRightTableCell>
+                                      );
+                                    }
+
+                                    // Ensure the value is renderable
+                                    if (typeof itemQuantity === 'object') {
+                                      console.error(
+                                        `Invalid value to render for key ${item}: `,
+                                        itemQuantity,
+                                      );
+                                      return (
+                                        <BorderRightTableCell
+                                          key={itemQuantity}
+                                          align="center"
+                                          sx={{ fontSize: 20 }}
+                                        >
+                                          NaN
+                                        </BorderRightTableCell>
+                                      );
+                                    }
+
                                     return (
                                       <BorderRightTableCell
-                                        align="center"
-                                        key={index}
-                                      ></BorderRightTableCell>
-                                    );
-                                  }
-
-                                  // Ensure the value is renderable
-                                  if (typeof itemQuantity === 'object') {
-                                    console.error(
-                                      `Invalid value to render for key ${item}: `,
-                                      itemQuantity,
-                                    );
-                                    return (
-                                      <BorderRightTableCell
-                                        key={itemQuantity}
                                         align="center"
                                         sx={{ fontSize: 20 }}
+                                        key={index}
+                                        $isSelected={itemQuantity > 0}
+                                        $productColor={productColors[index]}
                                       >
-                                        NaN
+                                        {itemQuantity}
                                       </BorderRightTableCell>
                                     );
-                                  }
-
-                                  return (
-                                    <BorderRightTableCell
-                                      align="center"
-                                      sx={{ fontSize: 20 }}
-                                      key={index}
-                                      $isSelected={itemQuantity > 0}
-                                      $productColor={productColors[index]}
-                                    >
-                                      {itemQuantity}
-                                    </BorderRightTableCell>
-                                  );
-                                },
-                              )}
-                            </TableRow>
-                          );
-                        },
-                      )}
+                                  },
+                                )}
+                              </TableRow>
+                            );
+                          },
+                        )}
                     </TableBody>
                   </Table>
                   {index < Object.keys(manifest).length - 1 && (

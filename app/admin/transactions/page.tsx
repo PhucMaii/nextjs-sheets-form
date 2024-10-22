@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-import Fuse from "fuse.js";
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/SelectDateRange';
 import { ShadowSection } from '../reports/styled';
@@ -26,6 +25,8 @@ import AddIcon from '@mui/icons-material/Add';
 import AddExpense from '../components/Modals/add/AddExpense';
 import useNotification from '@/hooks/useNotification';
 import { IExpense } from '@/app/utils/type';
+import useDebounce from '@/hooks/useDebounce';
+import { handleSearch } from '@/app/utils/search';
 
 export default function Transactions() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -33,38 +34,58 @@ export default function Transactions() {
   const openDropdown = Boolean(actionButtonAnchor);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>([]);
+  const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
+    [],
+  );
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
+  const [ searchKeywords, setSearchKeywords ] = useState<string>('');
 
-  const { showNotification, NotificationComp} = useNotification();
+  const { showNotification, NotificationComp } = useNotification();
+  const debouncedKeywords = useDebounce(searchKeywords, 1000)
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
-  const [transactions] = SWRFetchData(`${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`);
+  const [transactions] = SWRFetchData(
+    `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
+  );
 
   useEffect(() => {
     if (transactions) {
       setDisplayTransactions(transactions?.data);
     }
-  }, [transactions])
+  }, [transactions]);
 
-  const handleSearch = (e: any) => {
-    const { value } = e.target;
-    
-    if (value.length === 0) {
-      setDisplayTransactions(transactions?.data || []);
-      return;
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newTransactions = handleSearch(debouncedKeywords, transactions?.data, [
+        'description',
+        'spentBy',
+        'id',
+      ]);
+      setDisplayTransactions(newTransactions);
     }
+    else {
+      setDisplayTransactions(transactions?.data || []);
+    }
+  }, [debouncedKeywords]);
 
-    const fuse = new Fuse(transactions?.data || [], {
-      keys: ['description', 'spentBy', 'amount'],
-    });
-    
-    const result = fuse.search(value);
-    const data = result.map((item: any) => item.item);
-    console.log(data);
-    setDisplayTransactions(data);
-  }
+  // const handleSearch = (e: any) => {
+  //   const { value } = e.target;
+
+  //   if (value.length === 0) {
+  //     setDisplayTransactions(transactions?.data || []);
+  //     return;
+  //   }
+
+  //   const fuse = new Fuse(transactions?.data || [], {
+  //     keys: ['description', 'spentBy', 'amount'],
+  //   });
+
+  //   const result = fuse.search(value);
+  //   const data = result.map((item: any) => item.item);
+  //   console.log(data);
+  //   setDisplayTransactions(data);
+  // };
 
   const actions = (
     <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
@@ -92,7 +113,7 @@ export default function Transactions() {
       >
         <MenuItem
           onClick={() => {
-              setIsOpenAddExpense(true);
+            setIsOpenAddExpense(true);
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -108,7 +129,12 @@ export default function Transactions() {
     <Sidebar>
       {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
-      <AddExpense open={isOpenAddExpense} onClose={() => setIsOpenAddExpense(false)} showNotification={showNotification} paymentMethods={paymentMethods?.data || []} />
+        <AddExpense
+          open={isOpenAddExpense}
+          onClose={() => setIsOpenAddExpense(false)}
+          showNotification={showNotification}
+          paymentMethods={paymentMethods?.data || []}
+        />
         <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
           Transactions
         </Typography>
@@ -127,7 +153,7 @@ export default function Transactions() {
           fullWidth
         >
           <MenuItem value={-1}>All</MenuItem>
-          {paymentMethods > 0 &&
+          {paymentMethods?.data?.length > 0 &&
             paymentMethods?.data.map((method: any) => (
               <MenuItem key={method.id} value={method.id}>
                 {method.name}
@@ -144,7 +170,8 @@ export default function Transactions() {
               label="Search"
               placeholder="Search Transaction..."
               variant="filled"
-              onChange={handleSearch}
+              value={searchKeywords}
+              onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
           <Grid item xs={4} md={2} textAlign="center">

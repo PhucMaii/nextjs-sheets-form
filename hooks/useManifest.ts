@@ -11,10 +11,15 @@ const useManifest = (
   orderList: Order[],
   selectedRoutes: IRoutes[],
   date: string,
-  showNotification: (type: AlertColor, message: string) => void
+  showNotification: (type: AlertColor, message: string) => void,
 ) => {
-  const [debouncedSelectedRoutes, setDebouncedSelectedRoutes] = useState<IRoutes[]>([]);
-  const [manifestData, setManifestData] = useState<any>({orderPrint: [], itemManifest: {}});
+  const [debouncedSelectedRoutes, setDebouncedSelectedRoutes] = useState<
+    IRoutes[]
+  >([]);
+  const [manifestData, setManifestData] = useState<any>({
+    orderPrint: [],
+    itemManifest: {},
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderPrint, setOrderPrint] = useState<any>([]);
   const [itemManifest, setItemManifest] = useState<any>({});
@@ -42,7 +47,7 @@ const useManifest = (
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [selectedRoutes])
+  }, [selectedRoutes]);
 
   useEffect(() => {
     if (userRoute && orderList.length > 0) {
@@ -61,9 +66,9 @@ const useManifest = (
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL.ADMIN}/manifest`, {
-          day: givenDay,
-          orderList,
-          userRoute: userRoute?.data,
+        day: givenDay,
+        orderList,
+        userRoute: userRoute?.data,
       });
 
       if (response.data.error) {
@@ -82,12 +87,13 @@ const useManifest = (
         'There was an error: ' + error.response.data.error,
       );
       setIsLoading(false);
-
     }
-  }
+  };
 
   const handleSelectRoute = () => {
-    const newOrderPrint = manifestData.orderPrint.filter((order: any) => selectedRouteIds.includes(order.routeId));
+    const newOrderPrint = manifestData.orderPrint.filter((order: any) =>
+      selectedRouteIds.includes(order.routeId),
+    );
 
     setOrderPrint(newOrderPrint);
 
@@ -100,7 +106,7 @@ const useManifest = (
 
     console.log(newManifest, 'new manifest');
     setItemManifest(newManifest);
-  }
+  };
 
   // Filter void orders and sort it by user route
   const nonVoidOrders = useMemo(() => {
@@ -115,7 +121,13 @@ const useManifest = (
     return filteredVoidOrders;
   }, [orderList, userRoute]);
 
-  return { orderPrint, itemManifest, setItemManifest, nonVoidOrders, isLoading };
+  return {
+    orderPrint,
+    itemManifest,
+    setItemManifest,
+    nonVoidOrders,
+    isLoading,
+  };
 };
 
 export default useManifest;

@@ -50,9 +50,11 @@ export default function CodBoard() {
       return [];
     }
 
-    const boards = Object.keys(codBoards.data).map((key) => {
-      return codBoards.data[key];
-    }).flat();
+    const boards = Object.keys(codBoards.data)
+      .map((key) => {
+        return codBoards.data[key];
+      })
+      .flat();
 
     return boards;
   }, [codBoards]);
@@ -66,7 +68,7 @@ export default function CodBoard() {
       return acc + board.uncollected.amount;
     }, 0);
 
-    return amount
+    return amount;
   }, [codBoards]);
 
   const totalCash = useMemo(() => {
@@ -80,7 +82,7 @@ export default function CodBoard() {
 
     return totalCash;
   }, [codBoards]);
-  
+
   const sortedDate: any = useMemo(() => {
     if (!codBoards) {
       return [];
@@ -91,7 +93,7 @@ export default function CodBoard() {
       const date2 = new Date(key2);
 
       return date2.getTime() - date1.getTime();
-    })
+    });
   }, [codBoards]);
 
   useEffect(() => {
@@ -147,19 +149,21 @@ export default function CodBoard() {
         showNotification={showNotification}
       />
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" color={blueGrey[800]}>
-            C.O.D Board
-          </Typography>
-          <SelectDateRange
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-          />
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h5" color={blueGrey[800]}>
+          C.O.D Board
+        </Typography>
+        <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
       </Box>
-      
+
       <Grid container spacing={2}>
         <Grid item xs={12} md={4} sm={6}>
-          <OverviewCard 
+          <OverviewCard
             icon={<LocalAtmIcon fontSize="large" color="primary" />}
             text="Total Cash"
             value={totalCash.toFixed(2)}
@@ -168,7 +172,7 @@ export default function CodBoard() {
           />
         </Grid>
         <Grid item xs={12} md={4} sm={6}>
-          <OverviewCard 
+          <OverviewCard
             icon={<MoneyOffIcon fontSize="large" color="primary" />}
             text="Uncleared Amount"
             value={unclearedAmount.toFixed(2)}
@@ -177,7 +181,7 @@ export default function CodBoard() {
           />
         </Grid>
         <Grid item xs={12} md={4} sm={6}>
-          <OverviewCard 
+          <OverviewCard
             icon={<AssignmentIcon fontSize="large" color="primary" />}
             text="Total Boards"
             value={totalBoards.length}
@@ -186,7 +190,7 @@ export default function CodBoard() {
           />
         </Grid>
       </Grid>
-          {/* <ShadowSection>
+      {/* <ShadowSection>
             <Typography variant="h6" color={blueGrey[800]}>
               Select date
             </Typography>
@@ -198,54 +202,49 @@ export default function CodBoard() {
             </Box>
           </ShadowSection> */}
 
-          <ShadowSection>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Typography variant="h6" color={blueGrey[800]}>
-                Boards
+      <ShadowSection>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" color={blueGrey[800]}>
+            Boards
+          </Typography>
+          <Button variant="outlined" onClick={() => setIsOpenAddBoard(true)}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <AddIcon />
+              <Typography variant="body2" fontWeight={600}>
+                New Board
               </Typography>
-              <Button
-                variant="outlined"
-                onClick={() => setIsOpenAddBoard(true)}
-              >
-                <Box display="flex" alignItems="center" gap={1}>
-                  <AddIcon />
-                  <Typography variant="body2" fontWeight={600}>
-                    New Board
-                  </Typography>
-                </Box>
-              </Button>
             </Box>
-          </ShadowSection>
+          </Button>
+        </Box>
+      </ShadowSection>
 
-            <Box display="flex" flexDirection="column" gap={4} mt={2}>
-              {isLoading ? (
-                <LoadingComponent />
-              ) : codBoards && sortedDate.length > 0 ? (
-                sortedDate.map((date: string, index: number) => (
-                  <Box key={index} display="flex" flexDirection="column" gap={2}>
-                    <Divider textAlign='center'>
-                      <Typography variant="h6" color={blueGrey[800]}>{date}</Typography>
-                    </Divider>
-                    {codBoards?.data[date].map((board: IBoard) => (
-                      <CODBoardSummary
-                        key={board.id}
-                        boardData={board}
-                        onSelect={() => setSelectedBoard(board)}
-                        handleDeleteBoard={() =>
-                          setDeleteBoard({ isOpen: true, id: board.id })
-                        }
-                      />
-                    ))}
-                  </Box>
-                ))
-              ) : (
-                <ErrorComponent errorText="No boards found" />
-              )}
+      <Box display="flex" flexDirection="column" gap={4} mt={2}>
+        {isLoading ? (
+          <LoadingComponent />
+        ) : codBoards && sortedDate.length > 0 ? (
+          sortedDate.map((date: string, index: number) => (
+            <Box key={index} display="flex" flexDirection="column" gap={2}>
+              <Divider textAlign="center">
+                <Typography variant="h6" color={blueGrey[800]}>
+                  {date}
+                </Typography>
+              </Divider>
+              {codBoards?.data[date].map((board: IBoard) => (
+                <CODBoardSummary
+                  key={board.id}
+                  boardData={board}
+                  onSelect={() => setSelectedBoard(board)}
+                  handleDeleteBoard={() =>
+                    setDeleteBoard({ isOpen: true, id: board.id })
+                  }
+                />
+              ))}
             </Box>
+          ))
+        ) : (
+          <ErrorComponent errorText="No boards found" />
+        )}
+      </Box>
     </Sidebar>
   );
 }

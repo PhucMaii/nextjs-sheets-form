@@ -48,7 +48,7 @@ export default function BillPrintModal({
   routes,
   orderList,
   day,
-  showNotification
+  showNotification,
 }: PropTypes) {
   const [manifestAnchor, setManifestAnchor] = useState<HTMLElement | null>(
     null,
@@ -61,8 +61,13 @@ export default function BillPrintModal({
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
   const summaryManifest: any = useRef();
-  const { orderPrint, itemManifest, setItemManifest, nonVoidOrders, isLoading } =
-    useManifest(orderList, selectedRoutes, day, showNotification);
+  const {
+    orderPrint,
+    itemManifest,
+    setItemManifest,
+    nonVoidOrders,
+    isLoading,
+  } = useManifest(orderList, selectedRoutes, day, showNotification);
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -109,7 +114,7 @@ export default function BillPrintModal({
     }
   };
 
-  console.log(isLoading)
+  console.log(isLoading);
 
   const manifestPrintButton = (
     <Box

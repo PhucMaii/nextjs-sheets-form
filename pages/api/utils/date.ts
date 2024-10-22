@@ -47,12 +47,8 @@ export const sortByDeliveryDate = (orders: Order[]): any => {
 
 export const sortExpenseByDate = (expenses: Expense[]): any => {
   const sortedExpense = expenses.sort((expenseA, expenseB) => {
-    const dateA: any = convertDeliveryDateStringToDate(
-      expenseA.date,
-    );
-    const dateB: any = convertDeliveryDateStringToDate(
-      expenseB.date,
-    );
+    const dateA: any = convertDeliveryDateStringToDate(expenseA.date);
+    const dateB: any = convertDeliveryDateStringToDate(expenseB.date);
 
     return dateB - dateA;
   });
