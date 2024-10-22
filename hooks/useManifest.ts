@@ -1,29 +1,104 @@
 import { Order } from '@/app/admin/orders/page';
-import { groupBy } from '@/app/utils/array';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
-import { IItem, IRoutes } from '@/app/utils/type';
-import { UserRoute } from '@prisma/client';
+import { IRoutes } from '@/app/utils/type';
 import { useEffect, useMemo, useState } from 'react';
-import _ from 'lodash';
 import useSWR from 'swr';
 import { days } from '@/app/lib/constant';
+import axios from 'axios';
+import { AlertColor } from '@mui/material';
 
 const useManifest = (
   orderList: Order[],
-  routes: IRoutes[],
   selectedRoutes: IRoutes[],
   date: string,
+  showNotification: (type: AlertColor, message: string) => void
 ) => {
+  const [debouncedSelectedRoutes, setDebouncedSelectedRoutes] = useState<IRoutes[]>([]);
+  const [manifestData, setManifestData] = useState<any>({orderPrint: [], itemManifest: {}});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderPrint, setOrderPrint] = useState<any>([]);
   const [itemManifest, setItemManifest] = useState<any>({});
 
+  const selectedRouteIds = useMemo(() => {
+    return selectedRoutes.map((route: IRoutes) => {
+      return route.id;
+    });
+  }, [debouncedSelectedRoutes]);
+
   const formattedDate = new Date(date);
   const givenDay = days[formattedDate.getDay()];
+
   const { data: userRoute } = useSWR(
     `${API_URL.ROUTES}/clients?day=${givenDay}`,
   );
 
-  // console.log(userRoute?.data, 'user routes from backend');
+  useEffect(() => {
+    setIsLoading(true);
+    const timeoutId = setTimeout(() => {
+      setDebouncedSelectedRoutes(selectedRoutes);
+      setIsLoading(false);
+    }, 1500);
+
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [selectedRoutes])
+
+  useEffect(() => {
+    if (userRoute && orderList.length > 0) {
+      console.log(userRoute, 'user route');
+      handleGetManifest();
+    }
+  }, [userRoute, orderList]);
+
+  useEffect(() => {
+    if (manifestData && selectedRoutes.length > 0) {
+      handleSelectRoute();
+    }
+  }, [debouncedSelectedRoutes]);
+
+  const handleGetManifest = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${API_URL.ADMIN}/manifest`, {
+          day: givenDay,
+          orderList,
+          userRoute: userRoute?.data,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsLoading(false);
+        return;
+      }
+
+      setManifestData(response.data.data);
+
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
+      setIsLoading(false);
+
+    }
+  }
+
+  const handleSelectRoute = () => {
+    const newOrderPrint = manifestData.orderPrint.filter((order: any) => selectedRouteIds.includes(order.routeId));
+
+    setOrderPrint(newOrderPrint);
+
+    const newManifest: any = {};
+    selectedRouteIds.forEach((routeId: number) => {
+      newManifest[routeId] = manifestData.itemManifest[routeId];
+    });
+
+    setItemManifest(newManifest);
+  }
 
   // Filter void orders and sort it by user route
   const nonVoidOrders = useMemo(() => {
@@ -38,161 +113,7 @@ const useManifest = (
     return filteredVoidOrders;
   }, [orderList, userRoute]);
 
-  useEffect(() => {
-    if (routes.length > 0 && userRoute) {
-      getClientRoutes();
-    }
-  }, [orderList, routes, selectedRoutes, userRoute]);
-
-  useEffect(() => {
-    if (orderPrint.length > 0) {
-      console.log('GET ITEM MANIFEST');
-      getItemsManifest();
-    }
-  }, [orderPrint]);
-
-  const getClientRoutes = (): any => {
-    const selectedRoutesMap = new Map(
-      selectedRoutes.map((route: IRoutes) => [route.id, route])
-    );
-    
-    // Attach route id in order
-    const clientRoutes = nonVoidOrders.map((order: Order) => {
-      // Filter user routes to get only routes related to the current list of selected routes
-      const relatedRoute = order.user?.routes?.find((route: UserRoute) => 
-        selectedRoutesMap.has(route.routeId)
-      );
-    
-      // Attach the related routeId to the order, if found
-      const userRelatedRoute = { ...order, routeId: relatedRoute?.routeId };
-    
-      // Log the result for debugging
-      // console.log(relatedRoute, 'related route');
-      // console.log(userRelatedRoute, 'user related route');
-    
-      return userRelatedRoute;
-    }).filter((order: Order) => order.routeId);
-    // console.log(clientRoutes, 'client routes');
-
-    const orderByRoutes = _.orderBy(clientRoutes, ['routeId'], ['asc']);
-    // console.log(orderByRoutes, 'order by routes');
-
-    // Arrange as user route
-    const sortedOrderByRoutes = [];
-    for (const selectedRoute of selectedRoutes) {
-      const sortedUserIds = userRoute.data[selectedRoute.id];
-
-      // If that route does not have any orders
-      if (!sortedUserIds) {
-        setOrderPrint([]);
-        continue;
-      }
-
-      // Create a map for quick lookup of index positions
-      const orderIdIndexMap: any = new Map(
-        sortedUserIds.map((id: string, index: number) => [id, index]),
-      );
-
-      // Sort users based on the index positions in index map
-      orderByRoutes.sort(
-        (orderA: Order, orderB: Order) =>
-          orderIdIndexMap.get(orderA.userId) -
-          orderIdIndexMap.get(orderB.userId),
-      );
-      sortedOrderByRoutes.push(...orderByRoutes);
-    }
-
-    // console.log(orderByRoutes, 'order by routes');
-    // console.log(sortedOrderByRoutes, 'sorted order by routes');
-
-    setOrderPrint(sortedOrderByRoutes);
-  };
-
-  const getItemsManifest = () => {
-    const items = orderPrint.map((order: Order) => {
-      return order?.items.map((item: any) => {
-        return {
-          ...item,
-          routeId: order.routeId,
-          client: order.clientName,
-          user: order.user,
-        };
-      });
-    });
-
-    // If order print is undefined
-    if (!items[0]) {
-      return;
-    }
-
-    // Group items by route
-    const groupItemRoutes: any = groupBy(
-      items.flat(),
-      ({ routeId }: any) => routeId,
-    );
-
-    for (const itemRoute in groupItemRoutes) {
-      const manifestItem = groupItemRoutes[itemRoute].reduce(
-        (acc: any, item: IItem) => {
-          const { name } = item;
-
-          const itemKey = name.includes('KONGNAMUL')
-            ? name.split(' - ')[1]
-            : name;
-
-          if (!acc[itemKey]) {
-            acc[itemKey] = 0;
-          }
-
-          acc[itemKey] = acc[itemKey] + item.quantity;
-          return acc;
-        },
-        {},
-      );
-
-      const manifestDetail = groupItemRoutes[itemRoute].reduce(
-        (acc: any, item: IItem, index: number) => {
-          const { user, name, quantity } = item;
-          if (!user) {
-            return acc;
-          }
-
-          const itemKey = name.includes('KONGNAMUL')
-            ? name.split(' - ')[1]
-            : name;
-
-          // Beginning of new customer
-          if (
-            index === 0 ||
-            groupItemRoutes[itemRoute][index - 1].user.id !== user.id
-          ) {
-            const newUserManifest = {
-              user,
-              [itemKey]: quantity,
-            };
-            acc.push(newUserManifest);
-            return acc;
-          }
-
-          const currentUserManifest = acc[acc.length - 1];
-          const updatedUserManifest = {
-            ...currentUserManifest,
-            [itemKey]: quantity,
-          };
-          acc[acc.length - 1] = updatedUserManifest;
-          return acc;
-        },
-        [],
-      );
-
-      setItemManifest((prevManifest: any) => ({
-        ...prevManifest,
-        [itemRoute]: { details: manifestDetail, summary: manifestItem },
-      }));
-    }
-  };
-
-  return { orderPrint, itemManifest, setItemManifest, nonVoidOrders };
+  return { orderPrint, itemManifest, setItemManifest, nonVoidOrders, isLoading };
 };
 
 export default useManifest;
