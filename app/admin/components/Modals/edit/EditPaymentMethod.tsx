@@ -30,7 +30,7 @@ export default function EditPaymentMethod({
   showNotification,
   paymentMethod,
   setCurrentPaymentMethod,
-  mutateMethod
+  mutateMethod,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedPaymentMethod, setUpdatedPaymentMethod] =
@@ -52,38 +52,38 @@ export default function EditPaymentMethod({
   const handleUpdateMethod = async () => {
     setIsLoading(true);
     try {
-        const currentTime = generateCurrentTime();
-        const response = await axios.put(`${API_URL.ADMIN}/paymentMethods`, {
-            updatedData: {
-                name: updatedPaymentMethod?.name, 
-                type: updatedPaymentMethod?.type
-            }, 
-            methodId: updatedPaymentMethod?.id, 
-            updatedAt: currentTime
-        });
+      const currentTime = generateCurrentTime();
+      const response = await axios.put(`${API_URL.ADMIN}/paymentMethods`, {
+        updatedData: {
+          name: updatedPaymentMethod?.name,
+          type: updatedPaymentMethod?.type,
+        },
+        methodId: updatedPaymentMethod?.id,
+        updatedAt: currentTime,
+      });
 
-        if (response.data.error) {
-            showNotification('error', response.data.error);
-            setIsLoading(false);
-            return;
-        }
-
-        // Update Real Data
-        setCurrentPaymentMethod(updatedPaymentMethod);
-        mutateMethod();
-
-        showNotification('success', response.data.message);
-        onClose();
+      if (response.data.error) {
+        showNotification('error', response.data.error);
         setIsLoading(false);
+        return;
+      }
+
+      // Update Real Data
+      setCurrentPaymentMethod(updatedPaymentMethod);
+      mutateMethod();
+
+      showNotification('success', response.data.message);
+      onClose();
+      setIsLoading(false);
     } catch (error: any) {
-        console.log('Fail to update payment method: ', error);
-        showNotification(
-          'error',
-          'Fail to update payment method: ' + error.response.data.error,
-        );
-        setIsLoading(false);
+      console.log('Fail to update payment method: ', error);
+      showNotification(
+        'error',
+        'Fail to update payment method: ' + error.response.data.error,
+      );
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -92,7 +92,7 @@ export default function EditPaymentMethod({
           heading="Edit Payment Method"
           buttonLabel="EDIT"
           onClick={handleUpdateMethod}
-          buttonProps={{loading: isLoading}}
+          buttonProps={{ loading: isLoading }}
           onClose={onClose}
         />
 

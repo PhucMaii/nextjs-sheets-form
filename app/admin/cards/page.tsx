@@ -53,7 +53,9 @@ export default function CardManagement() {
   const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
-  const [paymentMethods, mutateMethod] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+  const [paymentMethods, mutateMethod] = SWRFetchData(
+    `${API_URL.ADMIN}/paymentMethods`,
+  );
   const [transactions] = SWRFetchData(
     `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
   );
@@ -122,10 +124,15 @@ export default function CardManagement() {
 
   const handleDeleteMethod = async (targetMethod: IPaymentMethod) => {
     try {
-      const response = await axios.delete(`${API_URL.ADMIN}/paymentMethods?methodId=${targetMethod.id}`);
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/paymentMethods?methodId=${targetMethod.id}`,
+      );
 
       if (response.data.error) {
-        showNotification('error', 'Fail to delete payment method. Please try again later.');
+        showNotification(
+          'error',
+          'Fail to delete payment method. Please try again later.',
+        );
         return;
       }
 
@@ -143,7 +150,7 @@ export default function CardManagement() {
         'Fail to delete payment method. Please try again later.',
       );
     }
-  }
+  };
 
   return (
     <Sidebar>
@@ -163,9 +170,11 @@ export default function CardManagement() {
         mutateMethod={mutateMethod}
       />
 
-      <DeleteModal 
+      <DeleteModal
         open={openModal.deleteModal}
-        handleCloseModal={() => setOpenModal({ ...openModal, deleteModal: false })}
+        handleCloseModal={() =>
+          setOpenModal({ ...openModal, deleteModal: false })
+        }
         targetObj={currentMethod}
         handleDelete={handleDeleteMethod}
       />
@@ -328,7 +337,7 @@ export default function CardManagement() {
                       />
                     }
                     text="Transactions"
-                    value={transactions?.data?.length || []}
+                    value={transactions?.data?.length || 0}
                   />
                 </Grid>
               </Grid>

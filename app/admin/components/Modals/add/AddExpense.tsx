@@ -8,13 +8,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
 import { API_URL } from '@/app/utils/enum';
-import { fetchApi } from '@/app/utils/db';
 import { IPaymentMethod } from '@/app/utils/type';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
@@ -22,6 +21,7 @@ import axios from 'axios';
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
   paymentMethods: IPaymentMethod[];
+  adminsAndDrivers: string[];
 }
 
 export default function AddExpense({
@@ -29,8 +29,8 @@ export default function AddExpense({
   onClose,
   showNotification,
   paymentMethods,
+  adminsAndDrivers,
 }: IProps) {
-  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
     description: '',
@@ -42,51 +42,6 @@ export default function AddExpense({
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
   const { date, SelectDate } = useSelectDate(todayString, true);
-
-  useEffect(() => {
-    fetchAdmins();
-    fetchDrivers();
-  }, []);
-
-  const fetchAdmins = async () => {
-    try {
-      const admins = await fetchApi(
-        `${API_URL.ADMIN}/admins`,
-        showNotification,
-      );
-
-      const formattedAdmins = admins.map((admin: any) => {
-        return `Admin - ${admin.clientName}`;
-      });
-      console.log([...adminsAndDrivers, ...formattedAdmins], 'admins');
-      setAdminsAndDrivers(formattedAdmins);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
-
-  const fetchDrivers = async () => {
-    try {
-      const drivers = await fetchApi(
-        `${API_URL.ADMIN}/drivers`,
-        showNotification,
-      );
-
-      const formattedDrivers = drivers.map((driver: any) => {
-        return `Driver - ${driver.name}`;
-      });
-      setAdminsAndDrivers((prevAdminAndDrivers) => [
-        ...prevAdminAndDrivers,
-        ...formattedDrivers,
-      ]);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
 
   const handleAddExpense = async () => {
     try {

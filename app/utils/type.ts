@@ -2,6 +2,7 @@ import { AlertColor } from '@mui/material';
 import {
   Category,
   CodBoard,
+  DayRange,
   Driver,
   Expense,
   PaymentMethod,
@@ -11,6 +12,9 @@ import {
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
+
+export interface IDayRange extends DayRange {
+}
 
 export interface BSData {
   quantity: number;
