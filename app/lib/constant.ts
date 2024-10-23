@@ -108,19 +108,9 @@ export const adminTabs = {
       path: '/admin/orders',
     },
     {
-      name: 'C.O.D',
-      icon: PaymentsIcon,
-      path: '/admin/codBoard',
-    },
-    {
       name: 'Reports',
       icon: ArticleIcon,
       path: '/admin/reports',
-    },
-    {
-      name: 'Transactions',
-      icon: SyncAltIcon,
-      path: '/admin/transactions',
     },
     {
       name: 'Settings',
@@ -151,6 +141,16 @@ export const adminTabs = {
     },
   ],
   Others: [
+    {
+      name: 'Transactions',
+      icon: SyncAltIcon,
+      path: '/admin/transactions',
+    },
+    {
+      name: 'C.O.D',
+      icon: PaymentsIcon,
+      path: '/admin/codBoard',
+    },
     {
       name: 'Blocking',
       icon: AppBlockingIcon,

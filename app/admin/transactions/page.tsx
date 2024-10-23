@@ -38,10 +38,10 @@ export default function Transactions() {
     [],
   );
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
-  const [ searchKeywords, setSearchKeywords ] = useState<string>('');
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   const { showNotification, NotificationComp } = useNotification();
-  const debouncedKeywords = useDebounce(searchKeywords, 1000)
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
@@ -57,14 +57,13 @@ export default function Transactions() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newTransactions = handleSearch(debouncedKeywords, transactions?.data, [
-        'description',
-        'spentBy',
-        'id',
-      ]);
+      const newTransactions = handleSearch(
+        debouncedKeywords,
+        transactions?.data,
+        ['description', 'spentBy', 'id'],
+      );
       setDisplayTransactions(newTransactions);
-    }
-    else {
+    } else {
       setDisplayTransactions(transactions?.data || []);
     }
   }, [debouncedKeywords]);

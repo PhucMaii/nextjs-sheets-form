@@ -175,6 +175,8 @@ model PaymentMethod {
   name         String
   balance      Float
   type         String
+  updatedAt    String?
+  updatedBy    String?
   transactions Expense[]
 }
 
@@ -188,5 +190,5 @@ model Expense {
   date            String
   paymentMethodId Int
 
-  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
 }

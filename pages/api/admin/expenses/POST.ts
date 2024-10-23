@@ -34,8 +34,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const existingMethod = await prisma.paymentMethod.findUnique({
       where: {
-        id: paymentMethodId
-      }
+        id: paymentMethodId,
+      },
     });
 
     if (!existingMethod) {
@@ -60,11 +60,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     await prisma.paymentMethod.update({
       where: {
-        id: paymentMethodId
+        id: paymentMethodId,
       },
       data: {
-        balance: newBalance
-      }
+        balance: newBalance,
+      },
     });
 
     return res.status(201).json({

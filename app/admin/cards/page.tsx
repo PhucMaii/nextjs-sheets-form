@@ -31,6 +31,11 @@ import { IExpense, IPaymentMethod } from '@/app/utils/type';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ErrorComponent from '../components/ErrorComponent';
 import { normalizeDate } from '@/pages/api/utils/date';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
+import axios from 'axios';
+import DeleteModal from '../components/Modals/delete/DeleteModal';
 
 export default function CardManagement() {
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
@@ -38,12 +43,17 @@ export default function CardManagement() {
     null,
   );
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<any>({
+    addModal: false,
+    editModal: false,
+    deleteModal: false,
+  });
+  // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
-  const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+  const [paymentMethods, mutateMethod] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
   const [transactions] = SWRFetchData(
     `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
   );
@@ -78,16 +88,19 @@ export default function CardManagement() {
       return {};
     }
 
-    const mostUsed = transactions?.data.reduce((acc: any, transaction: IExpense) => {
-      if (!acc[transaction.spentBy]) {
-        acc[transaction.spentBy] = {amount: transaction.amount, count: 1};
-        return acc;
-      }
+    const mostUsed = transactions?.data.reduce(
+      (acc: any, transaction: IExpense) => {
+        if (!acc[transaction.spentBy]) {
+          acc[transaction.spentBy] = { amount: transaction.amount, count: 1 };
+          return acc;
+        }
 
-      acc[transaction.spentBy].amount += transaction.amount;
-      acc[transaction.spentBy].count += 1;
-      return acc;
-    }, {});
+        acc[transaction.spentBy].amount += transaction.amount;
+        acc[transaction.spentBy].count += 1;
+        return acc;
+      },
+      {},
+    );
 
     return mostUsed;
   }, [transactions?.data]);
@@ -107,25 +120,87 @@ export default function CardManagement() {
     );
   };
 
+  const handleDeleteMethod = async (targetMethod: IPaymentMethod) => {
+    try {
+      const response = await axios.delete(`${API_URL.ADMIN}/paymentMethods?methodId=${targetMethod.id}`);
+
+      if (response.data.error) {
+        showNotification('error', 'Fail to delete payment method. Please try again later.');
+        return;
+      }
+
+      // Update Real Data
+      setCurrentMethodId(-1);
+      setCurrentMethod(null);
+
+      showNotification('success', 'Payment method deleted successfully.');
+      setOpenModal({ ...openModal, deleteModal: false });
+      mutateMethod();
+    } catch (error: any) {
+      console.log('Fail to delete payment method: ', error);
+      showNotification(
+        'error',
+        'Fail to delete payment method. Please try again later.',
+      );
+    }
+  }
+
   return (
     <Sidebar>
       {NotificationComp}
       <AddPaymentMethod
-        open={isOpenAddNewMethod}
-        onClose={() => setIsOpenAddNewMethod(false)}
+        open={openModal.addModal}
+        onClose={() => setOpenModal({ ...openModal, addModal: false })}
         showNotification={showNotification}
+      />
+
+      <EditPaymentMethod
+        open={openModal.editModal}
+        onClose={() => setOpenModal({ ...openModal, editModal: false })}
+        showNotification={showNotification}
+        paymentMethod={currentMethod}
+        setCurrentPaymentMethod={setCurrentMethod}
+        mutateMethod={mutateMethod}
+      />
+
+      <DeleteModal 
+        open={openModal.deleteModal}
+        handleCloseModal={() => setOpenModal({ ...openModal, deleteModal: false })}
+        targetObj={currentMethod}
+        handleDelete={handleDeleteMethod}
       />
 
       <Box display="flex" flexDirection="column" gap={2}>
         {/* Header */}
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
+            <IconButton
+              onClick={() => setOpenModal({ ...openModal, addModal: true })}
+            >
+              <AddIcon />
+            </IconButton>
             <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
               Cards
             </Typography>
-            <IconButton onClick={() => setIsOpenAddNewMethod(true)}>
-              <AddIcon />
-            </IconButton>
+
+            <Box display="flex" alignItems="center">
+              <IconButton
+                color="primary"
+                onClick={() => setOpenModal({ ...openModal, editModal: true })}
+                disabled={currentMethodId === -1}
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                color="error"
+                onClick={() =>
+                  setOpenModal({ ...openModal, deleteModal: true })
+                }
+                disabled={currentMethodId === -1}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
           </Box>
 
           <Box display="flex" alignItems="center" gap={1}>
@@ -183,14 +258,24 @@ export default function CardManagement() {
                         style={{ color: 'white', width: 50, height: 50 }}
                       />
                     ) : (
-                      <Box display="flex" alignItems="center" flexDirection="row">
-                      <Image
-                        src="/visa-image.png"
-                        alt="expense"
-                        width={150}
-                        height={50}
-                      />
-                      <Typography variant="body1" color="white" fontWeight={500}>{currentMethod?.type}</Typography>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        flexDirection="row"
+                      >
+                        <Image
+                          src="/visa-image.png"
+                          alt="expense"
+                          width={150}
+                          height={50}
+                        />
+                        <Typography
+                          variant="body1"
+                          color="white"
+                          fontWeight={500}
+                        >
+                          {currentMethod?.type}
+                        </Typography>
                       </Box>
                     )}
                   </Box>
@@ -251,7 +336,10 @@ export default function CardManagement() {
               <Grid item xs={12}>
                 {/* Expense Chart */}
                 <ShadowSection>
-                  <AreaChart timeSeries={listOfDateString} thisMonthData={transactions?.chartData || []} />
+                  <AreaChart
+                    timeSeries={listOfDateString}
+                    thisMonthData={transactions?.chartData || []}
+                  />
                 </ShadowSection>
               </Grid>
               <Grid item xs={12} md={8}>

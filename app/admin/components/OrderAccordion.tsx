@@ -244,12 +244,14 @@ const OrderAccordion = ({
         order={order}
         mutateOrders={mutateOrders}
       />
-      {handleUpdateItem && <OrderDetails
-        open={isOpenDetails}
-        onClose={() => setIsOpenDetails(false)}
-        order={order}
-        handleUpdateItem={handleUpdateItem}
-      />}
+      {handleUpdateItem && (
+        <OrderDetails
+          open={isOpenDetails}
+          onClose={() => setIsOpenDetails(false)}
+          order={order}
+          handleUpdateItem={handleUpdateItem}
+        />
+      )}
       <ShadowSection>
         <Grid container alignItems="center" columnSpacing={1}>
           <Grid item sm={0.5} xs={2}>
@@ -299,12 +301,13 @@ const OrderAccordion = ({
               alignItems="center"
             >
               <StatusText text={statusText.text} type={statusText.type} />
-              <IconButton onClick={() => {
-                if (handleOpenDetails) {
-                  handleOpenDetails();
-                } else {
-                  setIsOpenDetails(true);
-                }
+              <IconButton
+                onClick={() => {
+                  if (handleOpenDetails) {
+                    handleOpenDetails();
+                  } else {
+                    setIsOpenDetails(true);
+                  }
                 }}
               >
                 <PreviewIcon color="primary" />

@@ -18,18 +18,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           transactions: true,
-        }
+        },
       });
       return res.status(200).json({
         data: method,
         message: 'Fetch Payment Methods Successfully',
       });
     }
-    
+
     const allMethods = await prisma.paymentMethod.findMany({
       include: {
         transactions: true,
-      }
+      },
     });
 
     // Get who used it most
@@ -39,16 +39,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         continue;
       }
 
-      const mostUsed = method.transactions.reduce((acc: any, transaction: Expense) => {
-        if (!acc[transaction.spentBy]) {
-          acc[transaction.spentBy] = {amount: transaction.amount, count: 1};
-          return acc;
-        }
+      const mostUsed = method.transactions.reduce(
+        (acc: any, transaction: Expense) => {
+          if (!acc[transaction.spentBy]) {
+            acc[transaction.spentBy] = { amount: transaction.amount, count: 1 };
+            return acc;
+          }
 
-        acc[transaction.spentBy].amount += transaction.amount;
-        acc[transaction.spentBy].count += 1;
-        return acc;
-      }, {});
+          acc[transaction.spentBy].amount += transaction.amount;
+          acc[transaction.spentBy].count += 1;
+          return acc;
+        },
+        {},
+      );
 
       mostUsedMethod[method.id] = mostUsed;
     }

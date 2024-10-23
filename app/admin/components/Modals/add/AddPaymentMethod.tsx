@@ -35,6 +35,8 @@ export default function AddPaymentMethod({
     balance: 0,
     createdAt: '',
     createdBy: '',
+    updatedBy: null,
+    updatedAt: null,
   });
 
   const onChangePaymentMethod = (field: string, value: any) => {
@@ -74,6 +76,8 @@ export default function AddPaymentMethod({
         balance: 0,
         createdAt: '',
         createdBy: '',
+        updatedBy: null,
+        updatedAt: null,
       });
 
       setIsAdding(false);

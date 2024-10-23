@@ -415,7 +415,7 @@ export const updateOrderTotalPrice = async (
       include: {
         items: true,
         user: true,
-      }
+      },
     });
 
     const newItems = updatedOrder.items.map((item: OrderedItems) => {
@@ -423,7 +423,7 @@ export const updateOrderTotalPrice = async (
       return { ...item, totalPrice };
     });
 
-    return {...updatedOrder, items: newItems }
+    return { ...updatedOrder, items: newItems };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

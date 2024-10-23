@@ -61,15 +61,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);
 
-    const transactionBasedOnDate = sortedExpensesByDate.reduce((acc: any, expense: any) => {
-      if (!acc[expense.date]) {
-        acc[expense.date] = 0;
-      }
+    const transactionBasedOnDate = sortedExpensesByDate.reduce(
+      (acc: any, expense: any) => {
+        if (!acc[expense.date]) {
+          acc[expense.date] = 0;
+        }
 
-      acc[expense.date] += expense.amount;
-      return acc;
-    }, {});
-    const chartData = generateChartDataForm(transactionBasedOnDate, listOfDateString);
+        acc[expense.date] += expense.amount;
+        return acc;
+      },
+      {},
+    );
+    const chartData = generateChartDataForm(
+      transactionBasedOnDate,
+      listOfDateString,
+    );
     console.log(chartData, 'chartData');
 
     return res.status(200).json({
@@ -83,11 +89,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const generateChartDataForm = (transactionBasedOnDate: any, listOfDateString: any) => {
-  if (!transactionBasedOnDate || Object.keys(transactionBasedOnDate).length === 0) {
+const generateChartDataForm = (
+  transactionBasedOnDate: any,
+  listOfDateString: any,
+) => {
+  if (
+    !transactionBasedOnDate ||
+    Object.keys(transactionBasedOnDate).length === 0
+  ) {
     return [];
   }
-  
+
   const returnData = [];
 
   let dateIndex = 0;
@@ -106,4 +118,4 @@ const generateChartDataForm = (transactionBasedOnDate: any, listOfDateString: an
   }
 
   return returnData;
-}
+};

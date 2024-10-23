@@ -123,9 +123,8 @@ export default function Orders() {
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
-  const [selectedOrderDetails, setSelectedOrderDetails] = useState<Order | null>(
-    null,
-  )
+  const [selectedOrderDetails, setSelectedOrderDetails] =
+    useState<Order | null>(null);
   const [tabIndex, setTabIndex] = useState<number>(0);
 
   const componentRef: any = useRef();
@@ -805,12 +804,14 @@ export default function Orders() {
         // subcategories={subCategories?.data || []}
         handleUpdateItem={handleUpdateItem}
       />
-      {selectedOrderDetails && <OrderDetails 
-        open={!!selectedOrderDetails}
-        onClose={() => setSelectedOrderDetails(null)}
-        order={selectedOrderDetails}
-        handleUpdateItem={handleUpdateItem}
-      />}
+      {selectedOrderDetails && (
+        <OrderDetails
+          open={!!selectedOrderDetails}
+          onClose={() => setSelectedOrderDetails(null)}
+          order={selectedOrderDetails}
+          handleUpdateItem={handleUpdateItem}
+        />
+      )}
       {isLoading ? (
         <>
           {uppperContent}
