@@ -403,7 +403,7 @@ export const updateOrderTotalPrice = async (
     const prisma = new PrismaClient();
 
     const updateTime = new Date();
-    const updatedOrder = await prisma.orders.update({
+    const updatedOrder: any = await prisma.orders.update({
       where: {
         id: orderId,
       },
@@ -423,7 +423,7 @@ export const updateOrderTotalPrice = async (
       return { ...item, totalPrice };
     });
 
-    return { ...updatedOrder, items: newItems };
+    return { ...updatedOrder, items: newItems, clientName: updatedOrder.user.clientName, clientId: updatedOrder.user.clientId };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
