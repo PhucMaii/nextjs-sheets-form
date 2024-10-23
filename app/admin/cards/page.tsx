@@ -246,7 +246,7 @@ export default function CardManagement() {
                     height: '100%',
                     background:
                       currentMethod?.type === PAYMENT_METHOD_TYPE.CASH
-                        ? 'linear-gradient(to right, rgb(34, 197, 94), rgb(21, 128, 61))'
+                        ? 'linear-gradient(to right, rgb(34, 197, 94), rgb(21, 128, 61))' : currentMethod?.type === PAYMENT_METHOD_TYPE.CHEQUE ? 'linear-gradient(to right, rgb(202, 138, 4), rgb(220, 38, 38))'
                         : 'radial-gradient(at right center, rgb(56, 189, 248), rgb(49, 46, 129))',
                     display: 'flex',
                     flexDirection: 'column',
@@ -295,7 +295,7 @@ export default function CardManagement() {
                     justifyContent="flex-end"
                     sx={{ px: 8 }}
                   >
-                    {currentMethod?.type !== PAYMENT_METHOD_TYPE.CASH && (
+                    {currentMethod?.type !== PAYMENT_METHOD_TYPE.CASH && currentMethod?.type !== PAYMENT_METHOD_TYPE.CHEQUE && (
                       <Nfc style={{ color: 'white', width: 50, height: 50 }} />
                     )}
                   </Box>

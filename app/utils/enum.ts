@@ -60,6 +60,7 @@ export enum PAYMENT_METHOD_TYPE {
   CASH = 'CASH',
   CREDIT = 'CREDIT',
   DEBIT = 'DEBIT',
+  CHEQUE = 'CHEQUE',
   OTHER = 'OTHER',
 }
 

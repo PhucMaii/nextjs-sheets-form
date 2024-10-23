@@ -16,6 +16,7 @@ import { IPaymentMethod } from '@/app/utils/type';
 import { API_URL, PAYMENT_METHOD_TYPE } from '@/app/utils/enum';
 import axios from 'axios';
 import moment from 'moment';
+import { methodTypes } from '@/app/lib/constant';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -117,15 +118,13 @@ export default function AddPaymentMethod({
               value={newPaymentMethod.type}
               onChange={(e) => onChangePaymentMethod('type', e.target.value)}
             >
-              <MenuItem value={PAYMENT_METHOD_TYPE.CASH}>
-                {PAYMENT_METHOD_TYPE.CASH}
-              </MenuItem>
-              <MenuItem value={PAYMENT_METHOD_TYPE.CREDIT}>
-                {PAYMENT_METHOD_TYPE.CREDIT}
-              </MenuItem>
-              <MenuItem value={PAYMENT_METHOD_TYPE.DEBIT}>
-                {PAYMENT_METHOD_TYPE.DEBIT}
-              </MenuItem>
+              {
+                methodTypes.map((method: PAYMENT_METHOD_TYPE) => (
+                  <MenuItem key={method} value={method}>
+                    {method}
+                  </MenuItem>
+                ))
+              }
             </Select>
           </Box>
         </Box>
