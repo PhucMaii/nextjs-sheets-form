@@ -88,9 +88,9 @@ export const ManifestPrint = forwardRef(
                       continue;
                     }
 
-                    if (itemName.includes('KONGNAMUL')) {
-                      continue;
-                    }
+                    // if (itemName.includes('KONGNAMUL')) {
+                    //   continue;
+                    // }
 
                     itemNameList.push(itemName);
                   }

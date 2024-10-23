@@ -6,6 +6,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import _ from 'lodash';
 import { groupBy } from '@/app/utils/array';
 import { IItem } from '@/app/utils/type';
+import { checkIsKorean } from '../../utils/korean';
 
 interface IBody {
   day: string;
@@ -58,7 +59,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       .filter((order: Order) => order.routeId);
 
     const orderByRoutes = _.orderBy(clientRoutes, ['routeId'], ['asc']);
-    console.log(orderByRoutes.length, 'orderByRoutes.length');
 
     // console.log(orderByRoutes, 'orderByRoutes');
     // Arrange as user route
@@ -126,10 +126,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         (acc: any, item: IItem) => {
           const { name } = item;
 
-          const itemKey = name.includes('KONGNAMUL')
-            ? name.split(' - ')[1]
-            : name;
+          let itemKey = name;
 
+          if (checkIsKorean(itemKey.split(' - ')[0])) {
+            itemKey = itemKey.split(' - ')[1];
+          } else {
+            itemKey = itemKey.includes('KONGNAMUL')
+              ? itemKey.split(' - ')[1]
+              : itemKey;
+          }
+          
           if (!acc[itemKey]) {
             acc[itemKey] = 0;
           }
@@ -142,15 +148,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const manifestDetail = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem, index: number) => {
-          const { user, name, quantity } = item;
+          const { user, quantity } = item;
           if (!user) {
             return acc;
           }
 
-          const itemKey = name.includes('KONGNAMUL')
-            ? name.split(' - ')[1]
-            : name;
+          let itemKey = item.name;
 
+          if (checkIsKorean(itemKey.split(' - ')[0])) {
+            itemKey = itemKey.split(' - ')[1];
+          } else {
+            itemKey = itemKey.includes('KONGNAMUL')
+              ? itemKey.split(' - ')[1]
+              : itemKey;
+          }
+
+          if (user.clientId === '00303') {
+            console.log({itemKey, name: item.name}, 'itemKey');
+          }
           // Beginning of new customer
           if (
             index === 0 ||
