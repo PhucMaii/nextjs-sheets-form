@@ -26,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    await updateOrderTotalPrice(
+    const updatedOrder = await updateOrderTotalPrice(
       orderId,
       orderTotalPrice,
       `Admin - ${adminUpdate.clientName}`,
@@ -34,6 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     return res.status(200).json({
       data,
+      updatedOrder,
       message: 'Update Data Successfully',
     });
   } catch (error) {

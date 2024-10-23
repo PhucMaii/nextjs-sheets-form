@@ -403,7 +403,7 @@ export const updateOrderTotalPrice = async (
     const prisma = new PrismaClient();
 
     const updateTime = new Date();
-    await prisma.orders.update({
+    const updatedOrder = await prisma.orders.update({
       where: {
         id: orderId,
       },
@@ -412,7 +412,18 @@ export const updateOrderTotalPrice = async (
         updatedBy,
         updateTime,
       },
+      include: {
+        items: true,
+        user: true,
+      }
     });
+
+    const newItems = updatedOrder.items.map((item: OrderedItems) => {
+      const totalPrice = item.quantity * item.price;
+      return { ...item, totalPrice };
+    });
+
+    return {...updatedOrder, items: newItems }
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

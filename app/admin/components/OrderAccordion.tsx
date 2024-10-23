@@ -37,12 +37,13 @@ interface PropTypes {
   showNotification: (type: AlertColor, message: string) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
-  handleUpdateItem: (
+  handleUpdateItem?: (
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
   mutateOrders: any;
+  handleOpenDetails?: any;
 }
 
 const OrderAccordion = ({
@@ -52,6 +53,7 @@ const OrderAccordion = ({
   selectedOrders,
   handleUpdateItem,
   mutateOrders,
+  handleOpenDetails,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -242,12 +244,12 @@ const OrderAccordion = ({
         order={order}
         mutateOrders={mutateOrders}
       />
-      <OrderDetails
+      {handleUpdateItem && <OrderDetails
         open={isOpenDetails}
         onClose={() => setIsOpenDetails(false)}
         order={order}
         handleUpdateItem={handleUpdateItem}
-      />
+      />}
       <ShadowSection>
         <Grid container alignItems="center" columnSpacing={1}>
           <Grid item sm={0.5} xs={2}>
@@ -297,7 +299,14 @@ const OrderAccordion = ({
               alignItems="center"
             >
               <StatusText text={statusText.text} type={statusText.type} />
-              <IconButton onClick={() => setIsOpenDetails(true)}>
+              <IconButton onClick={() => {
+                if (handleOpenDetails) {
+                  handleOpenDetails();
+                } else {
+                  setIsOpenDetails(true);
+                }
+                }}
+              >
                 <PreviewIcon color="primary" />
               </IconButton>
             </Box>
