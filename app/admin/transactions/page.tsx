@@ -15,7 +15,7 @@ import { blueGrey } from '@mui/material/colors';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/SelectDateRange';
 import { ShadowSection } from '../reports/styled';
-import { SWRFetchData } from '@/app/utils/db';
+import { fetchApi, SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import TransactionsTable from '../components/Tables/TransactionsTable';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -32,6 +32,7 @@ export default function Transactions() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
@@ -68,23 +69,50 @@ export default function Transactions() {
     }
   }, [debouncedKeywords]);
 
-  // const handleSearch = (e: any) => {
-  //   const { value } = e.target;
+  useEffect(() => {
+    fetchAdmins();
+    fetchDrivers();
+  }, []);
 
-  //   if (value.length === 0) {
-  //     setDisplayTransactions(transactions?.data || []);
-  //     return;
-  //   }
+  const fetchAdmins = async () => {
+    try {
+      const admins = await fetchApi(
+        `${API_URL.ADMIN}/admins`,
+        showNotification,
+      );
 
-  //   const fuse = new Fuse(transactions?.data || [], {
-  //     keys: ['description', 'spentBy', 'amount'],
-  //   });
+      const formattedAdmins = admins.map((admin: any) => {
+        return `Admin - ${admin.clientName}`;
+      });
+      console.log([...adminsAndDrivers, ...formattedAdmins], 'admins');
+      setAdminsAndDrivers(formattedAdmins);
+    } catch (error) {
+      console.log(error);
+      showNotification('error', 'Something went wrong');
+      return;
+    }
+  };
 
-  //   const result = fuse.search(value);
-  //   const data = result.map((item: any) => item.item);
-  //   console.log(data);
-  //   setDisplayTransactions(data);
-  // };
+  const fetchDrivers = async () => {
+    try {
+      const drivers = await fetchApi(
+        `${API_URL.ADMIN}/drivers`,
+        showNotification,
+      );
+
+      const formattedDrivers = drivers.map((driver: any) => {
+        return `Driver - ${driver.name}`;
+      });
+      setAdminsAndDrivers((prevAdminAndDrivers) => [
+        ...prevAdminAndDrivers,
+        ...formattedDrivers,
+      ]);
+    } catch (error) {
+      console.log(error);
+      showNotification('error', 'Something went wrong');
+      return;
+    }
+  };
 
   const actions = (
     <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
@@ -133,6 +161,7 @@ export default function Transactions() {
           onClose={() => setIsOpenAddExpense(false)}
           showNotification={showNotification}
           paymentMethods={paymentMethods?.data || []}
+          adminsAndDrivers={adminsAndDrivers}
         />
         <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
           Transactions
@@ -177,7 +206,12 @@ export default function Transactions() {
             {actions}
           </Grid>
         </Grid>
-        <TransactionsTable transactions={displayTransactions} />
+        <TransactionsTable
+          transactions={displayTransactions}
+          paymentMethods={paymentMethods?.data || []}
+          adminsAndDrivers={adminsAndDrivers}
+          showNotification={showNotification}
+        />
       </ShadowSection>
     </Sidebar>
   );

@@ -29,7 +29,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Handle check name change
-    if (updatedData.name) {
+    if (updatedData.name && updatedData.name !== existingMethod.name) {
       const sameMethodName = await prisma.paymentMethod.findFirst({
         where: {
           name: updatedData.name,
@@ -54,7 +54,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         transactions: true,
-      }
+      },
     });
 
     return res.status(200).json({
