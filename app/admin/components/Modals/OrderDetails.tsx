@@ -67,7 +67,7 @@ export default function OrderDetails({
               <Typography variant="h6">#{order.id}</Typography>
             </Grid>
             <Grid item xs={4} textAlign="center">
-              <Typography variant="h6">{order.clientName}</Typography>
+              <Typography variant="h6">{order.user.clientName}</Typography>
             </Grid>
             <Grid item xs={4} textAlign="right">
               <IconButton onClick={onClose}>

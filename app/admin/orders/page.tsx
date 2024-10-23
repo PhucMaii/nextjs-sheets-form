@@ -54,6 +54,8 @@ import useNotification from '@/hooks/useNotification';
 import { filterByRoute } from '@/app/utils/array';
 import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
 import { handleSearch } from '@/app/utils/search';
+import OrderDetails from '../components/Modals/OrderDetails';
+import { set } from 'lodash';
 
 interface Category {
   id: number;
@@ -121,6 +123,9 @@ export default function Orders() {
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState<Order | null>(
+    null,
+  )
   const [tabIndex, setTabIndex] = useState<number>(0);
 
   const componentRef: any = useRef();
@@ -402,6 +407,7 @@ export default function Orders() {
 
       // Optimistic update
       handleUpdateUISingleOrder(order, response.data.data);
+      setSelectedOrderDetails(response.data.updatedOrder);
 
       // Mutate to update real data
       mutate();
@@ -452,20 +458,6 @@ export default function Orders() {
       );
     }
   };
-
-  // const handleUpdatePriceUI = (
-  //   targetOrder: Order,
-  //   newItems: any[],
-  //   newTotalPrice: number,
-  // ) => {
-  //   const newBaseOrderList = baseOrderData.map((order: Order) => {
-  //     if (order.id === targetOrder.id) {
-  //       return { ...targetOrder, totalPrice: newTotalPrice, items: newItems };
-  //     }
-  //     return order;
-  //   });
-  //   setBaseOrderData(newBaseOrderList);
-  // };
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
     e.stopPropagation();
@@ -681,13 +673,13 @@ export default function Orders() {
             gap={1}
             sx={{ width: '100% !important' }}
           >
-            <Fab
+            {/* <Fab
               size="medium"
               sx={{ backgroundColor: 'white' }}
               onClick={() => setIsSearchModalOpen(true)}
             >
               <SearchIcon />
-            </Fab>
+            </Fab> */}
             <Fab
               size="medium"
               color="primary"
@@ -813,6 +805,12 @@ export default function Orders() {
         // subcategories={subCategories?.data || []}
         handleUpdateItem={handleUpdateItem}
       />
+      {selectedOrderDetails && <OrderDetails 
+        open={!!selectedOrderDetails}
+        onClose={() => setSelectedOrderDetails(null)}
+        order={selectedOrderDetails}
+        handleUpdateItem={handleUpdateItem}
+      />}
       {isLoading ? (
         <>
           {uppperContent}
@@ -837,7 +835,7 @@ export default function Orders() {
                       showNotification={showNotification}
                       selectedOrders={selectedOrders}
                       handleSelectOrder={handleSelectOrder}
-                      handleUpdateItem={handleUpdateItem}
+                      handleOpenDetails={() => setSelectedOrderDetails(order)}
                       mutateOrders={mutate}
                     />
                   );
