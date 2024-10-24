@@ -259,6 +259,7 @@ export default function OrderForm() {
                         onChange={(e) => handleChangeItem(e, item)}
                         placeholder={`Enter ${item.name} here...`}
                         disabled={!item.availability}
+                        inputProps={{ min: 0 }}
                       />
                     </Box>
                   );

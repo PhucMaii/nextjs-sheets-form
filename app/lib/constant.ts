@@ -237,9 +237,9 @@ export const driverTabs = [
     path: '/driver/orders',
   },
   {
-    name: 'Order',
+    name: 'Add',
     icon: AddBoxIcon,
-    path: '/driver/place-order',
+    path: '/driver/add',
   },
   {
     name: 'Blocking',

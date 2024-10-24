@@ -88,7 +88,7 @@ export default function AddExpense({
           heading="Add Expense"
           onClose={onClose}
           onClick={handleAddExpense}
-          buttonProps={{ loading: isAdding }}
+          buttonProps={{ loading: isAdding, disabled: newExpense.paymentMethodId === -1 || newExpense.spentBy === '-- Choose who spent --' }}
           buttonLabel="ADD"
         />
 

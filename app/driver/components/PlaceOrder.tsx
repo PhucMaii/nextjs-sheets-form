@@ -1,10 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import { Autocomplete, Box, TextField, Typography } from '@mui/material';
+import { AlertColor, Autocomplete, Box, TextField, Typography } from '@mui/material';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
-import { ShadowSection } from '@/app/admin/reports/styled';
 import { grey } from '@mui/material/colors';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import moment from 'moment';
@@ -12,16 +10,18 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
-import useNotification from '@/hooks/useNotification';
 
-export default function PlaceOrder() {
+interface IProps {
+  showNotification: (type: AlertColor, message: string) => void
+}
+
+export default function PlaceOrder({showNotification}: IProps) {
   const [itemList, setItemList] = useState<OrderedItems[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [note, setNote] = useState<string>('');
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
 
-  const { showNotification, NotificationComp } = useNotification();
-  const { date: deliveryDate, SelectDate } = useSelectDate();
+  const { date: deliveryDate, SelectDate } = useSelectDate('', true);
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
@@ -114,18 +114,17 @@ export default function PlaceOrder() {
   };
 
   return (
-    <Sidebar>
-      {NotificationComp}
+    <>
       <Typography variant="h4" textAlign="center">
         Place Order
       </Typography>
-      <ShadowSection
+      <Box
         display="flex"
         flexDirection="column"
         gap={1}
         justifyContent="center"
       >
-        <Box mb={4}>
+        <Box mb={4} display="flex" flexDirection="column" gap={1}>
           <Typography fontWeight="bold" variant="subtitle1">
             Client
           </Typography>
@@ -140,7 +139,7 @@ export default function PlaceOrder() {
             sx={{ width: 'auto' }}
           />
         </Box>
-        <Box mb={4}>
+        <Box mb={4} display="flex" flexDirection="column" gap={1}>
           <Typography fontWeight="bold" variant="subtitle1">
             DELIVERY DATE
           </Typography>
@@ -206,7 +205,7 @@ export default function PlaceOrder() {
         >
           Submit
         </LoadingButton>
-      </ShadowSection>
-    </Sidebar>
+      </Box>
+    </>
   );
 }
