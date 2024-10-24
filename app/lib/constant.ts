@@ -251,11 +251,11 @@ export const driverTabs = [
   //   icon: MessageIcon,
   //   path: '/driver/message',
   // },
-  {
-    name: 'Account',
-    icon: AccountCircleIcon,
-    path: '/driver/account',
-  },
+  // {
+  //   name: 'Account',
+  //   icon: AccountCircleIcon,
+  //   path: '/driver/account',
+  // },
 ];
 
 export const settingsTabs = ['General', 'Announcement'];

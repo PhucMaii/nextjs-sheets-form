@@ -114,8 +114,6 @@ export default function BillPrintModal({
     }
   };
 
-  console.log(isLoading);
-
   const manifestPrintButton = (
     <Box
       display="flex"

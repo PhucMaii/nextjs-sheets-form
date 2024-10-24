@@ -219,23 +219,23 @@ export default function Orders() {
       if (currentRoute > 0) {
         baseOrders = filterOrderByRoute(baseOrderData);
       }
-      // const newOrderList = baseOrders.filter((order: Order) => {
-      //   if (
-      //     order.user.clientId.includes(debouncedKeywords) ||
-      //     debouncedKeywords == order.id.toString() ||
-      //     order.user.clientName
-      //       .toLowerCase()
-      //       .includes(debouncedKeywords.toLowerCase())
-      //   ) {
-      //     return true;
-      //   }
-      //   return false;
-      // });
-      const newOrderList = handleSearch(debouncedKeywords, baseOrders, [
-        'id',
-        'user.clientName',
-        'user.clientId',
-      ]);
+      const newOrderList = baseOrders.filter((order: Order) => {
+        if (
+          order.user.clientId.includes(debouncedKeywords) ||
+          debouncedKeywords == order.id.toString() ||
+          order.user.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        ) {
+          return true;
+        }
+        return false;
+      });
+      // const newOrderList = handleSearch(debouncedKeywords, baseOrders, [
+      //   'id',
+      //   'user.clientName',
+      //   'user.clientId',
+      // ]);
 
       setOrderData(newOrderList);
       setPages(1);

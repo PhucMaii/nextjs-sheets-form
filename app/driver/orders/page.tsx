@@ -103,6 +103,7 @@ export default function OrdersPage() {
       setOrders([]);
       setDisplayOrders([]);
     }
+    setIsFetching(false);
   }, [currentTab, ordersResponse]);
 
   const deliveredOrders = useMemo(() => {
