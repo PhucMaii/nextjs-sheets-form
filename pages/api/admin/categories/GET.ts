@@ -9,6 +9,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const cateogries = await prisma.category.findMany({
       include: {
         users: true,
+        items: true,
       },
     });
 

@@ -83,6 +83,7 @@ export interface UserType {
 
 export interface ICategory extends Category {
   users?: User[];
+  items?: IItem[];
 }
 
 export interface IItem {
