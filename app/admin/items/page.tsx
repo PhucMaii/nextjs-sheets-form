@@ -30,20 +30,25 @@ import { LoadingButton } from '@mui/lab';
 import { UPDATE_OPTION } from '../components/Modals/edit/EditItem';
 import { blueGrey } from '@mui/material/colors';
 import useNotification from '@/hooks/useNotification';
+import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';
+import PasteItemsModal from '../components/Modals/PasteItemsModal';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
-  const [isAddItem, setIsAddItem] = useState<boolean>(false);
-  const [isCategorySidebarOpen, setIsCategorySidebarOpen] =
-    useState<boolean>(true);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [isEditCategory, setIsEditCategory] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [items, setItems] = useState<IItem[]>([]);
   const [isSavingArrangement, setIsSavingArrangement] =
-    useState<boolean>(false);
+  useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-
+  
+  const [open, setOpen] = useMultipleBoolean({
+    isAddItemOpen: false,
+    isSidebarOpen: true,
+    isPasteModalOpen: false,
+    isDeleteModalOpen: false,
+    isEditCategoryOpen: false,
+  });
   const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
@@ -309,30 +314,31 @@ export default function ItemPage() {
   return (
     <Sidebar noMargin>
       <AddItem
-        open={isAddItem}
-        onClose={() => setIsAddItem(false)}
+        open={open.isAddItemOpen}
+        onClose={() => setOpen('isAddItemOpen', false)}
         categoryId={currentCategory?.id}
         addItem={handleAddItem}
       />
       <DeleteModal
         targetObj={currentCategory}
         handleDelete={handleDeleteCategory}
-        open={isDeleteModalOpen}
-        handleCloseModal={() => setIsDeleteModalOpen(false)}
+        open={open.isDeleteModalOpen}
+        handleCloseModal={() => setOpen('isDeleteModalOpen' ,false)}
       />
       <EditCategory
-        open={isEditCategory}
-        onClose={() => setIsEditCategory(false)}
+        open={open.isEditCategory}
+        onClose={() => setOpen('isEditCategory' ,false)}
         updateCategory={handleUpdateCategoryName}
         currentName={currentCategory?.name}
       />
       {NotificationComp}
+      <PasteItemsModal currentCategoryId={currentCategory?.id} open={open.isPasteModalOpen} onClose={() => setOpen('isPasteModalOpen' ,false)} showNotification={showNotification} categories={categories?.data || []} />
       <CategorySidebar
         currentCategory={currentCategory}
         categories={categories?.data || []}
         handleChangeTab={switchCurrentCategory}
-        isNavOpen={isCategorySidebarOpen}
-        setIsNavOpen={setIsCategorySidebarOpen}
+        isNavOpen={open.isSidebarOpen}
+        setIsNavOpen={setOpen}
       >
         <Grid container alignItems="center">
           <Grid item xs={12} md={10}>
@@ -341,9 +347,9 @@ export default function ItemPage() {
                 {currentCategory?.name} ( {currentCategory?.users?.length}{' '}
                 clients )
               </Typography>
-              <IconButton onClick={() => setIsEditCategory(true)}>
-                <EditIcon />
-              </IconButton>
+                <IconButton onClick={() => setOpen('isEditCategory', true)}>
+                  <EditIcon />
+                </IconButton>
             </Box>
           </Grid>
           <Grid item xs={12} md={2} textAlign="right">
@@ -352,7 +358,7 @@ export default function ItemPage() {
               fullWidth
               color="error"
               variant="outlined"
-              onClick={() => setIsDeleteModalOpen(true)}
+              onClick={() => setOpen('isDeleteModalOpen', true)}
             >
               Delete
             </Button>
@@ -360,7 +366,7 @@ export default function ItemPage() {
         </Grid>
         <ShadowSection sx={{ mt: 2 }}>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item xs={12} md={11}>
+            <Grid item xs={12} md={10.5}>
               <TextField
                 fullWidth
                 variant="standard"
@@ -371,10 +377,15 @@ export default function ItemPage() {
                 sx={{ borderRadius: 4 }}
               />
             </Grid>
-            <Grid item xs={12} md={1}>
-              <IconButton size="large" onClick={() => setIsAddItem(true)}>
-                <AddBoxIcon fontSize="large" color="primary" />
-              </IconButton>
+            <Grid item xs={12} md={1.5}>
+              <Box display="flex" alignItems="center">
+                <IconButton size='large' onClick={() => setOpen('isPasteModalOpen', true)}>
+                  <ContentPasteGoIcon fontSize="large" color="primary" />
+                </IconButton>
+                <IconButton size="large" onClick={() => setOpen('isAddItemOpen', true)}>
+                  <AddBoxIcon fontSize="large" color="primary" />
+                </IconButton>
+              </Box>
             </Grid>
             <Grid item xs={12} textAlign="right">
               <LoadingButton

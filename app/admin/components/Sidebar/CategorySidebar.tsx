@@ -36,7 +36,7 @@ export default function CategorySidebar({
     <>
       {!isNavOpen && (
         <Box>
-          <IconButton onClick={() => setIsNavOpen(true)}>
+          <IconButton onClick={() => setIsNavOpen('isSidebarOpen', true)}>
             <ArrowForwardIcon />
           </IconButton>
         </Box>
@@ -59,7 +59,7 @@ export default function CategorySidebar({
               flexWrap="wrap"
               alignItems="center"
             >
-              <IconButton onClick={() => setIsNavOpen(false)}>
+              <IconButton onClick={() => setIsNavOpen('isSidebarOpen', false)}>
                 <ArrowBackIcon />
               </IconButton>
               <Typography variant="h5" color={blueGrey[800]}>
