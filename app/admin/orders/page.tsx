@@ -56,6 +56,15 @@ import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
 import { handleSearch } from '@/app/utils/search';
 import OrderDetails from '../components/Modals/OrderDetails';
 import { set } from 'lodash';
+import { DropdownItemContainer } from './styled';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PendingIcon from '@mui/icons-material/Pending';
+import BlockIcon from '@mui/icons-material/Block';
+import DeleteIcon from '@mui/icons-material/Delete';;
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
+import { errorColor, infoColor, successColor, warningColor } from '@/theme/color';
+import LoadingModal from '../components/Modals/LoadingModal';
 
 interface Category {
   id: number;
@@ -115,6 +124,7 @@ export default function Orders() {
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [filterOptions, setFilterOptions] = useState<PAYMENT_TYPE[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isExecutingAction, setIsExecutingAction] = useState<boolean>(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [orderData, setOrderData] = useState<Order[]>([]);
@@ -421,6 +431,29 @@ export default function Orders() {
     }
   };
 
+  const handleDeleteSelectedOrders = async () => {
+    setIsExecutingAction(true);
+    try {
+      const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
+        data: { orderList: selectedOrders },
+      });
+
+      showNotification('success', response.data.message);
+      setSelectedOrders([]);
+      mutate();
+
+      setIsExecutingAction(false);
+    } catch (error: any) {
+      console.log('Fail to mark all as completed: ', error);
+
+      setIsExecutingAction(false);
+      showNotification(
+        'error',
+        'Fail to mark all as completed: ' + error.response.data.error,
+      )
+    }
+  };
+
   const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
     const newOrderData: Order[] = baseOrderData.map((order: Order) => {
       // If order is at targetOrder, then update
@@ -446,9 +479,12 @@ export default function Orders() {
   };
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+    setIsExecutingAction(true);
     try {
       await updateStatus(status, selectedOrders, showNotification);
       mutate();
+
+      setIsExecutingAction(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
       showNotification(
@@ -569,7 +605,22 @@ export default function Orders() {
           }}
           disabled={orderData.length === 0}
         >
-          <Typography>Print bills</Typography>
+          <DropdownItemContainer display="flex" gap={2}>
+            <LocalPrintshopIcon sx={{ color: infoColor }} />
+            <Typography>Print</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleDeleteSelectedOrders();
+            handleCloseAnchor();
+          }}
+          disabled={orderData.length === 0}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <DeleteIcon sx={{ color: errorColor }} />
+            <Typography>Delete</Typography>
+          </DropdownItemContainer>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -578,7 +629,10 @@ export default function Orders() {
           }}
           disabled={currentStatus === ORDER_STATUS.INCOMPLETED}
         >
-          <Typography>Mark as incompleted</Typography>
+          <DropdownItemContainer display="flex" gap={2}>
+            <PendingIcon sx={{ color: warningColor }} />
+            <Typography>Mark as incompleted</Typography>
+          </DropdownItemContainer>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -587,7 +641,10 @@ export default function Orders() {
           }}
           disabled={currentStatus === ORDER_STATUS.DELIVERED}
         >
-          <Typography>Mark as delivered</Typography>
+          <DropdownItemContainer display="flex" gap={2}>
+            <LocalShippingIcon sx={{ color: infoColor }} />
+            <Typography>Mark as delivered</Typography>
+          </DropdownItemContainer>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -596,7 +653,10 @@ export default function Orders() {
           }}
           disabled={currentStatus === ORDER_STATUS.COMPLETED}
         >
-          <Typography>Mark as completed</Typography>
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Mark as completed</Typography>
+          </DropdownItemContainer>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -605,7 +665,10 @@ export default function Orders() {
           }}
           disabled={currentStatus === ORDER_STATUS.VOID}
         >
-          <Typography>Mark as void</Typography>
+          <DropdownItemContainer display="flex" gap={2}>
+            <BlockIcon sx={{ color: errorColor }} />
+            <Typography>Mark as void</Typography>
+          </DropdownItemContainer>
         </MenuItem>
       </Menu>
     </Box>
@@ -777,7 +840,7 @@ export default function Orders() {
 
   return (
     <Sidebar>
-      {/* <LoadingModal open={isUpdating} /> */}
+      <LoadingModal open={isExecutingAction} />
       {NotificationComp}
       <div style={{ display: 'none' }}>
         <AllPrint

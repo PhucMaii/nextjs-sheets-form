@@ -131,6 +131,28 @@ const OrderAccordion = ({
     setTotalQuantity(quantity);
   };
 
+  const handleDeleteOrder = async (targetOrder: Order) => {
+    try {
+      const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
+        data: { orderId: targetOrder.id },
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      // Update Real Data
+      mutateOrders();
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to delete order: ' + error);
+      showNotification('error', 'Fail to delete order: ' + error);
+    }
+  };
+
+
   const actions = (
     <>
       <IconButton
@@ -183,6 +205,15 @@ const OrderAccordion = ({
         >
           Print
         </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDeleteOrder(order);
+          }}
+        >
+          Delete
+        </MenuItem>
+        
         <MenuItem
           disabled={
             isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
