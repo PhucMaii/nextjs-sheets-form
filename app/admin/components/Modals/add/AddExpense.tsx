@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -17,31 +17,85 @@ import { API_URL } from '@/app/utils/enum';
 import { IPaymentMethod } from '@/app/utils/type';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
+import { fetchApi, SWRFetchData } from '@/app/utils/db';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
-  paymentMethods: IPaymentMethod[];
-  adminsAndDrivers: string[];
+  defaultValue?: any;
+  handleAddExpenseId?: (id: number) => Promise<void>;
+  // paymentMethods: IPaymentMethod[];
+  // adminsAndDrivers: string[];
 }
 
 export default function AddExpense({
   open,
   onClose,
   showNotification,
-  paymentMethods,
-  adminsAndDrivers,
+  defaultValue,
+  handleAddExpenseId,
+  // paymentMethods,
+  // adminsAndDrivers,
 }: IProps) {
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
     description: '',
     paymentMethodId: -1,
     spentBy: '-- Choose who spent --',
+    ...(defaultValue ? defaultValue: {}),
   });
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
+  const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
-  const { date, SelectDate } = useSelectDate(todayString, true);
+  const { date, SelectDate } = useSelectDate(defaultValue?.date ? defaultValue?.date : todayString, true);
+
+  useEffect(() => {
+    fetchAdmins();
+    fetchDrivers();
+  }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      const admins = await fetchApi(
+        `${API_URL.ADMIN}/admins`,
+        showNotification,
+      );
+
+      const formattedAdmins = admins.map((admin: any) => {
+        return `Admin - ${admin.clientName}`;
+      });
+      console.log([...adminsAndDrivers, ...formattedAdmins], 'admins');
+      setAdminsAndDrivers(formattedAdmins);
+    } catch (error) {
+      console.log(error);
+      showNotification('error', 'Something went wrong');
+      return;
+    }
+  };
+
+  const fetchDrivers = async () => {
+    try {
+      const drivers = await fetchApi(
+        `${API_URL.ADMIN}/drivers`,
+        showNotification,
+      );
+
+      const formattedDrivers = drivers.map((driver: any) => {
+        return `Driver - ${driver.name}`;
+      });
+      setAdminsAndDrivers((prevAdminAndDrivers) => [
+        ...prevAdminAndDrivers,
+        ...formattedDrivers,
+      ]);
+    } catch (error) {
+      console.log(error);
+      showNotification('error', 'Something went wrong');
+      return;
+    }
+  };
 
   const handleAddExpense = async () => {
     try {
@@ -63,6 +117,9 @@ export default function AddExpense({
         return;
       }
 
+      if (handleAddExpenseId) {
+        await handleAddExpenseId(response.data.data.id);
+      }
       showNotification('success', response.data.message);
       setIsAdding(false);
       onClose();
@@ -132,8 +189,8 @@ export default function AddExpense({
               <MenuItem value={-1} disabled>
                 -- Choose payment method --
               </MenuItem>
-              {paymentMethods.length > 0 &&
-                paymentMethods.map(
+              {paymentMethods && paymentMethods?.data?.length > 0 &&
+                paymentMethods?.data.map(
                   (paymentMethod: IPaymentMethod, index: number) => {
                     return (
                       <MenuItem key={index} value={paymentMethod.id}>

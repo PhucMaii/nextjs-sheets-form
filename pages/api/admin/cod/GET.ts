@@ -24,6 +24,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           driver: true,
+          expense: true,
           orders: {
             include: {
               items: true,
@@ -131,6 +132,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         include: {
+          expense: true,
           orders: {
             include: {
               items: true,
@@ -193,6 +195,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           driverId: codBoard.driverId,
           orders: codBoard.orders,
           createdBy: codBoard.createdBy,
+          expense: codBoard.expense,
           totalAmount,
           boardClients: Array.from(boardClients),
           ...codData,

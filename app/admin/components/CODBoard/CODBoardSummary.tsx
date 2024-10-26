@@ -31,6 +31,11 @@ export default function CODBoardSummary({
   onSelect,
   handleDeleteBoard,
 }: IProps) {
+  console.log(boardData, 'boardData');
+  const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
+    return acc + order.totalPrice;
+  }, 0);
+
   const uncollectedOrders = useFilterOrders(boardData.orders, [
     ORDER_STATUS.INCOMPLETED,
     ORDER_STATUS.DELIVERED,
@@ -110,6 +115,14 @@ export default function CODBoardSummary({
             </Box>
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography variant="h5" textAlign="center">
+                ${boardData?.expense?.amount?.toFixed(2) || 0}
+              </Typography>
+              <Typography variant="body2" color={grey[600]}>
+                Expense
+              </Typography>
+            </Box>
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              <Typography variant="h5" textAlign="center">
                 ${uncollectedAmount.toFixed(2)}
               </Typography>
               <Typography variant="body2" color={grey[600]}>
@@ -126,10 +139,10 @@ export default function CODBoardSummary({
             </Box>
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography variant="h5" textAlign="center">
-                {boardData.boardClients.length}
+                {totalAmount.toFixed(2)}
               </Typography>
               <Typography variant="body2" color={grey[600]}>
-                Clients
+                Total Amount
               </Typography>
             </Box>
           </Box>

@@ -1,4 +1,3 @@
-import { IPaymentMethod } from '@/app/utils/type';
 import {
   AlertColor,
   Box,
@@ -17,19 +16,15 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 
 interface IProps {
   transactions: any[];
-  paymentMethods?: IPaymentMethod[];
-  adminsAndDrivers?: string[];
   showNotification?: (type: AlertColor, message: string) => void;
 }
 
 export default function TransactionsTable({
   transactions,
-  paymentMethods,
-  adminsAndDrivers,
   showNotification,
 }: IProps) {
   const handleDeleteTransaction = async (transaction: any) => {
-    if (!paymentMethods || !adminsAndDrivers || !showNotification) {
+    if (!showNotification) {
       return;
     }
     try {
@@ -59,7 +54,7 @@ export default function TransactionsTable({
           <TableCell>Spent By</TableCell>
           <TableCell>Description</TableCell>
           <TableCell>When</TableCell>
-          {adminsAndDrivers && paymentMethods && showNotification && <TableCell></TableCell>}
+          {showNotification && <TableCell></TableCell>}
         </TableRow>
       </TableHead>
       <TableBody>
@@ -88,11 +83,9 @@ export default function TransactionsTable({
                 </TableCell>
                 <TableCell style={{ width: 100 }}>{transaction.date}</TableCell>
                 <TableCell>
-                {adminsAndDrivers && paymentMethods && showNotification &&<Box display="flex" alignItems="center" gap={1}>
+                {showNotification &&<Box display="flex" alignItems="center" gap={1}>
                    <EditExpense
                       transaction={transaction}
-                      paymentMethods={paymentMethods}
-                      adminsAndDrivers={adminsAndDrivers}
                       showNotification={showNotification}
                     />
                     <DeleteModal 

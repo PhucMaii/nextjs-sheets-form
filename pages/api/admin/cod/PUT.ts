@@ -8,12 +8,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const { updatedBoard }: { updatedBoard: IBoard } = req.body;
 
-    const isDriverInValid = await checkIsDriverInDate(
+    const isDriverValid = await checkIsDriverInDate(
       updatedBoard.date,
       updatedBoard.driverId,
     );
 
-    if (!isDriverInValid) {
+    if (!isDriverValid) {
       return res.status(500).json({
         error: `Driver ${updatedBoard.driver.name} already in process for ${updatedBoard.date}`,
       });
@@ -27,6 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         date: updatedBoard.date,
         cash: updatedBoard.cash,
         driverId: updatedBoard.driverId,
+        expenseId: updatedBoard?.expenseId || null,
       },
     });
 

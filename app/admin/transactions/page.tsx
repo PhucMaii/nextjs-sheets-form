@@ -160,8 +160,8 @@ export default function Transactions() {
           open={isOpenAddExpense}
           onClose={() => setIsOpenAddExpense(false)}
           showNotification={showNotification}
-          paymentMethods={paymentMethods?.data || []}
-          adminsAndDrivers={adminsAndDrivers}
+          // paymentMethods={paymentMethods?.data || []}
+          // adminsAndDrivers={adminsAndDrivers}
         />
         <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
           Transactions
@@ -208,8 +208,6 @@ export default function Transactions() {
         </Grid>
         <TransactionsTable
           transactions={displayTransactions}
-          paymentMethods={paymentMethods?.data || []}
-          adminsAndDrivers={adminsAndDrivers}
           showNotification={showNotification}
         />
       </ShadowSection>

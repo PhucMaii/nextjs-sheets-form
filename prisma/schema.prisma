@@ -164,8 +164,10 @@ model CodBoard {
   status    String
   driverId  Int
   orders    Orders[]
+  expenseId Int?
 
-  driver Driver @relation(fields: [driverId], references: [id])
+  driver  Driver   @relation(fields: [driverId], references: [id])
+  expense Expense? @relation(fields: [expenseId], references: [id])
 }
 
 model PaymentMethod {
@@ -191,4 +193,5 @@ model Expense {
   paymentMethodId Int
 
   paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
+  codBoard      CodBoard[]
 }

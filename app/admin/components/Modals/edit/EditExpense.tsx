@@ -9,37 +9,86 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
 import { IExpense, IPaymentMethod } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
+import { fetchApi, SWRFetchData } from '@/app/utils/db';
 
 interface IProps {
   transaction: IExpense;
-  paymentMethods: IPaymentMethod[];
-  adminsAndDrivers: string[];
+  // paymentMethods: IPaymentMethod[];
+  // adminsAndDrivers: string[];
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function EditExpense({
   transaction,
-  paymentMethods,
-  adminsAndDrivers,
+  // paymentMethods,
+  // adminsAndDrivers,
   showNotification,
 }: IProps) {
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [updatedExpense, setUpdatedExpense] = useState<IExpense>(transaction);
   const { date, SelectDate } = useSelectDate(transaction.date, true);
+
+  const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
 
   const onChangeExpense = (field: string, value: any) => {
     setUpdatedExpense({
       ...updatedExpense,
       [field]: value,
     });
+  };
+
+  useEffect(() => {
+    fetchAdmins();
+    fetchDrivers();
+  }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      const admins = await fetchApi(
+        `${API_URL.ADMIN}/admins`,
+        showNotification,
+      );
+
+      const formattedAdmins = admins.map((admin: any) => {
+        return `Admin - ${admin.clientName}`;
+      });
+      console.log([...adminsAndDrivers, ...formattedAdmins], 'admins');
+      setAdminsAndDrivers(formattedAdmins);
+    } catch (error) {
+      console.log(error);
+      showNotification('error', 'Something went wrong');
+      return;
+    }
+  };
+
+  const fetchDrivers = async () => {
+    try {
+      const drivers = await fetchApi(
+        `${API_URL.ADMIN}/drivers`,
+        showNotification,
+      );
+
+      const formattedDrivers = drivers.map((driver: any) => {
+        return `Driver - ${driver.name}`;
+      });
+      setAdminsAndDrivers((prevAdminAndDrivers) => [
+        ...prevAdminAndDrivers,
+        ...formattedDrivers,
+      ]);
+    } catch (error) {
+      console.log(error);
+      showNotification('error', 'Something went wrong');
+      return;
+    }
   };
 
   const handleUpdateExpense = async () => {
@@ -125,8 +174,8 @@ export default function EditExpense({
                 <MenuItem value={-1} disabled>
                   -- Choose payment method --
                 </MenuItem>
-                {paymentMethods.length > 0 &&
-                  paymentMethods.map(
+                {paymentMethods && paymentMethods?.data.length > 0 &&
+                  paymentMethods?.data.map(
                     (paymentMethod: IPaymentMethod, index: number) => {
                       return (
                         <MenuItem key={index} value={paymentMethod.id}>

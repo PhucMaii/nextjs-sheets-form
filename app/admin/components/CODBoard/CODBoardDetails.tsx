@@ -50,6 +50,9 @@ import UnsettledOrders from '../Modals/UnsettledOrders';
 import EditCodBoard from '../Modals/edit/EditCodBoard';
 import EditIcon from '@mui/icons-material/Edit';
 import InsertOrderToCodBoard from '../Modals/add/InsertOrderToCodBoard';
+import PaidIcon from '@mui/icons-material/Paid';
+import AddExpense from '../Modals/add/AddExpense';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 
 interface IProps {
   boardData: IBoard;
@@ -83,6 +86,10 @@ export default function CODBoardDetails({
   });
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const [open, setOpen] = useMultipleBoolean({
+    isOpenAddExpense: false,
+  });
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [boardResponse, mutateBoard, isValidating] = SWRFetchData(
@@ -229,6 +236,31 @@ export default function CODBoardDetails({
     }
   };
 
+  const handleAddExpenseId = async (id: number) => {
+    try {
+      const response = await axios.put(`${API_URL.ADMIN}/cod`, {updatedBoard: {
+        id: boardData.id,
+        date: boardData.date,
+        driverId: boardData.driverId,
+        driver: boardData.driver,
+        expenseId: id,
+      }});
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateBoard();
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error.response.data.error);
+      return;
+    }
+  }
+
   const actions = (
     <Box display="flex" alignItems="center" gap={2}>
       <Button
@@ -253,6 +285,16 @@ export default function CODBoardDetails({
           'aria-labelledby': 'basic-button',
         }}
       >
+        <MenuItem
+          onClick={() => {
+            setOpen('isOpenAddExpense', true);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <PaidIcon sx={{ color: primaryColor }} />
+            <Typography>Add Expense</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
         <MenuItem
           onClick={() => {
             setIsOpenInsertOrders(true);
@@ -394,6 +436,18 @@ export default function CODBoardDetails({
 
   return (
     <>
+      <AddExpense 
+        showNotification={showNotification}
+        open={open.isOpenAddExpense}
+        onClose={() => setOpen('isOpenAddExpense', false)}
+        defaultValue={{
+          date: boardData?.date,
+          spentBy: `Driver - ${boardData?.driver.name}`
+        }}
+        handleAddExpenseId={handleAddExpenseId}
+        // paymentMethods={paymentMethods}
+        // adminsAndDrivers={adminsAndDrivers}
+      />
       <InsertOrderToCodBoard
         open={isOpenInsertOrders}
         onClose={() => setIsOpenInsertOrders(false)}
