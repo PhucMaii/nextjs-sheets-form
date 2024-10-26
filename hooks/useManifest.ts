@@ -13,9 +13,9 @@ const useManifest = (
   date: string,
   showNotification: (type: AlertColor, message: string) => void,
 ) => {
-  const [debouncedSelectedRoutes, setDebouncedSelectedRoutes] = useState<
-    IRoutes[]
-  >([]);
+  // const [debouncedSelectedRoutes, setDebouncedSelectedRoutes] = useState<
+  //   IRoutes[]
+  // >([]);
   const [manifestData, setManifestData] = useState<any>({
     orderPrint: [],
     itemManifest: {},
@@ -28,7 +28,7 @@ const useManifest = (
     return selectedRoutes.map((route: IRoutes) => {
       return route.id;
     });
-  }, [debouncedSelectedRoutes]);
+  }, [selectedRoutes]);
 
   const formattedDate = new Date(date);
   const givenDay = days[formattedDate.getDay()];
@@ -37,17 +37,17 @@ const useManifest = (
     `${API_URL.ROUTES}/clients?day=${givenDay}`,
   );
 
-  useEffect(() => {
-    setIsLoading(true);
-    const timeoutId = setTimeout(() => {
-      setDebouncedSelectedRoutes(selectedRoutes);
-      setIsLoading(false);
-    }, 1000);
+  // useEffect(() => {
+  //   setIsLoading(true);
+  //   const timeoutId = setTimeout(() => {
+  //     setDebouncedSelectedRoutes(selectedRoutes);
+  //     setIsLoading(false);
+  //   }, 1000);
 
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [selectedRoutes]);
+  //   return () => {
+  //     clearTimeout(timeoutId);
+  //   };
+  // }, [selectedRoutes]);
 
   useEffect(() => {
     if (userRoute && orderList.length > 0) {
@@ -60,7 +60,7 @@ const useManifest = (
     if (manifestData && selectedRoutes.length > 0) {
       handleSelectRoute();
     }
-  }, [debouncedSelectedRoutes]);
+  }, [selectedRoutes]);
 
   const handleGetManifest = async () => {
     setIsLoading(true);
@@ -102,9 +102,6 @@ const useManifest = (
       newManifest[routeId] = manifestData.itemManifest[routeId];
     });
 
-    console.log(selectedRouteIds, 'selected route ids');
-
-    console.log(newManifest, 'new manifest');
     setItemManifest(newManifest);
   };
 

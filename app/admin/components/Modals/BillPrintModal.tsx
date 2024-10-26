@@ -192,7 +192,7 @@ export default function BillPrintModal({
           heading="Print Bill"
           buttonLabel="Print"
           onClick={handleBillPrint}
-          buttonProps={{}}
+          buttonProps={{disabled: isLoading || selectedRoutes.length === 0}}
           onClose={onClose}
         />
         <RadioGroup
