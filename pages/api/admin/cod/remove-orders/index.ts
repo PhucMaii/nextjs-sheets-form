@@ -1,4 +1,5 @@
 import { Order } from '@/app/admin/orders/page';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -6,10 +7,10 @@ interface IBody {
   orders: Order[];
 }
 
-export default async function DELETE(
+const handler = async(
   req: NextApiRequest,
   res: NextApiResponse,
-) {
+) => {
   try {
     if (req.method !== 'DELETE') {
       return res.status(404).json({
@@ -44,3 +45,5 @@ export default async function DELETE(
     });
   }
 }
+
+export default withAdminAuthGuard(handler)

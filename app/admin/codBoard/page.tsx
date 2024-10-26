@@ -5,10 +5,9 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import { ShadowSection } from '../reports/styled';
 import { blueGrey } from '@mui/material/colors';
-import useSelectDate from '@/hooks/useSelectDate';
 import CODBoardSummary from '../components/CODBoard/CODBoardSummary';
 import AddIcon from '@mui/icons-material/Add';
-import { generateMonthRange, YYYYMMDDFormat } from '@/app/utils/time';
+import { generateCurrentTime, generateMonthRange, YYYYMMDDFormat } from '@/app/utils/time';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import AddCodBoard from '../components/Modals/add/AddCodBoard';
@@ -97,6 +96,12 @@ export default function CodBoard() {
   }, [codBoards]);
 
   useEffect(() => {
+    return () => {
+      handleAutoAddBoard();
+    };
+  }, []);
+
+  useEffect(() => {
     if (isValidating) {
       setIsLoading(true);
     } else {
@@ -120,6 +125,26 @@ export default function CodBoard() {
       showNotification('error', error.response.data.error);
     }
   };
+
+  const handleAutoAddBoard = async () => {
+    try {
+      const createdAt = generateCurrentTime();
+      const response = await axios.post(`${API_URL.ADMIN}/cod/auto-add-board`, {
+        todayString,
+        createdAt,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateBoards();
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  }
 
   if (selectedBoard) {
     return (
