@@ -31,7 +31,6 @@ export default function CODBoardSummary({
   onSelect,
   handleDeleteBoard,
 }: IProps) {
-  console.log(boardData, 'boardData');
   const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
   }, 0);

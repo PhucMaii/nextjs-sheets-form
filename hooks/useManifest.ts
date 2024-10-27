@@ -51,7 +51,6 @@ const useManifest = (
 
   useEffect(() => {
     if (userRoute && orderList.length > 0) {
-      console.log(userRoute, 'user route');
       handleGetManifest();
     }
   }, [userRoute, orderList]);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormControl } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -6,7 +6,13 @@ import { formatDateChanged, generateRecommendDate } from '@/app/utils/time'; // 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
-  const [date, setDate] = useState(providedDate || generateRecommendDate());
+  const [date, setDate] = useState(providedDate ? providedDate : generateRecommendDate());
+
+  useEffect(() => {
+    if (providedDate) {
+      setDate(providedDate);
+    }
+  }, [providedDate]);
 
   const handleDateChange = (e: any): void => {
     const formattedDate: string = formatDateChanged(e);

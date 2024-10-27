@@ -53,17 +53,18 @@ import InsertOrderToCodBoard from '../Modals/add/InsertOrderToCodBoard';
 import PaidIcon from '@mui/icons-material/Paid';
 import AddExpense from '../Modals/add/AddExpense';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import useNotification from '@/hooks/useNotification';
 
 interface IProps {
   boardData: IBoard;
   onClose: () => void;
-  showNotification: any;
+  // showNotification: any;
 }
 
 export default function CODBoardDetails({
   boardData,
   onClose,
-  showNotification,
+  // showNotification,
 }: IProps) {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -90,6 +91,7 @@ export default function CODBoardDetails({
   const [open, setOpen] = useMultipleBoolean({
     isOpenAddExpense: false,
   });
+  const { showNotification, NotificationComp } = useNotification();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [boardResponse, mutateBoard, isValidating] = SWRFetchData(
@@ -436,6 +438,7 @@ export default function CODBoardDetails({
 
   return (
     <>
+    {NotificationComp}
       <AddExpense 
         showNotification={showNotification}
         open={open.isOpenAddExpense}

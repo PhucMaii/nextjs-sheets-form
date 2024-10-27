@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -35,6 +35,12 @@ export default function EditCodBoard({
   const { date, SelectDate } = useSelectDate(codBoard.date, true);
 
   const [drivers] = SWRFetchData(`${API_URL.ADMIN}/drivers?date=${date}`);
+
+  useEffect(() => {
+    if (codBoard) {
+      setUpdatedBoard(codBoard);
+    }
+  }, [codBoard]);
 
   const handleUpdateBoard = async () => {
     setIsLoading(true);

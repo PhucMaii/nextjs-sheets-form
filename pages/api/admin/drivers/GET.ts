@@ -1,6 +1,7 @@
 import { days } from '@/app/lib/constant';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { normalizeDate } from '../../utils/date';
 
 interface IQuery {
   date?: string;
@@ -12,9 +13,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { date } = req.query as IQuery;
 
     if (date) {
-      const selectedDate = new Date(date);
+      console.log(date, 'date')
+      const selectedDate = normalizeDate(new Date(date));
       const dayIndex = selectedDate.getDay();
       const day = days[dayIndex];
+      console.log(day, 'day')
 
       const dayRoutes = await prisma.route.findMany({
         where: {
@@ -28,6 +31,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const drivers = dayRoutes.map((route) => {
         return route.driver;
       });
+
+      console.log(drivers, 'drivers')
 
       return res.status(200).json({
         data: drivers,

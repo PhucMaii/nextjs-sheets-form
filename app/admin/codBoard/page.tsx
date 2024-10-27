@@ -24,6 +24,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import { primary } from '@/theme/color';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 
 export default function CodBoard() {
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
@@ -32,7 +33,11 @@ export default function CodBoard() {
     isOpen: boolean;
     id: number;
   }>({ isOpen: false, id: -1 });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useMultipleBoolean({
+    isFetching: false,
+    isCheckingAutoAddBoard: true,
+  })
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenAddBoard, setIsOpenAddBoard] = useState<boolean>(false);
   const { showNotification, NotificationComp } = useNotification();
 
@@ -101,11 +106,15 @@ export default function CodBoard() {
     };
   }, []);
 
+  console.log(codBoards, 'codBoards');
+  console.log(isValidating, 'isValidating');
+  console.log(loading, 'loading');
+
   useEffect(() => {
-    if (isValidating) {
-      setIsLoading(true);
+    if (isValidating && !codBoards) {
+      setLoading('isFetching', true);
     } else {
-      setIsLoading(false);
+      setLoading('isFetching', false);
     }
   }, [codBoards]);
 
@@ -127,6 +136,7 @@ export default function CodBoard() {
   };
 
   const handleAutoAddBoard = async () => {
+    setLoading('isCheckingAutoAddBoard', true);
     try {
       const createdAt = generateCurrentTime();
       const response = await axios.post(`${API_URL.ADMIN}/cod/auto-add-board`, {
@@ -136,13 +146,18 @@ export default function CodBoard() {
 
       if (response.data.error) {
         showNotification('error', response.data.error);
+        setLoading('isCheckingAutoAddBoard', false);
         return;
       }
 
       mutateBoards();
+
+      setLoading('isCheckingAutoAddBoard', false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', error.response.data.error);
+
+      setLoading('isCheckingAutoAddBoard', false);
     }
   }
 
@@ -152,7 +167,6 @@ export default function CodBoard() {
         <CODBoardDetails
           boardData={selectedBoard}
           onClose={() => setSelectedBoard(null)}
-          showNotification={showNotification}
         />
       </Sidebar>
     );
@@ -241,10 +255,17 @@ export default function CodBoard() {
             </Box>
           </Button>
         </Box>
+        {
+          loading.isCheckingAutoAddBoard && (
+            <Box mt={2}>
+              <Typography variant="body2">We are checking for new boards...</Typography>
+            </Box>
+          )
+        }
       </ShadowSection>
 
       <Box display="flex" flexDirection="column" gap={4} mt={2}>
-        {isLoading ? (
+        {loading.isFetching ? (
           <LoadingComponent />
         ) : codBoards && sortedDate.length > 0 ? (
           sortedDate.map((date: string, index: number) => (
