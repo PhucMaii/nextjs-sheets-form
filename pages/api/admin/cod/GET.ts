@@ -1,5 +1,5 @@
 import { findCombinations } from '@/app/utils/array';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { COD_STATUS, ORDER_STATUS } from '@/app/utils/enum';
 import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
@@ -8,6 +8,7 @@ import { generateListOfDateString } from '@/app/utils/time';
 interface IQuery {
   startDate?: string;
   endDate?: string;
+  date?: string;
   id?: string;
 }
 
@@ -15,7 +16,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, startDate, endDate }: IQuery = req.query;
+    const { id, date, startDate, endDate }: IQuery = req.query;
 
     if (id) {
       const codBoard: any = await prisma.codBoard.findUnique({
@@ -72,6 +73,26 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
+      if (uncollectedOrders.length === 0 && codBoard.status === COD_STATUS.IN_PROCESS) {
+        await prisma.codBoard.update({
+          where: {
+            id: codBoard.id,
+          },
+          data: {
+            status: COD_STATUS.CLEARED,
+          },
+        });
+      } else if (uncollectedOrders.length > 0 && codBoard.status === COD_STATUS.CLEARED) {
+        await prisma.codBoard.update({
+          where: {
+            id: codBoard.id,
+          },
+          data: {
+            status: COD_STATUS.IN_PROCESS,
+          },
+        });
+      }
+
       const uncollectedAmount = uncollectedOrders.reduce(
         (acc: number, order: Orders) => {
           return acc + order.totalPrice;
@@ -116,6 +137,46 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    if (date) {
+      // const selectedDate = new Date(date);
+
+      // const dayIndex = selectedDate.getDay();
+      // const day = days[dayIndex];
+      const dateBoards = await prisma.codBoard.findMany({
+        where: {
+          date,
+        },
+        include: {
+          driver: true,
+          expense: true,
+          orders: {
+            include: {
+              items: true,
+              user: {
+                include: {
+                  preference: true,
+                  category: true,
+                  routes: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      
+      if (dateBoards.length === 0) {
+        return res.status(200).json({
+          data: [],
+        });
+      }
+
+      const allBoardsWithDetails = formatBoards(dateBoards);
+      return res.status(200).json({
+        data: allBoardsWithDetails,
+      });
+
+    }
+
     if (startDate && endDate) {
       const formattedStartDate = normalizeDate(new Date(startDate));
       const formattedEndDate = normalizeDate(new Date(endDate));
@@ -157,50 +218,47 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      // const selectedDate = new Date(date);
-
-      // const dayIndex = selectedDate.getDay();
-      // const day = days[dayIndex];
-
       if (allCodBoards.length === 0) {
         return res.status(200).json({
           data: [],
         });
       }
 
-      const allBoardsWithDetails = allCodBoards.map((codBoard: any) => {
-        const totalAmount = codBoard.orders.reduce(
-          (acc: number, order: Orders) => {
-            return acc + order.totalPrice;
-          },
-          0,
-        );
+      // const allBoardsWithDetails = allCodBoards.map((codBoard: any) => {
+      //   const totalAmount = codBoard.orders.reduce(
+      //     (acc: number, order: Orders) => {
+      //       return acc + order.totalPrice;
+      //     },
+      //     0,
+      //   );
 
-        const boardClients = new Set(
-          codBoard.orders.map((order: Orders) => {
-            return order.userId;
-          }),
-        );
+      //   const boardClients = new Set(
+      //     codBoard.orders.map((order: Orders) => {
+      //       return order.userId;
+      //     }),
+      //   );
 
-        const codData = getCODData(codBoard.orders);
+      //   const codData = getCODData(codBoard.orders);
 
-        return {
-          note: codBoard.note,
-          cash: codBoard.cash,
-          status: codBoard.status,
-          driver: codBoard.driver,
-          createdAt: codBoard.createdAt,
-          date: codBoard.date,
-          id: codBoard.id,
-          driverId: codBoard.driverId,
-          orders: codBoard.orders,
-          createdBy: codBoard.createdBy,
-          expense: codBoard.expense,
-          totalAmount,
-          boardClients: Array.from(boardClients),
-          ...codData,
-        };
-      });
+      //   return {
+      //     note: codBoard.note,
+      //     cash: codBoard.cash,
+      //     status: codBoard.status,
+      //     driver: codBoard.driver,
+      //     createdAt: codBoard.createdAt,
+      //     date: codBoard.date,
+      //     id: codBoard.id,
+      //     driverId: codBoard.driverId,
+      //     orders: codBoard.orders,
+      //     createdBy: codBoard.createdBy,
+      //     expense: codBoard.expense,
+      //     totalAmount,
+      //     boardClients: Array.from(boardClients),
+      //     ...codData,
+      //   };
+      // });
+
+      const allBoardsWithDetails = formatBoards(allCodBoards);
 
       const mappedBoard = allBoardsWithDetails.reduce(
         (acc: any, board: any) => {
@@ -229,6 +287,44 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       error: 'Internal Server Error: ' + error,
     });
   }
+}
+
+const formatBoards = (boards: any) => {
+  const allBoardsWithDetails = boards.map((codBoard: any) => {
+    const totalAmount = codBoard.orders.reduce(
+      (acc: number, order: Orders) => {
+        return acc + order.totalPrice;
+      },
+      0,
+    );
+
+    const boardClients = new Set(
+      codBoard.orders.map((order: Orders) => {
+        return order.userId;
+      }),
+    );
+
+    const codData = getCODData(codBoard.orders);
+
+    return {
+      note: codBoard.note,
+      cash: codBoard.cash,
+      status: codBoard.status,
+      driver: codBoard.driver,
+      createdAt: codBoard.createdAt,
+      date: codBoard.date,
+      id: codBoard.id,
+      driverId: codBoard.driverId,
+      orders: codBoard.orders,
+      createdBy: codBoard.createdBy,
+      expense: codBoard.expense,
+      totalAmount,
+      boardClients: Array.from(boardClients),
+      ...codData,
+    };
+  });
+
+  return allBoardsWithDetails;
 }
 
 const getCODData = (orders: Orders[]) => {

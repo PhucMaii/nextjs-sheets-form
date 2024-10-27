@@ -11,6 +11,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
 import useFilterOrders from '@/hooks/useFilterOrders';
+import PaidIcon from '@mui/icons-material/Paid';
 
 export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
   const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
@@ -35,7 +36,7 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item xs={12} md={6} lg={4} xl={2.4}>
         <OverviewCard
           textColor={primary.main}
           backgroundColor={primary.lightest}
@@ -48,7 +49,7 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           }}
         />
       </Grid>
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item xs={12} md={6} lg={4} xl={2.4}>
         <OverviewCard
           textColor={primary.main}
           backgroundColor={primary.lightest}
@@ -61,7 +62,7 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           }}
         />
       </Grid>
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item xs={12} md={6} lg={4} xl={2.4}>
         <OverviewCard
           textColor={primary.main}
           backgroundColor={primary.lightest}
@@ -74,7 +75,16 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           }}
         />
       </Grid>
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item xs={12} md={6} lg={4} xl={2.4}>
+        <OverviewCard
+          textColor={primary.main}
+          backgroundColor={primary.lightest}
+          icon={<PaidIcon fontSize="large" color="primary" />}
+          text="Expenses"
+          value={boardData?.expense?.amount?.toFixed(2) || 0}
+        />
+      </Grid>
+      <Grid item xs={12} md={6} lg={4} xl={2.4}>
         <OverviewCard
           textColor={primary.main}
           backgroundColor={primary.lightest}

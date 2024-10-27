@@ -63,14 +63,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 date: todayString
             }
         });
+
         
         if (boards.length > 0 && boardOrders.length === 0) {
-            return res.status(200).json({
-                message: 'Boards are added already',
-            });
+          return res.status(200).json({
+            message: 'Boards are added already',
+          });
         }
         
         const normalizedDate = normalizeDate(new Date(todayString));
+        console.log({normalizedDate});
         const dayIndex = normalizedDate.getDay();
         const day = days[dayIndex];
 
@@ -85,8 +87,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
 
         // If there are new orders that have not been added
-        if (boardOrders.length > 0) {
-            console.log(boardOrders, 'board orders');
+        if (boards.length > 0 && boardOrders.length > 0) {
             await insertOrdersToSelectedBoards(boardOrders, boards, routeOnDate);
             return res.status(200).json({
                 message: 'New orders are added already',
