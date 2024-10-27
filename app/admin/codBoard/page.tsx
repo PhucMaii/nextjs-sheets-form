@@ -2,7 +2,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { Box, Button, Divider, Grid, Typography } from '@mui/material';
+import { Box, Button, Divider, FormControlLabel, Grid, Switch, Typography } from '@mui/material';
 import { ShadowSection } from '../reports/styled';
 import { blueGrey } from '@mui/material/colors';
 import CODBoardSummary from '../components/CODBoard/CODBoardSummary';
@@ -25,9 +25,11 @@ import { primary } from '@/theme/color';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import useSelectDate from '@/hooks/useSelectDate';
 
 export default function CodBoard() {
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [isSingleDate, setIsSingleDate] = useState<boolean>(false);
   const [selectedBoard, setSelectedBoard] = useState<IBoard | any>(null);
   const [deleteBoard, setDeleteBoard] = useState<{
     isOpen: boolean;
@@ -43,10 +45,12 @@ export default function CodBoard() {
 
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
+  
+  const { date, SelectDate } = useSelectDate(todayString);
 
   // Data Fetching
   const [codBoards, mutateBoards, isValidating] = SWRFetchData(
-    `${API_URL.ADMIN}/cod?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    isSingleDate ? `${API_URL.ADMIN}/cod?date=${date}` : `${API_URL.ADMIN}/cod?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   const totalBoards = useMemo(() => {
@@ -88,7 +92,7 @@ export default function CodBoard() {
   }, [codBoards]);
 
   const sortedDate: any = useMemo(() => {
-    if (!codBoards) {
+    if (!codBoards || isSingleDate) {
       return [];
     }
 
@@ -105,10 +109,6 @@ export default function CodBoard() {
       handleAutoAddBoard();
     };
   }, []);
-
-  console.log(codBoards, 'codBoards');
-  console.log(isValidating, 'isValidating');
-  console.log(loading, 'loading');
 
   useEffect(() => {
     if (isValidating && !codBoards) {
@@ -197,7 +197,16 @@ export default function CodBoard() {
         <Typography variant="h5" color={blueGrey[800]}>
           C.O.D Board
         </Typography>
-        <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+
+        <Box display="flex" gap={1} alignItems="center">
+          <FormControlLabel control={<Switch checked={isSingleDate} onChange={(e) => setIsSingleDate(e.target.checked)} />} label="Single Date" />
+          {
+            isSingleDate ? (<>{SelectDate}</>) : (
+              <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+
+            )
+          }
+        </Box>
       </Box>
 
       <Grid container spacing={2}>
@@ -229,17 +238,6 @@ export default function CodBoard() {
           />
         </Grid>
       </Grid>
-      {/* <ShadowSection>
-            <Typography variant="h6" color={blueGrey[800]}>
-              Select date
-            </Typography>
-            <Box mt={2}>
-              <SelectDateRange 
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-              />
-            </Box>
-          </ShadowSection> */}
 
       <ShadowSection>
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -267,7 +265,15 @@ export default function CodBoard() {
       <Box display="flex" flexDirection="column" gap={4} mt={2}>
         {loading.isFetching ? (
           <LoadingComponent />
-        ) : codBoards && sortedDate.length > 0 ? (
+        ) : isSingleDate && codBoards ? codBoards.data.map((board: IBoard) => (
+          <CODBoardSummary 
+          key={board.id} 
+          boardData={board} 
+          onSelect={() => setSelectedBoard(board)}
+          handleDeleteBoard={() =>
+            setDeleteBoard({ isOpen: true, id: board.id })
+          } />
+        )) : codBoards && sortedDate.length > 0 ? (
           sortedDate.map((date: string, index: number) => (
             <Box key={index} display="flex" flexDirection="column" gap={2}>
               <Divider textAlign="center">
