@@ -4,6 +4,7 @@ import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
+// import { IBoard } from '@/app/utils/type';
 
 interface IQuery {
   startDate?: string;
@@ -142,7 +143,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       // const dayIndex = selectedDate.getDay();
       // const day = days[dayIndex];
-      const dateBoards = await prisma.codBoard.findMany({
+      const dateBoards: any = await prisma.codBoard.findMany({
         where: {
           date,
         },
@@ -163,6 +164,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       });
+
+      // await checkBoardStatus(dateBoards);
       
       if (dateBoards.length === 0) {
         return res.status(200).json({
@@ -223,6 +226,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           data: [],
         });
       }
+
+      // await checkBoardStatus(allCodBoards);
 
       // const allBoardsWithDetails = allCodBoards.map((codBoard: any) => {
       //   const totalAmount = codBoard.orders.reduce(
@@ -288,6 +293,54 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+// const checkBoardStatus = async (boards: IBoard[]) => {
+//   const prisma = new PrismaClient();
+//   const boardsStatusMap = boards.reduce((acc: any, board: any) => {
+//       const { id, status, orders } = board;
+
+//       const uncollectedOrders = orders.filter((order: any) => {
+//         return order.status === ORDER_STATUS.INCOMPLETED || order.status === ORDER_STATUS.DELIVERED;
+//       });
+
+//       if (uncollectedOrders.length === 0 && status === COD_STATUS.IN_PROCESS) {
+//         acc.CLEARED.push(id);
+//       } else if (uncollectedOrders.length > 0 && status === COD_STATUS.CLEARED) {
+//         acc.IN_PROCESS.push(id);
+//       }
+//   }, {});
+
+//   if (Object.keys(boardsStatusMap).length === 0) {
+//     return;
+//   }
+
+//   if (boardsStatusMap.CLEARED.length > 0) {
+//     await prisma.codBoard.updateMany({
+//         where: {
+//           id: {
+//             in: boardsStatusMap.CLEARED
+//           }
+//         },
+//         data: {
+//           status: COD_STATUS.CLEARED
+//         }
+//       })  
+//   }
+
+//   if (boardsStatusMap.IN_PROCESS.length > 0) {
+//     await prisma.codBoard.updateMany({
+//         where: {
+//           id: {
+//             in: boardsStatusMap.IN_PROCESS
+//           }
+//         },
+//         data: {
+//           status: COD_STATUS.IN_PROCESS
+//         }
+//       })  
+//   }
+  
+// }
 
 const formatBoards = (boards: any) => {
   const allBoardsWithDetails = boards.map((codBoard: any) => {

@@ -134,7 +134,6 @@ export default function CodBoard() {
   };
 
   const handleAutoAddBoard = async () => {
-    console.log('handleAutoAddBoard');
     setLoading('isCheckingAutoAddBoard', true);
     try {
       const createdAt = generateCurrentTime();
