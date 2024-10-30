@@ -36,7 +36,7 @@ export default function CodBoard() {
     id: number;
   }>({ isOpen: false, id: -1 });
   const [loading, setLoading] = useMultipleBoolean({
-    isFetching: false,
+    isFetching: true,
     isCheckingAutoAddBoard: true,
   })
   // const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -91,19 +91,6 @@ export default function CodBoard() {
     return totalCash;
   }, [codBoards]);
 
-  const sortedDate: any = useMemo(() => {
-    if (!codBoards || isSingleDate) {
-      return [];
-    }
-
-    return Object.keys(codBoards.data).sort((key1, key2) => {
-      const date1 = new Date(key1);
-      const date2 = new Date(key2);
-
-      return date2.getTime() - date1.getTime();
-    });
-  }, [codBoards]);
-
   useEffect(() => {
     handleAutoAddBoard();
   }, []);
@@ -114,7 +101,7 @@ export default function CodBoard() {
     } else {
       setLoading('isFetching', false);
     }
-  }, [codBoards]);
+  }, [codBoards, isValidating]);
 
   const handleDeleteBoard = async (boardId: number) => {
     try {
@@ -159,6 +146,8 @@ export default function CodBoard() {
     }
   }
 
+  console.log(codBoards, 'codBoards');
+
   if (selectedBoard) {
     return (
       <Sidebar>
@@ -172,13 +161,13 @@ export default function CodBoard() {
 
   return (
     <Sidebar>
+      {NotificationComp}
       <DeleteModal
         open={deleteBoard.isOpen}
         handleCloseModal={() => setDeleteBoard({ id: -1, isOpen: false })}
         targetObj={deleteBoard.id}
         handleDelete={handleDeleteBoard}
       />
-      {NotificationComp}
       <AddCodBoard
         open={isOpenAddBoard}
         onClose={() => setIsOpenAddBoard(false)}
@@ -270,9 +259,11 @@ export default function CodBoard() {
           onSelect={() => setSelectedBoard(board)}
           handleDeleteBoard={() =>
             setDeleteBoard({ isOpen: true, id: board.id })
-          } />
-        )) : codBoards && sortedDate.length > 0 ? (
-          sortedDate.map((date: string, index: number) => (
+          }
+          showNotification={showNotification} 
+          />
+        )) : codBoards?.sortedDate && codBoards?.sortedDate.length > 0 ? (
+          codBoards?.sortedDate.map((date: string, index: number) => (
             <Box key={index} display="flex" flexDirection="column" gap={2}>
               <Divider textAlign="center">
                 <Typography variant="h6" color={blueGrey[800]}>
@@ -287,6 +278,7 @@ export default function CodBoard() {
                   handleDeleteBoard={() =>
                     setDeleteBoard({ isOpen: true, id: board.id })
                   }
+                  showNotification={showNotification}
                 />
               ))}
             </Box>

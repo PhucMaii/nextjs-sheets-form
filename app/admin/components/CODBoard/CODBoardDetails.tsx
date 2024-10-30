@@ -240,11 +240,9 @@ export default function CODBoardDetails({
 
   const handleAddExpenseId = async (id: number) => {
     try {
-      const response = await axios.put(`${API_URL.ADMIN}/cod`, {updatedBoard: {
-        id: boardData.id,
+      const response = await axios.put(`${API_URL.ADMIN}/cod`, {id: boardData.id, updatedBoard: {
         date: boardData.date,
         driverId: boardData.driverId,
-        driver: boardData.driver,
         expenseId: id,
       }});
 

@@ -229,40 +229,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       // await checkBoardStatus(allCodBoards);
 
-      // const allBoardsWithDetails = allCodBoards.map((codBoard: any) => {
-      //   const totalAmount = codBoard.orders.reduce(
-      //     (acc: number, order: Orders) => {
-      //       return acc + order.totalPrice;
-      //     },
-      //     0,
-      //   );
-
-      //   const boardClients = new Set(
-      //     codBoard.orders.map((order: Orders) => {
-      //       return order.userId;
-      //     }),
-      //   );
-
-      //   const codData = getCODData(codBoard.orders);
-
-      //   return {
-      //     note: codBoard.note,
-      //     cash: codBoard.cash,
-      //     status: codBoard.status,
-      //     driver: codBoard.driver,
-      //     createdAt: codBoard.createdAt,
-      //     date: codBoard.date,
-      //     id: codBoard.id,
-      //     driverId: codBoard.driverId,
-      //     orders: codBoard.orders,
-      //     createdBy: codBoard.createdBy,
-      //     expense: codBoard.expense,
-      //     totalAmount,
-      //     boardClients: Array.from(boardClients),
-      //     ...codData,
-      //   };
-      // });
-
       const allBoardsWithDetails = formatBoards(allCodBoards);
 
       const mappedBoard = allBoardsWithDetails.reduce(
@@ -278,10 +244,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         {},
       );
 
+      const sortedDate = Object.keys(mappedBoard).length > 0 && Object.keys(mappedBoard).sort((a: any, b: any) => {
+        return new Date(b).getTime() - new Date(a).getTime();
+      });
+      
       return res.status(200).json({
         data: mappedBoard,
+        sortedDate
       });
     }
+
 
     return res.status(404).json({
       error: 'Missing required parameters',

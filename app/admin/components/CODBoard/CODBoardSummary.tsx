@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -6,7 +7,7 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { ShadowSection } from '../../reports/styled';
 import RememberMeIcon from '@mui/icons-material/RememberMe';
 import StatusText from '../StatusText';
@@ -19,18 +20,24 @@ import PendingIcon from '@mui/icons-material/Pending';
 import useFilterOrders from '@/hooks/useFilterOrders';
 import { Order } from '../../orders/page';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import EditCashInput from '../Modals/edit/EditCashInput';
 
 interface IProps {
   boardData: IBoard;
   onSelect: any;
   handleDeleteBoard: any;
+  showNotification: (type: AlertColor , message: string) => void
 }
 
 export default function CODBoardSummary({
   boardData,
   onSelect,
   handleDeleteBoard,
+  showNotification
 }: IProps) {
+  const [isOpenEditCashInput, setIsOpenEditCashInput] = useState<boolean>(false);
+
   const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
   }, 0);
@@ -59,7 +66,15 @@ export default function CODBoardSummary({
   );
 
   return (
+    <>
+      <EditCashInput 
+        open={isOpenEditCashInput}
+        onClose={() => setIsOpenEditCashInput(false)}
+        showNotification={showNotification}
+        board={boardData}
+      />
     <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
+      {/* First Row */}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box display="flex" alignItems="center" gap={0.5}>
           <RememberMeIcon fontSize="small" color="primary" />
@@ -104,21 +119,34 @@ export default function CODBoardSummary({
             p={2}
             flexWrap={'wrap'}
           >
-            <Box display="flex" flexDirection="column" gap={0.5}>
-              <Typography variant="h5" textAlign="center">
-                ${boardData.cash}
-              </Typography>
-              <Typography variant="body2" color={grey[600]} textAlign="center">
-                Cash Input
-              </Typography>
+            <Box display="flex" alignItems="flex-start">
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                <Typography variant="h5" textAlign="center">
+                  ${boardData.cash}
+                </Typography>
+                <Typography variant="body2" color={grey[600]} textAlign="center">
+                  Cash Input
+                </Typography>
+              </Box>  
+
+              <IconButton size="small" onClick={() => setIsOpenEditCashInput(true)}>
+                <EditIcon fontSize="small"/>
+              </IconButton>
             </Box>
-            <Box display="flex" flexDirection="column" gap={0.5}>
-              <Typography variant="h5" textAlign="center">
-                ${boardData?.expense?.amount?.toFixed(2) || 0}
-              </Typography>
-              <Typography variant="body2" color={grey[600]}>
-                Expense
-              </Typography>
+
+            <Box display="flex" alignItems="flex-start">
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                <Typography variant="h5" textAlign="center">
+                  ${boardData?.expense?.amount?.toFixed(2) || 0}
+                </Typography>
+                <Typography variant="body2" color={grey[600]}>
+                  Expense
+                </Typography>
+              </Box>
+
+              {/* <IconButton size="small">
+                <EditIcon fontSize="small"/>
+              </IconButton> */}
             </Box>
             <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography variant="h5" textAlign="center">
@@ -174,5 +202,7 @@ export default function CODBoardSummary({
         </Grid>
       </Grid>
     </ShadowSection>
+    </>
+
   );
 }
