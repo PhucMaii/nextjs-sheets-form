@@ -74,7 +74,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      if (uncollectedOrders.length === 0 && codBoard.status === COD_STATUS.IN_PROCESS) {
+      if (
+        uncollectedOrders.length === 0 &&
+        codBoard.status === COD_STATUS.IN_PROCESS
+      ) {
         await prisma.codBoard.update({
           where: {
             id: codBoard.id,
@@ -83,7 +86,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             status: COD_STATUS.CLEARED,
           },
         });
-      } else if (uncollectedOrders.length > 0 && codBoard.status === COD_STATUS.CLEARED) {
+      } else if (
+        uncollectedOrders.length > 0 &&
+        codBoard.status === COD_STATUS.CLEARED
+      ) {
         await prisma.codBoard.update({
           where: {
             id: codBoard.id,
@@ -166,7 +172,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // await checkBoardStatus(dateBoards);
-      
+
       if (dateBoards.length === 0) {
         return res.status(200).json({
           data: [],
@@ -177,7 +183,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(200).json({
         data: allBoardsWithDetails,
       });
-
     }
 
     if (startDate && endDate) {
@@ -244,16 +249,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         {},
       );
 
-      const sortedDate = Object.keys(mappedBoard).length > 0 && Object.keys(mappedBoard).sort((a: any, b: any) => {
-        return new Date(b).getTime() - new Date(a).getTime();
-      });
-      
+      const sortedDate =
+        Object.keys(mappedBoard).length > 0 &&
+        Object.keys(mappedBoard).sort((a: any, b: any) => {
+          return new Date(b).getTime() - new Date(a).getTime();
+        });
+
       return res.status(200).json({
         data: mappedBoard,
-        sortedDate
+        sortedDate,
       });
     }
-
 
     return res.status(404).json({
       error: 'Missing required parameters',
@@ -296,7 +302,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 //         data: {
 //           status: COD_STATUS.CLEARED
 //         }
-//       })  
+//       })
 //   }
 
 //   if (boardsStatusMap.IN_PROCESS.length > 0) {
@@ -309,19 +315,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 //         data: {
 //           status: COD_STATUS.IN_PROCESS
 //         }
-//       })  
+//       })
 //   }
-  
+
 // }
 
 const formatBoards = (boards: any) => {
   const allBoardsWithDetails = boards.map((codBoard: any) => {
-    const totalAmount = codBoard.orders.reduce(
-      (acc: number, order: Orders) => {
-        return acc + order.totalPrice;
-      },
-      0,
-    );
+    const totalAmount = codBoard.orders.reduce((acc: number, order: Orders) => {
+      return acc + order.totalPrice;
+    }, 0);
 
     const boardClients = new Set(
       codBoard.orders.map((order: Orders) => {
@@ -350,7 +353,7 @@ const formatBoards = (boards: any) => {
   });
 
   return allBoardsWithDetails;
-}
+};
 
 const getCODData = (orders: Orders[]) => {
   const uncollectedOrders = orders.filter((order: Orders) => {

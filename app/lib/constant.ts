@@ -9,7 +9,12 @@ import PeopleIcon from '@mui/icons-material/People';
 // import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
-import { ORDER_STATUS, ORDER_TYPE, PAYMENT_METHOD_TYPE, PAYMENT_TYPE } from '../utils/enum';
+import {
+  ORDER_STATUS,
+  ORDER_TYPE,
+  PAYMENT_METHOD_TYPE,
+  PAYMENT_TYPE,
+} from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import PendingIcon from '@mui/icons-material/Pending';
@@ -320,4 +325,3 @@ export const methodTypes = [
   PAYMENT_METHOD_TYPE.CHEQUE,
   PAYMENT_METHOD_TYPE.OTHER,
 ];
-

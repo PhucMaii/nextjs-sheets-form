@@ -41,20 +41,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       where: {
         id: paymentMethodId,
       },
-    })
+    });
 
     // Update payment method balance
     if (amount !== existingExpense.amount) {
-        const newBalance = paymentMethod.balance + amount - existingExpense.amount;
+      const newBalance =
+        paymentMethod.balance + amount - existingExpense.amount;
 
-        await prisma.paymentMethod.update({
-          where: {
-            id: paymentMethodId
-          },
-          data: {
-            balance: newBalance
-          }
-        });
+      await prisma.paymentMethod.update({
+        where: {
+          id: paymentMethodId,
+        },
+        data: {
+          balance: newBalance,
+        },
+      });
     }
 
     return res.status(200).json({

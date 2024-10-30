@@ -21,10 +21,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updatedCodBoard = await prisma.codBoard.update({
       where: {
-        id
+        id,
       },
       data: {
-        ...updatedBoard
+        ...updatedBoard,
       },
     });
 

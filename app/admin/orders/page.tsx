@@ -42,7 +42,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import SearchModal from '../components/Modals/SearchModal';
 import useDebounce from '@/hooks/useDebounce';
-import OrderOverview from '../components/OrderOverview';
+import OrderOverview from '../components/Overview/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useReactToPrint } from 'react-to-print';
 import { SWRFetchData } from '@/app/utils/db';
@@ -60,10 +60,15 @@ import { DropdownItemContainer } from './styled';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
-import DeleteIcon from '@mui/icons-material/Delete';;
+import DeleteIcon from '@mui/icons-material/Delete';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import { errorColor, infoColor, successColor, warningColor } from '@/theme/color';
+import {
+  errorColor,
+  infoColor,
+  successColor,
+  warningColor,
+} from '@/theme/color';
 import LoadingModal from '../components/Modals/LoadingModal';
 
 interface Category {
@@ -450,7 +455,7 @@ export default function Orders() {
       showNotification(
         'error',
         'Fail to mark all as completed: ' + error.response.data.error,
-      )
+      );
     }
   };
 

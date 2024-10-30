@@ -39,9 +39,9 @@ export default function ItemPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [items, setItems] = useState<IItem[]>([]);
   const [isSavingArrangement, setIsSavingArrangement] =
-  useState<boolean>(false);
+    useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  
+
   const [open, setOpen] = useMultipleBoolean({
     isAddItemOpen: false,
     isSidebarOpen: true,
@@ -323,16 +323,22 @@ export default function ItemPage() {
         targetObj={currentCategory}
         handleDelete={handleDeleteCategory}
         open={open.isDeleteModalOpen}
-        handleCloseModal={() => setOpen('isDeleteModalOpen' ,false)}
+        handleCloseModal={() => setOpen('isDeleteModalOpen', false)}
       />
       <EditCategory
         open={open.isEditCategory}
-        onClose={() => setOpen('isEditCategory' ,false)}
+        onClose={() => setOpen('isEditCategory', false)}
         updateCategory={handleUpdateCategoryName}
         currentName={currentCategory?.name}
       />
       {NotificationComp}
-      <PasteItemsModal currentCategoryId={currentCategory?.id} open={open.isPasteModalOpen} onClose={() => setOpen('isPasteModalOpen' ,false)} showNotification={showNotification} categories={categories?.data || []} />
+      <PasteItemsModal
+        currentCategoryId={currentCategory?.id}
+        open={open.isPasteModalOpen}
+        onClose={() => setOpen('isPasteModalOpen', false)}
+        showNotification={showNotification}
+        categories={categories?.data || []}
+      />
       <CategorySidebar
         currentCategory={currentCategory}
         categories={categories?.data || []}
@@ -347,9 +353,9 @@ export default function ItemPage() {
                 {currentCategory?.name} ( {currentCategory?.users?.length}{' '}
                 clients )
               </Typography>
-                <IconButton onClick={() => setOpen('isEditCategory', true)}>
-                  <EditIcon />
-                </IconButton>
+              <IconButton onClick={() => setOpen('isEditCategory', true)}>
+                <EditIcon />
+              </IconButton>
             </Box>
           </Grid>
           <Grid item xs={12} md={2} textAlign="right">
@@ -379,10 +385,16 @@ export default function ItemPage() {
             </Grid>
             <Grid item xs={12} md={1.5}>
               <Box display="flex" alignItems="center">
-                <IconButton size='large' onClick={() => setOpen('isPasteModalOpen', true)}>
+                <IconButton
+                  size="large"
+                  onClick={() => setOpen('isPasteModalOpen', true)}
+                >
                   <ContentPasteGoIcon fontSize="large" color="primary" />
                 </IconButton>
-                <IconButton size="large" onClick={() => setOpen('isAddItemOpen', true)}>
+                <IconButton
+                  size="large"
+                  onClick={() => setOpen('isAddItemOpen', true)}
+                >
                   <AddBoxIcon fontSize="large" color="primary" />
                 </IconButton>
               </Box>

@@ -27,16 +27,17 @@ interface IProps {
   boardData: IBoard;
   onSelect: any;
   handleDeleteBoard: any;
-  showNotification: (type: AlertColor , message: string) => void
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function CODBoardSummary({
   boardData,
   onSelect,
   handleDeleteBoard,
-  showNotification
+  showNotification,
 }: IProps) {
-  const [isOpenEditCashInput, setIsOpenEditCashInput] = useState<boolean>(false);
+  const [isOpenEditCashInput, setIsOpenEditCashInput] =
+    useState<boolean>(false);
 
   const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
@@ -67,142 +68,148 @@ export default function CODBoardSummary({
 
   return (
     <>
-      <EditCashInput 
+      <EditCashInput
         open={isOpenEditCashInput}
         onClose={() => setIsOpenEditCashInput(false)}
         showNotification={showNotification}
         board={boardData}
       />
-    <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
-      {/* First Row */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box display="flex" alignItems="center" gap={0.5}>
-          <RememberMeIcon fontSize="small" color="primary" />
-          <Typography variant="body2">{boardData.createdBy}</Typography>
-        </Box>
-        <Box display="flex" alignItems="center" gap={1}>
-          <StatusText
-            text={boardData.status}
-            type={
-              boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'
-            }
-            icon={
-              boardData.status === COD_STATUS.CLEARED ? (
-                <CheckIcon fontSize="small" color="success" />
-              ) : (
-                <PendingIcon fontSize="small" color="warning" />
-              )
-            }
-          />
-          <IconButton
-            color="error"
-            onClick={() => handleDeleteBoard(boardData.id)}
-          >
-            <RemoveCircleIcon fontSize="large" />
-          </IconButton>
-        </Box>
-      </Box>
-
-      <Grid container alignItems="stretch">
-        <Grid item xs={12} md={8.9}>
-          <Box>
-            <Typography variant="h6">{boardData.driver.name}</Typography>
-            <Typography variant="body2" color={grey[500]}>
-              Delivered on: {boardData.date}
-            </Typography>
+      <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
+        {/* First Row */}
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <RememberMeIcon fontSize="small" color="primary" />
+            <Typography variant="body2">{boardData.createdBy}</Typography>
           </Box>
-          <Divider sx={{ my: 2 }} />
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            p={2}
-            flexWrap={'wrap'}
-          >
-            <Box display="flex" alignItems="flex-start">
-              <Box display="flex" flexDirection="column" gap={0.5}>
-                <Typography variant="h5" textAlign="center">
-                  ${boardData.cash}
-                </Typography>
-                <Typography variant="body2" color={grey[600]} textAlign="center">
-                  Cash Input
-                </Typography>
-              </Box>  
+          <Box display="flex" alignItems="center" gap={1}>
+            <StatusText
+              text={boardData.status}
+              type={
+                boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'
+              }
+              icon={
+                boardData.status === COD_STATUS.CLEARED ? (
+                  <CheckIcon fontSize="small" color="success" />
+                ) : (
+                  <PendingIcon fontSize="small" color="warning" />
+                )
+              }
+            />
+            <IconButton
+              color="error"
+              onClick={() => handleDeleteBoard(boardData.id)}
+            >
+              <RemoveCircleIcon fontSize="large" />
+            </IconButton>
+          </Box>
+        </Box>
 
-              <IconButton size="small" onClick={() => setIsOpenEditCashInput(true)}>
-                <EditIcon fontSize="small"/>
-              </IconButton>
+        <Grid container alignItems="stretch">
+          <Grid item xs={12} md={8.9}>
+            <Box>
+              <Typography variant="h6">{boardData.driver.name}</Typography>
+              <Typography variant="body2" color={grey[500]}>
+                Delivered on: {boardData.date}
+              </Typography>
             </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              p={2}
+              flexWrap={'wrap'}
+            >
+              <Box display="flex" alignItems="flex-start">
+                <Box display="flex" flexDirection="column" gap={0.5}>
+                  <Typography variant="h5" textAlign="center">
+                    ${boardData.cash}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color={grey[600]}
+                    textAlign="center"
+                  >
+                    Cash Input
+                  </Typography>
+                </Box>
 
-            <Box display="flex" alignItems="flex-start">
-              <Box display="flex" flexDirection="column" gap={0.5}>
-                <Typography variant="h5" textAlign="center">
-                  ${boardData?.expense?.amount?.toFixed(2) || 0}
-                </Typography>
-                <Typography variant="body2" color={grey[600]}>
-                  Expense
-                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => setIsOpenEditCashInput(true)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
               </Box>
 
-              {/* <IconButton size="small">
+              <Box display="flex" alignItems="flex-start">
+                <Box display="flex" flexDirection="column" gap={0.5}>
+                  <Typography variant="h5" textAlign="center">
+                    ${boardData?.expense?.amount?.toFixed(2) || 0}
+                  </Typography>
+                  <Typography variant="body2" color={grey[600]}>
+                    Expense
+                  </Typography>
+                </Box>
+
+                {/* <IconButton size="small">
                 <EditIcon fontSize="small"/>
               </IconButton> */}
+              </Box>
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                <Typography variant="h5" textAlign="center">
+                  ${uncollectedAmount.toFixed(2)}
+                </Typography>
+                <Typography variant="body2" color={grey[600]}>
+                  Uncollected Amount
+                </Typography>
+              </Box>
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                <Typography variant="h5" textAlign="center">
+                  ${collectedAmount.toFixed(2)}
+                </Typography>
+                <Typography variant="body2" color={grey[600]}>
+                  Collected Amount
+                </Typography>
+              </Box>
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                <Typography variant="h5" textAlign="center">
+                  {totalAmount.toFixed(2)}
+                </Typography>
+                <Typography variant="body2" color={grey[600]}>
+                  Total Amount
+                </Typography>
+              </Box>
             </Box>
-            <Box display="flex" flexDirection="column" gap={0.5}>
-              <Typography variant="h5" textAlign="center">
-                ${uncollectedAmount.toFixed(2)}
-              </Typography>
-              <Typography variant="body2" color={grey[600]}>
-                Uncollected Amount
-              </Typography>
-            </Box>
-            <Box display="flex" flexDirection="column" gap={0.5}>
-              <Typography variant="h5" textAlign="center">
-                ${collectedAmount.toFixed(2)}
-              </Typography>
-              <Typography variant="body2" color={grey[600]}>
-                Collected Amount
-              </Typography>
-            </Box>
-            <Box display="flex" flexDirection="column" gap={0.5}>
-              <Typography variant="h5" textAlign="center">
-                {totalAmount.toFixed(2)}
-              </Typography>
-              <Typography variant="body2" color={grey[600]}>
-                Total Amount
-              </Typography>
-            </Box>
-          </Box>
-        </Grid>
-        <Grid item xs={0.1}>
-          <Divider orientation="vertical" flexItem sx={{ height: '100%' }} />
-        </Grid>
+          </Grid>
+          <Grid item xs={0.1}>
+            <Divider orientation="vertical" flexItem sx={{ height: '100%' }} />
+          </Grid>
 
-        <Grid item xs={12} md={3} textAlign="center">
-          <Box
-            display="flex"
-            flexDirection="column"
-            gap={0.5}
-            justifyContent="center"
-            mb={2}
-          >
-            <Typography variant="h4" textAlign="center">
-              {uncollectedOrders.length}
-            </Typography>
-            <Typography variant="body2" color={grey[600]}>
-              Uncleared Orders
-            </Typography>
-          </Box>
-          <Button variant="contained" onClick={onSelect}>
-            <Box display="flex" alignItems="center" gap={0.5}>
-              <Typography variant="subtitle2">View details</Typography>
-              <ArrowForwardIosIcon fontSize="small" />
+          <Grid item xs={12} md={3} textAlign="center">
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={0.5}
+              justifyContent="center"
+              mb={2}
+            >
+              <Typography variant="h4" textAlign="center">
+                {uncollectedOrders.length}
+              </Typography>
+              <Typography variant="body2" color={grey[600]}>
+                Uncleared Orders
+              </Typography>
             </Box>
-          </Button>
+            <Button variant="contained" onClick={onSelect}>
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <Typography variant="subtitle2">View details</Typography>
+                <ArrowForwardIosIcon fontSize="small" />
+              </Box>
+            </Button>
+          </Grid>
         </Grid>
-      </Grid>
-    </ShadowSection>
+      </ShadowSection>
     </>
-
   );
 }

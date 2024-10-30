@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 export const useMultipleBoolean = (booleanValues: any) => {
-    const [booleanState, setBooleanState] = useState<any>(booleanValues);
+  const [booleanState, setBooleanState] = useState<any>(booleanValues);
 
-    const onChangeBooleanValue = (field: string, value: boolean) => {
-        setBooleanState({...booleanState, [field]: value});
-    }
+  const onChangeBooleanValue = (field: string, value: boolean) => {
+    setBooleanState({ ...booleanState, [field]: value });
+  };
 
-    return [booleanState, onChangeBooleanValue]
-}
+  return [booleanState, onChangeBooleanValue];
+};

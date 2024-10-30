@@ -135,7 +135,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               ? itemKey.split(' - ')[1]
               : itemKey;
           }
-          
+
           if (!acc[itemKey]) {
             acc[itemKey] = 0;
           }
@@ -164,7 +164,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
 
           if (user.clientId === '00303') {
-            console.log({itemKey, name: item.name}, 'itemKey');
+            console.log({ itemKey, name: item.name }, 'itemKey');
           }
           // Beginning of new customer
           if (

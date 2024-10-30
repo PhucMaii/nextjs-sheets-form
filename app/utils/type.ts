@@ -13,8 +13,7 @@ import {
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
 
-export interface IDayRange extends DayRange {
-}
+export interface IDayRange extends DayRange {}
 
 export interface BSData {
   quantity: number;

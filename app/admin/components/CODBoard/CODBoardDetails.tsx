@@ -240,11 +240,14 @@ export default function CODBoardDetails({
 
   const handleAddExpenseId = async (id: number) => {
     try {
-      const response = await axios.put(`${API_URL.ADMIN}/cod`, {id: boardData.id, updatedBoard: {
-        date: boardData.date,
-        driverId: boardData.driverId,
-        expenseId: id,
-      }});
+      const response = await axios.put(`${API_URL.ADMIN}/cod`, {
+        id: boardData.id,
+        updatedBoard: {
+          date: boardData.date,
+          driverId: boardData.driverId,
+          expenseId: id,
+        },
+      });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -259,7 +262,7 @@ export default function CODBoardDetails({
       showNotification('error', error.response.data.error);
       return;
     }
-  }
+  };
 
   const actions = (
     <Box display="flex" alignItems="center" gap={2}>
@@ -436,14 +439,14 @@ export default function CODBoardDetails({
 
   return (
     <>
-    {NotificationComp}
-      <AddExpense 
+      {NotificationComp}
+      <AddExpense
         showNotification={showNotification}
         open={open.isOpenAddExpense}
         onClose={() => setOpen('isOpenAddExpense', false)}
         defaultValue={{
           date: boardData?.date,
-          spentBy: `Driver - ${boardData?.driver.name}`
+          spentBy: `Driver - ${boardData?.driver.name}`,
         }}
         handleAddExpenseId={handleAddExpenseId}
         // paymentMethods={paymentMethods}

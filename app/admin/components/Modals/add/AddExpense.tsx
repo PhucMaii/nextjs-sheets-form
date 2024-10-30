@@ -42,7 +42,7 @@ export default function AddExpense({
     description: '',
     paymentMethodId: -1,
     spentBy: '-- Choose who spent --',
-    ...(defaultValue ? defaultValue: {}),
+    ...(defaultValue ? defaultValue : {}),
   });
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
@@ -50,7 +50,10 @@ export default function AddExpense({
 
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
-  const { date, SelectDate } = useSelectDate(defaultValue?.date ? defaultValue?.date : todayString, true);
+  const { date, SelectDate } = useSelectDate(
+    defaultValue?.date ? defaultValue?.date : todayString,
+    true,
+  );
 
   useEffect(() => {
     fetchAdmins();
@@ -145,7 +148,12 @@ export default function AddExpense({
           heading="Add Expense"
           onClose={onClose}
           onClick={handleAddExpense}
-          buttonProps={{ loading: isAdding, disabled: newExpense.paymentMethodId === -1 || newExpense.spentBy === '-- Choose who spent --' }}
+          buttonProps={{
+            loading: isAdding,
+            disabled:
+              newExpense.paymentMethodId === -1 ||
+              newExpense.spentBy === '-- Choose who spent --',
+          }}
           buttonLabel="ADD"
         />
 
@@ -189,7 +197,8 @@ export default function AddExpense({
               <MenuItem value={-1} disabled>
                 -- Choose payment method --
               </MenuItem>
-              {paymentMethods && paymentMethods?.data?.length > 0 &&
+              {paymentMethods &&
+                paymentMethods?.data?.length > 0 &&
                 paymentMethods?.data.map(
                   (paymentMethod: IPaymentMethod, index: number) => {
                     return (

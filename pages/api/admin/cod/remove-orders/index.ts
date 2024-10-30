@@ -7,10 +7,7 @@ interface IBody {
   orders: Order[];
 }
 
-const handler = async(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'DELETE') {
       return res.status(404).json({
@@ -44,6 +41,6 @@ const handler = async(
       error: 'Internal Server Error: ' + error,
     });
   }
-}
+};
 
-export default withAdminAuthGuard(handler)
+export default withAdminAuthGuard(handler);

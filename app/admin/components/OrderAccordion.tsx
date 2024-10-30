@@ -152,7 +152,6 @@ const OrderAccordion = ({
     }
   };
 
-
   const actions = (
     <>
       <IconButton
@@ -213,7 +212,7 @@ const OrderAccordion = ({
         >
           Delete
         </MenuItem>
-        
+
         <MenuItem
           disabled={
             isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED

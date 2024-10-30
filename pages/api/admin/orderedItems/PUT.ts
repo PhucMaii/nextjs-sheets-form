@@ -423,7 +423,12 @@ export const updateOrderTotalPrice = async (
       return { ...item, totalPrice };
     });
 
-    return { ...updatedOrder, items: newItems, clientName: updatedOrder.user.clientName, clientId: updatedOrder.user.clientId };
+    return {
+      ...updatedOrder,
+      items: newItems,
+      clientName: updatedOrder.user.clientName,
+      clientId: updatedOrder.user.clientId,
+    };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

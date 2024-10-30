@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Order } from '../orders/page';
+import { Order } from '../../orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import {
   AlertColor,
@@ -15,15 +15,15 @@ import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TodayIcon from '@mui/icons-material/Today';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import { ShadowSection } from '../reports/styled';
+import { ShadowSection } from '../../reports/styled';
 import { IRoutes } from '@/app/utils/type';
 import { primary, primaryColor } from '@/theme/color';
 import { getCODData } from '@/app/utils/array';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import WCODInfo from './Modals/WCODInfo';
+import WCODInfo from '../Modals/WCODInfo';
 import { blueGrey } from '@mui/material/colors';
 import AddIcon from '@mui/icons-material/Add';
-import AddTempCOD from './Modals/AddTempCod/AddTempCOD';
+import AddTempCOD from '../Modals/AddTempCod/AddTempCOD';
 import ReplayIcon from '@mui/icons-material/Replay';
 
 interface IProps {
