@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
+import { mainPaymentMethodId } from '@/app/lib/constant';
 
 interface IBody {
   amount: number;
@@ -37,6 +38,56 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    if (paymentMethodId !== mainPaymentMethodId) {
+      return res.status(400).json({
+        error: 'Payment Method Not Allowed',
+      });
+    }
+
+    const dateBoard = await prisma.codBoard.findFirst({
+      where: {
+        date: date,
+        driverId: driver.id,
+      },
+      include: {
+        expense: true,
+      }
+    });
+
+    if (!dateBoard) {
+      return res.status(404).json({
+        error: `Your Board Is Not Available For ${date}`,
+      });
+    }
+
+    if (dateBoard.expense.length > 0) {
+      const updatedExpense = await prisma.expense.update({
+        where: {
+          id: dateBoard.expense[0].id,
+        },
+        data: {
+          amount: amount,
+          date: date,
+          description: description,
+        },
+      });
+
+      const newBalance = existingMethod.balance + amount - dateBoard.expense[0].amount;
+
+      await prisma.paymentMethod.update({
+        where: {
+          id: paymentMethodId,
+        },
+        data: {
+          balance: newBalance,
+        },
+      });
+
+      return res
+        .status(200)
+        .json({ data: updatedExpense, message: 'Update Expense Successfully' });
+    }
+
     const newExpense = await prisma.expense.create({
       data: {
         amount: amount,
@@ -46,6 +97,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt,
         spentBy: `Driver - ${driver?.name}`,
         createdBy: `Driver - ${driver?.name}`,
+        codBoardId: dateBoard.id,
       },
     });
 

@@ -1,3 +1,4 @@
+import { mainPaymentMethodId } from '@/app/lib/constant';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
@@ -24,7 +25,7 @@ export default function AddExpense({ showNotification }: IProps) {
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
     description: '',
-    paymentMethodId: -1,
+    paymentMethodId: mainPaymentMethodId,
   });
 
   // Data Fetching
@@ -49,7 +50,6 @@ export default function AddExpense({ showNotification }: IProps) {
       const response = await axios.post(`${API_URL.DRIVER}/expenses`, {
         date,
         createdAt,
-        spentBy: newExpense.spentBy,
         amount: newExpense.amount,
         description: newExpense.description,
         paymentMethodId: newExpense.paymentMethodId,
@@ -119,7 +119,7 @@ export default function AddExpense({ showNotification }: IProps) {
               paymentMethods.data.map(
                 (paymentMethod: IPaymentMethod, index: number) => {
                   return (
-                    <MenuItem key={index} value={paymentMethod.id}>
+                    <MenuItem key={index} value={paymentMethod.id} disabled={paymentMethod.id !== mainPaymentMethodId}>
                       {paymentMethod.name}
                     </MenuItem>
                   );
