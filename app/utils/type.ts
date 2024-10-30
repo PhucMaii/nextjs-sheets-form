@@ -13,8 +13,7 @@ import {
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
 
-export interface IDayRange extends DayRange {
-}
+export interface IDayRange extends DayRange {}
 
 export interface BSData {
   quantity: number;
@@ -143,7 +142,8 @@ export interface IBoard extends CodBoard {
   boardClients: UserType[];
   orders: Order[];
   totalAmount: number;
-  expense: IExpense;
+  expense: IExpense[];
+  cashDiff: number;
 }
 
 export interface IExpense extends Expense {

@@ -28,7 +28,9 @@ export default function TransactionsTable({
       return;
     }
     try {
-      const response = await axios.delete(`${API_URL.ADMIN}/expenses?id=${transaction.id}`);
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/expenses?id=${transaction.id}`,
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -42,7 +44,7 @@ export default function TransactionsTable({
       showNotification('error', 'Something went wrong');
       return;
     }
-  }
+  };
 
   return (
     <Table>
@@ -64,11 +66,11 @@ export default function TransactionsTable({
               <TableRow key={index}>
                 <TableCell style={{ width: 50 }}>
                   {/* <Toolbar> */}
-                    <img
-                      src={`/images/${transaction.paymentMethod.type}.png`}
-                      alt="method"
-                      style={{width: 30, height: 30}}
-                    />
+                  <img
+                    src={`/images/${transaction.paymentMethod.type}.png`}
+                    alt="method"
+                    style={{ width: 30, height: 30 }}
+                  />
                   {/* </Toolbar> */}
                 </TableCell>
                 <TableCell style={{ width: 50 }}>{transaction.id}</TableCell>
@@ -83,18 +85,19 @@ export default function TransactionsTable({
                 </TableCell>
                 <TableCell style={{ width: 100 }}>{transaction.date}</TableCell>
                 <TableCell>
-                {showNotification &&<Box display="flex" alignItems="center" gap={1}>
-                   <EditExpense
-                      transaction={transaction}
-                      showNotification={showNotification}
-                    />
-                    <DeleteModal 
-                      targetObj={transaction}
-                      handleDelete={handleDeleteTransaction}
-                      includedButton
-                    />
-                  </Box>
-                }
+                  {showNotification && (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <EditExpense
+                        transaction={transaction}
+                        showNotification={showNotification}
+                      />
+                      <DeleteModal
+                        targetObj={transaction}
+                        handleDelete={handleDeleteTransaction}
+                        includedButton
+                      />
+                    </Box>
+                  )}
                 </TableCell>
               </TableRow>
             );

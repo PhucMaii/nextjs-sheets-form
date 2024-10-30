@@ -1,4 +1,3 @@
-import { IBoard } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -6,7 +5,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { updatedBoard }: { updatedBoard: IBoard } = req.body;
+    const { id, updatedBoard }: { id: number; updatedBoard: any } = req.body;
 
     const isDriverValid = await checkIsDriverInDate(
       updatedBoard.date,
@@ -15,19 +14,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     if (!isDriverValid) {
       return res.status(500).json({
-        error: `Driver ${updatedBoard.driver.name} already in process for ${updatedBoard.date}`,
+        error: `Driver ${updatedBoard.driverId} already in process for ${updatedBoard.date}`,
       });
     }
 
     const updatedCodBoard = await prisma.codBoard.update({
       where: {
-        id: updatedBoard.id,
+        id,
       },
       data: {
-        date: updatedBoard.date,
-        cash: updatedBoard.cash,
-        driverId: updatedBoard.driverId,
-        expenseId: updatedBoard?.expenseId || null,
+        ...updatedBoard,
       },
     });
 

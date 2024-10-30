@@ -22,9 +22,7 @@ import { fetchApi, SWRFetchData } from '@/app/utils/db';
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
   defaultValue?: any;
-  handleAddExpenseId?: (id: number) => Promise<void>;
-  // paymentMethods: IPaymentMethod[];
-  // adminsAndDrivers: string[];
+  codBoardId?: number;
 }
 
 export default function AddExpense({
@@ -32,25 +30,27 @@ export default function AddExpense({
   onClose,
   showNotification,
   defaultValue,
-  handleAddExpenseId,
-  // paymentMethods,
-  // adminsAndDrivers,
+  codBoardId
 }: IProps) {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
     description: '',
-    paymentMethodId: -1,
+    paymentMethodId: codBoardId ? 4 : -1,
     spentBy: '-- Choose who spent --',
-    ...(defaultValue ? defaultValue: {}),
+    ...(defaultValue ? defaultValue : {}),
   });
+
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
 
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
-  const { date, SelectDate } = useSelectDate(defaultValue?.date ? defaultValue?.date : todayString, true);
+  const { date, SelectDate } = useSelectDate(
+    defaultValue?.date ? defaultValue?.date : todayString,
+    true,
+  );
 
   useEffect(() => {
     fetchAdmins();
@@ -67,8 +67,10 @@ export default function AddExpense({
       const formattedAdmins = admins.map((admin: any) => {
         return `Admin - ${admin.clientName}`;
       });
-      console.log([...adminsAndDrivers, ...formattedAdmins], 'admins');
-      setAdminsAndDrivers(formattedAdmins);
+      setAdminsAndDrivers((prevAdminAndDrivers) => [
+        ...prevAdminAndDrivers,
+        ...formattedAdmins,
+      ]);
     } catch (error) {
       console.log(error);
       showNotification('error', 'Something went wrong');
@@ -102,14 +104,31 @@ export default function AddExpense({
       setIsAdding(true);
       const createdAt = generateCurrentTime();
 
-      const response = await axios.post(`${API_URL.ADMIN}/expenses`, {
-        date,
+      let response;
+
+      if (codBoardId) {
+        response = await axios.post(`${API_URL.ADMIN}/cod/expenses`, {
+          date,
         createdAt,
+        createdBy: defaultValue.createdBy,
         spentBy: newExpense.spentBy,
         amount: newExpense.amount,
         description: newExpense.description,
         paymentMethodId: newExpense.paymentMethodId,
-      });
+        codBoardId,
+        })
+      } else {
+        response = await axios.post(`${API_URL.ADMIN}/expenses`, {
+          date,
+          createdAt,
+          spentBy: newExpense.spentBy,
+          amount: newExpense.amount,
+          description: newExpense.description,
+          paymentMethodId: newExpense.paymentMethodId,
+        });
+
+        }
+
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -117,9 +136,6 @@ export default function AddExpense({
         return;
       }
 
-      if (handleAddExpenseId) {
-        await handleAddExpenseId(response.data.data.id);
-      }
       showNotification('success', response.data.message);
       setIsAdding(false);
       onClose();
@@ -145,7 +161,12 @@ export default function AddExpense({
           heading="Add Expense"
           onClose={onClose}
           onClick={handleAddExpense}
-          buttonProps={{ loading: isAdding, disabled: newExpense.paymentMethodId === -1 || newExpense.spentBy === '-- Choose who spent --' }}
+          buttonProps={{
+            loading: isAdding,
+            disabled:
+              newExpense.paymentMethodId === -1 ||
+              newExpense.spentBy === '-- Choose who spent --',
+          }}
           buttonLabel="ADD"
         />
 
@@ -180,7 +201,19 @@ export default function AddExpense({
           </Box>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Payment Method</Typography>
-            <Select
+            {codBoardId ? (
+              <Select
+              value={newExpense.paymentMethodId}
+              onChange={(e) =>
+                onChangeNewExpense('paymentMethodId', +e.target.value)
+              }
+            >
+              <MenuItem value={4} disabled>
+                {paymentMethods?.data[0]?.name}
+              </MenuItem>
+              
+            </Select>
+            ) : <Select
               value={newExpense.paymentMethodId}
               onChange={(e) =>
                 onChangeNewExpense('paymentMethodId', +e.target.value)
@@ -189,7 +222,8 @@ export default function AddExpense({
               <MenuItem value={-1} disabled>
                 -- Choose payment method --
               </MenuItem>
-              {paymentMethods && paymentMethods?.data?.length > 0 &&
+              {paymentMethods &&
+                paymentMethods?.data?.length > 0 &&
                 paymentMethods?.data.map(
                   (paymentMethod: IPaymentMethod, index: number) => {
                     return (
@@ -199,7 +233,7 @@ export default function AddExpense({
                     );
                   },
                 )}
-            </Select>
+            </Select>}
           </Box>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Spent By</Typography>

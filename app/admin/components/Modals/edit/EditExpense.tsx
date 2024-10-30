@@ -174,7 +174,8 @@ export default function EditExpense({
                 <MenuItem value={-1} disabled>
                   -- Choose payment method --
                 </MenuItem>
-                {paymentMethods && paymentMethods?.data.length > 0 &&
+                {paymentMethods &&
+                  paymentMethods?.data.length > 0 &&
                   paymentMethods?.data.map(
                     (paymentMethod: IPaymentMethod, index: number) => {
                       return (

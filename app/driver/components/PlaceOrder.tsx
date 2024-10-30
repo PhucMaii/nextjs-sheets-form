@@ -1,6 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { AlertColor, Autocomplete, Box, TextField, Typography } from '@mui/material';
+import {
+  AlertColor,
+  Autocomplete,
+  Box,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { grey } from '@mui/material/colors';
@@ -12,10 +18,10 @@ import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
 
 interface IProps {
-  showNotification: (type: AlertColor, message: string) => void
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function PlaceOrder({showNotification}: IProps) {
+export default function PlaceOrder({ showNotification }: IProps) {
   const [itemList, setItemList] = useState<OrderedItems[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [note, setNote] = useState<string>('');

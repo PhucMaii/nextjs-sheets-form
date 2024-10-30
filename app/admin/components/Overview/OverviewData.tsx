@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import OverviewCard from '../components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import LoopIcon from '@mui/icons-material/Loop';
@@ -7,6 +6,7 @@ import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import { Grid } from '@mui/material';
 import { primary, primaryColor } from '@/theme/color';
 import { minifyNumber } from '@/app/utils/number';
+import OverviewCard from '../OverviewCard/OverviewCard';
 
 interface IProps {
   isMinify: boolean;

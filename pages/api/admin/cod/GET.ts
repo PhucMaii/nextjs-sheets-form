@@ -4,6 +4,8 @@ import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
+import { IBoard } from '@/app/utils/type';
+// import { IBoard } from '@/app/utils/type';
 
 interface IQuery {
   startDate?: string;
@@ -73,7 +75,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      if (uncollectedOrders.length === 0 && codBoard.status === COD_STATUS.IN_PROCESS) {
+      if (
+        uncollectedOrders.length === 0 &&
+        codBoard.status === COD_STATUS.IN_PROCESS
+      ) {
         await prisma.codBoard.update({
           where: {
             id: codBoard.id,
@@ -82,7 +87,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             status: COD_STATUS.CLEARED,
           },
         });
-      } else if (uncollectedOrders.length > 0 && codBoard.status === COD_STATUS.CLEARED) {
+      } else if (
+        uncollectedOrders.length > 0 &&
+        codBoard.status === COD_STATUS.CLEARED
+      ) {
         await prisma.codBoard.update({
           where: {
             id: codBoard.id,
@@ -100,7 +108,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      const cashDiff = Math.abs(codBoard.cash - uncollectedAmount);
+      const cashDiff = Math.abs(codBoard.cash + (codBoard?.expense?.amount || 0) - uncollectedAmount);
 
       const expectedUnpaidOrders = boardOrdersWithTotalPriceItems.filter(
         (order: Orders) => {
@@ -142,7 +150,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       // const dayIndex = selectedDate.getDay();
       // const day = days[dayIndex];
-      const dateBoards = await prisma.codBoard.findMany({
+      const dateBoards: any = await prisma.codBoard.findMany({
         where: {
           date,
         },
@@ -163,7 +171,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       });
-      
+
+      // await checkBoardStatus(dateBoards);
+
       if (dateBoards.length === 0) {
         return res.status(200).json({
           data: [],
@@ -174,7 +184,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(200).json({
         data: allBoardsWithDetails,
       });
-
     }
 
     if (startDate && endDate) {
@@ -224,39 +233,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      // const allBoardsWithDetails = allCodBoards.map((codBoard: any) => {
-      //   const totalAmount = codBoard.orders.reduce(
-      //     (acc: number, order: Orders) => {
-      //       return acc + order.totalPrice;
-      //     },
-      //     0,
-      //   );
-
-      //   const boardClients = new Set(
-      //     codBoard.orders.map((order: Orders) => {
-      //       return order.userId;
-      //     }),
-      //   );
-
-      //   const codData = getCODData(codBoard.orders);
-
-      //   return {
-      //     note: codBoard.note,
-      //     cash: codBoard.cash,
-      //     status: codBoard.status,
-      //     driver: codBoard.driver,
-      //     createdAt: codBoard.createdAt,
-      //     date: codBoard.date,
-      //     id: codBoard.id,
-      //     driverId: codBoard.driverId,
-      //     orders: codBoard.orders,
-      //     createdBy: codBoard.createdBy,
-      //     expense: codBoard.expense,
-      //     totalAmount,
-      //     boardClients: Array.from(boardClients),
-      //     ...codData,
-      //   };
-      // });
+      // await checkBoardStatus(allCodBoards);
 
       const allBoardsWithDetails = formatBoards(allCodBoards);
 
@@ -273,8 +250,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         {},
       );
 
+      const sortedDate =
+        Object.keys(mappedBoard).length > 0 &&
+        Object.keys(mappedBoard).sort((a: any, b: any) => {
+          return new Date(b).getTime() - new Date(a).getTime();
+        });
+
       return res.status(200).json({
         data: mappedBoard,
+        sortedDate,
       });
     }
 
@@ -289,14 +273,59 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
+// const checkBoardStatus = async (boards: IBoard[]) => {
+//   const prisma = new PrismaClient();
+//   const boardsStatusMap = boards.reduce((acc: any, board: any) => {
+//       const { id, status, orders } = board;
+
+//       const uncollectedOrders = orders.filter((order: any) => {
+//         return order.status === ORDER_STATUS.INCOMPLETED || order.status === ORDER_STATUS.DELIVERED;
+//       });
+
+//       if (uncollectedOrders.length === 0 && status === COD_STATUS.IN_PROCESS) {
+//         acc.CLEARED.push(id);
+//       } else if (uncollectedOrders.length > 0 && status === COD_STATUS.CLEARED) {
+//         acc.IN_PROCESS.push(id);
+//       }
+//   }, {});
+
+//   if (Object.keys(boardsStatusMap).length === 0) {
+//     return;
+//   }
+
+//   if (boardsStatusMap.CLEARED.length > 0) {
+//     await prisma.codBoard.updateMany({
+//         where: {
+//           id: {
+//             in: boardsStatusMap.CLEARED
+//           }
+//         },
+//         data: {
+//           status: COD_STATUS.CLEARED
+//         }
+//       })
+//   }
+
+//   if (boardsStatusMap.IN_PROCESS.length > 0) {
+//     await prisma.codBoard.updateMany({
+//         where: {
+//           id: {
+//             in: boardsStatusMap.IN_PROCESS
+//           }
+//         },
+//         data: {
+//           status: COD_STATUS.IN_PROCESS
+//         }
+//       })
+//   }
+
+// }
+
 const formatBoards = (boards: any) => {
   const allBoardsWithDetails = boards.map((codBoard: any) => {
-    const totalAmount = codBoard.orders.reduce(
-      (acc: number, order: Orders) => {
-        return acc + order.totalPrice;
-      },
-      0,
-    );
+    const totalAmount = codBoard.orders.reduce((acc: number, order: Orders) => {
+      return acc + order.totalPrice;
+    }, 0);
 
     const boardClients = new Set(
       codBoard.orders.map((order: Orders) => {
@@ -305,6 +334,8 @@ const formatBoards = (boards: any) => {
     );
 
     const codData = getCODData(codBoard.orders);
+
+    const cashDiff = calculateCashDiff(codBoard, totalAmount);
 
     return {
       note: codBoard.note,
@@ -319,13 +350,14 @@ const formatBoards = (boards: any) => {
       createdBy: codBoard.createdBy,
       expense: codBoard.expense,
       totalAmount,
+      cashDiff,
       boardClients: Array.from(boardClients),
       ...codData,
     };
   });
 
   return allBoardsWithDetails;
-}
+};
 
 const getCODData = (orders: Orders[]) => {
   const uncollectedOrders = orders.filter((order: Orders) => {
@@ -364,3 +396,9 @@ const getCODData = (orders: Orders[]) => {
     },
   };
 };
+
+const calculateCashDiff = (board: IBoard, totalAmount: number) => {
+  const cashDiff = Math.abs(board.cash + (board?.expense[0]?.amount || 0) - totalAmount);
+
+  return cashDiff;
+}

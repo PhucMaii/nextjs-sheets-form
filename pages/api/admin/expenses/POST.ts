@@ -38,6 +38,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    console.log({paymentMethodId, existingMethod}, 'paymentMethodId');
+
     if (!existingMethod) {
       return res.status(404).json({
         error: 'Payment Method Not Found',

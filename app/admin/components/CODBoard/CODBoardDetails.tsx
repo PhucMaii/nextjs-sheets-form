@@ -16,7 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IBoard, OrderedItems } from '@/app/utils/type';
 import { blueGrey } from '@mui/material/colors';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import OverviewBoard from './OverviewBoard';
+import OverviewBoard from '../Overview/OverviewBoard';
 import useDebounce from '@/hooks/useDebounce';
 import TuneIcon from '@mui/icons-material/Tune';
 import OrderAccordion from '../OrderAccordion';
@@ -238,30 +238,31 @@ export default function CODBoardDetails({
     }
   };
 
-  const handleAddExpenseId = async (id: number) => {
-    try {
-      const response = await axios.put(`${API_URL.ADMIN}/cod`, {updatedBoard: {
-        id: boardData.id,
-        date: boardData.date,
-        driverId: boardData.driverId,
-        driver: boardData.driver,
-        expenseId: id,
-      }});
+  // const handleAddExpenseId = async (id: number) => {
+  //   try {
+  //     const response = await axios.put(`${API_URL.ADMIN}/cod`, {
+  //       id: boardData.id,
+  //       updatedBoard: {
+  //         date: boardData.date,
+  //         driverId: boardData.driverId,
+  //         expenseId: id,
+  //       },
+  //     });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
 
-      mutateBoard();
+  //     mutateBoard();
 
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification('error', error.response.data.error);
-      return;
-    }
-  }
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('Internal Server Error: ', error);
+  //     showNotification('error', error.response.data.error);
+  //     return;
+  //   }
+  // };
 
   const actions = (
     <Box display="flex" alignItems="center" gap={2}>
@@ -438,16 +439,17 @@ export default function CODBoardDetails({
 
   return (
     <>
-    {NotificationComp}
-      <AddExpense 
+      {NotificationComp}
+      <AddExpense
         showNotification={showNotification}
         open={open.isOpenAddExpense}
         onClose={() => setOpen('isOpenAddExpense', false)}
         defaultValue={{
           date: boardData?.date,
-          spentBy: `Driver - ${boardData?.driver.name}`
+          spentBy: `Driver - ${boardData?.driver.name}`,
         }}
-        handleAddExpenseId={handleAddExpenseId}
+        // handleAddExpenseId={handleAddExpenseId}
+        codBoardId={boardData?.id}
         // paymentMethods={paymentMethods}
         // adminsAndDrivers={adminsAndDrivers}
       />

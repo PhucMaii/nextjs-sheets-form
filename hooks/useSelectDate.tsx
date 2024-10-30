@@ -6,7 +6,9 @@ import { formatDateChanged, generateRecommendDate } from '@/app/utils/time'; // 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
-  const [date, setDate] = useState(providedDate ? providedDate : generateRecommendDate());
+  const [date, setDate] = useState(
+    providedDate ? providedDate : generateRecommendDate(),
+  );
 
   useEffect(() => {
     if (providedDate) {
