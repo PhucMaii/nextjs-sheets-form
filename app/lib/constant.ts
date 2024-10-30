@@ -127,7 +127,7 @@ export const adminTabs = {
   ],
   Manage: [
     {
-      name: 'Cards',
+      name: 'Expenses',
       icon: PaymentIcon,
       path: '/admin/cards',
     },

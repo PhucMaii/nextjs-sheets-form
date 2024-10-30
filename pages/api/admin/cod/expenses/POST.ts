@@ -30,6 +30,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
     });
 
+    const existingMethod = await prisma.paymentMethod.findUnique({
+        where: {
+            id: paymentMethodId
+        }
+    });
+
+    if (!existingMethod) {
+        return res.status(404).json({
+            error: 'Payment Method Not Found',
+        });
+    }
+
     if (paymentMethodId !== mainPaymentMethodId) {
         return res.status(400).json({
             error: 'Payment Method Not Allowed',
@@ -58,6 +70,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
            }
        });
 
+       const newBalance = existingMethod.balance + amount - existingBoard.expense[0].amount;
+
+       await prisma.paymentMethod.update({
+           where: {
+               id: paymentMethodId
+           },
+           data: {
+               balance: newBalance
+           }
+       });
+
        return res.status(200).json({
            message: 'Expense Updated Successfully',
            data: updatedExpense
@@ -76,6 +99,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             createdAt,
             createdBy: createdBy ? createdBy : `Admin - ${user?.clientName}` ,
             codBoardId
+        }
+    });
+
+    const newBalance = existingMethod.balance + amount;
+
+    await prisma.paymentMethod.update({
+        where: {
+            id: paymentMethodId
+        },
+        data: {
+            balance: newBalance
         }
     });
 
