@@ -4,6 +4,7 @@ import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
+import { IBoard } from '@/app/utils/type';
 // import { IBoard } from '@/app/utils/type';
 
 interface IQuery {
@@ -107,7 +108,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      const cashDiff = Math.abs(codBoard.cash - uncollectedAmount);
+      const cashDiff = Math.abs(codBoard.cash + (codBoard?.expense?.amount || 0) - uncollectedAmount);
 
       const expectedUnpaidOrders = boardOrdersWithTotalPriceItems.filter(
         (order: Orders) => {
@@ -334,6 +335,8 @@ const formatBoards = (boards: any) => {
 
     const codData = getCODData(codBoard.orders);
 
+    const cashDiff = calculateCashDiff(codBoard, totalAmount);
+
     return {
       note: codBoard.note,
       cash: codBoard.cash,
@@ -347,6 +350,7 @@ const formatBoards = (boards: any) => {
       createdBy: codBoard.createdBy,
       expense: codBoard.expense,
       totalAmount,
+      cashDiff,
       boardClients: Array.from(boardClients),
       ...codData,
     };
@@ -392,3 +396,9 @@ const getCODData = (orders: Orders[]) => {
     },
   };
 };
+
+const calculateCashDiff = (board: IBoard, totalAmount: number) => {
+  const cashDiff = Math.abs(board.cash + (board?.expense[0]?.amount || 0) - totalAmount);
+
+  return cashDiff;
+}

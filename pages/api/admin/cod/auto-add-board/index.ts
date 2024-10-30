@@ -71,7 +71,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const normalizedDate = normalizeDate(new Date(todayString));
-    console.log({ normalizedDate });
     const dayIndex = normalizedDate.getDay();
     const day = days[dayIndex];
 

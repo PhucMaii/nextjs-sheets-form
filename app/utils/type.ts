@@ -142,7 +142,8 @@ export interface IBoard extends CodBoard {
   boardClients: UserType[];
   orders: Order[];
   totalAmount: number;
-  expense: IExpense;
+  expense: IExpense[];
+  cashDiff: number;
 }
 
 export interface IExpense extends Expense {

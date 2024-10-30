@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
   Button,
   Divider,
   FormControlLabel,
-  Grid,
   Switch,
   Typography,
 } from '@mui/material';
@@ -31,11 +30,6 @@ import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import SelectDateRange from '../components/SelectDateRange';
-import OverviewCard from '../components/OverviewCard/OverviewCard';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import { primary } from '@/theme/color';
-import LocalAtmIcon from '@mui/icons-material/LocalAtm';
-import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useSelectDate from '@/hooks/useSelectDate';
 import CodOverview from '../components/Overview/CodOverview';
@@ -52,6 +46,7 @@ export default function CodBoard() {
     isFetching: true,
     isCheckingAutoAddBoard: true,
   });
+  const [isFetching, setIsFetching] = useState<boolean>(true);
   // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenAddBoard, setIsOpenAddBoard] = useState<boolean>(false);
   const { showNotification, NotificationComp } = useNotification();
@@ -73,12 +68,13 @@ export default function CodBoard() {
   }, []);
 
   useEffect(() => {
-    if (isValidating && !codBoards) {
+    if (!codBoards) {
       setLoading('isFetching', true);
     } else {
       setLoading('isFetching', false);
     }
   }, [codBoards, isValidating]);
+  
 
   const handleDeleteBoard = async (boardId: number) => {
     try {
@@ -122,8 +118,6 @@ export default function CodBoard() {
       setLoading('isCheckingAutoAddBoard', false);
     }
   };
-
-  console.log(codBoards, 'codBoards');
 
   if (selectedBoard) {
     return (

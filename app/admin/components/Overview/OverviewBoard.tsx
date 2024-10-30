@@ -81,7 +81,7 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
           backgroundColor={primary.lightest}
           icon={<PaidIcon fontSize="large" color="primary" />}
           text="Expenses"
-          value={boardData?.expense?.amount?.toFixed(2) || 0}
+          value={boardData?.expense && boardData?.expense[0]?.amount?.toFixed(2) || 0}
         />
       </Grid>
       <Grid item xs={12} md={6} lg={4} xl={2.4}>

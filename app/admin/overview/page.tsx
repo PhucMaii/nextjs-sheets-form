@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import { Box, Button, Grid, Skeleton, Switch, Typography } from '@mui/material';
 import SelectDateRange from '../components/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
-import OverviewData from '../components/OverviewData';
 import { API_URL } from '@/app/utils/enum';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
@@ -19,6 +18,7 @@ import DebtCustomers from '../components/Printing/DebtCustomers';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import useNotification from '@/hooks/useNotification';
+import OverviewData from '../components/Overview/OverviewData';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();

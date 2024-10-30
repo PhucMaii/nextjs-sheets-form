@@ -44,8 +44,8 @@ export default function CodOverview({ codBoards }: IProps) {
     }
 
     const amount = totalBoards.reduce((acc: number, board: any) => {
-        if (board.expense) {
-            return acc + board.expense.amount;
+        if (board.expense && board.expense.length > 0) {
+            return acc + board.expense[0].amount;
         }
 
         return acc;

@@ -22,6 +22,8 @@ import { Order } from '../../orders/page';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import EditCashInput from '../Modals/edit/EditCashInput';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import AddExpense from '../Modals/add/AddExpense';
 
 interface IProps {
   boardData: IBoard;
@@ -36,6 +38,7 @@ export default function CODBoardSummary({
   handleDeleteBoard,
   showNotification,
 }: IProps) {
+  const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
   const [isOpenEditCashInput, setIsOpenEditCashInput] =
     useState<boolean>(false);
 
@@ -66,8 +69,43 @@ export default function CODBoardSummary({
     0,
   );
 
+  // const handleAddExpenseId = async (id: number) => {
+  //   try {
+  //     const response = await axios.put(`${API_URL.ADMIN}/cod`, {
+  //       id: boardData.id,
+  //       updatedBoard: {
+  //         date: boardData.date,
+  //         driverId: boardData.driverId,
+  //         expenseId: id,
+  //       },
+  //     });
+
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
+
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('Internal Server Error: ', error);
+  //     showNotification('error', error.response.data.error);
+  //     return;
+  //   }
+  // };
+
   return (
     <>
+    <AddExpense
+      open={isOpenAddExpense}
+      onClose={() => setIsOpenAddExpense(false)}
+      showNotification={showNotification}
+      // handleAddExpenseId={handleAddExpenseId}
+      defaultValue={{
+        date: boardData.date,
+        spentBy: `Driver - ${boardData.driver.name}`,
+      }}
+      codBoardId={boardData.id}
+    />
       <EditCashInput
         open={isOpenEditCashInput}
         onClose={() => setIsOpenEditCashInput(false)}
@@ -77,9 +115,15 @@ export default function CODBoardSummary({
       <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
         {/* First Row */}
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <RememberMeIcon fontSize="small" color="primary" />
-            <Typography variant="body2">{boardData.createdBy}</Typography>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <RememberMeIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{boardData.createdBy}</Typography>
+            </Box>
+
+            {boardData.cashDiff > 5 && (
+              <StatusText text={`Exceeding $${boardData.cashDiff.toFixed(2)} `} type="error" icon={<ErrorOutlineIcon fontSize="small" color="error" />} />
+            )}
           </Box>
           <Box display="flex" alignItems="center" gap={1}>
             <StatusText
@@ -145,16 +189,16 @@ export default function CODBoardSummary({
               <Box display="flex" alignItems="flex-start">
                 <Box display="flex" flexDirection="column" gap={0.5}>
                   <Typography variant="h5" textAlign="center">
-                    ${boardData?.expense?.amount?.toFixed(2) || 0}
+                    ${boardData?.expense && boardData?.expense[0]?.amount?.toFixed(2) || 0}
                   </Typography>
                   <Typography variant="body2" color={grey[600]}>
                     Expense
                   </Typography>
                 </Box>
 
-                {/* <IconButton size="small">
+                <IconButton size="small" onClick={() => setIsOpenAddExpense(true)}>
                 <EditIcon fontSize="small"/>
-              </IconButton> */}
+              </IconButton>
               </Box>
               <Box display="flex" flexDirection="column" gap={0.5}>
                 <Typography variant="h5" textAlign="center">
