@@ -1,11 +1,17 @@
-import withAuthGuard from '@/pages/api/utils/withAuthGuard';
 import { NextApiRequest, NextApiResponse } from 'next';
+import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 import POST from './POST';
+import GET from './GET';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
       const response = await POST(req, res);
+      return response;
+    }
+
+    if (req.method === 'GET') {
+      const response = await GET(req, res);
       return response;
     }
 
@@ -17,4 +23,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default withAuthGuard(handler);
+export default withAdminAuthGuard(handler);

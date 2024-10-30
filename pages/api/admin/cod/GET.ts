@@ -108,7 +108,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      const cashDiff = Math.abs(codBoard.cash + (codBoard?.expense?.amount || 0) - uncollectedAmount);
+      const cashDiff = Math.abs(
+        codBoard.cash + (codBoard?.expense?.amount || 0) - uncollectedAmount,
+      );
 
       const expectedUnpaidOrders = boardOrdersWithTotalPriceItems.filter(
         (order: Orders) => {
@@ -398,7 +400,9 @@ const getCODData = (orders: Orders[]) => {
 };
 
 const calculateCashDiff = (board: IBoard, totalAmount: number) => {
-  const cashDiff = Math.abs(board.cash + (board?.expense[0]?.amount || 0) - totalAmount);
+  const cashDiff = Math.abs(
+    board.cash + (board?.expense[0]?.amount || 0) - totalAmount,
+  );
 
   return cashDiff;
-}
+};

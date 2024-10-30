@@ -30,7 +30,7 @@ export default function AddExpense({
   onClose,
   showNotification,
   defaultValue,
-  codBoardId
+  codBoardId,
 }: IProps) {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [newExpense, setNewExpense] = useState<any>({
@@ -109,14 +109,14 @@ export default function AddExpense({
       if (codBoardId) {
         response = await axios.post(`${API_URL.ADMIN}/cod/expenses`, {
           date,
-        createdAt,
-        createdBy: defaultValue.createdBy,
-        spentBy: newExpense.spentBy,
-        amount: newExpense.amount,
-        description: newExpense.description,
-        paymentMethodId: newExpense.paymentMethodId,
-        codBoardId,
-        })
+          createdAt,
+          createdBy: defaultValue.createdBy,
+          spentBy: newExpense.spentBy,
+          amount: newExpense.amount,
+          description: newExpense.description,
+          paymentMethodId: newExpense.paymentMethodId,
+          codBoardId,
+        });
       } else {
         response = await axios.post(`${API_URL.ADMIN}/expenses`, {
           date,
@@ -126,9 +126,7 @@ export default function AddExpense({
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
         });
-
-        }
-
+      }
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -203,37 +201,38 @@ export default function AddExpense({
             <Typography variant="h6">Payment Method</Typography>
             {codBoardId ? (
               <Select
-              value={newExpense.paymentMethodId}
-              onChange={(e) =>
-                onChangeNewExpense('paymentMethodId', +e.target.value)
-              }
-            >
-              <MenuItem value={4} disabled>
-                {paymentMethods?.data[0]?.name}
-              </MenuItem>
-              
-            </Select>
-            ) : <Select
-              value={newExpense.paymentMethodId}
-              onChange={(e) =>
-                onChangeNewExpense('paymentMethodId', +e.target.value)
-              }
-            >
-              <MenuItem value={-1} disabled>
-                -- Choose payment method --
-              </MenuItem>
-              {paymentMethods &&
-                paymentMethods?.data?.length > 0 &&
-                paymentMethods?.data.map(
-                  (paymentMethod: IPaymentMethod, index: number) => {
-                    return (
-                      <MenuItem key={index} value={paymentMethod.id}>
-                        {paymentMethod.name}
-                      </MenuItem>
-                    );
-                  },
-                )}
-            </Select>}
+                value={newExpense.paymentMethodId}
+                onChange={(e) =>
+                  onChangeNewExpense('paymentMethodId', +e.target.value)
+                }
+              >
+                <MenuItem value={4} disabled>
+                  {paymentMethods?.data[0]?.name}
+                </MenuItem>
+              </Select>
+            ) : (
+              <Select
+                value={newExpense.paymentMethodId}
+                onChange={(e) =>
+                  onChangeNewExpense('paymentMethodId', +e.target.value)
+                }
+              >
+                <MenuItem value={-1} disabled>
+                  -- Choose payment method --
+                </MenuItem>
+                {paymentMethods &&
+                  paymentMethods?.data?.length > 0 &&
+                  paymentMethods?.data.map(
+                    (paymentMethod: IPaymentMethod, index: number) => {
+                      return (
+                        <MenuItem key={index} value={paymentMethod.id}>
+                          {paymentMethod.name}
+                        </MenuItem>
+                      );
+                    },
+                  )}
+              </Select>
+            )}
           </Box>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Spent By</Typography>

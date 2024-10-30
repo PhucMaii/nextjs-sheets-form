@@ -9,6 +9,7 @@ import {
   Route,
   User,
   UserRoute,
+  Vendor,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
@@ -152,4 +153,8 @@ export interface IExpense extends Expense {
 
 export interface IPaymentMethod extends PaymentMethod {
   transactions: IExpense[];
+}
+
+export interface IVendor extends Vendor {
+  inventoryItems: any;
 }

@@ -95,17 +95,17 @@ export default function CODBoardSummary({
 
   return (
     <>
-    <AddExpense
-      open={isOpenAddExpense}
-      onClose={() => setIsOpenAddExpense(false)}
-      showNotification={showNotification}
-      // handleAddExpenseId={handleAddExpenseId}
-      defaultValue={{
-        date: boardData.date,
-        spentBy: `Driver - ${boardData.driver.name}`,
-      }}
-      codBoardId={boardData.id}
-    />
+      <AddExpense
+        open={isOpenAddExpense}
+        onClose={() => setIsOpenAddExpense(false)}
+        showNotification={showNotification}
+        // handleAddExpenseId={handleAddExpenseId}
+        defaultValue={{
+          date: boardData.date,
+          spentBy: `Driver - ${boardData.driver.name}`,
+        }}
+        codBoardId={boardData.id}
+      />
       <EditCashInput
         open={isOpenEditCashInput}
         onClose={() => setIsOpenEditCashInput(false)}
@@ -122,7 +122,11 @@ export default function CODBoardSummary({
             </Box>
 
             {boardData.cashDiff > 5 && (
-              <StatusText text={`Exceeding $${boardData.cashDiff.toFixed(2)} `} type="error" icon={<ErrorOutlineIcon fontSize="small" color="error" />} />
+              <StatusText
+                text={`Exceeding $${boardData.cashDiff.toFixed(2)} `}
+                type="error"
+                icon={<ErrorOutlineIcon fontSize="small" color="error" />}
+              />
             )}
           </Box>
           <Box display="flex" alignItems="center" gap={1}>
@@ -189,16 +193,22 @@ export default function CODBoardSummary({
               <Box display="flex" alignItems="flex-start">
                 <Box display="flex" flexDirection="column" gap={0.5}>
                   <Typography variant="h5" textAlign="center">
-                    ${boardData?.expense && boardData?.expense[0]?.amount?.toFixed(2) || 0}
+                    $
+                    {(boardData?.expense &&
+                      boardData?.expense[0]?.amount?.toFixed(2)) ||
+                      0}
                   </Typography>
                   <Typography variant="body2" color={grey[600]}>
                     Expense
                   </Typography>
                 </Box>
 
-                <IconButton size="small" onClick={() => setIsOpenAddExpense(true)}>
-                <EditIcon fontSize="small"/>
-              </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => setIsOpenAddExpense(true)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
               </Box>
               <Box display="flex" flexDirection="column" gap={0.5}>
                 <Typography variant="h5" textAlign="center">
