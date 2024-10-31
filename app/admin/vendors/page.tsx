@@ -74,13 +74,13 @@ export default function Vendors() {
         <TextField
           label="Search"
           variant="filled"
-          placeholder="Search Vendors..."
+          placeholder="Search vendors by name or address..."
           value={searchKeywods}
           onChange={(e) => setSearchKeywords(e.target.value)}
           fullWidth
         />
       
-        <VendorTable vendors={displayData} />
+        <VendorTable vendors={displayData} showNotification={showNotification} />
       </ShadowSection>}
     </Sidebar>
   );

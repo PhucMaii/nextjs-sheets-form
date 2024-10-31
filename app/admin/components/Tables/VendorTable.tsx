@@ -1,13 +1,34 @@
 import { IVendor } from '@/app/utils/type';
-import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { AlertColor, Box, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import React from 'react';
+import EditVendor from '../Modals/edit/EditVendor';
+import DeleteModal from '../Modals/delete/DeleteModal';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface IProps {
     vendors: IVendor[];
+    showNotification: (type: AlertColor, message: string) => void;
 }
 
 
-export default function VendorTable({vendors}: IProps) {
+export default function VendorTable({vendors, showNotification}: IProps) {
+    const handleDelete = async (targetObj: IVendor) => {
+        try {
+            const response = await axios.delete(`${API_URL.ADMIN}/vendors?id=${targetObj.id}`);
+
+            if (response.data.error) {
+                showNotification('error', response.data.error);
+                return;
+            }
+
+            showNotification('success', response.data.message);
+        } catch (error: any) {
+            console.log('Fail to delete order: ' + error);
+            showNotification('error', 'Fail to delete order: ' + error);
+        }
+    }
+
   return (
     <Table>
         <TableHead>
@@ -17,6 +38,7 @@ export default function VendorTable({vendors}: IProps) {
                 <TableCell>Phone Number</TableCell>
                 <TableCell>Address</TableCell>
                 <TableCell>Joined Date</TableCell>
+                <TableCell></TableCell>
             </TableRow>
         </TableHead>
         <TableBody>
@@ -28,6 +50,12 @@ export default function VendorTable({vendors}: IProps) {
                         <TableCell>{vendor.phoneNumber}</TableCell>
                         <TableCell>{vendor.address}</TableCell>
                         <TableCell>{vendor.joinedDate}</TableCell>
+                        <TableCell>
+                            <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+                                <DeleteModal targetObj={vendor} includedButton handleDelete={handleDelete} />
+                                <EditVendor vendor={vendor} showNotification={showNotification} />
+                            </Box>
+                        </TableCell>
                     </TableRow>
                 )
             })}
