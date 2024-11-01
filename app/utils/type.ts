@@ -5,6 +5,7 @@ import {
   DayRange,
   Driver,
   Expense,
+  InventoryItem,
   PaymentMethod,
   Route,
   User,
@@ -157,4 +158,9 @@ export interface IPaymentMethod extends PaymentMethod {
 
 export interface IVendor extends Vendor {
   inventoryItems: any;
+}
+
+export interface IInventoryItem extends InventoryItem {
+  vendor: IVendor;
+  totalValue: number;
 }

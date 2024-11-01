@@ -19,7 +19,7 @@ export default function Vendors() {
   const [displayData, setDisplayData] = useState<IVendor[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchKeywods, setSearchKeywords] = useState<string>('');
-  
+
   const [open, setOpen] = useMultipleBoolean({
     addVendor: false,
   });
@@ -43,7 +43,7 @@ export default function Vendors() {
       const searchedVendors = handleSearch(
         debouncedKeywords,
         vendors?.data || [],
-        ['name', 'address']
+        ['name', 'address'],
       );
 
       setDisplayData(searchedVendors);
@@ -55,7 +55,11 @@ export default function Vendors() {
   return (
     <Sidebar>
       {NotificationComp}
-      <AddVendor open={open.addVendor} onClose={() => setOpen('addVendor', false)} showNotification={showNotification}/>
+      <AddVendor
+        open={open.addVendor}
+        onClose={() => setOpen('addVendor', false)}
+        showNotification={showNotification}
+      />
       <Box display="flex" alignItems="center" gap={1}>
         <Typography variant="h5" fontWeight="bold">
           Vendors ({vendors?.data?.length || 0})
@@ -70,18 +74,25 @@ export default function Vendors() {
         </Button>
       </Box>
 
-      {isLoading ? (<LoadingComponent />) :  <ShadowSection mt={2} display="flex" flexDirection="column" gap={2}>
-        <TextField
-          label="Search"
-          variant="filled"
-          placeholder="Search vendors by name or address..."
-          value={searchKeywods}
-          onChange={(e) => setSearchKeywords(e.target.value)}
-          fullWidth
-        />
-      
-        <VendorTable vendors={displayData} showNotification={showNotification} />
-      </ShadowSection>}
+      {isLoading ? (
+        <LoadingComponent />
+      ) : (
+        <ShadowSection mt={2} display="flex" flexDirection="column" gap={2}>
+          <TextField
+            label="Search"
+            variant="filled"
+            placeholder="Search vendors by name or address..."
+            value={searchKeywods}
+            onChange={(e) => setSearchKeywords(e.target.value)}
+            fullWidth
+          />
+
+          <VendorTable
+            vendors={displayData}
+            showNotification={showNotification}
+          />
+        </ShadowSection>
+      )}
     </Sidebar>
   );
 }

@@ -1,4 +1,11 @@
-import { AlertColor, Box, Divider, Modal, TextField, Typography } from '@mui/material';
+import {
+  AlertColor,
+  Box,
+  Divider,
+  Modal,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
@@ -10,10 +17,10 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
-  showNotification: (type: AlertColor, message: string) => void
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function AddVendor({open, onClose, showNotification}: IProps) {
+export default function AddVendor({ open, onClose, showNotification }: IProps) {
   const [address, setAddress] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [newVendor, setNewVendor] = useState<any>({
@@ -47,14 +54,13 @@ export default function AddVendor({open, onClose, showNotification}: IProps) {
       resetState();
 
       setIsLoading(false);
-
     } catch (error) {
       console.log(error);
       showNotification('error', 'Something went wrong');
       setIsLoading(false);
       return;
     }
-  }
+  };
 
   const resetState = () => {
     setNewVendor({
@@ -64,57 +70,61 @@ export default function AddVendor({open, onClose, showNotification}: IProps) {
 
     setAddress(null);
     setDate(today);
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
-        <BoxModal>
-            <ModalHead 
-                heading="Add Vendor"
-                buttonLabel="ADD"
-                onClose={onClose}
-                buttonProps={{loading: isLoading}}
-                onClick={handleAddVendor}
+      <BoxModal>
+        <ModalHead
+          heading="Add Vendor"
+          buttonLabel="ADD"
+          onClose={onClose}
+          buttonProps={{ loading: isLoading }}
+          onClick={handleAddVendor}
+        />
+
+        <Divider sx={{ my: 2 }} />
+
+        <Box display="flex" flexDirection="column" gap={3}>
+          {/* Name */}
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Typography variant="h6">Name</Typography>
+            <TextField
+              fullWidth
+              placeholder="Enter vendor's name..."
+              value={newVendor.name}
+              onChange={(e) =>
+                setNewVendor({ ...newVendor, name: e.target.value })
+              }
             />
+          </Box>
 
-            <Divider sx={{ my: 2 }} />
+          {/* Phone Number */}
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Typography variant="h6">Contact</Typography>
+            <TextField
+              fullWidth
+              placeholder="Enter vendor's phone number..."
+              value={newVendor.phoneNumber}
+              onChange={(e) =>
+                setNewVendor({ ...newVendor, phoneNumber: e.target.value })
+              }
+            />
+          </Box>
 
-            <Box display="flex" flexDirection="column" gap={3}>
-              {/* Name */}
-              <Box display="flex" flexDirection="column" gap={1}>
-                <Typography variant="h6">Name</Typography>
-                <TextField 
-                  fullWidth
-                  placeholder="Enter vendor's name..."
-                  value={newVendor.name}
-                  onChange={(e) => setNewVendor({ ...newVendor, name: e.target.value })}
-                />
-              </Box>
+          {/* Address */}
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Typography variant="h6">Address</Typography>
+            <AutoCompleteAddress onDataReceived={(data) => setAddress(data)} />
+          </Box>
 
-              {/* Phone Number */}
-              <Box display="flex" flexDirection="column" gap={1}>
-                <Typography variant="h6">Contact</Typography>
-                <TextField 
-                  fullWidth
-                  placeholder="Enter vendor's phone number..."
-                  value={newVendor.phoneNumber}
-                  onChange={(e) => setNewVendor({ ...newVendor, phoneNumber: e.target.value })}
-                />
-              </Box>
-
-              {/* Address */}
-              <Box display="flex" flexDirection="column" gap={1}>
-                <Typography variant="h6">Address</Typography>
-                <AutoCompleteAddress onDataReceived={(data) => setAddress(data)}/>
-              </Box>
-
-              {/* Joined Date */}              
-              <Box display="flex" flexDirection="column" gap={1}>
-                <Typography variant="h6">Joined Date</Typography>
-                {SelectDate}
-              </Box>
-            </Box>
-        </BoxModal>
+          {/* Joined Date */}
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Typography variant="h6">Joined Date</Typography>
+            {SelectDate}
+          </Box>
+        </Box>
+      </BoxModal>
     </Modal>
-  )
+  );
 }

@@ -339,3 +339,5 @@ export const methodTypes = [
   PAYMENT_METHOD_TYPE.CHEQUE,
   PAYMENT_METHOD_TYPE.OTHER,
 ];
+
+export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];

@@ -14,13 +14,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const {
-      name,
-      address,
-      phoneNumber,
-      joinedDate,
-      createdAt,
-    }: IBody = req.body;
+    const { name, address, phoneNumber, joinedDate, createdAt }: IBody =
+      req.body;
 
     const existingVendor = await prisma.vendor.findFirst({
       where: {
@@ -48,12 +43,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdBy: `Admin - ${admin.clientName}`,
       },
     });
-    
+
     return res.status(200).json({
       data: newVendor,
       message: 'Create New Vendor Successfully',
     });
-
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

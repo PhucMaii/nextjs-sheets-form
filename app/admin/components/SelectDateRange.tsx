@@ -58,14 +58,17 @@ export default function SelectDateRange({
       dateRange[0].toDateString() === dateRange[1].toDateString()
     ) {
       return (
-        <Button variant={variant ? variant : "outlined"} onClick={handleDateOpen}>
+        <Button
+          variant={variant ? variant : 'outlined'}
+          onClick={handleDateOpen}
+        >
           Select Date Range
         </Button>
       );
     }
 
     return (
-      <Button variant={variant ? variant : "outlined"} onClick={handleDateOpen}>
+      <Button variant={variant ? variant : 'outlined'} onClick={handleDateOpen}>
         {dateRange[0] &&
           dateRange[1] &&
           `${dateRange[0]?.toDateString()} - ${dateRange[1]?.toDateString()}`}
