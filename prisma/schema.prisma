@@ -198,7 +198,7 @@ model Expense {
 
   paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
   codBoard      CodBoard?      @relation(fields: [codBoardId], references: [id])
-  OrderedItems  OrderedItems[]
+  orderedItems  OrderedItems[]
 }
 
 model Vendor {
