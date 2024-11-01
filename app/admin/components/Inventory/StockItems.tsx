@@ -6,21 +6,51 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import InventoryTable from '../Tables/InventoryTable';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import AddInventory from '../Modals/add/AddInventory';
+import useDebounce from '@/hooks/useDebounce';
+import { handleSearch } from '@/app/utils/search';
+import { IInventoryItem } from '@/app/utils/type';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function StockItems({ showNotification }: IProps) {
+  const [displayData, setDisplayData] = useState<IInventoryItem[]>([]);
   const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+
+  useEffect(() => {
+    if (inventoryItems) {
+        setIsLoading(false);
+        setDisplayData(inventoryItems?.data || []);
+    } else {
+        setIsLoading(true);
+    }
+  }, [inventoryItems]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+        const newDisplayData = handleSearch(debouncedKeywords, inventoryItems?.data || [], ['name', 'vendor.name']);
+
+        setDisplayData(newDisplayData);
+    } else {
+        setDisplayData(inventoryItems?.data || []);
+    }
+  }, [debouncedKeywords]);
+
+
 
   return (
     <>
@@ -37,6 +67,8 @@ export default function StockItems({ showNotification }: IProps) {
               placeholder="Search items by name..."
               size="small"
               variant="filled"
+              value={searchKeywords}
+              onChange={(e) => setSearchKeywords(e.target.value)}
               fullWidth
             />
           </Grid>
@@ -53,7 +85,10 @@ export default function StockItems({ showNotification }: IProps) {
           </Grid>
         </Grid>
 
-        <InventoryTable inventoryItems={inventoryItems?.data || []} />
+        {isLoading ? <LoadingComponent /> : <InventoryTable
+          inventoryItems={displayData}
+          showNotification={showNotification}
+        />}
       </Box>
     </>
   );
