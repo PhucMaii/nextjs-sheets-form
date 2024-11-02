@@ -9,8 +9,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import InventoryTable from '../Tables/InventoryTable';
-import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
 import AddInventory from '../Modals/add/AddInventory';
 import useDebounce from '@/hooks/useDebounce';
 import { handleSearch } from '@/app/utils/search';
@@ -19,9 +17,13 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
+  inventoryItems: any;
 }
 
-export default function StockItems({ showNotification }: IProps) {
+export default function StockItems({
+  showNotification,
+  inventoryItems,
+}: IProps) {
   const [displayData, setDisplayData] = useState<IInventoryItem[]>([]);
   const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -29,28 +31,30 @@ export default function StockItems({ showNotification }: IProps) {
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  //   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
 
   useEffect(() => {
     if (inventoryItems) {
-        setIsLoading(false);
-        setDisplayData(inventoryItems?.data || []);
+      setIsLoading(false);
+      setDisplayData(inventoryItems?.data || []);
     } else {
-        setIsLoading(true);
+      setIsLoading(true);
     }
   }, [inventoryItems]);
 
   useEffect(() => {
     if (debouncedKeywords) {
-        const newDisplayData = handleSearch(debouncedKeywords, inventoryItems?.data || [], ['name', 'vendor.name']);
+      const newDisplayData = handleSearch(
+        debouncedKeywords,
+        inventoryItems?.data || [],
+        ['name', 'vendor.name'],
+      );
 
-        setDisplayData(newDisplayData);
+      setDisplayData(newDisplayData);
     } else {
-        setDisplayData(inventoryItems?.data || []);
+      setDisplayData(inventoryItems?.data || []);
     }
   }, [debouncedKeywords]);
-
-
 
   return (
     <>
@@ -85,10 +89,14 @@ export default function StockItems({ showNotification }: IProps) {
           </Grid>
         </Grid>
 
-        {isLoading ? <LoadingComponent /> : <InventoryTable
-          inventoryItems={displayData}
-          showNotification={showNotification}
-        />}
+        {isLoading ? (
+          <LoadingComponent />
+        ) : (
+          <InventoryTable
+            inventoryItems={displayData}
+            showNotification={showNotification}
+          />
+        )}
       </Box>
     </>
   );

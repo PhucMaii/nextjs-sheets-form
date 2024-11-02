@@ -66,14 +66,14 @@ export default function InventoryTable({
               <TableCell>${item.totalValue}</TableCell>
               <TableCell>
                 <Box display="flex" gap={2}>
+                    <DeleteModal
+                      includedButton
+                      targetObj={item}
+                      handleDelete={handleDelete}
+                    />
                   <EditInventory
                     inventoryItem={item}
                     showNotification={showNotification}
-                  />
-                  <DeleteModal
-                    includedButton
-                    targetObj={item}
-                    handleDelete={handleDelete}
                   />
                 </Box>
               </TableCell>

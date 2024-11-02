@@ -14,6 +14,7 @@ import {
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
+import { STOCK_STATUS } from './enum';
 
 export interface IDayRange extends DayRange {}
 
@@ -163,4 +164,5 @@ export interface IVendor extends Vendor {
 export interface IInventoryItem extends InventoryItem {
   vendor: IVendor;
   totalValue: number;
+  stockStatus: STOCK_STATUS;
 }

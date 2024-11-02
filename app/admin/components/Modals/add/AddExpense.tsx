@@ -1,12 +1,8 @@
 import {
   AlertColor,
-  Box,
-  Divider,
-  MenuItem,
   Modal,
-  Select,
-  TextField,
-  Typography,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
@@ -14,10 +10,11 @@ import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
 import { API_URL } from '@/app/utils/enum';
-import { IPaymentMethod } from '@/app/utils/type';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
 import { fetchApi, SWRFetchData } from '@/app/utils/db';
+import StockPurchased from '../../Expense/StockPurchased';
+import OtherExpense from '../../Expense/OtherExpense';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -33,6 +30,7 @@ export default function AddExpense({
   codBoardId,
 }: IProps) {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  const [currentTabIndex, setCurrentTabIndex] = useState<number>(0);
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
     description: '',
@@ -161,16 +159,24 @@ export default function AddExpense({
           onClick={handleAddExpense}
           buttonProps={{
             loading: isAdding,
-            disabled:
-              newExpense.paymentMethodId === -1 ||
-              newExpense.spentBy === '-- Choose who spent --',
           }}
           buttonLabel="ADD"
         />
 
-        <Divider sx={{ my: 2 }} />
+        <Tabs sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }} variant="fullWidth" value={currentTabIndex} onChange={(e, index) => setCurrentTabIndex(index)}>
+          <Tab label="Stock Purchased" value={0} />
+          <Tab label="Other Expenses" value={1} />
+        </Tabs>
 
-        <Box display="flex" flexDirection="column" gap={3}>
+        {
+          currentTabIndex === 0 ? (
+          <StockPurchased />
+        ) : (
+          <OtherExpense codBoardId={codBoardId} adminsAndDrivers={adminsAndDrivers} paymentMethods={paymentMethods} SelectDate={SelectDate} onChangeNewExpense={onChangeNewExpense} newExpense={newExpense} />
+        )
+        }
+
+        {/* <Box display="flex" flexDirection="column" gap={3}>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Date</Typography>
             {SelectDate}
@@ -251,7 +257,7 @@ export default function AddExpense({
                 ))}
             </Select>
           </Box>
-        </Box>
+        </Box> */}
       </BoxModal>
     </Modal>
   );
