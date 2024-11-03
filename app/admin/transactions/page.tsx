@@ -15,7 +15,7 @@ import { blueGrey } from '@mui/material/colors';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/SelectDateRange';
 import { ShadowSection } from '../reports/styled';
-import { fetchApi, SWRFetchData } from '@/app/utils/db';
+import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import TransactionsTable from '../components/Tables/TransactionsTable';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -32,7 +32,7 @@ export default function Transactions() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
-  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  // const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
@@ -69,50 +69,49 @@ export default function Transactions() {
     }
   }, [debouncedKeywords]);
 
-  useEffect(() => {
-    fetchAdmins();
-    fetchDrivers();
-  }, []);
+  // useEffect(() => {
+  //   fetchAdmins();
+  //   fetchDrivers();
+  // }, []);
 
-  const fetchAdmins = async () => {
-    try {
-      const admins = await fetchApi(
-        `${API_URL.ADMIN}/admins`,
-        showNotification,
-      );
+  // const fetchAdmins = async () => {
+  //   try {
+  //     const admins = await fetchApi(
+  //       `${API_URL.ADMIN}/admins`,
+  //       showNotification,
+  //     );
 
-      const formattedAdmins = admins.map((admin: any) => {
-        return `Admin - ${admin.clientName}`;
-      });
-      console.log([...adminsAndDrivers, ...formattedAdmins], 'admins');
-      setAdminsAndDrivers(formattedAdmins);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
+  //     const formattedAdmins = admins.map((admin: any) => {
+  //       return `Admin - ${admin.clientName}`;
+  //     });
+  //     setAdminsAndDrivers(formattedAdmins);
+  //   } catch (error) {
+  //     console.log(error);
+  //     showNotification('error', 'Something went wrong');
+  //     return;
+  //   }
+  // };
 
-  const fetchDrivers = async () => {
-    try {
-      const drivers = await fetchApi(
-        `${API_URL.ADMIN}/drivers`,
-        showNotification,
-      );
+  // const fetchDrivers = async () => {
+  //   try {
+  //     const drivers = await fetchApi(
+  //       `${API_URL.ADMIN}/drivers`,
+  //       showNotification,
+  //     );
 
-      const formattedDrivers = drivers.map((driver: any) => {
-        return `Driver - ${driver.name}`;
-      });
-      setAdminsAndDrivers((prevAdminAndDrivers) => [
-        ...prevAdminAndDrivers,
-        ...formattedDrivers,
-      ]);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
+  //     const formattedDrivers = drivers.map((driver: any) => {
+  //       return `Driver - ${driver.name}`;
+  //     });
+  //     setAdminsAndDrivers((prevAdminAndDrivers) => [
+  //       ...prevAdminAndDrivers,
+  //       ...formattedDrivers,
+  //     ]);
+  //   } catch (error) {
+  //     console.log(error);
+  //     showNotification('error', 'Something went wrong');
+  //     return;
+  //   }
+  // };
 
   const actions = (
     <Box display="flex" alignItems="center" justifyContent="center" gap={2}>

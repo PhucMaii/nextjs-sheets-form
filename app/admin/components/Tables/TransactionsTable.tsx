@@ -62,6 +62,7 @@ export default function TransactionsTable({
       <TableBody>
         {transactions.length > 0 &&
           transactions.map((transaction: any, index: number) => {
+            console.log(transaction, 'transaction');
             return (
               <TableRow key={index}>
                 <TableCell style={{ width: 50 }}>
@@ -87,14 +88,14 @@ export default function TransactionsTable({
                 <TableCell>
                   {showNotification && (
                     <Box display="flex" alignItems="center" gap={1}>
-                      <EditExpense
-                        transaction={transaction}
-                        showNotification={showNotification}
-                      />
                       <DeleteModal
                         targetObj={transaction}
                         handleDelete={handleDeleteTransaction}
                         includedButton
+                      />
+                      <EditExpense
+                        transaction={transaction}
+                        showNotification={showNotification}
                       />
                     </Box>
                   )}

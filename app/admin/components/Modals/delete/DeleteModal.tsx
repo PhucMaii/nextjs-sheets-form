@@ -30,6 +30,10 @@ export default function DeleteModal({
       setIsDeleting(true);
       await handleDelete(targetObj);
       setIsDeleting(false);
+      if (handleCloseModal) {
+        handleCloseModal();
+      }
+      setIsOpen(false);
     } catch (error: any) {
       console.log('Fail to delete order: ' + error);
       setIsDeleting(false);

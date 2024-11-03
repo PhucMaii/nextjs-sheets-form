@@ -39,6 +39,12 @@ export default function EditExpense({
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
 
+  useEffect(() => {
+    if (transaction) {
+      setUpdatedExpense(transaction);
+    }
+  }, [transaction]);
+
   const onChangeExpense = (field: string, value: any) => {
     setUpdatedExpense({
       ...updatedExpense,
@@ -61,7 +67,6 @@ export default function EditExpense({
       const formattedAdmins = admins.map((admin: any) => {
         return `Admin - ${admin.clientName}`;
       });
-      console.log([...adminsAndDrivers, ...formattedAdmins], 'admins');
       setAdminsAndDrivers(formattedAdmins);
     } catch (error) {
       console.log(error);
