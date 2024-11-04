@@ -196,9 +196,20 @@ model Expense {
   paymentMethodId Int
   codBoardId      Int?
 
-  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
-  codBoard      CodBoard?      @relation(fields: [codBoardId], references: [id])
+  paymentMethod PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
+  codBoard      CodBoard?       @relation(fields: [codBoardId], references: [id])
   orderedItems  OrderedItems[]
+  vendors       VendorExpense[]
+}
+
+model VendorExpense {
+  expenseId Int
+  vendorId  Int
+
+  expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  vendor  Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@id([expenseId, vendorId])
 }
 
 model Vendor {
@@ -213,6 +224,7 @@ model Vendor {
   joinedDate  String
 
   inventoryItems InventoryItem[]
+  expense        VendorExpense[]
 }
 
 model InventoryItem {

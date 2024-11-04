@@ -25,7 +25,7 @@ export default function InventoryPage() {
       </Typography>
       <Divider sx={{ my: 2 }} />
 
-        <InventoryOverview inventoryItems={inventoryItems?.data || []} />
+      <InventoryOverview inventoryItems={inventoryItems?.data || []} />
 
       <Tabs
         sx={{ borderBottom: 1, borderColor: 'divider' }}

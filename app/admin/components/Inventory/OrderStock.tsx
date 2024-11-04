@@ -4,9 +4,13 @@ import AddIcon from '@mui/icons-material/Add';
 import OrderStockTable from '../Tables/OrderStockTable';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../SelectDateRange';
+import { SWRFetchData } from '@/app/utils/db';
+import { API_URL } from '@/app/utils/enum';
 
 export default function OrderStock() {
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+
+  const [expenses] = SWRFetchData(`${API_URL.ADMIN}/inventory/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}`);
 
   return (
     <Box display="flex" flexDirection="column">
@@ -36,7 +40,7 @@ export default function OrderStock() {
         </Grid>
       </Grid>
 
-      <OrderStockTable />
+      <OrderStockTable stockOrders={expenses?.data || []}/>
     </Box>
   );
 }

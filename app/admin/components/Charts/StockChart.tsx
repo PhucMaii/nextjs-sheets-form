@@ -5,26 +5,38 @@ import { green, red, yellow } from '@mui/material/colors';
 import React, { useMemo } from 'react';
 
 interface IProps {
-    inventoryItems: IInventoryItem[];
+  inventoryItems: IInventoryItem[];
 }
 
 const chartWidth = 300;
-export default function StockChart({inventoryItems}: IProps) {
+export default function StockChart({ inventoryItems }: IProps) {
   // On Stock: 20
   // Low Stock: 8
   // Out of Stock: 12
   // Total: inventoryItems?.length
 
   const onStock = useMemo(() => {
-    return inventoryItems?.filter((item) => item.stockStatus === STOCK_STATUS.IN_STOCK).length || 0;
+    return (
+      inventoryItems?.filter(
+        (item) => item.stockStatus === STOCK_STATUS.IN_STOCK,
+      ).length || 0
+    );
   }, [inventoryItems]);
 
   const lowStock = useMemo(() => {
-    return inventoryItems?.filter((item) => item.stockStatus === STOCK_STATUS.LOW_STOCK).length || 0;
+    return (
+      inventoryItems?.filter(
+        (item) => item.stockStatus === STOCK_STATUS.LOW_STOCK,
+      ).length || 0
+    );
   }, [inventoryItems]);
 
   const outOfStock = useMemo(() => {
-    return inventoryItems?.filter((item) => item.stockStatus === STOCK_STATUS.OUT_OF_STOCK).length || 0;
+    return (
+      inventoryItems?.filter(
+        (item) => item.stockStatus === STOCK_STATUS.OUT_OF_STOCK,
+      ).length || 0
+    );
   }, [inventoryItems]);
 
   return (

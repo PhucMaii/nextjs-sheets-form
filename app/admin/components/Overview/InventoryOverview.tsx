@@ -7,15 +7,14 @@ import { IInventoryItem } from '@/app/utils/type';
 import { minifyNumber } from '@/app/utils/number';
 
 interface IProps {
-    inventoryItems: IInventoryItem[];
+  inventoryItems: IInventoryItem[];
 }
 
 export default function InventoryOverview({ inventoryItems }: IProps) {
-    const totalAssetValue = useMemo(() => {
-        return inventoryItems.reduce((acc, item) => acc + item.totalValue, 0);
-    }, [inventoryItems]);
+  const totalAssetValue = useMemo(() => {
+    return inventoryItems.reduce((acc, item) => acc + item.totalValue, 0);
+  }, [inventoryItems]);
 
-    
   return (
     <Box display="flex" alignItems="center" gap={4}>
       <Box p={2}>

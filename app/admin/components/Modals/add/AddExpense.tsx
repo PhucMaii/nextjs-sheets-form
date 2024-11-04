@@ -1,9 +1,4 @@
-import {
-  AlertColor,
-  Modal,
-  Tab,
-  Tabs,
-} from '@mui/material';
+import { AlertColor, Modal, Tab, Tabs } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
@@ -69,9 +64,12 @@ export default function AddExpense({
         ...prevAdminAndDrivers,
         ...formattedAdmins,
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      showNotification('error', 'Something went wrong');
+      showNotification(
+        'error',
+        'Something went wrong: ' + error.response.data.error,
+      );
       return;
     }
   };
@@ -90,9 +88,12 @@ export default function AddExpense({
         ...prevAdminAndDrivers,
         ...formattedDrivers,
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      showNotification('error', 'Something went wrong');
+      showNotification(
+        'error',
+        'Something went wrong: ' + error.response.data.error,
+      );
       return;
     }
   };
@@ -156,25 +157,41 @@ export default function AddExpense({
         <ModalHead
           heading="Add Expense"
           onClose={onClose}
-          onClick={handleAddExpense}
+          onClick={() => {}}
           buttonProps={{
             loading: isAdding,
           }}
           buttonLabel="ADD"
+          onlyHeading
         />
 
-        <Tabs sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }} variant="fullWidth" value={currentTabIndex} onChange={(e, index) => setCurrentTabIndex(index)}>
+        <Tabs
+          sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }}
+          variant="fullWidth"
+          value={currentTabIndex}
+          onChange={(e, index) => setCurrentTabIndex(index)}
+        >
           <Tab label="Stock Purchased" value={0} />
           <Tab label="Other Expenses" value={1} />
         </Tabs>
 
-        {
-          currentTabIndex === 0 ? (
-          <StockPurchased />
+        {currentTabIndex === 0 ? (
+          <StockPurchased
+            showNotification={showNotification}
+            adminsAndDrivers={adminsAndDrivers}
+            paymentMethods={paymentMethods?.data || []}
+          />
         ) : (
-          <OtherExpense codBoardId={codBoardId} adminsAndDrivers={adminsAndDrivers} paymentMethods={paymentMethods} SelectDate={SelectDate} onChangeNewExpense={onChangeNewExpense} newExpense={newExpense} />
-        )
-        }
+          <OtherExpense
+            codBoardId={codBoardId}
+            adminsAndDrivers={adminsAndDrivers}
+            paymentMethods={paymentMethods}
+            SelectDate={SelectDate}
+            onChangeNewExpense={onChangeNewExpense}
+            newExpense={newExpense}
+            handleAddExpense={handleAddExpense}
+          />
+        )}
 
         {/* <Box display="flex" flexDirection="column" gap={3}>
           <Box display="flex" flexDirection="column" gap={2}>
