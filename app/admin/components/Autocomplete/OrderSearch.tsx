@@ -65,7 +65,10 @@ export default function OrderSearch({
                 <Typography>{option.clientId}</Typography>
               </Box>
             </Grid>
-            <Grid item xs={5} textAlign={'right'}>
+            <Grid item xs={3}>
+              <Typography>{option.deliveryDate}</Typography>
+            </Grid>
+            <Grid item xs={2} textAlign={'right'}>
               <Typography>Total: ${option.totalPrice.toFixed(2)}</Typography>
             </Grid>
           </Grid>

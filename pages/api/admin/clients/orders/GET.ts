@@ -16,6 +16,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { userId, deliveryDate, startDate, endDate } =
       req.query as RequestQuery;
 
+      console.log({startDate, endDate})
+
     // Check if there is no userId, then fetch all orders with specific delivery date
     let userOrders: any = [];
     if (userId && !isNaN(Number(userId))) {
@@ -82,19 +84,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const { user, ...restOfData } = order;
       return { ...user, ...restOfData, user, items: formatItems };
     });
-
-    // if (!startDate || !endDate) {
-    //   return res.status(200).json({
-    //     data: formatUserOrders,
-    //     message: 'Fetch User Orders Successfully',
-    //   });
-    // }
-
-    // const filteredDateRangeOrders = filterDateRangeOrders(
-    //   formatUserOrders,
-    //   startDate,
-    //   endDate,
-    // );
 
     return res.status(200).json({
       data: formatUserOrders,
