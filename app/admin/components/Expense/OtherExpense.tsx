@@ -23,18 +23,17 @@ export default function OtherExpense({
   handleAddExpense,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  
+
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
       await handleAddExpense();
       setIsLoading(false);
-
     } catch (error: any) {
       console.log(error);
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Box display="flex" flexDirection="column" gap={3}>
@@ -116,7 +115,12 @@ export default function OtherExpense({
             ))}
         </Select>
       </Box>
-      <LoadingButton variant="contained" onClick={handleSubmit} loading={isLoading} fullWidth>
+      <LoadingButton
+        variant="contained"
+        onClick={handleSubmit}
+        loading={isLoading}
+        fullWidth
+      >
         Submit
       </LoadingButton>
     </Box>

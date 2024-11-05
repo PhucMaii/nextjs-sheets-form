@@ -10,8 +10,11 @@ import useNotification from '@/hooks/useNotification';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import InventoryOverview from '../components/Overview/InventoryOverview';
+import AddStockPurchased from '../components/Modals/add/AddStockPurchased';
 
 export default function InventoryPage() {
+  const [isOpenAddStockPurchased, setIsOpenAddStockPurchased] =
+    useState<boolean>(false);
   const [tabIndex, setTabIndex] = useState<number>(0);
 
   const { showNotification, NotificationComp } = useNotification();
@@ -19,6 +22,11 @@ export default function InventoryPage() {
 
   return (
     <Sidebar>
+      <AddStockPurchased
+        open={isOpenAddStockPurchased}
+        onClose={() => setIsOpenAddStockPurchased(false)}
+        showNotification={showNotification}
+      />
       {NotificationComp}
       <Typography variant="h5" color={blueGrey[800]}>
         Inventory
@@ -43,7 +51,10 @@ export default function InventoryPage() {
             inventoryItems={inventoryItems}
           />
         ) : (
-          <OrderStock />
+          <OrderStock
+            openAddStockPurchased={() => setIsOpenAddStockPurchased(true)}
+            showNotification={showNotification}
+          />
         )}
       </ShadowSection>
     </Sidebar>

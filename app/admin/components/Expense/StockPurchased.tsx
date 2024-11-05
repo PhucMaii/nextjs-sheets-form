@@ -94,7 +94,6 @@ export default function StockPurchased({
     }
   };
 
-  // TODO: Add prompted item into purchased items
   const addPromptedItem = () => {
     if (promptedItem.id === -1) {
       showNotification('error', 'Please select item');
@@ -126,20 +125,22 @@ export default function StockPurchased({
 
   const calculateNewAmount = () => {
     const newAmount = purchasedItems.reduce((acc: number, item: any) => {
-      return acc + (item.unitPrice * item.quantity);
+      return acc + item.unitPrice * item.quantity;
     }, 0);
 
     setTotalAmount(newAmount);
-  }
+  };
 
   const generateDescription = () => {
-    const itemNames = purchasedItems.map((item: any) => {
-      return `${item.quantity} ${item.unit} ${item.name}`;
-    }).join(', ');
+    const itemNames = purchasedItems
+      .map((item: any) => {
+        return `${item.quantity} ${item.unit} ${item.name}`;
+      })
+      .join(', ');
 
     setNewExpense({ ...newExpense, description: itemNames });
-  }
-  
+  };
+
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
@@ -154,13 +155,13 @@ export default function StockPurchased({
         }
         return item;
       }
-      
+
       return item;
     });
-    
+
     setPurchasedItems(newItemList);
   };
-  
+
   // TODO: /api/inventory/expense to add expense for stock purchased
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -185,12 +186,21 @@ export default function StockPurchased({
       showNotification('success', response.data.message);
       setPurchasedItems([]);
       setTotalAmount(0);
-      setNewExpense({ ...newExpense, amount: 0, description: '', paymentMethodId: -1, spentBy: '-- Choose who spent --'});
+      setNewExpense({
+        ...newExpense,
+        amount: 0,
+        description: '',
+        paymentMethodId: -1,
+        spentBy: '-- Choose who spent --',
+      });
+      setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Internal Server Error: ' + error);
+
+      setIsLoading(false);
     }
-  }
+  };
 
   const removeItem = (id: number) => {
     const newItemList = purchasedItems.filter((item: any) => {
@@ -236,7 +246,12 @@ export default function StockPurchased({
               clearOnBlur
               handleHomeEndKeys
               id="free-solo-with-text-demo"
-              options={[{id: -1, name: '-- Choose an item --'}, ...(inventoryItems?.data || [])] || []}
+              options={
+                [
+                  { id: -1, name: '-- Choose an item --' },
+                  ...(inventoryItems?.data || []),
+                ] || []
+              }
               getOptionLabel={(option) => {
                 // Check if the option has a custom title (for new item suggestion)
                 if (option.title) {
@@ -255,9 +270,7 @@ export default function StockPurchased({
               }}
               sx={{ width: '100%' }}
               freeSolo
-              renderInput={(params) => (
-                <TextField {...params} label="Item" />
-              )}
+              renderInput={(params) => <TextField {...params} label="Item" />}
             />
           </Grid>
 
@@ -411,7 +424,9 @@ export default function StockPurchased({
             placeholder="Enter description..."
             fullWidth
             value={newExpense.description}
-            onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+            onChange={(e) =>
+              setNewExpense({ ...newExpense, description: e.target.value })
+            }
           />
         </Box>
 
@@ -453,7 +468,12 @@ export default function StockPurchased({
           </Select>
         </Box>
 
-        <LoadingButton variant="contained" onClick={handleSubmit} fullWidth loading={isLoading}>
+        <LoadingButton
+          variant="contained"
+          onClick={handleSubmit}
+          fullWidth
+          loading={isLoading}
+        >
           Submit
         </LoadingButton>
       </Box>

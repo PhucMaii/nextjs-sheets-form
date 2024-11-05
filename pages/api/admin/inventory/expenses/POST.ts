@@ -59,7 +59,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         paymentMethodId: paymentMethodId,
         spentBy: spentBy,
         createdAt: createdAt,
-        createdBy: `Admin - ${user.clientName}`,
+        createdBy: `Admin - ${user?.clientName}`,
       },
     });
 
@@ -92,22 +92,41 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const itemsAlreadyExist = items.filter((item: any) => item.id > 0);
     const itemsToCreate = items.filter((item: any) => item.id === 0);
 
+    const inventoryItems = await prisma.inventoryItem.findMany({});
+
     // Update existing inventory items
     if (itemsAlreadyExist.length > 0) {
-      await prisma.inventoryItem.updateMany({
-        where: {
-          id: {
-            in: itemsAlreadyExist.map((item: any) => item.id),
+      // await prisma.inventoryItem.updateMany({
+      //   where: {
+      //     id: {
+      //       in: itemsAlreadyExist.map((item: any) => item.id),
+      //     },
+      //   },
+      //   data: {
+      //     quantity: {
+      //       increment: itemsAlreadyExist.reduce((acc: number, item: any) => {
+      //         return acc + item.quantity;
+      //       }, 0),
+      //     },
+      //   },
+      // });
+
+      for (const item of itemsAlreadyExist) {
+        const existedItem = inventoryItems.find(
+          (inventoryItem) => inventoryItem.id === item.id,
+        );
+        if (!existedItem) continue;
+
+        await prisma.inventoryItem.update({
+          where: {
+            id: item.id,
           },
-        },
-        data: {
-          quantity: {
-            increment: itemsAlreadyExist.reduce((acc: number, item: any) => {
-              return acc + item.quantity;
-            }, 0),
+          data: {
+            quantity: existedItem.quantity + item.quantity,
+            unitPrice: item.unitPrice,
           },
-        },
-      });
+        });
+      }
     }
 
     // Create new inventory items
@@ -121,7 +140,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             unitPrice: item.unitPrice,
             unit: item.unit,
             createdAt,
-            createdBy: `Admin - ${user.clientName}`,
+            createdBy: `Admin - ${user?.clientName}`,
           };
         }),
       });

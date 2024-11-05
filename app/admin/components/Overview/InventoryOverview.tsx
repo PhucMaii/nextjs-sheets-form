@@ -26,7 +26,9 @@ export default function InventoryOverview({ inventoryItems }: IProps) {
             </Typography>
           </Box>
 
-          <Typography variant="h3">${minifyNumber(totalAssetValue)}</Typography>
+          <Typography variant="h3">
+            ${minifyNumber(totalAssetValue) || 0}
+          </Typography>
         </Box>
       </Box>
 

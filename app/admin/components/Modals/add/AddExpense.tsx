@@ -7,9 +7,10 @@ import useSelectDate from '@/hooks/useSelectDate';
 import { API_URL } from '@/app/utils/enum';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
-import { fetchApi, SWRFetchData } from '@/app/utils/db';
+import { SWRFetchData } from '@/app/utils/db';
 import StockPurchased from '../../Expense/StockPurchased';
 import OtherExpense from '../../Expense/OtherExpense';
+import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -46,57 +47,13 @@ export default function AddExpense({
   );
 
   useEffect(() => {
-    fetchAdmins();
-    fetchDrivers();
+    const fetchAdminsAndDrivers = async () => {
+      const users: any = await getAdminsAndDrivers(showNotification);
+      setAdminsAndDrivers(users);
+    };
+
+    fetchAdminsAndDrivers();
   }, []);
-
-  const fetchAdmins = async () => {
-    try {
-      const admins = await fetchApi(
-        `${API_URL.ADMIN}/admins`,
-        showNotification,
-      );
-
-      const formattedAdmins = admins.map((admin: any) => {
-        return `Admin - ${admin.clientName}`;
-      });
-      setAdminsAndDrivers((prevAdminAndDrivers) => [
-        ...prevAdminAndDrivers,
-        ...formattedAdmins,
-      ]);
-    } catch (error: any) {
-      console.log(error);
-      showNotification(
-        'error',
-        'Something went wrong: ' + error.response.data.error,
-      );
-      return;
-    }
-  };
-
-  const fetchDrivers = async () => {
-    try {
-      const drivers = await fetchApi(
-        `${API_URL.ADMIN}/drivers`,
-        showNotification,
-      );
-
-      const formattedDrivers = drivers.map((driver: any) => {
-        return `Driver - ${driver.name}`;
-      });
-      setAdminsAndDrivers((prevAdminAndDrivers) => [
-        ...prevAdminAndDrivers,
-        ...formattedDrivers,
-      ]);
-    } catch (error: any) {
-      console.log(error);
-      showNotification(
-        'error',
-        'Something went wrong: ' + error.response.data.error,
-      );
-      return;
-    }
-  };
 
   const handleAddExpense = async () => {
     try {

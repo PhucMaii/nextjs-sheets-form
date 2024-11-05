@@ -152,6 +152,7 @@ export interface IBoard extends CodBoard {
 export interface IExpense extends Expense {
   paymentMethod: IPaymentMethod;
   vendors?: IVendor[];
+  orderedItems?: OrderedItems[];
 }
 
 export interface IPaymentMethod extends PaymentMethod {

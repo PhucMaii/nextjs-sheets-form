@@ -177,3 +177,11 @@ export const findCombinations = (arr: number[], target: number) => {
   backtrack(0, [], 0);
   return result;
 };
+
+export const compareTwoArrays = (arr1: any[], arr2: any[]) => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  return JSON.stringify(arr1) === JSON.stringify(arr2);
+};

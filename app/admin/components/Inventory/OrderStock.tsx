@@ -1,16 +1,44 @@
-import { Box, Button, Grid, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import {
+  AlertColor,
+  Box,
+  Button,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import OrderStockTable from '../Tables/OrderStockTable';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../SelectDateRange';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
-export default function OrderStock() {
+interface IProps {
+  openAddStockPurchased: () => void;
+  showNotification: (type: AlertColor, message: string) => void;
+}
+
+export default function OrderStock({
+  openAddStockPurchased,
+  showNotification,
+}: IProps) {
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [expenses] = SWRFetchData(`${API_URL.ADMIN}/inventory/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}`);
+
+  const [expenses] = SWRFetchData(
+    `${API_URL.ADMIN}/inventory/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  );
+
+  useEffect(() => {
+    if (expenses) {
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
+  }, [expenses]);
 
   return (
     <Box display="flex" flexDirection="column">
@@ -29,7 +57,7 @@ export default function OrderStock() {
         </Grid>
 
         <Grid item xs={1.5}>
-          <Button>
+          <Button onClick={openAddStockPurchased}>
             <Box display="flex" alignItems="center" gap={0.5}>
               <AddIcon />
               <Typography variant="body2" fontWeight="bold">
@@ -40,7 +68,10 @@ export default function OrderStock() {
         </Grid>
       </Grid>
 
-      <OrderStockTable stockOrders={expenses?.data || []}/>
+      {isLoading ? (<LoadingComponent />) : <OrderStockTable
+        stockOrders={expenses?.data || []}
+        showNotification={showNotification}
+      />}
     </Box>
   );
 }
