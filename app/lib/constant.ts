@@ -25,6 +25,8 @@ import SellIcon from '@mui/icons-material/Sell';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
+import StoreIcon from '@mui/icons-material/Store';
+import InventoryIcon from '@mui/icons-material/Inventory';
 import {
   errorColor,
   infoColor,
@@ -132,6 +134,16 @@ export const adminTabs = {
       path: '/admin/cards',
     },
     {
+      name: 'Inventory',
+      icon: InventoryIcon,
+      path: '/admin/inventory',
+    },
+    {
+      name: 'Items',
+      icon: SellIcon,
+      path: '/admin/items',
+    },
+    {
       name: 'Clients',
       icon: PeopleIcon,
       path: '/admin/clients',
@@ -142,9 +154,9 @@ export const adminTabs = {
       path: '/admin/drivers',
     },
     {
-      name: 'Items',
-      icon: SellIcon,
-      path: '/admin/items',
+      name: 'Vendors',
+      icon: StoreIcon,
+      path: '/admin/vendors',
     },
   ],
   Others: [
@@ -327,3 +339,5 @@ export const methodTypes = [
   PAYMENT_METHOD_TYPE.CHEQUE,
   PAYMENT_METHOD_TYPE.OTHER,
 ];
+
+export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];

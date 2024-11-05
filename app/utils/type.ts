@@ -5,13 +5,16 @@ import {
   DayRange,
   Driver,
   Expense,
+  InventoryItem,
   PaymentMethod,
   Route,
   User,
   UserRoute,
+  Vendor,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
+import { STOCK_STATUS } from './enum';
 
 export interface IDayRange extends DayRange {}
 
@@ -148,8 +151,20 @@ export interface IBoard extends CodBoard {
 
 export interface IExpense extends Expense {
   paymentMethod: IPaymentMethod;
+  vendors?: IVendor[];
+  orderedItems?: OrderedItems[];
 }
 
 export interface IPaymentMethod extends PaymentMethod {
   transactions: IExpense[];
+}
+
+export interface IVendor extends Vendor {
+  inventoryItems: any;
+}
+
+export interface IInventoryItem extends InventoryItem {
+  vendor: IVendor;
+  totalValue: number;
+  stockStatus: STOCK_STATUS;
 }

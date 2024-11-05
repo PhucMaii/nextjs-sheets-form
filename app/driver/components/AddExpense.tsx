@@ -119,7 +119,11 @@ export default function AddExpense({ showNotification }: IProps) {
               paymentMethods.data.map(
                 (paymentMethod: IPaymentMethod, index: number) => {
                   return (
-                    <MenuItem key={index} value={paymentMethod.id} disabled={paymentMethod.id !== mainPaymentMethodId}>
+                    <MenuItem
+                      key={index}
+                      value={paymentMethod.id}
+                      disabled={paymentMethod.id !== mainPaymentMethodId}
+                    >
                       {paymentMethod.name}
                     </MenuItem>
                   );

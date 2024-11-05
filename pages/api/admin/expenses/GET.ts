@@ -36,6 +36,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           paymentMethod: true,
+          vendors: true,
+          orderedItems: true,
         },
       });
 
@@ -56,6 +58,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         paymentMethod: true,
+        vendors: true,
+        orderedItems: true,
       },
     });
 
@@ -76,7 +80,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       transactionBasedOnDate,
       listOfDateString,
     );
-    console.log(chartData, 'chartData');
 
     return res.status(200).json({
       data: sortedExpensesByDate,

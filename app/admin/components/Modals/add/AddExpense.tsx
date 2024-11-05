@@ -1,23 +1,16 @@
-import {
-  AlertColor,
-  Box,
-  Divider,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { AlertColor, Modal, Tab, Tabs } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
 import { API_URL } from '@/app/utils/enum';
-import { IPaymentMethod } from '@/app/utils/type';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
-import { fetchApi, SWRFetchData } from '@/app/utils/db';
+import { SWRFetchData } from '@/app/utils/db';
+import StockPurchased from '../../Expense/StockPurchased';
+import OtherExpense from '../../Expense/OtherExpense';
+import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -30,9 +23,10 @@ export default function AddExpense({
   onClose,
   showNotification,
   defaultValue,
-  codBoardId
+  codBoardId,
 }: IProps) {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  const [currentTabIndex, setCurrentTabIndex] = useState<number>(0);
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
     description: '',
@@ -53,51 +47,13 @@ export default function AddExpense({
   );
 
   useEffect(() => {
-    fetchAdmins();
-    fetchDrivers();
+    const fetchAdminsAndDrivers = async () => {
+      const users: any = await getAdminsAndDrivers(showNotification);
+      setAdminsAndDrivers(users);
+    };
+
+    fetchAdminsAndDrivers();
   }, []);
-
-  const fetchAdmins = async () => {
-    try {
-      const admins = await fetchApi(
-        `${API_URL.ADMIN}/admins`,
-        showNotification,
-      );
-
-      const formattedAdmins = admins.map((admin: any) => {
-        return `Admin - ${admin.clientName}`;
-      });
-      setAdminsAndDrivers((prevAdminAndDrivers) => [
-        ...prevAdminAndDrivers,
-        ...formattedAdmins,
-      ]);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
-
-  const fetchDrivers = async () => {
-    try {
-      const drivers = await fetchApi(
-        `${API_URL.ADMIN}/drivers`,
-        showNotification,
-      );
-
-      const formattedDrivers = drivers.map((driver: any) => {
-        return `Driver - ${driver.name}`;
-      });
-      setAdminsAndDrivers((prevAdminAndDrivers) => [
-        ...prevAdminAndDrivers,
-        ...formattedDrivers,
-      ]);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
 
   const handleAddExpense = async () => {
     try {
@@ -109,14 +65,14 @@ export default function AddExpense({
       if (codBoardId) {
         response = await axios.post(`${API_URL.ADMIN}/cod/expenses`, {
           date,
-        createdAt,
-        createdBy: defaultValue.createdBy,
-        spentBy: newExpense.spentBy,
-        amount: newExpense.amount,
-        description: newExpense.description,
-        paymentMethodId: newExpense.paymentMethodId,
-        codBoardId,
-        })
+          createdAt,
+          createdBy: defaultValue.createdBy,
+          spentBy: newExpense.spentBy,
+          amount: newExpense.amount,
+          description: newExpense.description,
+          paymentMethodId: newExpense.paymentMethodId,
+          codBoardId,
+        });
       } else {
         response = await axios.post(`${API_URL.ADMIN}/expenses`, {
           date,
@@ -126,9 +82,7 @@ export default function AddExpense({
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
         });
-
-        }
-
+      }
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -160,19 +114,43 @@ export default function AddExpense({
         <ModalHead
           heading="Add Expense"
           onClose={onClose}
-          onClick={handleAddExpense}
+          onClick={() => {}}
           buttonProps={{
             loading: isAdding,
-            disabled:
-              newExpense.paymentMethodId === -1 ||
-              newExpense.spentBy === '-- Choose who spent --',
           }}
           buttonLabel="ADD"
+          onlyHeading
         />
 
-        <Divider sx={{ my: 2 }} />
+        <Tabs
+          sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }}
+          variant="fullWidth"
+          value={currentTabIndex}
+          onChange={(e, index) => setCurrentTabIndex(index)}
+        >
+          <Tab label="Stock Purchased" value={0} />
+          <Tab label="Other Expenses" value={1} />
+        </Tabs>
 
-        <Box display="flex" flexDirection="column" gap={3}>
+        {currentTabIndex === 0 ? (
+          <StockPurchased
+            showNotification={showNotification}
+            adminsAndDrivers={adminsAndDrivers}
+            paymentMethods={paymentMethods?.data || []}
+          />
+        ) : (
+          <OtherExpense
+            codBoardId={codBoardId}
+            adminsAndDrivers={adminsAndDrivers}
+            paymentMethods={paymentMethods}
+            SelectDate={SelectDate}
+            onChangeNewExpense={onChangeNewExpense}
+            newExpense={newExpense}
+            handleAddExpense={handleAddExpense}
+          />
+        )}
+
+        {/* <Box display="flex" flexDirection="column" gap={3}>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Date</Typography>
             {SelectDate}
@@ -203,37 +181,38 @@ export default function AddExpense({
             <Typography variant="h6">Payment Method</Typography>
             {codBoardId ? (
               <Select
-              value={newExpense.paymentMethodId}
-              onChange={(e) =>
-                onChangeNewExpense('paymentMethodId', +e.target.value)
-              }
-            >
-              <MenuItem value={4} disabled>
-                {paymentMethods?.data[0]?.name}
-              </MenuItem>
-              
-            </Select>
-            ) : <Select
-              value={newExpense.paymentMethodId}
-              onChange={(e) =>
-                onChangeNewExpense('paymentMethodId', +e.target.value)
-              }
-            >
-              <MenuItem value={-1} disabled>
-                -- Choose payment method --
-              </MenuItem>
-              {paymentMethods &&
-                paymentMethods?.data?.length > 0 &&
-                paymentMethods?.data.map(
-                  (paymentMethod: IPaymentMethod, index: number) => {
-                    return (
-                      <MenuItem key={index} value={paymentMethod.id}>
-                        {paymentMethod.name}
-                      </MenuItem>
-                    );
-                  },
-                )}
-            </Select>}
+                value={newExpense.paymentMethodId}
+                onChange={(e) =>
+                  onChangeNewExpense('paymentMethodId', +e.target.value)
+                }
+              >
+                <MenuItem value={4} disabled>
+                  {paymentMethods?.data[0]?.name}
+                </MenuItem>
+              </Select>
+            ) : (
+              <Select
+                value={newExpense.paymentMethodId}
+                onChange={(e) =>
+                  onChangeNewExpense('paymentMethodId', +e.target.value)
+                }
+              >
+                <MenuItem value={-1} disabled>
+                  -- Choose payment method --
+                </MenuItem>
+                {paymentMethods &&
+                  paymentMethods?.data?.length > 0 &&
+                  paymentMethods?.data.map(
+                    (paymentMethod: IPaymentMethod, index: number) => {
+                      return (
+                        <MenuItem key={index} value={paymentMethod.id}>
+                          {paymentMethod.name}
+                        </MenuItem>
+                      );
+                    },
+                  )}
+              </Select>
+            )}
           </Box>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Spent By</Typography>
@@ -252,7 +231,7 @@ export default function AddExpense({
                 ))}
             </Select>
           </Box>
-        </Box>
+        </Box> */}
       </BoxModal>
     </Modal>
   );

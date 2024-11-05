@@ -74,7 +74,6 @@ export default function CodBoard() {
       setLoading('isFetching', false);
     }
   }, [codBoards, isValidating]);
-  
 
   const handleDeleteBoard = async (boardId: number) => {
     try {

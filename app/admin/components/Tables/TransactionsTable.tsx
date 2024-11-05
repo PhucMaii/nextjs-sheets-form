@@ -13,6 +13,7 @@ import EditExpense from '../Modals/edit/EditExpense';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import DeleteModal from '../Modals/delete/DeleteModal';
+import EditStockPurchased from '../Modals/edit/EditStockPurchased';
 
 interface IProps {
   transactions: any[];
@@ -28,9 +29,17 @@ export default function TransactionsTable({
       return;
     }
     try {
-      const response = await axios.delete(
-        `${API_URL.ADMIN}/expenses?id=${transaction.id}`,
-      );
+      let response;
+
+      if (transaction?.orderedItems?.length > 0) {
+        response = await axios.delete(
+          `${API_URL.ADMIN}/inventory/expenses?id=${transaction.id}`,
+        );
+      } else {
+        response = await axios.delete(
+          `${API_URL.ADMIN}/expenses?id=${transaction.id}`,
+        );
+      }
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -62,7 +71,6 @@ export default function TransactionsTable({
       <TableBody>
         {transactions.length > 0 &&
           transactions.map((transaction: any, index: number) => {
-            console.log(transaction, 'transaction');
             return (
               <TableRow key={index}>
                 <TableCell style={{ width: 50 }}>
@@ -93,10 +101,15 @@ export default function TransactionsTable({
                         handleDelete={handleDeleteTransaction}
                         includedButton
                       />
-                      <EditExpense
-                        transaction={transaction}
-                        showNotification={showNotification}
-                      />
+                      {
+                        transaction?.orderedItems.length > 0 ? 
+                        <EditStockPurchased stockPurchased={transaction} showNotification={showNotification}/>
+                         : (
+                          <EditExpense
+                            transaction={transaction}
+                            showNotification={showNotification}/>
+                        )
+                      }
                     </Box>
                   )}
                 </TableCell>

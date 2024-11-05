@@ -51,7 +51,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         expense: true,
-      }
+      },
     });
 
     if (!dateBoard) {
@@ -72,7 +72,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      const newBalance = existingMethod.balance + amount - dateBoard.expense[0].amount;
+      const newBalance =
+        existingMethod.balance + amount - dateBoard.expense[0].amount;
 
       await prisma.paymentMethod.update({
         where: {

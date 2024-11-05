@@ -80,3 +80,9 @@ export enum FILTER_TYPE {
   MONTHLY = 'monthly',
   YEARLY = 'yearly',
 }
+
+export enum STOCK_STATUS {
+  IN_STOCK = 'In Stock',
+  OUT_OF_STOCK = 'Out of Stock',
+  LOW_STOCK = 'Low Stock',
+}
