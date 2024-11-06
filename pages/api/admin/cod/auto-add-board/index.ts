@@ -2,9 +2,10 @@ import { Order } from '@/app/admin/orders/page';
 import { days } from '@/app/lib/constant';
 import { filterByRoute } from '@/app/utils/array';
 import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
+import { getWCODDay } from '@/app/utils/time';
 import { IBoard, IRoutes } from '@/app/utils/type';
 import { getUserInfo } from '@/pages/api/utils/auth';
-import { normalizeDate } from '@/pages/api/utils/date';
+import { generate7DaysBefore, normalizeDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -31,6 +32,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'You are not authenticated',
       });
     }
+    const wcodDay: any = getWCODDay(todayString);
 
     // Check if boards are added already
     const boardOrders: any = await prisma.orders.findMany({
@@ -42,7 +44,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         codBoardId: null,
         user: {
           preference: {
-            paymentType: PAYMENT_TYPE.COD,
+            paymentType: {
+              in: [wcodDay, PAYMENT_TYPE.COD],
+            },
           },
         },
       },
@@ -86,7 +90,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // If there are new orders that have not been added
     if (boards.length > 0 && boardOrders.length > 0) {
-      await insertOrdersToSelectedBoards(boardOrders, boards, routeOnDate);
+      await insertOrdersToSelectedBoards(
+        boardOrders,
+        boards,
+        routeOnDate,
+        todayString,
+      );
       return res.status(200).json({
         message: 'New orders are added already',
       });
@@ -124,7 +133,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         user: {
           preference: {
-            paymentType: PAYMENT_TYPE.COD,
+            paymentType: {
+              in: [PAYMENT_TYPE.COD, wcodDay],
+            },
           },
         },
       },
@@ -141,29 +152,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     // Add Orders Into Boards
-    // for (const board of newBoards) {
-    //     const selectedRoute = routeOnDate.find((route: any) => route.driverId === board.driverId);
-    //     if (!selectedRoute) {
-    //         continue;
-    //     }
-
-    //     const filteredOrders = filterByRoute(dateOrders, selectedRoute);
-
-    //     // Convert order list to order ids list
-    //     const orderIds = filteredOrders.map((order: Order) => order.id);
-
-    //     await prisma.orders.updateMany({
-    //         where: {
-    //           id: {
-    //             in: orderIds,
-    //           },
-    //         },
-    //         data: {
-    //           codBoardId: board.id,
-    //         },
-    //     });
-    // }
-    await insertOrdersToSelectedBoards(dateOrders, newBoards, routeOnDate);
+    await insertOrdersToSelectedBoards(
+      dateOrders,
+      newBoards,
+      routeOnDate,
+      wcodDay,
+    );
 
     return res.status(200).json({
       message: 'Boards Added Successfully',
@@ -182,6 +176,7 @@ const insertOrdersToSelectedBoards = async (
   orders: Order[],
   selectedBoards: IBoard[],
   routeOnDate: IRoutes[],
+  date: string,
 ) => {
   const prisma = new PrismaClient();
 
@@ -189,6 +184,7 @@ const insertOrdersToSelectedBoards = async (
     const selectedRoute = routeOnDate.find(
       (route: any) => route.driverId === board.driverId,
     );
+
     if (!selectedRoute) {
       continue;
     }
@@ -197,6 +193,46 @@ const insertOrdersToSelectedBoards = async (
 
     // Convert order list to order ids list
     const orderIds = filteredOrders.map((order: Order) => order.id);
+
+    // Handle WCOD
+    const wcodDay: any = getWCODDay(date);
+    const clientIds = filteredOrders
+      .filter((order: Order) => {
+        return order?.user?.preference?.paymentType === wcodDay;
+      })
+      .map((order: Order) => order.userId);
+    const dayList = generate7DaysBefore(date);
+
+    if (clientIds.length > 0) {
+      const wcodOrders = await prisma.orders.findMany({
+        where: {
+          userId: {
+            in: clientIds,
+          },
+          deliveryDate: {
+            in: dayList,
+          },
+          status: {
+            in: [
+              ORDER_STATUS.DELIVERED,
+              ORDER_STATUS.INCOMPLETED,
+              ORDER_STATUS.COMPLETED,
+            ],
+          },
+        },
+        include: {
+          user: {
+            include: {
+              preference: true,
+            },
+          },
+        },
+      });
+
+      if (wcodOrders.length > 0) {
+        orderIds.push(...wcodOrders.map((order: any) => order.id));
+      }
+    }
 
     await prisma.orders.updateMany({
       where: {

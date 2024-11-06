@@ -588,6 +588,7 @@ export default function CODBoardDetails({
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               mutateOrders={mutateBoard}
+              isMarkDateDifference={order.deliveryDate !== boardData.date}
             />
           ))
         )}

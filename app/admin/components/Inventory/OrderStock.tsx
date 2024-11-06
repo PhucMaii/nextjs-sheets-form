@@ -27,7 +27,6 @@ export default function OrderStock({
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-
   const [expenses] = SWRFetchData(
     `${API_URL.ADMIN}/inventory/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
@@ -68,10 +67,14 @@ export default function OrderStock({
         </Grid>
       </Grid>
 
-      {isLoading ? (<LoadingComponent />) : <OrderStockTable
-        stockOrders={expenses?.data || []}
-        showNotification={showNotification}
-      />}
+      {isLoading ? (
+        <LoadingComponent />
+      ) : (
+        <OrderStockTable
+          stockOrders={expenses?.data || []}
+          showNotification={showNotification}
+        />
+      )}
     </Box>
   );
 }

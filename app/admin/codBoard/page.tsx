@@ -44,7 +44,7 @@ export default function CodBoard() {
   }>({ isOpen: false, id: -1 });
   const [loading, setLoading] = useMultipleBoolean({
     isFetching: true,
-    isCheckingAutoAddBoard: true,
+    isCheckingAutoAddBoard: false,
   });
   const [isFetching, setIsFetching] = useState<boolean>(true);
   // const [isLoading, setIsLoading] = useState<boolean>(true);

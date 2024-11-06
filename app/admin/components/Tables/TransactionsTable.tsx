@@ -101,15 +101,17 @@ export default function TransactionsTable({
                         handleDelete={handleDeleteTransaction}
                         includedButton
                       />
-                      {
-                        transaction?.orderedItems.length > 0 ? 
-                        <EditStockPurchased stockPurchased={transaction} showNotification={showNotification}/>
-                         : (
-                          <EditExpense
-                            transaction={transaction}
-                            showNotification={showNotification}/>
-                        )
-                      }
+                      {transaction?.orderedItems.length > 0 ? (
+                        <EditStockPurchased
+                          stockPurchased={transaction}
+                          showNotification={showNotification}
+                        />
+                      ) : (
+                        <EditExpense
+                          transaction={transaction}
+                          showNotification={showNotification}
+                        />
+                      )}
                     </Box>
                   )}
                 </TableCell>

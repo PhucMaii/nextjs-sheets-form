@@ -316,7 +316,11 @@ export default function ItemPage() {
 
   return (
     <Sidebar noMargin>
-      <CategoryClients open={open.isShowingClients} onClose={() => setOpen('isShowingClients', false)} clients={currentCategory?.users || []}/>
+      <CategoryClients
+        open={open.isShowingClients}
+        onClose={() => setOpen('isShowingClients', false)}
+        clients={currentCategory?.users || []}
+      />
       <AddItem
         open={open.isAddItemOpen}
         onClose={() => setOpen('isAddItemOpen', false)}
