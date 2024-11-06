@@ -33,6 +33,8 @@ import useNotification from '@/hooks/useNotification';
 import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';
 import PasteItemsModal from '../components/Modals/PasteItemsModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import CategoryClients from '../components/CategoryClients';
+import InfoIcon from '@mui/icons-material/Info';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -48,6 +50,7 @@ export default function ItemPage() {
     isPasteModalOpen: false,
     isDeleteModalOpen: false,
     isEditCategoryOpen: false,
+    isShowingClients: false,
   });
   const { showNotification, NotificationComp } = useNotification();
 
@@ -313,6 +316,7 @@ export default function ItemPage() {
 
   return (
     <Sidebar noMargin>
+      <CategoryClients open={open.isShowingClients} onClose={() => setOpen('isShowingClients', false)} clients={currentCategory?.users || []}/>
       <AddItem
         open={open.isAddItemOpen}
         onClose={() => setOpen('isAddItemOpen', false)}
@@ -353,6 +357,9 @@ export default function ItemPage() {
                 {currentCategory?.name} ( {currentCategory?.users?.length}{' '}
                 clients )
               </Typography>
+              <IconButton onClick={() => setOpen('isShowingClients', true)}>
+                <InfoIcon />
+              </IconButton>
               <IconButton onClick={() => setOpen('isEditCategory', true)}>
                 <EditIcon />
               </IconButton>
