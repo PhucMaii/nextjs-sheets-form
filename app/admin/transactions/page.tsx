@@ -27,6 +27,8 @@ import useNotification from '@/hooks/useNotification';
 import { IExpense } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import { handleSearch } from '@/app/utils/search';
+import TransactionOverview from '../components/Overview/TransactionOverview';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 export default function Transactions() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -38,6 +40,7 @@ export default function Transactions() {
   const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
     [],
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
@@ -51,10 +54,13 @@ export default function Transactions() {
   );
 
   useEffect(() => {
-    if (transactions) {
-      setDisplayTransactions(transactions?.data);
+    if (!transactions) {
+      setIsLoading(true)
+    } else {
+      setIsLoading(false);
+      setDisplayTransactions(transactions?.data || []);
     }
-  }, [transactions]);
+  }, [transactions, dateRange]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -68,50 +74,6 @@ export default function Transactions() {
       setDisplayTransactions(transactions?.data || []);
     }
   }, [debouncedKeywords]);
-
-  // useEffect(() => {
-  //   fetchAdmins();
-  //   fetchDrivers();
-  // }, []);
-
-  // const fetchAdmins = async () => {
-  //   try {
-  //     const admins = await fetchApi(
-  //       `${API_URL.ADMIN}/admins`,
-  //       showNotification,
-  //     );
-
-  //     const formattedAdmins = admins.map((admin: any) => {
-  //       return `Admin - ${admin.clientName}`;
-  //     });
-  //     setAdminsAndDrivers(formattedAdmins);
-  //   } catch (error) {
-  //     console.log(error);
-  //     showNotification('error', 'Something went wrong');
-  //     return;
-  //   }
-  // };
-
-  // const fetchDrivers = async () => {
-  //   try {
-  //     const drivers = await fetchApi(
-  //       `${API_URL.ADMIN}/drivers`,
-  //       showNotification,
-  //     );
-
-  //     const formattedDrivers = drivers.map((driver: any) => {
-  //       return `Driver - ${driver.name}`;
-  //     });
-  //     setAdminsAndDrivers((prevAdminAndDrivers) => [
-  //       ...prevAdminAndDrivers,
-  //       ...formattedDrivers,
-  //     ]);
-  //   } catch (error) {
-  //     console.log(error);
-  //     showNotification('error', 'Something went wrong');
-  //     return;
-  //   }
-  // };
 
   const actions = (
     <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
@@ -159,8 +121,6 @@ export default function Transactions() {
           open={isOpenAddExpense}
           onClose={() => setIsOpenAddExpense(false)}
           showNotification={showNotification}
-          // paymentMethods={paymentMethods?.data || []}
-          // adminsAndDrivers={adminsAndDrivers}
         />
         <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
           Transactions
@@ -169,6 +129,7 @@ export default function Transactions() {
         <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
       </Box>
 
+      <TransactionOverview transactions={displayTransactions} />
       <ShadowSection>
         <Typography variant="h6" fontWeight="bold" color={blueGrey[800]}>
           Payment Method
@@ -205,10 +166,10 @@ export default function Transactions() {
             {actions}
           </Grid>
         </Grid>
-        <TransactionsTable
+        {isLoading ? (<LoadingComponent />) : <TransactionsTable
           transactions={displayTransactions}
           showNotification={showNotification}
-        />
+        />}
       </ShadowSection>
     </Sidebar>
   );
