@@ -17,8 +17,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    console.log(admins);
-
     return res
       .status(200)
       .json({ data: admins, message: 'Fetch Admins Successfully' });

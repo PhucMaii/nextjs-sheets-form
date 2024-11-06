@@ -44,6 +44,7 @@ interface PropTypes {
   ) => Promise<void>;
   mutateOrders: any;
   handleOpenDetails?: any;
+  isMarkDateDifference?: boolean;
 }
 
 const OrderAccordion = ({
@@ -54,6 +55,7 @@ const OrderAccordion = ({
   handleUpdateItem,
   mutateOrders,
   handleOpenDetails,
+  isMarkDateDifference,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -317,6 +319,13 @@ const OrderAccordion = ({
                   text={`Void by ${order?.updatedBy || 'client'} `}
                   type={'error'}
                   icon={<BlockIcon color="error" fontSize="small" />}
+                />
+              )}
+              {isMarkDateDifference && (
+                <StatusText
+                  text={`Date difference`}
+                  type={'info'}
+                  icon={<InfoIcon color="info" fontSize="small" />}
                 />
               )}
             </Box>
