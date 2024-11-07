@@ -66,7 +66,7 @@ export default function StockPurchased({
   useEffect(() => {
     if (purchasedItems.length > 0) {
       calculateNewAmount();
-      generateDescription();
+      // generateDescription();
     } else {
       setNewExpense({ ...newExpense, amount: 0, description: '' });
       setTotalAmount(0);
@@ -101,7 +101,7 @@ export default function StockPurchased({
     }
 
     const existingItem = purchasedItems.find((item: any) => {
-      return item.id === promptedItem.id;
+      return item.name === promptedItem.name;
     });
 
     if (existingItem) {
@@ -131,15 +131,15 @@ export default function StockPurchased({
     setTotalAmount(newAmount);
   };
 
-  const generateDescription = () => {
-    const itemNames = purchasedItems
-      .map((item: any) => {
-        return `${item.quantity} ${item.unit} ${item.name}`;
-      })
-      .join(', ');
+  // const generateDescription = () => {
+  //   const itemNames = purchasedItems
+  //     .map((item: any) => {
+  //       return `${item.quantity} ${item.unit} ${item.name}`;
+  //     })
+  //     .join(', ');
 
-    setNewExpense({ ...newExpense, description: itemNames });
-  };
+  //   setNewExpense({ ...newExpense, description: itemNames });
+  // };
 
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
@@ -202,9 +202,9 @@ export default function StockPurchased({
     }
   };
 
-  const removeItem = (id: number) => {
+  const removeItem = (name: string) => {
     const newItemList = purchasedItems.filter((item: any) => {
-      return item.id !== id;
+      return item.name !== name;
     });
 
     setPurchasedItems(newItemList);
@@ -368,7 +368,7 @@ export default function StockPurchased({
                     <Typography variant="h6" fontWeight="bold">
                       {item.name}
                     </Typography>
-                    <IconButton onClick={() => removeItem(item.id)}>
+                    <IconButton onClick={() => removeItem(item.name)}>
                       <RemoveCircleIcon sx={{ color: errorColor }} />
                     </IconButton>
                   </Box>

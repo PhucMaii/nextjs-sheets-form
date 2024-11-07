@@ -26,6 +26,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         categoryId: newItem.categoryId,
         price: newItem.price,
         availability: newItem?.availability || true,
+        inventoryItemId: newItem?.inventoryItemId || null,
       },
       include: {
         subCategory: true,

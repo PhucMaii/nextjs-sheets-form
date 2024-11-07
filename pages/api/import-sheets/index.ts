@@ -77,7 +77,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    // Check has user ordered for target delivery date yet
+    // Check has user already ordered for target delivery date yet
     const userOrder = await checkHasClientOrder(
       existingUser.id,
       body['DELIVERY DATE'],
@@ -133,36 +133,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    // Get info person create it
-    // let createdBy = '';
-
-    // const session: any = await getServerSession(req, res, authOptions);
-    // if (body?.createdBy === USER_ROLE.DRIVER) {
-    //   const driverCreate: any = await prisma.driver.findUnique({
-    //     where: {
-    //       id: Number(session.user.id),
-    //     },
-    //   });
-
-    //   createdBy = `Driver - ${driverCreate.name}`;
-    // } else if (
-    //   body?.createdBy === USER_ROLE.ADMIN ||
-    //   body?.createdBy === USER_ROLE.CLIENT
-    // ) {
-    //   const userCreate: any = await prisma.user.findUnique({
-    //     where: {
-    //       id: Number(session.user.id),
-    //     },
-    //   });
-
-    //   if (userCreate.role === USER_ROLE.ADMIN) {
-    //     createdBy = `Admin - ${userCreate.clientName}`;
-    //   }
-
-    //   if (userCreate.role === USER_ROLE.CLIENT) {
-    //     createdBy = `Client - ${userCreate.clientId}`;
-    //   }
-    // }
     const createdBy = await getCreatedBy(req, res, body.createdBy);
 
     // Initialize new order
@@ -197,6 +167,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
+      // if (!itemData?.inventoryItemId) {
+      //   return res.status(500).json({
+      //     error: `Item ${item} has no inventory item`,
+      //   });
+      // }
+      // Get inventory item
+      let inventoryItem: any = null;
+
+      if (itemData?.inventoryItemId) {
+        inventoryItem = await prisma.inventoryItem.findUnique({
+          where: {
+            id: itemData.inventoryItemId,
+          }
+        });
+      }
+
+      // if (!inventoryItem) {
+      //   return res.status(500).json({
+      //     error: `Inventory Item for item ${item} does not exist`,
+      //   });
+      // }
+
       if (itemData) {
         totalPrice += itemData.price * body[item];
         const orderedItems = await prisma.orderedItems.create({
@@ -212,6 +204,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           ...orderedItems,
           totalPrice: itemData.price * body[item],
         });
+
+        if (inventoryItem) {
+          // update inventoryItem
+          await prisma.inventoryItem.update({
+            where: {
+              id: inventoryItem.id,
+            },
+            data: {
+              quantity: inventoryItem.quantity - body[item],
+            },
+          });
+        }
       }
     }
 

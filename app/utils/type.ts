@@ -98,6 +98,7 @@ export interface IItem {
   // subCategory?: any;
   availability: boolean;
   user?: User;
+  inventoryItemId?: number;
 }
 
 export interface OrderedItems {
