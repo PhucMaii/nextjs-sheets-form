@@ -11,6 +11,7 @@ import {
   User,
   UserRoute,
   Vendor,
+  VendorExpense,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
@@ -152,7 +153,7 @@ export interface IBoard extends CodBoard {
 
 export interface IExpense extends Expense {
   paymentMethod: IPaymentMethod;
-  vendors?: IVendor[];
+  vendors?: VendorExpense[];
   orderedItems?: OrderedItems[];
 }
 

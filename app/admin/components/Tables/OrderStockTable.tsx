@@ -46,7 +46,7 @@ export default function OrderStockTable({
       <TableHead>
         <TableRow>
           <TableCell>Method</TableCell>
-          <TableCell>Id</TableCell>
+          <TableCell>Invoice</TableCell>
           <TableCell>Cost</TableCell>
           <TableCell>Spent By</TableCell>
           <TableCell>Vendors</TableCell>
@@ -69,7 +69,7 @@ export default function OrderStockTable({
                     style={{ width: 30, height: 30 }}
                   />
                 </TableCell>
-                <TableCell>{expense.id}</TableCell>
+                <TableCell>{expense?.invoice}</TableCell>
                 <TableCell>${expense.amount}</TableCell>
                 <TableCell>{expense.spentBy}</TableCell>
                 <TableCell>

@@ -46,6 +46,7 @@ export default function StockPurchased({
     description: '',
     paymentMethodId: -1,
     spentBy: '-- Choose who spent --',
+    invoice: '',
   });
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
@@ -56,11 +57,12 @@ export default function StockPurchased({
     unitPrice: 0,
     unit: 'bags',
   });
+  const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
 
   const todayString = YYYYMMDDFormat(new Date());
   const { date, SelectDate } = useSelectDate(todayString, true);
 
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  const [inventoryItems] = SWRFetchData(selectedVendorId === -1 ? `${API_URL.ADMIN}/inventory` : `${API_URL.ADMIN}/inventory?vendorId=${selectedVendorId}`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
   useEffect(() => {
@@ -73,6 +75,12 @@ export default function StockPurchased({
     }
   }, [purchasedItems]);
 
+  useEffect(() => {
+    if (selectedVendorId !== -1) {
+      setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
+    }
+  }, [selectedVendorId]);
+
   const selectPromptedItem = (newValue: any) => {
     if (newValue?.inputValue) {
       setPromptedItem({
@@ -81,6 +89,7 @@ export default function StockPurchased({
         unitPrice: 0,
         unit: 'bags',
         name: newValue.inputValue,
+        vendorId: selectedVendorId,
       });
     } else {
       setPromptedItem({
@@ -88,7 +97,7 @@ export default function StockPurchased({
         id: newValue?.id || 0,
         unitPrice: newValue?.unitPrice || 0,
         name: newValue?.name,
-        vendorId: newValue?.vendorId || -1,
+        vendorId: selectedVendorId,
         unit: newValue?.unit || 'bags',
       });
     }
@@ -120,6 +129,8 @@ export default function StockPurchased({
       quantity: 0,
       unitPrice: 0,
       name: '',
+      vendorId: selectedVendorId,
+      unit: 'bags',
     });
   };
 
@@ -149,9 +160,9 @@ export default function StockPurchased({
           const totalPrice = item.price * +e.target.value;
           return { ...item, quantity: +e.target.value, totalPrice };
         }
-        if (keyChange === 'price') {
+        if (keyChange === 'unitPrice') {
           const totalPrice = item.quantity * +e.target.value;
-          return { ...item, price: +e.target.value, totalPrice };
+          return { ...item, unitPrice: +e.target.value, totalPrice };
         }
         return item;
       }
@@ -164,6 +175,26 @@ export default function StockPurchased({
 
   // TODO: /api/inventory/expense to add expense for stock purchased
   const handleSubmit = async () => {
+    if (purchasedItems.length === 0) {
+      showNotification('error', 'Please add items');
+      return;
+    }
+
+    if (totalAmount === 0) {
+      showNotification('error', 'Please enter amount');
+      return;
+    }
+
+    if (newExpense.spentBy === '-- Choose who spent --') {
+      showNotification('error', 'Please select who spent');
+      return;
+    }
+
+    if (newExpense.paymentMethodId === -1) {
+      showNotification('error', 'Please add payment method');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const createdAt = generateCurrentTime();
@@ -173,6 +204,7 @@ export default function StockPurchased({
         description: newExpense.description,
         paymentMethodId: newExpense.paymentMethodId,
         spentBy: newExpense.spentBy,
+        invoice: newExpense.invoice,
         createdAt,
         items: purchasedItems,
       });
@@ -192,11 +224,12 @@ export default function StockPurchased({
         description: '',
         paymentMethodId: -1,
         spentBy: '-- Choose who spent --',
+        invoice: '',
       });
       setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', 'Internal Server Error: ' + error);
+      showNotification('error', 'Fail to add expense: ' + error.response.data.error);
 
       setIsLoading(false);
     }
@@ -219,6 +252,33 @@ export default function StockPurchased({
       />
       <Box display="flex" flexDirection="column" gap={3}>
         <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="vendor">Vendor</InputLabel>
+            <Select
+              id="vendor"
+              label="Vendor"
+              value={selectedVendorId}
+              onChange={(e) =>
+                setSelectedVendorId(e.target.value as number)
+              }
+              fullWidth
+            >
+              <MenuItem value={-1} disabled>
+                -- Choose a vendor --
+              </MenuItem>
+              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                + Create new vendor
+              </MenuItem>
+              {vendors &&
+                vendors?.data.map((vendor: any, index: number) => (
+                  <MenuItem key={index} value={vendor.id}>
+                    {vendor.name}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        </Grid>
           <Grid item xs={12}>
             <Autocomplete
               value={promptedItem.name}
@@ -282,14 +342,12 @@ export default function StockPurchased({
                   <Select
                     id="vendor"
                     label="Vendor"
-                    value={promptedItem.vendorId}
+                    value={selectedVendorId}
                     onChange={(e) =>
-                      setPromptedItem({
-                        ...promptedItem,
-                        vendorId: +e.target.value,
-                      })
+                      setSelectedVendorId(e.target.value as number)
                     }
                     fullWidth
+                    disabled
                   >
                     <MenuItem value={-1} disabled>
                       -- Choose a vendor --
@@ -379,7 +437,7 @@ export default function StockPurchased({
                       fullWidth
                       label="Unit Price ($)"
                       value={item.unitPrice}
-                      onChange={(e) => handleChangeItem(e, item, 'price')}
+                      onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
                       type="number"
                       inputProps={{ min: 0 }}
                     />
@@ -404,6 +462,16 @@ export default function StockPurchased({
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Date</Typography>
           {SelectDate}
+        </Box>
+
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Typography variant="h6">Invoice Number</Typography>
+          <TextField
+            placeholder="Enter invoice number..."
+            fullWidth
+            value={newExpense.invoice}
+              onChange={(e) => setNewExpense({ ...newExpense, invoice: e.target.value })}          
+          />
         </Box>
 
         <Box display="flex" flexDirection="column" gap={2}>

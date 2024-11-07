@@ -19,6 +19,7 @@ interface IBody {
   date: string;
   paymentMethodId: number;
   spentBy: string;
+  invoice: string;
   oldItemIds: number[]; // Ordered items ids
   updatedItems: IPurchasedItem[];
   updatedAt: string;
@@ -31,6 +32,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const {
       id,
       amount,
+      invoice,
       description,
       date,
       paymentMethodId,
@@ -53,6 +55,23 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Expense not found' });
     }
 
+    if (invoice !== existingExpense.invoice) {
+      const existingInvoice = await prisma.expense.findFirst({
+        where: {
+          invoice: invoice,
+          vendors: {
+            some: {
+              vendorId: updatedItems[0].vendorId,
+            }
+          }
+        },
+      });
+
+      if (existingInvoice) {  
+        return res.status(400).json({ error: 'Invoice Number already exists' });
+      }
+    }
+
     await prisma.expense.update({
       where: {
         id: id,
@@ -61,6 +80,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         amount: amount,
         description: description,
         date: date,
+        invoice,
         paymentMethodId: paymentMethodId,
         spentBy: spentBy,
       },

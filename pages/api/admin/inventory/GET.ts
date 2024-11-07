@@ -3,23 +3,49 @@ import { IInventoryItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+interface IQuery {
+  vendorId?: string;
+}
+
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { vendorId }: IQuery = req.query;
+
+    if (!vendorId) {
+      const inventory: any = await prisma.inventoryItem.findMany({
+        include: {
+          vendor: true,
+        },
+      });
+
+      const formattedInventory =
+        formatInventoryWithTotalValueAndStatus(inventory);
+  
+      return res.status(200).json({
+        data: formattedInventory,
+        message: 'Fetch Inventory Successfully',
+      });
+    }
+
     const inventory: any = await prisma.inventoryItem.findMany({
+      where: {
+        vendorId: Number(vendorId),
+      },
       include: {
         vendor: true,
       },
     });
-
+  
     const formattedInventory =
       formatInventoryWithTotalValueAndStatus(inventory);
-
+  
     return res.status(200).json({
       data: formattedInventory,
       message: 'Fetch Inventory Successfully',
     });
+
   } catch (error: any) {
     console.log('Internal Server Error :', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
