@@ -163,9 +163,9 @@ export default function EditStockPurchased({
           const totalPrice = item.price * +e.target.value;
           return { ...item, quantity: +e.target.value, totalPrice };
         }
-        if (keyChange === 'price') {
+        if (keyChange === 'unitPrice') {
           const totalPrice = item.quantity * +e.target.value;
-          return { ...item, price: +e.target.value, totalPrice };
+          return { ...item, unitPrice: +e.target.value, totalPrice };
         }
         return item;
       }

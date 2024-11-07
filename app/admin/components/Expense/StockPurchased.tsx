@@ -56,17 +56,18 @@ export default function StockPurchased({
     unitPrice: 0,
     unit: 'bags',
   });
+  const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
 
   const todayString = YYYYMMDDFormat(new Date());
   const { date, SelectDate } = useSelectDate(todayString, true);
 
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  const [inventoryItems] = SWRFetchData(selectedVendorId === -1 ? `${API_URL.ADMIN}/inventory` : `${API_URL.ADMIN}/inventory?vendorId=${selectedVendorId}`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
   useEffect(() => {
     if (purchasedItems.length > 0) {
       calculateNewAmount();
-      generateDescription();
+      // generateDescription();
     } else {
       setNewExpense({ ...newExpense, amount: 0, description: '' });
       setTotalAmount(0);
@@ -131,15 +132,15 @@ export default function StockPurchased({
     setTotalAmount(newAmount);
   };
 
-  const generateDescription = () => {
-    const itemNames = purchasedItems
-      .map((item: any) => {
-        return `${item.quantity} ${item.unit} ${item.name}`;
-      })
-      .join(', ');
+  // const generateDescription = () => {
+  //   const itemNames = purchasedItems
+  //     .map((item: any) => {
+  //       return `${item.quantity} ${item.unit} ${item.name}`;
+  //     })
+  //     .join(', ');
 
-    setNewExpense({ ...newExpense, description: itemNames });
-  };
+  //   setNewExpense({ ...newExpense, description: itemNames });
+  // };
 
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
@@ -149,9 +150,9 @@ export default function StockPurchased({
           const totalPrice = item.price * +e.target.value;
           return { ...item, quantity: +e.target.value, totalPrice };
         }
-        if (keyChange === 'price') {
+        if (keyChange === 'unitPrice') {
           const totalPrice = item.quantity * +e.target.value;
-          return { ...item, price: +e.target.value, totalPrice };
+          return { ...item, unitPrice: +e.target.value, totalPrice };
         }
         return item;
       }
@@ -219,6 +220,33 @@ export default function StockPurchased({
       />
       <Box display="flex" flexDirection="column" gap={3}>
         <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="vendor">Vendor</InputLabel>
+            <Select
+              id="vendor"
+              label="Vendor"
+              value={selectedVendorId}
+              onChange={(e) =>
+                setSelectedVendorId(e.target.value as number)
+              }
+              fullWidth
+            >
+              <MenuItem value={-1} disabled>
+                -- Choose a vendor --
+              </MenuItem>
+              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                + Create new vendor
+              </MenuItem>
+              {vendors &&
+                vendors?.data.map((vendor: any, index: number) => (
+                  <MenuItem key={index} value={vendor.id}>
+                    {vendor.name}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+              </Grid>
           <Grid item xs={12}>
             <Autocomplete
               value={promptedItem.name}
@@ -282,14 +310,12 @@ export default function StockPurchased({
                   <Select
                     id="vendor"
                     label="Vendor"
-                    value={promptedItem.vendorId}
+                    value={selectedVendorId}
                     onChange={(e) =>
-                      setPromptedItem({
-                        ...promptedItem,
-                        vendorId: +e.target.value,
-                      })
+                      setSelectedVendorId(e.target.value as number)
                     }
                     fullWidth
+                    disabled
                   >
                     <MenuItem value={-1} disabled>
                       -- Choose a vendor --
@@ -379,7 +405,7 @@ export default function StockPurchased({
                       fullWidth
                       label="Unit Price ($)"
                       value={item.unitPrice}
-                      onChange={(e) => handleChangeItem(e, item, 'price')}
+                      onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
                       type="number"
                       inputProps={{ min: 0 }}
                     />
@@ -404,6 +430,16 @@ export default function StockPurchased({
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Date</Typography>
           {SelectDate}
+        </Box>
+
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Typography variant="h6">Invoice Number</Typography>
+          <TextField
+            placeholder="Enter invoice number..."
+            fullWidth
+            value={newExpense.invoiceNumber}
+            onChange={(e) => setNewExpense({ ...newExpense, invoiceNumber: e.target.value })}          
+          />
         </Box>
 
         <Box display="flex" flexDirection="column" gap={2}>

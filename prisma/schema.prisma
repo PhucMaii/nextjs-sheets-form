@@ -195,6 +195,7 @@ model Expense {
   date            String
   paymentMethodId Int
   codBoardId      Int?
+  invoice         String?
 
   paymentMethod PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
   codBoard      CodBoard?       @relation(fields: [codBoardId], references: [id])
