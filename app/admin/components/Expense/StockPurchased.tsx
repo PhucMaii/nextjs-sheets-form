@@ -46,6 +46,7 @@ export default function StockPurchased({
     description: '',
     paymentMethodId: -1,
     spentBy: '-- Choose who spent --',
+    invoice: '',
   });
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
@@ -172,10 +173,28 @@ export default function StockPurchased({
     setPurchasedItems(newItemList);
   };
 
-  console.log(promptedItem, 'promptedItem');
-
   // TODO: /api/inventory/expense to add expense for stock purchased
   const handleSubmit = async () => {
+    if (purchasedItems.length === 0) {
+      showNotification('error', 'Please add items');
+      return;
+    }
+
+    if (totalAmount === 0) {
+      showNotification('error', 'Please enter amount');
+      return;
+    }
+
+    if (newExpense.spentBy === '-- Choose who spent --') {
+      showNotification('error', 'Please select who spent');
+      return;
+    }
+
+    if (newExpense.paymentMethodId === -1) {
+      showNotification('error', 'Please add payment method');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const createdAt = generateCurrentTime();
@@ -185,6 +204,7 @@ export default function StockPurchased({
         description: newExpense.description,
         paymentMethodId: newExpense.paymentMethodId,
         spentBy: newExpense.spentBy,
+        invoice: newExpense.invoice,
         createdAt,
         items: purchasedItems,
       });
@@ -204,11 +224,12 @@ export default function StockPurchased({
         description: '',
         paymentMethodId: -1,
         spentBy: '-- Choose who spent --',
+        invoice: '',
       });
       setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', 'Internal Server Error: ' + error);
+      showNotification('error', 'Fail to add expense: ' + error.response.data.error);
 
       setIsLoading(false);
     }
@@ -257,7 +278,7 @@ export default function StockPurchased({
                 ))}
             </Select>
           </FormControl>
-              </Grid>
+        </Grid>
           <Grid item xs={12}>
             <Autocomplete
               value={promptedItem.name}
@@ -443,15 +464,15 @@ export default function StockPurchased({
           {SelectDate}
         </Box>
 
-        {/* <Box display="flex" flexDirection="column" gap={2}>
+        <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Invoice Number</Typography>
           <TextField
             placeholder="Enter invoice number..."
             fullWidth
-            value={newExpense.invoiceNumber}
-            onChange={(e) => setNewExpense({ ...newExpense, invoiceNumber: e.target.value })}          
+            value={newExpense.invoice}
+              onChange={(e) => setNewExpense({ ...newExpense, invoice: e.target.value })}          
           />
-        </Box> */}
+        </Box>
 
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Amount</Typography>

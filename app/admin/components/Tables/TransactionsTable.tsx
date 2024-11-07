@@ -60,7 +60,7 @@ export default function TransactionsTable({
       <TableHead>
         <TableRow>
           <TableCell>Method</TableCell>
-          <TableCell>Id</TableCell>
+          <TableCell>Invoice</TableCell>
           <TableCell>Amount</TableCell>
           <TableCell>Spent By</TableCell>
           <TableCell>Description</TableCell>
@@ -82,7 +82,7 @@ export default function TransactionsTable({
                   />
                   {/* </Toolbar> */}
                 </TableCell>
-                <TableCell style={{ width: 50 }}>{transaction.id}</TableCell>
+                <TableCell style={{ width: 50 }}>{transaction?.invoice}</TableCell>
                 <TableCell style={{ width: 100 }}>
                   ${transaction.amount}
                 </TableCell>

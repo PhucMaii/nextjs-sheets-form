@@ -55,6 +55,8 @@ export default function EditStockPurchased({
     unit: 'bags',
   });
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
+  const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
+
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
@@ -81,6 +83,10 @@ export default function EditStockPurchased({
   useEffect(() => {
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
+
+      if (stockPurchased?.vendors) {
+        setSelectedVendorId(stockPurchased.vendors[0].vendorId);
+      }
     }
 
     const initializeItems = () => {
@@ -144,6 +150,7 @@ export default function EditStockPurchased({
       quantity: 0,
       unitPrice: 0,
       name: '',
+      vendorId: selectedVendorId,
     });
   };
 
@@ -188,8 +195,6 @@ export default function EditStockPurchased({
         stockPurchased?.orderedItems,
       );
 
-      console.log({ isUpdatePurchasedItems });
-
       let oldItemIds: number[] = [];
       if (!isUpdatePurchasedItems) {
         oldItemIds = stockPurchased?.orderedItems.map((item: any) => {
@@ -205,6 +210,7 @@ export default function EditStockPurchased({
         description: updatedExpense.description,
         paymentMethodId: updatedExpense.paymentMethodId,
         spentBy: updatedExpense.spentBy,
+        invoice: updatedExpense.invoice,
         oldItemIds,
         updatedItems: !isUpdatePurchasedItems ? purchasedItems : [], // prevent update items if client does not update
         updatedAt: createdAt,
@@ -220,7 +226,7 @@ export default function EditStockPurchased({
       setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', 'Internal Server Error: ' + error);
+      showNotification('error', 'Fail to update expense: ' + error.response.data.error);
       setIsLoading(false);
       return;
     }
@@ -234,6 +240,7 @@ export default function EditStockPurchased({
         unitPrice: 0,
         unit: 'bags',
         name: newValue.inputValue,
+        vendorId: selectedVendorId,
       });
     } else {
       setPromptedItem({
@@ -241,7 +248,7 @@ export default function EditStockPurchased({
         id: newValue?.id || 0,
         unitPrice: newValue?.unitPrice || 0,
         name: newValue?.name,
-        vendorId: newValue?.vendorId || -1,
+        vendorId: selectedVendorId,
         unit: newValue?.unit || 'bags',
       });
     }
@@ -254,6 +261,7 @@ export default function EditStockPurchased({
 
     setPurchasedItems(newItemList);
   };
+
 
   return (
     <>
@@ -277,6 +285,33 @@ export default function EditStockPurchased({
 
           <Box display="flex" flexDirection="column" gap={3}>
             <Grid container spacing={3}>
+            <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="vendor">Vendor</InputLabel>
+            <Select
+              id="vendor"
+              label="Vendor"
+              value={selectedVendorId}
+              onChange={(e) =>
+                setSelectedVendorId(e.target.value as number)
+              }
+              fullWidth
+            >
+              <MenuItem value={-1} disabled>
+                -- Choose a vendor --
+              </MenuItem>
+              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                + Create new vendor
+              </MenuItem>
+              {vendors &&
+                vendors?.data.map((vendor: any, index: number) => (
+                  <MenuItem key={index} value={vendor.id}>
+                    {vendor.name}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        </Grid>
               <Grid item xs={12}>
                 <Autocomplete
                   value={promptedItem.name}
@@ -349,6 +384,7 @@ export default function EditStockPurchased({
                             vendorId: +e.target.value,
                           })
                         }
+                        disabled
                         fullWidth
                       >
                         <MenuItem value={-1} disabled>
@@ -477,6 +513,16 @@ export default function EditStockPurchased({
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Date</Typography>
               {SelectDate}
+            </Box>
+
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Typography variant="h6">Invoice Number</Typography>
+              <TextField
+                placeholder="Enter invoice number..."
+                fullWidth
+                value={updatedExpense?.invoice}
+                  onChange={(e) => setUpdatedExpense({ ...updatedExpense, invoice: e.target.value })}          
+              />
             </Box>
 
             <Box display="flex" flexDirection="column" gap={2}>

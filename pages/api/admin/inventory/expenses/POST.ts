@@ -9,6 +9,7 @@ interface IBody {
   paymentMethodId: number;
   spentBy: string;
   createdAt: string;
+  invoice: string;
   items: {
     id: number;
     quantity: number;
@@ -29,6 +30,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       paymentMethodId,
       spentBy,
       createdAt,
+      invoice,
       items,
     }: IBody = req.body;
 
@@ -51,8 +53,27 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return acc;
     }, []);
 
+    // Check if vendor has expense on that date
+    const existingVendorExpense = await prisma.expense.findMany({
+      where: {
+        invoice: invoice,
+        vendors: {
+          some: {
+            vendorId: {
+              in: vendors,
+            },
+          },
+        },
+      }
+    }); 
+
+    if (existingVendorExpense.length > 0) {
+      return res.status(409).json({ error: `Expense Already Exists For ${invoice}` });
+    }
+
     const newExpense = await prisma.expense.create({
       data: {
+        invoice,
         date: date,
         amount: amount,
         description: description,
