@@ -74,6 +74,12 @@ export default function StockPurchased({
     }
   }, [purchasedItems]);
 
+  useEffect(() => {
+    if (selectedVendorId !== -1) {
+      setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
+    }
+  }, [selectedVendorId]);
+
   const selectPromptedItem = (newValue: any) => {
     if (newValue?.inputValue) {
       setPromptedItem({
