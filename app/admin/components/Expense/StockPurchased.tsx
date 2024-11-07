@@ -443,7 +443,7 @@ export default function StockPurchased({
           {SelectDate}
         </Box>
 
-        <Box display="flex" flexDirection="column" gap={2}>
+        {/* <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Invoice Number</Typography>
           <TextField
             placeholder="Enter invoice number..."
@@ -451,7 +451,7 @@ export default function StockPurchased({
             value={newExpense.invoiceNumber}
             onChange={(e) => setNewExpense({ ...newExpense, invoiceNumber: e.target.value })}          
           />
-        </Box>
+        </Box> */}
 
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Amount</Typography>
