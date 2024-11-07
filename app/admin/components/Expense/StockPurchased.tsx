@@ -88,6 +88,7 @@ export default function StockPurchased({
         unitPrice: 0,
         unit: 'bags',
         name: newValue.inputValue,
+        vendorId: selectedVendorId,
       });
     } else {
       setPromptedItem({
@@ -95,7 +96,7 @@ export default function StockPurchased({
         id: newValue?.id || 0,
         unitPrice: newValue?.unitPrice || 0,
         name: newValue?.name,
-        vendorId: newValue?.vendorId || -1,
+        vendorId: selectedVendorId,
         unit: newValue?.unit || 'bags',
       });
     }
@@ -127,6 +128,8 @@ export default function StockPurchased({
       quantity: 0,
       unitPrice: 0,
       name: '',
+      vendorId: selectedVendorId,
+      unit: 'bags',
     });
   };
 
@@ -168,6 +171,8 @@ export default function StockPurchased({
 
     setPurchasedItems(newItemList);
   };
+
+  console.log(promptedItem, 'promptedItem');
 
   // TODO: /api/inventory/expense to add expense for stock purchased
   const handleSubmit = async () => {
@@ -438,7 +443,7 @@ export default function StockPurchased({
           {SelectDate}
         </Box>
 
-        <Box display="flex" flexDirection="column" gap={2}>
+        {/* <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Invoice Number</Typography>
           <TextField
             placeholder="Enter invoice number..."
@@ -446,7 +451,7 @@ export default function StockPurchased({
             value={newExpense.invoiceNumber}
             onChange={(e) => setNewExpense({ ...newExpense, invoiceNumber: e.target.value })}          
           />
-        </Box>
+        </Box> */}
 
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Amount</Typography>
