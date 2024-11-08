@@ -237,6 +237,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ...updatedNewOrder,
       items: itemList,
       ...existingUser,
+      id: newOrder.id,
       totalPrice,
       category: userCategory,
     });
@@ -360,6 +361,7 @@ const overrideOrder = async (
       totalPrice: total,
       category: user.category,
       isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
+      id: updatedOrder.id
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
