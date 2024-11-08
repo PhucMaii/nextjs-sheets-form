@@ -137,6 +137,7 @@ export default function AddExpense({
             showNotification={showNotification}
             adminsAndDrivers={adminsAndDrivers}
             paymentMethods={paymentMethods?.data || []}
+            codBoardId={codBoardId}
           />
         ) : (
           <OtherExpense
