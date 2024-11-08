@@ -55,6 +55,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Expense not found' });
     }
 
+    // Check if invoice number already exists
     if (invoice !== existingExpense.invoice) {
       const existingInvoice = await prisma.expense.findFirst({
         where: {
@@ -72,6 +73,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
+    // Update expense
     await prisma.expense.update({
       where: {
         id: id,
@@ -125,7 +127,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             },
           });
 
-          console.log(item, 'item');
           if (!existingItem) {
             await prisma.inventoryItem.create({
               data: {
@@ -139,14 +140,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               },
             });
           } else {
+            const newQuantity = item.inventoryItem.quantity - oldInventoryItem.quantity + item.quantity;
             await prisma.inventoryItem.update({
               where: {
                 id: item.inventoryItem.id,
               },
               data: {
-                quantity:
-                  item.inventoryItem.quantity - oldInventoryItem?.quantity ||
-                  0 + item.quantity,
+                quantity: newQuantity,
                 unitPrice: item.unitPrice,
               },
             });
