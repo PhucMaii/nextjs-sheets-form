@@ -1,5 +1,6 @@
 import {
   AlertColor,
+  Autocomplete,
   Box,
   Button,
   Divider,
@@ -24,6 +25,7 @@ import { errorColor } from '@/theme/color';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
+import { SWRFetchData } from '@/app/utils/db';
 
 interface IProps {
   order: ScheduledOrder;
@@ -45,11 +47,12 @@ export default function EditScheduleOrder({
   mutateOrders,
 }: IProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [newItem, setNewItem] = useState<OrderedItems>({
+  const [newItem, setNewItem] = useState<any>({
     name: '',
     price: 0,
     quantity: 0,
     totalPrice: 0,
+    inventoryItemId: -1,
   });
   const [newRouteId, setNewRouteId] = useState<number>(routeId);
   const [itemList, setItemList] = useState<OrderedItems[]>(() => {
@@ -64,12 +67,20 @@ export default function EditScheduleOrder({
     UpdateOption.NONE,
   );
 
+  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+
   const addNewItem = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (newItem.inventoryItemId === -1) {
+      showNotification('error', 'Inventory Item Is Missing');
+      return;
+    }
+
     const newItemName = newItem.name.toUpperCase();
     const hasNameExisted = itemList.some(
-      (item: OrderedItems) => item.name === newItemName,
+      (item: OrderedItems) => item.name === newItemName || item.inventoryItemId === newItem.inventoryItemId,
     );
 
     if (newItem.name.trim() === '') {
@@ -78,7 +89,7 @@ export default function EditScheduleOrder({
     }
 
     if (hasNameExisted) {
-      showNotification('error', 'Item Name Existed Already');
+      showNotification('error', 'Inventory Item Existed Already');
     } else {
       const totalPrice = newItem.quantity * newItem.price;
       setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
@@ -264,6 +275,27 @@ export default function EditScheduleOrder({
                   setUpdateOption={setUpdateOption}
                   noCreate
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <Autocomplete
+                    id="inventory-item"
+                    options={inventoryItems?.data || []}
+                    getOptionLabel={(option: any) => option?.name || ''}
+                    renderInput={(params) => <TextField {...params} label="Inventory Item" />}
+                    value={inventoryItems?.data?.find((item: any) => item.name === newItem.name) || null}
+                    onChange={(e, newValue: any) => {
+                      setNewItem({ ...newItem, name: newValue.name || '', price: newValue?.unitPrice || 0, inventoryItemId: newValue.id })
+                    }
+                    }
+                    onInputChange={(e, newInputValue) => {
+                      setNewItem({ ...newItem, name: newInputValue })
+                    }
+                    }
+                    sx={{ width: 'auto' }}
+                    freeSolo
+                  />
+                </FormControl>
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth>

@@ -1,13 +1,12 @@
-import { OrderedItems, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import { Item, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { UpdateOption } from '../orderedItems/PUT';
 
 interface BodyTypes {
   user: UserType;
-  items?: OrderedItems[];
+  items?: any[];
   scheduledOrderId?: number;
-  totalPrice?: number;
   updateOption?: UpdateOption;
   oldRouteId?: number;
   newRouteId?: number;
@@ -21,11 +20,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       user,
       items,
       scheduledOrderId,
-      totalPrice,
       updateOption,
       oldRouteId,
       newRouteId,
     } = req.body as BodyTypes;
+
 
     if (oldRouteId && newRouteId) {
       // remove from user route
@@ -70,6 +69,27 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         error: 'Item List Not Provided',
       });
     }
+
+    const totalPrice = items.reduce((acc: number, cV: any) => {
+      return acc + cV.totalPrice;
+    }, 0);
+
+    const existingScheduleOrder = await prisma.scheduleOrders.findUnique({
+      where: {
+        id: scheduledOrderId,
+      },
+      include: {
+        items: true,
+      }
+    });
+
+    if (!existingScheduleOrder) {
+      return res.status(404).json({
+        error: `Schedule Order ${scheduledOrderId} Not Found`,
+      });
+    }
+
+    let baseOrderItemList = existingScheduleOrder.items;
     // Update items in schedule order
     for (const item of items) {
       if (!item.id) {
@@ -79,6 +99,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             name: item.name,
             quantity: item.quantity,
             price: item.price,
+            inventoryItemId: item.inventoryItemId,
           },
         });
         continue;
@@ -105,18 +126,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           price: item.price,
         },
       });
+
+      baseOrderItemList = baseOrderItemList.filter(
+        (baseItem: any) => baseItem.id !== item.id,
+      );
     }
 
-    // Check if schedule order id is right
-    const existingScheduleOrder = await prisma.scheduleOrders.findUnique({
-      where: {
-        id: scheduledOrderId,
-      },
-    });
-
-    if (!existingScheduleOrder) {
-      return res.status(404).json({
-        error: `Schedule Order ${scheduledOrderId} Not Found`,
+    if (baseOrderItemList.length > 0) {
+      await prisma.orderedItems.deleteMany({
+        where: {
+          id: {
+            in: baseOrderItemList.map((item: any) => item.id),
+          },
+        },
       });
     }
 
@@ -158,12 +180,23 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
 
     for (const item of items) {
-      const existingItem = await prisma.item.findFirst({
-        where: {
-          name: item.name,
-          categoryId: userCategory.id,
-        },
-      });
+      let existingItem = null;
+      if (item?.inventoryItemId) {
+        existingItem = await prisma.item.findFirst({
+          where: {
+            categoryId: userCategory.id,
+            inventoryItemId: item.inventoryItemId,
+          },
+        });
+      } else {
+        existingItem = await prisma.item.findFirst({
+          where: {
+            name: item.name,
+            categoryId: userCategory.id,
+          },
+        });
+
+      }
 
       if (existingItem) {
         const updatedItem = await prisma.item.update({
@@ -187,6 +220,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             categoryId: userCategory.id,
             price: item.price,
             availability: true,
+            inventoryItemId: item.inventoryItemId
           },
         });
       }

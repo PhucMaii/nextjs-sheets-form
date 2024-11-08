@@ -5,7 +5,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId, items, day, routeId, newTotalPrice } = req.body;
+    const { userId, items, day, routeId } = req.body;
+
+    console.log(items,' items');
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -30,6 +32,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const newTotalPrice = items.reduce(
+      (acc: number, item: any) => acc + (item.price * item.quantity),
+      0,
+    );
+
     if (existingUser.scheduleOrders.length > 0) {
       const sameDayOrder = existingUser.scheduleOrders.find(
         (order: ScheduleOrders) => {
@@ -53,6 +60,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             await prisma.orderedItems.updateMany({
               where: {
                 scheduledOrderId: sameDayOrder.id,
+                inventoryItemId: item.inventoryItemId,
                 name: item.name,
               },
               data: {
@@ -67,6 +75,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
                 price: item.price,
                 quantity: item.quantity,
                 scheduledOrderId: sameDayOrder.id,
+                inventoryItemId: item.inventoryItemId,
               },
             });
           }
@@ -142,6 +151,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           price: item.price,
           quantity: item.quantity,
           scheduledOrderId: newScheduleOrder.id,
+          inventoryItemId: item.inventoryItemId,
         },
       });
     }
