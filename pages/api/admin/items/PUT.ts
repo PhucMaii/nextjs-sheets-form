@@ -55,36 +55,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    // * BAD CASE: Beansprouts name and subcategoryId existed already in that category
-    // If updated item is beansprouts => check is subcategory id valid
-    // if (updatedItem.name.includes('BEAN')) {
-    //   if (!updatedItem.subCategoryId) {
-    //     return res.status(404).json({
-    //       error: 'Subcategory required if item is beansprouts',
-    //     });
-    //   }
-
-    //   const itemSameNameAndSubCategory = await prisma.item.findMany({
-    //     where: {
-    //       name: updatedItem.name,
-    //       categoryId: updatedItem.categoryId,
-    //       subCategoryId: updatedItem.subCategoryId,
-    //     },
-    //   });
-
-    //   if (itemSameNameAndSubCategory.length !== 0) {
-    //     const isNotValid = itemSameNameAndSubCategory.some(
-    //       (item: Item) => item.id !== updatedItem.id,
-    //     );
-
-    //     if (isNotValid) {
-    //       return res.status(500).json({
-    //         error: `Item with name ${updatedItem.name} and subcategory id ${updatedItem.subCategoryId} existed already`,
-    //       });
-    //     }
-    //   }
-    // }
-
     // Update Item
     const newUpdatedItem = await prisma.item.update({
       where: {
@@ -101,18 +71,29 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // Update PRICE all items has same name
-    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+    // Update PRICE all items has same inventory id
+    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
+      existingItem.inventoryItemId) {
       await prisma.item.updateMany({
         where: {
-          name: existingItem.name,
+          inventoryItemId: existingItem.inventoryItemId,
         },
         data: {
           price: updatedItem.price,
-          name: updatedItem.name,
         },
       });
-    }
+    } else if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && 
+      !existingItem.inventoryItemId) {
+        await prisma.item.updateMany({
+          where: {
+            name: existingItem.name,
+          },
+          data: {
+            price: updatedItem.price,
+            name: updatedItem.name,
+          },
+        }) 
+      }
 
     // Update schedule order items
     const responseUpdate = await updateAllScheduleOrderItems(

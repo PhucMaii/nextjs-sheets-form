@@ -119,26 +119,53 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Item already existed in inventory
         if (item.inventoryItem) {
-          await prisma.inventoryItem.update({
+          const existingItem = await prisma.inventoryItem.findUnique({
             where: {
               id: item.inventoryItem.id,
             },
-            data: {
-              quantity:
-                item.inventoryItem.quantity - oldInventoryItem?.quantity ||
-                0 + item.quantity,
-              unitPrice: item.unitPrice,
-            },
           });
+
+          console.log(item, 'item');
+          if (!existingItem) {
+            await prisma.inventoryItem.create({
+              data: {
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                unit: item?.inventoryItem?.unit || 'bags',
+                vendorId: item.inventoryItem.vendorId,
+                createdAt: updatedAt,
+                createdBy: `Admin - ${user?.clientName}`,
+              },
+            });
+          } else {
+            await prisma.inventoryItem.update({
+              where: {
+                id: item.inventoryItem.id,
+              },
+              data: {
+                quantity:
+                  item.inventoryItem.quantity - oldInventoryItem?.quantity ||
+                  0 + item.quantity,
+                unitPrice: item.unitPrice,
+              },
+            });
+          }
+
         } else {
+          const vendor: any = await prisma.vendorExpense.findFirst({
+            where: {
+              expenseId: existingExpense.id,
+            }
+          })
           // New item
           await prisma.inventoryItem.create({
             data: {
               name: item.name,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
-              unit: item.unit,
-              vendorId: item.vendorId,
+              unit: 'bags',
+              vendorId: vendor.vendorId,
               createdAt: updatedAt,
               createdBy: `Admin - ${user?.clientName}`,
             },

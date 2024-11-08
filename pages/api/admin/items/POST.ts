@@ -50,51 +50,27 @@ const checkIsItemValid = async (newItem: IItem) => {
     const prisma = new PrismaClient();
 
     // * BAD CASE
-    // if (!newItem.name.includes('BEAN')) {
     // Check is new name valid
-    const itemSameName = await prisma.item.findMany({
-      where: {
-        name: newItem.name,
-        categoryId: newItem.categoryId,
-      },
-    });
-
-    if (itemSameName.length > 0) {
-      return { check: false, message: 'Item Name Already Existed' };
+    let inventoryItemExists: any = [];
+    if (newItem.inventoryItemId) {
+      inventoryItemExists = await prisma.item.findMany({
+        where: {
+          categoryId: newItem.categoryId,
+          inventoryItemId: newItem?.inventoryItemId
+        },
+      });
+    } else {
+      inventoryItemExists = await prisma.item.findMany({
+        where: {
+          categoryId: newItem.categoryId,
+          name: newItem.name,
+        },
+      });
     }
-    // }
 
-    // * BAD CASE
-    // If updated item is beansprouts => check is subcategory id valid
-    // if (newItem.name.includes('BEAN')) {
-    //   if (!newItem.subCategoryId) {
-    //     return {
-    //       check: false,
-    //       message: 'Subcategory required if item is beansprouts',
-    //     };
-    //   }
-
-    //   const itemSameNameAndSubCategory = await prisma.item.findMany({
-    //     where: {
-    //       name: newItem.name,
-    //       categoryId: newItem.categoryId,
-    //       subCategoryId: newItem.subCategoryId,
-    //     },
-    //   });
-
-    //   if (itemSameNameAndSubCategory.length !== 0) {
-    //     const isNotValid = itemSameNameAndSubCategory.some(
-    //       (item: Item) => item.id !== newItem.id,
-    //     );
-
-    //     if (isNotValid) {
-    //       return {
-    //         check: false,
-    //         message: `Item with name ${newItem.name} and subcategory id ${newItem.subCategoryId} existed already`,
-    //       };
-    //     }
-    //   }
-    // }
+    if (inventoryItemExists.length > 0) {
+      return { check: false, message: 'Inventory Item Already Existed' };
+    }
 
     return { check: true };
   } catch (error: any) {

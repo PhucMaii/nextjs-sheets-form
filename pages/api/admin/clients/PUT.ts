@@ -101,7 +101,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             });
 
             const formatItemToOrderedItem = newCategoryItems.map(
-              (item: IItem) => {
+              (item: any) => {
                 return {
                   name: item.name,
                   quantity: 0,

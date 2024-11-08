@@ -32,7 +32,6 @@ export default function AddItem({
     price: 0,
     categoryId,
     inventoryItemId: -1,
-    // subCategoryId: null,
     availability: true,
   });
 
@@ -43,8 +42,6 @@ export default function AddItem({
       setNewItem({ ...newItem, categoryId });
     }
   }, [categoryId]);
-
-  console.log(newItem, 'new item');
 
   const handleAddItem = async () => {
     const updatedNewItem = { ...newItem, name: newItem.name.toUpperCase() };
@@ -73,16 +70,10 @@ export default function AddItem({
           alignItems="center"
           rowGap={2}
         >
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6">Name:</Typography>
+          <Grid item xs={12}>
+            <Typography variant="h6">Inventory Item:</Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
-            {/* <TextField
-              fullWidth
-              label="Name"
-              value={newItem.name}
-              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-            /> */}
+          <Grid item xs={12}>
             <Autocomplete
               options={inventoryItems?.data || []}
               getOptionLabel={(option: any) => option?.name || ''}
@@ -100,10 +91,23 @@ export default function AddItem({
               freeSolo
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
+            <Typography variant="h6">Name:</Typography>
+          </Grid>
+          <Grid item xs={12}>
+          <TextField
+              fullWidth
+              label="Name"
+              value={newItem.name}
+              onChange={(e) =>
+                setNewItem({ ...newItem, name: e.target.value })
+              }
+            />
+          </Grid>
+          <Grid item xs={12}>
             <Typography variant="h6">Price:</Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               label="Price"

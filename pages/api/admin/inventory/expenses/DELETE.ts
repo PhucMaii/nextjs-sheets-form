@@ -36,7 +36,7 @@ export default async function DELETE(
       });
 
       if (!inventoryItem) {
-        return res.status(404).json({ error: 'Inventory Item Not Found' });
+        continue;
       }
 
       await prisma.inventoryItem.update({

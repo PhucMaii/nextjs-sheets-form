@@ -77,12 +77,14 @@ model OrderedItems {
   price            Float
   orderId          Int?
   scheduledOrderId Int?
+  inventoryItemId  Int?
   expenseId        Int?
   quantity         Int
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
 }
 
 model Orders {
@@ -186,7 +188,7 @@ model PaymentMethod {
 }
 
 model Expense {
-  id              Int    @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   createdAt       String
   createdBy       String
   amount          Float
@@ -240,6 +242,7 @@ model InventoryItem {
   createdBy String
 
   sellingItems Item[]
+  solItems     OrderedItems[]
 
   vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 }

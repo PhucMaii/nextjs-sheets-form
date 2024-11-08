@@ -191,12 +191,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (itemData) {
         totalPrice += itemData.price * body[item];
+        
         const orderedItems = await prisma.orderedItems.create({
           data: {
             name: itemData.name,
             price: itemData.price,
             orderId: newOrder.id,
             quantity: body[item],
+            inventoryItemId: itemData.inventoryItemId,
           },
         });
 

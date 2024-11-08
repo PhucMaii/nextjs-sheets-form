@@ -82,7 +82,7 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
             <FormControlLabel
               value={UPDATE_OPTION.ALL_ITEMS_SAME_NAME}
               control={<Radio />}
-              label="All items same name"
+              label="Same inventory item"
             />
           </RadioGroup>
           <Divider />
