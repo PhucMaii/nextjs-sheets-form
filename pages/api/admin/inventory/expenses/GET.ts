@@ -47,8 +47,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    console.log(expenses, 'expenses');
-
     return res.status(200).json({
       data: expenses,
       message: 'Fetch Expenses successfully',

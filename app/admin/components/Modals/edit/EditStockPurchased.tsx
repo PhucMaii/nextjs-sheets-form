@@ -296,6 +296,7 @@ export default function EditStockPurchased({
                 setSelectedVendorId(e.target.value as number)
               }
               fullWidth
+              disabled={purchasedItems.length > 0 && purchasedItems[0].vendorId === selectedVendorId}
             >
               <MenuItem value={-1} disabled>
                 -- Choose a vendor --

@@ -87,7 +87,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const newOrder: any = await createOrder(
         scheduleOrder.user,
         scheduleOrder.items,
-        scheduleOrder.totalPrice,
         deliveryDate,
         `Admin - ${adminCreate.clientName}`,
       );
@@ -124,7 +123,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 const createOrder = async (
   user: User | UserType,
   items: OrderedItems[],
-  totalPrice: number,
   deliveryDate: string,
   createdBy: string,
 ) => {
@@ -132,6 +130,11 @@ const createOrder = async (
     const prisma = new PrismaClient();
 
     const orderTime = generateCurrentTime();
+
+    const totalPrice = items.reduce((acc: number, item: OrderedItems) => {
+      return acc + (item.price * item.quantity);
+    }, 0);
+    
     // initialize order
     const newOrder = await prisma.orders.create({
       data: {

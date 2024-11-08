@@ -55,6 +55,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Expense not found' });
     }
 
+    // Check if invoice number already exists
     if (invoice !== existingExpense.invoice) {
       const existingInvoice = await prisma.expense.findFirst({
         where: {
@@ -72,6 +73,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
+    // Update expense
     await prisma.expense.update({
       where: {
         id: id,
@@ -119,26 +121,53 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Item already existed in inventory
         if (item.inventoryItem) {
-          await prisma.inventoryItem.update({
+          const existingItem = await prisma.inventoryItem.findUnique({
             where: {
               id: item.inventoryItem.id,
             },
-            data: {
-              quantity:
-                item.inventoryItem.quantity - oldInventoryItem?.quantity ||
-                0 + item.quantity,
-              unitPrice: item.unitPrice,
-            },
           });
+
+          if (!existingItem) {
+            await prisma.inventoryItem.create({
+              data: {
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                unit: item?.inventoryItem?.unit || 'bags',
+                vendorId: item.inventoryItem.vendorId,
+                createdAt: updatedAt,
+                createdBy: `Admin - ${user?.clientName}`,
+              },
+            });
+          } else {
+            const newQuantity = item.inventoryItem.quantity - oldInventoryItem.quantity + item.quantity;
+            console.log('newQuantity: ', newQuantity);
+            console.log({itemInventory: item.inventoryItem.quantity, oldInventoryItem: oldInventoryItem.quantity, itemQuantity: item.quantity});
+            await prisma.inventoryItem.update({
+              where: {
+                id: item.inventoryItem.id,
+              },
+              data: {
+                quantity: newQuantity,
+                unitPrice: item.unitPrice,
+              },
+            });
+          }
+
         } else {
+          const vendor: any = await prisma.vendorExpense.findFirst({
+            where: {
+              expenseId: existingExpense.id,
+            }
+          })
           // New item
           await prisma.inventoryItem.create({
             data: {
               name: item.name,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
-              unit: item.unit,
-              vendorId: item.vendorId,
+              unit: 'bags',
+              vendorId: vendor.vendorId,
               createdAt: updatedAt,
               createdBy: `Admin - ${user?.clientName}`,
             },
