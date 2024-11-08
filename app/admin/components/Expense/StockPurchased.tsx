@@ -30,6 +30,7 @@ interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
   paymentMethods: any;
   adminsAndDrivers: string[];
+  codBoardId?: number;
 }
 
 const filter = createFilterOptions<any>();
@@ -38,6 +39,7 @@ export default function StockPurchased({
   showNotification,
   paymentMethods,
   adminsAndDrivers,
+  codBoardId,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
@@ -48,6 +50,7 @@ export default function StockPurchased({
     spentBy: '-- Choose who spent --',
     invoice: '',
   });
+  const [vendorItems, setVendorItems] = useState<any[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const [promptedItem, setPromptedItem] = useState<any>({
@@ -62,7 +65,7 @@ export default function StockPurchased({
   const todayString = YYYYMMDDFormat(new Date());
   const { date, SelectDate } = useSelectDate(todayString, true);
 
-  const [inventoryItems] = SWRFetchData(selectedVendorId === -1 ? `${API_URL.ADMIN}/inventory` : `${API_URL.ADMIN}/inventory?vendorId=${selectedVendorId}`);
+  // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
   useEffect(() => {
@@ -78,6 +81,19 @@ export default function StockPurchased({
   useEffect(() => {
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
+      // setVendorItems(() => {
+        
+      // })
+
+      if (vendors) {
+        const targetVendor = vendors?.data.find((vendor: any) => {
+          return vendor.id === selectedVendorId;
+        });
+        
+        if (targetVendor) {
+          setVendorItems(targetVendor?.inventoryItems);
+        }
+      }
     }
   }, [selectedVendorId]);
 
@@ -206,6 +222,7 @@ export default function StockPurchased({
         spentBy: newExpense.spentBy,
         invoice: newExpense.invoice,
         createdAt,
+        codBoardId: codBoardId,
         items: purchasedItems,
       });
 
@@ -263,6 +280,7 @@ export default function StockPurchased({
                 setSelectedVendorId(e.target.value as number)
               }
               fullWidth
+              disabled={purchasedItems.length > 0 && purchasedItems[0].vendorId === selectedVendorId}
             >
               <MenuItem value={-1} disabled>
                 -- Choose a vendor --
@@ -309,7 +327,7 @@ export default function StockPurchased({
               options={
                 [
                   { id: -1, name: '-- Choose an item --' },
-                  ...(inventoryItems?.data || []),
+                  ...(vendorItems || []),
                 ] || []
               }
               getOptionLabel={(option) => {

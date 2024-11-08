@@ -10,6 +10,7 @@ interface IBody {
   spentBy: string;
   createdAt: string;
   invoice: string;
+  codBoardId?: number;
   items: {
     id: number;
     quantity: number;
@@ -31,6 +32,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       spentBy,
       createdAt,
       invoice,
+      codBoardId,
       items,
     }: IBody = req.body;
 
@@ -80,6 +82,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         paymentMethodId: paymentMethodId,
         spentBy: spentBy,
         createdAt: createdAt,
+        codBoardId: codBoardId,
         createdBy: `Admin - ${user?.clientName}`,
       },
     });
