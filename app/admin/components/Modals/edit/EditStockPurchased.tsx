@@ -57,7 +57,6 @@ export default function EditStockPurchased({
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
 
-
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
@@ -226,7 +225,10 @@ export default function EditStockPurchased({
       setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', 'Fail to update expense: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'Fail to update expense: ' + error.response.data.error,
+      );
       setIsLoading(false);
       return;
     }
@@ -262,7 +264,6 @@ export default function EditStockPurchased({
     setPurchasedItems(newItemList);
   };
 
-
   return (
     <>
       <AddVendor
@@ -285,34 +286,37 @@ export default function EditStockPurchased({
 
           <Box display="flex" flexDirection="column" gap={3}>
             <Grid container spacing={3}>
-            <Grid item xs={12}>
-          <FormControl fullWidth>
-            <InputLabel id="vendor">Vendor</InputLabel>
-            <Select
-              id="vendor"
-              label="Vendor"
-              value={selectedVendorId}
-              onChange={(e) =>
-                setSelectedVendorId(e.target.value as number)
-              }
-              fullWidth
-              disabled={purchasedItems.length > 0 && purchasedItems[0].vendorId === selectedVendorId}
-            >
-              <MenuItem value={-1} disabled>
-                -- Choose a vendor --
-              </MenuItem>
-              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
-                + Create new vendor
-              </MenuItem>
-              {vendors &&
-                vendors?.data.map((vendor: any, index: number) => (
-                  <MenuItem key={index} value={vendor.id}>
-                    {vendor.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-        </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="vendor">Vendor</InputLabel>
+                  <Select
+                    id="vendor"
+                    label="Vendor"
+                    value={selectedVendorId}
+                    onChange={(e) =>
+                      setSelectedVendorId(e.target.value as number)
+                    }
+                    fullWidth
+                    disabled={
+                      purchasedItems.length > 0 &&
+                      purchasedItems[0].vendorId === selectedVendorId
+                    }
+                  >
+                    <MenuItem value={-1} disabled>
+                      -- Choose a vendor --
+                    </MenuItem>
+                    <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                      + Create new vendor
+                    </MenuItem>
+                    {vendors &&
+                      vendors?.data.map((vendor: any, index: number) => (
+                        <MenuItem key={index} value={vendor.id}>
+                          {vendor.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={12}>
                 <Autocomplete
                   value={promptedItem.name}
@@ -522,7 +526,12 @@ export default function EditStockPurchased({
                 placeholder="Enter invoice number..."
                 fullWidth
                 value={updatedExpense?.invoice}
-                  onChange={(e) => setUpdatedExpense({ ...updatedExpense, invoice: e.target.value })}          
+                onChange={(e) =>
+                  setUpdatedExpense({
+                    ...updatedExpense,
+                    invoice: e.target.value,
+                  })
+                }
               />
             </Box>
 

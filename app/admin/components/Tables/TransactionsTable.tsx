@@ -82,7 +82,9 @@ export default function TransactionsTable({
                   />
                   {/* </Toolbar> */}
                 </TableCell>
-                <TableCell style={{ width: 50 }}>{transaction?.invoice}</TableCell>
+                <TableCell style={{ width: 50 }}>
+                  {transaction?.invoice}
+                </TableCell>
                 <TableCell style={{ width: 100 }}>
                   ${transaction.amount}
                 </TableCell>

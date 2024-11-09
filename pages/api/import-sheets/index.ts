@@ -361,7 +361,7 @@ const overrideOrder = async (
       totalPrice: total,
       category: user.category,
       isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
-      id: updatedOrder.id
+      id: updatedOrder.id,
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

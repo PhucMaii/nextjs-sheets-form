@@ -87,14 +87,14 @@ export default function StockPurchased({
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
       // setVendorItems(() => {
-        
+
       // })
 
       if (vendors) {
         const targetVendor = vendors?.data.find((vendor: any) => {
           return vendor.id === selectedVendorId;
         });
-        
+
         if (targetVendor) {
           setVendorItems(targetVendor?.inventoryItems);
         }
@@ -251,7 +251,10 @@ export default function StockPurchased({
       setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', 'Fail to add expense: ' + error.response.data.error);
+      showNotification(
+        'error',
+        'Fail to add expense: ' + error.response.data.error,
+      );
 
       setIsLoading(false);
     }
@@ -274,34 +277,35 @@ export default function StockPurchased({
       />
       <Box display="flex" flexDirection="column" gap={3}>
         <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <FormControl fullWidth>
-            <InputLabel id="vendor">Vendor</InputLabel>
-            <Select
-              id="vendor"
-              label="Vendor"
-              value={selectedVendorId}
-              onChange={(e) =>
-                setSelectedVendorId(e.target.value as number)
-              }
-              fullWidth
-              disabled={purchasedItems.length > 0 && purchasedItems[0].vendorId === selectedVendorId}
-            >
-              <MenuItem value={-1} disabled>
-                -- Choose a vendor --
-              </MenuItem>
-              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
-                + Create new vendor
-              </MenuItem>
-              {vendors &&
-                vendors?.data.map((vendor: any, index: number) => (
-                  <MenuItem key={index} value={vendor.id}>
-                    {vendor.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-        </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel id="vendor">Vendor</InputLabel>
+              <Select
+                id="vendor"
+                label="Vendor"
+                value={selectedVendorId}
+                onChange={(e) => setSelectedVendorId(e.target.value as number)}
+                fullWidth
+                disabled={
+                  purchasedItems.length > 0 &&
+                  purchasedItems[0].vendorId === selectedVendorId
+                }
+              >
+                <MenuItem value={-1} disabled>
+                  -- Choose a vendor --
+                </MenuItem>
+                <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                  + Create new vendor
+                </MenuItem>
+                {vendors &&
+                  vendors?.data.map((vendor: any, index: number) => (
+                    <MenuItem key={index} value={vendor.id}>
+                      {vendor.name}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </Grid>
           <Grid item xs={12}>
             <Autocomplete
               value={promptedItem.name}
@@ -493,7 +497,9 @@ export default function StockPurchased({
             placeholder="Enter invoice number..."
             fullWidth
             value={newExpense.invoice}
-              onChange={(e) => setNewExpense({ ...newExpense, invoice: e.target.value })}          
+            onChange={(e) =>
+              setNewExpense({ ...newExpense, invoice: e.target.value })
+            }
           />
         </Box>
 
@@ -535,29 +541,41 @@ export default function StockPurchased({
             </MenuItem>
             {paymentMethods.length > 0 &&
               paymentMethods.map((item: any) => {
-                return <MenuItem value={item.id} disabled={role !== USER_ROLE.ADMIN && item.id === mainPaymentMethodId}>{item.name}</MenuItem>;
+                return (
+                  <MenuItem
+                    value={item.id}
+                    disabled={
+                      role !== USER_ROLE.ADMIN &&
+                      item.id === mainPaymentMethodId
+                    }
+                  >
+                    {item.name}
+                  </MenuItem>
+                );
               })}
           </Select>
         </Box>
 
-        {role === USER_ROLE.ADMIN && <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="h6">Driver</Typography>
-          <Select
-            fullWidth
-            value={newExpense.spentBy}
-            onChange={(e) =>
-              setNewExpense({ ...newExpense, spentBy: e.target.value })
-            }
-          >
-            <MenuItem value={'-- Choose who spent --'} disabled>
-              -- Choose who spent --
-            </MenuItem>
-            {adminsAndDrivers.length > 0 &&
-              adminsAndDrivers.map((person: string) => {
-                return <MenuItem value={person}>{person}</MenuItem>;
-              })}
-          </Select>
-        </Box>}
+        {role === USER_ROLE.ADMIN && (
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Driver</Typography>
+            <Select
+              fullWidth
+              value={newExpense.spentBy}
+              onChange={(e) =>
+                setNewExpense({ ...newExpense, spentBy: e.target.value })
+              }
+            >
+              <MenuItem value={'-- Choose who spent --'} disabled>
+                -- Choose who spent --
+              </MenuItem>
+              {adminsAndDrivers.length > 0 &&
+                adminsAndDrivers.map((person: string) => {
+                  return <MenuItem value={person}>{person}</MenuItem>;
+                })}
+            </Select>
+          </Box>
+        )}
 
         <LoadingButton
           variant="contained"

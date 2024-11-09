@@ -63,12 +63,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           vendors: {
             some: {
               vendorId: updatedItems[0].vendorId,
-            }
-          }
+            },
+          },
         },
       });
 
-      if (existingInvoice) {  
+      if (existingInvoice) {
         return res.status(400).json({ error: 'Invoice Number already exists' });
       }
     }
@@ -140,9 +140,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               },
             });
           } else {
-            const newQuantity = item.inventoryItem.quantity - oldInventoryItem.quantity + item.quantity;
+            const newQuantity =
+              item.inventoryItem.quantity -
+              oldInventoryItem.quantity +
+              item.quantity;
             console.log('newQuantity: ', newQuantity);
-            console.log({itemInventory: item.inventoryItem.quantity, oldInventoryItem: oldInventoryItem.quantity, itemQuantity: item.quantity});
+            console.log({
+              itemInventory: item.inventoryItem.quantity,
+              oldInventoryItem: oldInventoryItem.quantity,
+              itemQuantity: item.quantity,
+            });
             await prisma.inventoryItem.update({
               where: {
                 id: item.inventoryItem.id,
@@ -153,13 +160,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               },
             });
           }
-
         } else {
           const vendor: any = await prisma.vendorExpense.findFirst({
             where: {
               expenseId: existingExpense.id,
-            }
-          })
+            },
+          });
           // New item
           await prisma.inventoryItem.create({
             data: {

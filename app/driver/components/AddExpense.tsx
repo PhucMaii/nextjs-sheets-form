@@ -1,9 +1,4 @@
-import {
-  AlertColor,
-  Box,
-  Button,
-  Typography,
-} from '@mui/material';
+import { AlertColor, Box, Button, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import OtherExpenses from './Expense/OtherExpenses';
 import { grey } from '@mui/material/colors';
@@ -22,20 +17,40 @@ export default function AddExpense({ showNotification }: IProps) {
         Add Expense
       </Typography>
 
-      <Box display="flex" alignItems="center" gap={2} justifyContent="center" width="100%" my={2} sx={{backgroundColor: grey[100], borderRadius: 2, p: 1}}>
-        <Button sx={{ backgroundColor: tabIndex === 0 ? 'primary.lightest' : '', color: tabIndex === 0 ? 'primary.main' : 'grey'}} onClick={() => setTabIndex(0)}>
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={2}
+        justifyContent="center"
+        width="100%"
+        my={2}
+        sx={{ backgroundColor: grey[100], borderRadius: 2, p: 1 }}
+      >
+        <Button
+          sx={{
+            backgroundColor: tabIndex === 0 ? 'primary.lightest' : '',
+            color: tabIndex === 0 ? 'primary.main' : 'grey',
+          }}
+          onClick={() => setTabIndex(0)}
+        >
           <Typography fontWeight="bold">Stock Purchased</Typography>
         </Button>
-        <Button sx={{ backgroundColor: tabIndex === 1 ? 'primary.lightest' : '', color: tabIndex === 1 ? 'primary.main' : 'grey'}} onClick={() => setTabIndex(1)}>
+        <Button
+          sx={{
+            backgroundColor: tabIndex === 1 ? 'primary.lightest' : '',
+            color: tabIndex === 1 ? 'primary.main' : 'grey',
+          }}
+          onClick={() => setTabIndex(1)}
+        >
           <Typography fontWeight="bold">Other Expense</Typography>
         </Button>
       </Box>
 
-      {
-        tabIndex === 0
-          ?  <StockPurchased />
-          : <OtherExpenses showNotification={showNotification} />
-      }
+      {tabIndex === 0 ? (
+        <StockPurchased />
+      ) : (
+        <OtherExpenses showNotification={showNotification} />
+      )}
     </Box>
   );
 }

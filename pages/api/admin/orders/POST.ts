@@ -132,9 +132,9 @@ const createOrder = async (
     const orderTime = generateCurrentTime();
 
     const totalPrice = items.reduce((acc: number, item: OrderedItems) => {
-      return acc + (item.price * item.quantity);
+      return acc + item.price * item.quantity;
     }, 0);
-    
+
     // initialize order
     const newOrder = await prisma.orders.create({
       data: {

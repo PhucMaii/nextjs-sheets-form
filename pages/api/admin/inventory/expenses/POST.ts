@@ -66,11 +66,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
-      }
-    }); 
+      },
+    });
 
     if (existingVendorExpense.length > 0) {
-      return res.status(409).json({ error: `Expense Already Exists For ${invoice}` });
+      return res
+        .status(409)
+        .json({ error: `Expense Already Exists For ${invoice}` });
     }
 
     const newExpense = await prisma.expense.create({

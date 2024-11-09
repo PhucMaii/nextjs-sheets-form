@@ -23,7 +23,8 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import EditCashInput from '../Modals/edit/EditCashInput';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import AddExpense from '../Modals/add/AddExpense';
+// import AddExpense from '../Modals/add/AddExpense';
+import ShowExpenses from '../Modals/ShowExpenses';
 
 interface IProps {
   boardData: IBoard;
@@ -38,7 +39,7 @@ export default function CODBoardSummary({
   handleDeleteBoard,
   showNotification,
 }: IProps) {
-  const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
+  const [isOpenShowExpenses, setIsOpenShowExpenses] = useState<boolean>(false);
   const [isOpenEditCashInput, setIsOpenEditCashInput] =
     useState<boolean>(false);
 
@@ -95,9 +96,16 @@ export default function CODBoardSummary({
 
   return (
     <>
-      <AddExpense
-        open={isOpenAddExpense}
-        onClose={() => setIsOpenAddExpense(false)}
+    <ShowExpenses 
+      open={isOpenShowExpenses} 
+      onClose={() => setIsOpenShowExpenses(false)} 
+      expenses={boardData?.expense || []} 
+      showNotification={showNotification}
+      boardData={boardData}
+    />
+      {/* <AddExpense
+        open={isOpenShowExpenses}
+        onClose={() => setIsOpenShowExpenses(false)}
         showNotification={showNotification}
         // handleAddExpenseId={handleAddExpenseId}
         defaultValue={{
@@ -105,7 +113,7 @@ export default function CODBoardSummary({
           spentBy: `Driver - ${boardData.driver.name}`,
         }}
         codBoardId={boardData.id}
-      />
+      /> */}
       <EditCashInput
         open={isOpenEditCashInput}
         onClose={() => setIsOpenEditCashInput(false)}
@@ -205,7 +213,7 @@ export default function CODBoardSummary({
 
                 <IconButton
                   size="small"
-                  onClick={() => setIsOpenAddExpense(true)}
+                  onClick={() => setIsOpenShowExpenses(true)}
                 >
                   <EditIcon fontSize="small" />
                 </IconButton>

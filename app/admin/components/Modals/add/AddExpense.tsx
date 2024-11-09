@@ -138,10 +138,7 @@ export default function AddExpense({
             adminsAndDrivers={adminsAndDrivers}
             paymentMethods={paymentMethods?.data || []}
             codBoardId={codBoardId}
-<<<<<<< HEAD
             role={USER_ROLE.ADMIN}
-=======
->>>>>>> b91c1136cde281479a436538635c5f77f3521bd7
           />
         ) : (
           <OtherExpense

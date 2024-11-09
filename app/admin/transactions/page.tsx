@@ -55,7 +55,7 @@ export default function Transactions() {
 
   useEffect(() => {
     if (!transactions) {
-      setIsLoading(true)
+      setIsLoading(true);
     } else {
       setIsLoading(false);
       setDisplayTransactions(transactions?.data || []);
@@ -166,10 +166,14 @@ export default function Transactions() {
             {actions}
           </Grid>
         </Grid>
-        {isLoading ? (<LoadingComponent />) : <TransactionsTable
-          transactions={displayTransactions}
-          showNotification={showNotification}
-        />}
+        {isLoading ? (
+          <LoadingComponent />
+        ) : (
+          <TransactionsTable
+            transactions={displayTransactions}
+            showNotification={showNotification}
+          />
+        )}
       </ShadowSection>
     </Sidebar>
   );
