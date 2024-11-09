@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BoxModal } from '../styled';
 import { IExpense } from '@/app/utils/type';
 import ModalHead from '@/app/lib/ModalHead';
@@ -63,6 +63,19 @@ export default function EditStockPurchased({
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
   const { date, SelectDate } = useSelectDate(stockPurchased.date, true);
+
+  const sortedVendors = useMemo(() => {
+    if (!vendors?.data) {
+      return [];
+    }
+
+
+    const vendorsSorted = [...vendors.data].sort((a: any, b: any) => {
+      return a?.name?.localeCompare(b?.name);
+    });
+
+    return vendorsSorted;
+  }, [vendors]);
 
   useEffect(() => {
     const fetchAdminsAndDrivers = async () => {
@@ -123,7 +136,7 @@ export default function EditStockPurchased({
     }
 
     const existingItem = purchasedItems.find((item: any) => {
-      return item.id === promptedItem.id;
+      return item.name === promptedItem.name;
     });
 
     if (existingItem) {
@@ -164,6 +177,21 @@ export default function EditStockPurchased({
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
+      // If it is a new item
+      if (targetItem.id < 1) {
+        if (item.name === targetItem.name) {
+          if (keyChange === 'quantity') {
+            const totalPrice = item.price * +e.target.value;
+            return { ...item, quantity: +e.target.value, totalPrice };
+          }
+          if (keyChange === 'unitPrice') {
+            const totalPrice = item.quantity * +e.target.value;
+            return { ...item, unitPrice: +e.target.value, totalPrice };
+          }
+          return item;  
+        }
+      }
+
       if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {
           const totalPrice = item.price * +e.target.value;
@@ -261,7 +289,6 @@ export default function EditStockPurchased({
     setPurchasedItems(newItemList);
   };
 
-
   return (
     <>
       <AddVendor
@@ -295,7 +322,7 @@ export default function EditStockPurchased({
                 setSelectedVendorId(e.target.value as number)
               }
               fullWidth
-              disabled={purchasedItems.length > 0 && purchasedItems[0].vendorId === selectedVendorId}
+              disabled={purchasedItems.length > 0 && purchasedItems[0]?.inventoryItem?.vendorId === selectedVendorId}
             >
               <MenuItem value={-1} disabled>
                 -- Choose a vendor --
@@ -303,8 +330,8 @@ export default function EditStockPurchased({
               <MenuItem onClick={() => setIsOpenAddVendor(true)}>
                 + Create new vendor
               </MenuItem>
-              {vendors &&
-                vendors?.data.map((vendor: any, index: number) => (
+              {sortedVendors.length > 0 &&
+                sortedVendors.map((vendor: any, index: number) => (
                   <MenuItem key={index} value={vendor.id}>
                     {vendor.name}
                   </MenuItem>
@@ -393,8 +420,8 @@ export default function EditStockPurchased({
                         <MenuItem onClick={() => setIsOpenAddVendor(true)}>
                           + Create new vendor
                         </MenuItem>
-                        {vendors &&
-                          vendors?.data.map((vendor: any, index: number) => (
+                        {sortedVendors && sortedVendors.length > 0 &&
+                          sortedVendors?.map((vendor: any, index: number) => (
                             <MenuItem key={index} value={vendor.id}>
                               {vendor.name}
                             </MenuItem>

@@ -63,7 +63,7 @@ export default function InventoryTable({
                 {item.quantity} {item.unit}
               </TableCell>
               <TableCell>${item.unitPrice}</TableCell>
-              <TableCell>${item.totalValue}</TableCell>
+              <TableCell>${item.totalValue?.toFixed(2)}</TableCell>
               <TableCell>
                 <Box display="flex" gap={2}>
                   <DeleteModal

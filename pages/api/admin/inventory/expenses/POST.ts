@@ -55,23 +55,26 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return acc;
     }, []);
 
-    // Check if vendor has expense on that date
-    const existingVendorExpense = await prisma.expense.findMany({
-      where: {
-        invoice: invoice,
-        vendors: {
-          some: {
-            vendorId: {
-              in: vendors,
+
+      // Check if vendor has expense on that date
+      const existingVendorExpense = await prisma.expense.findMany({
+        where: {
+          invoice: invoice,
+          date: date,
+          vendors: {
+            some: {
+              vendorId: {
+                in: vendors,
+              },
             },
           },
-        },
+        }
+      }); 
+  
+      if (existingVendorExpense.length > 0) {
+        return res.status(409).json({ error: `Expense Already Exists For ${invoice}` });
       }
-    }); 
 
-    if (existingVendorExpense.length > 0) {
-      return res.status(409).json({ error: `Expense Already Exists For ${invoice}` });
-    }
 
     const newExpense = await prisma.expense.create({
       data: {

@@ -1,5 +1,5 @@
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import useSelectDate from '@/hooks/useSelectDate';
 import {
@@ -18,11 +18,11 @@ import {
   Typography,
 } from '@mui/material';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { errorColor } from '@/theme/color';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import AddVendor from '../Modals/add/AddVendor';
-import { units } from '@/app/lib/constant';
+import { mainPaymentMethodId, units } from '@/app/lib/constant';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 
@@ -31,6 +31,8 @@ interface IProps {
   paymentMethods: any;
   adminsAndDrivers: string[];
   codBoardId?: number;
+  role: USER_ROLE;
+  defaultValue?: any;
 }
 
 const filter = createFilterOptions<any>();
@@ -40,6 +42,8 @@ export default function StockPurchased({
   paymentMethods,
   adminsAndDrivers,
   codBoardId,
+  role,
+  defaultValue,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
@@ -49,6 +53,7 @@ export default function StockPurchased({
     paymentMethodId: -1,
     spentBy: '-- Choose who spent --',
     invoice: '',
+    ...(defaultValue ? defaultValue : {}),
   });
   const [vendorItems, setVendorItems] = useState<any[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -67,6 +72,19 @@ export default function StockPurchased({
 
   // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+
+  const sortedVendors = useMemo(() => {
+    if (!vendors?.data) {
+      return [];
+    }
+
+
+    const vendorsSorted = [...vendors.data].sort((a: any, b: any) => {
+      return a?.name?.localeCompare(b?.name);
+    });
+
+    return vendorsSorted;
+  }, [vendors]);
 
   useEffect(() => {
     if (purchasedItems.length > 0) {
@@ -167,11 +185,24 @@ export default function StockPurchased({
 
   //   setNewExpense({ ...newExpense, description: itemNames });
   // };
-
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
-      if (item.id === targetItem.id) {
+      console.log({item, targetItem})
+      // If it is a new item
+      if (targetItem.id < 1) {
+        if (item.name === targetItem.name) {
+          if (keyChange === 'quantity') {
+            const totalPrice = item.price * +e.target.value;
+            return { ...item, quantity: +e.target.value, totalPrice };
+          }
+          if (keyChange === 'unitPrice') {
+            const totalPrice = item.quantity * +e.target.value;
+            return { ...item, unitPrice: +e.target.value, totalPrice };
+          }
+          return item;
+        }
+      } else if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {
           const totalPrice = item.price * +e.target.value;
           return { ...item, quantity: +e.target.value, totalPrice };
@@ -188,7 +219,6 @@ export default function StockPurchased({
 
     setPurchasedItems(newItemList);
   };
-
   // TODO: /api/inventory/expense to add expense for stock purchased
   const handleSubmit = async () => {
     if (purchasedItems.length === 0) {
@@ -288,8 +318,8 @@ export default function StockPurchased({
               <MenuItem onClick={() => setIsOpenAddVendor(true)}>
                 + Create new vendor
               </MenuItem>
-              {vendors &&
-                vendors?.data.map((vendor: any, index: number) => (
+              {sortedVendors.length > 0 &&
+                sortedVendors.map((vendor: any, index: number) => (
                   <MenuItem key={index} value={vendor.id}>
                     {vendor.name}
                   </MenuItem>
@@ -373,8 +403,8 @@ export default function StockPurchased({
                     <MenuItem onClick={() => setIsOpenAddVendor(true)}>
                       + Create new vendor
                     </MenuItem>
-                    {vendors &&
-                      vendors?.data.map((vendor: any, index: number) => (
+                    {sortedVendors.length > 0 &&
+                      sortedVendors.map((vendor: any, index: number) => (
                         <MenuItem key={index} value={vendor.id}>
                           {vendor.name}
                         </MenuItem>
@@ -530,12 +560,12 @@ export default function StockPurchased({
             </MenuItem>
             {paymentMethods.length > 0 &&
               paymentMethods.map((item: any) => {
-                return <MenuItem value={item.id}>{item.name}</MenuItem>;
+                return <MenuItem value={item.id} disabled={role !== USER_ROLE.ADMIN && item.id === mainPaymentMethodId}>{item.name}</MenuItem>;
               })}
           </Select>
         </Box>
 
-        <Box display="flex" flexDirection="column" gap={2}>
+        {role === USER_ROLE.ADMIN && <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Driver</Typography>
           <Select
             fullWidth
@@ -552,7 +582,7 @@ export default function StockPurchased({
                 return <MenuItem value={person}>{person}</MenuItem>;
               })}
           </Select>
-        </Box>
+        </Box>}
 
         <LoadingButton
           variant="contained"
