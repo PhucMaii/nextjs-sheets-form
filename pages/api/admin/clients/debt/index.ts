@@ -58,7 +58,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-export const groupOrderByMMYYYY = (orders: Orders[], endMonth: string) => {
+export const groupOrderByMMYYYY = (orders: Orders[], endDate: string) => {
+  const endMonth = endDate.split('/')[0];
+  console.log(endMonth, 'endMonth');
   const debtOrdersByMonth = orders.reduce((acc: any, order: Orders) => {
     const splitDeliveryDate = order.deliveryDate.split('/');
     if (Number(splitDeliveryDate[0]) > Number(endMonth)) {
