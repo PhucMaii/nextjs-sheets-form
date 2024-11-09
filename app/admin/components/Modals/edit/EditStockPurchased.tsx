@@ -27,7 +27,7 @@ import { errorColor } from '@/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AddVendor from '../add/AddVendor';
 import useSelectDate from '@/hooks/useSelectDate';
-import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
+import { generateCurrentTime } from '@/app/utils/time';
 import axios from 'axios';
 import { compareTwoArrays } from '@/app/utils/array';
 
@@ -62,8 +62,7 @@ export default function EditStockPurchased({
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
-  const todayString = YYYYMMDDFormat(new Date());
-  const { date, SelectDate } = useSelectDate(todayString, true);
+  const { date, SelectDate } = useSelectDate(stockPurchased.date, true);
 
   useEffect(() => {
     const fetchAdminsAndDrivers = async () => {
