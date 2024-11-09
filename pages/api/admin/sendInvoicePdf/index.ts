@@ -4,14 +4,15 @@ import { Order } from '@/app/admin/orders/page';
 import { UserType } from '@/app/utils/type';
 import { sendInvoiceThroughEmail } from '../../utils/email';
 import { groupOrderByMMYYYY } from '../clients/debt';
-import { YYYYMMDDFormat } from '@/app/utils/time';
+import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
+import { normalizeDate } from '../../utils/date';
 
 interface IBody {
   client: UserType | null;
   orders: Order[];
-  endDate: Date;
+  endDate: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -27,11 +28,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (!client || !orders || !endDate) {
       return res.status(404).json({
-        error: 'Parameters are',
+        error: 'Parameters are missing',
       });
     }
 
-    const formattedEndDate = new Date(endDate);
+    const normalizedStartDate = normalizeDate(new Date('01/01/2024'));
+    const normalizedEndDate = normalizeDate(new Date(endDate));
+
+    const listOfDateString = generateListOfDateString(
+      normalizedStartDate,
+      normalizedEndDate,
+    );
 
     const incompletedOrders: any = await prisma.orders.findMany({
       where: {
@@ -39,12 +46,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: {
           in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
         },
+        deliveryDate: {
+          in: listOfDateString,
+        }
       },
       include: {
         items: true,
         user: true,
       },
     });
+
 
     const ordersWithItemTotalPrice = incompletedOrders.map((order: Order) => {
       const items = order.items.map((item: any) => {
@@ -55,7 +66,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     // Group order by mm/yyyy
-    const endMonth = YYYYMMDDFormat(formattedEndDate);
+    const endMonth = YYYYMMDDFormat(normalizedEndDate);
     const debtOrders = groupOrderByMMYYYY(incompletedOrders, endMonth);
     const balanceDue = calculateTotalPrice(debtOrders);
     const debtData = { ...debtOrders, 'Balance Due': balanceDue };
