@@ -67,7 +67,7 @@ export default function Transactions() {
       const newTransactions = handleSearch(
         debouncedKeywords,
         transactions?.data,
-        ['description', 'spentBy', 'id'],
+        ['description', 'spentBy', 'invoice'],
       );
       setDisplayTransactions(newTransactions);
     } else {

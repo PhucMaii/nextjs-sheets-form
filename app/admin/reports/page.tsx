@@ -359,7 +359,7 @@ export default function ReportPage() {
       const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
         client: clientValue,
         orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
-        endDate: dateRange[0],
+        endDate: dateRange[1],
       });
 
       if (response.data.error) {
