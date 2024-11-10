@@ -4,7 +4,7 @@ import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
@@ -138,6 +138,7 @@ export default function AddExpense({
             adminsAndDrivers={adminsAndDrivers}
             paymentMethods={paymentMethods?.data || []}
             codBoardId={codBoardId}
+            role={USER_ROLE.ADMIN}
           />
         ) : (
           <OtherExpense
