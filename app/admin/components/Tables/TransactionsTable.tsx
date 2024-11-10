@@ -55,6 +55,7 @@ export default function TransactionsTable({
     }
   };
 
+
   return (
     <Table>
       <TableHead>
@@ -62,8 +63,9 @@ export default function TransactionsTable({
           <TableCell>Method</TableCell>
           <TableCell>Invoice</TableCell>
           <TableCell>Amount</TableCell>
-          <TableCell>Spent By</TableCell>
+          <TableCell>Vendor</TableCell>
           <TableCell>Description</TableCell>
+          <TableCell>Spent By</TableCell>
           <TableCell>When</TableCell>
           {showNotification && <TableCell></TableCell>}
         </TableRow>
@@ -88,11 +90,14 @@ export default function TransactionsTable({
                 <TableCell style={{ width: 100 }}>
                   ${transaction.amount}
                 </TableCell>
-                <TableCell style={{ width: 150 }}>
-                  {transaction.spentBy}
+                <TableCell style={{ width: 300 }}>
+                  {transaction?.vendors[0]?.vendor.name}
                 </TableCell>
                 <TableCell style={{ width: 300 }}>
                   {transaction.description}
+                </TableCell>                
+                <TableCell style={{ width: 150 }}>
+                  {transaction.spentBy}
                 </TableCell>
                 <TableCell style={{ width: 100 }}>{transaction.date}</TableCell>
                 <TableCell>

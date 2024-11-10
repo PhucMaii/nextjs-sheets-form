@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { errorColor } from '@/theme/color';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import AddVendor from '../Modals/add/AddVendor';
@@ -72,6 +72,19 @@ export default function StockPurchased({
 
   // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+
+  const sortedVendors = useMemo(() => {
+    if (!vendors?.data) {
+      return [];
+    }
+
+
+    const vendorsSorted = [...vendors.data].sort((a: any, b: any) => {
+      return a?.name?.localeCompare(b?.name);
+    });
+
+    return vendorsSorted;
+  }, [vendors]);
 
   useEffect(() => {
     if (purchasedItems.length > 0) {
@@ -172,11 +185,24 @@ export default function StockPurchased({
 
   //   setNewExpense({ ...newExpense, description: itemNames });
   // };
-
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
-      if (item.id === targetItem.id) {
+      console.log({item, targetItem})
+      // If it is a new item
+      if (targetItem.id < 1) {
+        if (item.name === targetItem.name) {
+          if (keyChange === 'quantity') {
+            const totalPrice = item.price * +e.target.value;
+            return { ...item, quantity: +e.target.value, totalPrice };
+          }
+          if (keyChange === 'unitPrice') {
+            const totalPrice = item.quantity * +e.target.value;
+            return { ...item, unitPrice: +e.target.value, totalPrice };
+          }
+          return item;
+        }
+      } else if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {
           const totalPrice = item.price * +e.target.value;
           return { ...item, quantity: +e.target.value, totalPrice };
@@ -193,7 +219,6 @@ export default function StockPurchased({
 
     setPurchasedItems(newItemList);
   };
-
   // TODO: /api/inventory/expense to add expense for stock purchased
   const handleSubmit = async () => {
     if (purchasedItems.length === 0) {
@@ -277,35 +302,34 @@ export default function StockPurchased({
       />
       <Box display="flex" flexDirection="column" gap={3}>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel id="vendor">Vendor</InputLabel>
-              <Select
-                id="vendor"
-                label="Vendor"
-                value={selectedVendorId}
-                onChange={(e) => setSelectedVendorId(e.target.value as number)}
-                fullWidth
-                disabled={
-                  purchasedItems.length > 0 &&
-                  purchasedItems[0].vendorId === selectedVendorId
-                }
-              >
-                <MenuItem value={-1} disabled>
-                  -- Choose a vendor --
-                </MenuItem>
-                <MenuItem onClick={() => setIsOpenAddVendor(true)}>
-                  + Create new vendor
-                </MenuItem>
-                {vendors &&
-                  vendors?.data.map((vendor: any, index: number) => (
-                    <MenuItem key={index} value={vendor.id}>
-                      {vendor.name}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
-          </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel id="vendor">Vendor</InputLabel>
+            <Select
+              id="vendor"
+              label="Vendor"
+              value={selectedVendorId}
+              onChange={(e) =>
+                setSelectedVendorId(e.target.value as number)
+              }
+              fullWidth
+              disabled={purchasedItems.length > 0 && purchasedItems[0].vendorId === selectedVendorId}
+            >
+              <MenuItem value={-1} disabled>
+                -- Choose a vendor --
+              </MenuItem>
+              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                + Create new vendor
+              </MenuItem>
+              {sortedVendors.length > 0 &&
+                sortedVendors.map((vendor: any, index: number) => (
+                  <MenuItem key={index} value={vendor.id}>
+                    {vendor.name}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        </Grid>
           <Grid item xs={12}>
             <Autocomplete
               value={promptedItem.name}
@@ -382,8 +406,8 @@ export default function StockPurchased({
                     <MenuItem onClick={() => setIsOpenAddVendor(true)}>
                       + Create new vendor
                     </MenuItem>
-                    {vendors &&
-                      vendors?.data.map((vendor: any, index: number) => (
+                    {sortedVendors.length > 0 &&
+                      sortedVendors.map((vendor: any, index: number) => (
                         <MenuItem key={index} value={vendor.id}>
                           {vendor.name}
                         </MenuItem>
@@ -541,41 +565,29 @@ export default function StockPurchased({
             </MenuItem>
             {paymentMethods.length > 0 &&
               paymentMethods.map((item: any) => {
-                return (
-                  <MenuItem
-                    value={item.id}
-                    disabled={
-                      role !== USER_ROLE.ADMIN &&
-                      item.id === mainPaymentMethodId
-                    }
-                  >
-                    {item.name}
-                  </MenuItem>
-                );
+                return <MenuItem value={item.id} disabled={role !== USER_ROLE.ADMIN && item.id === mainPaymentMethodId}>{item.name}</MenuItem>;
               })}
           </Select>
         </Box>
 
-        {role === USER_ROLE.ADMIN && (
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Driver</Typography>
-            <Select
-              fullWidth
-              value={newExpense.spentBy}
-              onChange={(e) =>
-                setNewExpense({ ...newExpense, spentBy: e.target.value })
-              }
-            >
-              <MenuItem value={'-- Choose who spent --'} disabled>
-                -- Choose who spent --
-              </MenuItem>
-              {adminsAndDrivers.length > 0 &&
-                adminsAndDrivers.map((person: string) => {
-                  return <MenuItem value={person}>{person}</MenuItem>;
-                })}
-            </Select>
-          </Box>
-        )}
+        {role === USER_ROLE.ADMIN && <Box display="flex" flexDirection="column" gap={2}>
+          <Typography variant="h6">Driver</Typography>
+          <Select
+            fullWidth
+            value={newExpense.spentBy}
+            onChange={(e) =>
+              setNewExpense({ ...newExpense, spentBy: e.target.value })
+            }
+          >
+            <MenuItem value={'-- Choose who spent --'} disabled>
+              -- Choose who spent --
+            </MenuItem>
+            {adminsAndDrivers.length > 0 &&
+              adminsAndDrivers.map((person: string) => {
+                return <MenuItem value={person}>{person}</MenuItem>;
+              })}
+          </Select>
+        </Box>}
 
         <LoadingButton
           variant="contained"

@@ -60,6 +60,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const existingInvoice = await prisma.expense.findFirst({
         where: {
           invoice: invoice,
+          date: date,
           vendors: {
             some: {
               vendorId: updatedItems[0].vendorId,
@@ -140,16 +141,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               },
             });
           } else {
-            const newQuantity =
-              item.inventoryItem.quantity -
-              oldInventoryItem.quantity +
-              item.quantity;
-            console.log('newQuantity: ', newQuantity);
-            console.log({
-              itemInventory: item.inventoryItem.quantity,
-              oldInventoryItem: oldInventoryItem.quantity,
-              itemQuantity: item.quantity,
-            });
+            const newQuantity = item.inventoryItem.quantity - oldInventoryItem.quantity + item.quantity;
             await prisma.inventoryItem.update({
               where: {
                 id: item.inventoryItem.id,
