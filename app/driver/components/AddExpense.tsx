@@ -2,7 +2,9 @@ import { AlertColor, Box, Button, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import OtherExpenses from './Expense/OtherExpenses';
 import { grey } from '@mui/material/colors';
-import StockPurchased from './Expense/StockPurchased';
+import StockPurchased from '@/app/admin/components/Expense/StockPurchased';
+import { PAYMENT_METHOD_TYPE, USER_ROLE } from '@/app/utils/enum';
+import { mainPaymentMethodId } from '@/app/lib/constant';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -47,7 +49,21 @@ export default function AddExpense({ showNotification }: IProps) {
       </Box>
 
       {tabIndex === 0 ? (
-        <StockPurchased />
+        <StockPurchased
+          showNotification={showNotification}
+          role={USER_ROLE.DRIVER}
+          defaultValue={{
+            paymentMethodId: mainPaymentMethodId,
+          }}
+          adminsAndDrivers={[]}
+          paymentMethods={[
+            {
+              id: mainPaymentMethodId,
+              name: 'Cash',
+              type: PAYMENT_METHOD_TYPE.CASH,
+            },
+          ]}
+        />
       ) : (
         <OtherExpenses showNotification={showNotification} />
       )}

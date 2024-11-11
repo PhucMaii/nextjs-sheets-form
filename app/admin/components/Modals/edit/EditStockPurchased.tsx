@@ -55,6 +55,7 @@ export default function EditStockPurchased({
     unit: 'bags',
   });
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
+  const [vendorItems, setVendorItems] = useState<any[]>([]);
   const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
@@ -67,7 +68,6 @@ export default function EditStockPurchased({
     if (!vendors?.data) {
       return [];
     }
-
 
     const vendorsSorted = [...vendors.data].sort((a: any, b: any) => {
       return a?.name?.localeCompare(b?.name);
@@ -92,6 +92,22 @@ export default function EditStockPurchased({
   }, [purchasedItems]);
 
   useEffect(() => {
+    if (selectedVendorId !== -1) {
+      setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
+
+      if (vendors) {
+        const targetVendor = vendors?.data.find((vendor: any) => {
+          return vendor.id === selectedVendorId;
+        });
+
+        if (targetVendor) {
+          setVendorItems(targetVendor?.inventoryItems);
+        }
+      }
+    }
+  }, [selectedVendorId, vendors]);
+
+  useEffect(() => {
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
 
@@ -99,7 +115,6 @@ export default function EditStockPurchased({
         setSelectedVendorId(stockPurchased.vendors[0].vendorId);
       }
     }
-
     const initializeItems = () => {
       if (!stockPurchased?.orderedItems) {
         setPurchasedItems([]);
@@ -126,7 +141,7 @@ export default function EditStockPurchased({
     };
 
     initializeItems();
-  }, [stockPurchased, inventoryItems]);
+  }, [stockPurchased, vendorItems]);
 
   const addPromptedItem = () => {
     if (promptedItem.id === -1) {
@@ -149,7 +164,7 @@ export default function EditStockPurchased({
     }
 
     const inventoryItemExisted = inventoryItems?.data?.find((item: any) => {
-      return item.id === promptedItem.id;
+      return item.name === promptedItem.name;
     });
 
     setPurchasedItems([
@@ -187,7 +202,7 @@ export default function EditStockPurchased({
             const totalPrice = item.quantity * +e.target.value;
             return { ...item, unitPrice: +e.target.value, totalPrice };
           }
-          return item;  
+          return item;
         }
       }
 
@@ -313,34 +328,38 @@ export default function EditStockPurchased({
 
           <Box display="flex" flexDirection="column" gap={3}>
             <Grid container spacing={3}>
-            <Grid item xs={12}>
-          <FormControl fullWidth>
-            <InputLabel id="vendor">Vendor</InputLabel>
-            <Select
-              id="vendor"
-              label="Vendor"
-              value={selectedVendorId}
-              onChange={(e) =>
-                setSelectedVendorId(e.target.value as number)
-              }
-              fullWidth
-              disabled={purchasedItems.length > 0 && purchasedItems[0]?.inventoryItem?.vendorId === selectedVendorId}
-            >
-              <MenuItem value={-1} disabled>
-                -- Choose a vendor --
-              </MenuItem>
-              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
-                + Create new vendor
-              </MenuItem>
-              {sortedVendors.length > 0 &&
-                sortedVendors.map((vendor: any, index: number) => (
-                  <MenuItem key={index} value={vendor.id}>
-                    {vendor.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-        </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="vendor">Vendor</InputLabel>
+                  <Select
+                    id="vendor"
+                    label="Vendor"
+                    value={selectedVendorId}
+                    onChange={(e) =>
+                      setSelectedVendorId(e.target.value as number)
+                    }
+                    fullWidth
+                    disabled={
+                      purchasedItems.length > 0 &&
+                      purchasedItems[0]?.inventoryItem?.vendorId ===
+                        selectedVendorId
+                    }
+                  >
+                    <MenuItem value={-1} disabled>
+                      -- Choose a vendor --
+                    </MenuItem>
+                    <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                      + Create new vendor
+                    </MenuItem>
+                    {sortedVendors.length > 0 &&
+                      sortedVendors.map((vendor: any, index: number) => (
+                        <MenuItem key={index} value={vendor.id}>
+                          {vendor.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={12}>
                 <Autocomplete
                   value={promptedItem.name}
@@ -371,7 +390,7 @@ export default function EditStockPurchased({
                   options={
                     [
                       { id: -1, name: '-- Choose an item --' },
-                      ...(inventoryItems?.data || []),
+                      ...(vendorItems || []),
                     ] || []
                   }
                   getOptionLabel={(option) => {
@@ -422,7 +441,8 @@ export default function EditStockPurchased({
                         <MenuItem onClick={() => setIsOpenAddVendor(true)}>
                           + Create new vendor
                         </MenuItem>
-                        {sortedVendors && sortedVendors.length > 0 &&
+                        {sortedVendors &&
+                          sortedVendors.length > 0 &&
                           sortedVendors?.map((vendor: any, index: number) => (
                             <MenuItem key={index} value={vendor.id}>
                               {vendor.name}

@@ -38,8 +38,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           paymentMethod: true,
           vendors: {
             include: {
-              vendor: true
-            }
+              vendor: true,
+            },
           },
           orderedItems: true,
         },
@@ -65,7 +65,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         vendors: {
           include: {
             vendor: true,
-          }
+          },
         },
         orderedItems: true,
       },

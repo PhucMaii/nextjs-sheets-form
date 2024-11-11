@@ -55,7 +55,6 @@ export default function TransactionsTable({
     }
   };
 
-
   return (
     <Table>
       <TableHead>
@@ -91,11 +90,11 @@ export default function TransactionsTable({
                   ${transaction.amount}
                 </TableCell>
                 <TableCell style={{ width: 300 }}>
-                  {transaction?.vendors[0]?.vendor.name}
+                  {transaction?.vendors[0]?.vendor?.name}
                 </TableCell>
                 <TableCell style={{ width: 300 }}>
                   {transaction.description}
-                </TableCell>                
+                </TableCell>
                 <TableCell style={{ width: 150 }}>
                   {transaction.spentBy}
                 </TableCell>

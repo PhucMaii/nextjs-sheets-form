@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import POST from './POST';
-import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
+import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -20,4 +20,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default withAdminAuthGuard(handler);
+export default withDriverAuthGuard(handler);

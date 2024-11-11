@@ -81,10 +81,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
       return acc;
     }, []);
+
     // Check if vendor has expense on that date
     const existingVendorExpense = await prisma.expense.findMany({
       where: {
         invoice: invoice,
+        date: date,
         vendors: {
           some: {
             vendorId: {
@@ -98,7 +100,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     if (existingVendorExpense.length > 0) {
       return res
         .status(409)
-        .json({ error: `Expense Already Exists For ${invoice}` });
+        .json({ error: `Expense Already Exists For "${invoice}" On ${date}` });
     }
 
     const newExpense = await prisma.expense.create({
@@ -114,7 +116,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdBy: `Driver - ${driver.name}`,
       },
     });
-
 
     const inventoryItems = await prisma.inventoryItem.findMany({});
     // Create ordered items
@@ -137,7 +138,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         });
 
         if (!existedItem) {
-          continue;
+          return res.status(404).json({
+            error:
+              'Driver Can Only Select Inventory Items, Not Allow To Create New Items',
+          });
         }
 
         await prisma.inventoryItem.update({
@@ -145,14 +149,29 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             id: existedItem.id,
           },
           data: {
-            quantity: existedItem.quantity - item.quantity,
+            quantity: existedItem.quantity + item.quantity,
             unitPrice: item.unitPrice,
           },
-        })
+        });
       }
     }
 
-    
+    // Connect Vendors and Expense
+    if (vendors.length > 0) {
+      await prisma.vendorExpense.createMany({
+        data: vendors.map((vendor: any) => {
+          return {
+            expenseId: newExpense.id,
+            vendorId: vendor,
+          };
+        }),
+      });
+    }
+
+    return res.status(201).json({
+      data: newExpense,
+      message: 'Stock Purchased Created Successfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

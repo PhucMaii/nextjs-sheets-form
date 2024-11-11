@@ -71,13 +71,16 @@ export default function StockPurchased({
   const { date, SelectDate } = useSelectDate(todayString, true);
 
   // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
-  const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+  const [vendors] = SWRFetchData(
+    role === USER_ROLE.ADMIN
+      ? `${API_URL.ADMIN}/vendors`
+      : `${API_URL.DRIVER}/vendors`,
+  );
 
   const sortedVendors = useMemo(() => {
     if (!vendors?.data) {
       return [];
     }
-
 
     const vendorsSorted = [...vendors.data].sort((a: any, b: any) => {
       return a?.name?.localeCompare(b?.name);
@@ -143,6 +146,17 @@ export default function StockPurchased({
       return;
     }
 
+    if (role === USER_ROLE.DRIVER) {
+      const existingItemInVendor = vendorItems.find((item: any) => {
+        return item.name === promptedItem.name;
+      });
+
+      if (!existingItemInVendor) {
+        showNotification('error', 'Item not found in vendor');
+        return;
+      }
+    }
+
     const existingItem = purchasedItems.find((item: any) => {
       return item.name === promptedItem.name;
     });
@@ -188,7 +202,6 @@ export default function StockPurchased({
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
-      console.log({item, targetItem})
       // If it is a new item
       if (targetItem.id < 1) {
         if (item.name === targetItem.name) {
@@ -231,7 +244,10 @@ export default function StockPurchased({
       return;
     }
 
-    if (newExpense.spentBy === '-- Choose who spent --') {
+    if (
+      newExpense.spentBy === '-- Choose who spent --' &&
+      role === USER_ROLE.ADMIN
+    ) {
       showNotification('error', 'Please select who spent');
       return;
     }
@@ -244,17 +260,21 @@ export default function StockPurchased({
     setIsLoading(true);
     try {
       const createdAt = generateCurrentTime();
-      const response = await axios.post(`${API_URL.ADMIN}/inventory/expenses`, {
-        date,
-        amount: totalAmount,
-        description: newExpense.description,
-        paymentMethodId: newExpense.paymentMethodId,
-        spentBy: newExpense.spentBy,
-        invoice: newExpense.invoice,
-        createdAt,
-        codBoardId: codBoardId,
-        items: purchasedItems,
-      });
+
+      const response = await axios.post(
+        `${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/inventory/expenses`,
+        {
+          date,
+          amount: totalAmount,
+          description: newExpense.description,
+          paymentMethodId: newExpense.paymentMethodId,
+          spentBy: newExpense.spentBy,
+          invoice: newExpense.invoice,
+          createdAt,
+          codBoardId: codBoardId,
+          items: purchasedItems,
+        },
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -269,9 +289,10 @@ export default function StockPurchased({
         ...newExpense,
         amount: 0,
         description: '',
-        paymentMethodId: -1,
+        paymentMethodId: role === USER_ROLE.ADMIN ? -1 : mainPaymentMethodId,
         spentBy: '-- Choose who spent --',
         invoice: '',
+        ...(defaultValue ? defaultValue : {}),
       });
       setIsLoading(false);
     } catch (error: any) {
@@ -295,41 +316,46 @@ export default function StockPurchased({
 
   return (
     <>
-      <AddVendor
-        showNotification={showNotification}
-        open={isOpenAddVendor}
-        onClose={() => setIsOpenAddVendor(false)}
-      />
+      {role === USER_ROLE.ADMIN && (
+        <AddVendor
+          showNotification={showNotification}
+          open={isOpenAddVendor}
+          onClose={() => setIsOpenAddVendor(false)}
+        />
+      )}
       <Box display="flex" flexDirection="column" gap={3}>
         <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <FormControl fullWidth>
-            <InputLabel id="vendor">Vendor</InputLabel>
-            <Select
-              id="vendor"
-              label="Vendor"
-              value={selectedVendorId}
-              onChange={(e) =>
-                setSelectedVendorId(e.target.value as number)
-              }
-              fullWidth
-              disabled={purchasedItems.length > 0 && purchasedItems[0].vendorId === selectedVendorId}
-            >
-              <MenuItem value={-1} disabled>
-                -- Choose a vendor --
-              </MenuItem>
-              <MenuItem onClick={() => setIsOpenAddVendor(true)}>
-                + Create new vendor
-              </MenuItem>
-              {sortedVendors.length > 0 &&
-                sortedVendors.map((vendor: any, index: number) => (
-                  <MenuItem key={index} value={vendor.id}>
-                    {vendor.name}
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel id="vendor">Vendor</InputLabel>
+              <Select
+                id="vendor"
+                label="Vendor"
+                value={selectedVendorId}
+                onChange={(e) => setSelectedVendorId(e.target.value as number)}
+                fullWidth
+                disabled={
+                  purchasedItems.length > 0 &&
+                  purchasedItems[0].vendorId === selectedVendorId
+                }
+              >
+                <MenuItem value={-1} disabled>
+                  -- Choose a vendor --
+                </MenuItem>
+                {role === USER_ROLE.ADMIN && (
+                  <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                    + Create new vendor
                   </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-        </Grid>
+                )}
+                {sortedVendors.length > 0 &&
+                  sortedVendors.map((vendor: any, index: number) => (
+                    <MenuItem key={index} value={vendor.id}>
+                      {vendor.name}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </Grid>
           <Grid item xs={12}>
             <Autocomplete
               value={promptedItem.name}
@@ -344,7 +370,11 @@ export default function StockPurchased({
                 const isExisting = options.some(
                   (option) => inputValue === option.name,
                 );
-                if (inputValue !== '' && !isExisting) {
+                if (
+                  role === USER_ROLE.ADMIN &&
+                  inputValue !== '' &&
+                  !isExisting
+                ) {
                   filtered.push({
                     inputValue,
                     title: `Add "${inputValue}"`,
@@ -447,6 +477,7 @@ export default function StockPurchased({
               onChange={(e: any) =>
                 setPromptedItem({ ...promptedItem, unitPrice: +e.target.value })
               }
+              disabled={role === USER_ROLE.DRIVER}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -491,6 +522,7 @@ export default function StockPurchased({
                       onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
                       type="number"
                       inputProps={{ min: 0 }}
+                      disabled={role === USER_ROLE.DRIVER}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -565,29 +597,41 @@ export default function StockPurchased({
             </MenuItem>
             {paymentMethods.length > 0 &&
               paymentMethods.map((item: any) => {
-                return <MenuItem value={item.id} disabled={role !== USER_ROLE.ADMIN && item.id === mainPaymentMethodId}>{item.name}</MenuItem>;
+                return (
+                  <MenuItem
+                    value={item.id}
+                    disabled={
+                      role !== USER_ROLE.ADMIN &&
+                      item.id === mainPaymentMethodId
+                    }
+                  >
+                    {item.name}
+                  </MenuItem>
+                );
               })}
           </Select>
         </Box>
 
-        {role === USER_ROLE.ADMIN && <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="h6">Driver</Typography>
-          <Select
-            fullWidth
-            value={newExpense.spentBy}
-            onChange={(e) =>
-              setNewExpense({ ...newExpense, spentBy: e.target.value })
-            }
-          >
-            <MenuItem value={'-- Choose who spent --'} disabled>
-              -- Choose who spent --
-            </MenuItem>
-            {adminsAndDrivers.length > 0 &&
-              adminsAndDrivers.map((person: string) => {
-                return <MenuItem value={person}>{person}</MenuItem>;
-              })}
-          </Select>
-        </Box>}
+        {role === USER_ROLE.ADMIN && (
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Driver</Typography>
+            <Select
+              fullWidth
+              value={newExpense.spentBy}
+              onChange={(e) =>
+                setNewExpense({ ...newExpense, spentBy: e.target.value })
+              }
+            >
+              <MenuItem value={'-- Choose who spent --'} disabled>
+                -- Choose who spent --
+              </MenuItem>
+              {adminsAndDrivers.length > 0 &&
+                adminsAndDrivers.map((person: string) => {
+                  return <MenuItem value={person}>{person}</MenuItem>;
+                })}
+            </Select>
+          </Box>
+        )}
 
         <LoadingButton
           variant="contained"

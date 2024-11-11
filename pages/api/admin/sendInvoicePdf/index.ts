@@ -48,14 +48,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         deliveryDate: {
           in: listOfDateString,
-        }
+        },
       },
       include: {
         items: true,
         user: true,
       },
     });
-
 
     const ordersWithItemTotalPrice = incompletedOrders.map((order: Order) => {
       const items = order.items.map((item: any) => {

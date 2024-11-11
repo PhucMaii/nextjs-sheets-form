@@ -60,34 +60,35 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (dateBoard.expense.length > 0) {
-      const updatedExpense = await prisma.expense.update({
-        where: {
-          id: dateBoard.expense[0].id,
-        },
-        data: {
-          amount: amount,
-          date: date,
-          description: description,
-        },
-      });
+    // Create new expense
+    // if (dateBoard.expense.length > 0) {
+    //   const updatedExpense = await prisma.expense.update({
+    //     where: {
+    //       id: dateBoard.expense[0].id,
+    //     },
+    //     data: {
+    //       amount: amount,
+    //       date: date,
+    //       description: description,
+    //     },
+    //   });
 
-      const newBalance =
-        existingMethod.balance + amount - dateBoard.expense[0].amount;
+    //   const newBalance =
+    //     existingMethod.balance + amount - dateBoard.expense[0].amount;
 
-      await prisma.paymentMethod.update({
-        where: {
-          id: paymentMethodId,
-        },
-        data: {
-          balance: newBalance,
-        },
-      });
+    //   await prisma.paymentMethod.update({
+    //     where: {
+    //       id: paymentMethodId,
+    //     },
+    //     data: {
+    //       balance: newBalance,
+    //     },
+    //   });
 
-      return res
-        .status(200)
-        .json({ data: updatedExpense, message: 'Update Expense Successfully' });
-    }
+    //   return res
+    //     .status(200)
+    //     .json({ data: updatedExpense, message: 'Update Expense Successfully' });
+    // }
 
     const newExpense = await prisma.expense.create({
       data: {
