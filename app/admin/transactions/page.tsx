@@ -55,7 +55,7 @@ export default function Transactions() {
 
   useEffect(() => {
     if (!transactions) {
-      setIsLoading(true)
+      setIsLoading(true);
     } else {
       setIsLoading(false);
       setDisplayTransactions(transactions?.data || []);
@@ -67,7 +67,7 @@ export default function Transactions() {
       const newTransactions = handleSearch(
         debouncedKeywords,
         transactions?.data,
-        ['description', 'spentBy', 'id'],
+        ['description', 'spentBy', 'invoice'],
       );
       setDisplayTransactions(newTransactions);
     } else {
@@ -166,10 +166,14 @@ export default function Transactions() {
             {actions}
           </Grid>
         </Grid>
-        {isLoading ? (<LoadingComponent />) : <TransactionsTable
-          transactions={displayTransactions}
-          showNotification={showNotification}
-        />}
+        {isLoading ? (
+          <LoadingComponent />
+        ) : (
+          <TransactionsTable
+            transactions={displayTransactions}
+            showNotification={showNotification}
+          />
+        )}
       </ShadowSection>
     </Sidebar>
   );

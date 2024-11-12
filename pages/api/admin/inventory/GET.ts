@@ -22,7 +22,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       const formattedInventory =
         formatInventoryWithTotalValueAndStatus(inventory);
-  
+
       return res.status(200).json({
         data: formattedInventory,
         message: 'Fetch Inventory Successfully',
@@ -37,15 +37,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         vendor: true,
       },
     });
-  
+
     const formattedInventory =
       formatInventoryWithTotalValueAndStatus(inventory);
-  
+
     return res.status(200).json({
       data: formattedInventory,
       message: 'Fetch Inventory Successfully',
     });
-
   } catch (error: any) {
     console.log('Internal Server Error :', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

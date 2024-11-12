@@ -4,7 +4,7 @@ import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import StockPurchased from '../../Expense/StockPurchased';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
@@ -48,6 +48,7 @@ export default function AddStockPurchased({
           showNotification={showNotification}
           paymentMethods={paymentMethods?.data || []}
           adminsAndDrivers={adminsAndDrivers}
+          role={USER_ROLE.ADMIN}
         />
       </BoxModal>
     </Modal>

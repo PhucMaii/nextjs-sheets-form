@@ -7,14 +7,14 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ShadowSection } from '../../reports/styled';
 import RememberMeIcon from '@mui/icons-material/RememberMe';
 import StatusText from '../StatusText';
 import CheckIcon from '@mui/icons-material/Check';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { grey } from '@mui/material/colors';
-import { IBoard } from '@/app/utils/type';
+import { IBoard, IExpense } from '@/app/utils/type';
 import { COD_STATUS, ORDER_STATUS } from '@/app/utils/enum';
 import PendingIcon from '@mui/icons-material/Pending';
 import useFilterOrders from '@/hooks/useFilterOrders';
@@ -23,7 +23,8 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import EditCashInput from '../Modals/edit/EditCashInput';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import AddExpense from '../Modals/add/AddExpense';
+// import AddExpense from '../Modals/add/AddExpense';
+import ShowExpenses from '../Modals/ShowExpenses';
 
 interface IProps {
   boardData: IBoard;
@@ -38,13 +39,23 @@ export default function CODBoardSummary({
   handleDeleteBoard,
   showNotification,
 }: IProps) {
-  const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
+  const [isOpenShowExpenses, setIsOpenShowExpenses] = useState<boolean>(false);
   const [isOpenEditCashInput, setIsOpenEditCashInput] =
     useState<boolean>(false);
 
   const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
   }, 0);
+
+  const totalExpense = useMemo(() => {
+    if (!boardData?.expense || boardData?.expense.length === 0) {
+      return 0;
+    }
+
+    return boardData?.expense.reduce((acc: number, expense: IExpense) => {
+      return acc + expense.amount;
+    }, 0);
+  }, [boardData]);
 
   const uncollectedOrders = useFilterOrders(boardData.orders, [
     ORDER_STATUS.INCOMPLETED,
@@ -95,9 +106,16 @@ export default function CODBoardSummary({
 
   return (
     <>
-      <AddExpense
-        open={isOpenAddExpense}
-        onClose={() => setIsOpenAddExpense(false)}
+      <ShowExpenses
+        open={isOpenShowExpenses}
+        onClose={() => setIsOpenShowExpenses(false)}
+        expenses={boardData?.expense || []}
+        showNotification={showNotification}
+        boardData={boardData}
+      />
+      {/* <AddExpense
+        open={isOpenShowExpenses}
+        onClose={() => setIsOpenShowExpenses(false)}
         showNotification={showNotification}
         // handleAddExpenseId={handleAddExpenseId}
         defaultValue={{
@@ -105,7 +123,7 @@ export default function CODBoardSummary({
           spentBy: `Driver - ${boardData.driver.name}`,
         }}
         codBoardId={boardData.id}
-      />
+      /> */}
       <EditCashInput
         open={isOpenEditCashInput}
         onClose={() => setIsOpenEditCashInput(false)}
@@ -193,10 +211,7 @@ export default function CODBoardSummary({
               <Box display="flex" alignItems="flex-start">
                 <Box display="flex" flexDirection="column" gap={0.5}>
                   <Typography variant="h5" textAlign="center">
-                    $
-                    {(boardData?.expense &&
-                      boardData?.expense[0]?.amount?.toFixed(2)) ||
-                      0}
+                    ${totalExpense}
                   </Typography>
                   <Typography variant="body2" color={grey[600]}>
                     Expense
@@ -205,7 +220,7 @@ export default function CODBoardSummary({
 
                 <IconButton
                   size="small"
-                  onClick={() => setIsOpenAddExpense(true)}
+                  onClick={() => setIsOpenShowExpenses(true)}
                 >
                   <EditIcon fontSize="small" />
                 </IconButton>

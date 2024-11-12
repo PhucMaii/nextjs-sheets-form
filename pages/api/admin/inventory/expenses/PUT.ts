@@ -60,15 +60,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const existingInvoice = await prisma.expense.findFirst({
         where: {
           invoice: invoice,
+          date: date,
           vendors: {
             some: {
               vendorId: updatedItems[0].vendorId,
-            }
-          }
+            },
+          },
         },
       });
 
-      if (existingInvoice) {  
+      if (existingInvoice) {
         return res.status(400).json({ error: 'Invoice Number already exists' });
       }
     }
@@ -111,53 +112,47 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
 
       const user = await getUserInfo(req, res);
+
+      const inventoryItems = await prisma.inventoryItem.findMany({
+        include: {
+          vendor: true,
+        },
+      });
+
       // Update inventory items quantity
       for (const item of updatedItems) {
-        const oldInventoryItem: any = existingExpense.orderedItems.find(
-          (orderedItem: any) => {
-            return orderedItem.id === item.id;
+        const itemExistedInventory = inventoryItems.find(
+          (inventoryItem: any) => {
+            return inventoryItem.name === item.name;
           },
         );
 
         // Item already existed in inventory
-        if (item.inventoryItem) {
-          const existingItem = await prisma.inventoryItem.findUnique({
+        if (itemExistedInventory) {
+          const itemInBill = existingExpense.orderedItems.find(
+            (orderedItem: any) => {
+              return orderedItem.id === item.id;
+            },
+          );
+          const newQuantity =
+            item.inventoryItem.quantity -
+            (itemInBill?.quantity || 0) +
+            item.quantity;
+          await prisma.inventoryItem.update({
             where: {
               id: item.inventoryItem.id,
             },
+            data: {
+              quantity: newQuantity,
+              unitPrice: item.unitPrice,
+            },
           });
-
-          if (!existingItem) {
-            await prisma.inventoryItem.create({
-              data: {
-                name: item.name,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                unit: item?.inventoryItem?.unit || 'bags',
-                vendorId: item.inventoryItem.vendorId,
-                createdAt: updatedAt,
-                createdBy: `Admin - ${user?.clientName}`,
-              },
-            });
-          } else {
-            const newQuantity = item.inventoryItem.quantity - oldInventoryItem.quantity + item.quantity;
-            await prisma.inventoryItem.update({
-              where: {
-                id: item.inventoryItem.id,
-              },
-              data: {
-                quantity: newQuantity,
-                unitPrice: item.unitPrice,
-              },
-            });
-          }
-
         } else {
           const vendor: any = await prisma.vendorExpense.findFirst({
             where: {
               expenseId: existingExpense.id,
-            }
-          })
+            },
+          });
           // New item
           await prisma.inventoryItem.create({
             data: {

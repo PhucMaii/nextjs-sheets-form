@@ -33,7 +33,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         name,
         vendorId,
         id: {
-          not: id,
+          not: existingInventoryItem.id,
         },
       },
     });

@@ -62,39 +62,39 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (existingBoard.expense.length > 0) {
-      const updatedExpense = await prisma.expense.update({
-        where: {
-          id: existingBoard.expense[0].id,
-        },
-        data: {
-          date,
-          amount,
-          description,
-          paymentMethodId,
-          spentBy,
-          createdAt,
-          createdBy,
-        },
-      });
+    // if (existingBoard.expense.length > 0) {
+    //   const updatedExpense = await prisma.expense.update({
+    //     where: {
+    //       id: existingBoard.expense[0].id,
+    //     },
+    //     data: {
+    //       date,
+    //       amount,
+    //       description,
+    //       paymentMethodId,
+    //       spentBy,
+    //       createdAt,
+    //       createdBy,
+    //     },
+    //   });
 
-      const newBalance =
-        existingMethod.balance + amount - existingBoard.expense[0].amount;
+    //   const newBalance =
+    //     existingMethod.balance + amount - existingBoard.expense[0].amount;
 
-      await prisma.paymentMethod.update({
-        where: {
-          id: paymentMethodId,
-        },
-        data: {
-          balance: newBalance,
-        },
-      });
+    //   await prisma.paymentMethod.update({
+    //     where: {
+    //       id: paymentMethodId,
+    //     },
+    //     data: {
+    //       balance: newBalance,
+    //     },
+    //   });
 
-      return res.status(200).json({
-        message: 'Expense Updated Successfully',
-        data: updatedExpense,
-      });
-    }
+    //   return res.status(200).json({
+    //     message: 'Expense Updated Successfully',
+    //     data: updatedExpense,
+    //   });
+    // }
 
     const user = await getUserInfo(req, res);
 
