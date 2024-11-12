@@ -13,10 +13,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prisma = new PrismaClient();
     const { id, orderId, quantity, price, orderTotalPrice } = req.body as any;
 
+    const existingOrderedItem = await prisma.orderedItems.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingOrderedItem) {
+      return res.status(404).json({ error: 'Item Not Found' });
+    }
+
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
 
-    const data = await prisma.orderedItems.update({
+    const updatedOrderedItem = await prisma.orderedItems.update({
       where: {
         id,
       },
@@ -26,6 +36,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    if (updatedOrderedItem?.inventoryItemId) {
+      await updateSingleInventoryItem(updatedOrderedItem.inventoryItemId, quantity, existingOrderedItem.quantity)
+    }
+
     const updatedOrder = await updateOrderTotalPrice(
       orderId,
       orderTotalPrice,
@@ -33,7 +47,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     return res.status(200).json({
-      data,
+      data: updatedOrderedItem,
       updatedOrder,
       message: 'Update Data Successfully',
     });
@@ -43,3 +57,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAdminAuthGuard(handler);
+
+export const updateSingleInventoryItem = async (inventoryItemId: number, newQuantity: number, previousQuantity: number) => {
+  try {
+    const prisma = new PrismaClient();
+
+    const inventoryItem = await prisma.inventoryItem.findUnique({
+      where: {
+        id: inventoryItemId,
+      },
+    });
+
+    if (inventoryItem) {
+      // Subtract the new quantity from inventory quantity, then add back the previous quantity
+      const updatedQuantity = inventoryItem.quantity - newQuantity + previousQuantity;
+      await prisma.inventoryItem.update({
+        where: {
+          id: inventoryItemId,
+        },
+        data: {
+          quantity: updatedQuantity,
+        },
+      });
+    }
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+  }
+}

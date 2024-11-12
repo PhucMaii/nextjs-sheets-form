@@ -2,6 +2,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
+import { updateSingleInventoryItem } from '../orderedItems/single';
 
 interface BodyPropTypes {
   orderId: number;
@@ -22,6 +23,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateData.status = status;
     }
 
+    const existingOrder = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      }
+    });
+
+    if (!existingOrder) {
+      return res.status(404).json({
+        error: 'No Order Found'
+      });
+    }
+
     // Get person update info
     const adminUpdate: any = await getUserInfo(req, res);
 
@@ -35,7 +48,29 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         updatedBy: `Admin - ${adminUpdate.clientName}`,
         updateTime,
       },
+      include: {
+        items: true,
+      }
     });
+
+    // Update Inventory Item
+    // From other status to VOID -> Inventory Item get restock
+    if (existingOrder.status !== ORDER_STATUS.VOID && updatedOrder.status === ORDER_STATUS.VOID) {
+      for (const item of updatedOrder.items) {
+        if (item?.inventoryItemId) {
+          await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+        }
+      }
+    }
+    
+    // From VOID to other status -> Inventory Item Stock Is Subtracted
+    if (existingOrder.status === ORDER_STATUS.VOID && updatedOrder.status !== ORDER_STATUS.VOID) {
+      for (const item of updatedOrder.items) {
+        if (item?.inventoryItemId) {
+          await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+        }
+      }
+    }
 
     return res.status(200).json({
       data: updatedOrder,

@@ -10,6 +10,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import order from '../../order';
 import { getUserInfo } from '../../utils/auth';
 import { useRootElementName } from '@mui/base';
+import { updateSingleInventoryItem } from './single';
 
 interface UpdatedItem {
   id: number;
@@ -18,7 +19,7 @@ interface UpdatedItem {
   quantity: number;
   orderId: number;
   totalPrice: number;
-  // subCategoryId?: number;
+  inventoryItemId?: number;
 }
 
 export enum UpdateOption {
@@ -35,7 +36,6 @@ interface BodyType {
   categoryName?: string;
   userId: number;
   userCategoryId: number;
-  // userSubCategoryId: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -50,7 +50,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       categoryName,
       userId,
       userCategoryId,
-      // userSubCategoryId,
     } = updatedData as BodyType;
 
     // Bad cases
@@ -74,7 +73,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    let newTotalPrice = 0;
     for (const item of updatedItems) {
+      newTotalPrice += item.totalPrice;
+
       // Check does system has that item
       if (item.id) {
         const existingItem = await prisma.orderedItems.findUnique({
@@ -104,6 +106,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           return item.name !== updatedItem.name;
         });
         orderedItemList = newList;
+
+        // Inventory Update
+        if (existingItem?.inventoryItemId) {
+          await updateSingleInventoryItem(existingItem.inventoryItemId, item.quantity, existingItem.quantity);
+        }
+
       } else {
         // Check does item name exist already in that order
         const foundItem = await prisma.orderedItems.findFirst({
@@ -131,6 +139,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             return item.id !== foundItem.id;
           });
           orderedItemList = newList;
+
+          // Inventory Update
+          if (foundItem?.inventoryItemId) {
+            await updateSingleInventoryItem(foundItem.inventoryItemId, item.quantity, foundItem.quantity);
+          }
+
         } else {
           // if not, create it in the same order id
           await prisma.orderedItems.create({
@@ -141,18 +155,37 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               quantity: item.quantity,
             },
           });
+
+          if (item?.inventoryItemId) {
+            await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+          }
         }
       }
     }
 
     // Delete the rest of item that admin wants to delete it
     if (orderedItemList.length > 0) {
+      // for (const item of orderedItemList) {
+      //   await prisma.orderedItems.delete({
+      //     where: {
+      //       id: item.id,
+      //     },
+      //   });
+      // }
+      const idToDelete = orderedItemList.map((order: any) => order.id);
+      await prisma.orderedItems.deleteMany({
+        where: {
+          id: {
+            in: idToDelete
+          }
+        }
+      });
+
+      // Inventory item update
       for (const item of orderedItemList) {
-        await prisma.orderedItems.delete({
-          where: {
-            id: item.id,
-          },
-        });
+        if (item?.inventoryItemId) {
+          await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+        }
       }
     }
 
@@ -222,8 +255,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           await updateScheduleOrderItems(
             updatedItems,
             scheduleOrder,
-            // userSubCategoryId,
-            // userSubCategoryId,
             userId,
           );
         }
@@ -259,15 +290,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       let fetchCondition: any = { categoryId: userCategoryId };
 
-      // if (userSubCategoryId) {
-      //   fetchCondition.subCategoryId = userSubCategoryId;
-      // }
-
-      // Get beansprouts based on subcateogry id if it is provided
-      // const beansprouts = await prisma.item.findMany({
-      //   where: fetchCondition,
-      // });
-
       // Get the rest of items
       const itemList = await prisma.item.findMany({
         where: {
@@ -288,13 +310,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
 
         const updateFields: any = { price: item.price };
-
-        // if (
-        //   item.subCategoryId &&
-        //   item.subCategoryId !== existingItem?.subCategoryId
-        // ) {
-        //   updateFields.subCategoryId = item.subCategoryId;
-        // }
 
         if (existingItem) {
           const updatedItem = await prisma.item.update({
@@ -441,20 +456,12 @@ const formatUpdatedItems = async (
 ) => {
   const formattedUpdatedItems = await Promise.all(
     updatedItems.map(async (item: UpdatedItem) => {
-      // if (item?.subCategoryId && item.subCategoryId === subcategoryId) {
-      //   return {
-      //     name: item.name,
-      //     price: item.price,
-      //     categoryId: categoryId,
-      //     subCategoryId: item.subCategoryId,
-      //     availability: true,
-      //   };
-      // }
       return {
         name: item.name,
         price: item.price,
         categoryId: categoryId,
         availability: true,
+        inventoryItemId: item?.inventoryItemId || null
       };
     }),
   );
@@ -511,8 +518,6 @@ const generateScheduleOrderItems = (
 const updateScheduleOrderItems = async (
   updatedItems: UpdatedItem[],
   scheduleOrder: any,
-  // subCategoryId: number | null,
-  // baseSubCategoryId: number | null,
   userId: number,
 ) => {
   const prisma = new PrismaClient();
