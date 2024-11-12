@@ -47,6 +47,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         ...updateData,
         updatedBy: `Admin - ${adminUpdate.clientName}`,
         updateTime,
+        isVoid: false,
       },
       include: {
         items: true,

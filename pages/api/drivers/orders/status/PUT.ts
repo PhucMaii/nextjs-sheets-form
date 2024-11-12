@@ -1,4 +1,5 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { restockInventoryItem, subtractInventoryItem } from '@/pages/api/admin/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -50,6 +51,27 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         items: true,
       },
     });
+
+    // Inventory Item Update
+    // From other status to VOID -> Inventory Item get restock
+    if (existingOrder.status !== ORDER_STATUS.VOID && updatedOrder.status === ORDER_STATUS.VOID) {
+      for (const item of updatedOrder.items) {
+        if (item?.inventoryItemId) {
+          // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+          await restockInventoryItem(item.inventoryItemId, item.quantity);
+        }
+      }
+    }
+    
+    // From VOID to other status -> Inventory Item Stock Is Subtracted
+    if (existingOrder.status === ORDER_STATUS.VOID && updatedOrder.status !== ORDER_STATUS.VOID) {
+      for (const item of updatedOrder.items) {
+        if (item?.inventoryItemId) {
+          // await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+          await subtractInventoryItem(item.inventoryItemId, item.quantity);
+        }
+      }
+    }
 
     const newItems = updatedOrder.items.map((item: OrderedItems) => {
       const totalPrice = item.quantity * item.price;

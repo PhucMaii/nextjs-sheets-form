@@ -33,6 +33,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           status,
           updatedBy: `Admin - ${adminCreate.clientName}`,
           updateTime,
+          isVoid: false,
         },
         include: {
           items: true,
@@ -100,7 +101,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
       },
       data: {
-        status
+        status,
+        isVoid: false
       }
     });
 

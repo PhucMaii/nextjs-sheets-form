@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
 import { updateOrderTotalPrice } from '../../admin/orderedItems/PUT';
 import { getDriverInfo } from '../../utils/auth';
+import { updateSingleInventoryItem } from '../../admin/orderedItems/single';
 
 interface IBody {
   id: number; // ordered item id
@@ -33,7 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const data = await prisma.orderedItems.update({
+    const updatedOrderedItem = await prisma.orderedItems.update({
       where: {
         id,
       },
@@ -42,6 +43,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         price,
       },
     });
+
+    // Update Inventory Item Quantity
+    if (updatedOrderedItem?.inventoryItemId) {
+      await updateSingleInventoryItem(
+        updatedOrderedItem.inventoryItemId,
+        updatedOrderedItem.quantity,
+        existingOrderedItem.quantity
+      );
+    }
 
     // Get driver update info
     const driverUpdate: any = await getDriverInfo(req, res);
@@ -53,7 +63,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     return res.status(200).json({
-      data,
+      data: updatedOrderedItem,
       message: 'Item Updated Successfully',
     });
   } catch (error) {
