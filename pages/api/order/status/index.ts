@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../../utils/email';
+import { restockInventoryItem } from '../../admin/orderedItems/single';
 
 interface BodyTypes {
   orderId: number;
@@ -21,6 +22,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const prisma = new PrismaClient();
+
+    // Updated Status will always be VOID
     const { orderId, updatedStatus }: BodyTypes = req.body;
 
     const session: any = await getServerSession(req, res, authOptions);
@@ -62,11 +65,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: updatedStatus,
         isVoid: true,
         updateTime: new Date(),
+        updatedBy: `Client - ${existingUser.clientName}`,
       },
     });
 
     let total = 0;
     const itemList: any = [];
+    const orderDetails: any = {};
+
     for (const item of existingOrder.items) {
       // Update each item
       const newItem = await prisma.orderedItems.update({
@@ -84,6 +90,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
       });
+
+      // Restock inventory item
+      if (item?.inventoryItemId) {
+        await restockInventoryItem(item.inventoryItemId, item.quantity);
+      }
+
+      // Format order to send email
+      orderDetails[item.name] = {
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.quantity * item.price,
+      };
     }
 
     const userCategory = await prisma.category.findUnique({
@@ -91,15 +109,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         id: existingUser?.categoryId,
       },
     });
-
-    const orderDetails: any = {};
-    for (const item of existingOrder.items) {
-      orderDetails[item.name] = {
-        quantity: item.quantity,
-        price: item.price,
-        totalPrice: item.quantity * item.price,
-      };
-    }
 
     // Notify Email for admin
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;

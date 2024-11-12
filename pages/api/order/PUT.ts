@@ -5,6 +5,7 @@ import { authOptions } from '../auth/[...nextauth]';
 import { pusherServer } from '@/app/pusher';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../utils/email';
+import { updateSingleInventoryItem } from '../admin/orderedItems/single';
 
 interface BodyProps {
   deliveryDate: string;
@@ -46,7 +47,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     let total = 0;
     const itemList: any = [];
+    const orderDetails: any = {};
+
     for (const item of body.items) {
+      const existingItem = await prisma.orderedItems.findUnique({
+        where: {
+          id: item.id
+        }
+      });
+
+      if (!existingItem) {
+        return res.status(404).json({
+          error: 'Item Not Found'
+        })
+      }
+      
       // Update each item
       const newItem = await prisma.orderedItems.update({
         where: {
@@ -63,6 +78,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
       });
+
+      // Update Inventory Item
+      if (item?.inventoryItemId) {
+        await updateSingleInventoryItem(item.inventoryItemId, newItem.quantity, existingItem.quantity);
+      }
+
+      // Format order to send email
+      orderDetails[item.name] = {
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.quantity * item.price,
+      };
     }
 
     // Apply new total price on order and update note
@@ -84,15 +111,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: existingUser?.categoryId,
       },
     });
-
-    const orderDetails: any = {};
-    for (const item of body.items) {
-      orderDetails[item.name] = {
-        quantity: item.quantity,
-        price: item.price,
-        totalPrice: item.quantity * item.price,
-      };
-    }
 
     // Notify Email for admin
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;

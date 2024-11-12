@@ -2,7 +2,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { getUserInfo } from '@/pages/api/utils/auth';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { updateSingleInventoryItem } from '../../orderedItems/single';
+import { restockInventoryItem, subtractInventoryItem } from '../../orderedItems/single';
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   const prisma = new PrismaClient();
@@ -59,7 +59,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       if (existingOrder.status !== ORDER_STATUS.VOID && updatedOrder.status === ORDER_STATUS.VOID) {
         for (const item of updatedOrder.items) {
           if (item?.inventoryItemId) {
-            await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+            // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+            await restockInventoryItem(item.inventoryItemId, item.quantity);
           }
         }
       }
@@ -68,7 +69,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       if (existingOrder.status === ORDER_STATUS.VOID && updatedOrder.status !== ORDER_STATUS.VOID) {
         for (const item of updatedOrder.items) {
           if (item?.inventoryItemId) {
-            await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+            // await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+            await subtractInventoryItem(item.inventoryItemId, item.quantity);
           }
         }
       }
@@ -119,7 +121,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             continue;
           }
 
-          await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+          // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+          await restockInventoryItem(item.inventoryItemId, item.quantity)
         }
       }
     } 
@@ -140,7 +143,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             continue;
           }
 
-          await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+          // await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+          await subtractInventoryItem(item.inventoryItemId, item.quantity);
         }
       }
     }

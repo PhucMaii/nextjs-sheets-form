@@ -84,3 +84,19 @@ export const updateSingleInventoryItem = async (inventoryItemId: number, newQuan
     console.log('Internal Server Error: ', error);
   }
 }
+
+export const restockInventoryItem = async (inventoryItemId: number, restockQuantity: number) => {
+  try {
+    await updateSingleInventoryItem(inventoryItemId, 0, restockQuantity);
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+  }
+}
+
+export const subtractInventoryItem = async (inventoryItemId: number, subtractedQuantity: number) => {
+  try {
+    await updateSingleInventoryItem(inventoryItemId, subtractedQuantity, 0);
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+  }
+}

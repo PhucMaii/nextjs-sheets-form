@@ -10,7 +10,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import order from '../../order';
 import { getUserInfo } from '../../utils/auth';
 import { useRootElementName } from '@mui/base';
-import { updateSingleInventoryItem } from './single';
+import { subtractInventoryItem, updateSingleInventoryItem } from './single';
 
 interface UpdatedItem {
   id: number;
@@ -157,7 +157,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           });
 
           if (item?.inventoryItemId) {
-            await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
+            await subtractInventoryItem(item.inventoryItemId, item.quantity)
           }
         }
       }

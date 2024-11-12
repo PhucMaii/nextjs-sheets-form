@@ -9,6 +9,7 @@ import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { pusherServer } from '@/app/pusher';
 import { normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
+import { updateSingleInventoryItem } from '../admin/orderedItems/single';
 
 interface RequestQuery {
   userId?: string;
@@ -320,6 +321,15 @@ const overrideOrder = async (
     let total = 0;
     const itemList: any = [];
     for (const item of newItems) {
+      const existingItem = await prisma.orderedItems.findUnique({
+        where: {
+          id: item.id,
+        }
+      });
+
+      if (!existingItem) {
+        continue;
+      }
       // Update each item
       const newItem = await prisma.orderedItems.update({
         where: {
@@ -336,6 +346,11 @@ const overrideOrder = async (
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
       });
+
+      // Update inventory item
+      if (item?.inventoryItemId) {
+        await updateSingleInventoryItem(item.inventoryItemId, newItem.quantity, existingItem.quantity);
+      }
     }
 
     const updatedOrder = await prisma.orders.update({
