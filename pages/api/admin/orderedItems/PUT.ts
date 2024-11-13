@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ScheduledOrder } from '@/app/utils/type';
-import {
-  Item,
-  OrderedItems,
-  PrismaClient,
-  ScheduleOrders,
-} from '@prisma/client';
+import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import order from '../../order';
 import { getUserInfo } from '../../utils/auth';
-import { useRootElementName } from '@mui/base';
-import { subtractInventoryItem, updateSingleInventoryItem } from './single';
+import {
+  restockInventoryItem,
+  subtractInventoryItem,
+  updateSingleInventoryItem,
+} from './single';
 
 interface UpdatedItem {
   id: number;
@@ -45,7 +41,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const {
       orderId,
       updatedItems,
-      orderTotalPrice,
       updateOption,
       categoryName,
       userId,
@@ -109,9 +104,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Inventory Update
         if (existingItem?.inventoryItemId) {
-          await updateSingleInventoryItem(existingItem.inventoryItemId, item.quantity, existingItem.quantity);
+          await updateSingleInventoryItem(
+            existingItem.inventoryItemId,
+            item.quantity,
+            existingItem.quantity,
+          );
         }
-
       } else {
         // Check does item name exist already in that order
         const foundItem = await prisma.orderedItems.findFirst({
@@ -142,9 +140,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
           // Inventory Update
           if (foundItem?.inventoryItemId) {
-            await updateSingleInventoryItem(foundItem.inventoryItemId, item.quantity, foundItem.quantity);
+            await updateSingleInventoryItem(
+              foundItem.inventoryItemId,
+              item.quantity,
+              foundItem.quantity,
+            );
           }
-
         } else {
           // if not, create it in the same order id
           await prisma.orderedItems.create({
@@ -153,11 +154,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               orderId: orderId,
               price: item.price,
               quantity: item.quantity,
+              inventoryItemId: item?.inventoryItemId,
             },
           });
 
           if (item?.inventoryItemId) {
-            await subtractInventoryItem(item.inventoryItemId, item.quantity)
+            await subtractInventoryItem(item.inventoryItemId, item.quantity);
           }
         }
       }
@@ -176,15 +178,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       await prisma.orderedItems.deleteMany({
         where: {
           id: {
-            in: idToDelete
-          }
-        }
+            in: idToDelete,
+          },
+        },
       });
 
       // Inventory item update
       for (const item of orderedItemList) {
         if (item?.inventoryItemId) {
-          await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
+          await restockInventoryItem(item.inventoryItemId, item.quantity);
         }
       }
     }
@@ -193,7 +195,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const adminUpdate: any = await getUserInfo(req, res);
     await updateOrderTotalPrice(
       orderId,
-      orderTotalPrice,
+      newTotalPrice,
       `Admin - ${adminUpdate.clientName}`,
     );
 
@@ -252,11 +254,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       ) {
         // Update schedule order of this client
         for (const scheduleOrder of targetClient.scheduleOrders) {
-          await updateScheduleOrderItems(
-            updatedItems,
-            scheduleOrder,
-            userId,
-          );
+          await updateScheduleOrderItems(updatedItems, scheduleOrder, userId);
         }
       }
 
@@ -330,8 +328,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               name: item.name,
               categoryId: userCategoryId,
               price: item.price,
-              // subCategoryId: item.subCategoryId,
               availability: true,
+              inventoryItemId: item?.inventoryItemId,
             },
           });
         }
@@ -461,7 +459,7 @@ const formatUpdatedItems = async (
         price: item.price,
         categoryId: categoryId,
         availability: true,
-        inventoryItemId: item?.inventoryItemId || null
+        inventoryItemId: item?.inventoryItemId || null,
       };
     }),
   );

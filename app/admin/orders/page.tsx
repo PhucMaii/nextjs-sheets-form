@@ -25,7 +25,7 @@ import {
   PAYMENT_TYPE,
   USER_ROLE,
 } from '../../utils/enum';
-import axios, { formToJSON } from 'axios';
+import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
 import { IRoutes, OrderedItems, UserType } from '@/app/utils/type';
@@ -439,7 +439,7 @@ export default function Orders() {
   const handleDeleteSelectedOrders = async () => {
     setIsExecutingAction(true);
     try {
-      const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
+      const response = await axios.delete(`${API_URL.ADMIN}/clients/orders`, {
         data: { orderList: selectedOrders },
       });
 

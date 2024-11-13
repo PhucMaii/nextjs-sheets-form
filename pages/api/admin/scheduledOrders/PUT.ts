@@ -25,7 +25,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       newRouteId,
     } = req.body as BodyTypes;
 
-
     if (oldRouteId && newRouteId) {
       // remove from user route
       const existingUserRoute = await prisma.userRoute.findUnique({
@@ -80,7 +79,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         items: true,
-      }
+      },
     });
 
     if (!existingScheduleOrder) {
@@ -195,7 +194,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             categoryId: userCategory.id,
           },
         });
-
       }
 
       if (existingItem) {
@@ -220,7 +218,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             categoryId: userCategory.id,
             price: item.price,
             availability: true,
-            inventoryItemId: item.inventoryItemId
+            inventoryItemId: item.inventoryItemId,
           },
         });
       }

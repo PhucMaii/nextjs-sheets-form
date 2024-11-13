@@ -56,7 +56,7 @@ const checkIsItemValid = async (newItem: IItem) => {
       inventoryItemExists = await prisma.item.findMany({
         where: {
           categoryId: newItem.categoryId,
-          inventoryItemId: newItem?.inventoryItemId
+          inventoryItemId: newItem?.inventoryItemId,
         },
       });
     } else {

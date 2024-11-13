@@ -150,7 +150,6 @@ const createOrder = async (
 
     const inventoryItemQuantityMap: any = {};
     const itemsToCreate = items.map((item: OrderedItems) => {
-
       if (inventoryItemQuantityMap[item?.inventoryItemId || -1]) {
         inventoryItemQuantityMap[item?.inventoryItemId || -1] += item.quantity;
       } else {
@@ -167,27 +166,31 @@ const createOrder = async (
     });
 
     await prisma.orderedItems.createMany({
-      data: itemsToCreate
+      data: itemsToCreate,
     });
 
     // update inventory item quantity
     const inventoryItems: any = await prisma.inventoryItem.findMany({
       where: {
         id: {
-          in: Object.keys(inventoryItemQuantityMap).map((itemId: string) => Number(itemId)),
+          in: Object.keys(inventoryItemQuantityMap).map((itemId: string) =>
+            Number(itemId),
+          ),
         },
       },
     });
 
     for (const inventoryItem of inventoryItems) {
-      console.log({inventoryItem});
+      console.log({ inventoryItem });
       if (inventoryItemQuantityMap[inventoryItem.id]) {
         await prisma.inventoryItem.update({
           where: {
             id: inventoryItem.id,
           },
           data: {
-            quantity: inventoryItem.quantity - inventoryItemQuantityMap[inventoryItem.id],
+            quantity:
+              inventoryItem.quantity -
+              inventoryItemQuantityMap[inventoryItem.id],
           },
         });
       }

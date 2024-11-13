@@ -137,11 +137,12 @@ export default function EditItemAvailability({
               }}
             >
               <Typography variant="h6" fontWeight="bold">
-                Update All Items Same Name
+                Update Items In Same Inventory
               </Typography>
               <Typography variant="body2">
-                This option will affect all <strong>{item.name}</strong> in the
-                database, no matter which category they are assigned.
+                This option will affect all item with same{' '}
+                <strong>INVENTORY ITEM</strong> in the database, no matter which
+                category they are assigned.
               </Typography>
             </ShadowSectionStyled>
           </Box>

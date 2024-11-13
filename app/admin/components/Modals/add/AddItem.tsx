@@ -78,15 +78,22 @@ export default function AddItem({
               options={inventoryItems?.data || []}
               getOptionLabel={(option: any) => option?.name || ''}
               renderInput={(params) => <TextField {...params} label="Item" />}
-              value={inventoryItems?.data?.find((item: any) => item.name === newItem.name) || null}
+              value={
+                inventoryItems?.data?.find(
+                  (item: any) => item.name === newItem.name,
+                ) || null
+              }
               onChange={(e, newValue: any) => {
-                setNewItem({ ...newItem, name: newValue.name || '', price: newValue?.unitPrice || 0, inventoryItemId: newValue.id })
-              }
-              }
+                setNewItem({
+                  ...newItem,
+                  name: newValue.name || '',
+                  price: newValue?.unitPrice || 0,
+                  inventoryItemId: newValue.id,
+                });
+              }}
               onInputChange={(e, newInputValue) => {
-                setNewItem({ ...newItem, name: newInputValue })
-              }
-              }
+                setNewItem({ ...newItem, name: newInputValue });
+              }}
               sx={{ width: 'auto' }}
               freeSolo
             />
@@ -95,13 +102,11 @@ export default function AddItem({
             <Typography variant="h6">Name:</Typography>
           </Grid>
           <Grid item xs={12}>
-          <TextField
+            <TextField
               fullWidth
               label="Name"
               value={newItem.name}
-              onChange={(e) =>
-                setNewItem({ ...newItem, name: e.target.value })
-              }
+              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
             />
           </Grid>
           <Grid item xs={12}>

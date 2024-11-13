@@ -72,8 +72,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Update PRICE all items has same inventory id
-    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-      existingItem.inventoryItemId) {
+    if (
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
+      existingItem.inventoryItemId
+    ) {
       await prisma.item.updateMany({
         where: {
           inventoryItemId: existingItem.inventoryItemId,
@@ -82,18 +84,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           price: updatedItem.price,
         },
       });
-    } else if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && 
-      !existingItem.inventoryItemId) {
-        await prisma.item.updateMany({
-          where: {
-            name: existingItem.name,
-          },
-          data: {
-            price: updatedItem.price,
-            name: updatedItem.name,
-          },
-        }) 
-      }
+    } else if (
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
+      !existingItem.inventoryItemId
+    ) {
+      await prisma.item.updateMany({
+        where: {
+          name: existingItem.name,
+        },
+        data: {
+          price: updatedItem.price,
+          name: updatedItem.name,
+        },
+      });
+    }
 
     // Update schedule order items
     const responseUpdate = await updateAllScheduleOrderItems(

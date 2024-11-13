@@ -37,7 +37,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (updatedOrderedItem?.inventoryItemId) {
-      await updateSingleInventoryItem(updatedOrderedItem.inventoryItemId, quantity, existingOrderedItem.quantity)
+      await updateSingleInventoryItem(
+        updatedOrderedItem.inventoryItemId,
+        quantity,
+        existingOrderedItem.quantity,
+      );
     }
 
     const updatedOrder = await updateOrderTotalPrice(
@@ -58,7 +62,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-export const updateSingleInventoryItem = async (inventoryItemId: number, newQuantity: number, previousQuantity: number) => {
+export const updateSingleInventoryItem = async (
+  inventoryItemId: number,
+  newQuantity: number,
+  previousQuantity: number,
+) => {
   try {
     const prisma = new PrismaClient();
 
@@ -70,7 +78,8 @@ export const updateSingleInventoryItem = async (inventoryItemId: number, newQuan
 
     if (inventoryItem) {
       // Subtract the new quantity from inventory quantity, then add back the previous quantity
-      const updatedQuantity = inventoryItem.quantity - newQuantity + previousQuantity;
+      const updatedQuantity =
+        inventoryItem.quantity - newQuantity + previousQuantity;
       await prisma.inventoryItem.update({
         where: {
           id: inventoryItemId,
@@ -83,20 +92,26 @@ export const updateSingleInventoryItem = async (inventoryItemId: number, newQuan
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
-}
+};
 
-export const restockInventoryItem = async (inventoryItemId: number, restockQuantity: number) => {
+export const restockInventoryItem = async (
+  inventoryItemId: number,
+  restockQuantity: number,
+) => {
   try {
     await updateSingleInventoryItem(inventoryItemId, 0, restockQuantity);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
-}
+};
 
-export const subtractInventoryItem = async (inventoryItemId: number, subtractedQuantity: number) => {
+export const subtractInventoryItem = async (
+  inventoryItemId: number,
+  subtractedQuantity: number,
+) => {
   try {
     await updateSingleInventoryItem(inventoryItemId, subtractedQuantity, 0);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
-}
+};

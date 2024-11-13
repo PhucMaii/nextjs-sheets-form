@@ -180,7 +180,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         inventoryItem = await prisma.inventoryItem.findUnique({
           where: {
             id: itemData.inventoryItemId,
-          }
+          },
         });
       }
 
@@ -192,7 +192,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (itemData) {
         totalPrice += itemData.price * body[item];
-        
+
         const orderedItems = await prisma.orderedItems.create({
           data: {
             name: itemData.name,
@@ -324,7 +324,7 @@ const overrideOrder = async (
       const existingItem = await prisma.orderedItems.findUnique({
         where: {
           id: item.id,
-        }
+        },
       });
 
       if (!existingItem) {
@@ -349,7 +349,11 @@ const overrideOrder = async (
 
       // Update inventory item
       if (item?.inventoryItemId) {
-        await updateSingleInventoryItem(item.inventoryItemId, newItem.quantity, existingItem.quantity);
+        await updateSingleInventoryItem(
+          item.inventoryItemId,
+          newItem.quantity,
+          existingItem.quantity,
+        );
       }
     }
 

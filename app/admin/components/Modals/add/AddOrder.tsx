@@ -142,7 +142,12 @@ export default function AddOrder({
       }
 
       const quantitySetUp = response.data.data.map((item: IItem) => {
-        return { ...item, quantity: 0, totalPrice: 0, inventoryItemId: item.inventoryItemId };
+        return {
+          ...item,
+          quantity: 0,
+          totalPrice: 0,
+          inventoryItemId: item.inventoryItemId,
+        };
       });
 
       setItemList(quantitySetUp);
@@ -158,7 +163,7 @@ export default function AddOrder({
     const newItems = itemList.map((item: any) => {
       if (item.id === targetItem.id) {
         const totalPrice = item.price * +e.target.value;
-        return { ...targetItem, quantity: +e.target.value, totalPrice, };
+        return { ...targetItem, quantity: +e.target.value, totalPrice };
       }
       return item;
     });

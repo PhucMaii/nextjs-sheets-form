@@ -45,7 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // } else {
     await prisma.item.updateMany({
       where: {
-        name: item.name,
+        inventoryItemId: item.inventoryItemId,
       },
       data: {
         availability,

@@ -43,6 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         price: item.price,
         availability: item.availability,
         categoryId: item.categoryId,
+        inventoryItemId: item?.inventoryItemId,
       };
     });
 

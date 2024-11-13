@@ -2,6 +2,7 @@ import { Order } from '@/app/admin/orders/page';
 import { pusherServer } from '@/app/pusher';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { restockInventoryItem } from '../../orderedItems/single';
 
 interface BodyTypes {
   orderId?: string;
@@ -35,7 +36,16 @@ export default async function DELETE(
           where: {
             id: Number(order.id),
           },
+          include: {
+            items: true,
+          },
         });
+
+        for (const item of deletedOrder.items) {
+          if (item?.inventoryItemId) {
+            await restockInventoryItem(item.inventoryItemId, item.quantity);
+          }
+        }
 
         await pusherServer?.trigger(
           'admin-delete-order',
@@ -56,11 +66,20 @@ export default async function DELETE(
         });
       }
 
-      await prisma.orders.delete({
+      const deletedOrder = await prisma.orders.delete({
         where: {
           id: Number(orderId),
         },
+        include: {
+          items: true,
+        },
       });
+
+      for (const item of deletedOrder.items) {
+        if (item?.inventoryItemId) {
+          await restockInventoryItem(item.inventoryItemId, item.quantity);
+        }
+      }
     } else {
       return res.status(500).json({
         error: 'Please provide either order list or order id to be deleted',

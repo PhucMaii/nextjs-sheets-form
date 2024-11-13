@@ -49,7 +49,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await updateSingleInventoryItem(
         updatedOrderedItem.inventoryItemId,
         updatedOrderedItem.quantity,
-        existingOrderedItem.quantity
+        existingOrderedItem.quantity,
       );
     }
 

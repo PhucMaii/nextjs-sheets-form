@@ -135,7 +135,7 @@ const OrderAccordion = ({
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     try {
-      const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
+      const response = await axios.delete(`${API_URL.ADMIN}/clients/orders`, {
         data: { orderId: targetOrder.id },
       });
 

@@ -44,6 +44,7 @@ export default async function handler(
         price: item.price,
         categoryId: categoryId,
         availability: item?.availability,
+        inventoryItemId: item?.inventoryItemId,
       };
     });
 

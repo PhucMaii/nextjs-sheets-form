@@ -7,7 +7,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { userId, items, day, routeId } = req.body;
 
-    console.log(items,' items');
+    console.log(items, ' items');
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -33,7 +33,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const newTotalPrice = items.reduce(
-      (acc: number, item: any) => acc + (item.price * item.quantity),
+      (acc: number, item: any) => acc + item.price * item.quantity,
       0,
     );
 

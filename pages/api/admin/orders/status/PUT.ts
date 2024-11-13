@@ -2,7 +2,10 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { getUserInfo } from '@/pages/api/utils/auth';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { restockInventoryItem, subtractInventoryItem } from '../../orderedItems/single';
+import {
+  restockInventoryItem,
+  subtractInventoryItem,
+} from '../../orderedItems/single';
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   const prisma = new PrismaClient();
@@ -16,13 +19,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const existingOrder = await prisma.orders.findUnique({
         where: {
           id,
-        }
+        },
       });
 
       if (!existingOrder) {
         return res.status(404).json({
-          error: 'Order Not Found'
-        })
+          error: 'Order Not Found',
+        });
       }
 
       const updatedOrder = await prisma.orders.update({
@@ -57,7 +60,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Inventory Item Update
       // From other status to VOID -> Inventory Item get restock
-      if (existingOrder.status !== ORDER_STATUS.VOID && updatedOrder.status === ORDER_STATUS.VOID) {
+      if (
+        existingOrder.status !== ORDER_STATUS.VOID &&
+        updatedOrder.status === ORDER_STATUS.VOID
+      ) {
         for (const item of updatedOrder.items) {
           if (item?.inventoryItemId) {
             // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
@@ -67,7 +73,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // From VOID to other status -> Inventory Item Stock Is Subtracted
-      if (existingOrder.status === ORDER_STATUS.VOID && updatedOrder.status !== ORDER_STATUS.VOID) {
+      if (
+        existingOrder.status === ORDER_STATUS.VOID &&
+        updatedOrder.status !== ORDER_STATUS.VOID
+      ) {
         for (const item of updatedOrder.items) {
           if (item?.inventoryItemId) {
             // await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
@@ -97,13 +106,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     await prisma.orders.updateMany({
       where: {
         id: {
-          in: idsToUpdate
-        }
+          in: idsToUpdate,
+        },
       },
       data: {
         status,
-        isVoid: false
-      }
+        isVoid: false,
+      },
     });
 
     // From other status to VOID -> Inventory Item get restock
@@ -117,17 +126,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (order.status === ORDER_STATUS.VOID) {
           continue;
         }
-        
+
         for (const item of order.items) {
           if (!item?.inventoryItemId) {
             continue;
           }
 
           // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
-          await restockInventoryItem(item.inventoryItemId, item.quantity)
+          await restockInventoryItem(item.inventoryItemId, item.quantity);
         }
       }
-    } 
+    }
     // From VOID status to other status -> Inventory Item Get Subtracted
     else {
       for (const order of updatedOrders) {
@@ -139,7 +148,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (order.status !== ORDER_STATUS.VOID) {
           continue;
         }
-        
+
         for (const item of order.items) {
           if (!item?.inventoryItemId) {
             continue;
@@ -150,8 +159,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
       }
     }
-
-
 
     return res.status(200).json({
       message: 'Order Status Updated Successfully',

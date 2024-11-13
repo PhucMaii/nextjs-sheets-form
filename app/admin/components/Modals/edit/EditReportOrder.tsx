@@ -1,5 +1,6 @@
 import {
   AlertColor,
+  Autocomplete,
   Box,
   Button,
   Divider,
@@ -14,7 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, memo, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -29,6 +30,9 @@ import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { LoadingButton } from '@mui/lab';
+import { SWRFetchData } from '@/app/utils/db';
+import AddVendor from '../add/AddVendor';
+import { filter } from './EditStockPurchased';
 
 interface PropTypes {
   order: Order;
@@ -36,33 +40,67 @@ interface PropTypes {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function EditReportOrder({
+const EditReportOrder = ({
   order,
   handleUpdateOrderUI,
   showNotification,
-}: PropTypes) {
+}: PropTypes) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
-  const [newItem, setNewItem] = useState<Item>({
+  const [newItem, setNewItem] = useState<any>({
     id: -1,
-    name: '',
     price: 0,
     quantity: 0,
     totalPrice: 0,
+    inventoryItemId: -1,
   });
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
   const [updateOption, setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );
+  // const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
   const [status, setStatus] = useState<ORDER_STATUS>(order.status);
+  // const [vendorItems, setVendorItems] = useState<any[]>([]);
+
+  // const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+
+  // const sortedVendors = useMemo(() => {
+  //   if (!vendors?.data) {
+  //     return [];
+  //   }
+
+  //   const vendorsSorted = [...vendors.data].sort((a: any, b: any) => {
+  //     return a?.name?.localeCompare(b?.name);
+  //   });
+
+  //   return vendorsSorted;
+  // }, [vendors]);
 
   useEffect(() => {
     if (order.items) {
       setItemList(order.items);
     }
   }, [order.items]);
+
+  // useEffect(() => {
+  //   if (selectedVendorId !== -1) {
+  //     if (vendors) {
+  //       const targetVendor = vendors?.data.find((vendor: any) => {
+  //         return vendor.id === selectedVendorId;
+  //       });
+
+  //       if (targetVendor) {
+  //         setVendorItems(targetVendor?.inventoryItems);
+  //       }
+  //     }
+  //   } else {
+  //     setVendorItems([]);
+  //   }
+  // }, [selectedVendorId, vendors]);
 
   const addNewItem = () => {
     const newItemName = newItem.name.toUpperCase();
@@ -75,6 +113,10 @@ export default function EditReportOrder({
       return;
     }
 
+    if (!newItem?.id || newItem.id === -1) {
+      showNotification('error', 'Inventory Item Is Required');
+      return;
+    }
     if (hasNameExisted) {
       showNotification('error', 'Item Name Existed Already');
     } else {
@@ -85,6 +127,7 @@ export default function EditReportOrder({
         ...restOfNewItem,
         totalPrice,
         name: newItemName,
+        inventoryItemId: id,
       };
       setItemList([...itemList, newItemData]);
       setNewItem({
@@ -93,6 +136,7 @@ export default function EditReportOrder({
         price: 0,
         quantity: 0,
         totalPrice: 0,
+        inventoryItemId: -1,
       });
     }
   };
@@ -147,7 +191,6 @@ export default function EditReportOrder({
         categoryName: newCategoryName,
         userId: order.userId,
         userCategoryId: order.categoryId,
-        // userSubCategoryId: order.subCategoryId,
       });
 
       if (response.data.error) {
@@ -156,11 +199,11 @@ export default function EditReportOrder({
         return;
       }
 
-      handleUpdateOrderUI({
-        ...order,
-        items: itemList,
-        totalPrice,
-      });
+      // handleUpdateOrderUI({
+      //   ...order,
+      //   items: itemList,
+      //   totalPrice,
+      // });
 
       showNotification('success', response.data.message);
       setIsSubmitting(false);
@@ -215,8 +258,37 @@ export default function EditReportOrder({
     setItemList(newItemList);
   };
 
+  const selectInventoryItem = (newValue: any) => {
+    if (newValue?.inputValue) {
+      setNewItem({
+        ...newItem,
+        id: 0,
+        price: 0,
+        unit: 'bags',
+        name: newValue.inputValue,
+        // vendorId: selectedVendorId,
+        inventoryItemId: -1,
+      });
+    } else {
+      setNewItem({
+        ...newItem,
+        id: newValue?.id || 0,
+        price: newValue?.unitPrice || 0,
+        name: newValue?.name,
+        // vendorId: selectedVendorId,
+        unit: newItem?.unit || 'bags',
+        inventoryItemId: newItem?.inventoryItemId || -1,
+      });
+    }
+  };
+
   return (
     <>
+      <AddVendor
+        showNotification={showNotification}
+        open={isOpenAddVendor}
+        onClose={() => setIsOpenAddVendor(false)}
+      />
       <Button
         onClick={(e) => {
           e.stopPropagation();
@@ -302,11 +374,68 @@ export default function EditReportOrder({
                 />
               </Grid>
               <Grid item xs={12}>
+                <Autocomplete
+                  value={newItem.name}
+                  onChange={(event, newValue) => {
+                    selectInventoryItem(newValue);
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+
+                    // const { inputValue } = params;
+                    // // Suggest the creation of a new value
+                    // const isExisting = options.some(
+                    //   (option) => inputValue === option.name,
+                    // );
+                    // if (inputValue !== '' && !isExisting) {
+                    //   filtered.push({
+                    //     inputValue,
+                    //     title: `Add "${inputValue}"`,
+                    //   });
+                    // }
+
+                    return filtered;
+                  }}
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  id="autocomplete"
+                  options={
+                    [
+                      { id: -1, name: '-- Choose an item --' },
+                      ...(inventoryItems?.data || []),
+                    ] || []
+                  }
+                  getOptionLabel={(option) => {
+                    // Check if the option has a custom title (for new item suggestion)
+                    if (option.title) {
+                      return option.title;
+                    }
+                    // Regular option
+                    return option.name || '';
+                  }}
+                  renderOption={(props, option) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <li key={key} {...optionProps}>
+                        {option.title || option.name}
+                      </li>
+                    );
+                  }}
+                  sx={{ width: '100%' }}
+                  freeSolo
+                  renderInput={(params) => (
+                    <TextField {...params} label="Item" />
+                  )}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel id="item-name-label">Item name</InputLabel>
+                  <InputLabel id="item-name-label">Name</InputLabel>
                   <OutlinedInput
                     fullWidth
-                    label="Item name"
+                    label="Name"
                     value={newItem.name}
                     onChange={(e) =>
                       handleNewItemOnChange('name', e.target.value)
@@ -421,4 +550,12 @@ export default function EditReportOrder({
       </Modal>
     </>
   );
-}
+};
+
+export default memo(EditReportOrder, (prev, next) => {
+  return (
+    prev.order === next.order,
+    prev.showNotification === next.showNotification,
+    prev.handleUpdateOrderUI === next.handleUpdateOrderUI
+  );
+});

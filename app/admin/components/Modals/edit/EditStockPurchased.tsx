@@ -36,7 +36,7 @@ interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-const filter = createFilterOptions<any>();
+export const filter = createFilterOptions<any>();
 
 export default function EditStockPurchased({
   stockPurchased,

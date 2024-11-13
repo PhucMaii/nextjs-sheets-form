@@ -52,16 +52,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     for (const item of body.items) {
       const existingItem = await prisma.orderedItems.findUnique({
         where: {
-          id: item.id
-        }
+          id: item.id,
+        },
       });
 
       if (!existingItem) {
         return res.status(404).json({
-          error: 'Item Not Found'
-        })
+          error: 'Item Not Found',
+        });
       }
-      
+
       // Update each item
       const newItem = await prisma.orderedItems.update({
         where: {
@@ -81,7 +81,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Update Inventory Item
       if (item?.inventoryItemId) {
-        await updateSingleInventoryItem(item.inventoryItemId, newItem.quantity, existingItem.quantity);
+        await updateSingleInventoryItem(
+          item.inventoryItemId,
+          newItem.quantity,
+          existingItem.quantity,
+        );
       }
 
       // Format order to send email

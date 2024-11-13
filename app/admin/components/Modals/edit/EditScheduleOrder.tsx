@@ -80,7 +80,9 @@ export default function EditScheduleOrder({
 
     const newItemName = newItem.name.toUpperCase();
     const hasNameExisted = itemList.some(
-      (item: OrderedItems) => item.name === newItemName || item.inventoryItemId === newItem.inventoryItemId,
+      (item: OrderedItems) =>
+        item.name === newItemName ||
+        item.inventoryItemId === newItem.inventoryItemId,
     );
 
     if (newItem.name.trim() === '') {
@@ -282,16 +284,25 @@ export default function EditScheduleOrder({
                     id="inventory-item"
                     options={inventoryItems?.data || []}
                     getOptionLabel={(option: any) => option?.name || ''}
-                    renderInput={(params) => <TextField {...params} label="Inventory Item" />}
-                    value={inventoryItems?.data?.find((item: any) => item.name === newItem.name) || null}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Inventory Item" />
+                    )}
+                    value={
+                      inventoryItems?.data?.find(
+                        (item: any) => item.name === newItem.name,
+                      ) || null
+                    }
                     onChange={(e, newValue: any) => {
-                      setNewItem({ ...newItem, name: newValue.name || '', price: newValue?.unitPrice || 0, inventoryItemId: newValue.id })
-                    }
-                    }
+                      setNewItem({
+                        ...newItem,
+                        name: newValue.name || '',
+                        price: newValue?.unitPrice || 0,
+                        inventoryItemId: newValue.id,
+                      });
+                    }}
                     onInputChange={(e, newInputValue) => {
-                      setNewItem({ ...newItem, name: newInputValue })
-                    }
-                    }
+                      setNewItem({ ...newItem, name: newInputValue });
+                    }}
                     sx={{ width: 'auto' }}
                     freeSolo
                   />
