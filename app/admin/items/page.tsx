@@ -85,6 +85,7 @@ export default function ItemPage() {
   useEffect(() => {
     if (itemsResponse && categories?.data.length > 0 && currentCategory) {
       initializeItems();
+      setSearchKeywords('');
     }
   }, [categories, currentCategory, itemsResponse]);
 

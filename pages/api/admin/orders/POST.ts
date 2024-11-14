@@ -2,12 +2,12 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateCurrentTime } from '@/app/utils/time';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { checkHasClientOrder } from '../../import-sheets';
 import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
 import { normalizeDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
+import { checkHasClientOrder } from '../../import-sheets/utils';
 
 interface BodyTypes {
   deliveryDate: string;

@@ -8,16 +8,6 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.user.updateMany({
-    where: {
-      clientId: {
-        in: ['00123', '00157', '00240'],
-      },
-    },
-    data: {
-      email: 'sweetfhui@gmail.com',
-    },
-  });
 }
 
 main()
