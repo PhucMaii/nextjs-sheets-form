@@ -97,6 +97,8 @@ const OrderAccordion = ({
     calculateTotalQuantity();
   }, [order]);
 
+  console.log(order, 'order');
+
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
     setIsClientModalOpen(true);
@@ -328,6 +330,13 @@ const OrderAccordion = ({
                   icon={<InfoIcon color="info" fontSize="small" />}
                 />
               )}
+              {order?.multipleOrders && (
+                <StatusText
+                  text={`Multiple orders`}
+                  type={'info'}
+                  icon={<InfoIcon color="info" fontSize="small" />}
+                />
+              )}
             </Box>
           </Grid>
           <Grid item xs={12} md={1.5} textAlign="right">
@@ -365,7 +374,7 @@ const OrderAccordion = ({
               variant="contained"
               onClick={handleOpenClientModal}
             >
-              {order.user.clientName}
+              {order?.clientName || order?.user?.clientName}
             </Button>
           </Grid>
           <Grid item xs={12} md={3} textAlign="left" alignItems="center">
