@@ -22,7 +22,7 @@ import { BoxModal } from '../styled';
 import { LoadingButton } from '@mui/lab';
 import { IItem, UserType } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ErrorComponent from '../../ErrorComponent';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -33,18 +33,13 @@ import dayjs from 'dayjs';
 import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
+import moment from 'moment';
+import ConfirmModal from '../ConfirmModal';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
   showNotification: (type: AlertColor, message: string) => void;
   currentDate?: string;
-  createOrder?: (
-    clientValue: UserType | null,
-    deliveryDate: string,
-    note: string,
-    itemList: IItem[],
-    isCheckUnavailableRange?: boolean,
-  ) => Promise<any>;
   createScheduledOrder?: (userId: number, items: IItem[]) => Promise<void>;
 }
 
@@ -54,7 +49,6 @@ export default function AddOrder({
   clientList,
   showNotification,
   currentDate,
-  createOrder,
   createScheduledOrder,
 }: PropTypes) {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
@@ -65,6 +59,8 @@ export default function AddOrder({
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOrderOnVacationOpen, setIsOrderOnVacationOpen] =
     useState<boolean>(false);
+  const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
+
   const [itemList, setItemList] = useState<IItem[]>([]);
   const [note, setNote] = useState<string>('');
   const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
@@ -88,6 +84,62 @@ export default function AddOrder({
       setItemList([]);
     }
   }, [clientValue]);
+
+  const addOrder = async (
+    clientValue: UserType | null,
+    deliveryDate: string,
+    note: string,
+    itemList: any,
+    isCheckUnavailableRange: boolean = true,
+    isForceOrder: boolean = false,
+  ) => {
+    try {
+      const currentDate = new Date();
+      const dateString = moment(currentDate).format('YYYY-MM-DD');
+      const timeString = moment(currentDate).format('HH:mm:ss');
+
+      // Format data to have the same structure as backend
+      let submittedData: any = {
+        ['DELIVERY DATE']: deliveryDate,
+        ['NOTE']: note,
+        orderTime: `${timeString} ${dateString}`,
+        isCheckUnavailableRange,
+      };
+
+      for (const item of itemList) {
+        submittedData = { ...submittedData, [item.name]: item.quantity };
+      }
+
+      const response = await axios.post(
+        `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
+        { ...submittedData, createdBy: USER_ROLE.ADMIN, isForceOrder },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      if (response.data.warning) {
+        if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
+          // showNotification('warning', response.data.warning);
+          setIsOpenConfirmModal(true);
+          return;
+        } else {
+          return response;
+        }
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log(error);
+      showNotification(
+        'error',
+        'There was an error creating order: ' + error.response.data.error,
+      );
+      return;
+    }
+  };
 
   const copyLastOrder = async () => {
     try {
@@ -180,25 +232,23 @@ export default function AddOrder({
     e.preventDefault();
     setIsButtonLoading(true);
     try {
-      if (createOrder) {
-        const response: any = await createOrder(
-          clientValue,
-          deliveryDate,
-          note,
-          itemList,
-        );
-        if (response && response.data.warning) {
-          setUnavailableRange(response.data.data.unavailableRange);
-        }
-
+      if (createScheduledOrder && clientValue) {
+        await createScheduledOrder(clientValue.id, itemList);
         setIsButtonLoading(false);
         return;
       }
 
-      if (createScheduledOrder && clientValue) {
-        await createScheduledOrder(clientValue.id, itemList);
+      const response: any = await addOrder(
+        clientValue,
+        deliveryDate,
+        note,
+        itemList,
+      );
+      if (response && response.data.warning) {
+        setUnavailableRange(response.data.data.unavailableRange);
       }
       setIsButtonLoading(false);
+      return;
     } catch (error: any) {
       console.log(error);
       showNotification(
@@ -211,7 +261,14 @@ export default function AddOrder({
 
   return (
     <>
-      {createOrder && unavailableRange && (
+      <ConfirmModal
+        open={isOpenConfirmModal}
+        onClose={() => setIsOpenConfirmModal(false)}
+        handleSubmit={() => addOrder(clientValue, deliveryDate, note, itemList, true, true)}
+        title="This client already order for selected date, are you sure to create new order?"
+        showNotification={showNotification}
+      />
+      {unavailableRange && (
         <OrderOnVacationModal
           open={isOrderOnVacationOpen}
           onClose={() => setIsOrderOnVacationOpen(false)}
@@ -219,7 +276,7 @@ export default function AddOrder({
           startDate={new Date(unavailableRange[0])}
           endDate={new Date(unavailableRange[1])}
           handleContinueOrder={async () =>
-            await createOrder(clientValue, deliveryDate, note, itemList, false)
+            await addOrder(clientValue, deliveryDate, note, itemList, false)
           }
         />
       )}
@@ -284,7 +341,7 @@ export default function AddOrder({
                   </Box>
                 </LoadingButton>
               </Grid>
-              {createOrder && (
+              {!createScheduledOrder && (
                 <>
                   <Grid item xs={6}>
                     DELIVERY DATE

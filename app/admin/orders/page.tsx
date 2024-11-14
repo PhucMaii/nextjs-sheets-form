@@ -20,10 +20,8 @@ import {
 } from '@mui/material';
 import {
   API_URL,
-  FLAG_ORDER_TYPE,
   ORDER_STATUS,
   PAYMENT_TYPE,
-  USER_ROLE,
 } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -53,9 +51,7 @@ import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import { filterByRoute } from '@/app/utils/array';
 import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
-import { handleSearch } from '@/app/utils/search';
 import OrderDetails from '../components/Modals/OrderDetails';
-import { set } from 'lodash';
 import { DropdownItemContainer } from './styled';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
@@ -110,6 +106,7 @@ export interface Order {
   createdBy?: string;
   updatedBy?: string;
   previousUnpaidOrders?: { numberOfOrders: number; totalPrice: number };
+  multipleOrders?: boolean;
 }
 
 const orderPerPage = 10;
@@ -160,7 +157,7 @@ export default function Orders() {
   );
 
   const selectedDate = new Date(date);
-  const [routes, _mutateRoutes, isRoutesValidating] = SWRFetchData(
+  const [routes, _mutateRoutes] = SWRFetchData(
     `${API_URL.ROUTES}?day=${days[selectedDate.getDay()]}`,
   );
 
@@ -246,11 +243,6 @@ export default function Orders() {
         }
         return false;
       });
-      // const newOrderList = handleSearch(debouncedKeywords, baseOrders, [
-      //   'id',
-      //   'user.clientName',
-      //   'user.clientId',
-      // ]);
 
       setOrderData(newOrderList);
       setPages(1);
@@ -295,60 +287,6 @@ export default function Orders() {
       setIncomingOrder(null);
     }
   }, [incomingOrder]);
-
-  const addOrder = async (
-    clientValue: UserType | null,
-    deliveryDate: string,
-    note: string,
-    itemList: any,
-    isCheckUnavailableRange: boolean = true,
-  ) => {
-    try {
-      const currentDate = new Date();
-      const dateString = moment(currentDate).format('YYYY-MM-DD');
-      const timeString = moment(currentDate).format('HH:mm:ss');
-
-      // Format data to have the same structure as backend
-      let submittedData: any = {
-        ['DELIVERY DATE']: deliveryDate,
-        ['NOTE']: note,
-        orderTime: `${timeString} ${dateString}`,
-        isCheckUnavailableRange,
-      };
-
-      for (const item of itemList) {
-        submittedData = { ...submittedData, [item.name]: item.quantity };
-      }
-
-      const response = await axios.post(
-        `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
-        { ...submittedData, createdBy: USER_ROLE.ADMIN },
-      );
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      if (response.data.warning) {
-        if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
-          showNotification('warning', response.data.warning);
-          return;
-        } else {
-          return response;
-        }
-      }
-
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log(error);
-      showNotification(
-        'error',
-        'There was an error creating order: ' + error.response.data.error,
-      );
-      return;
-    }
-  };
 
   const filterOrderByRoute = (orders: Order[]) => {
     if (!routes || !orders || orders.length === 0) {
@@ -543,22 +481,6 @@ export default function Orders() {
   const handlePrintAll = useReactToPrint({
     content: () => componentRef.current,
   });
-
-  const handleUpdateDateUI = (orderId: number, updatedDate: string): void => {
-    const newOrders = baseOrderData.filter((order) => {
-      if (order.id !== orderId) {
-        return true;
-      }
-
-      if (order.deliveryDate === updatedDate) {
-        return true;
-      }
-
-      return false;
-    });
-
-    setBaseOrderData(newOrders);
-  };
 
   const filterByPaymentType = (orderList: Order[], type: PAYMENT_TYPE[]) => {
     setFilterOptions(type);
@@ -859,7 +781,7 @@ export default function Orders() {
         clientList={clients?.data || []}
         showNotification={showNotification}
         currentDate={date}
-        createOrder={addOrder}
+        // createOrder={addOrder}
       />
       <SearchModal
         open={isSearchModalOpen}

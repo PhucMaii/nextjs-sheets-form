@@ -74,6 +74,14 @@ export default function DeleteModal({
             Are you sure to delete ?
           </Typography>
           <Box display="flex" gap={2}>
+            <LoadingButton
+              color="error"
+              loading={isDeleting}
+              onClick={handleDeleteOrder}
+              variant="contained"
+            >
+              DELETE
+            </LoadingButton>
             <Button
               variant="outlined"
               color="error"
@@ -87,14 +95,6 @@ export default function DeleteModal({
             >
               Cancel
             </Button>
-            <LoadingButton
-              color="error"
-              loading={isDeleting}
-              onClick={handleDeleteOrder}
-              variant="contained"
-            >
-              DELETE
-            </LoadingButton>
           </Box>
         </BoxModal>
       </Modal>

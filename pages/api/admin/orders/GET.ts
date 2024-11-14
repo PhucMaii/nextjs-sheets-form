@@ -13,7 +13,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const { date, status } = req.query as RequestQuery;
 
-    // const skip = (page - 1) * pageSize;
     const fetchCondition: any = {};
 
     if (status && status !== ORDER_STATUS.NONE) {
@@ -93,6 +92,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       {},
     );
 
+    // console.log('-- BATCH ORDERS --');
+    // console.log({orders, date}, 'orders');
+
     // Format return result
     const newOrders = orders.map((order: any) => {
       const formattedItems = order.items.map((item: OrderedItems) => {
@@ -103,6 +105,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         };
       });
 
+      const sameClientOrder = orders.filter(
+        (sameOrder: any) => (sameOrder.userId === order.userId && sameOrder.deliveryDate === order.deliveryDate),
+      );
+
       return {
         ...order,
         items: formattedItems,
@@ -112,6 +118,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         previousUnpaidOrders: previousUnpaidCodOrdersMap[order.user.clientId]
           ? previousUnpaidCodOrdersMap[order.user.clientId]
           : null,
+        multipleOrders: sameClientOrder.length > 1 ? true : false,
       };
     });
 

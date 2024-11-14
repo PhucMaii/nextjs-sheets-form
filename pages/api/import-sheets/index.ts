@@ -1,15 +1,18 @@
 // import { google } from 'googleapis';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { sendEmail } from '../utils/email';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
-import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
-import { pusherServer } from '@/app/pusher';
 import { normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
-import { updateSingleInventoryItem } from '../admin/orderedItems/single';
+import {
+  checkHasClientOrder,
+  createOrder,
+  getCreatedBy,
+  overrideOrder,
+} from './utils';
 
 interface RequestQuery {
   userId?: string;
@@ -84,7 +87,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       body['DELIVERY DATE'],
     );
 
+    
     if (userOrder) {
+      if (body.createdBy === USER_ROLE.ADMIN && body?.isForceOrder) {
+        const createdBy = await getCreatedBy(req, res, body.createdBy);
+        await createOrder(body, existingUser, createdBy);
+      }
+
       if (body.createdBy !== USER_ROLE.CLIENT) {
         return res.status(200).json({
           warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
@@ -122,155 +131,160 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const userCategory = await prisma.category.findUnique({
-      where: {
-        id: existingUser.categoryId,
-      },
-    });
-
-    const items = await prisma.item.findMany({
-      where: {
-        categoryId: existingUser.categoryId,
-      },
-    });
-
     const createdBy = await getCreatedBy(req, res, body.createdBy);
+    await createOrder(body, existingUser, createdBy);
+    // const userCategory = await prisma.category.findUnique({
+    //   where: {
+    //     id: existingUser.categoryId,
+    //   },
+    // });
 
-    // Initialize new order
-    const newOrder = await prisma.orders.create({
-      data: {
-        deliveryDate: body['DELIVERY DATE'],
-        orderTime: body.orderTime,
-        userId: existingUser.id,
-        totalPrice: 0,
-        note: body['NOTE'],
-        status: ORDER_STATUS.INCOMPLETED,
-        createdBy,
-      },
-    });
+    // const items = await prisma.item.findMany({
+    //   where: {
+    //     categoryId: existingUser.categoryId,
+    //   },
+    // });
 
-    let totalPrice = 0;
-    const itemList: any = [];
-    // Loop through each item from request and save it to order
-    for (const item of Object.keys(body)) {
-      if (item === 'DELIVERY DATE') {
-        continue;
-      }
+    // const createdBy = await getCreatedBy(req, res, body.createdBy);
 
-      if (item === 'NOTE') {
-        continue;
-      }
+    // // Initialize new order
+    // const newOrder = await prisma.orders.create({
+    //   data: {
+    //     deliveryDate: body['DELIVERY DATE'],
+    //     orderTime: body.orderTime,
+    //     userId: existingUser.id,
+    //     totalPrice: 0,
+    //     note: body['NOTE'],
+    //     status: ORDER_STATUS.INCOMPLETED,
+    //     createdBy,
+    //   },
+    // });
 
-      const itemData = await prisma.item.findFirst({
-        where: {
-          name: item,
-          categoryId: existingUser.categoryId,
-        },
-      });
+    // let totalPrice = 0;
+    // const itemList: any = [];
+    // // Loop through each item from request and save it to order
+    // for (const item of Object.keys(body)) {
+    //   if (item === 'DELIVERY DATE') {
+    //     continue;
+    //   }
 
-      // if (!itemData?.inventoryItemId) {
-      //   return res.status(500).json({
-      //     error: `Item ${item} has no inventory item`,
-      //   });
-      // }
-      // Get inventory item
-      let inventoryItem: any = null;
+    //   if (item === 'NOTE') {
+    //     continue;
+    //   }
 
-      if (itemData?.inventoryItemId) {
-        inventoryItem = await prisma.inventoryItem.findUnique({
-          where: {
-            id: itemData.inventoryItemId,
-          },
-        });
-      }
+    //   const itemData = await prisma.item.findFirst({
+    //     where: {
+    //       name: item,
+    //       categoryId: existingUser.categoryId,
+    //     },
+    //   });
 
-      // if (!inventoryItem) {
-      //   return res.status(500).json({
-      //     error: `Inventory Item for item ${item} does not exist`,
-      //   });
-      // }
+    //   // TODO: Check if item exist when Item page set up correctly
 
-      if (itemData) {
-        totalPrice += itemData.price * body[item];
+    //   // if (!itemData?.inventoryItemId) {
+    //   //   return res.status(500).json({
+    //   //     error: `Item ${item} has no inventory item`,
+    //   //   });
+    //   // }
+    //   // Get inventory item
+    //   let inventoryItem: any = null;
 
-        const orderedItems = await prisma.orderedItems.create({
-          data: {
-            name: itemData.name,
-            price: itemData.price,
-            orderId: newOrder.id,
-            quantity: body[item],
-            inventoryItemId: itemData.inventoryItemId,
-          },
-        });
+    //   if (itemData?.inventoryItemId) {
+    //     inventoryItem = await prisma.inventoryItem.findUnique({
+    //       where: {
+    //         id: itemData.inventoryItemId,
+    //       },
+    //     });
+    //   }
 
-        itemList.push({
-          ...orderedItems,
-          totalPrice: itemData.price * body[item],
-        });
+    //   // TODO: Check if item exist when Item page set up correctly
+    //   // if (!inventoryItem) {
+    //   //   return res.status(500).json({
+    //   //     error: `Inventory Item for item ${item} does not exist`,
+    //   //   });
+    //   // }
 
-        if (inventoryItem) {
-          // update inventoryItem
-          await prisma.inventoryItem.update({
-            where: {
-              id: inventoryItem.id,
-            },
-            data: {
-              quantity: inventoryItem.quantity - body[item],
-            },
-          });
-        }
-      }
-    }
+    //   if (itemData) {
+    //     totalPrice += itemData.price * body[item];
 
-    // Update the order with the totalPrice
-    const updatedNewOrder = await prisma.orders.update({
-      where: {
-        id: newOrder.id,
-      },
-      data: {
-        totalPrice,
-      },
-      include: {
-        items: true,
-        user: {
-          include: {
-            category: true,
-          },
-        },
-      },
-    });
+    //     const orderedItems = await prisma.orderedItems.create({
+    //       data: {
+    //         name: itemData.name,
+    //         price: itemData.price,
+    //         orderId: newOrder.id,
+    //         quantity: body[item],
+    //         inventoryItemId: itemData.inventoryItemId,
+    //       },
+    //     });
 
-    await pusherServer?.trigger('admin', 'incoming-order', {
-      ...updatedNewOrder,
-      items: itemList,
-      ...existingUser,
-      id: newOrder.id,
-      totalPrice,
-      category: userCategory,
-    });
+    //     itemList.push({
+    //       ...orderedItems,
+    //       totalPrice: itemData.price * body[item],
+    //     });
 
-    // Generate object of quantity, price, and totalPrice
-    const orderDetails = body;
-    for (const item of items) {
-      if (Object.prototype.hasOwnProperty.call(body, item.name)) {
-        orderDetails[item.name] = {
-          quantity: orderDetails[item.name],
-          price: item.price,
-          totalPrice: orderDetails[item.name] * item.price,
-        };
-      }
-    }
+    //     if (inventoryItem) {
+    //       // update inventoryItem
+    //       await prisma.inventoryItem.update({
+    //         where: {
+    //           id: inventoryItem.id,
+    //         },
+    //         data: {
+    //           quantity: inventoryItem.quantity - body[item],
+    //         },
+    //       });
+    //     }
+    //   }
+    // }
 
-    // Notify Email for admin
-    const isSendToAdmin = true;
-    await sendEmail(
-      existingUser,
-      updatedNewOrder.items,
-      newOrder.id,
-      body['DELIVERY DATE'],
-      isSendToAdmin,
-      body['NOTE'],
-    );
+    // // Update the order with the totalPrice
+    // const updatedNewOrder = await prisma.orders.update({
+    //   where: {
+    //     id: newOrder.id,
+    //   },
+    //   data: {
+    //     totalPrice,
+    //   },
+    //   include: {
+    //     items: true,
+    //     user: {
+    //       include: {
+    //         category: true,
+    //       },
+    //     },
+    //   },
+    // });
+
+    // await pusherServer?.trigger('admin', 'incoming-order', {
+    //   ...updatedNewOrder,
+    //   items: itemList,
+    //   ...existingUser,
+    //   id: newOrder.id,
+    //   totalPrice,
+    //   category: userCategory,
+    // });
+
+    // // Generate object of quantity, price, and totalPrice
+    // const orderDetails = body;
+    // for (const item of items) {
+    //   if (Object.prototype.hasOwnProperty.call(body, item.name)) {
+    //     orderDetails[item.name] = {
+    //       quantity: orderDetails[item.name],
+    //       price: item.price,
+    //       totalPrice: orderDetails[item.name] * item.price,
+    //     };
+    //   }
+    // }
+
+    // // Notify Email for admin
+    // const isSendToAdmin = true;
+    // await sendEmail(
+    //   existingUser,
+    //   updatedNewOrder.items,
+    //   newOrder.id,
+    //   body['DELIVERY DATE'],
+    //   isSendToAdmin,
+    //   body['NOTE'],
+    // );
 
     return res.status(200).json({
       // overviewFormattedData,
@@ -285,150 +299,3 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAuthGuard(handler);
-
-export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
-  const prisma = new PrismaClient();
-
-  const userOrders = await prisma.orders.findFirst({
-    where: {
-      userId: id,
-      deliveryDate,
-      status: {
-        in: [
-          ORDER_STATUS.COMPLETED,
-          ORDER_STATUS.INCOMPLETED,
-          ORDER_STATUS.DELIVERED,
-        ],
-      },
-    },
-    include: {
-      items: true,
-    },
-  });
-
-  return userOrders;
-};
-
-const overrideOrder = async (
-  user: any,
-  orderId: number,
-  newItems: any,
-  newNote: string,
-  updatedBy: string,
-) => {
-  const prisma = new PrismaClient();
-  try {
-    let total = 0;
-    const itemList: any = [];
-    for (const item of newItems) {
-      const existingItem = await prisma.orderedItems.findUnique({
-        where: {
-          id: item.id,
-        },
-      });
-
-      if (!existingItem) {
-        continue;
-      }
-      // Update each item
-      const newItem = await prisma.orderedItems.update({
-        where: {
-          id: item.id,
-        },
-        data: {
-          quantity: item.quantity,
-        },
-      });
-
-      // Update new total price
-      total += newItem.quantity * newItem.price;
-      itemList.push({
-        ...newItem,
-        totalPrice: newItem.quantity * newItem.price,
-      });
-
-      // Update inventory item
-      if (item?.inventoryItemId) {
-        await updateSingleInventoryItem(
-          item.inventoryItemId,
-          newItem.quantity,
-          existingItem.quantity,
-        );
-      }
-    }
-
-    const updatedOrder = await prisma.orders.update({
-      where: {
-        id: orderId,
-      },
-      data: {
-        totalPrice: total,
-        note: newNote,
-        isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
-        updateTime: new Date(),
-        updatedBy,
-      },
-    });
-
-    await sendEmail(
-      user,
-      itemList,
-      orderId,
-      updatedOrder.deliveryDate,
-      true,
-      newNote,
-    );
-
-    await pusherServer?.trigger('override-order', 'incoming-order', {
-      items: itemList,
-      ...user,
-      ...updatedOrder,
-      totalPrice: total,
-      category: user.category,
-      isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
-      id: updatedOrder.id,
-    });
-  } catch (error: any) {
-    console.log('Internal Server Error: ', error);
-  }
-};
-
-const getCreatedBy = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-  createdByRole: USER_ROLE,
-) => {
-  const prisma = new PrismaClient();
-  const session: any = await getServerSession(req, res, authOptions);
-
-  let createdBy = '';
-
-  if (createdByRole === USER_ROLE.DRIVER) {
-    const driverCreate: any = await prisma.driver.findUnique({
-      where: {
-        id: Number(session.user.id),
-      },
-    });
-
-    createdBy = `Driver - ${driverCreate.name}`;
-  } else if (
-    createdByRole === USER_ROLE.ADMIN ||
-    createdByRole === USER_ROLE.CLIENT
-  ) {
-    const userCreate: any = await prisma.user.findUnique({
-      where: {
-        id: Number(session.user.id),
-      },
-    });
-
-    if (userCreate.role === USER_ROLE.ADMIN) {
-      createdBy = `Admin - ${userCreate.clientName}`;
-    }
-
-    if (userCreate.role === USER_ROLE.CLIENT) {
-      createdBy = `Client - ${userCreate.clientId}`;
-    }
-  }
-
-  return createdBy;
-};

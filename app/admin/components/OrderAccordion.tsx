@@ -97,6 +97,8 @@ const OrderAccordion = ({
     calculateTotalQuantity();
   }, [order]);
 
+  console.log(order, 'order');
+
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
     setIsClientModalOpen(true);
@@ -324,6 +326,13 @@ const OrderAccordion = ({
               {isMarkDateDifference && (
                 <StatusText
                   text={`Date difference`}
+                  type={'info'}
+                  icon={<InfoIcon color="info" fontSize="small" />}
+                />
+              )}
+              {order?.multipleOrders && (
+                <StatusText
+                  text={`Multiple orders`}
                   type={'info'}
                   icon={<InfoIcon color="info" fontSize="small" />}
                 />
