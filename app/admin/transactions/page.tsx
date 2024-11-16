@@ -29,12 +29,12 @@ import useDebounce from '@/hooks/useDebounce';
 import { handleSearch } from '@/app/utils/search';
 import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import LoadingModal from '../components/Modals/LoadingModal';
 
 export default function Transactions() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
-  // const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
@@ -42,6 +42,7 @@ export default function Transactions() {
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
+  const [isOpenLoadingModal, setIsOpenLoadingModal] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   const { showNotification, NotificationComp } = useNotification();
@@ -115,6 +116,7 @@ export default function Transactions() {
 
   return (
     <Sidebar>
+      <LoadingModal open={isOpenLoadingModal} />
       {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <AddExpense
@@ -172,6 +174,7 @@ export default function Transactions() {
           <TransactionsTable
             transactions={displayTransactions}
             showNotification={showNotification}
+            setIsOpenLoadingModal={setIsOpenLoadingModal}
           />
         )}
       </ShadowSection>

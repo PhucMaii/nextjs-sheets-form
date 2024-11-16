@@ -86,3 +86,8 @@ export enum STOCK_STATUS {
   OUT_OF_STOCK = 'Out of Stock',
   LOW_STOCK = 'Low Stock',
 }
+
+export enum TRANSACTION_STATUS {
+  PAID = 'Paid',
+  UNPAID = 'Unpaid',
+}

@@ -1,10 +1,9 @@
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { API_URL, TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import useSelectDate from '@/hooks/useSelectDate';
 import {
   AlertColor,
-  Autocomplete,
   Box,
   Button,
   Divider,
@@ -20,11 +19,12 @@ import {
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import React, { useEffect, useMemo, useState } from 'react';
 import { errorColor } from '@/theme/color';
-import { createFilterOptions } from '@mui/material/Autocomplete';
 import AddVendor from '../Modals/add/AddVendor';
 import { mainPaymentMethodId, units } from '@/app/lib/constant';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
+import InventoryItemSearch from '../Autocomplete/InventoryItemSearch';
+import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -34,8 +34,6 @@ interface IProps {
   role: USER_ROLE;
   defaultValue?: any;
 }
-
-const filter = createFilterOptions<any>();
 
 export default function StockPurchased({
   showNotification,
@@ -53,6 +51,7 @@ export default function StockPurchased({
     paymentMethodId: -1,
     spentBy: '-- Choose who spent --',
     invoice: '',
+    status: TRANSACTION_STATUS.UNPAID,
     ...(defaultValue ? defaultValue : {}),
   });
   const [vendorItems, setVendorItems] = useState<any[]>([]);
@@ -190,15 +189,6 @@ export default function StockPurchased({
     setTotalAmount(newAmount);
   };
 
-  // const generateDescription = () => {
-  //   const itemNames = purchasedItems
-  //     .map((item: any) => {
-  //       return `${item.quantity} ${item.unit} ${item.name}`;
-  //     })
-  //     .join(', ');
-
-  //   setNewExpense({ ...newExpense, description: itemNames });
-  // };
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
@@ -270,6 +260,7 @@ export default function StockPurchased({
           paymentMethodId: newExpense.paymentMethodId,
           spentBy: newExpense.spentBy,
           invoice: newExpense.invoice,
+          status: newExpense.status,
           createdAt,
           codBoardId: codBoardId,
           items: purchasedItems,
@@ -292,6 +283,7 @@ export default function StockPurchased({
         paymentMethodId: role === USER_ROLE.ADMIN ? -1 : mainPaymentMethodId,
         spentBy: '-- Choose who spent --',
         invoice: '',
+        status: TRANSACTION_STATUS.UNPAID,
         ...(defaultValue ? defaultValue : {}),
       });
       setIsLoading(false);
@@ -357,7 +349,7 @@ export default function StockPurchased({
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <Autocomplete
+            {/* <Autocomplete
               value={promptedItem.name}
               onChange={(event, newValue) => {
                 selectPromptedItem(newValue);
@@ -412,6 +404,12 @@ export default function StockPurchased({
               sx={{ width: '100%' }}
               freeSolo
               renderInput={(params) => <TextField {...params} label="Item" />}
+            /> */}
+            <InventoryItemSearch 
+              promptedItem={promptedItem}
+              handleSelectPromptedItem={selectPromptedItem}
+              role={role}
+              displayItems={vendorItems}
             />
           </Grid>
 
@@ -588,9 +586,13 @@ export default function StockPurchased({
           <Select
             fullWidth
             value={newExpense.paymentMethodId}
-            onChange={(e) =>
-              setNewExpense({ ...newExpense, paymentMethodId: +e.target.value })
-            }
+            onChange={(e) => {
+              if (+e.target.value === mainPaymentMethodId) {
+                setNewExpense({ ...newExpense, paymentMethodId: +e.target.value, status: TRANSACTION_STATUS.PAID })
+              } else {
+                setNewExpense({...newExpense, paymentMethodId: +e.target.value})
+              }
+            }}
           >
             <MenuItem value={-1} disabled>
               -- Choose a method --
@@ -632,6 +634,14 @@ export default function StockPurchased({
             </Select>
           </Box>
         )}
+
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Typography variant="h6">Status</Typography>
+          <SelectExpenseStatus 
+            value={newExpense.status}
+            onChange={(e: any) => setNewExpense({...newExpense, status: e.target.value})}
+          />
+        </Box>
 
         <LoadingButton
           variant="contained"

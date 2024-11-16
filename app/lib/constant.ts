@@ -14,6 +14,7 @@ import {
   ORDER_TYPE,
   PAYMENT_METHOD_TYPE,
   PAYMENT_TYPE,
+  TRANSACTION_STATUS,
 } from '../utils/enum';
 import { COLOR_TYPE } from '../admin/components/StatusText';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
@@ -339,5 +340,10 @@ export const methodTypes = [
   PAYMENT_METHOD_TYPE.CHEQUE,
   PAYMENT_METHOD_TYPE.OTHER,
 ];
+
+export const transactionStatusList = [
+  TRANSACTION_STATUS.PAID,
+  TRANSACTION_STATUS.UNPAID
+]
 
 export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];

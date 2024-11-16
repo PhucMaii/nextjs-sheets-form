@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
+import { TRANSACTION_STATUS } from '@/app/utils/enum';
 
 interface IBody {
   amount: number;
@@ -9,6 +10,7 @@ interface IBody {
   spentBy: string;
   date: string;
   paymentMethodId: number;
+  status: TRANSACTION_STATUS;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -22,6 +24,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       date,
       spentBy,
       paymentMethodId,
+      status
     }: IBody = req.body;
 
     const adminUser = await getUserInfo(req, res);
@@ -38,8 +41,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    console.log({ paymentMethodId, existingMethod }, 'paymentMethodId');
-
     if (!existingMethod) {
       return res.status(404).json({
         error: 'Payment Method Not Found',
@@ -55,6 +56,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         date,
         spentBy,
         paymentMethodId,
+        status
       },
     });
 

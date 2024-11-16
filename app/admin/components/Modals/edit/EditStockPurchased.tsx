@@ -1,6 +1,5 @@
 import {
   AlertColor,
-  Autocomplete,
   Box,
   Button,
   createFilterOptions,
@@ -15,11 +14,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { BoxModal } from '../styled';
 import { IExpense } from '@/app/utils/type';
 import ModalHead from '@/app/lib/ModalHead';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { units } from '@/app/lib/constant';
@@ -30,6 +29,7 @@ import useSelectDate from '@/hooks/useSelectDate';
 import { generateCurrentTime } from '@/app/utils/time';
 import axios from 'axios';
 import { compareTwoArrays } from '@/app/utils/array';
+import InventoryItemSearch from '../../Autocomplete/InventoryItemSearch';
 
 interface IProps {
   stockPurchased: IExpense;
@@ -38,10 +38,10 @@ interface IProps {
 
 export const filter = createFilterOptions<any>();
 
-export default function EditStockPurchased({
+const EditStockPurchased = ({
   stockPurchased,
   showNotification,
-}: IProps) {
+}: IProps) => {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -75,6 +75,8 @@ export default function EditStockPurchased({
 
     return vendorsSorted;
   }, [vendors]);
+
+  console.log(selectedVendorId, 'selected vendor id')
 
   useEffect(() => {
     const fetchAdminsAndDrivers = async () => {
@@ -361,7 +363,7 @@ export default function EditStockPurchased({
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <Autocomplete
+                {/* <Autocomplete
                   value={promptedItem.name}
                   onChange={(event, newValue) => {
                     selectPromptedItem(newValue);
@@ -414,6 +416,12 @@ export default function EditStockPurchased({
                   renderInput={(params) => (
                     <TextField {...params} label="Item" />
                   )}
+                /> */}
+                <InventoryItemSearch 
+                  promptedItem={promptedItem}
+                  handleSelectPromptedItem={selectPromptedItem}
+                  role={USER_ROLE.ADMIN}
+                  displayItems={vendorItems}
                 />
               </Grid>
 
@@ -665,3 +673,7 @@ export default function EditStockPurchased({
     </>
   );
 }
+
+export default memo(EditStockPurchased, (prev, next) => {
+  return (prev.showNotification === next.showNotification && prev.stockPurchased === next.stockPurchased)
+})

@@ -2,6 +2,7 @@ import { IPaymentMethod } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import { Box, MenuItem, Select, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
+import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 
 interface IProps {
   paymentMethods: any;
@@ -115,6 +116,12 @@ export default function OtherExpense({
             ))}
         </Select>
       </Box>
+
+      <Box display="flex" flexDirection="column" gap={2}>
+          <Typography variant="h6">Status</Typography>
+          <SelectExpenseStatus value={newExpense.status} onChange={(e: any) => onChangeNewExpense('status', e.target.value)}/>
+      </Box>
+      
       <LoadingButton
         variant="contained"
         onClick={handleSubmit}

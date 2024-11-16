@@ -4,13 +4,14 @@ import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { API_URL, TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
 import StockPurchased from '../../Expense/StockPurchased';
 import OtherExpense from '../../Expense/OtherExpense';
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+import { mainPaymentMethodId } from '@/app/lib/constant';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -32,6 +33,7 @@ export default function AddExpense({
     description: '',
     paymentMethodId: codBoardId ? 4 : -1,
     spentBy: '-- Choose who spent --',
+    status: TRANSACTION_STATUS.UNPAID,
     ...(defaultValue ? defaultValue : {}),
   });
 
@@ -71,6 +73,7 @@ export default function AddExpense({
           amount: newExpense.amount,
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
+          status: newExpense.status,
           codBoardId,
         });
       } else {
@@ -81,6 +84,7 @@ export default function AddExpense({
           amount: newExpense.amount,
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
+          status: newExpense.status
         });
       }
 
@@ -106,6 +110,13 @@ export default function AddExpense({
       ...newExpense,
       [field]: value,
     });
+
+    if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
+      setNewExpense({
+        ...newExpense,
+        status: TRANSACTION_STATUS.PAID
+      })
+    }
   };
 
   return (
@@ -151,89 +162,6 @@ export default function AddExpense({
             handleAddExpense={handleAddExpense}
           />
         )}
-
-        {/* <Box display="flex" flexDirection="column" gap={3}>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Date</Typography>
-            {SelectDate}
-          </Box>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Amount</Typography>
-            <TextField
-              placeholder="Enter epxense amount..."
-              fullWidth
-              value={newExpense.amount}
-              type="number"
-              onChange={(e) => onChangeNewExpense('amount', +e.target.value)}
-            />
-          </Box>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Description</Typography>
-            <TextField
-              multiline
-              placeholder="Enter description..."
-              fullWidth
-              value={newExpense.description}
-              onChange={(e) =>
-                onChangeNewExpense('description', e.target.value)
-              }
-            />
-          </Box>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Payment Method</Typography>
-            {codBoardId ? (
-              <Select
-                value={newExpense.paymentMethodId}
-                onChange={(e) =>
-                  onChangeNewExpense('paymentMethodId', +e.target.value)
-                }
-              >
-                <MenuItem value={4} disabled>
-                  {paymentMethods?.data[0]?.name}
-                </MenuItem>
-              </Select>
-            ) : (
-              <Select
-                value={newExpense.paymentMethodId}
-                onChange={(e) =>
-                  onChangeNewExpense('paymentMethodId', +e.target.value)
-                }
-              >
-                <MenuItem value={-1} disabled>
-                  -- Choose payment method --
-                </MenuItem>
-                {paymentMethods &&
-                  paymentMethods?.data?.length > 0 &&
-                  paymentMethods?.data.map(
-                    (paymentMethod: IPaymentMethod, index: number) => {
-                      return (
-                        <MenuItem key={index} value={paymentMethod.id}>
-                          {paymentMethod.name}
-                        </MenuItem>
-                      );
-                    },
-                  )}
-              </Select>
-            )}
-          </Box>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Spent By</Typography>
-            <Select
-              value={newExpense.spentBy}
-              onChange={(e) => onChangeNewExpense('spentBy', e.target.value)}
-            >
-              <MenuItem value="-- Choose who spent --" disabled>
-                -- Choose who spent --
-              </MenuItem>
-              {adminsAndDrivers.length > 0 &&
-                adminsAndDrivers.map((adminOrDriver: string, index: number) => (
-                  <MenuItem key={index} value={adminOrDriver}>
-                    {adminOrDriver}
-                  </MenuItem>
-                ))}
-            </Select>
-          </Box>
-        </Box> */}
       </BoxModal>
     </Modal>
   );
