@@ -76,8 +76,6 @@ const EditStockPurchased = ({
     return vendorsSorted;
   }, [vendors]);
 
-  console.log(selectedVendorId, 'selected vendor id')
-
   useEffect(() => {
     const fetchAdminsAndDrivers = async () => {
       const users: any = await getAdminsAndDrivers(showNotification);

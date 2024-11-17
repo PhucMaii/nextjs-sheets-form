@@ -16,11 +16,11 @@ import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/SelectDateRange';
 import { ShadowSection } from '../reports/styled';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import TransactionsTable from '../components/Tables/TransactionsTable';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DropdownItemContainer } from '../orders/styled';
-import { primaryColor } from '@/theme/color';
+import { errorColor, primaryColor, successColor } from '@/theme/color';
 import AddIcon from '@mui/icons-material/Add';
 import AddExpense from '../components/Modals/add/AddExpense';
 import useNotification from '@/hooks/useNotification';
@@ -30,6 +30,11 @@ import { handleSearch } from '@/app/utils/search';
 import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import LoadingModal from '../components/Modals/LoadingModal';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import SingleFieldEdit from '../components/Modals/edit/SingleFieldEdit';
+import { otherPaymentMethodId } from '@/app/lib/constant';
+import axios from 'axios';
 
 export default function Transactions() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -44,6 +49,13 @@ export default function Transactions() {
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
   const [isOpenLoadingModal, setIsOpenLoadingModal] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
+  const [selectPaymentMethod, setSelectPaymentMethod] = useState<any>({
+    isOpenModal: false,
+    selectedTransaction: null,
+    updatedStatus: null,
+    isBulk: false,
+  });
 
   const { showNotification, NotificationComp } = useNotification();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -75,6 +87,116 @@ export default function Transactions() {
       setDisplayTransactions(transactions?.data || []);
     }
   }, [debouncedKeywords]);
+
+  const handleBulkUpdateStatus = async (newStatus: TRANSACTION_STATUS, newPaymentMethodId: number = otherPaymentMethodId) => {
+    try {
+      const idsToUpdate = selectedExpenses.map((expense: IExpense) => expense.id);
+
+      if (newStatus === TRANSACTION_STATUS.PAID && newPaymentMethodId === otherPaymentMethodId) {
+        const isOtherPaymentMethod = selectedExpenses.some((expense: IExpense) => expense.paymentMethodId === otherPaymentMethodId);
+
+        if (isOtherPaymentMethod) {
+          setSelectPaymentMethod({
+            isOpenModal: true,
+            selectedTransaction: null,
+            updatedStatus: newStatus,
+            isBulk: true,
+          });
+          showNotification('warning', 'Please choose a different method')
+          return;
+        }
+      }
+
+      const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
+        idsToUpdate,
+        status: newStatus,
+        newPaymentMethodId
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsOpenLoadingModal(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsOpenLoadingModal(false);
+
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Fail to bulk update status: ' + error.response.data.error);
+      setIsOpenLoadingModal(false);
+    }
+  }
+
+  const handleSelectExpense = (e: any, targetExpense: IExpense) => {
+    e.preventDefault();
+    const selectedExpense = selectedExpenses.find((expense: IExpense) => {
+      return expense.id === targetExpense.id;
+    });
+
+    if (selectedExpense) {
+      const newSelectedExpense = selectedExpenses.filter((expense: IExpense) => {
+        return expense.id !== targetExpense.id;
+      });
+      setSelectedExpenses(newSelectedExpense);
+    } else {
+      setSelectedExpenses([...selectedExpenses, targetExpense]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (!transactions) {
+      return;
+    }
+
+    if (selectedExpenses.length === transactions?.data.length) {
+      setSelectedExpenses([]);
+    } else {
+      setSelectedExpenses(transactions?.data);
+    }
+  };
+
+  const handleUpdateStatus = async (transaction: any, newStatus: TRANSACTION_STATUS, newPaymentMethodId: any = otherPaymentMethodId) => {
+    if (!showNotification) {
+      return;
+    }
+
+    // Handle update status of OTHER payment method
+    if (transaction.paymentMethodId === otherPaymentMethodId && newPaymentMethodId === otherPaymentMethodId && newStatus === TRANSACTION_STATUS.PAID) {
+      setSelectPaymentMethod({
+        isOpenModal: true,
+        selectedTransaction: transaction,
+        updatedStatus: newStatus,
+        isBulk: false,
+      });
+      showNotification('warning', 'Please choose a different method')
+      return;
+    }
+    
+    setIsOpenLoadingModal(true);
+
+    try {
+      const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
+        id: transaction.id,
+        status: newStatus,
+        newPaymentMethodId
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsOpenLoadingModal(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsOpenLoadingModal(false);
+    } catch (error: any) {
+      console.log('Fail to update status: ', error);
+      showNotification('error', `Fail to update status: ${error?.respones?.data?.error}`);
+      setIsOpenLoadingModal(false);
+    }
+  }
 
   const actions = (
     <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
@@ -110,12 +232,52 @@ export default function Transactions() {
             <Typography>Add Expense</Typography>
           </DropdownItemContainer>
         </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            handleBulkUpdateStatus(TRANSACTION_STATUS.PAID)
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckIcon sx={{ color: successColor }} />
+            <Typography>Mark as Paid</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            handleBulkUpdateStatus(TRANSACTION_STATUS.UNPAID)
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CloseIcon sx={{ color: errorColor }} />
+            <Typography>Mark as Unpaid</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
       </Menu>
     </Box>
   );
 
   return (
     <Sidebar>
+      <SingleFieldEdit
+        title="Select Payment Method"
+        open={selectPaymentMethod.isOpenModal}
+        onClose={() => setSelectPaymentMethod({...selectPaymentMethod, isOpenModal: false})}
+        handleUpdate={(newPaymentMethod: any) => {
+          if (selectPaymentMethod.isBulk) {
+            handleBulkUpdateStatus(selectPaymentMethod.updatedStatus, newPaymentMethod)
+          } else {
+            handleUpdateStatus(selectPaymentMethod.selectedTransaction, selectPaymentMethod.updatedStatus, newPaymentMethod)
+            
+          }
+            
+        }}
+        renderField="name"
+        inputLabel="Payment Method"
+        menuList={paymentMethods?.data || []}
+        defaultValue={otherPaymentMethodId}
+      />
       <LoadingModal open={isOpenLoadingModal} />
       {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -173,8 +335,11 @@ export default function Transactions() {
         ) : (
           <TransactionsTable
             transactions={displayTransactions}
+            handleUpdateStatus={handleUpdateStatus}
             showNotification={showNotification}
-            setIsOpenLoadingModal={setIsOpenLoadingModal}
+            selectedExpense={selectedExpenses}
+            handleSelectExpense={handleSelectExpense}
+            handleSelectAll={handleSelectAll}
           />
         )}
       </ShadowSection>

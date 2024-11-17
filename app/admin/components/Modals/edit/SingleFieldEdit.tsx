@@ -8,11 +8,10 @@ interface IProps {
     onClose: any;
     handleUpdate: any;
     title: string;
-    value: any;
     inputLabel: string;
-    handleOnChange: any;
     menuList?: any[];
     renderField?: string;
+    defaultValue?: any;
 }
 
 export default function SingleFieldEdit({
@@ -20,22 +19,25 @@ export default function SingleFieldEdit({
     onClose,
     handleUpdate,
     title,
-    value,
     inputLabel,
-    handleOnChange,
     renderField,
     menuList,
+    defaultValue,
 }: IProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [value, setValue] = useState<any>(defaultValue ? defaultValue : null);
 
     const handleSubmit = async () => {
         try {
             setIsLoading(true);
-            await handleUpdate();
+            console.log('access here', value);
+            await handleUpdate(value);
+            console.log('DONE')
 
             setIsLoading(false);
         } catch (error: any) {
             console.log('Internal Server Error: ', error.response.data.error);
+            setIsLoading(false);
         }
     }
 
@@ -54,9 +56,9 @@ export default function SingleFieldEdit({
 
             {
                 menuList && renderField ? (
-                    <FormControl>
+                    <FormControl fullWidth>
                         <InputLabel htmlFor="select">{inputLabel}</InputLabel>
-                        <Select id="select" value={value} onChange={handleOnChange}>
+                        <Select fullWidth id="select" value={value} onChange={(e) => setValue(e.target.value)} label={inputLabel}>
                             {
                                 menuList.length > 0 && menuList.map((item: any, index: number) => {
                                     return (
@@ -67,13 +69,15 @@ export default function SingleFieldEdit({
                         </Select>
                     </FormControl>
                 ) : (
-                    <FormControl>
+                    <FormControl fullWidth>
                         <InputLabel htmlFor="text-field">{inputLabel}</InputLabel>
-                        <TextField 
+                        <TextField
+                            fullWidth
                             id="text-field"
                             value={value}
-                            onChange={handleOnChange}
+                            onChange={(e) => setValue(e.target.value)}
                             variant="outlined"
+                            label={inputLabel}
                         />
                     </FormControl>
                 )
