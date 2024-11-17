@@ -309,11 +309,13 @@ export default function StockPurchased({
   return (
     <>
       {role === USER_ROLE.ADMIN && (
+        <>
         <AddVendor
           showNotification={showNotification}
           open={isOpenAddVendor}
           onClose={() => setIsOpenAddVendor(false)}
         />
+        </>
       )}
       <Box display="flex" flexDirection="column" gap={3}>
         <Grid container spacing={3}>

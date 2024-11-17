@@ -18,6 +18,7 @@ export interface SingleFieldUpdateProps {
   open: boolean;
   onClose?: any;
   updatedField: string;
+  renderField?: string;
 }
 
 const SingleFieldUpdate = ({
@@ -28,6 +29,7 @@ const SingleFieldUpdate = ({
   menuList,
   label,
   updatedField,
+  renderField,
 }: SingleFieldUpdateProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [value, setValue] = useState<any>('');
@@ -68,8 +70,8 @@ const SingleFieldUpdate = ({
           {menuList.length > 0 &&
             menuList.map((menuItem: any, index: number) => {
               return (
-                <MenuItem key={index} value={menuItem}>
-                  {menuItem}
+                <MenuItem key={index} value={renderField ? menuItem.id : menuItem}>
+                  {renderField ? menuItem[renderField] : menuItem}
                 </MenuItem>
               );
             })}

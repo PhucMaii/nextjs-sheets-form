@@ -8,13 +8,17 @@ import {
   TableRow,
   // Toolbar,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import EditExpense from '../Modals/edit/EditExpense';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditStockPurchased from '../Modals/edit/EditStockPurchased';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
+import SingleFieldUpdate from '../Modals/edit/SingleFieldUpdate';
+import { SWRFetchData } from '@/app/utils/db';
+import { otherPaymentMethodId } from '@/app/lib/constant';
+import SingleFieldEdit from '../Modals/edit/SingleFieldEdit';
 
 interface IProps {
   transactions: any[];
@@ -27,6 +31,15 @@ export default function TransactionsTable({
   showNotification,
   setIsOpenLoadingModal
 }: IProps) {
+  const [selectPaymentMethod, setSelectPaymentMethod] = useState<any>({
+    isOpenModal: false,
+    selectedTransaction: null,
+    updatedStatus: null,
+  });
+
+
+  const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+
   const handleDeleteTransaction = async (transaction: any) => {
     if (!showNotification) {
       return;
@@ -58,8 +71,17 @@ export default function TransactionsTable({
     }
   };
 
-  const handleUpdateStatus = async (e: any, transaction: any) => {
+  const handleUpdateStatus = async (transaction: any, newStatus: TRANSACTION_STATUS, isForce: boolean = false) => {
     if (!showNotification) {
+      return;
+    }
+
+    if (transaction.paymentMethodId === otherPaymentMethodId && !isForce) {
+      setSelectPaymentMethod({
+        isOpenModal: true,
+        selectedTransaction: transaction,
+        updatedStatus: newStatus
+      });
       return;
     }
     
@@ -68,7 +90,7 @@ export default function TransactionsTable({
     try {
       const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
         id: transaction.id,
-        status: e.target.value
+        status: newStatus
       });
 
       if (response.data.error) {
@@ -85,8 +107,43 @@ export default function TransactionsTable({
       setIsOpenLoadingModal(false);
     }
   }
+  
+  // const handleUpdateOtherMethodStatus = async (transaction: any, newValue: TRANSACTION_STATUS) => {
+  //   if (!showNotification) {
+  //     return;
+  //   }
+
+  //   setIsOpenLoadingModal(true);
+  //   try {
+  //     const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
+  //       id: transaction.id,
+  //       status: newValue
+  //     });
+
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       setIsOpenLoadingModal(false);
+  //       return;
+  //     }
+
+  //     showNotification('success', response.data.message);
+  //     setIsOpenLoadingModal(false);
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error.response.data.error);
+  //     showNotification('error', 'There was an error: ' + error.response.data.error);
+  //   }
+  // }
 
   return (
+    <>
+      <SingleFieldEdit 
+        title="Select Payment Method"
+        open={selectPaymentMethod.isOpenModal}
+        onClose={() => setSelectPaymentMethod({...selectPaymentMethod, isOpenModal: false})}
+        handleUpdate={() => handleUpdateStatus(selectPaymentMethod.selectedTransaction, selectPaymentMethod.updatedStatus, true)}
+        renderField="name"
+        value={}
+      />
     <Table sx={{ overflow: 'scroll' }}>
       <TableHead>
         <TableRow>
@@ -112,7 +169,7 @@ export default function TransactionsTable({
                     src={`/images/${transaction.paymentMethod.type}.png`}
                     alt="method"
                     style={{ width: 30, height: 30 }}
-                  />
+                    />
                   {/* </Toolbar> */}
                 </TableCell>
                 <TableCell style={{ width: 50 }}>
@@ -132,18 +189,7 @@ export default function TransactionsTable({
                 </TableCell>
                 <TableCell style={{ width: 100 }}>{transaction.date}</TableCell>
                 <TableCell>
-                  {/* <Select value={transaction.status} onChange={(e: any) => handleUpdateStatus(transaction, e.target.value)}>
-                    {
-                      transactionStatusList.map((status: TRANSACTION_STATUS) => {
-                        return (
-                          <MenuItem key={status} value={status}>
-                            <StatusText text={status.toUpperCase()} type={status === TRANSACTION_STATUS.PAID ? 'success' : 'error'} icon={status === TRANSACTION_STATUS.PAID ? <CheckIcon color="success" /> : <CloseIcon color="error" />}  />
-                          </MenuItem>
-                        )
-                      })
-                    }
-                  </Select> */}
-                  <SelectExpenseStatus value={transaction.status} onChange={(e: any) => handleUpdateStatus(e, transaction)} />
+                  <SelectExpenseStatus value={transaction.status} onChange={(e: any) => handleUpdateStatus(transaction, e.target.value)} />
                 </TableCell>
                 <TableCell>
                   {showNotification && (
@@ -152,16 +198,16 @@ export default function TransactionsTable({
                         targetObj={transaction}
                         handleDelete={handleDeleteTransaction}
                         includedButton
-                      />
+                        />
                       {transaction?.orderedItems.length > 0 ? (
                         <EditStockPurchased
-                          stockPurchased={transaction}
-                          showNotification={showNotification}
+                        stockPurchased={transaction}
+                        showNotification={showNotification}
                         />
                       ) : (
                         <EditExpense
-                          transaction={transaction}
-                          showNotification={showNotification}
+                        transaction={transaction}
+                        showNotification={showNotification}
                         />
                       )}
                     </Box>
@@ -172,5 +218,6 @@ export default function TransactionsTable({
           })}
       </TableBody>
     </Table>
+    </>
   );
 }

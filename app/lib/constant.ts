@@ -36,6 +36,7 @@ import {
 } from '../../theme/color';
 
 export const mainPaymentMethodId = 4;
+export const otherPaymentMethodId = 9;
 
 export const mainItems = [
   'BEAN 10 LB',
