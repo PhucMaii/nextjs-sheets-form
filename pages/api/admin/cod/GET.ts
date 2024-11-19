@@ -357,7 +357,9 @@ const formatBoards = (boards: any) => {
       }),
     );
 
-    const codData = getCODData(codBoard.orders);
+    const nonVoidOrders = codBoard.orders.filter((order: Orders) => order.status !== ORDER_STATUS.VOID);
+
+    const codData = getCODData(nonVoidOrders);
 
     const cashDiff = calculateCashDiff(codBoard, totalAmount);
 

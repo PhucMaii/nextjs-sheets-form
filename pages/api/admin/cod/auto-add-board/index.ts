@@ -24,7 +24,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prisma = new PrismaClient();
 
     const { todayString, createdAt }: IBody = req.body;
-    console.log(todayString, 'today string');
 
     const user = await getUserInfo(req, res);
 
