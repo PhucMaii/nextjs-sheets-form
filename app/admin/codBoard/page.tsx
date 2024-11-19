@@ -46,8 +46,6 @@ export default function CodBoard() {
     isFetching: true,
     isCheckingAutoAddBoard: false,
   });
-  const [isFetching, setIsFetching] = useState<boolean>(true);
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenAddBoard, setIsOpenAddBoard] = useState<boolean>(false);
   const { showNotification, NotificationComp } = useNotification();
 
@@ -65,7 +63,7 @@ export default function CodBoard() {
 
   useEffect(() => {
     handleAutoAddBoard();
-  }, []);
+  }, [date, selectedBoard]);
 
   useEffect(() => {
     if (!codBoards) {
@@ -97,7 +95,7 @@ export default function CodBoard() {
     try {
       const createdAt = generateCurrentTime();
       const response = await axios.post(`${API_URL.ADMIN}/cod/auto-add-board`, {
-        todayString,
+        todayString: date,
         createdAt,
       });
 

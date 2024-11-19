@@ -66,6 +66,18 @@ export default function CodOverview({ codBoards }: IProps) {
     return amount;
   }, [codBoards]);
 
+  const collectedAmount = useMemo(() => {
+    if (!codBoards) {
+      return 0;
+    }
+
+    const amount = totalBoards.reduce((acc: number, board: any) => {
+      return acc + board.collected.amount;
+    }, 0);
+
+    return amount;
+  }, [codBoards]);
+
   const totalAmount = useMemo(() => {
     if (!codBoards) {
       return 0;
@@ -102,6 +114,15 @@ export default function CodOverview({ codBoards }: IProps) {
           icon={<MoneyOffIcon fontSize="large" color="primary" />}
           text="Uncleared Amount"
           value={unclearedAmount.toFixed(2)}
+          backgroundColor={primary.lightest}
+          textColor={primary.main}
+        />
+      </Grid>
+      <Grid item xs={12} md={3} sm={6}>
+        <OverviewCard
+          icon={<MoneyOffIcon fontSize="large" color="primary" />}
+          text="Collected Amount"
+          value={collectedAmount.toFixed(2)}
           backgroundColor={primary.lightest}
           textColor={primary.main}
         />

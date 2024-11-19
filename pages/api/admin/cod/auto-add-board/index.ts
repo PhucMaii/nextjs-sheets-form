@@ -68,6 +68,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    console.log(boardOrders, 'board orders')
+
     if (boards.length > 0 && boardOrders.length === 0) {
       return res.status(200).json({
         message: 'Boards are added already',
