@@ -24,6 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prisma = new PrismaClient();
 
     const { todayString, createdAt }: IBody = req.body;
+    console.log(todayString, 'today string');
 
     const user = await getUserInfo(req, res);
 
@@ -67,6 +68,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         date: todayString,
       },
     });
+
+    console.log(boardOrders, 'board orders')
 
     if (boards.length > 0 && boardOrders.length === 0) {
       return res.status(200).json({
