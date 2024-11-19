@@ -238,11 +238,13 @@ export default function ItemPage() {
   const handleUpdateItem = async (
     updatedItem: IItem,
     updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
+    updatedFields: string[] = [],
   ) => {
     try {
       const response = await axios.put(API_URL.ITEM, {
         updatedItem,
         updateOption,
+        updatedFields
       });
 
       if (response.data.error) {

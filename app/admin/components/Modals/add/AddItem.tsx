@@ -84,6 +84,7 @@ export default function AddItem({
                 ) || null
               }
               onChange={(e, newValue: any) => {
+                console.log('new value', newValue)
                 setNewItem({
                   ...newItem,
                   name: newValue.name || '',
@@ -92,6 +93,7 @@ export default function AddItem({
                 });
               }}
               onInputChange={(e, newInputValue) => {
+                console.log(newInputValue, 'new input value')
                 setNewItem({ ...newItem, name: newInputValue });
               }}
               sx={{ width: 'auto' }}
