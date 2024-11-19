@@ -46,6 +46,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const checkIsItemValid = async (newItem: IItem) => {
+  console.log(newItem, 'new item')
   try {
     const prisma = new PrismaClient();
 

@@ -1,5 +1,7 @@
 import {
+  Box,
   Button,
+  Checkbox,
   Divider,
   FormControlLabel,
   Grid,
@@ -19,6 +21,7 @@ interface IProps {
   handleUpdateItem: (
     updatedItem: IItem,
     updateOption: UPDATE_OPTION,
+    updatedFields: string[],
   ) => Promise<void>;
 }
 
@@ -30,6 +33,7 @@ export enum UPDATE_OPTION {
 export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [updatedField, setUpdatedField] = useState<string[]>([]);
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
   const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(
     UPDATE_OPTION.CURRENT_CATEGORY,
@@ -46,10 +50,31 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
       ...updatedItem,
       name: updatedItem.name.toUpperCase(),
     };
+
+    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && updatedField.length === 0) {
+      return;
+    }
+
     setIsUpdating(true);
-    await handleUpdateItem(newUpdatedItem, updateOption);
+    await handleUpdateItem(newUpdatedItem, updateOption, updatedField);
     setIsUpdating(false);
   };
+
+  const addToUpdatedField = (newField: string) => {
+    if (updatedField.length === 0) {
+      setUpdatedField([newField]);
+      return;
+    }
+
+    const isFieldExist = updatedField.some((field: string) => field === newField);
+    if (isFieldExist) {
+      const newUpdatedField = updatedField.filter((field) => field !== newField);
+      setUpdatedField(newUpdatedField);
+    } else {
+      setUpdatedField([...updatedField, newField]);
+    }
+  }
+
 
   return (
     <>
@@ -86,9 +111,16 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
             />
           </RadioGroup>
           <Divider />
-          <Grid container rowGap={2}>
+          <Grid container rowGap={2} alignItems="center">
             <Grid item xs={12} md={6}>
-              <Typography variant="h6">Name:</Typography>
+              <Box display="flex" gap={2} alignItems="center">
+                {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                  <>
+                    <Checkbox value={updatedField.some((field) => field === 'name')} onChange={() => addToUpdatedField('name')} />
+                  </>
+                )}
+                <Typography variant="h6">Name:</Typography>
+              </Box>
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
@@ -102,7 +134,14 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6">Price:</Typography>
+              <Box display="flex" alignItems="center" gap={2}>
+              {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                  <>
+                    <Checkbox value={updatedField.some((field) => field === 'price')} onChange={() => addToUpdatedField('price')} />
+                  </>
+                )}
+                <Typography variant="h6">Price:</Typography>
+              </Box>
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField

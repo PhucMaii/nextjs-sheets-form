@@ -374,7 +374,7 @@ const OrderAccordion = ({
               variant="contained"
               onClick={handleOpenClientModal}
             >
-              {order.user.clientName}
+              {order?.clientName || order?.user?.clientName}
             </Button>
           </Grid>
           <Grid item xs={12} md={3} textAlign="left" alignItems="center">

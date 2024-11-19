@@ -23,7 +23,6 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import EditCashInput from '../Modals/edit/EditCashInput';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-// import AddExpense from '../Modals/add/AddExpense';
 import ShowExpenses from '../Modals/ShowExpenses';
 
 interface IProps {
@@ -43,7 +42,12 @@ export default function CODBoardSummary({
   const [isOpenEditCashInput, setIsOpenEditCashInput] =
     useState<boolean>(false);
 
-  const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
+  const orderWithoutVOID = useFilterOrders(boardData.orders, [
+    ORDER_STATUS.INCOMPLETED,
+    ORDER_STATUS.DELIVERED,
+    ORDER_STATUS.COMPLETED
+  ]);
+  const totalAmount = orderWithoutVOID.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
   }, 0);
 
