@@ -45,7 +45,7 @@ export default function CODBoardSummary({
   const orderWithoutVOID = useFilterOrders(boardData.orders, [
     ORDER_STATUS.INCOMPLETED,
     ORDER_STATUS.DELIVERED,
-    ORDER_STATUS.COMPLETED
+    ORDER_STATUS.COMPLETED,
   ]);
   const totalAmount = orderWithoutVOID.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
@@ -84,30 +84,6 @@ export default function CODBoardSummary({
     0,
   );
 
-  // const handleAddExpenseId = async (id: number) => {
-  //   try {
-  //     const response = await axios.put(`${API_URL.ADMIN}/cod`, {
-  //       id: boardData.id,
-  //       updatedBoard: {
-  //         date: boardData.date,
-  //         driverId: boardData.driverId,
-  //         expenseId: id,
-  //       },
-  //     });
-
-  //     if (response.data.error) {
-  //       showNotification('error', response.data.error);
-  //       return;
-  //     }
-
-  //     showNotification('success', response.data.message);
-  //   } catch (error: any) {
-  //     console.log('Internal Server Error: ', error);
-  //     showNotification('error', error.response.data.error);
-  //     return;
-  //   }
-  // };
-
   return (
     <>
       <ShowExpenses
@@ -117,17 +93,6 @@ export default function CODBoardSummary({
         showNotification={showNotification}
         boardData={boardData}
       />
-      {/* <AddExpense
-        open={isOpenShowExpenses}
-        onClose={() => setIsOpenShowExpenses(false)}
-        showNotification={showNotification}
-        // handleAddExpenseId={handleAddExpenseId}
-        defaultValue={{
-          date: boardData.date,
-          spentBy: `Driver - ${boardData.driver.name}`,
-        }}
-        codBoardId={boardData.id}
-      /> */}
       <EditCashInput
         open={isOpenEditCashInput}
         onClose={() => setIsOpenEditCashInput(false)}

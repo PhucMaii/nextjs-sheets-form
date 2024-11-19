@@ -70,7 +70,10 @@ const SingleFieldUpdate = ({
           {menuList.length > 0 &&
             menuList.map((menuItem: any, index: number) => {
               return (
-                <MenuItem key={index} value={renderField ? menuItem.id : menuItem}>
+                <MenuItem
+                  key={index}
+                  value={renderField ? menuItem.id : menuItem}
+                >
                   {renderField ? menuItem[renderField] : menuItem}
                 </MenuItem>
               );

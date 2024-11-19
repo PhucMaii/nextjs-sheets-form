@@ -24,7 +24,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       date,
       spentBy,
       paymentMethodId,
-      status
+      status,
     }: IBody = req.body;
 
     const adminUser = await getUserInfo(req, res);
@@ -56,7 +56,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         date,
         spentBy,
         paymentMethodId,
-        status
+        status,
       },
     });
 

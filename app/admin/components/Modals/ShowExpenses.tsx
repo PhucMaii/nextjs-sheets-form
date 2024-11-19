@@ -7,6 +7,8 @@ import { IExpense } from '@/app/utils/type';
 import TransactionsTable from '../Tables/TransactionsTable';
 import AddExpense from './add/AddExpense';
 import ErrorComponent from '../ErrorComponent';
+import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
+import LoadingModal from './LoadingModal';
 
 interface IProps extends ModalProps {
   expenses: IExpense[];
@@ -22,6 +24,8 @@ export default function ShowExpenses({
   boardData,
 }: IProps) {
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
+  
+  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating } = useUpdateExpenseStatus(showNotification);
 
   const totalAmount = useMemo(() => {
     if (expenses.length === 0) {
@@ -37,6 +41,8 @@ export default function ShowExpenses({
 
   return (
     <>
+      {UpdateExpenseStatusComp}
+      <LoadingModal open={isUpdating} />
       <AddExpense
         open={isOpenAddExpense}
         onClose={() => setIsOpenAddExpense(false)}
@@ -74,6 +80,7 @@ export default function ShowExpenses({
             <TransactionsTable
               transactions={expenses}
               showNotification={showNotification}
+              handleUpdateStatus={handleUpdateStatus}
             />
           ) : (
             <ErrorComponent errorText="No Transactions Found" />

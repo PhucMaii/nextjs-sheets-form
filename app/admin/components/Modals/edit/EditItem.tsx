@@ -51,7 +51,10 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
       name: updatedItem.name.toUpperCase(),
     };
 
-    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && updatedField.length === 0) {
+    if (
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
+      updatedField.length === 0
+    ) {
       return;
     }
 
@@ -66,15 +69,18 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
       return;
     }
 
-    const isFieldExist = updatedField.some((field: string) => field === newField);
+    const isFieldExist = updatedField.some(
+      (field: string) => field === newField,
+    );
     if (isFieldExist) {
-      const newUpdatedField = updatedField.filter((field) => field !== newField);
+      const newUpdatedField = updatedField.filter(
+        (field) => field !== newField,
+      );
       setUpdatedField(newUpdatedField);
     } else {
       setUpdatedField([...updatedField, newField]);
     }
-  }
-
+  };
 
   return (
     <>
@@ -116,7 +122,10 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
               <Box display="flex" gap={2} alignItems="center">
                 {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
                   <>
-                    <Checkbox value={updatedField.some((field) => field === 'name')} onChange={() => addToUpdatedField('name')} />
+                    <Checkbox
+                      value={updatedField.some((field) => field === 'name')}
+                      onChange={() => addToUpdatedField('name')}
+                    />
                   </>
                 )}
                 <Typography variant="h6">Name:</Typography>
@@ -135,9 +144,12 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
             </Grid>
             <Grid item xs={12} md={6}>
               <Box display="flex" alignItems="center" gap={2}>
-              {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
                   <>
-                    <Checkbox value={updatedField.some((field) => field === 'price')} onChange={() => addToUpdatedField('price')} />
+                    <Checkbox
+                      value={updatedField.some((field) => field === 'price')}
+                      onChange={() => addToUpdatedField('price')}
+                    />
                   </>
                 )}
                 <Typography variant="h6">Price:</Typography>

@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { mainPaymentMethodId } from '@/app/lib/constant';
+import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { checkIsExpenseValid } from '@/pages/api/admin/inventory/expenses/POST';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -9,6 +11,7 @@ interface IBody {
   amount: number;
   description: string;
   paymentMethodId: number;
+  status: TRANSACTION_STATUS;
   createdAt: string;
   invoice: string;
   items: {
@@ -29,6 +32,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       amount,
       description,
       paymentMethodId,
+      status,
       createdAt,
       invoice,
       items,
@@ -82,25 +86,32 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return acc;
     }, []);
 
-    // Check if vendor has expense on that date
-    const existingVendorExpense = await prisma.expense.findMany({
-      where: {
-        invoice: invoice,
-        date: date,
-        vendors: {
-          some: {
-            vendorId: {
-              in: vendors,
-            },
-          },
-        },
-      },
-    });
+    if (invoice && invoice.trim() !== '') {
+      // Check if vendor has expense on that date
+      // const existingVendorExpense = await prisma.expense.findMany({
+      //   where: {
+      //     invoice: invoice,
+      //     date: date,
+      //     vendors: {
+      //       some: {
+      //         vendorId: {
+      //           in: vendors,
+      //         },
+      //       },
+      //     },
+      //   },
+      // });
 
-    if (existingVendorExpense.length > 0) {
-      return res
-        .status(409)
-        .json({ error: `Expense Already Exists For "${invoice}" On ${date}` });
+      // if (existingVendorExpense.length > 0) {
+      //   return res
+      //     .status(409)
+      //     .json({ error: `Expense Already Exists For "${invoice}" On ${date}` });
+      // }
+      const isExpenseValid = await checkIsExpenseValid(invoice, date, vendors);
+
+      if (!isExpenseValid.ok) {
+        return res.status(409).json({ error: isExpenseValid.error });
+      }
     }
 
     const newExpense = await prisma.expense.create({
@@ -109,6 +120,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         date: date,
         amount: amount,
         description: description,
+        status,
         paymentMethodId: paymentMethodId,
         spentBy: `Driver - ${driver.name}`,
         createdAt: createdAt,

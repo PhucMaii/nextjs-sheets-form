@@ -2,12 +2,14 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import { mainPaymentMethodId } from '@/app/lib/constant';
+import { TRANSACTION_STATUS } from '@/app/utils/enum';
 
 interface IBody {
   amount: number;
   date: string;
   paymentMethodId: number;
   description: string;
+  status: TRANSACTION_STATUS;
   createdAt: string;
 }
 
@@ -15,8 +17,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { amount, date, paymentMethodId, description, createdAt }: IBody =
-      req.body;
+    const {
+      amount,
+      date,
+      paymentMethodId,
+      description,
+      status,
+      createdAt,
+    }: IBody = req.body;
 
     const driver = await getDriverInfo(req, res);
 
@@ -97,6 +105,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         paymentMethodId: paymentMethodId,
         description: description,
         createdAt,
+        status,
         spentBy: `Driver - ${driver?.name}`,
         createdBy: `Driver - ${driver?.name}`,
         codBoardId: dateBoard.id,
