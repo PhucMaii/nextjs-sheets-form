@@ -10,65 +10,63 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.orderedItems.updateMany({
     where: {
-      name: "NO. 2 OSYTER MUSHROOM 5 LB"
+      name: 'NO. 2 OSYTER MUSHROOM 5 LB',
     },
     data: {
       name: 'NO. 2 OYSTER MUSHROOM 5 LB',
-      inventoryItemId: 41
-    }
+      inventoryItemId: 41,
+    },
   });
 
   await prisma.orderedItems.updateMany({
     where: {
-      name: "SOYA 24X1"
+      name: 'SOYA 24X1',
     },
     data: {
       name: 'SOYA 24X1 LB',
-      inventoryItemId: 23
-    }
+      inventoryItemId: 23,
+    },
   });
 
   await prisma.orderedItems.updateMany({
     where: {
-      name: {in: ["BEAN 24X1", "BEANSPROUTS 24 x 1 LB"]}
+      name: { in: ['BEAN 24X1', 'BEANSPROUTS 24 x 1 LB'] },
     },
     data: {
       name: 'BEAN 24X1 LB',
-      inventoryItemId: 20
-    }
+      inventoryItemId: 20,
+    },
   });
 
   await prisma.orderedItems.updateMany({
     where: {
-      name: "흰 버섯 - WHITE MUSHROOM"
+      name: '흰 버섯 - WHITE MUSHROOM',
     },
     data: {
       name: '흰 버섯 - NO. 1 MUSHROOM WHITE 10 LB',
-      inventoryItemId: 25
-    }
-  })
+      inventoryItemId: 25,
+    },
+  });
 
   await prisma.orderedItems.updateMany({
     where: {
-      name: "GINGER 30 LB"
+      name: 'GINGER 30 LB',
     },
     data: {
       name: 'ORGANIC GINGER 30 LB',
-      inventoryItemId: 56
-    }
+      inventoryItemId: 56,
+    },
   });
 
   await prisma.orderedItems.updateMany({
     where: {
-      name: "JUMBO EGGS"
+      name: 'JUMBO EGGS',
     },
     data: {
       name: 'JUMBO EGG',
-      inventoryItemId: 65
-    }
+      inventoryItemId: 65,
+    },
   });
-
-
 
   // // BEAN 10 LB
   // await prisma.orderedItems.updateMany({
@@ -339,7 +337,7 @@ async function main() {
   //     inventoryItemId: 65
   //   }
   // });
-  
+
   // // LARGE EGG
   // await prisma.orderedItems.updateMany({
   //   where: {
@@ -524,15 +522,18 @@ async function main() {
   await prisma.orderedItems.updateMany({
     where: {
       name: {
-        in: ["NO. 2 MUSHROOM WHITE 10 LB", "흰 버섯 - NO. 2 MUSHROOM WHITE 10 LB"]
+        in: [
+          'NO. 2 MUSHROOM WHITE 10 LB',
+          '흰 버섯 - NO. 2 MUSHROOM WHITE 10 LB',
+        ],
       },
       scheduledOrderId: {
-        not: null
-      }
+        not: null,
+      },
     },
     data: {
-      inventoryItemId: 26
-    }
+      inventoryItemId: 26,
+    },
   });
 
   // // NO. 1 OYSTER MUSHROOM
@@ -549,7 +550,6 @@ async function main() {
   //     inventoryItemId: 73
   //   }
   // });
-
 
   // // NO. 2 OYSTER MUSHROOM
   // await prisma.orderedItems.updateMany({

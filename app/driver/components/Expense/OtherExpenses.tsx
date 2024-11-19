@@ -1,6 +1,7 @@
+import SelectExpenseStatus from '@/app/admin/components/Select/SelectExpenseStatus';
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
 import { IPaymentMethod } from '@/app/utils/type';
 import useSelectDate from '@/hooks/useSelectDate';
@@ -26,6 +27,7 @@ export default function OtherExpenses({ showNotification }: IProps) {
     amount: 0,
     description: '',
     paymentMethodId: mainPaymentMethodId,
+    status: TRANSACTION_STATUS.PAID,
   });
 
   // Data Fetching
@@ -53,6 +55,7 @@ export default function OtherExpenses({ showNotification }: IProps) {
         amount: newExpense.amount,
         description: newExpense.description,
         paymentMethodId: newExpense.paymentMethodId,
+        status: newExpense.status,
       });
 
       if (response.data.error) {
@@ -124,6 +127,16 @@ export default function OtherExpenses({ showNotification }: IProps) {
               },
             )}
         </Select>
+      </Box>
+
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Typography variant="h6">Status</Typography>
+        <SelectExpenseStatus
+          value={newExpense.status}
+          onChange={(e: any) =>
+            setNewExpense({ ...newExpense, status: e.target.value })
+          }
+        />
       </Box>
 
       <LoadingButton

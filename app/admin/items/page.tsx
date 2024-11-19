@@ -244,7 +244,7 @@ export default function ItemPage() {
       const response = await axios.put(API_URL.ITEM, {
         updatedItem,
         updateOption,
-        updatedFields
+        updatedFields,
       });
 
       if (response.data.error) {

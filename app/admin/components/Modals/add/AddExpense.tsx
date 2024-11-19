@@ -84,7 +84,7 @@ export default function AddExpense({
           amount: newExpense.amount,
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
-          status: newExpense.status
+          status: newExpense.status,
         });
       }
 
@@ -114,8 +114,8 @@ export default function AddExpense({
     if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
       setNewExpense({
         ...newExpense,
-        status: TRANSACTION_STATUS.PAID
-      })
+        status: TRANSACTION_STATUS.PAID,
+      });
     }
   };
 

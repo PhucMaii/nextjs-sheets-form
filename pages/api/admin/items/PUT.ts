@@ -15,7 +15,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const {
       updatedItem,
       updateOption = UPDATE_OPTION.CURRENT_CATEGORY,
-      updatedFields = []
+      updatedFields = [],
     }: IBody = req.body;
 
     if (
@@ -41,10 +41,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // If nothing change to update
-    if (updatedFields?.length === 0 && updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+    if (
+      updatedFields?.length === 0 &&
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
+    ) {
       return res.status(500).json({
-        error: 'No Updated Field For Same Inventory Item'
-      })
+        error: 'No Updated Field For Same Inventory Item',
+      });
     }
 
     // * BAD CASE: Item name existed already in that category
@@ -85,11 +88,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       price: updatedItem.price,
     };
 
-    if (!updatedFields.includes('name') && updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+    if (
+      !updatedFields.includes('name') &&
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
+    ) {
       delete updatedData.name;
     }
 
-    if (!updatedFields.includes('price') && updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+    if (
+      !updatedFields.includes('price') &&
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
+    ) {
       delete updatedData.price;
     }
 
@@ -98,14 +107,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
       existingItem.inventoryItemId
     ) {
-
       await prisma.item.updateMany({
         where: {
           inventoryItemId: existingItem.inventoryItemId,
         },
-        data: updatedData
+        data: updatedData,
       });
-    } 
+    }
     // else if (
     //   updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
     //   !existingItem.inventoryItemId
@@ -123,7 +131,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       existingItem,
       updatedItem,
       updateOption,
-      updatedData
+      updatedData,
     );
 
     if (!responseUpdate.ok) {
@@ -148,7 +156,7 @@ const updateAllScheduleOrderItems = async (
   oldItem: any,
   updatedItem: any,
   updateOption: UPDATE_OPTION,
-  updatedData: any
+  updatedData: any,
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -172,8 +180,10 @@ const updateAllScheduleOrderItems = async (
     // }
 
     // if update all item same inventory id
-    if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-      updatedItem?.inventoryItemId) {
+    if (
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
+      updatedItem?.inventoryItemId
+    ) {
       await prisma.orderedItems.updateMany({
         where: {
           scheduledOrderId: {
@@ -181,7 +191,7 @@ const updateAllScheduleOrderItems = async (
           },
           inventoryItemId: updatedItem.inventoryItemId,
         },
-        data: updatedData
+        data: updatedData,
       });
 
       return { ok: true };
@@ -207,7 +217,8 @@ const updateAllScheduleOrderItems = async (
         if (scheduleOrder) {
           // Get the item to be updated, then subtract it from total price and add the its new price
           const itemToBeUpdated = scheduleOrder.items.find(
-            (item: OrderedItems) => item?.inventoryItemId === oldItem.inventoryItemId,
+            (item: OrderedItems) =>
+              item?.inventoryItemId === oldItem.inventoryItemId,
           );
 
           if (!itemToBeUpdated) {
@@ -226,7 +237,7 @@ const updateAllScheduleOrderItems = async (
               scheduledOrderId: scheduleOrder.id,
               inventoryItemId: itemToBeUpdated.inventoryItemId,
             },
-            data: updatedData
+            data: updatedData,
           });
 
           // Update new total price

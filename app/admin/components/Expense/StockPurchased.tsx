@@ -310,11 +310,11 @@ export default function StockPurchased({
     <>
       {role === USER_ROLE.ADMIN && (
         <>
-        <AddVendor
-          showNotification={showNotification}
-          open={isOpenAddVendor}
-          onClose={() => setIsOpenAddVendor(false)}
-        />
+          <AddVendor
+            showNotification={showNotification}
+            open={isOpenAddVendor}
+            onClose={() => setIsOpenAddVendor(false)}
+          />
         </>
       )}
       <Box display="flex" flexDirection="column" gap={3}>
@@ -407,7 +407,7 @@ export default function StockPurchased({
               freeSolo
               renderInput={(params) => <TextField {...params} label="Item" />}
             /> */}
-            <InventoryItemSearch 
+            <InventoryItemSearch
               promptedItem={promptedItem}
               handleSelectPromptedItem={selectPromptedItem}
               role={role}
@@ -590,9 +590,16 @@ export default function StockPurchased({
             value={newExpense.paymentMethodId}
             onChange={(e) => {
               if (+e.target.value === mainPaymentMethodId) {
-                setNewExpense({ ...newExpense, paymentMethodId: +e.target.value, status: TRANSACTION_STATUS.PAID })
+                setNewExpense({
+                  ...newExpense,
+                  paymentMethodId: +e.target.value,
+                  status: TRANSACTION_STATUS.PAID,
+                });
               } else {
-                setNewExpense({...newExpense, paymentMethodId: +e.target.value})
+                setNewExpense({
+                  ...newExpense,
+                  paymentMethodId: +e.target.value,
+                });
               }
             }}
           >
@@ -639,9 +646,11 @@ export default function StockPurchased({
 
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography variant="h6">Status</Typography>
-          <SelectExpenseStatus 
+          <SelectExpenseStatus
             value={newExpense.status}
-            onChange={(e: any) => setNewExpense({...newExpense, status: e.target.value})}
+            onChange={(e: any) =>
+              setNewExpense({ ...newExpense, status: e.target.value })
+            }
           />
         </Box>
 

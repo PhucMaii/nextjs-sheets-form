@@ -60,24 +60,29 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     if (invoice && invoice?.trim() !== '') {
       // Check if vendor has expense on that date
-      const existingVendorExpense = await prisma.expense.findMany({
-        where: {
-          invoice: invoice,
-          date: date,
-          vendors: {
-            some: {
-              vendorId: {
-                in: vendors,
-              },
-            },
-          },
-        },
-      });
-  
-      if (existingVendorExpense.length > 0) {
-        return res
-          .status(409)
-          .json({ error: `Expense Already Exists For ${invoice}` });
+      // const existingVendorExpense = await prisma.expense.findMany({
+      //   where: {
+      //     invoice: invoice,
+      //     date: date,
+      //     vendors: {
+      //       some: {
+      //         vendorId: {
+      //           in: vendors,
+      //         },
+      //       },
+      //     },
+      //   },
+      // });
+
+      // if (existingVendorExpense.length > 0) {
+      //   return res
+      //     .status(409)
+      //     .json({ error: `Expense Already Exists For ${invoice}` });
+      // }
+      const isExpenseValid = await checkIsExpenseValid(invoice, date, vendors);
+
+      if (!isExpenseValid.ok) {
+        return res.status(409).json({ error: isExpenseValid.error });
       }
     }
 
@@ -185,3 +190,34 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
+
+export const checkIsExpenseValid = async (
+  invoice: string,
+  date: string,
+  vendors: number[],
+) => {
+  const prisma = new PrismaClient();
+
+  const existingVendorExpense = await prisma.expense.findMany({
+    where: {
+      invoice: invoice,
+      date: date,
+      vendors: {
+        some: {
+          vendorId: {
+            in: vendors,
+          },
+        },
+      },
+    },
+  });
+
+  if (existingVendorExpense.length > 0) {
+    return { ok: false, error: `Expense Already Exists For ${invoice}` };
+    // return res
+    //   .status(409)
+    //   .json({ error: `Expense Already Exists For ${invoice}` });
+  }
+
+  return { ok: true };
+};

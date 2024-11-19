@@ -357,7 +357,9 @@ const formatBoards = (boards: any) => {
       }),
     );
 
-    const nonVoidOrders = codBoard.orders.filter((order: Orders) => order.status !== ORDER_STATUS.VOID);
+    const nonVoidOrders = codBoard.orders.filter(
+      (order: Orders) => order.status !== ORDER_STATUS.VOID,
+    );
 
     const codData = getCODData(nonVoidOrders);
 

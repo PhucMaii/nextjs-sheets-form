@@ -118,10 +118,13 @@ export default function OtherExpense({
       </Box>
 
       <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="h6">Status</Typography>
-          <SelectExpenseStatus value={newExpense.status} onChange={(e: any) => onChangeNewExpense('status', e.target.value)}/>
+        <Typography variant="h6">Status</Typography>
+        <SelectExpenseStatus
+          value={newExpense.status}
+          onChange={(e: any) => onChangeNewExpense('status', e.target.value)}
+        />
       </Box>
-      
+
       <LoadingButton
         variant="contained"
         onClick={handleSubmit}

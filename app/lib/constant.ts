@@ -344,7 +344,7 @@ export const methodTypes = [
 
 export const transactionStatusList = [
   TRANSACTION_STATUS.PAID,
-  TRANSACTION_STATUS.UNPAID
-]
+  TRANSACTION_STATUS.UNPAID,
+];
 
 export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];

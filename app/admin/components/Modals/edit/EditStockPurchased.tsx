@@ -38,10 +38,7 @@ interface IProps {
 
 export const filter = createFilterOptions<any>();
 
-const EditStockPurchased = ({
-  stockPurchased,
-  showNotification,
-}: IProps) => {
+const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -415,7 +412,7 @@ const EditStockPurchased = ({
                     <TextField {...params} label="Item" />
                   )}
                 /> */}
-                <InventoryItemSearch 
+                <InventoryItemSearch
                   promptedItem={promptedItem}
                   handleSelectPromptedItem={selectPromptedItem}
                   role={USER_ROLE.ADMIN}
@@ -670,8 +667,11 @@ const EditStockPurchased = ({
       </Modal>
     </>
   );
-}
+};
 
 export default memo(EditStockPurchased, (prev, next) => {
-  return (prev.showNotification === next.showNotification && prev.stockPurchased === next.stockPurchased)
-})
+  return (
+    prev.showNotification === next.showNotification &&
+    prev.stockPurchased === next.stockPurchased
+  );
+});
