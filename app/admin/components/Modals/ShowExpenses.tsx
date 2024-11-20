@@ -24,8 +24,9 @@ export default function ShowExpenses({
   boardData,
 }: IProps) {
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
-  
-  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating } = useUpdateExpenseStatus(showNotification);
+
+  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating } =
+    useUpdateExpenseStatus(showNotification);
 
   const totalAmount = useMemo(() => {
     if (expenses.length === 0) {

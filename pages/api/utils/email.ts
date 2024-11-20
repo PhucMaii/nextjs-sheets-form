@@ -115,7 +115,7 @@ export const sendInvoiceThroughEmail = async (
 
   const mailOptions: any = {
     from: process.env.NODEMAILER_EMAIL,
-    to: 'maithienphuc0102@gmail.com',
+    to: client?.email,
     subject: 'Invoice from Supreme Sprouts Ltd.',
     text: invoiceEmail,
     attachments: [

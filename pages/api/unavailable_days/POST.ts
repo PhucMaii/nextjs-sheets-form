@@ -1,17 +1,21 @@
+import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getDriverInfo } from '../utils/auth';
 
 interface IBody {
   startDate: Date;
   endDate: Date;
   userId: number;
+  createdAt: string;
+  role: USER_ROLE;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { startDate, endDate, userId }: IBody = req.body;
+    const { startDate, endDate, userId, createdAt, role }: IBody = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -23,6 +27,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({
         error: 'User Not Found',
       });
+    }
+
+    let createdBy = role.charAt(0).toUpperCase() + role.slice(1);
+
+    if (role === USER_ROLE.CLIENT) {
+      createdBy = `Client - ${existingUser.clientName}`;
+    } else if (role === USER_ROLE.DRIVER) {
+      const driver: any = await getDriverInfo(req, res);
+      createdBy = driver.name;
+    } else if (role === USER_ROLE.ADMIN) {
+      createdBy = `Admin - ${existingUser.clientName}`;
     }
 
     // Check is same start date or same end date exist
@@ -43,6 +58,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         startDate,
         endDate,
         userId,
+        createdAt,
+        createdBy,
       },
     });
 

@@ -7,8 +7,8 @@ import { ShadowSection } from '../reports/styled';
 import { LoadingButton } from '@mui/lab';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
-import { generateMonthRange } from '@/app/utils/time';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { generateCurrentTime, generateMonthRange } from '@/app/utils/time';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import ErrorComponent from '../components/ErrorComponent';
@@ -79,10 +79,13 @@ export default function BlockingPage() {
     try {
       setIsAdding(true);
 
+      const createdAt = generateCurrentTime();
       const response = await axios.post(apiURL, {
         startDate: newDateRange[0],
         endDate: newDateRange[1],
         userId: selectedClient?.id,
+        createdAt,
+        role: USER_ROLE.ADMIN,
       });
 
       if (response.data.error) {

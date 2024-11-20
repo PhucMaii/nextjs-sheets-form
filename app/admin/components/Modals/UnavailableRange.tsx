@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import DateRange from './DateRangeModal';
-import { generateMonthRange } from '@/app/utils/time';
+import { generateCurrentTime, generateMonthRange } from '@/app/utils/time';
 import AddIcon from '@mui/icons-material/Add';
 import { SWRFetchData } from '@/app/utils/db';
 import { IDayRange, UserType } from '@/app/utils/type';
@@ -19,6 +19,7 @@ import ErrorComponent from '../ErrorComponent';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import DayRange from '../DayRange';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   currentUser: UserType;
@@ -70,10 +71,13 @@ export default function UnavailableRange({
     try {
       setIsAdding(true);
 
+      const createdAt = generateCurrentTime();
       const response = await axios.post(apiURL, {
         startDate: newDateRange[0],
         endDate: newDateRange[1],
         userId: currentUser.id,
+        createdAt,
+        role: USER_ROLE.ADMIN,
       });
 
       if (response.data.error) {

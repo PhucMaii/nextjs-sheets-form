@@ -68,7 +68,6 @@ export const useUpdateExpenseStatus = (
     }
   };
 
-
   const handleBulkUpdateStatus = async (
     newStatus: TRANSACTION_STATUS,
     newPaymentMethodId: number = otherPaymentMethodId,
@@ -126,31 +125,36 @@ export const useUpdateExpenseStatus = (
 
   const UpdateExpenseStatusComp = (
     <SingleFieldEdit
-        title="Select Payment Method"
-        open={selectPaymentMethod.isOpenModal}
-        onClose={() =>
-          setSelectPaymentMethod({ ...selectPaymentMethod, isOpenModal: false })
+      title="Select Payment Method"
+      open={selectPaymentMethod.isOpenModal}
+      onClose={() =>
+        setSelectPaymentMethod({ ...selectPaymentMethod, isOpenModal: false })
+      }
+      handleUpdate={(newPaymentMethod: any) => {
+        if (selectPaymentMethod.isBulk) {
+          handleBulkUpdateStatus(
+            selectPaymentMethod.updatedStatus,
+            newPaymentMethod,
+          );
+        } else {
+          handleUpdateStatus(
+            selectPaymentMethod.selectedTransaction,
+            selectPaymentMethod.updatedStatus,
+            newPaymentMethod,
+          );
         }
-        handleUpdate={(newPaymentMethod: any) => {
-          if (selectPaymentMethod.isBulk) {
-            handleBulkUpdateStatus(
-              selectPaymentMethod.updatedStatus,
-              newPaymentMethod,
-            );
-          } else {
-            handleUpdateStatus(
-              selectPaymentMethod.selectedTransaction,
-              selectPaymentMethod.updatedStatus,
-              newPaymentMethod,
-            );
-          }
-        }}
-        renderField="name"
-        inputLabel="Payment Method"
-        menuList={paymentMethods?.data || []}
-        defaultValue={otherPaymentMethodId}
-      />
+      }}
+      renderField="name"
+      inputLabel="Payment Method"
+      menuList={paymentMethods?.data || []}
+      defaultValue={otherPaymentMethodId}
+    />
   );
 
-  return { handleUpdateStatus, handleBulkUpdateStatus, UpdateExpenseStatusComp, isUpdating }
+  return {
+    handleUpdateStatus,
+    handleBulkUpdateStatus,
+    UpdateExpenseStatusComp,
+    isUpdating,
+  };
 };
