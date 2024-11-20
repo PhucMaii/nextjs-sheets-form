@@ -4,9 +4,9 @@ import Sidebar from '../components/Sidebar';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { IDayRange, UserType } from '@/app/utils/type';
-import { generateMonthRange } from '@/app/utils/time';
+import { generateCurrentTime, generateMonthRange } from '@/app/utils/time';
 import { LoadingButton } from '@mui/lab';
 import AddIcon from '@mui/icons-material/Add';
 import DateRange from '@/app/admin/components/Modals/DateRangeModal';
@@ -70,10 +70,13 @@ export default function BlockingPage() {
     try {
       setIsAdding(true);
 
+      const createdAt = generateCurrentTime();
       const response = await axios.post(apiURL, {
         startDate: newDateRange[0],
         endDate: newDateRange[1],
         userId: selectedClient?.id,
+        createdAt,
+        role: USER_ROLE.DRIVER,
       });
 
       if (response.data.error) {

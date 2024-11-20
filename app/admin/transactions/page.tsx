@@ -47,10 +47,15 @@ export default function Transactions() {
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
-  
+
   const { showNotification, NotificationComp } = useNotification();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
-  const { handleUpdateStatus, handleBulkUpdateStatus, UpdateExpenseStatusComp, isUpdating } = useUpdateExpenseStatus(showNotification, selectedExpenses);
+  const {
+    handleUpdateStatus,
+    handleBulkUpdateStatus,
+    UpdateExpenseStatusComp,
+    isUpdating,
+  } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);

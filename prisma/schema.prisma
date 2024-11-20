@@ -149,6 +149,7 @@ model DayRange {
   endDate   DateTime
   userId    Int
   createdAt String?
+  createdBy String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
