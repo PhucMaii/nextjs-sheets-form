@@ -1,3 +1,4 @@
+import { generateCurrentTime } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
@@ -8,863 +9,458 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: 'NO. 2 OSYTER MUSHROOM 5 LB',
-    },
+  const createdAt = generateCurrentTime();
+  const createdBy = `Admin - Admin Test`;
+
+  // ******** LIQUID EGG ********
+  const liquidEgg = await prisma.vendorItem.create({
     data: {
-      name: 'NO. 2 OYSTER MUSHROOM 5 LB',
-      inventoryItemId: 41,
-    },
+      inventoryItemId: 17,
+      vendorId: 7,
+      quantity: 12,
+      createdAt,
+      createdBy
+    }
   });
 
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: 'SOYA 24X1',
-    },
+  await prisma.inventoryUnit.create({
     data: {
-      name: 'SOYA 24X1 LB',
-      inventoryItemId: 23,
-    },
+      vendorItemId: liquidEgg.id,
+      unit: 'cases',
+      unitPrice: 82,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
   });
 
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: { in: ['BEAN 24X1', 'BEANSPROUTS 24 x 1 LB'] },
-    },
+  // ******** BEAN 10 LB ********
+  const bean10 = await prisma.vendorItem.create({
     data: {
-      name: 'BEAN 24X1 LB',
+      inventoryItemId: 18,
+      vendorId: 4,
+      quantity: 5000,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: bean10.id,
+      unit: 'bags',
+      unitPrice: 6.5,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
+
+  // ******** BEAN 5 LB ********
+  const bean5 = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 19,
+      vendorId: 4,
+      quantity: 5000,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: bean5.id,
+      unit: 'bags',
+      unitPrice: 3.25,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
+
+  // ******** BEAN 1 LB ********
+  const bean1 = await prisma.vendorItem.create({
+    data: {
       inventoryItemId: 20,
-    },
+      vendorId: 4,
+      quantity: 100,
+      createdAt,
+      createdBy
+    }
   });
 
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: '흰 버섯 - WHITE MUSHROOM',
-    },
+  await prisma.inventoryUnit.create({
     data: {
-      name: '흰 버섯 - NO. 1 MUSHROOM WHITE 10 LB',
+      vendorItemId: bean1.id,
+      unit: 'bags',
+      unitPrice: 0.96,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: bean1.id,
+      unit: '24 bags',
+      unitPrice: 23,
+      ratio: 24,
+      createdAt,
+      createdBy
+    }
+  });
+
+  // ******** KOREAN SOYA 1 LB ********
+  const koreanSoya = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 21,
+      vendorId: 4,
+      quantity: 48,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: koreanSoya.id,
+      unit: 'bags',
+      unitPrice: 1.25,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: koreanSoya.id,
+      unit: 'cases',
+      unitPrice: 30,
+      ratio: 24,
+      createdAt,
+      createdBy
+    }
+  });
+
+  // ******** SILVER SPROUT 5 LB ********
+  const silverSprout = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 22,
+      vendorId: 4,
+      quantity: 30,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: silverSprout.id,
+      unit: 'bags',
+      unitPrice: 17.5,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
+
+  // ******** SOYA 1 LB ********
+  const soya1 = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 23,
+      vendorId: 4,
+      quantity: 4,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: soya1.id,
+      unit: 'bags',
+      unitPrice: 0.96,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: soya1.id,
+      unit: 'cases',
+      unitPrice: 23,
+      ratio: 24,
+      createdAt,
+      createdBy
+    }
+  });
+
+  // ******** JUMBO ONION 50 LB ********
+  const jumboOnion = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 24,
+      vendorId: 4,
+      quantity: 0,
+      createdAt,
+      createdBy
+    }
+  });
+
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: jumboOnion.id,
+      unit: 'bags',
+      unitPrice: 18,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
+
+  // ******** NO. 1 MUSHROOM WHITE 10 LB ********
+  const no1MushroomWhite = await prisma.vendorItem.create({
+    data: {
       inventoryItemId: 25,
-    },
+      vendorId: 8,
+      quantity: 43,
+      createdAt,
+      createdBy
+    }
   });
 
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: 'GINGER 30 LB',
-    },
+  await prisma.inventoryUnit.create({
     data: {
-      name: 'ORGANIC GINGER 30 LB',
-      inventoryItemId: 56,
-    },
+      vendorItemId: no1MushroomWhite.id,
+      unit: 'cases',
+      unitPrice: 26,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
   });
 
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: 'JUMBO EGGS',
-    },
-    data: {
-      name: 'JUMBO EGG',
-      inventoryItemId: 65,
-    },
-  });
-
-  // // BEAN 10 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["BEAN 10 LB", "숙주나물 - BEAN 10 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 18
-  //   }
-  // });
-
-  // // BEAN 5 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["BEAN 5 LB", "숙주나물 - BEAN 5 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 19
-  //   }
-  // });
-
-  // // BEAN 24X1 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["BEAN 24X1 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 20
-  //   }
-  // });
-
-  // // SOYA 24X1 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["SOYA 24X1 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 23
-  //   }
-  // });
-
-  // // K. SOYA 24X1 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["KOREAN SOYA 1X24"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 21
-  //   }
-  // });
-
-  // // SOYA 5 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["SOYA 5 LB", "콩나물 - SOYA 5 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 71
-  //   }
-  // });
-
-  // // SOYA 10 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["SOYA 10 LB", "콩나물 - SOYA 10 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 70
-  //   }
-  // });
-
-  // // BASIL
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["BASIL", "바질 - BASIL"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 51
-  //   }
-  // });
-
-  // // LIME NO. 1
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["LIME NO. 1", "라임 - LIME NO. 1"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 43
-  //   }
-  // });
-
-  // // LIME NO. 2
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["LIME NO. 2", "라임 - LIME NO. 2"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 77
-  //   }
-  // });
-
-  // // LEMON
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["LEMON", "레몬 - LEMON"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 78
-  //   }
-  // });
-
-  // // TRADITIONAL TOFU
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["TRADITIONAL TOFU", "SR 전통 두부 - TRADITIONAL TOFU"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 52
-  //   }
-  // });
-
-  // // OG CHINESE PUFF
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["OG CHINESE PUFF", "SR 오리지널 중국 퍼프 - OG CHINESE PUFF"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 54
-  //   }
-  // });
-
-  // // FRIED TOFU
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["FRIED TOFU", "SR 튀긴 두부 - FRIED TOFU"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 55
-  //   }
-  // });
-
-  // // FIRM TOFU
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["FIRM TOFU", "SR 단단한 두부 - FIRM TOFU"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 79
-  //   }
-  // });
-
-  // // MEDIUM FIRM TOFU
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["MEDIUM FIRM TOFU", "SR 중간 단단한 두부 - MEDIUM FIRM TOFU"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 53
-  //   }
-  // });
-
-  // // SILKEN TUBE TOFU
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["SILKEN TUBE TOFU", "SR 실크 두부 - SILKEN TUBE TOFU"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 80
-  //   }
-  // });
-
-  // // JUMBO EGG
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["점보 계란 - JUMBO EGG", "JUMBO EGG"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 65
-  //   }
-  // });
-
-  // // LARGE EGG
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["계란 - LAGRE EGG", "LARGE EGG"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 49
-  //   }
-  // });
-
-  // // XL EGG
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["XL EGG"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 86
-  //   }
-  // });
-
-  // // LIQUID EGG 33 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["LIQUID EGG 33 LB", "LIQUID EGG", "액란 33파운드 - LIQUID EGG 33 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 17
-  //   }
-  // });
-
-  // // EGGPLANTS
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["EGGPLANTS 30 LB", "EGGPLANTS", "가지 - EGGPLANTS 30 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 64
-  //   }
-  // });
-
-  // // DAIKON
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["DAIKON", "무 - DAIKON 40 LB", "DAIKON 40 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 72
-  //   }
-  // });
-
-  // // JUMBO CARROT
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["점보 당근 - JUMBO CARROT", "JUMBO CARROT"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 47
-  //   }
-  // });
-
-  // // BROCCOLI
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["브로콜리 - BROCCOLI 20 LB", "BROCCOLI 20 LB", "BROCCOLI"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 46
-  //   }
-  // });
-
-  // // BELL PEPPER
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["벨 페퍼 - NO. 2 BELL PEPPER 25 LB", "NO. 2 BELL PEPPER 25 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 81
-  //   }
-  // });
-
-  // // WHITE ONION
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["백합양파 - WHITE ONION 50 LB", "WHITE ONION 50 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 42
-  //   }
-  // });
-
-  // // POTATO
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["POTATO", "감자 -  POTATO"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 82
-  //   }
-  // });
-
-  // // PEEL GARLIC
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["PEEL GARLIC", "PEELED GARLIC", "PEELED GARLIC 5 LB", "껍질 벗긴 마늘 - PEELED GARLIC 5 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 48
-  //   }
-  // });
-
-  // // NO. 1 MUSHROOM WHITE
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["NO. 1 MUSHROOM WHITE 10 LB", "흰 버섯 - NO. 1 MUSHROOM WHITE 10 LB", "WHITE MUSHROOM"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 25
-  //   }
-  // });
-
-  // NO. 2 MUSHROOM WHITE
-  await prisma.orderedItems.updateMany({
-    where: {
-      name: {
-        in: [
-          'NO. 2 MUSHROOM WHITE 10 LB',
-          '흰 버섯 - NO. 2 MUSHROOM WHITE 10 LB',
-        ],
-      },
-      scheduledOrderId: {
-        not: null,
-      },
-    },
+  // ******** NO. 2 MUSHROOM WHITE 10 LB ********
+  const no2MushroomWhite = await prisma.vendorItem.create({
     data: {
       inventoryItemId: 26,
-    },
+      vendorId: 8,
+      quantity: 21,
+      createdAt,
+      createdBy
+    }
   });
 
-  // // NO. 1 OYSTER MUSHROOM
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["느타리버섯 - NO. 1 OYSTER MUSHROOM 5 LB", "NO. 1 OYSTER MUSHROOM 5 LB", "OYSTER MUSHROOM #1"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 73
-  //   }
-  // });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: no2MushroomWhite.id,
+      unit: 'cases',
+      unitPrice: 26,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // NO. 2 OYSTER MUSHROOM
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["느타리버섯 - NO. 2 OYSTER MUSHROOM 5 LB", "NO. 2 OYSTER MUSHROOM 5 LB", "OYSTER MUSHROOM #2"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 41
-  //   }
-  // });
+  // ******** BANH PHO SINCERE 30 LB ********
+  const banhPhoSincere = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 40,
+      vendorId: 9,
+      quantity: 39,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // KING OYSTER
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["왕느타리버섯 - KING OYSTER", "KING OYSTER"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 83
-  //   }
-  // });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: banhPhoSincere.id,
+      unit: 'cases',
+      unitPrice: 39.5,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // SHIITAKE
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["SHIITAKE", "신선한 표고버섯 - SHIITAKE"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 84
-  //   }
-  // });
+  // ******** NO. 2 OYSTER MUSHROOM 5 LB ********
+  const no2OysterMushroom = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 41,
+      vendorId: 5,
+      quantity: 3,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // FRESH RICE NOODLE
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["신선한 쌀국수 - FRESH RICE NOODLE 1 LB", "FRESH RICE NOODLE 1 LB", "FRESH RICE NOODLES 1 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 60
-  //   }
-  // });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: no2OysterMushroom.id,
+      unit: 'cases',
+      unitPrice: 7.5,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // WONTON NOODLE
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["완탕면 - WONTON NOODLE 1 LB", "WONTON NOODLE 1 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 45
-  //   }
-  // });
+  // ******** WHITE ONION 50 LB ********
+  const whiteOnion = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 42,
+      vendorId: 8,
+      quantity: 11,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // CHOW MEIN
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["차우면 - CHOW MEIN 10 LB", "CHOW MEIN", "CHOW MEIN 10 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 85
-  //   }
-  // });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: whiteOnion.id,
+      unit: 'bags',
+      unitPrice: 18,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // GINGER
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["ORGANIC GINGER 30 LB", "GINGER", "ORGANIC GINGER"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 56
-  //   }
-  // });
+  // ******** LIME NO. 1 ********
+  const limeNo1HOK = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 43,
+      vendorId: 8,
+      quantity: 8,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // USA GREEN CABBAGE
-  // await prisma.orderedItems.updateMany({
-  //  where: {
-  //    name: {
-  //      in: ["USA GREEN CABBAGE"]
-  //    },
-  //    scheduledOrderId: {
-  //      not: null
-  //    }
-  //  },
-  //  data: {
-  //    inventoryItemId: 88
-  //  }
-  // });
+  const limeNo1CP = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 43,
+      vendorId: 11,
+      quantity: 3,
+      createdAt,
+      createdBy
+    }
+  });
 
-  // // BANH PHO SINCERE 30 LB
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["BANH PHO SINCERE 30 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 40
-  //   }
-  //  });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: limeNo1HOK.id,
+      unit: 'cases',
+      unitPrice: 45,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // TOFU PUFF
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["TOFU PUFF"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 91
-  //   }
-  //  });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: limeNo1CP.id,
+      unit: 'cases',
+      unitPrice: 16,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // SOFT TOFU
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["SOFT TOFU"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 90
-  //   }
-  //  });
+  // ******** WONTON NOODLE 1 LB ********
+  const wontonNoodle = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 45,
+      vendorId: 10,
+      quantity: 20,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //   // PREMIUM SOFT TOFU
-  // await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["PREMIUM SOFT TOFU"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 89
-  //   }
-  //  });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: wontonNoodle.id,
+      unit: 'lbs',
+      unitPrice: 4.5,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // LEUCOCASIA / BAC HA 20 LB
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["LEUCOCASIA / BAC HA 20 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 87
-  //   }
-  //  });
+  // ******** BROCCOLI 20 LB ********
+  const broccoli = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 46,
+      vendorId: 11,
+      quantity: 3,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // LEUCOCASIA / BAC HA 30 LB
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["LEUCOCASIA / BAC HA 30 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 93
-  //   }
-  //  });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: broccoli.id,
+      unit: 'cases',
+      unitPrice: 20,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // BASIL BOX
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["BASIL 20 LB BOX", "BASIL BOX"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 94
-  //   }
-  //  });
+  // ******** JUMBO CARROT ********
+  const jumboCarrot = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 47,
+      vendorId: 11,
+      quantity: 6,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // OYSTER PRE PACKED
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["OYSTER PRE PACKED"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 95
-  //   }
-  //  });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: jumboCarrot.id,
+      unit: 'cases',
+      unitPrice: 15,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // TARO
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["TARO", "TARO 40 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 76
-  //   }
-  //  });
+  // ******** PEELED GARLIC ********
+  const peeledGarlic = await prisma.vendorItem.create({
+    data: {
+      inventoryItemId: 48,
+      vendorId: 11,
+      quantity: 10,
+      createdAt,
+      createdBy
+    }
+  });
 
-  //  // FISH SAUCE
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["FISH SAUCE"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 75
-  //   }
-  //  });
-
-  //  // TARO STEM
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["TARO STEM"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 68
-  //   }
-  //  });
-
-  //  // JUMBO ONION
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["JUMBO ONION 50 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 24
-  //   }
-  //  });
-
-  //  // BROWN MUSHROOM
-  //  await prisma.orderedItems.updateMany({
-  //   where: {
-  //     name: {
-  //       in: ["BROWN MUSHROOM 5 LB"]
-  //     },
-  //     scheduledOrderId: {
-  //       not: null
-  //     }
-  //   },
-  //   data: {
-  //     inventoryItemId: 92
-  //   }
-  //  });
+  await prisma.inventoryUnit.create({
+    data: {
+      vendorItemId: peeledGarlic.id,
+      unit: 'bags',
+      unitPrice: 10.33,
+      ratio: 1,
+      createdAt,
+      createdBy
+    }
+  });
 }
 
 main()

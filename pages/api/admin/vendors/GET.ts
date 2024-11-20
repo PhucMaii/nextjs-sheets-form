@@ -5,11 +5,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const vendors = await prisma.vendor.findMany({
-      include: {
-        inventoryItems: true,
-      },
-    });
+    const vendors = await prisma.vendor.findMany({});
 
     return res.status(200).json({
       data: vendors,

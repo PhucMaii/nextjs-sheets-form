@@ -4,10 +4,7 @@ import { getUserInfo } from '../../utils/auth';
 
 interface IBody {
   name: string;
-  vendorId: number;
-  quantity: number;
-  unitPrice: number;
-  unit: string;
+  vendorIds: number[],
   createdAt: string;
 }
 
@@ -15,31 +12,45 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, vendorId, quantity, unitPrice, unit, createdAt }: IBody =
+    const { name, vendorIds, createdAt }: IBody =
       req.body;
 
-    const existingVendor = await prisma.vendor.findUnique({
+    const existingVendors = await prisma.vendor.findMany({
       where: {
-        id: vendorId,
+        id: {
+          in: vendorIds
+        },
       },
     });
 
-    if (!existingVendor) {
+    if (existingVendors.length !== vendorIds.length) {
       return res.status(404).json({ error: 'Vendor not found' });
     }
 
     const user: any = await getUserInfo(req, res);
 
+    // Create Main Inventory Item
     const newInventory = await prisma.inventoryItem.create({
       data: {
         name,
-        vendorId,
-        quantity,
-        unitPrice,
-        unit,
         createdAt,
         createdBy: `Admin - ${user.clientName}`,
       },
+    });
+
+    // Create Vendor Item
+    const newVendorItems = vendorIds.map((vendorId: number) => {
+      return {
+        inventoryItemId: newInventory.id,
+        vendorId,
+        quantity: 0,
+        createdAt,
+        createdBy: `Admin - ${user.clientName}`,
+      };
+    });
+
+    await prisma.vendorItem.createMany({
+      data: newVendorItems,
     });
 
     return res.status(201).json({

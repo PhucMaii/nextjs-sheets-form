@@ -5,6 +5,7 @@ import {
   DayRange,
   Driver,
   Expense,
+  Fifo,
   InventoryItem,
   PaymentMethod,
   Route,
@@ -12,6 +13,7 @@ import {
   UserRoute,
   Vendor,
   VendorExpense,
+  VendorItem,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
@@ -168,6 +170,9 @@ export interface IVendor extends Vendor {
 
 export interface IInventoryItem extends InventoryItem {
   vendor: IVendor;
+  quantity: number;
+  vendorItems: VendorItem[];
+  fifo: Fifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
 }

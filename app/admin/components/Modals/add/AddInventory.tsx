@@ -2,9 +2,7 @@ import {
   AlertColor,
   Box,
   Divider,
-  MenuItem,
   Modal,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -12,12 +10,14 @@ import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { ModalProps } from '../type';
-import { units } from '@/app/lib/constant';
+// import { units } from '@/app/lib/constant';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { generateCurrentTime } from '@/app/utils/time';
 import { SWRFetchData } from '@/app/utils/db';
 import AddVendor from './AddVendor';
+import VendorSearch from '../../Autocomplete/VendorSearch';
+import { IVendor } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -37,6 +37,7 @@ export default function AddInventory({
     unit: 'bags',
     unitPrice: 0,
   });
+  const [itemVendors, setItemVendors] = useState<IVendor[]>([]);
 
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
@@ -82,6 +83,10 @@ export default function AddInventory({
     }
   };
 
+  const handleOnChangeVendorSearch = (e: any) => {
+    setItemVendors([...itemVendors, e.target.value]);
+  }
+
   return (
     <>
       <AddVendor
@@ -114,7 +119,7 @@ export default function AddInventory({
               />
             </Box>
 
-            <Box display="flex" flexDirection="column" gap={1}>
+            {/* <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Quantity</Typography>
               <TextField
                 fullWidth
@@ -125,11 +130,11 @@ export default function AddInventory({
                   setNewItem({ ...newItem, quantity: +e.target.value })
                 }
               />
-            </Box>
+            </Box> */}
 
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Vendor</Typography>
-              <Select
+              {/* <Select
                 value={newItem.vendorId}
                 onChange={(e) =>
                   setNewItem({ ...newItem, vendorId: +e.target.value })
@@ -147,10 +152,11 @@ export default function AddInventory({
                       {vendor.name}
                     </MenuItem>
                   ))}
-              </Select>
+              </Select> */}
+              <VendorSearch vendors={vendors?.data || []} value={itemVendors} onChange={handleOnChangeVendorSearch} />
             </Box>
 
-            <Box display="flex" flexDirection="column" gap={1}>
+            {/* <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Unit</Typography>
               <Select
                 value={newItem.unit}
@@ -177,7 +183,7 @@ export default function AddInventory({
                   setNewItem({ ...newItem, unitPrice: +e.target.value })
                 }
               />
-            </Box>
+            </Box> */}
           </Box>
         </BoxModal>
       </Modal>

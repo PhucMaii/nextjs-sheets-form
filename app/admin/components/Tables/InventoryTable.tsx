@@ -58,11 +58,11 @@ export default function InventoryTable({
           return (
             <TableRow key={index}>
               <TableCell>{item.name}</TableCell>
-              <TableCell>{item.vendor.name}</TableCell>
+              <TableCell>{item.vendorItems.vendor.map((vendor) => vendor.name).join(', ')}</TableCell>
               <TableCell>
-                {item.quantity} {item.unit}
+                {item?.quantity} {item?.unit}
               </TableCell>
-              <TableCell>${item.unitPrice}</TableCell>
+              <TableCell>${item?.unitPrice}</TableCell>
               <TableCell>${item.totalValue?.toFixed(2)}</TableCell>
               <TableCell>
                 <Box display="flex" gap={2}>
