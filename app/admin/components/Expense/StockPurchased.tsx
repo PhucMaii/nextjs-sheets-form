@@ -8,10 +8,14 @@ import {
   Button,
   Divider,
   FormControl,
+  FormControlLabel,
+  FormLabel,
   Grid,
   IconButton,
   InputLabel,
   MenuItem,
+  Radio,
+  RadioGroup,
   Select,
   TextField,
   Typography,
@@ -25,6 +29,11 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import InventoryItemSearch from '../Autocomplete/InventoryItemSearch';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
+import AddUnit from '../Modals/add/AddUnit';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import AddIcon from '@mui/icons-material/Add';
+import { IInventoryUnit } from '@/app/utils/type';
+import UnitSearch from '../Autocomplete/UnitSearch';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -44,7 +53,12 @@ export default function StockPurchased({
   defaultValue,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
+  // const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
+  // const [isOpenAddUnit, setIsOpenAddUnit] = useState<boolean>(false);
+  const [open, onChangeOpen] = useMultipleBoolean({
+    isOpenAddVendor: false,
+    isOpenAddUnit: false,
+  });
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
     description: '',
@@ -62,12 +76,18 @@ export default function StockPurchased({
     vendorId: -1,
     quantity: 0,
     unitPrice: 0,
-    unit: 'bags',
+    unit: {
+      id: -1,
+      unitPrice: 0,
+      ratio: 1,
+    },
   });
   const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
 
   const todayString = YYYYMMDDFormat(new Date());
   const { date, SelectDate } = useSelectDate(todayString, true);
+
+  // console.log(promptedItem?.units, 'promptedItem?.units');
 
   // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [vendors] = SWRFetchData(
@@ -101,9 +121,6 @@ export default function StockPurchased({
   useEffect(() => {
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
-      // setVendorItems(() => {
-
-      // })
 
       if (vendors) {
         const targetVendor = vendors?.data.find((vendor: any) => {
@@ -111,13 +128,32 @@ export default function StockPurchased({
         });
 
         if (targetVendor) {
-          setVendorItems(targetVendor?.inventoryItems);
+          setVendorItems(targetVendor?.vendorItem);
         }
       }
     }
   }, [selectedVendorId]);
 
+  const handleOnChangeUnitPrice = (e: any) => {
+    const newUnitPrice = +e.target.value;
+
+    // Update units immutably
+    const newUnits = promptedItem?.units?.map((unit: any) =>
+      unit.ratio === promptedItem?.unit?.ratio
+        ? { ...unit, unitPrice: newUnitPrice } // Replace the matching unit
+        : unit // Keep the other units unchanged
+    );
+
+    // Update state
+    setPromptedItem({
+      ...promptedItem,
+      unit: { ...promptedItem.unit, unitPrice: newUnitPrice },
+      units: newUnits,
+    });
+  }
+
   const selectPromptedItem = (newValue: any) => {
+    // New Item Add
     if (newValue?.inputValue) {
       setPromptedItem({
         ...promptedItem,
@@ -127,14 +163,15 @@ export default function StockPurchased({
         name: newValue.inputValue,
         vendorId: selectedVendorId,
       });
-    } else {
+    } else { // Existing Item Add
       setPromptedItem({
         ...promptedItem,
         id: newValue?.id || 0,
-        unitPrice: newValue?.unitPrice || 0,
-        name: newValue?.name,
+        name: newValue?.inventoryItem?.name,
         vendorId: selectedVendorId,
-        unit: newValue?.unit || 'bags',
+        inventoryItemId: newValue?.inventoryItemId,
+        unit: newValue?.unit[0],
+        units: newValue?.unit || [],
       });
     }
   };
@@ -174,16 +211,46 @@ export default function StockPurchased({
     setPromptedItem({
       id: -1,
       quantity: 0,
-      unitPrice: 0,
       name: '',
       vendorId: selectedVendorId,
-      unit: 'bags',
+      unit: {
+        id: -1,
+        unitPrice: 0,
+        ratio: 1,
+      }
     });
   };
 
+  const addUnit = (newUnit: IInventoryUnit) => {
+    const unitRatioExist = promptedItem?.units?.find((unit: any) => {
+      return newUnit.ratio === unit.ratio;
+    });
+    
+    if (unitRatioExist) {
+      showNotification('error', 'Unit ratio already exists');
+      return;
+    }
+
+    const unitNameExist = promptedItem?.units?.find((unit: any) => {
+      return newUnit.unit === unit.unit;
+    });
+
+    if (unitNameExist) {
+      showNotification('error', 'Unit name already exists');
+      return;
+    }
+
+    onChangeOpen('isOpenAddUnit', false);
+
+    setPromptedItem({
+      ...promptedItem,
+      units: [...promptedItem.units, newUnit],
+    });
+  }
+
   const calculateNewAmount = () => {
     const newAmount = purchasedItems.reduce((acc: number, item: any) => {
-      return acc + item.unitPrice * item.quantity;
+      return acc + item.unit.unitPrice * item.quantity;
     }, 0);
 
     setTotalAmount(newAmount);
@@ -201,7 +268,23 @@ export default function StockPurchased({
           }
           if (keyChange === 'unitPrice') {
             const totalPrice = item.quantity * +e.target.value;
-            return { ...item, unitPrice: +e.target.value, totalPrice };
+            const newUnits = item.units?.map((unit: any) =>
+              unit.ratio === item.unit?.ratio
+                ? { ...unit, unitPrice: +e.target.value } // Replace the matching unit
+                : unit // Keep the other units unchanged
+            );
+
+            return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice};
+          }
+
+          if (keyChange === 'unit') {
+            const newUnits = item.units?.map((unit: any) =>
+              unit.ratio === item.unit?.ratio 
+                ? { ...unit, unit: e.target.value } // Replace the matching unit
+                : unit // Keep the other units unchanged
+            );
+
+            return { ...item, unit: {...item.unit, unit: e.target.value}};
           }
           return item;
         }
@@ -212,7 +295,24 @@ export default function StockPurchased({
         }
         if (keyChange === 'unitPrice') {
           const totalPrice = item.quantity * +e.target.value;
-          return { ...item, unitPrice: +e.target.value, totalPrice };
+
+          const newUnits = item.units?.map((unit: any) =>
+            unit.ratio === item.unit?.ratio
+              ? { ...unit, unitPrice: +e.target.value } // Replace the matching unit
+              : unit // Keep the other units unchanged
+          );
+
+          return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice};
+        }
+
+        if (keyChange === 'unit') {
+          const newUnits = item.units?.map((unit: any) =>
+            unit.ratio === item.unit?.ratio 
+              ? { ...unit, unit: e.target.value } // Replace the matching unit
+              : unit // Keep the other units unchanged
+          );
+
+          return { ...item, unit: {...item.unit, unit: e.target.value}};
         }
         return item;
       }
@@ -222,7 +322,25 @@ export default function StockPurchased({
 
     setPurchasedItems(newItemList);
   };
-  // TODO: /api/inventory/expense to add expense for stock purchased
+
+  const onChangeUnitInItems = (e: any, newValue: any, targetItem: any) => {
+    e.preventDefault();
+
+    console.log(newValue, 'newValue');
+
+    const newPurchasedItems = purchasedItems.map((item: any) => {
+      if (item.id === targetItem.id) {
+        return { ...item, unit: newValue };
+      } else if (item.name === targetItem.name) {
+        return { ...item, unit: newValue };
+      } else {
+        return item;
+      }
+    });
+
+    setPurchasedItems(newPurchasedItems);
+  }
+
   const handleSubmit = async () => {
     if (purchasedItems.length === 0) {
       showNotification('error', 'Please add items');
@@ -312,8 +430,14 @@ export default function StockPurchased({
         <>
           <AddVendor
             showNotification={showNotification}
-            open={isOpenAddVendor}
-            onClose={() => setIsOpenAddVendor(false)}
+            open={open.isOpenAddVendor}
+            onClose={() => onChangeOpen('isOpenAddVendor', false)}
+          />
+          <AddUnit 
+            open={open.isOpenAddUnit} 
+            onClose={() => onChangeOpen('isOpenAddUnit', false)} 
+            vendorItemId={promptedItem?.id}
+            onClick={addUnit}  
           />
         </>
       )}
@@ -337,7 +461,7 @@ export default function StockPurchased({
                   -- Choose a vendor --
                 </MenuItem>
                 {role === USER_ROLE.ADMIN && (
-                  <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                  <MenuItem onClick={() => onChangeOpen('isOpenAddVendor', true)}>
                     + Create new vendor
                   </MenuItem>
                 )}
@@ -351,69 +475,33 @@ export default function StockPurchased({
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            {/* <Autocomplete
-              value={promptedItem.name}
-              onChange={(event, newValue) => {
-                selectPromptedItem(newValue);
-              }}
-              filterOptions={(options, params) => {
-                const filtered = filter(options, params);
-
-                const { inputValue } = params;
-                // Suggest the creation of a new value
-                const isExisting = options.some(
-                  (option) => inputValue === option.name,
-                );
-                if (
-                  role === USER_ROLE.ADMIN &&
-                  inputValue !== '' &&
-                  !isExisting
-                ) {
-                  filtered.push({
-                    inputValue,
-                    title: `Add "${inputValue}"`,
-                  });
-                }
-
-                return filtered;
-              }}
-              selectOnFocus
-              clearOnBlur
-              handleHomeEndKeys
-              id="free-solo-with-text-demo"
-              options={
-                [
-                  { id: -1, name: '-- Choose an item --' },
-                  ...(vendorItems || []),
-                ] || []
-              }
-              getOptionLabel={(option) => {
-                // Check if the option has a custom title (for new item suggestion)
-                if (option.title) {
-                  return option.title;
-                }
-                // Regular option
-                return option.name || '';
-              }}
-              renderOption={(props, option) => {
-                const { key, ...optionProps } = props;
-                return (
-                  <li key={key} {...optionProps}>
-                    {option.title || option.name}
-                  </li>
-                );
-              }}
-              sx={{ width: '100%' }}
-              freeSolo
-              renderInput={(params) => <TextField {...params} label="Item" />}
-            /> */}
             <InventoryItemSearch
               promptedItem={promptedItem}
               handleSelectPromptedItem={selectPromptedItem}
               role={role}
               displayItems={vendorItems}
+              disabled={selectedVendorId === -1}
             />
           </Grid>
+          {promptedItem?.units && promptedItem?.units.length > 0 && <Grid item xs={12}>
+            <FormControl>
+              <Box display="flex" alignItems="center" gap={1}>
+                <FormLabel id="unit">Units</FormLabel>
+                <IconButton onClick={() => onChangeOpen('isOpenAddUnit', true)}>
+                  <AddIcon />
+                </IconButton>
+              </Box>
+              <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
+                  {
+                    promptedItem.units.map((unit: any, index: number) => {
+                      return (
+                        <FormControlLabel key={index} value={JSON.stringify(unit)} control={<Radio />} label={`1:${unit.ratio} - ${unit.unit}`} />
+                      )
+                    })
+                  }
+              </RadioGroup>
+            </FormControl>
+          </Grid>}
 
           {promptedItem.id === 0 && (
             <>
@@ -433,7 +521,7 @@ export default function StockPurchased({
                     <MenuItem value={-1} disabled>
                       -- Choose a vendor --
                     </MenuItem>
-                    <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                    <MenuItem onClick={() => onChangeOpen('isOpenAddVendor', true)}>
                       + Create new vendor
                     </MenuItem>
                     {sortedVendors.length > 0 &&
@@ -473,11 +561,9 @@ export default function StockPurchased({
               fullWidth
               label="Unit Price"
               type="number"
-              value={promptedItem.unitPrice}
-              onChange={(e: any) =>
-                setPromptedItem({ ...promptedItem, unitPrice: +e.target.value })
-              }
-              disabled={role === USER_ROLE.DRIVER}
+              value={promptedItem?.unit?.unitPrice || 0}
+              onChange={handleOnChangeUnitPrice}
+              disabled={role === USER_ROLE.DRIVER || selectedVendorId === -1 || !promptedItem.name}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -489,6 +575,7 @@ export default function StockPurchased({
               onChange={(e: any) =>
                 setPromptedItem({ ...promptedItem, quantity: +e.target.value })
               }
+              disabled={selectedVendorId === -1 || !promptedItem.name}
             />
           </Grid>
 
@@ -502,9 +589,18 @@ export default function StockPurchased({
         {purchasedItems.length > 0 &&
           purchasedItems.map((item: any, index) => {
             return (
-              <Grid container spacing={1} key={index}>
+              <Grid container spacing={2} key={index}>
                 <Grid item xs={12} fontWeight="bold">
                   <Box display="flex" alignItems="center" gap={1}>
+                    <TextField
+                      label="Unit Price ($)"
+                      value={item?.unit?.unitPrice}
+                      onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
+                      type="number"
+                      inputProps={{ min: 0 }}
+                      disabled={role === USER_ROLE.DRIVER}
+                      sx={{maxWidth: 100, width: 'auto'}}
+                    />
                     <Typography variant="h6" fontWeight="bold">
                       {item.name}
                     </Typography>
@@ -514,17 +610,17 @@ export default function StockPurchased({
                   </Box>
                 </Grid>
                 <Grid item container columnSpacing={2}>
-                  <Grid item xs={6} textAlign="right">
-                    <TextField
-                      fullWidth
-                      label="Unit Price ($)"
-                      value={item.unitPrice}
-                      onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
-                      type="number"
-                      inputProps={{ min: 0 }}
+                  {/* <Grid item xs={6} textAlign="right">
+                    <UnitSearch 
+                      value={item.units[0]}
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      handleSelectPromptedItem={(e: any, newValue: any) => onChangeUnitInItems(e, newValue, item)}
                       disabled={role === USER_ROLE.DRIVER}
+                      displayKey="unit"
+                      displayItems={item.units}
                     />
-                  </Grid>
+
+                  </Grid> */}
                   <Grid item xs={6}>
                     <TextField
                       fullWidth

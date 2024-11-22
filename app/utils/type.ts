@@ -7,6 +7,7 @@ import {
   Expense,
   Fifo,
   InventoryItem,
+  InventoryUnit,
   PaymentMethod,
   Route,
   User,
@@ -171,8 +172,22 @@ export interface IVendor extends Vendor {
 export interface IInventoryItem extends InventoryItem {
   vendor: IVendor;
   quantity: number;
-  vendorItems: VendorItem[];
+  vendorItem: IVendorItem[];
   fifo: Fifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
+}
+
+export interface IVendorItem extends VendorItem {
+  inventoryItem?: IInventoryItem;
+  vendor?: IVendor;
+  quantity: number;
+  unit?: any;
+  fifo?: Fifo[];
+}
+
+export interface IInventoryUnit extends InventoryUnit {
+  isSelected?: boolean;
+  vendorItem: IVendorItem;
+  inventoryItem: IInventoryItem;
 }

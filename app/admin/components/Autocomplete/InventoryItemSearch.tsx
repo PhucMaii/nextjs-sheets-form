@@ -2,13 +2,14 @@ import { USER_ROLE } from '@/app/utils/enum';
 import { Autocomplete, createFilterOptions, TextField } from '@mui/material';
 import React from 'react';
 
-const filter = createFilterOptions<any>();
+export const filter = createFilterOptions<any>();
 
 interface IProps {
   promptedItem: any;
   handleSelectPromptedItem: any;
   role?: USER_ROLE;
   displayItems: any[];
+  disabled?: boolean;
 }
 
 export default function InventoryItemSearch({
@@ -16,9 +17,11 @@ export default function InventoryItemSearch({
   handleSelectPromptedItem,
   role,
   displayItems,
+  disabled,
 }: IProps) {
   return (
     <Autocomplete
+      disabled={disabled}
       value={promptedItem.name}
       onChange={(event, newValue) => {
         handleSelectPromptedItem(newValue);
@@ -28,7 +31,7 @@ export default function InventoryItemSearch({
 
         const { inputValue } = params;
         // Suggest the creation of a new value
-        const isExisting = options.some((option) => inputValue === option.name);
+        const isExisting = options.some((option) => inputValue === option?.inventoryItem?.name);
         if (role === USER_ROLE.ADMIN && inputValue !== '' && !isExisting) {
           filtered.push({
             inputValue,
@@ -52,13 +55,13 @@ export default function InventoryItemSearch({
           return option.title;
         }
         // Regular option
-        return option.name || '';
+        return option?.inventoryItem?.name || '';
       }}
       renderOption={(props, option) => {
         const { key, ...optionProps } = props;
         return (
           <li key={key} {...optionProps}>
-            {option.title || option.name}
+            {option.title || option?.inventoryItem?.name}
           </li>
         );
       }}

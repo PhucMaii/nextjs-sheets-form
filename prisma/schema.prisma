@@ -83,11 +83,13 @@ model OrderedItems {
   fifoId           Int?
   expenseId        Int?
   quantity         Int
+  inventoryUnitId  Int?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   fifo           Fifo?           @relation(fields: [fifoId], references: [id], onDelete: Cascade)
+  inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
 }
 
 model Orders {
@@ -276,7 +278,7 @@ model Fifo {
 }
 
 model InventoryUnit {
-  id           Int      @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
   vendorItemId Int
   unit         String
   unitPrice    Int
@@ -285,5 +287,6 @@ model InventoryUnit {
   createdBy    String
   sellingItem  Item[]
 
-  vendorItem VendorItem @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
+  vendorItem   VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
+  orderedItems OrderedItems[]
 }

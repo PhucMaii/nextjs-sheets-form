@@ -77,9 +77,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedInventory.push(...formattedItem);
     }
 
-    // const formattedInventory =
-    //   formatInventoryWithTotalValueAndStatus(inventoryItems);
-
     return res.status(200).json({
       data: formattedInventory,
       message: 'Fetch Inventory Successfully',
@@ -94,47 +91,47 @@ export const formatInventoryWithTotalValueAndStatus = (
   inventoryItems: any[],
 ) => {
   const newInventoryItems = inventoryItems.map((inventoryItem: IInventoryItem) => {
-    const quantityAndValue = inventoryItem?.fifo?.reduce((acc: any, fifo: any) => {
-      const targetedVendorItem = fifo.vendorItem.unit.find((unit: any) => unit.isSmallest);
+    let quantity = 0;
+    let totalValue = 0;
 
-      if (!acc['totalQuantity']) {
-        acc['totalQuantity'] = fifo.quantity;
+    for (const vendorItem of inventoryItem.vendorItem) {
+        const quantityAndValue = vendorItem?.fifo?.reduce((acc: any, fifo: any) => {
+          const baseUnit = vendorItem.unit.find((unit: any) => unit.ratio === 1);
+    
+          if (!acc.totalQuantity) {
+            acc.totalQuantity = fifo.quantity;
+          } else {
+            acc.totalQuantity += fifo.quantity;
+          }
+          
+          if (!acc.totalValue) {
+            acc.totalValue = (fifo.quantity * baseUnit.unitPrice || 1);
+          } else {
+            acc.totalValue += (fifo.quantity * baseUnit.unitPrice || 1);
+          }
+          
+          return acc;
+        }, {}) || {};
+        
+        quantity += quantityAndValue?.totalQuantity || 0;
+        totalValue += quantityAndValue?.totalValue || 0;
+      }
+      
+      let status = STOCK_STATUS.OUT_OF_STOCK;
+      if (quantity === 0) {
+        status = STOCK_STATUS.OUT_OF_STOCK;
+      } else if (quantity < 10) {
+        status = STOCK_STATUS.LOW_STOCK;
       } else {
-        acc['totalQuantity'] += fifo.quantity;
+        status = STOCK_STATUS.IN_STOCK;
       }
 
-      if (!acc['totalValue']) {
-        acc['totalValue'] = acc + (fifo.quantity * targetedVendorItem.unitPrice || 1);
-      } else {
-        acc['totalValue'] += acc + (fifo.quantity * targetedVendorItem.unitPrice || 1);
-      }
-
-      return acc;
-    }, {});
-
-    let status = STOCK_STATUS.OUT_OF_STOCK;
-    if (!quantityAndValue['totalQuantity'] && !quantityAndValue['totalValue']) {
       return {
         ...inventoryItem,
-        totalValue: 0,
-        quantity: 0,
+        totalValue,
+        quantity,
         stockStatus: status
       }
-    }
-    if (quantityAndValue['totalQuantity'] === 0) {
-      status = STOCK_STATUS.OUT_OF_STOCK;
-    } else if (quantityAndValue['totalQuantity'] < 10) {
-      status = STOCK_STATUS.LOW_STOCK;
-    } else {
-      status = STOCK_STATUS.IN_STOCK;
-    }
-
-    return {
-      ...inventoryItem,
-      totalValue: quantityAndValue['totalValue'] || 0,
-      quantity: quantityAndValue['totalQuantity'] || 0,
-      stockStatus: status
-    }
   });
 
   return newInventoryItems;

@@ -112,7 +112,7 @@ const TransactionsTable = ({
                   <TableCell style={{ width: 50 }}>
                     {/* <Toolbar> */}
                     <img
-                      src={`/images/${transaction.paymentMethod.type}.png`}
+                      src={`/images/${transaction?.paymentMethod?.type}.png`}
                       alt="method"
                       style={{ width: 30, height: 30 }}
                     />
@@ -152,7 +152,7 @@ const TransactionsTable = ({
                           handleDelete={handleDeleteTransaction}
                           includedButton
                         />
-                        {transaction?.orderedItems.length > 0 ? (
+                        {transaction?.orderedItems?.length > 0 ? (
                           <EditStockPurchased
                             stockPurchased={transaction}
                             showNotification={showNotification}

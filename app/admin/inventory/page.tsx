@@ -19,8 +19,6 @@ export default function InventoryPage() {
 
   const { showNotification, NotificationComp } = useNotification();
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
-  console.log(inventoryItems, 'inventoryItems');
-  // const inventoryItems = {data: []}
 
   return (
     <Sidebar>

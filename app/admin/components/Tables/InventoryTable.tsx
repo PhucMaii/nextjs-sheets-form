@@ -2,11 +2,13 @@ import { IInventoryItem } from '@/app/utils/type';
 import {
   AlertColor,
   Box,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 import React from 'react';
 import EditInventory from '../Modals/edit/EditInventory';
@@ -23,6 +25,9 @@ export default function InventoryTable({
   inventoryItems,
   showNotification,
 }: IProps) {
+
+  console.log(inventoryItems, 'inventoryItems');
+
   const handleDelete = async (targetObj: IInventoryItem) => {
     try {
       const response = await axios.delete(
@@ -42,28 +47,47 @@ export default function InventoryTable({
   };
 
   return (
+    <Paper sx={{ overflow: 'scroll' }}>
     <Table>
       <TableHead>
         <TableRow>
           <TableCell>Name</TableCell>
-          <TableCell>Vendor</TableCell>
+          <TableCell>Vendor - Unit Value</TableCell>
           <TableCell>Quantity</TableCell>
-          <TableCell>Unit Value</TableCell>
           <TableCell>Total Value</TableCell>
           <TableCell></TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {inventoryItems.map((item: IInventoryItem, index: number) => {
+          let unit;
+          for (const vendorItem of item.vendorItem) {
+            unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
+          }
+
           return (
             <TableRow key={index}>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.vendorItems.vendor.map((vendor) => vendor.name).join(', ')}</TableCell>
               <TableCell>
-                {item?.quantity} {item?.unit}
+                <Typography>{item.name}</Typography>
+                </TableCell>
+              <TableCell>
+                <Box display="flex" flexDirection="column" gap={3}>
+                  {
+                    item?.vendorItem?.map((vItem) => {
+                      const smallestUnit = vItem?.unit.find((unit: any) => unit?.ratio === 1);
+                      return (
+                        <Typography>{vItem?.vendor?.name} - <strong>${smallestUnit?.unitPrice}</strong></Typography>
+                      )
+                    })
+                  }
+                </Box>
               </TableCell>
-              <TableCell>${item?.unitPrice}</TableCell>
-              <TableCell>${item.totalValue?.toFixed(2)}</TableCell>
+              <TableCell>
+                <Typography>{item?.quantity} {unit?.unit}</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography>${item?.totalValue?.toFixed(2)}</Typography>
+              </TableCell>
               <TableCell>
                 <Box display="flex" gap={2}>
                   <DeleteModal
@@ -82,5 +106,6 @@ export default function InventoryTable({
         })}
       </TableBody>
     </Table>
+    </Paper>
   );
 }
