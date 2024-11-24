@@ -111,7 +111,9 @@ export default function ItemPage() {
     if (
       newItem.name.trim() === '' ||
       newItem.price < 0 ||
-      !newItem.categoryId
+      !newItem.categoryId ||
+      !newItem.inventoryItemId ||
+      newItem.inventoryItemId < 1
     ) {
       showNotification('error', 'Your input data is invalid');
       return false;

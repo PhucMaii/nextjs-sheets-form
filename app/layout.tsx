@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './provider';
-import { ThemeProvider } from '@mui/material';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import '../styles/reactCalendar.css';
 import UserContextAPI from './context/UserContextAPI';
 import { theme } from '@/theme';
@@ -49,6 +49,7 @@ export default function RootLayout({
       </head>
       <body id="root" className={inter.className}>
         <ThemeProvider theme={theme}>
+          <CssBaseline />
           <Providers>
             <UserContextAPI>{children}</UserContextAPI>
           </Providers>
