@@ -55,10 +55,7 @@ export default function UnitSearch({
     clearOnBlur
     handleHomeEndKeys
     id="free-solo-with-text-demo"
-    options={
-      [ '-- Choose a unit --', ...(displayItems || [])] ||
-      []
-    }
+    options={displayItems}
     getOptionLabel={(option) => {
       // Check if the option has a custom title (for new item suggestion)
       if (option.title) {

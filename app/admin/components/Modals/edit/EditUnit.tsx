@@ -1,63 +1,59 @@
-import { Box, Divider, Modal, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { Box, Divider, Modal, TextField, Typography } from '@mui/material'
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import UnitSearch from '../../Autocomplete/UnitSearch';
-import { units } from '@/app/lib/constant';
+import { IInventoryUnit } from '@/app/utils/type';
 import { USER_ROLE } from '@/app/utils/enum';
+import { units } from '@/app/lib/constant';
 
 interface IProps extends ModalProps {
-    vendorItemId: number;
-    addUnit: any;
-    noClose?: boolean;
+    unit: IInventoryUnit;
+    updateUnit: any;
 }
 
-export default function AddUnit({open, onClose, vendorItemId, addUnit, noClose}: IProps) {
-    const [newUnit, setNewUnit] = useState<any>({
-        id: 0,
-        unit: 'bags',
-        unitPrice: 0,
-        ratio: 1,
-        vendorItemId
-    });
+export default function EditUnit({open, onClose, unit, updateUnit}: IProps) {
+    const [updatedUnit, setUpdatedUnit] = useState<any>({...unit});
 
-    const selectNewUnit = (newValue: any) => {
+    useEffect(() => {
+        setUpdatedUnit({...unit});
+    }, [unit]);
+
+    const selectUpdatedUnit = (newValue: any) => {
         // New Item Add
         if (newValue?.inputValue) {
-          setNewUnit({
-            ...newUnit,
+            setUpdatedUnit({
+            ...updatedUnit,
             unit: newValue.inputValue,
           });
         } else { // Existing Item Add
-          setNewUnit({
-            ...newUnit,
+            setUpdatedUnit({
+            ...updatedUnit,
             unit: newValue,
           });
         }
-      };
+    };
 
   return (
-    <Modal open={open} onClose={() => !noClose && onClose()}>
+    <Modal open={open} onClose={onClose}>
         <BoxModal>
             <ModalHead 
-                heading="Add Unit"
-                buttonLabel="ADD"
-                onClick={() => addUnit(newUnit)}
+                heading="Edit Unit"
+                buttonLabel="EDIT"
+                onClose={onClose}
+                onClick={() => updateUnit(updatedUnit)}
                 buttonProps={{}}
-                onClose={() => !noClose && onClose()}
-                closeButtonProps={{disabled: noClose}}
             />
 
             <Divider sx={{my: 2}} />
 
             <Box display="flex" flexDirection="column" gap={3}>
-
                 <Box display="flex" flexDirection="column" gap={2}>
                     <Typography variant="h6">Unit</Typography>
                     <UnitSearch 
-                        value={newUnit.unit}
-                        handleSelectPromptedItem={selectNewUnit}
+                        value={updatedUnit.unit}
+                        handleSelectPromptedItem={selectUpdatedUnit}
                         displayItems={units}
                         role={USER_ROLE.ADMIN}
                     />
@@ -68,8 +64,8 @@ export default function AddUnit({open, onClose, vendorItemId, addUnit, noClose}:
                     <TextField
                         placeholder='Enter unit price...'
                         type="number"
-                        value={newUnit.unitPrice}
-                        onChange={(e) => setNewUnit({...newUnit, unitPrice: +e.target.value})}
+                        value={updatedUnit.unitPrice}
+                        onChange={(e) => setUpdatedUnit({...updatedUnit, unitPrice: +e.target.value})}
                         fullWidth
                     />
                 </Box>
@@ -79,15 +75,13 @@ export default function AddUnit({open, onClose, vendorItemId, addUnit, noClose}:
                     <TextField
                         placeholder='Enter ratio...'
                         type="number"
-                        value={newUnit.ratio}
+                        value={updatedUnit.ratio}
                         inputProps={{min: 1}}
-                        onChange={(e) => setNewUnit({...newUnit, ratio: +e.target.value})}
+                        onChange={(e) => setUpdatedUnit({...updatedUnit, ratio: +e.target.value})}
                         fullWidth
                     />
                 </Box>
             </Box>
-
-
         </BoxModal>
     </Modal>
   )

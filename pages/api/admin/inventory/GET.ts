@@ -105,11 +105,11 @@ export const formatInventoryWithTotalValueAndStatus = (
           }
           
           if (!acc.totalValue) {
-            acc.totalValue = (fifo.quantity * baseUnit.unitPrice || 1);
+            acc.totalValue = (fifo.quantity * baseUnit?.unitPrice || 1);
           } else {
-            acc.totalValue += (fifo.quantity * baseUnit.unitPrice || 1);
+            acc.totalValue += (fifo.quantity * baseUnit?.unitPrice || 1);
           }
-          
+            
           return acc;
         }, {}) || {};
         

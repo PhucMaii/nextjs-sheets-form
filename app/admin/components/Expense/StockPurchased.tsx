@@ -24,7 +24,7 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import React, { useEffect, useMemo, useState } from 'react';
 import { errorColor } from '@/theme/color';
 import AddVendor from '../Modals/add/AddVendor';
-import { mainPaymentMethodId, units } from '@/app/lib/constant';
+import { mainPaymentMethodId } from '@/app/lib/constant';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import InventoryItemSearch from '../Autocomplete/InventoryItemSearch';
@@ -33,7 +33,10 @@ import AddUnit from '../Modals/add/AddUnit';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import AddIcon from '@mui/icons-material/Add';
 import { IInventoryUnit } from '@/app/utils/type';
-import UnitSearch from '../Autocomplete/UnitSearch';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import EditIcon from '@mui/icons-material/Edit';
+import EditUnit from '../Modals/edit/EditUnit';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -42,6 +45,7 @@ interface IProps {
   codBoardId?: number;
   role: USER_ROLE;
   defaultValue?: any;
+  fetchAdminAndDrivers?: () => void;
 }
 
 export default function StockPurchased({
@@ -51,13 +55,18 @@ export default function StockPurchased({
   codBoardId,
   role,
   defaultValue,
+  fetchAdminAndDrivers,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
-  // const [isOpenAddUnit, setIsOpenAddUnit] = useState<boolean>(false);
+  const [editUnit, setEditUnit] = useState<any>({
+    open: false,
+    unit: null,
+    unitIndex: -1,
+  })
   const [open, onChangeOpen] = useMultipleBoolean({
     isOpenAddVendor: false,
     isOpenAddUnit: false,
+    disabledCloseAddUnit: false,
   });
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
@@ -159,10 +168,14 @@ export default function StockPurchased({
         ...promptedItem,
         id: 0,
         unitPrice: 0,
-        unit: 'bags',
+        unit: {unit: 'bags', ratio: 1, unitPrice: 0},
+        units: [],
         name: newValue.inputValue,
         vendorId: selectedVendorId,
       });
+
+      onChangeOpen('isOpenAddUnit', true);
+      onChangeOpen('disabledCloseAddUnit', true);
     } else { // Existing Item Add
       setPromptedItem({
         ...promptedItem,
@@ -174,6 +187,8 @@ export default function StockPurchased({
         units: newValue?.unit || [],
       });
     }
+
+    
   };
 
   const addPromptedItem = () => {
@@ -219,9 +234,18 @@ export default function StockPurchased({
         ratio: 1,
       }
     });
+
+    onChangeOpen('disabledCloseAddUnit', false);
   };
 
   const addUnit = (newUnit: IInventoryUnit) => {
+    if (promptedItem?.units?.length === 0) {
+      if (newUnit.ratio !== 1) {
+        showNotification('error', 'New Item Required Ratio of 1');
+        return;
+      }
+    }
+
     const unitRatioExist = promptedItem?.units?.find((unit: any) => {
       return newUnit.ratio === unit.ratio;
     });
@@ -240,11 +264,13 @@ export default function StockPurchased({
       return;
     }
 
+
     onChangeOpen('isOpenAddUnit', false);
 
     setPromptedItem({
       ...promptedItem,
-      units: [...promptedItem.units, newUnit],
+      units: [...(promptedItem?.units || []), newUnit],
+      unit: newUnit
     });
   }
 
@@ -268,21 +294,19 @@ export default function StockPurchased({
           }
           if (keyChange === 'unitPrice') {
             const totalPrice = item.quantity * +e.target.value;
-            const newUnits = item.units?.map((unit: any) =>
-              unit.ratio === item.unit?.ratio
-                ? { ...unit, unitPrice: +e.target.value } // Replace the matching unit
-                : unit // Keep the other units unchanged
-            );
+            
+            const newUnits = item.units.map((unit: any) => {
+              if (unit.ratio === item.unit.ratio) {
+                return { ...unit, unitPrice: +e.target.value };
+              }
 
-            return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice};
+              return unit;
+            });
+
+            return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
           }
 
           if (keyChange === 'unit') {
-            const newUnits = item.units?.map((unit: any) =>
-              unit.ratio === item.unit?.ratio 
-                ? { ...unit, unit: e.target.value } // Replace the matching unit
-                : unit // Keep the other units unchanged
-            );
 
             return { ...item, unit: {...item.unit, unit: e.target.value}};
           }
@@ -296,22 +320,18 @@ export default function StockPurchased({
         if (keyChange === 'unitPrice') {
           const totalPrice = item.quantity * +e.target.value;
 
-          const newUnits = item.units?.map((unit: any) =>
-            unit.ratio === item.unit?.ratio
-              ? { ...unit, unitPrice: +e.target.value } // Replace the matching unit
-              : unit // Keep the other units unchanged
-          );
+          const newUnits = item.units.map((unit: any) => {
+            if (unit.ratio === item.unit.ratio) {
+              return { ...unit, unitPrice: +e.target.value };
+            }
 
-          return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice};
+            return unit;
+          });
+          
+          return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
         }
 
         if (keyChange === 'unit') {
-          const newUnits = item.units?.map((unit: any) =>
-            unit.ratio === item.unit?.ratio 
-              ? { ...unit, unit: e.target.value } // Replace the matching unit
-              : unit // Keep the other units unchanged
-          );
-
           return { ...item, unit: {...item.unit, unit: e.target.value}};
         }
         return item;
@@ -323,23 +343,23 @@ export default function StockPurchased({
     setPurchasedItems(newItemList);
   };
 
-  const onChangeUnitInItems = (e: any, newValue: any, targetItem: any) => {
-    e.preventDefault();
+  // const onChangeUnitInItems = (e: any, newValue: any, targetItem: any) => {
+  //   e.preventDefault();
 
-    console.log(newValue, 'newValue');
+  //   console.log(newValue, 'newValue');
 
-    const newPurchasedItems = purchasedItems.map((item: any) => {
-      if (item.id === targetItem.id) {
-        return { ...item, unit: newValue };
-      } else if (item.name === targetItem.name) {
-        return { ...item, unit: newValue };
-      } else {
-        return item;
-      }
-    });
+  //   const newPurchasedItems = purchasedItems.map((item: any) => {
+  //     if (item.id === targetItem.id) {
+  //       return { ...item, unit: newValue };
+  //     } else if (item.name === targetItem.name) {
+  //       return { ...item, unit: newValue };
+  //     } else {
+  //       return item;
+  //     }
+  //   });
 
-    setPurchasedItems(newPurchasedItems);
-  }
+  //   setPurchasedItems(newPurchasedItems);
+  // }
 
   const handleSubmit = async () => {
     if (purchasedItems.length === 0) {
@@ -423,6 +443,77 @@ export default function StockPurchased({
 
     setPurchasedItems(newItemList);
   };
+  
+  const removeUnit = (removedUnit: any) => {
+    if (removedUnit.ratio === 1) {
+      showNotification('error', 'Inventory Item Required Ratio of 1');
+      return;
+    }
+
+    const newUnits = promptedItem?.units?.filter((item: any) => {
+      return removedUnit.unit !== item.unit && removedUnit.ratio !== item.ratio;
+    });
+
+    if (promptedItem.unit.ratio === removedUnit.ratio && promptedItem.unit.unit === removedUnit.unit) {
+      setPromptedItem({
+        ...promptedItem,
+        units: newUnits,
+        unit: newUnits[0],
+      });      
+    } else {
+      setPromptedItem({
+        ...promptedItem,
+        units: newUnits,
+      })
+    }
+
+  }
+
+  const updateUnit = (updatedUnit: any, updatedIndex: number) => {
+    if (promptedItem?.units?.length === 1) {
+      if (updatedUnit.ratio !== 1) {
+        showNotification('error', 'Inventory Item Required Ratio of 1');
+        return;
+      }
+    }
+
+    const unitRatioExist = promptedItem?.units?.find((unit: any, index: number) => {
+      return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
+    });
+    
+    if (unitRatioExist) {
+      showNotification('error', 'Unit ratio already exists');
+      return;
+    }
+
+    const unitNameExist = promptedItem?.units?.find((unit: any, index: number) => {
+      return updatedUnit.unit === unit.unit && index !== updatedIndex;
+    });
+
+    if (unitNameExist) {
+      showNotification('error', 'Unit name already exists');
+      return;
+    }
+
+    const newUnits = promptedItem?.units?.map((unit: any, index: number) => {
+      if (index === updatedIndex) {
+        return updatedUnit;
+      }
+
+      return unit;
+    })
+
+    setEditUnit({
+      unit: null,
+      open: false
+    });
+
+    setPromptedItem({
+      ...promptedItem,
+      units: newUnits,
+      unit: updatedUnit
+    });
+  }
 
   return (
     <>
@@ -437,7 +528,14 @@ export default function StockPurchased({
             open={open.isOpenAddUnit} 
             onClose={() => onChangeOpen('isOpenAddUnit', false)} 
             vendorItemId={promptedItem?.id}
-            onClick={addUnit}  
+            addUnit={addUnit}
+            noClose={open.disabledCloseAddUnit}
+          />
+          <EditUnit 
+            open={editUnit.open}
+            onClose={() => setEditUnit((prevEditUnit: any) => ({...prevEditUnit, open: false}))}
+            unit={editUnit.unit}
+            updateUnit={(updatedUnit: any) => updateUnit(updatedUnit, editUnit.unitIndex)}
           />
         </>
       )}
@@ -495,7 +593,15 @@ export default function StockPurchased({
                   {
                     promptedItem.units.map((unit: any, index: number) => {
                       return (
-                        <FormControlLabel key={index} value={JSON.stringify(unit)} control={<Radio />} label={`1:${unit.ratio} - ${unit.unit}`} />
+                        <Box display="flex" alignItems="center" mx={2}>
+                          <FormControlLabel key={index} value={JSON.stringify(unit)} control={<Radio />} label={`1:${unit.ratio} - ${unit.unit}`} />
+                          <IconButton onClick={() => removeUnit(unit)} size="small">
+                            <RemoveIcon fontSize='small' />
+                          </IconButton>
+                          <IconButton onClick={() => setEditUnit({unit: unit, open: true, unitIndex: index})} size="small">
+                            <EditIcon fontSize='small' />
+                          </IconButton>
+                        </Box>
                       )
                     })
                   }
@@ -503,7 +609,7 @@ export default function StockPurchased({
             </FormControl>
           </Grid>}
 
-          {promptedItem.id === 0 && (
+          {/* {promptedItem.id === 0 && (
             <>
               <Grid item xs={6}>
                 <FormControl fullWidth>
@@ -554,7 +660,7 @@ export default function StockPurchased({
                 </FormControl>
               </Grid>
             </>
-          )}
+          )} */}
 
           <Grid item xs={12} md={6}>
             <TextField
@@ -592,15 +698,6 @@ export default function StockPurchased({
               <Grid container spacing={2} key={index}>
                 <Grid item xs={12} fontWeight="bold">
                   <Box display="flex" alignItems="center" gap={1}>
-                    <TextField
-                      label="Unit Price ($)"
-                      value={item?.unit?.unitPrice}
-                      onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
-                      type="number"
-                      inputProps={{ min: 0 }}
-                      disabled={role === USER_ROLE.DRIVER}
-                      sx={{maxWidth: 100, width: 'auto'}}
-                    />
                     <Typography variant="h6" fontWeight="bold">
                       {item.name}
                     </Typography>
@@ -610,17 +707,27 @@ export default function StockPurchased({
                   </Box>
                 </Grid>
                 <Grid item container columnSpacing={2}>
-                  {/* <Grid item xs={6} textAlign="right">
-                    <UnitSearch 
+                  <Grid item xs={6} textAlign="right">
+                    <TextField
+                      label="Unit Price ($)"
+                      value={item?.unit?.unitPrice}
+                      onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
+                      type="number"
+                      inputProps={{ min: 0 }}
+                      disabled={role === USER_ROLE.DRIVER}
+                      // sx={{maxWidth: 100, width: 'auto'}}
+                      fullWidth
+                    />
+                    {/* <UnitSearch 
                       value={item.units[0]}
                       // eslint-disable-next-line @typescript-eslint/no-unused-vars
                       handleSelectPromptedItem={(e: any, newValue: any) => onChangeUnitInItems(e, newValue, item)}
                       disabled={role === USER_ROLE.DRIVER}
                       displayKey="unit"
                       displayItems={item.units}
-                    />
+                    /> */}
 
-                  </Grid> */}
+                  </Grid>
                   <Grid item xs={6}>
                     <TextField
                       fullWidth
@@ -721,7 +828,12 @@ export default function StockPurchased({
 
         {role === USER_ROLE.ADMIN && (
           <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Driver</Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="h6">Driver</Typography>
+              <IconButton onClick={fetchAdminAndDrivers}>
+                <RefreshIcon />
+              </IconButton>
+            </Box>
             <Select
               fullWidth
               value={newExpense.spentBy}
