@@ -5,11 +5,15 @@ import {
   createFilterOptions,
   Divider,
   FormControl,
+  FormControlLabel,
+  FormLabel,
   Grid,
   IconButton,
   InputLabel,
   MenuItem,
   Modal,
+  Radio,
+  RadioGroup,
   Select,
   TextField,
   Typography,
@@ -21,7 +25,6 @@ import ModalHead from '@/app/lib/ModalHead';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
-import { units } from '@/app/lib/constant';
 import { errorColor } from '@/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AddVendor from '../add/AddVendor';
@@ -30,6 +33,11 @@ import { generateCurrentTime } from '@/app/utils/time';
 import axios from 'axios';
 import { compareTwoArrays } from '@/app/utils/array';
 import InventoryItemSearch from '../../Autocomplete/InventoryItemSearch';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import RemoveIcon from '@mui/icons-material/Remove';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import EditUnit from './EditUnit';
 
 interface IProps {
   stockPurchased: IExpense;
@@ -39,24 +47,39 @@ interface IProps {
 export const filter = createFilterOptions<any>();
 
 const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
-  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>(['Admin - Admin Test']);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
+  const [open, onChangeOpen] = useMultipleBoolean({
+    isOpenAddVendor: false,
+    isOpenAddUnit: false,
+    disabledCloseAddUnit: false,
+  })
+  const [editUnit, setEditUnit] = useState<any>({
+    isOpen: false,
+    unit: null,
+  });
+  // const [affectQuantity, setAffectQuantity] = useState<any>({
+  //   checked: false,
+  //   disabled: false,
+  // });
   const [updatedExpense, setUpdatedExpense] = useState<any>(null);
   const [promptedItem, setPromptedItem] = useState<any>({
     id: -1,
     vendorId: -1,
     quantity: 0,
     unitPrice: 0,
-    unit: 'bags',
+    unit: {
+      unit: 'bags',
+      ratio: 1,
+      unitPrice: 0,
+    },
   });
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const [vendorItems, setVendorItems] = useState<any[]>([]);
   const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  const [allVendorItems] = SWRFetchData(`${API_URL.ADMIN}/vendorItems`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
   const { date, SelectDate } = useSelectDate(stockPurchased.date, true);
@@ -74,72 +97,94 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   }, [vendors]);
 
   useEffect(() => {
-    const fetchAdminsAndDrivers = async () => {
-      const users: any = await getAdminsAndDrivers(showNotification);
-      setAdminsAndDrivers(users);
-    };
-
     fetchAdminsAndDrivers();
   }, []);
-
+  
   useEffect(() => {
     if (purchasedItems.length > 0) {
       calculateNewAmount();
     }
   }, [purchasedItems]);
-
+  
   useEffect(() => {
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
-
+      
       if (vendors) {
         const targetVendor = vendors?.data.find((vendor: any) => {
           return vendor.id === selectedVendorId;
         });
-
+        
         if (targetVendor) {
-          setVendorItems(targetVendor?.inventoryItems);
+          setVendorItems(targetVendor?.vendorItem);
         }
       }
     }
   }, [selectedVendorId, vendors]);
-
+  
   useEffect(() => {
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
-
+      
       if (stockPurchased?.vendors) {
         setSelectedVendorId(stockPurchased.vendors[0].vendorId);
       }
     }
+    
     const initializeItems = () => {
       if (!stockPurchased?.orderedItems) {
         setPurchasedItems([]);
         return;
       }
-
+      
       const newItems = stockPurchased.orderedItems.map((item: any) => {
-        const inventoryItem = inventoryItems?.data?.find((i: any) => {
-          return i.name === item.name;
+        const vendorItem = allVendorItems?.data?.find((i: any) => {
+          return i.inventoryItem.name == item.name;
         });
-
+        
         return {
-          inventoryItem,
           id: item.id,
           name: item.name,
           quantity: item.quantity,
           unitPrice: item.price,
-          unit: inventoryItem?.unit,
+          unit: item.inventoryUnit,
+          units: vendorItem?.unit,
           vendorId: item.vendorId,
+          vendorItemId: vendorItem?.id,
+          inventoryItemId: item.inventoryItemId,
+          inventoryItem: vendorItem?.inventoryItem,
         };
       });
-
+      
       setPurchasedItems(newItems);
     };
-
-    initializeItems();
-  }, [stockPurchased, vendorItems]);
-
+    
+    if (allVendorItems) {
+      initializeItems();
+    }
+  }, [stockPurchased, vendorItems, allVendorItems]);
+  
+  // useEffect(() => {
+  //   if (stockPurchased?.orderedItems) {
+  //     if (purchasedItems.some((item: any) => item.id < 1)) {
+  //       setAffectQuantity({
+  //         ...affectQuantity,
+  //         checked: true,
+  //         disabled: true,
+  //       })
+  //     } else {
+  //       setAffectQuantity({
+  //         ...affectQuantity,
+  //         disabled: false,
+  //       });
+  //     }
+  //   }
+  // }, [purchasedItems]);
+  const fetchAdminsAndDrivers = async () => {
+    const users: any = await getAdminsAndDrivers(showNotification);
+    setAdminsAndDrivers(users);
+  };
+  
   const addPromptedItem = () => {
     if (promptedItem.id === -1) {
       showNotification('error', 'Please select item');
@@ -160,13 +205,19 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
       return;
     }
 
-    const inventoryItemExisted = inventoryItems?.data?.find((item: any) => {
-      return item.name === promptedItem.name;
+    const vendorItemExisted = allVendorItems?.data?.find((item: any) => {
+      return item.inventoryItem.name === promptedItem.name;
     });
 
     setPurchasedItems([
       ...purchasedItems,
-      { ...promptedItem, inventoryItem: inventoryItemExisted },
+      { ...promptedItem, 
+        inventoryItem: 
+        vendorItemExisted.inventoryItem, 
+        id: -1, 
+        vendorItemId: promptedItem.id, 
+        unitPrice: promptedItem.unit.unitPrice
+      },
     ]);
     setPromptedItem({
       id: -1,
@@ -185,6 +236,24 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     setUpdatedExpense({ ...updatedExpense, amount: newAmount });
   };
 
+  const handleOnChangeUnitPrice = (e: any) => {
+    const newUnitPrice = +e.target.value;
+
+    // Update units immutably
+    const newUnits = promptedItem?.units?.map((unit: any) =>
+      unit.ratio === promptedItem?.unit?.ratio
+        ? { ...unit, unitPrice: newUnitPrice } // Replace the matching unit
+        : unit // Keep the other units unchanged
+    );
+
+    // Update state
+    setPromptedItem({
+      ...promptedItem,
+      unit: { ...promptedItem.unit, unitPrice: newUnitPrice },
+      units: newUnits,
+    });
+  }
+
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
@@ -197,20 +266,45 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
           }
           if (keyChange === 'unitPrice') {
             const totalPrice = item.quantity * +e.target.value;
-            return { ...item, unitPrice: +e.target.value, totalPrice };
+            
+            const newUnits = item.units.map((unit: any) => {
+              if (unit.ratio === item.unit.ratio) {
+                return { ...unit, unitPrice: +e.target.value };
+              }
+
+              return unit;
+            });
+
+            return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
+          }
+
+          if (keyChange === 'unit') {
+
+            return { ...item, unit: {...item.unit, unit: e.target.value}};
           }
           return item;
         }
-      }
-
-      if (item.id === targetItem.id) {
+      } else if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {
           const totalPrice = item.price * +e.target.value;
           return { ...item, quantity: +e.target.value, totalPrice };
         }
         if (keyChange === 'unitPrice') {
           const totalPrice = item.quantity * +e.target.value;
-          return { ...item, unitPrice: +e.target.value, totalPrice };
+
+          const newUnits = item.units.map((unit: any) => {
+            if (unit.ratio === item.unit.ratio) {
+              return { ...unit, unitPrice: +e.target.value };
+            }
+
+            return unit;
+          });
+          
+          return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
+        }
+
+        if (keyChange === 'unit') {
+          return { ...item, unit: {...item.unit, unit: e.target.value}};
         }
         return item;
       }
@@ -220,7 +314,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
     setPurchasedItems(newItemList);
   };
-
   const handleSubmit = async () => {
     if (!stockPurchased?.orderedItems) {
       showNotification('error', 'Please add items');
@@ -232,14 +325,10 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         purchasedItems,
         stockPurchased?.orderedItems,
       );
-
-      let oldItemIds: number[] = [];
-      if (!isUpdatePurchasedItems) {
-        oldItemIds = stockPurchased?.orderedItems.map((item: any) => {
-          return item.id;
-        });
-      }
-
+      
+      // console.log(purchasedItems, 'purchasedItems');
+      // setIsLoading(false);
+      // return;
       const createdAt = generateCurrentTime();
       const response = await axios.put(`${API_URL.ADMIN}/inventory/expenses`, {
         id: updatedExpense.id,
@@ -249,9 +338,10 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         paymentMethodId: updatedExpense.paymentMethodId,
         spentBy: updatedExpense.spentBy,
         invoice: updatedExpense.invoice,
-        oldItemIds,
-        updatedItems: !isUpdatePurchasedItems ? purchasedItems : [], // prevent update items if client does not update
+        oldItems: isUpdatePurchasedItems ? [] : stockPurchased?.orderedItems,
+        updatedItems: isUpdatePurchasedItems ? [] : purchasedItems, // prevent update items if client does not update
         updatedAt: createdAt,
+        isAffectQuantity: true,
       });
 
       if (response.data.error) {
@@ -275,22 +365,31 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
   const selectPromptedItem = (newValue: any) => {
     if (newValue?.inputValue) {
+      showNotification('error', 'Not Allowed To Create New Item in Edit Mode');
+      return;
+    }
+
+    // New Item Add
+    if (newValue?.inputValue) {
       setPromptedItem({
         ...promptedItem,
-        id: 0,
+        id: -1,
         unitPrice: 0,
-        unit: 'bags',
+        unit: {unit: 'bags', ratio: 1, unitPrice: 0},
+        units: [],
         name: newValue.inputValue,
         vendorId: selectedVendorId,
       });
-    } else {
+
+    } else { // Existing Item Add
       setPromptedItem({
         ...promptedItem,
         id: newValue?.id || 0,
-        unitPrice: newValue?.unitPrice || 0,
-        name: newValue?.name,
+        name: newValue?.inventoryItem?.name,
         vendorId: selectedVendorId,
-        unit: newValue?.unit || 'bags',
+        inventoryItemId: newValue?.inventoryItemId,
+        unit: newValue?.unit[0],
+        units: newValue?.unit || [],
       });
     }
   };
@@ -303,26 +402,105 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     setPurchasedItems(newItemList);
   };
 
+  const removeUnit = (removedUnit: any) => {
+    if (removedUnit.ratio === 1) {
+      showNotification('error', 'Inventory Item Required Ratio of 1');
+      return;
+    }
+
+    const newUnits = promptedItem?.units?.filter((item: any) => {
+      return removedUnit.unit !== item.unit && removedUnit.ratio !== item.ratio;
+    });
+
+    if (promptedItem.unit.ratio === removedUnit.ratio && promptedItem.unit.unit === removedUnit.unit) {
+      setPromptedItem({
+        ...promptedItem,
+        units: newUnits,
+        unit: newUnits[0],
+      });      
+    } else {
+      setPromptedItem({
+        ...promptedItem,
+        units: newUnits,
+      })
+    }
+  }
+
+  const updateUnit = (updatedUnit: any, updatedIndex: number) => {
+    if (promptedItem?.units?.length === 1) {
+      if (updatedUnit.ratio !== 1) {
+        showNotification('error', 'Inventory Item Required Ratio of 1');
+        return;
+      }
+    }
+
+    const unitRatioExist = promptedItem?.units?.find((unit: any, index: number) => {
+      return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
+    });
+    
+    if (unitRatioExist) {
+      showNotification('error', 'Unit ratio already exists');
+      return;
+    }
+
+    const unitNameExist = promptedItem?.units?.find((unit: any, index: number) => {
+      return updatedUnit.unit === unit.unit && index !== updatedIndex;
+    });
+
+    if (unitNameExist) {
+      showNotification('error', 'Unit name already exists');
+      return;
+    }
+
+    const newUnits = promptedItem?.units?.map((unit: any, index: number) => {
+      if (index === updatedIndex) {
+        return updatedUnit;
+      }
+
+      return unit;
+    })
+
+    setEditUnit({
+      unit: null,
+      open: false
+    });
+
+    setPromptedItem({
+      ...promptedItem,
+      units: newUnits,
+      unit: updatedUnit
+    });
+  }
+
   return (
     <>
       <AddVendor
         showNotification={showNotification}
-        open={isOpenAddVendor}
-        onClose={() => setIsOpenAddVendor(false)}
+        open={open.isOpenAddVendor}
+        onClose={() => onChangeOpen('isOpenAddVendor', false)}
       />
-      <Button onClick={() => setIsOpen(true)}>Edit</Button>
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+      <EditUnit 
+        open={editUnit.open}
+        onClose={() => setEditUnit((prevEditUnit: any) => ({...prevEditUnit, open: false}))}
+        unit={editUnit.unit}
+        updateUnit={(updatedUnit: any) => updateUnit(updatedUnit, editUnit.unitIndex)}
+      />
+      <Button onClick={() => onChangeOpen('isOpen', true)}>Edit</Button>
+      <Modal open={open.isOpen} onClose={() => onChangeOpen('isOpen', false)}>
         <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Stock Purchased"
             buttonLabel="EDIT"
             onClick={handleSubmit}
             buttonProps={{ loading: isLoading }}
-            onClose={() => setIsOpen(false)}
+            onClose={() => onChangeOpen('isOpen', false)}
           />
 
           <Divider sx={{ my: 2 }} />
 
+          {/* <Box display="flex" width="100%" justifyContent="flex-end" my={2}>
+            <FormControlLabel control={<Switch checked={affectQuantity.checked} onChange={(e) => setAffectQuantity((prevState: any) => ({...prevState, checked: e.target.checked}))} />} label="Affect Quantity" labelPlacement='start' disabled={affectQuantity.disabled}/>
+          </Box> */}
           <Box display="flex" flexDirection="column" gap={3}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -336,16 +514,12 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                       setSelectedVendorId(e.target.value as number)
                     }
                     fullWidth
-                    disabled={
-                      purchasedItems.length > 0 &&
-                      purchasedItems[0]?.inventoryItem?.vendorId ===
-                        selectedVendorId
-                    }
+                    disabled={purchasedItems.length > 0}
                   >
                     <MenuItem value={-1} disabled>
                       -- Choose a vendor --
                     </MenuItem>
-                    <MenuItem onClick={() => setIsOpenAddVendor(true)}>
+                    <MenuItem onClick={() => onChangeOpen('isOpenAddVendor', true)}>
                       + Create new vendor
                     </MenuItem>
                     {sortedVendors.length > 0 &&
@@ -358,140 +532,51 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                {/* <Autocomplete
-                  value={promptedItem.name}
-                  onChange={(event, newValue) => {
-                    selectPromptedItem(newValue);
-                  }}
-                  filterOptions={(options, params) => {
-                    const filtered = filter(options, params);
-
-                    const { inputValue } = params;
-                    // Suggest the creation of a new value
-                    const isExisting = options.some(
-                      (option) => inputValue === option.name,
-                    );
-                    if (inputValue !== '' && !isExisting) {
-                      filtered.push({
-                        inputValue,
-                        title: `Add "${inputValue}"`,
-                      });
-                    }
-
-                    return filtered;
-                  }}
-                  selectOnFocus
-                  clearOnBlur
-                  handleHomeEndKeys
-                  id="free-solo-with-text-demo"
-                  options={
-                    [
-                      { id: -1, name: '-- Choose an item --' },
-                      ...(vendorItems || []),
-                    ] || []
-                  }
-                  getOptionLabel={(option) => {
-                    // Check if the option has a custom title (for new item suggestion)
-                    if (option.title) {
-                      return option.title;
-                    }
-                    // Regular option
-                    return option.name || '';
-                  }}
-                  renderOption={(props, option) => {
-                    const { key, ...optionProps } = props;
-                    return (
-                      <li key={key} {...optionProps}>
-                        {option.title || option.name}
-                      </li>
-                    );
-                  }}
-                  sx={{ width: '100%' }}
-                  freeSolo
-                  renderInput={(params) => (
-                    <TextField {...params} label="Item" />
-                  )}
-                /> */}
                 <InventoryItemSearch
                   promptedItem={promptedItem}
                   handleSelectPromptedItem={selectPromptedItem}
                   role={USER_ROLE.ADMIN}
                   displayItems={vendorItems}
+                  disabledItems={purchasedItems.map((item: any) => {
+                    return item.vendorItemId;
+                  })}
                 />
               </Grid>
-
-              {promptedItem.id === 0 && (
-                <>
-                  <Grid item xs={6}>
-                    <FormControl fullWidth>
-                      <InputLabel id="vendor">Vendor</InputLabel>
-                      <Select
-                        id="vendor"
-                        label="Vendor"
-                        value={promptedItem.vendorId}
-                        onChange={(e) =>
-                          setPromptedItem({
-                            ...promptedItem,
-                            vendorId: +e.target.value,
-                          })
-                        }
-                        disabled
-                        fullWidth
-                      >
-                        <MenuItem value={-1} disabled>
-                          -- Choose a vendor --
-                        </MenuItem>
-                        <MenuItem onClick={() => setIsOpenAddVendor(true)}>
-                          + Create new vendor
-                        </MenuItem>
-                        {sortedVendors &&
-                          sortedVendors.length > 0 &&
-                          sortedVendors?.map((vendor: any, index: number) => (
-                            <MenuItem key={index} value={vendor.id}>
-                              {vendor.name}
-                            </MenuItem>
-                          ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <FormControl fullWidth>
-                      <InputLabel id="unit">Unit</InputLabel>
-                      <Select
-                        value={promptedItem.unit}
-                        onChange={(e) =>
-                          setPromptedItem({
-                            ...promptedItem,
-                            unit: e.target.value,
-                          })
-                        }
-                        fullWidth
-                        id="unit"
-                        label="Unit"
-                      >
-                        {units.map((unit, index) => (
-                          <MenuItem key={index} value={unit}>
-                            {unit}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </>
-              )}
-
+              {promptedItem?.units && promptedItem?.units.length > 0 && <Grid item xs={12}>
+            <FormControl>
+              <Box display="flex" alignItems="center" gap={1}>
+                <FormLabel id="unit">Units</FormLabel>
+                <IconButton onClick={() => onChangeOpen('isOpenAddUnit', true)}>
+                  <AddIcon />
+                </IconButton>
+              </Box>
+              <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
+                  {
+                    promptedItem.units.map((unit: any, index: number) => {
+                      return (
+                        <Box display="flex" alignItems="center" mx={2}>
+                          <FormControlLabel key={index} value={JSON.stringify(unit)} control={<Radio />} label={`1:${unit.ratio} - ${unit.unit}`} />
+                          <IconButton onClick={() => removeUnit(unit)} size="small">
+                            <RemoveIcon fontSize='small' />
+                          </IconButton>
+                          <IconButton onClick={() => setEditUnit({unit: unit, open: true, unitIndex: index})} size="small">
+                            <EditIcon fontSize='small' />
+                          </IconButton>
+                        </Box>
+                      )
+                    })
+                  }
+              </RadioGroup>
+            </FormControl>
+          </Grid>
+          }
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Unit Price"
                   type="number"
-                  value={promptedItem.unitPrice}
-                  onChange={(e: any) =>
-                    setPromptedItem({
-                      ...promptedItem,
-                      unitPrice: +e.target.value,
-                    })
-                  }
+                  value={promptedItem?.unit?.unitPrice}
+                  onChange={handleOnChangeUnitPrice}
                 />
               </Grid>
               <Grid item xs={12} md={6}>

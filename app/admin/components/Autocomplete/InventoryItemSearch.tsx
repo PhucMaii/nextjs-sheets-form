@@ -10,6 +10,7 @@ interface IProps {
   role?: USER_ROLE;
   displayItems: any[];
   disabled?: boolean;
+  disabledItems?: any[];
 }
 
 export default function InventoryItemSearch({
@@ -18,7 +19,9 @@ export default function InventoryItemSearch({
   role,
   displayItems,
   disabled,
+  disabledItems
 }: IProps) {
+
   return (
     <Autocomplete
       disabled={disabled}
@@ -59,8 +62,10 @@ export default function InventoryItemSearch({
       }}
       renderOption={(props, option) => {
         const { key, ...optionProps } = props;
+
+        const isDisabled = disabledItems?.includes(option?.id);
         return (
-          <li key={key} {...optionProps}>
+          <li key={key} {...optionProps} aria-disabled={isDisabled}>
             {option.title || option?.inventoryItem?.name}
           </li>
         );

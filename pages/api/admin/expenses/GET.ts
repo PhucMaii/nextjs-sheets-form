@@ -41,7 +41,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               vendor: true,
             },
           },
-          orderedItems: true,
+          orderedItems: {
+            include: {
+              inventoryUnit: true,
+            },
+          },
         },
       });
 
@@ -67,7 +71,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             vendor: true,
           },
         },
-        orderedItems: true,
+        orderedItems: {
+          include: {
+            inventoryUnit: true,
+          },
+        },
       },
     });
 

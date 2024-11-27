@@ -187,8 +187,6 @@ export default function StockPurchased({
         units: newValue?.unit || [],
       });
     }
-
-    
   };
 
   const addPromptedItem = () => {
@@ -263,7 +261,6 @@ export default function StockPurchased({
       showNotification('error', 'Unit name already exists');
       return;
     }
-
 
     onChangeOpen('isOpenAddUnit', false);
 
@@ -342,24 +339,6 @@ export default function StockPurchased({
 
     setPurchasedItems(newItemList);
   };
-
-  // const onChangeUnitInItems = (e: any, newValue: any, targetItem: any) => {
-  //   e.preventDefault();
-
-  //   console.log(newValue, 'newValue');
-
-  //   const newPurchasedItems = purchasedItems.map((item: any) => {
-  //     if (item.id === targetItem.id) {
-  //       return { ...item, unit: newValue };
-  //     } else if (item.name === targetItem.name) {
-  //       return { ...item, unit: newValue };
-  //     } else {
-  //       return item;
-  //     }
-  //   });
-
-  //   setPurchasedItems(newPurchasedItems);
-  // }
 
   const handleSubmit = async () => {
     if (purchasedItems.length === 0) {
@@ -466,7 +445,6 @@ export default function StockPurchased({
         units: newUnits,
       })
     }
-
   }
 
   const updateUnit = (updatedUnit: any, updatedIndex: number) => {

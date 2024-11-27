@@ -170,8 +170,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     if (Object.keys(newItems).length > 0 && newItems?.brandNewItems?.length > 0) {
       const brandNewItems = newItems.brandNewItems;
 
-      console.log(brandNewItems, 'brand new items');
-
       // STEP 1: Create Inventory Items
       await prisma.inventoryItem.createMany({
         data: brandNewItems.map((item: any) => {
@@ -413,14 +411,14 @@ export const checkIsExpenseValid = async (
 export const checkAndUpdateUnits = async (dbUnits: InventoryUnit[], newUnits: IInventoryUnit[], vendorItemId: number, createdAt: string, createdBy: string) => {
   const prisma = new PrismaClient();
 
-  const sortedDBUnits = dbUnits.sort((a, b) => a.ratio - b.ratio);
-  const sortedNewUnits = newUnits.sort((a, b) => a.ratio - b.ratio);
+  const sortedDBUnits = dbUnits.sort((a, b) => a?.ratio - b?.ratio);
+  const sortedNewUnits = newUnits.sort((a, b) => a?.ratio - b?.ratio);
 
   let dbIndex = 0;
   let newIndex = 0;
 
   while (dbIndex < sortedDBUnits.length && newIndex < sortedNewUnits.length) {
-    if (sortedDBUnits[dbIndex].ratio === sortedNewUnits[newIndex].ratio) {
+    if (sortedDBUnits[dbIndex]?.ratio === sortedNewUnits[newIndex]?.ratio) {
       // Check for both unit and unit price
       const updatedField: any = {};
 
@@ -445,7 +443,7 @@ export const checkAndUpdateUnits = async (dbUnits: InventoryUnit[], newUnits: II
       newIndex++;
     } else {
       // CASE 1: dbUnit.ratio < newUnit.ratio
-      if (sortedDBUnits[dbIndex].ratio < sortedNewUnits[newIndex].ratio) {
+      if (sortedDBUnits[dbIndex]?.ratio < sortedNewUnits[newIndex]?.ratio) {
         await prisma.inventoryUnit.delete({
           where: {
             id: sortedDBUnits[dbIndex].id,
@@ -455,13 +453,13 @@ export const checkAndUpdateUnits = async (dbUnits: InventoryUnit[], newUnits: II
       }
 
       // CASE 2: newUnit.ratio < dbUnit.ratio
-      if (sortedNewUnits[newIndex].ratio < sortedDBUnits[dbIndex].ratio) {
+      if (sortedNewUnits[newIndex]?.ratio < sortedDBUnits[dbIndex]?.ratio) {
         await prisma.inventoryUnit.create({
           data: {
             vendorItemId,
             unit: sortedNewUnits[newIndex].unit,
             unitPrice: sortedNewUnits[newIndex].unitPrice,
-            ratio: sortedNewUnits[newIndex].ratio,
+            ratio: sortedNewUnits[newIndex]?.ratio,
             createdAt,
             createdBy
           },
@@ -486,7 +484,7 @@ export const checkAndUpdateUnits = async (dbUnits: InventoryUnit[], newUnits: II
         vendorItemId,
         unit: sortedNewUnits[newIndex].unit,
         unitPrice: sortedNewUnits[newIndex].unitPrice,
-        ratio: sortedNewUnits[newIndex].ratio,
+        ratio: sortedNewUnits[newIndex]?.ratio,
         createdAt,
         createdBy
       },
@@ -498,12 +496,14 @@ export const checkAndUpdateUnits = async (dbUnits: InventoryUnit[], newUnits: II
 export const createFifo = async (vendorItemList: any, createdAt: string, createdBy: string) => {
   const prisma = new PrismaClient();
 
+  console.log(vendorItemList, 'vendor item list');
+
   const fifoItems = vendorItemList.map((item: any) => {
 
     return {
       inventoryItemId: item.inventoryItemId,
       vendorItemId: item.id,
-      quantity: item.quantity * item.unit.ratio,
+      quantity: item.quantity * item?.unit?.ratio,
       createdAt,
       createdBy,
     };
