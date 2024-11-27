@@ -5,15 +5,12 @@ import {
   createFilterOptions,
   Divider,
   FormControl,
-  FormControlLabel,
   FormLabel,
   Grid,
   IconButton,
   InputLabel,
   MenuItem,
   Modal,
-  Radio,
-  RadioGroup,
   Select,
   TextField,
   Typography,
@@ -34,10 +31,9 @@ import axios from 'axios';
 import { compareTwoArrays } from '@/app/utils/array';
 import InventoryItemSearch from '../../Autocomplete/InventoryItemSearch';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import RemoveIcon from '@mui/icons-material/Remove';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import EditUnit from './EditUnit';
+import UnitRadio from '../../Radio/UnitRadio';
 
 interface IProps {
   stockPurchased: IExpense;
@@ -47,13 +43,15 @@ interface IProps {
 export const filter = createFilterOptions<any>();
 
 const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
-  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>(['Admin - Admin Test']);
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([
+    'Admin - Admin Test',
+  ]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, onChangeOpen] = useMultipleBoolean({
     isOpenAddVendor: false,
     isOpenAddUnit: false,
     disabledCloseAddUnit: false,
-  })
+  });
   const [editUnit, setEditUnit] = useState<any>({
     isOpen: false,
     unit: null,
@@ -99,49 +97,49 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   useEffect(() => {
     fetchAdminsAndDrivers();
   }, []);
-  
+
   useEffect(() => {
     if (purchasedItems.length > 0) {
       calculateNewAmount();
     }
   }, [purchasedItems]);
-  
+
   useEffect(() => {
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
-      
+
       if (vendors) {
         const targetVendor = vendors?.data.find((vendor: any) => {
           return vendor.id === selectedVendorId;
         });
-        
+
         if (targetVendor) {
           setVendorItems(targetVendor?.vendorItem);
         }
       }
     }
   }, [selectedVendorId, vendors]);
-  
+
   useEffect(() => {
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
-      
+
       if (stockPurchased?.vendors) {
         setSelectedVendorId(stockPurchased.vendors[0].vendorId);
       }
     }
-    
+
     const initializeItems = () => {
       if (!stockPurchased?.orderedItems) {
         setPurchasedItems([]);
         return;
       }
-      
+
       const newItems = stockPurchased.orderedItems.map((item: any) => {
         const vendorItem = allVendorItems?.data?.find((i: any) => {
           return i.inventoryItem.name == item.name;
         });
-        
+
         return {
           id: item.id,
           name: item.name,
@@ -155,15 +153,15 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
           inventoryItem: vendorItem?.inventoryItem,
         };
       });
-      
+
       setPurchasedItems(newItems);
     };
-    
+
     if (allVendorItems) {
       initializeItems();
     }
   }, [stockPurchased, vendorItems, allVendorItems]);
-  
+
   // useEffect(() => {
   //   if (stockPurchased?.orderedItems) {
   //     if (purchasedItems.some((item: any) => item.id < 1)) {
@@ -184,7 +182,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     const users: any = await getAdminsAndDrivers(showNotification);
     setAdminsAndDrivers(users);
   };
-  
+
   const addPromptedItem = () => {
     if (promptedItem.id === -1) {
       showNotification('error', 'Please select item');
@@ -211,12 +209,12 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
     setPurchasedItems([
       ...purchasedItems,
-      { ...promptedItem, 
-        inventoryItem: 
-        vendorItemExisted.inventoryItem, 
-        id: -1, 
-        vendorItemId: promptedItem.id, 
-        unitPrice: promptedItem.unit.unitPrice
+      {
+        ...promptedItem,
+        inventoryItem: vendorItemExisted.inventoryItem,
+        id: -1,
+        vendorItemId: promptedItem.id,
+        unitPrice: promptedItem.unit.unitPrice,
       },
     ]);
     setPromptedItem({
@@ -240,10 +238,11 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     const newUnitPrice = +e.target.value;
 
     // Update units immutably
-    const newUnits = promptedItem?.units?.map((unit: any) =>
-      unit.ratio === promptedItem?.unit?.ratio
-        ? { ...unit, unitPrice: newUnitPrice } // Replace the matching unit
-        : unit // Keep the other units unchanged
+    const newUnits = promptedItem?.units?.map(
+      (unit: any) =>
+        unit.ratio === promptedItem?.unit?.ratio
+          ? { ...unit, unitPrice: newUnitPrice } // Replace the matching unit
+          : unit, // Keep the other units unchanged
     );
 
     // Update state
@@ -252,7 +251,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
       unit: { ...promptedItem.unit, unitPrice: newUnitPrice },
       units: newUnits,
     });
-  }
+  };
 
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
@@ -266,7 +265,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
           }
           if (keyChange === 'unitPrice') {
             const totalPrice = item.quantity * +e.target.value;
-            
+
             const newUnits = item.units.map((unit: any) => {
               if (unit.ratio === item.unit.ratio) {
                 return { ...unit, unitPrice: +e.target.value };
@@ -275,12 +274,16 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
               return unit;
             });
 
-            return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
+            return {
+              ...item,
+              unit: { ...item.unit, unitPrice: +e.target.value },
+              totalPrice,
+              units: newUnits,
+            };
           }
 
           if (keyChange === 'unit') {
-
-            return { ...item, unit: {...item.unit, unit: e.target.value}};
+            return { ...item, unit: { ...item.unit, unit: e.target.value } };
           }
           return item;
         }
@@ -299,12 +302,17 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
             return unit;
           });
-          
-          return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
+
+          return {
+            ...item,
+            unit: { ...item.unit, unitPrice: +e.target.value },
+            totalPrice,
+            units: newUnits,
+          };
         }
 
         if (keyChange === 'unit') {
-          return { ...item, unit: {...item.unit, unit: e.target.value}};
+          return { ...item, unit: { ...item.unit, unit: e.target.value } };
         }
         return item;
       }
@@ -325,7 +333,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         purchasedItems,
         stockPurchased?.orderedItems,
       );
-      
+
       // console.log(purchasedItems, 'purchasedItems');
       // setIsLoading(false);
       // return;
@@ -375,13 +383,13 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         ...promptedItem,
         id: -1,
         unitPrice: 0,
-        unit: {unit: 'bags', ratio: 1, unitPrice: 0},
+        unit: { unit: 'bags', ratio: 1, unitPrice: 0 },
         units: [],
         name: newValue.inputValue,
         vendorId: selectedVendorId,
       });
-
-    } else { // Existing Item Add
+    } else {
+      // Existing Item Add
       setPromptedItem({
         ...promptedItem,
         id: newValue?.id || 0,
@@ -412,19 +420,22 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
       return removedUnit.unit !== item.unit && removedUnit.ratio !== item.ratio;
     });
 
-    if (promptedItem.unit.ratio === removedUnit.ratio && promptedItem.unit.unit === removedUnit.unit) {
+    if (
+      promptedItem.unit.ratio === removedUnit.ratio &&
+      promptedItem.unit.unit === removedUnit.unit
+    ) {
       setPromptedItem({
         ...promptedItem,
         units: newUnits,
         unit: newUnits[0],
-      });      
+      });
     } else {
       setPromptedItem({
         ...promptedItem,
         units: newUnits,
-      })
+      });
     }
-  }
+  };
 
   const updateUnit = (updatedUnit: any, updatedIndex: number) => {
     if (promptedItem?.units?.length === 1) {
@@ -434,18 +445,22 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
       }
     }
 
-    const unitRatioExist = promptedItem?.units?.find((unit: any, index: number) => {
-      return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
-    });
-    
+    const unitRatioExist = promptedItem?.units?.find(
+      (unit: any, index: number) => {
+        return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
+      },
+    );
+
     if (unitRatioExist) {
       showNotification('error', 'Unit ratio already exists');
       return;
     }
 
-    const unitNameExist = promptedItem?.units?.find((unit: any, index: number) => {
-      return updatedUnit.unit === unit.unit && index !== updatedIndex;
-    });
+    const unitNameExist = promptedItem?.units?.find(
+      (unit: any, index: number) => {
+        return updatedUnit.unit === unit.unit && index !== updatedIndex;
+      },
+    );
 
     if (unitNameExist) {
       showNotification('error', 'Unit name already exists');
@@ -458,19 +473,19 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
       }
 
       return unit;
-    })
+    });
 
     setEditUnit({
       unit: null,
-      open: false
+      open: false,
     });
 
     setPromptedItem({
       ...promptedItem,
       units: newUnits,
-      unit: updatedUnit
+      unit: updatedUnit,
     });
-  }
+  };
 
   return (
     <>
@@ -479,11 +494,15 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         open={open.isOpenAddVendor}
         onClose={() => onChangeOpen('isOpenAddVendor', false)}
       />
-      <EditUnit 
+      <EditUnit
         open={editUnit.open}
-        onClose={() => setEditUnit((prevEditUnit: any) => ({...prevEditUnit, open: false}))}
+        onClose={() =>
+          setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
+        }
         unit={editUnit.unit}
-        updateUnit={(updatedUnit: any) => updateUnit(updatedUnit, editUnit.unitIndex)}
+        updateUnit={(updatedUnit: any) =>
+          updateUnit(updatedUnit, editUnit.unitIndex)
+        }
       />
       <Button onClick={() => onChangeOpen('isOpen', true)}>Edit</Button>
       <Modal open={open.isOpen} onClose={() => onChangeOpen('isOpen', false)}>
@@ -519,7 +538,9 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                     <MenuItem value={-1} disabled>
                       -- Choose a vendor --
                     </MenuItem>
-                    <MenuItem onClick={() => onChangeOpen('isOpenAddVendor', true)}>
+                    <MenuItem
+                      onClick={() => onChangeOpen('isOpenAddVendor', true)}
+                    >
                       + Create new vendor
                     </MenuItem>
                     {sortedVendors.length > 0 &&
@@ -542,15 +563,18 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                   })}
                 />
               </Grid>
-              {promptedItem?.units && promptedItem?.units.length > 0 && <Grid item xs={12}>
-            <FormControl>
-              <Box display="flex" alignItems="center" gap={1}>
-                <FormLabel id="unit">Units</FormLabel>
-                <IconButton onClick={() => onChangeOpen('isOpenAddUnit', true)}>
-                  <AddIcon />
-                </IconButton>
-              </Box>
-              <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
+              {promptedItem?.units && promptedItem?.units.length > 0 && (
+                <Grid item xs={12}>
+                  <FormControl>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <FormLabel id="unit">Units</FormLabel>
+                      <IconButton
+                        onClick={() => onChangeOpen('isOpenAddUnit', true)}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    </Box>
+                    {/* <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
                   {
                     promptedItem.units.map((unit: any, index: number) => {
                       return (
@@ -566,10 +590,22 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                       )
                     })
                   }
-              </RadioGroup>
-            </FormControl>
-          </Grid>
-          }
+              </RadioGroup> */}
+                    <UnitRadio
+                      units={promptedItem.units}
+                      onChange={(e: any) =>
+                        setPromptedItem({
+                          ...promptedItem,
+                          unit: JSON.parse(e.target.value),
+                        })
+                      }
+                      value={JSON.stringify(promptedItem.unit)}
+                      removeUnit={removeUnit}
+                      setEditUnit={setEditUnit}
+                    />
+                  </FormControl>
+                </Grid>
+              )}
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth

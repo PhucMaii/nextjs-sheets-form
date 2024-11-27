@@ -21,7 +21,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               vendor: true,
               fifo: true,
               unit: true,
-            }
+            },
           },
         },
       });
@@ -45,7 +45,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // });
     const vendorItems = await prisma.vendorItem.findMany({
       where: {
-        vendorId: Number(vendorId)
+        vendorId: Number(vendorId),
       },
       include: {
         inventoryItem: {
@@ -55,11 +55,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 vendor: true,
                 fifo: true,
                 unit: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
-      }
+      },
     });
 
     const formattedInventory: any[] = [];
@@ -73,7 +73,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         continue;
       }
 
-      const formattedItem = formatInventoryWithTotalValueAndStatus([vendorItem.inventoryItem]);
+      const formattedItem = formatInventoryWithTotalValueAndStatus([
+        vendorItem.inventoryItem,
+      ]);
       formattedInventory.push(...formattedItem);
     }
 
@@ -90,33 +92,37 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 export const formatInventoryWithTotalValueAndStatus = (
   inventoryItems: any[],
 ) => {
-  const newInventoryItems = inventoryItems.map((inventoryItem: IInventoryItem) => {
-    let quantity = 0;
-    let totalValue = 0;
+  const newInventoryItems = inventoryItems.map(
+    (inventoryItem: IInventoryItem) => {
+      let quantity = 0;
+      let totalValue = 0;
 
-    for (const vendorItem of inventoryItem.vendorItem) {
-        const quantityAndValue = vendorItem?.fifo?.reduce((acc: any, fifo: any) => {
-          const baseUnit = vendorItem.unit.find((unit: any) => unit.ratio === 1);
-    
-          if (!acc.totalQuantity) {
-            acc.totalQuantity = fifo.quantity;
-          } else {
-            acc.totalQuantity += fifo.quantity;
-          }
-          
-          if (!acc.totalValue) {
-            acc.totalValue = (fifo.quantity * baseUnit?.unitPrice || 1);
-          } else {
-            acc.totalValue += (fifo.quantity * baseUnit?.unitPrice || 1);
-          }
-            
-          return acc;
-        }, {}) || {};
-        
+      for (const vendorItem of inventoryItem.vendorItem) {
+        const quantityAndValue =
+          vendorItem?.fifo?.reduce((acc: any, fifo: any) => {
+            const baseUnit = vendorItem.unit.find(
+              (unit: any) => unit.ratio === 1,
+            );
+
+            if (!acc.totalQuantity) {
+              acc.totalQuantity = fifo.quantity;
+            } else {
+              acc.totalQuantity += fifo.quantity;
+            }
+
+            if (!acc.totalValue) {
+              acc.totalValue = fifo.quantity * baseUnit?.unitPrice || 1;
+            } else {
+              acc.totalValue += fifo.quantity * baseUnit?.unitPrice || 1;
+            }
+
+            return acc;
+          }, {}) || {};
+
         quantity += quantityAndValue?.totalQuantity || 0;
         totalValue += quantityAndValue?.totalValue || 0;
       }
-      
+
       let status = STOCK_STATUS.OUT_OF_STOCK;
       if (quantity === 0) {
         status = STOCK_STATUS.OUT_OF_STOCK;
@@ -130,9 +136,10 @@ export const formatInventoryWithTotalValueAndStatus = (
         ...inventoryItem,
         totalValue,
         quantity,
-        stockStatus: status
-      }
-  });
+        stockStatus: status,
+      };
+    },
+  );
 
   return newInventoryItems;
 };

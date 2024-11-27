@@ -11,10 +11,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             inventoryItem: true,
             unit: true,
-            fifo: true
-          }
+            fifo: true,
+          },
         },
-      }
+      },
     });
 
     return res.status(200).json({

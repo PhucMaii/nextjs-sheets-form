@@ -4,7 +4,7 @@ import { getUserInfo } from '../../utils/auth';
 
 interface IBody {
   name: string;
-  vendorIds: number[],
+  vendorIds: number[];
   createdAt: string;
 }
 
@@ -12,13 +12,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, vendorIds, createdAt }: IBody =
-      req.body;
+    const { name, vendorIds, createdAt }: IBody = req.body;
 
     const existingVendors = await prisma.vendor.findMany({
       where: {
         id: {
-          in: vendorIds
+          in: vendorIds,
         },
       },
     });

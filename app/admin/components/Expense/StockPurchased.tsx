@@ -8,14 +8,11 @@ import {
   Button,
   Divider,
   FormControl,
-  FormControlLabel,
   FormLabel,
   Grid,
   IconButton,
   InputLabel,
   MenuItem,
-  Radio,
-  RadioGroup,
   Select,
   TextField,
   Typography,
@@ -34,9 +31,8 @@ import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import AddIcon from '@mui/icons-material/Add';
 import { IInventoryUnit } from '@/app/utils/type';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import EditIcon from '@mui/icons-material/Edit';
 import EditUnit from '../Modals/edit/EditUnit';
-import RemoveIcon from '@mui/icons-material/Remove';
+import UnitRadio from '../Radio/UnitRadio';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -62,7 +58,7 @@ export default function StockPurchased({
     open: false,
     unit: null,
     unitIndex: -1,
-  })
+  });
   const [open, onChangeOpen] = useMultipleBoolean({
     isOpenAddVendor: false,
     isOpenAddUnit: false,
@@ -147,10 +143,11 @@ export default function StockPurchased({
     const newUnitPrice = +e.target.value;
 
     // Update units immutably
-    const newUnits = promptedItem?.units?.map((unit: any) =>
-      unit.ratio === promptedItem?.unit?.ratio
-        ? { ...unit, unitPrice: newUnitPrice } // Replace the matching unit
-        : unit // Keep the other units unchanged
+    const newUnits = promptedItem?.units?.map(
+      (unit: any) =>
+        unit.ratio === promptedItem?.unit?.ratio
+          ? { ...unit, unitPrice: newUnitPrice } // Replace the matching unit
+          : unit, // Keep the other units unchanged
     );
 
     // Update state
@@ -159,7 +156,7 @@ export default function StockPurchased({
       unit: { ...promptedItem.unit, unitPrice: newUnitPrice },
       units: newUnits,
     });
-  }
+  };
 
   const selectPromptedItem = (newValue: any) => {
     // New Item Add
@@ -168,7 +165,7 @@ export default function StockPurchased({
         ...promptedItem,
         id: 0,
         unitPrice: 0,
-        unit: {unit: 'bags', ratio: 1, unitPrice: 0},
+        unit: { unit: 'bags', ratio: 1, unitPrice: 0 },
         units: [],
         name: newValue.inputValue,
         vendorId: selectedVendorId,
@@ -176,7 +173,8 @@ export default function StockPurchased({
 
       onChangeOpen('isOpenAddUnit', true);
       onChangeOpen('disabledCloseAddUnit', true);
-    } else { // Existing Item Add
+    } else {
+      // Existing Item Add
       setPromptedItem({
         ...promptedItem,
         id: newValue?.id || 0,
@@ -230,7 +228,7 @@ export default function StockPurchased({
         id: -1,
         unitPrice: 0,
         ratio: 1,
-      }
+      },
     });
 
     onChangeOpen('disabledCloseAddUnit', false);
@@ -247,7 +245,7 @@ export default function StockPurchased({
     const unitRatioExist = promptedItem?.units?.find((unit: any) => {
       return newUnit.ratio === unit.ratio;
     });
-    
+
     if (unitRatioExist) {
       showNotification('error', 'Unit ratio already exists');
       return;
@@ -267,9 +265,9 @@ export default function StockPurchased({
     setPromptedItem({
       ...promptedItem,
       units: [...(promptedItem?.units || []), newUnit],
-      unit: newUnit
+      unit: newUnit,
     });
-  }
+  };
 
   const calculateNewAmount = () => {
     const newAmount = purchasedItems.reduce((acc: number, item: any) => {
@@ -291,7 +289,7 @@ export default function StockPurchased({
           }
           if (keyChange === 'unitPrice') {
             const totalPrice = item.quantity * +e.target.value;
-            
+
             const newUnits = item.units.map((unit: any) => {
               if (unit.ratio === item.unit.ratio) {
                 return { ...unit, unitPrice: +e.target.value };
@@ -300,12 +298,16 @@ export default function StockPurchased({
               return unit;
             });
 
-            return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
+            return {
+              ...item,
+              unit: { ...item.unit, unitPrice: +e.target.value },
+              totalPrice,
+              units: newUnits,
+            };
           }
 
           if (keyChange === 'unit') {
-
-            return { ...item, unit: {...item.unit, unit: e.target.value}};
+            return { ...item, unit: { ...item.unit, unit: e.target.value } };
           }
           return item;
         }
@@ -324,12 +326,17 @@ export default function StockPurchased({
 
             return unit;
           });
-          
-          return { ...item, unit: {...item.unit, unitPrice: +e.target.value}, totalPrice, units: newUnits};
+
+          return {
+            ...item,
+            unit: { ...item.unit, unitPrice: +e.target.value },
+            totalPrice,
+            units: newUnits,
+          };
         }
 
         if (keyChange === 'unit') {
-          return { ...item, unit: {...item.unit, unit: e.target.value}};
+          return { ...item, unit: { ...item.unit, unit: e.target.value } };
         }
         return item;
       }
@@ -422,7 +429,7 @@ export default function StockPurchased({
 
     setPurchasedItems(newItemList);
   };
-  
+
   const removeUnit = (removedUnit: any) => {
     if (removedUnit.ratio === 1) {
       showNotification('error', 'Inventory Item Required Ratio of 1');
@@ -433,19 +440,22 @@ export default function StockPurchased({
       return removedUnit.unit !== item.unit && removedUnit.ratio !== item.ratio;
     });
 
-    if (promptedItem.unit.ratio === removedUnit.ratio && promptedItem.unit.unit === removedUnit.unit) {
+    if (
+      promptedItem.unit.ratio === removedUnit.ratio &&
+      promptedItem.unit.unit === removedUnit.unit
+    ) {
       setPromptedItem({
         ...promptedItem,
         units: newUnits,
         unit: newUnits[0],
-      });      
+      });
     } else {
       setPromptedItem({
         ...promptedItem,
         units: newUnits,
-      })
+      });
     }
-  }
+  };
 
   const updateUnit = (updatedUnit: any, updatedIndex: number) => {
     if (promptedItem?.units?.length === 1) {
@@ -455,18 +465,22 @@ export default function StockPurchased({
       }
     }
 
-    const unitRatioExist = promptedItem?.units?.find((unit: any, index: number) => {
-      return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
-    });
-    
+    const unitRatioExist = promptedItem?.units?.find(
+      (unit: any, index: number) => {
+        return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
+      },
+    );
+
     if (unitRatioExist) {
       showNotification('error', 'Unit ratio already exists');
       return;
     }
 
-    const unitNameExist = promptedItem?.units?.find((unit: any, index: number) => {
-      return updatedUnit.unit === unit.unit && index !== updatedIndex;
-    });
+    const unitNameExist = promptedItem?.units?.find(
+      (unit: any, index: number) => {
+        return updatedUnit.unit === unit.unit && index !== updatedIndex;
+      },
+    );
 
     if (unitNameExist) {
       showNotification('error', 'Unit name already exists');
@@ -479,19 +493,19 @@ export default function StockPurchased({
       }
 
       return unit;
-    })
+    });
 
     setEditUnit({
       unit: null,
-      open: false
+      open: false,
     });
 
     setPromptedItem({
       ...promptedItem,
       units: newUnits,
-      unit: updatedUnit
+      unit: updatedUnit,
     });
-  }
+  };
 
   return (
     <>
@@ -502,18 +516,25 @@ export default function StockPurchased({
             open={open.isOpenAddVendor}
             onClose={() => onChangeOpen('isOpenAddVendor', false)}
           />
-          <AddUnit 
-            open={open.isOpenAddUnit} 
-            onClose={() => onChangeOpen('isOpenAddUnit', false)} 
+          <AddUnit
+            open={open.isOpenAddUnit}
+            onClose={() => onChangeOpen('isOpenAddUnit', false)}
             vendorItemId={promptedItem?.id}
             addUnit={addUnit}
             noClose={open.disabledCloseAddUnit}
           />
-          <EditUnit 
+          <EditUnit
             open={editUnit.open}
-            onClose={() => setEditUnit((prevEditUnit: any) => ({...prevEditUnit, open: false}))}
+            onClose={() =>
+              setEditUnit((prevEditUnit: any) => ({
+                ...prevEditUnit,
+                open: false,
+              }))
+            }
             unit={editUnit.unit}
-            updateUnit={(updatedUnit: any) => updateUnit(updatedUnit, editUnit.unitIndex)}
+            updateUnit={(updatedUnit: any) =>
+              updateUnit(updatedUnit, editUnit.unitIndex)
+            }
           />
         </>
       )}
@@ -537,7 +558,9 @@ export default function StockPurchased({
                   -- Choose a vendor --
                 </MenuItem>
                 {role === USER_ROLE.ADMIN && (
-                  <MenuItem onClick={() => onChangeOpen('isOpenAddVendor', true)}>
+                  <MenuItem
+                    onClick={() => onChangeOpen('isOpenAddVendor', true)}
+                  >
                     + Create new vendor
                   </MenuItem>
                 )}
@@ -559,15 +582,18 @@ export default function StockPurchased({
               disabled={selectedVendorId === -1}
             />
           </Grid>
-          {promptedItem?.units && promptedItem?.units.length > 0 && <Grid item xs={12}>
-            <FormControl>
-              <Box display="flex" alignItems="center" gap={1}>
-                <FormLabel id="unit">Units</FormLabel>
-                <IconButton onClick={() => onChangeOpen('isOpenAddUnit', true)}>
-                  <AddIcon />
-                </IconButton>
-              </Box>
-              <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
+          {promptedItem?.units && promptedItem?.units.length > 0 && (
+            <Grid item xs={12}>
+              <FormControl>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <FormLabel id="unit">Units</FormLabel>
+                  <IconButton
+                    onClick={() => onChangeOpen('isOpenAddUnit', true)}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Box>
+                {/* <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
                   {
                     promptedItem.units.map((unit: any, index: number) => {
                       return (
@@ -583,9 +609,22 @@ export default function StockPurchased({
                       )
                     })
                   }
-              </RadioGroup>
-            </FormControl>
-          </Grid>}
+              </RadioGroup> */}
+                <UnitRadio
+                  units={promptedItem.units}
+                  onChange={(e: any) =>
+                    setPromptedItem({
+                      ...promptedItem,
+                      unit: JSON.parse(e.target.value),
+                    })
+                  }
+                  value={JSON.stringify(promptedItem.unit)}
+                  removeUnit={removeUnit}
+                  setEditUnit={setEditUnit}
+                />
+              </FormControl>
+            </Grid>
+          )}
 
           {/* {promptedItem.id === 0 && (
             <>
@@ -647,7 +686,11 @@ export default function StockPurchased({
               type="number"
               value={promptedItem?.unit?.unitPrice || 0}
               onChange={handleOnChangeUnitPrice}
-              disabled={role === USER_ROLE.DRIVER || selectedVendorId === -1 || !promptedItem.name}
+              disabled={
+                role === USER_ROLE.DRIVER ||
+                selectedVendorId === -1 ||
+                !promptedItem.name
+              }
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -704,7 +747,6 @@ export default function StockPurchased({
                       displayKey="unit"
                       displayItems={item.units}
                     /> */}
-
                   </Grid>
                   <Grid item xs={6}>
                     <TextField

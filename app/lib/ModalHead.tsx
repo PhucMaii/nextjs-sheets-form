@@ -34,7 +34,11 @@ export default function ModalHead({
         </IconButton>
       ) : (
         <Box display="flex" alignItems="center" gap={1}>
-          <Button variant="outlined" onClick={onClose} {...(closeButtonProps || {})}>
+          <Button
+            variant="outlined"
+            onClick={onClose}
+            {...(closeButtonProps || {})}
+          >
             Cancel
           </Button>
           <LoadingButton variant="contained" onClick={onClick} {...buttonProps}>

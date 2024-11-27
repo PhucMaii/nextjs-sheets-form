@@ -47,14 +47,14 @@ export default function AddExpense({
     defaultValue?.date ? defaultValue?.date : todayString,
     true,
   );
-  
+
   const fetchAdminsAndDrivers = async () => {
     const users: any = await getAdminsAndDrivers(showNotification);
     setAdminsAndDrivers(users);
   };
 
   useEffect(() => {
-      fetchAdminsAndDrivers();
+    fetchAdminsAndDrivers();
   }, [open]);
 
   const handleAddExpense = async () => {

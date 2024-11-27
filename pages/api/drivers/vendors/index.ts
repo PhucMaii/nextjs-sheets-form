@@ -15,8 +15,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           include: {
             inventoryItem: true,
             unit: true,
-            fifo: true
-          }
+            fifo: true,
+          },
         },
       },
     });

@@ -20,9 +20,9 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.vendorItem.updateMany({
     data: {
-      quantity: 0
-    }
-  })
+      quantity: 0,
+    },
+  });
   // const createdAt = generateCurrentTime();
   // const createdBy = `Admin - Admin Test`;
 

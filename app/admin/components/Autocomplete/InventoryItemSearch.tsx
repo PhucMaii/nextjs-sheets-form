@@ -19,9 +19,8 @@ export default function InventoryItemSearch({
   role,
   displayItems,
   disabled,
-  disabledItems
+  disabledItems,
 }: IProps) {
-
   return (
     <Autocomplete
       disabled={disabled}
@@ -34,7 +33,9 @@ export default function InventoryItemSearch({
 
         const { inputValue } = params;
         // Suggest the creation of a new value
-        const isExisting = options.some((option) => inputValue === option?.inventoryItem?.name);
+        const isExisting = options.some(
+          (option) => inputValue === option?.inventoryItem?.name,
+        );
         if (role === USER_ROLE.ADMIN && inputValue !== '' && !isExisting) {
           filtered.push({
             inputValue,

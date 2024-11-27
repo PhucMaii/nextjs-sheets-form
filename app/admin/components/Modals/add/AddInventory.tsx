@@ -6,7 +6,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { ModalProps } from '../type';
@@ -18,6 +18,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import AddVendor from './AddVendor';
 import VendorSearch from '../../Autocomplete/VendorSearch';
 import { IVendor } from '@/app/utils/type';
+import UnitRadio from '../../Radio/UnitRadio';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -37,9 +38,35 @@ export default function AddInventory({
     unit: 'bags',
     unitPrice: 0,
   });
-  const [itemVendors, setItemVendors] = useState<IVendor[]>([]);
+  const [newVendorItems, setNewVendorItems] = useState<any[]>([]);
+  const [selectedVendors, setSelectedVendors] = useState<IVendor[]>([]);
 
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+
+  useEffect(() => {
+    // Whenever selected vendors change then set new vendor items
+    if (selectedVendors.length > 0) {
+      const newVItems = selectedVendors.map((vendor) => {
+        const existedInNewVendorItems = newVendorItems.find(
+          (item) => item.vendorId === vendor.id,
+        );
+
+        if (existedInNewVendorItems) {
+          return existedInNewVendorItems;
+        }
+
+        return {
+          vendorId: vendor.id,
+          vendor: vendor,
+          name: vendor.name,
+          quantity: 0,
+          units: [],
+        };
+      });
+
+      setNewVendorItems(newVItems);
+    }
+  }, [selectedVendors]);
 
   const handleAddInventory = async () => {
     setIsLoading(true);
@@ -83,9 +110,9 @@ export default function AddInventory({
     }
   };
 
-  const handleOnChangeVendorSearch = (e: any) => {
-    setItemVendors([...itemVendors, e.target.value]);
-  }
+  const handleOnChangeVendorSearch = (newValue: any) => {
+    setSelectedVendors(newValue);
+  };
 
   return (
     <>
@@ -119,71 +146,25 @@ export default function AddInventory({
               />
             </Box>
 
-            {/* <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Quantity</Typography>
-              <TextField
-                fullWidth
-                placeholder="Enter item quantity..."
-                type="number"
-                value={newItem.quantity}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, quantity: +e.target.value })
-                }
-              />
-            </Box> */}
-
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Vendor</Typography>
-              {/* <Select
-                value={newItem.vendorId}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, vendorId: +e.target.value })
-                }
-              >
-                <MenuItem value={-1} disabled>
-                  -- Choose a vendor --
-                </MenuItem>
-                <MenuItem onClick={() => setIsOpenAddVendor(true)}>
-                  + Create new vendor
-                </MenuItem>
-                {vendors &&
-                  vendors?.data.map((vendor: any, index: number) => (
-                    <MenuItem key={index} value={vendor.id}>
-                      {vendor.name}
-                    </MenuItem>
-                  ))}
-              </Select> */}
-              <VendorSearch vendors={vendors?.data || []} value={itemVendors} onChange={handleOnChangeVendorSearch} />
-            </Box>
-
-            {/* <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Unit</Typography>
-              <Select
-                value={newItem.unit}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, unit: e.target.value })
-                }
-              >
-                {units.map((unit, index) => (
-                  <MenuItem key={index} value={unit}>
-                    {unit}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Unit Price</Typography>
-              <TextField
-                fullWidth
-                placeholder="Enter item name..."
-                type="number"
-                value={newItem.unitPrice}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, unitPrice: +e.target.value })
+              <VendorSearch
+                vendors={vendors?.data || []}
+                value={selectedVendors}
+                onChange={(e: any, newValue: any) =>
+                  handleOnChangeVendorSearch(newValue)
                 }
               />
-            </Box> */}
+            </Box>
+
+            {newVendorItems.map((item: any, index: number) => (
+              <Box key={index} display="flex" flexDirection="column" gap={2}>
+                <Typography variant="h6">{item.vendor.name}</Typography>
+                <Box display="flex" gap={1} flexDirection="column">
+                  <UnitRadio units={item.units} />
+                </Box>
+              </Box>
+            ))}
           </Box>
         </BoxModal>
       </Modal>

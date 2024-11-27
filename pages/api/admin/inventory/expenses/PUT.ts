@@ -46,7 +46,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       oldItems,
       updatedItems,
       updatedAt,
-      isAffectQuantity
+      isAffectQuantity,
     }: IBody = req.body;
 
     const existingExpense = await prisma.expense.findUnique({
@@ -126,85 +126,105 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const vendorItems = await prisma.vendorItem.findMany({
         include: {
           unit: true,
-        }
+        },
       });
-
 
       // Update inventory units
       for (const item of updatedItems) {
-          const vendorItem = vendorItems.find((vendorItem: any) => {
-            return vendorItem.id === item?.vendorItemId;
-          });
+        const vendorItem = vendorItems.find((vendorItem: any) => {
+          return vendorItem.id === item?.vendorItemId;
+        });
 
-          if (vendorItem) {
-            await checkAndUpdateUnits(vendorItem.unit, item?.units || [], vendorItem.id, updatedAt, createdBy);
-          }
+        if (vendorItem) {
+          await checkAndUpdateUnits(
+            vendorItem.unit,
+            item?.units || [],
+            vendorItem.id,
+            updatedAt,
+            createdBy,
+          );
+        }
       }
 
       // Item Existed In Bill Before
-      const existingOrderedItems = updatedItems.filter((item: any) => {
-        return item.id > 0;
-      }).map((item: any) => {
-        const existingItems = existingExpense.orderedItems.find(
-          (orderedItem: any) => {
-            return orderedItem.id === item.id;
-          },
-        );
-        
-        return {
-          expenseId: id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.unitPrice,
-          fifoId: existingItems?.fifoId || null,
-          unit: item?.unit,
-          inventoryItemId: item.inventoryItem.id,
-          vendorItemId: item.id
-        };
-      });
-      
-      // Just added ordered items in current bill
-      const newOrderedItems = updatedItems.filter((item: any) => {
-        return item.id < 1;
-      }).map((item: any) => {
-        return {
-          ...item,
-          inventoryItemId: item.inventoryItem.id,
-          id: item.vendorItemId,
-        }
-      });
-      
-      if (isAffectQuantity) {
-        const existingOrderedItemsFifoId = existingOrderedItems.map((item: any) => {
-          return item?.fifoId || null;
-        }).filter((id: any) => {
-          return id !== null;
+      const existingOrderedItems = updatedItems
+        .filter((item: any) => {
+          return item.id > 0;
+        })
+        .map((item: any) => {
+          const existingItems = existingExpense.orderedItems.find(
+            (orderedItem: any) => {
+              return orderedItem.id === item.id;
+            },
+          );
+
+          return {
+            expenseId: id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.unitPrice,
+            fifoId: existingItems?.fifoId || null,
+            unit: item?.unit,
+            inventoryItemId: item.inventoryItem.id,
+            vendorItemId: item.id,
+          };
         });
-        
+
+      // Just added ordered items in current bill
+      const newOrderedItems = updatedItems
+        .filter((item: any) => {
+          return item.id < 1;
+        })
+        .map((item: any) => {
+          return {
+            ...item,
+            inventoryItemId: item.inventoryItem.id,
+            id: item.vendorItemId,
+          };
+        });
+
+      if (isAffectQuantity) {
+        const existingOrderedItemsFifoId = existingOrderedItems
+          .map((item: any) => {
+            return item?.fifoId || null;
+          })
+          .filter((id: any) => {
+            return id !== null;
+          });
+
         await prisma.fifo.deleteMany({
           where: {
             id: {
-              in: existingOrderedItemsFifoId
-            }
-          }
+              in: existingOrderedItemsFifoId,
+            },
+          },
         });
-        
-        const existingOrderedItemsFifo = existingOrderedItems.map((item: any) => {
-          return {
-            ...item,
-            id: item.vendorItemId,
-          }
-        });
-        
-        console.log({updatedItems, existingOrderedItems, newOrderedItems}, 'updatedItems');
-        await createFifo([...newOrderedItems, ...existingOrderedItemsFifo], updatedAt, createdBy);
+
+        const existingOrderedItemsFifo = existingOrderedItems.map(
+          (item: any) => {
+            return {
+              ...item,
+              id: item.vendorItemId,
+            };
+          },
+        );
+
+        console.log(
+          { updatedItems, existingOrderedItems, newOrderedItems },
+          'updatedItems',
+        );
+        await createFifo(
+          [...newOrderedItems, ...existingOrderedItemsFifo],
+          updatedAt,
+          createdBy,
+        );
       }
 
       const newFifo = await prisma.fifo.findMany({
         where: {
           createdAt: updatedAt,
           createdBy,
-        }
+        },
       });
 
       const createdNewOrderedItems = newOrderedItems.map((item: any) => {
@@ -219,19 +239,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         };
       });
 
-      const createdExistingOrderedItems = existingOrderedItems.map((item: any) => {
-        return {
-          expenseId: id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          fifoId: item.fifoId,
-        };
-      })
+      const createdExistingOrderedItems = existingOrderedItems.map(
+        (item: any) => {
+          return {
+            expenseId: id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            fifoId: item.fifoId,
+          };
+        },
+      );
       await prisma.orderedItems.createMany({
         data: [...createdNewOrderedItems, ...createdExistingOrderedItems],
       });
-
 
       const updatedExpense = await prisma.expense.findUnique({
         where: {
@@ -241,7 +262,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           orderedItems: {
             include: {
               fifo: true,
-            }
+            },
           },
         },
       });
@@ -250,19 +271,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         return res.status(404).json({ error: 'Conflict Expense not found' });
       }
 
-      if (!updatedExpense.orderedItems || updatedExpense.orderedItems.length === 0) {
-        return res.status(400).json({ error: 'Conflict Ordered Items not found' });
+      if (
+        !updatedExpense.orderedItems ||
+        updatedExpense.orderedItems.length === 0
+      ) {
+        return res
+          .status(400)
+          .json({ error: 'Conflict Ordered Items not found' });
       }
 
       // If new item is added while editing, it have to force user to choose affect quantity
       if (isAffectQuantity) {
         for (const item of updatedExpense.orderedItems) {
-          const itemExistedInventory = vendorItems.find(
-            (vendorItem: any) => {
-              return vendorItem.id === item?.fifo?.vendorItemId;
-            },
-          );
-  
+          const itemExistedInventory = vendorItems.find((vendorItem: any) => {
+            return vendorItem.id === item?.fifo?.vendorItemId;
+          });
+
           // Item already existed in inventory -> Update quantity
           if (itemExistedInventory) {
             const itemInBill = existingExpense.orderedItems.find(
@@ -321,10 +345,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                   createdAt: updatedAt,
                   createdBy: `Admin - ${user?.clientName}`,
                 };
-              })
+              });
 
               await prisma.inventoryUnit.createMany({
-                data: newUnits
+                data: newUnits,
               });
 
               await prisma.fifo.create({
@@ -334,7 +358,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                   quantity: item.quantity * itemExistedInBill?.unit?.ratio,
                   createdAt: updatedAt,
                   createdBy: `Admin - ${user?.clientName}`,
-                }
+                },
               });
             }
           }

@@ -25,7 +25,6 @@ export default function InventoryTable({
   inventoryItems,
   showNotification,
 }: IProps) {
-
   console.log(inventoryItems, 'inventoryItems');
 
   const handleDelete = async (targetObj: IInventoryItem) => {
@@ -48,64 +47,69 @@ export default function InventoryTable({
 
   return (
     <Paper sx={{ overflow: 'scroll' }}>
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>Name</TableCell>
-          <TableCell>Vendor - Unit Value</TableCell>
-          <TableCell>Quantity</TableCell>
-          <TableCell>Total Value</TableCell>
-          <TableCell></TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {inventoryItems.map((item: IInventoryItem, index: number) => {
-          let unit;
-          for (const vendorItem of item.vendorItem) {
-            unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
-          }
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Vendor - Unit Value</TableCell>
+            <TableCell>Quantity</TableCell>
+            <TableCell>Total Value</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {inventoryItems.map((item: IInventoryItem, index: number) => {
+            let unit;
+            for (const vendorItem of item.vendorItem) {
+              unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
+            }
 
-          return (
-            <TableRow key={index}>
-              <TableCell>
-                <Typography>{item.name}</Typography>
+            return (
+              <TableRow key={index}>
+                <TableCell>
+                  <Typography>{item.name}</Typography>
                 </TableCell>
-              <TableCell>
-                <Box display="flex" flexDirection="column" gap={3}>
-                  {
-                    item?.vendorItem?.map((vItem) => {
-                      const smallestUnit = vItem?.unit.find((unit: any) => unit?.ratio === 1);
+                <TableCell>
+                  <Box display="flex" flexDirection="column" gap={3}>
+                    {item?.vendorItem?.map((vItem) => {
+                      const smallestUnit = vItem?.unit.find(
+                        (unit: any) => unit?.ratio === 1,
+                      );
                       return (
-                        <Typography>{vItem?.vendor?.name} - <strong>${smallestUnit?.unitPrice}</strong></Typography>
-                      )
-                    })
-                  }
-                </Box>
-              </TableCell>
-              <TableCell>
-                <Typography>{item?.quantity} {unit?.unit}</Typography>
-              </TableCell>
-              <TableCell>
-                <Typography>${item?.totalValue?.toFixed(2)}</Typography>
-              </TableCell>
-              <TableCell>
-                <Box display="flex" gap={2}>
-                  <DeleteModal
-                    includedButton
-                    targetObj={item}
-                    handleDelete={handleDelete}
-                  />
-                  <EditInventory
-                    inventoryItem={item}
-                    showNotification={showNotification}
-                  />
-                </Box>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                        <Typography>
+                          {vItem?.vendor?.name} -{' '}
+                          <strong>${smallestUnit?.unitPrice}</strong>
+                        </Typography>
+                      );
+                    })}
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Typography>
+                    {item?.quantity} {unit?.unit}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography>${item?.totalValue?.toFixed(2)}</Typography>
+                </TableCell>
+                <TableCell>
+                  <Box display="flex" gap={2}>
+                    <DeleteModal
+                      includedButton
+                      targetObj={item}
+                      handleDelete={handleDelete}
+                    />
+                    <EditInventory
+                      inventoryItem={item}
+                      showNotification={showNotification}
+                    />
+                  </Box>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </Paper>
   );
 }
