@@ -82,11 +82,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // Create inventory unit
     const newUnits = vendorItems.flatMap((vendorItem: any) => {
       const targetVendorItem = createdVendorItems.find(
-        (item: any) => item.vendorId === vendorItem.vendorId
+        (item: any) => item.vendorId === vendorItem.vendorId,
       );
 
       if (!targetVendorItem) {
-        console.error(`Conflict Vendor Item not found for vendorItem ID: ${vendorItem.id}`);
+        console.error(
+          `Conflict Vendor Item not found for vendorItem ID: ${vendorItem.id}`,
+        );
         return []; // Skip this vendorItem by returning an empty array
       }
 
@@ -99,7 +101,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           createdAt,
           createdBy,
         };
-      })
+      });
     });
 
     await prisma.inventoryUnit.createMany({

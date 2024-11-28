@@ -16,22 +16,22 @@ import useSelectDate from '@/hooks/useSelectDate';
 import { IExpense, IPaymentMethod } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
-import { fetchApi, SWRFetchData } from '@/app/utils/db';
+import { SWRFetchData } from '@/app/utils/db';
 
 interface IProps {
   transaction: IExpense;
   // paymentMethods: IPaymentMethod[];
-  // adminsAndDrivers: string[];
+  adminsAndDrivers: string[];
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function EditExpense({
   transaction,
   // paymentMethods,
-  // adminsAndDrivers,
+  adminsAndDrivers,
   showNotification,
 }: IProps) {
-  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  // const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [updatedExpense, setUpdatedExpense] = useState<IExpense>(transaction);
@@ -52,49 +52,49 @@ export default function EditExpense({
     });
   };
 
-  useEffect(() => {
-    fetchAdmins();
-    fetchDrivers();
-  }, []);
+  // useEffect(() => {
+  //   fetchAdmins();
+  //   fetchDrivers();
+  // }, []);
 
-  const fetchAdmins = async () => {
-    try {
-      const admins = await fetchApi(
-        `${API_URL.ADMIN}/admins`,
-        showNotification,
-      );
+  // const fetchAdmins = async () => {
+  //   try {
+  //     const admins = await fetchApi(
+  //       `${API_URL.ADMIN}/admins`,
+  //       showNotification,
+  //     );
 
-      const formattedAdmins = admins.map((admin: any) => {
-        return `Admin - ${admin.clientName}`;
-      });
-      setAdminsAndDrivers(formattedAdmins);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
+  //     const formattedAdmins = admins.map((admin: any) => {
+  //       return `Admin - ${admin.clientName}`;
+  //     });
+  //     setAdminsAndDrivers(formattedAdmins);
+  //   } catch (error) {
+  //     console.log(error);
+  //     showNotification('error', 'Something went wrong');
+  //     return;
+  //   }
+  // };
 
-  const fetchDrivers = async () => {
-    try {
-      const drivers = await fetchApi(
-        `${API_URL.ADMIN}/drivers`,
-        showNotification,
-      );
+  // const fetchDrivers = async () => {
+  //   try {
+  //     const drivers = await fetchApi(
+  //       `${API_URL.ADMIN}/drivers`,
+  //       showNotification,
+  //     );
 
-      const formattedDrivers = drivers.map((driver: any) => {
-        return `Driver - ${driver.name}`;
-      });
-      setAdminsAndDrivers((prevAdminAndDrivers) => [
-        ...prevAdminAndDrivers,
-        ...formattedDrivers,
-      ]);
-    } catch (error) {
-      console.log(error);
-      showNotification('error', 'Something went wrong');
-      return;
-    }
-  };
+  //     const formattedDrivers = drivers.map((driver: any) => {
+  //       return `Driver - ${driver.name}`;
+  //     });
+  //     setAdminsAndDrivers((prevAdminAndDrivers) => [
+  //       ...prevAdminAndDrivers,
+  //       ...formattedDrivers,
+  //     ]);
+  //   } catch (error) {
+  //     console.log(error);
+  //     showNotification('error', 'Something went wrong');
+  //     return;
+  //   }
+  // };
 
   const handleUpdateExpense = async () => {
     setIsLoading(true);

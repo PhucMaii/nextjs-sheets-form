@@ -1,5 +1,11 @@
 import { IInventoryUnit } from '@/app/utils/type';
-import { AlertColor, Box, FormControl, FormLabel, IconButton } from '@mui/material';
+import {
+  AlertColor,
+  Box,
+  FormControl,
+  FormLabel,
+  IconButton,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useMultipleBoolean } from '../useMultipleBoolean';
 import AddUnit from '@/app/admin/components/Modals/add/AddUnit';
@@ -7,22 +13,23 @@ import EditUnit from '@/app/admin/components/Modals/edit/EditUnit';
 import UnitRadio from '@/app/admin/components/Radio/UnitRadio';
 import AddIcon from '@mui/icons-material/Add';
 
-
 const useEditUnit = (
   initialUnits: IInventoryUnit[] = [],
   initialSelectedUnit: IInventoryUnit | null = null,
   showNotification: (type: AlertColor, message: string) => void,
 ) => {
-    const [addUnitBoolean, onChangeAddUnitBoolean] = useMultipleBoolean({
-      open: false,
-      disabledClose: false,
-    });
-    const [editUnit, setEditUnit] = useState<any>({
-      open: false,
-      unit: null,
-      unitIndex: -1,
-    });
-  const [selectedUnit, setSelectedUnit] = useState<IInventoryUnit | null>(initialSelectedUnit);
+  const [addUnitBoolean, onChangeAddUnitBoolean] = useMultipleBoolean({
+    open: false,
+    disabledClose: false,
+  });
+  const [editUnit, setEditUnit] = useState<any>({
+    open: false,
+    unit: null,
+    unitIndex: -1,
+  });
+  const [selectedUnit, setSelectedUnit] = useState<IInventoryUnit | null>(
+    initialSelectedUnit,
+  );
   const [units, setUnits] = useState<IInventoryUnit[]>(initialUnits);
 
   useEffect(() => {
@@ -80,11 +87,14 @@ const useEditUnit = (
     });
 
     setUnits(newUnits);
-    
+
     if (selectedUnit) {
-        if (selectedUnit?.ratio === removedUnit.ratio && selectedUnit?.unit === removedUnit.unit) {
-          setSelectedUnit(units[0]);
-        }
+      if (
+        selectedUnit?.ratio === removedUnit.ratio &&
+        selectedUnit?.unit === removedUnit.unit
+      ) {
+        setSelectedUnit(units[0]);
+      }
     }
   };
 
@@ -137,48 +147,44 @@ const useEditUnit = (
   };
 
   const AddUnitModal = (
-      <AddUnit
-        open={addUnitBoolean.open}
-        onClose={() => onChangeAddUnitBoolean('open', false)}
-        addUnit={addUnit}
-        noClose={addUnitBoolean.disabledClose}
-      />
-    );
+    <AddUnit
+      open={addUnitBoolean.open}
+      onClose={() => onChangeAddUnitBoolean('open', false)}
+      addUnit={addUnit}
+      noClose={addUnitBoolean.disabledClose}
+    />
+  );
 
   const EditUnitModal = (
-      <EditUnit
-        open={editUnit.open}
-        onClose={() =>
-          setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
-        }
-        unit={editUnit.unit}
-        updateUnit={(updatedUnit: any) =>
-          updateUnit(updatedUnit, editUnit.unitIndex)
-        }
-      />
-    );
+    <EditUnit
+      open={editUnit.open}
+      onClose={() =>
+        setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
+      }
+      unit={editUnit.unit}
+      updateUnit={(updatedUnit: any) =>
+        updateUnit(updatedUnit, editUnit.unitIndex)
+      }
+    />
+  );
 
   const UnitDisplay = (
-        <FormControl>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <FormLabel id="unit">Units</FormLabel>
-                  <IconButton
-                    onClick={() => onChangeAddUnitBoolean('open', true)}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-                <UnitRadio
-                  units={units}
-                  onChange={(e: any) =>
-                    setSelectedUnit(JSON.parse(e.target.value))
-                  }
-                  value={JSON.stringify(selectedUnit)}
-                  removeUnit={removeUnit}
-                  setEditUnit={setEditUnit}
-                />
-              </FormControl>
-    )
+    <FormControl>
+      <Box display="flex" alignItems="center" gap={1}>
+        <FormLabel id="unit">Units</FormLabel>
+        <IconButton onClick={() => onChangeAddUnitBoolean('open', true)}>
+          <AddIcon />
+        </IconButton>
+      </Box>
+      <UnitRadio
+        units={units}
+        onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
+        value={JSON.stringify(selectedUnit)}
+        removeUnit={removeUnit}
+        setEditUnit={setEditUnit}
+      />
+    </FormControl>
+  );
 
   return {
     units,

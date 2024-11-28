@@ -43,14 +43,15 @@ export default function EditInventory({
   });
   const [open, setOpen] = useState<boolean>(false);
   const [updatedItem, setUpdatedItem] = useState<any>(inventoryItem);
-  const [updatedVendorItems, setUpdatedVendorItems] = useState<any[]>(inventoryItem.vendorItem);
+  const [updatedVendorItems, setUpdatedVendorItems] = useState<any[]>(
+    inventoryItem.vendorItem,
+  );
   const [selectedVendors, setSelectedVendors] = useState<IVendor[]>([]);
 
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
-  
   // console.log(updatedVendorItems, 'updated vendor items');
-  
+
   useEffect(() => {
     // Whenever selected vendors change then set new vendor items
     if (selectedVendors.length > 0) {
@@ -58,11 +59,11 @@ export default function EditInventory({
         const existedInNewVendorItems = updatedVendorItems.find(
           (item) => item.vendorId === vendor.id,
         );
-        
+
         if (existedInNewVendorItems) {
           return existedInNewVendorItems;
         }
-        
+
         return {
           vendorId: vendor.id,
           vendor: vendor,
@@ -71,13 +72,13 @@ export default function EditInventory({
           units: [],
         };
       });
-      
+
       setUpdatedVendorItems(newVItems);
     } else {
       setUpdatedVendorItems([]);
     }
   }, [selectedVendors]);
-  
+
   useEffect(() => {
     if (inventoryItem) {
       setUpdatedItem(inventoryItem);
@@ -88,7 +89,7 @@ export default function EditInventory({
             ...unit,
             vendorId: item.vendorId,
           };
-        })
+        });
 
         return {
           id: item.id,
@@ -149,7 +150,7 @@ export default function EditInventory({
 
     const existingVendorItem = updatedVendorItems.find(
       (item) => item.vendorId === addUnitProps.selectedVendorId,
-    )
+    );
 
     if (existingVendorItem?.units?.length === 0 && newValue.ratio !== 1) {
       showNotification('error', 'New Item Required Ratio of 1');
@@ -178,7 +179,10 @@ export default function EditInventory({
       if (item.vendorId === addUnitProps.selectedVendorId) {
         return {
           ...item,
-          units: [...item.units, {...newValue, vendorId: addUnitProps.selectedVendorId}],
+          units: [
+            ...item.units,
+            { ...newValue, vendorId: addUnitProps.selectedVendorId },
+          ],
         };
       }
       return item;
@@ -186,7 +190,7 @@ export default function EditInventory({
 
     setAddUnitProps({ open: false, selectedVendorId: -1 });
     setUpdatedVendorItems(newVendorItemsWithNewUnit);
-  }
+  };
 
   const removeUnit = (removedUnit: any, selectedVendorId: number) => {
     if (selectedVendorId === -1) {
@@ -230,7 +234,7 @@ export default function EditInventory({
 
     const existingVendorItem = updatedVendorItems.find(
       (item) => item.vendorId === editUnit.vendorId,
-    )
+    );
 
     if (existingVendorItem?.units?.length === 1) {
       if (updatedUnit.ratio !== 1) {
@@ -239,37 +243,43 @@ export default function EditInventory({
       }
     }
 
-    const unitRatioExist = existingVendorItem?.units?.find((unit: any, index: number) => {
-      return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
-    });
+    const unitRatioExist = existingVendorItem?.units?.find(
+      (unit: any, index: number) => {
+        return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
+      },
+    );
 
     if (unitRatioExist) {
       showNotification('error', 'Unit ratio already exists');
       return;
     }
 
-    const unitNameExist = existingVendorItem?.units?.find((unit: any, index: number) => {
-      return updatedUnit.unit === unit.unit && index !== updatedIndex;
-    });
+    const unitNameExist = existingVendorItem?.units?.find(
+      (unit: any, index: number) => {
+        return updatedUnit.unit === unit.unit && index !== updatedIndex;
+      },
+    );
 
     if (unitNameExist) {
       showNotification('error', 'Unit name already exists');
       return;
     }
 
-    const newUnits = existingVendorItem?.units?.map((unit: any, index: number) => {
-      if (index === updatedIndex) {
-        return updatedUnit;
-      }
+    const newUnits = existingVendorItem?.units?.map(
+      (unit: any, index: number) => {
+        if (index === updatedIndex) {
+          return updatedUnit;
+        }
 
-      return unit;
-    });
+        return unit;
+      },
+    );
 
     setEditUnit({
       unit: null,
       open: false,
       vendorId: -1,
-      unitIndex: -1
+      unitIndex: -1,
     });
 
     const newVendorItemsWithNewUnit = updatedVendorItems.map((item) => {
@@ -284,7 +294,7 @@ export default function EditInventory({
 
     setUpdatedVendorItems(newVendorItemsWithNewUnit);
   };
-  
+
   return (
     <>
       <AddUnit
@@ -341,12 +351,36 @@ export default function EditInventory({
 
             {updatedVendorItems.map((item: any, index: number) => (
               <Box key={index} display="flex" flexDirection="column" gap={2}>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <Typography variant="h6">{item.vendor.name}</Typography>
-                  <Button onClick={() => setAddUnitProps({ open: true, selectedVendorId: item.vendorId })}>+ New Unit</Button>
+                  <Button
+                    onClick={() =>
+                      setAddUnitProps({
+                        open: true,
+                        selectedVendorId: item.vendorId,
+                      })
+                    }
+                  >
+                    + New Unit
+                  </Button>
                 </Box>
                 <Box display="flex" gap={1} flexDirection="column">
-                  {item?.units?.length > 0 ? <UnitRadio units={item.units} isShowPrice removeUnit={(removedUnit: any) => removeUnit(removedUnit, item.vendorId)} setEditUnit={setEditUnit} /> : <ErrorComponent errorText='No unit found' />}
+                  {item?.units?.length > 0 ? (
+                    <UnitRadio
+                      units={item.units}
+                      isShowPrice
+                      removeUnit={(removedUnit: any) =>
+                        removeUnit(removedUnit, item.vendorId)
+                      }
+                      setEditUnit={setEditUnit}
+                    />
+                  ) : (
+                    <ErrorComponent errorText="No unit found" />
+                  )}
                 </Box>
               </Box>
             ))}

@@ -21,7 +21,6 @@ import { IExpense } from '@/app/utils/type';
 import ModalHead from '@/app/lib/ModalHead';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { errorColor } from '@/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AddVendor from '../add/AddVendor';
@@ -38,14 +37,19 @@ import UnitRadio from '../../Radio/UnitRadio';
 interface IProps {
   stockPurchased: IExpense;
   showNotification: (type: AlertColor, message: string) => void;
+  adminsAndDrivers: string[];
 }
 
 export const filter = createFilterOptions<any>();
 
-const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
-  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([
-    'Admin - Admin Test',
-  ]);
+const EditStockPurchased = ({
+  stockPurchased,
+  showNotification,
+  adminsAndDrivers,
+}: IProps) => {
+  // const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([
+  //   'Admin - Admin Test',
+  // ]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, onChangeOpen] = useMultipleBoolean({
     isOpenAddVendor: false,
@@ -94,9 +98,9 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     return vendorsSorted;
   }, [vendors]);
 
-  useEffect(() => {
-    fetchAdminsAndDrivers();
-  }, []);
+  // useEffect(() => {
+  //   fetchAdminsAndDrivers();
+  // }, []);
 
   useEffect(() => {
     if (purchasedItems.length > 0) {
@@ -141,7 +145,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
           return i.inventoryItem.name == item.name;
         });
 
-        console.log('VENDOR ITEM', {vendorItem, item});
+        console.log('VENDOR ITEM', { vendorItem, item });
 
         return {
           id: item.id,
@@ -181,10 +185,10 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   //     }
   //   }
   // }, [purchasedItems]);
-  const fetchAdminsAndDrivers = async () => {
-    const users: any = await getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(users);
-  };
+  // const fetchAdminsAndDrivers = async () => {
+  //   const users: any = await getAdminsAndDrivers(showNotification);
+  //   setAdminsAndDrivers(users);
+  // };
 
   const addPromptedItem = () => {
     if (promptedItem.id === -1) {

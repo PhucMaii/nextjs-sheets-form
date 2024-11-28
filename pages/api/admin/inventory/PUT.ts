@@ -28,14 +28,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             unit: true,
           },
         },
-      }
+      },
     });
 
     if (!existingInventoryItem) {
       return res.status(404).json({
         error: 'Inventory Item Not Found',
       });
-    };
+    }
 
     const sameNameInventoryItem = await prisma.inventoryItem.findFirst({
       where: {
@@ -62,14 +62,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
     }
-    
+
     const user: any = await getUserInfo(req, res);
     const createdBy = `Admin - ${user.clientName}`;
 
     let dbInventoryItemLeft = existingInventoryItem.vendorItem;
     for (const updatedVendorItem of vendorItems) {
       if (updatedVendorItem.id > 0) {
-        const existingVendorItem = existingInventoryItem.vendorItem.find((item: any) => item.id === updatedVendorItem.id);
+        const existingVendorItem = existingInventoryItem.vendorItem.find(
+          (item: any) => item.id === updatedVendorItem.id,
+        );
 
         if (!existingVendorItem) {
           console.error('Vendor Item Not Found');
@@ -77,9 +79,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
 
         // Check units and update units
-        await checkAndUpdateUnits(existingVendorItem.unit, updatedVendorItem.units, existingInventoryItem.id, updatedAt, createdBy);
+        await checkAndUpdateUnits(
+          existingVendorItem.unit,
+          updatedVendorItem.units,
+          existingInventoryItem.id,
+          updatedAt,
+          createdBy,
+        );
 
-        dbInventoryItemLeft = dbInventoryItemLeft.filter((item: any) => item.id !== existingVendorItem.id);
+        dbInventoryItemLeft = dbInventoryItemLeft.filter(
+          (item: any) => item.id !== existingVendorItem.id,
+        );
       } else {
         // Case: New Vendor Item
         const newVendorItem = await prisma.vendorItem.create({
@@ -88,8 +98,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             vendorId: updatedVendorItem.vendorId,
             quantity: updatedVendorItem.quantity,
             createdAt: updatedAt,
-            createdBy
-          }
+            createdBy,
+          },
         });
 
         // Create Inventory Unit
@@ -101,10 +111,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               unitPrice: unit.unitPrice,
               ratio: unit.ratio,
               createdAt: updatedAt,
-              createdBy
-            }
-          })
-        })
+              createdBy,
+            };
+          }),
+        });
       }
     }
 
@@ -118,7 +128,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
     }
-    
+
     return res.status(200).json({
       message: 'Inventory Item Updated Successfully',
     });

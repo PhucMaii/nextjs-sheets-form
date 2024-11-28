@@ -36,21 +36,31 @@ export default function UnitRadio({
               key={index}
               value={JSON.stringify(unit)}
               control={<Radio />}
-              label={`${isShowPrice ?`($${unit?.unitPrice})` : ''} 1:${unit.ratio} - ${unit.unit}`}
+              label={`${isShowPrice ? `($${unit?.unitPrice})` : ''} 1:${unit.ratio} - ${unit.unit}`}
               disabled={!value}
             />
 
-                {removeUnit && <IconButton onClick={() => removeUnit(unit)} size="small">
-                  <RemoveIcon fontSize="small" />
-                </IconButton>}
-                {setEditUnit && <IconButton
-                  onClick={() =>
-                    setEditUnit((prevState: any) => ({ ...prevState, unit: unit, open: true, unitIndex: index, vendorId: unit?.vendorId }))
-                  }
-                  size="small"
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>}
+            {removeUnit && (
+              <IconButton onClick={() => removeUnit(unit)} size="small">
+                <RemoveIcon fontSize="small" />
+              </IconButton>
+            )}
+            {setEditUnit && (
+              <IconButton
+                onClick={() =>
+                  setEditUnit((prevState: any) => ({
+                    ...prevState,
+                    unit: unit,
+                    open: true,
+                    unitIndex: index,
+                    vendorId: unit?.vendorId,
+                  }))
+                }
+                size="small"
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            )}
           </Box>
         );
       })}

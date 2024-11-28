@@ -26,6 +26,7 @@ interface IProps {
   selectedExpense?: IExpense[];
   handleSelectExpense?: any;
   handleSelectAll?: any;
+  adminsAndDrivers?: any;
 }
 
 const TransactionsTable = ({
@@ -35,6 +36,7 @@ const TransactionsTable = ({
   selectedExpense,
   handleSelectExpense,
   handleSelectAll,
+  adminsAndDrivers,
 }: IProps) => {
   console.log('TABLE RE RENDER');
 
@@ -152,15 +154,18 @@ const TransactionsTable = ({
                           handleDelete={handleDeleteTransaction}
                           includedButton
                         />
-                        {transaction?.orderedItems?.length > 0 ? (
+                        {adminsAndDrivers &&
+                        transaction?.orderedItems?.length > 0 ? (
                           <EditStockPurchased
                             stockPurchased={transaction}
                             showNotification={showNotification}
+                            adminsAndDrivers={adminsAndDrivers}
                           />
                         ) : (
                           <EditExpense
                             transaction={transaction}
                             showNotification={showNotification}
+                            adminsAndDrivers={adminsAndDrivers}
                           />
                         )}
                       </Box>

@@ -82,13 +82,13 @@ export default function StockPurchased({
 
   const todayString = YYYYMMDDFormat(new Date());
   const { date, SelectDate } = useSelectDate(todayString, true);
-  const { 
-    units, 
-    selectedUnit, 
-    AddUnitModal, 
-    EditUnitModal, 
+  const {
+    units,
+    selectedUnit,
+    AddUnitModal,
+    EditUnitModal,
     UnitDisplay,
-    onChangeAddUnitBoolean
+    onChangeAddUnitBoolean,
   } = useEditUnit(promptedItem.units, promptedItem.unit, showNotification);
 
   // console.log(promptedItem?.units, 'promptedItem?.units');
@@ -153,7 +153,7 @@ export default function StockPurchased({
         unit: selectedUnit,
       }));
     }
-  }, [selectedUnit])
+  }, [selectedUnit]);
 
   const handleOnChangeUnitPrice = (e: any) => {
     const newUnitPrice = +e.target.value;
@@ -247,7 +247,6 @@ export default function StockPurchased({
       },
       units: [],
     });
-
   };
 
   const calculateNewAmount = () => {

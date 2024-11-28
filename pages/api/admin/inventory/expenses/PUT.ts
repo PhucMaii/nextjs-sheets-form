@@ -209,16 +209,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             if (!unit) {
               unit = allUnits.find((browsingUnit: any) => {
                 return browsingUnit.vendorItemId === item.vendorItemId;
-              })
+              });
             }
             return {
               ...item,
-              unit,              
+              unit,
               id: item.vendorItemId,
             };
           },
         );
-
 
         console.log(
           { updatedItems, existingOrderedItems, newOrderedItems },

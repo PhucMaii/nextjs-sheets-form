@@ -22,8 +22,8 @@ async function main() {
     where: {
       id: {
         gt: 106,
-      }
-    }
+      },
+    },
   });
   // const createdAt = generateCurrentTime();
   // const createdBy = `Admin - Admin Test`;
