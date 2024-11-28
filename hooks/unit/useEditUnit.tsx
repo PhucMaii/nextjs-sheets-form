@@ -17,6 +17,7 @@ const useEditUnit = (
   initialUnits: IInventoryUnit[] = [],
   initialSelectedUnit: IInventoryUnit | null = null,
   showNotification: (type: AlertColor, message: string) => void,
+  isShowPrice: boolean = false,
 ) => {
   const [addUnitBoolean, onChangeAddUnitBoolean] = useMultipleBoolean({
     open: false,
@@ -136,7 +137,8 @@ const useEditUnit = (
       unit: null,
       open: false,
     });
-
+    
+    setSelectedUnit(updatedUnit);
     setUnits(newUnits);
 
     // setPromptedItem({
@@ -182,6 +184,7 @@ const useEditUnit = (
         value={JSON.stringify(selectedUnit)}
         removeUnit={removeUnit}
         setEditUnit={setEditUnit}
+        isShowPrice={isShowPrice}
       />
     </FormControl>
   );

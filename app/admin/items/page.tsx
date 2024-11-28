@@ -35,6 +35,7 @@ import PasteItemsModal from '../components/Modals/PasteItemsModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
+import { generateCurrentTime } from '@/app/utils/time';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -107,7 +108,6 @@ export default function ItemPage() {
   }, [debouncedKeywords]);
 
   const checkIsNewItemValid = (newItem: IItem) => {
-    console.log(newItem, 'new item');
     if (
       newItem.name.trim() === '' ||
       newItem.price < 0 ||
@@ -133,7 +133,9 @@ export default function ItemPage() {
       if (!isNewItemValid) {
         return;
       }
-      const response = await axios.post(API_URL.ITEM, { newItem });
+
+      const createdAt = generateCurrentTime();
+      const response = await axios.post(API_URL.ITEM, { newItem, createdAt });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -331,6 +333,7 @@ export default function ItemPage() {
         onClose={() => setOpen('isAddItemOpen', false)}
         categoryId={currentCategory?.id}
         addItem={handleAddItem}
+        showNotification={showNotification}
       />
       <DeleteModal
         targetObj={currentCategory}

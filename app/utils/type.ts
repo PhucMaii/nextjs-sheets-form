@@ -103,6 +103,10 @@ export interface IItem {
   availability: boolean;
   user?: User;
   inventoryItemId?: number;
+  unit?: any;
+  inventoryUnitId?: number;
+  inventoryUnit?: any;
+  units?: any;
 }
 
 export interface OrderedItems {

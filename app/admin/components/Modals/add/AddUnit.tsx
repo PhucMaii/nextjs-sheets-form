@@ -70,19 +70,6 @@ export default function AddUnit({
           </Box>
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Unit Price</Typography>
-            <TextField
-              placeholder="Enter unit price..."
-              type="number"
-              value={newUnit.unitPrice}
-              onChange={(e) =>
-                setNewUnit({ ...newUnit, unitPrice: +e.target.value })
-              }
-              fullWidth
-            />
-          </Box>
-
-          <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Ratio</Typography>
             <TextField
               placeholder="Enter ratio..."
@@ -91,6 +78,19 @@ export default function AddUnit({
               inputProps={{ min: 1 }}
               onChange={(e) =>
                 setNewUnit({ ...newUnit, ratio: +e.target.value })
+              }
+              fullWidth
+            />
+          </Box>
+
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Unit Price</Typography>
+            <TextField
+              placeholder="Enter unit price..."
+              type="number"
+              value={newUnit.unitPrice}
+              onChange={(e) =>
+                setNewUnit({ ...newUnit, unitPrice: +e.target.value })
               }
               fullWidth
             />
