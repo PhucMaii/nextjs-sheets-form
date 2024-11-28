@@ -16,6 +16,7 @@ interface IProps {
   value?: any;
   removeUnit?: any;
   setEditUnit?: any;
+  isShowPrice?: boolean;
 }
 
 export default function UnitRadio({
@@ -24,6 +25,7 @@ export default function UnitRadio({
   value,
   removeUnit,
   setEditUnit,
+  isShowPrice,
 }: IProps) {
   return (
     <RadioGroup row name="unit" value={value} onChange={onChange}>
@@ -34,24 +36,21 @@ export default function UnitRadio({
               key={index}
               value={JSON.stringify(unit)}
               control={<Radio />}
-              label={`1:${unit.ratio} - ${unit.unit}`}
+              label={`${isShowPrice ?`($${unit?.unitPrice})` : ''} 1:${unit.ratio} - ${unit.unit}`}
               disabled={!value}
             />
-            {removeUnit && setEditUnit && (
-              <>
-                <IconButton onClick={() => removeUnit(unit)} size="small">
+
+                {removeUnit && <IconButton onClick={() => removeUnit(unit)} size="small">
                   <RemoveIcon fontSize="small" />
-                </IconButton>
-                <IconButton
+                </IconButton>}
+                {setEditUnit && <IconButton
                   onClick={() =>
-                    setEditUnit({ unit: unit, open: true, unitIndex: index })
+                    setEditUnit((prevState: any) => ({ ...prevState, unit: unit, open: true, unitIndex: index, vendorId: unit?.vendorId }))
                   }
                   size="small"
                 >
                   <EditIcon fontSize="small" />
-                </IconButton>
-              </>
-            )}
+                </IconButton>}
           </Box>
         );
       })}
