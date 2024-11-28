@@ -184,6 +184,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
 
       if (isAffectQuantity) {
+        // Handle if db conflict
+        const allUnits = await prisma.inventoryUnit.findMany({});
+
         const existingOrderedItemsFifoId = existingOrderedItems
           .map((item: any) => {
             return item?.fifoId || null;
@@ -202,12 +205,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         const existingOrderedItemsFifo = existingOrderedItems.map(
           (item: any) => {
+            let unit = item?.unit || null;
+            if (!unit) {
+              unit = allUnits.find((browsingUnit: any) => {
+                return browsingUnit.vendorItemId === item.vendorItemId;
+              })
+            }
             return {
               ...item,
+              unit,              
               id: item.vendorItemId,
             };
           },
         );
+
 
         console.log(
           { updatedItems, existingOrderedItems, newOrderedItems },
@@ -254,116 +265,139 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         data: [...createdNewOrderedItems, ...createdExistingOrderedItems],
       });
 
-      const updatedExpense = await prisma.expense.findUnique({
-        where: {
-          id: id,
-        },
-        include: {
-          orderedItems: {
-            include: {
-              fifo: true,
-            },
-          },
-        },
-      });
+      // const updatedExpense = await prisma.expense.findUnique({
+      //   where: {
+      //     id: id,
+      //   },
+      //   include: {
+      //     orderedItems: {
+      //       include: {
+      //         fifo: true,
+      //       },
+      //     },
+      //   },
+      // });
 
-      if (!updatedExpense) {
-        return res.status(404).json({ error: 'Conflict Expense not found' });
-      }
+      // if (!updatedExpense) {
+      //   return res.status(404).json({ error: 'Conflict Expense not found' });
+      // }
 
-      if (
-        !updatedExpense.orderedItems ||
-        updatedExpense.orderedItems.length === 0
-      ) {
-        return res
-          .status(400)
-          .json({ error: 'Conflict Ordered Items not found' });
-      }
+      // if (
+      //   !updatedExpense.orderedItems ||
+      //   updatedExpense.orderedItems.length === 0
+      // ) {
+      //   return res
+      //     .status(400)
+      //     .json({ error: 'Conflict Ordered Items not found' });
+      // }
 
       // If new item is added while editing, it have to force user to choose affect quantity
-      if (isAffectQuantity) {
-        for (const item of updatedExpense.orderedItems) {
-          const itemExistedInventory = vendorItems.find((vendorItem: any) => {
-            return vendorItem.id === item?.fifo?.vendorItemId;
-          });
+      // if (isAffectQuantity) {
+      //   const allFifos = await prisma.fifo.findMany({
+      //     where: {
+      //       createdAt: updatedAt,
+      //       createdBy,
+      //     }
+      //   })
 
-          // Item already existed in inventory -> Update quantity
-          if (itemExistedInventory) {
-            const itemInBill = existingExpense.orderedItems.find(
-              (orderedItem: any) => {
-                return orderedItem.id === item.id;
-              },
-            );
-            const newQuantity =
-              itemExistedInventory?.quantity -
-              (itemInBill?.quantity || 0) +
-              item.quantity;
-            await prisma.vendorItem.update({
-              where: {
-                id: itemExistedInventory.id,
-              },
-              data: {
-                quantity: newQuantity,
-              },
-            });
-          } else {
-            const vendor: any = await prisma.vendorExpense.findFirst({
-              where: {
-                expenseId: existingExpense.id,
-              },
-            });
-            // // New item -> Create fifo
-            const newInventoryItem = await prisma.inventoryItem.create({
-              data: {
-                name: item.name,
-                createdAt: updatedAt,
-                createdBy: `Admin - ${user?.clientName}`,
-              },
-            });
+      //   for (const item of updatedExpense.orderedItems) {
+      //     // Handle exception if there is conflict in db
 
-            const newVendorItem = await prisma.vendorItem.create({
-              data: {
-                inventoryItemId: newInventoryItem.id,
-                vendorId: vendor?.vendorId,
-                quantity: item.quantity,
-                createdAt: updatedAt,
-                createdBy: `Admin - ${user?.clientName}`,
-              },
-            });
+      //     let itemFifo: any = null;
+      //     if (item.fifoId && item.fifoId > 0 && !item?.fifo) {
+      //       console.log('ACCESS SEARCH FIFO')
+      //       itemFifo = allFifos.find((fifo: any) => {
+      //         return fifo.vendorItemId === item?.vendorItemId;
+      //       });
+      //     }
 
-            const itemExistedInBill = updatedItems.find((item: any) => {
-              return item.name === newInventoryItem.name;
-            });
+      //     const itemExistedInventory = vendorItems.find((vendorItem: any) => {
+      //       if (itemFifo) {
+      //         return vendorItem.id === itemFifo?.vendorItemId;
+      //       }
+      //       return vendorItem.id === item?.fifo?.vendorItemId;
+      //     });
 
-            if (itemExistedInBill && itemExistedInBill.units) {
-              const newUnits = itemExistedInBill?.units.map((unit: any) => {
-                return {
-                  unit: unit.unit,
-                  unitPrice: unit.unitPrice,
-                  ratio: unit?.ratio || 1,
-                  vendorItemId: newVendorItem.id,
-                  createdAt: updatedAt,
-                  createdBy: `Admin - ${user?.clientName}`,
-                };
-              });
+      //     console.log(
+      //       { item, itemExistedInventory }, 'itemExistedInventory',)
 
-              await prisma.inventoryUnit.createMany({
-                data: newUnits,
-              });
+      //     // Item already existed in inventory -> Update quantity
+      //     if (itemExistedInventory) {
+      //       const itemInBill = existingExpense.orderedItems.find(
+      //         (orderedItem: any) => {
+      //           return orderedItem.id === item.id;
+      //         },
+      //       );
+      //       const newQuantity =
+      //         itemExistedInventory?.quantity -
+      //         (itemInBill?.quantity || 0) +
+      //         item.quantity;
+      //       await prisma.vendorItem.update({
+      //         where: {
+      //           id: itemExistedInventory.id,
+      //         },
+      //         data: {
+      //           quantity: newQuantity,
+      //         },
+      //       });
+      //     } else {
+      //       // const vendor: any = await prisma.vendorExpense.findFirst({
+      //       //   where: {
+      //       //     expenseId: existingExpense.id,
+      //       //   },
+      //       // });
+      //       // // // New item -> Create fifo
+      //       // const newInventoryItem = await prisma.inventoryItem.create({
+      //       //   data: {
+      //       //     name: item.name,
+      //       //     createdAt: updatedAt,
+      //       //     createdBy: `Admin - ${user?.clientName}`,
+      //       //   },
+      //       // });
 
-              await prisma.fifo.create({
-                data: {
-                  inventoryItemId: newInventoryItem.id,
-                  vendorItemId: newVendorItem.id,
-                  quantity: item.quantity * itemExistedInBill?.unit?.ratio,
-                  createdAt: updatedAt,
-                  createdBy: `Admin - ${user?.clientName}`,
-                },
-              });
-            }
-          }
-        }
-      }
+      //       // const newVendorItem = await prisma.vendorItem.create({
+      //       //   data: {
+      //       //     inventoryItemId: newInventoryItem.id,
+      //       //     vendorId: vendor?.vendorId,
+      //       //     quantity: item.quantity,
+      //       //     createdAt: updatedAt,
+      //       //     createdBy: `Admin - ${user?.clientName}`,
+      //       //   },
+      //       // });
+
+      //       // const itemExistedInBill = updatedItems.find((item: any) => {
+      //       //   return item.name === newInventoryItem.name;
+      //       // });
+
+      //       // if (itemExistedInBill && itemExistedInBill.units) {
+      //       //   const newUnits = itemExistedInBill?.units.map((unit: any) => {
+      //       //     return {
+      //       //       unit: unit.unit,
+      //       //       unitPrice: unit.unitPrice,
+      //       //       ratio: unit?.ratio || 1,
+      //       //       vendorItemId: newVendorItem.id,
+      //       //       createdAt: updatedAt,
+      //       //       createdBy: `Admin - ${user?.clientName}`,
+      //       //     };
+      //       //   });
+
+      //       //   await prisma.inventoryUnit.createMany({
+      //       //     data: newUnits,
+      //       //   });
+
+      //       //   await prisma.fifo.create({
+      //       //     data: {
+      //       //       inventoryItemId: newInventoryItem.id,
+      //       //       vendorItemId: newVendorItem.id,
+      //       //       quantity: item.quantity * itemExistedInBill?.unit?.ratio,
+      //       //       createdAt: updatedAt,
+      //       //       createdBy: `Admin - ${user?.clientName}`,
+      //       //     },
+      //       //   });
+      //       // }
+      //     }
+      //   }
+      // }
     }
 
     return res.status(200).json({ message: 'Expense updated successfully' });

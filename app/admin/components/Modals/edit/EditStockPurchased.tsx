@@ -121,6 +121,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   }, [selectedVendorId, vendors]);
 
   useEffect(() => {
+    console.log('ACCESS USE EFFECT');
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
 
@@ -139,6 +140,8 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         const vendorItem = allVendorItems?.data?.find((i: any) => {
           return i.inventoryItem.name == item.name;
         });
+
+        console.log('VENDOR ITEM', {vendorItem, item});
 
         return {
           id: item.id,
@@ -334,7 +337,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         stockPurchased?.orderedItems,
       );
 
-      // console.log(purchasedItems, 'purchasedItems');
+      console.log(purchasedItems, 'purchasedItems');
       // setIsLoading(false);
       // return;
       const createdAt = generateCurrentTime();

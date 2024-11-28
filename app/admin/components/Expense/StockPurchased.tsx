@@ -8,7 +8,6 @@ import {
   Button,
   Divider,
   FormControl,
-  FormLabel,
   Grid,
   IconButton,
   InputLabel,
@@ -26,13 +25,9 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import InventoryItemSearch from '../Autocomplete/InventoryItemSearch';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
-import AddUnit from '../Modals/add/AddUnit';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
-import AddIcon from '@mui/icons-material/Add';
-import { IInventoryUnit } from '@/app/utils/type';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import EditUnit from '../Modals/edit/EditUnit';
-import UnitRadio from '../Radio/UnitRadio';
+import useEditUnit from '@/hooks/unit/useEditUnit';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -54,11 +49,6 @@ export default function StockPurchased({
   fetchAdminAndDrivers,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [editUnit, setEditUnit] = useState<any>({
-    open: false,
-    unit: null,
-    unitIndex: -1,
-  });
   const [open, onChangeOpen] = useMultipleBoolean({
     isOpenAddVendor: false,
     isOpenAddUnit: false,
@@ -86,11 +76,20 @@ export default function StockPurchased({
       unitPrice: 0,
       ratio: 1,
     },
+    units: [],
   });
   const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
 
   const todayString = YYYYMMDDFormat(new Date());
   const { date, SelectDate } = useSelectDate(todayString, true);
+  const { 
+    units, 
+    selectedUnit, 
+    AddUnitModal, 
+    EditUnitModal, 
+    UnitDisplay,
+    onChangeAddUnitBoolean
+  } = useEditUnit(promptedItem.units, promptedItem.unit, showNotification);
 
   // console.log(promptedItem?.units, 'promptedItem?.units');
 
@@ -139,6 +138,23 @@ export default function StockPurchased({
     }
   }, [selectedVendorId]);
 
+  useEffect(() => {
+    setPromptedItem((prevState: any) => ({
+      ...prevState,
+      unit: units[0],
+      units: units,
+    }));
+  }, [units]);
+
+  useEffect(() => {
+    if (selectedUnit) {
+      setPromptedItem((prevState: any) => ({
+        ...prevState,
+        unit: selectedUnit,
+      }));
+    }
+  }, [selectedUnit])
+
   const handleOnChangeUnitPrice = (e: any) => {
     const newUnitPrice = +e.target.value;
 
@@ -171,8 +187,8 @@ export default function StockPurchased({
         vendorId: selectedVendorId,
       });
 
-      onChangeOpen('isOpenAddUnit', true);
-      onChangeOpen('disabledCloseAddUnit', true);
+      onChangeAddUnitBoolean('open', true);
+      onChangeAddUnitBoolean('disabledClose', true);
     } else {
       // Existing Item Add
       setPromptedItem({
@@ -229,44 +245,9 @@ export default function StockPurchased({
         unitPrice: 0,
         ratio: 1,
       },
+      units: [],
     });
 
-    onChangeOpen('disabledCloseAddUnit', false);
-  };
-
-  const addUnit = (newUnit: IInventoryUnit) => {
-    if (promptedItem?.units?.length === 0) {
-      if (newUnit.ratio !== 1) {
-        showNotification('error', 'New Item Required Ratio of 1');
-        return;
-      }
-    }
-
-    const unitRatioExist = promptedItem?.units?.find((unit: any) => {
-      return newUnit.ratio === unit.ratio;
-    });
-
-    if (unitRatioExist) {
-      showNotification('error', 'Unit ratio already exists');
-      return;
-    }
-
-    const unitNameExist = promptedItem?.units?.find((unit: any) => {
-      return newUnit.unit === unit.unit;
-    });
-
-    if (unitNameExist) {
-      showNotification('error', 'Unit name already exists');
-      return;
-    }
-
-    onChangeOpen('isOpenAddUnit', false);
-
-    setPromptedItem({
-      ...promptedItem,
-      units: [...(promptedItem?.units || []), newUnit],
-      unit: newUnit,
-    });
   };
 
   const calculateNewAmount = () => {
@@ -430,83 +411,6 @@ export default function StockPurchased({
     setPurchasedItems(newItemList);
   };
 
-  const removeUnit = (removedUnit: any) => {
-    if (removedUnit.ratio === 1) {
-      showNotification('error', 'Inventory Item Required Ratio of 1');
-      return;
-    }
-
-    const newUnits = promptedItem?.units?.filter((item: any) => {
-      return removedUnit.unit !== item.unit && removedUnit.ratio !== item.ratio;
-    });
-
-    if (
-      promptedItem.unit.ratio === removedUnit.ratio &&
-      promptedItem.unit.unit === removedUnit.unit
-    ) {
-      setPromptedItem({
-        ...promptedItem,
-        units: newUnits,
-        unit: newUnits[0],
-      });
-    } else {
-      setPromptedItem({
-        ...promptedItem,
-        units: newUnits,
-      });
-    }
-  };
-
-  const updateUnit = (updatedUnit: any, updatedIndex: number) => {
-    if (promptedItem?.units?.length === 1) {
-      if (updatedUnit.ratio !== 1) {
-        showNotification('error', 'Inventory Item Required Ratio of 1');
-        return;
-      }
-    }
-
-    const unitRatioExist = promptedItem?.units?.find(
-      (unit: any, index: number) => {
-        return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
-      },
-    );
-
-    if (unitRatioExist) {
-      showNotification('error', 'Unit ratio already exists');
-      return;
-    }
-
-    const unitNameExist = promptedItem?.units?.find(
-      (unit: any, index: number) => {
-        return updatedUnit.unit === unit.unit && index !== updatedIndex;
-      },
-    );
-
-    if (unitNameExist) {
-      showNotification('error', 'Unit name already exists');
-      return;
-    }
-
-    const newUnits = promptedItem?.units?.map((unit: any, index: number) => {
-      if (index === updatedIndex) {
-        return updatedUnit;
-      }
-
-      return unit;
-    });
-
-    setEditUnit({
-      unit: null,
-      open: false,
-    });
-
-    setPromptedItem({
-      ...promptedItem,
-      units: newUnits,
-      unit: updatedUnit,
-    });
-  };
-
   return (
     <>
       {role === USER_ROLE.ADMIN && (
@@ -516,26 +420,8 @@ export default function StockPurchased({
             open={open.isOpenAddVendor}
             onClose={() => onChangeOpen('isOpenAddVendor', false)}
           />
-          <AddUnit
-            open={open.isOpenAddUnit}
-            onClose={() => onChangeOpen('isOpenAddUnit', false)}
-            vendorItemId={promptedItem?.id}
-            addUnit={addUnit}
-            noClose={open.disabledCloseAddUnit}
-          />
-          <EditUnit
-            open={editUnit.open}
-            onClose={() =>
-              setEditUnit((prevEditUnit: any) => ({
-                ...prevEditUnit,
-                open: false,
-              }))
-            }
-            unit={editUnit.unit}
-            updateUnit={(updatedUnit: any) =>
-              updateUnit(updatedUnit, editUnit.unitIndex)
-            }
-          />
+          {AddUnitModal}
+          {EditUnitModal}
         </>
       )}
       <Box display="flex" flexDirection="column" gap={3}>
@@ -584,100 +470,9 @@ export default function StockPurchased({
           </Grid>
           {promptedItem?.units && promptedItem?.units.length > 0 && (
             <Grid item xs={12}>
-              <FormControl>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <FormLabel id="unit">Units</FormLabel>
-                  <IconButton
-                    onClick={() => onChangeOpen('isOpenAddUnit', true)}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-                {/* <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
-                  {
-                    promptedItem.units.map((unit: any, index: number) => {
-                      return (
-                        <Box display="flex" alignItems="center" mx={2}>
-                          <FormControlLabel key={index} value={JSON.stringify(unit)} control={<Radio />} label={`1:${unit.ratio} - ${unit.unit}`} />
-                          <IconButton onClick={() => removeUnit(unit)} size="small">
-                            <RemoveIcon fontSize='small' />
-                          </IconButton>
-                          <IconButton onClick={() => setEditUnit({unit: unit, open: true, unitIndex: index})} size="small">
-                            <EditIcon fontSize='small' />
-                          </IconButton>
-                        </Box>
-                      )
-                    })
-                  }
-              </RadioGroup> */}
-                <UnitRadio
-                  units={promptedItem.units}
-                  onChange={(e: any) =>
-                    setPromptedItem({
-                      ...promptedItem,
-                      unit: JSON.parse(e.target.value),
-                    })
-                  }
-                  value={JSON.stringify(promptedItem.unit)}
-                  removeUnit={removeUnit}
-                  setEditUnit={setEditUnit}
-                />
-              </FormControl>
+              {UnitDisplay}
             </Grid>
           )}
-
-          {/* {promptedItem.id === 0 && (
-            <>
-              <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="vendor">Vendor</InputLabel>
-                  <Select
-                    id="vendor"
-                    label="Vendor"
-                    value={selectedVendorId}
-                    onChange={(e) =>
-                      setSelectedVendorId(e.target.value as number)
-                    }
-                    fullWidth
-                    disabled
-                  >
-                    <MenuItem value={-1} disabled>
-                      -- Choose a vendor --
-                    </MenuItem>
-                    <MenuItem onClick={() => onChangeOpen('isOpenAddVendor', true)}>
-                      + Create new vendor
-                    </MenuItem>
-                    {sortedVendors.length > 0 &&
-                      sortedVendors.map((vendor: any, index: number) => (
-                        <MenuItem key={index} value={vendor.id}>
-                          {vendor.name}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="unit">Unit</InputLabel>
-                  <Select
-                    value={promptedItem.unit}
-                    onChange={(e) =>
-                      setPromptedItem({ ...promptedItem, unit: e.target.value })
-                    }
-                    fullWidth
-                    id="unit"
-                    label="Unit"
-                  >
-                    {units.map((unit, index) => (
-                      <MenuItem key={index} value={unit}>
-                        {unit}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </>
-          )} */}
 
           <Grid item xs={12} md={6}>
             <TextField
@@ -736,17 +531,8 @@ export default function StockPurchased({
                       type="number"
                       inputProps={{ min: 0 }}
                       disabled={role === USER_ROLE.DRIVER}
-                      // sx={{maxWidth: 100, width: 'auto'}}
                       fullWidth
                     />
-                    {/* <UnitSearch 
-                      value={item.units[0]}
-                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      handleSelectPromptedItem={(e: any, newValue: any) => onChangeUnitInItems(e, newValue, item)}
-                      disabled={role === USER_ROLE.DRIVER}
-                      displayKey="unit"
-                      displayItems={item.units}
-                    /> */}
                   </Grid>
                   <Grid item xs={6}>
                     <TextField

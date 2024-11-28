@@ -35,7 +35,7 @@ export default function UnitRadio({
               value={JSON.stringify(unit)}
               control={<Radio />}
               label={`1:${unit.ratio} - ${unit.unit}`}
-              disabled={!!value}
+              disabled={!value}
             />
             {removeUnit && setEditUnit && (
               <>

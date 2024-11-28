@@ -18,10 +18,12 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.vendorItem.updateMany({
-    data: {
-      quantity: 0,
-    },
+  await prisma.vendorItem.deleteMany({
+    where: {
+      id: {
+        gt: 106,
+      }
+    }
   });
   // const createdAt = generateCurrentTime();
   // const createdBy = `Admin - Admin Test`;
