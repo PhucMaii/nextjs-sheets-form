@@ -3,9 +3,7 @@ import {
   Box,
   Button,
   Divider,
-  MenuItem,
   Modal,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -14,9 +12,14 @@ import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
-import { IInventoryItem } from '@/app/utils/type';
-import { units } from '@/app/lib/constant';
+import { IInventoryItem, IVendor } from '@/app/utils/type';
 import axios from 'axios';
+import VendorSearch from '../../Autocomplete/VendorSearch';
+import AddUnit from '../add/AddUnit';
+import EditUnit from './EditUnit';
+import UnitRadio from '../../Radio/UnitRadio';
+import ErrorComponent from '../../ErrorComponent';
+import { generateCurrentTime } from '@/app/utils/time';
 
 interface IProps {
   inventoryItem: IInventoryItem;
@@ -27,28 +30,95 @@ export default function EditInventory({
   inventoryItem,
   showNotification,
 }: IProps) {
+  const [addUnitProps, setAddUnitProps] = useState<any>({
+    open: false,
+    selectedVendorId: -1,
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [editUnit, setEditUnit] = useState<any>({
+    open: false,
+    unit: null,
+    unitIndex: -1,
+    selectedVendorId: -1,
+  });
   const [open, setOpen] = useState<boolean>(false);
   const [updatedItem, setUpdatedItem] = useState<any>(inventoryItem);
+  const [updatedVendorItems, setUpdatedVendorItems] = useState<any[]>(inventoryItem.vendorItem);
+  const [selectedVendors, setSelectedVendors] = useState<IVendor[]>([]);
 
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
+  
+  // console.log(updatedVendorItems, 'updated vendor items');
+  
+  useEffect(() => {
+    // Whenever selected vendors change then set new vendor items
+    if (selectedVendors.length > 0) {
+      const newVItems = selectedVendors.map((vendor) => {
+        const existedInNewVendorItems = updatedVendorItems.find(
+          (item) => item.vendorId === vendor.id,
+        );
+        
+        if (existedInNewVendorItems) {
+          return existedInNewVendorItems;
+        }
+        
+        return {
+          vendorId: vendor.id,
+          vendor: vendor,
+          name: vendor.name,
+          quantity: 0,
+          units: [],
+        };
+      });
+      
+      setUpdatedVendorItems(newVItems);
+    } else {
+      setUpdatedVendorItems([]);
+    }
+  }, [selectedVendors]);
+  
   useEffect(() => {
     if (inventoryItem) {
       setUpdatedItem(inventoryItem);
+
+      const vendorItems = inventoryItem.vendorItem.map((item: any) => {
+        const itemUnits = item.unit.map((unit: any) => {
+          return {
+            ...unit,
+            vendorId: item.vendorId,
+          };
+        })
+
+        return {
+          id: item.id,
+          vendorId: item.vendorId,
+          vendor: item.vendor,
+          name: item.vendor.name,
+          quantity: item.quantity,
+          units: itemUnits,
+        };
+      });
+
+      const vendors = vendorItems.map((item: any) => {
+        return item.vendor;
+      });
+
+      setUpdatedVendorItems(vendorItems);
+      setSelectedVendors(vendors);
     }
   }, [inventoryItem]);
 
   const handleUpdate = async () => {
     setIsLoading(true);
+
+    const updatedAt = generateCurrentTime();
     try {
       const response = await axios.put(`${API_URL.ADMIN}/inventory`, {
         id: inventoryItem.id,
         name: updatedItem.name,
-        vendorId: updatedItem.vendorId,
-        quantity: updatedItem.quantity,
-        unitPrice: updatedItem.unitPrice,
-        unit: updatedItem.unit,
+        vendorItems: updatedVendorItems,
+        updatedAt,
       });
 
       if (response.data.error) {
@@ -67,8 +137,171 @@ export default function EditInventory({
     }
   };
 
+  const handleOnChangeVendorSearch = (newValue: any) => {
+    setSelectedVendors(newValue);
+  };
+
+  const addUnit = (newValue: any) => {
+    if (addUnitProps.selectedVendorId === -1) {
+      showNotification('error', 'Missing required data');
+      return;
+    }
+
+    const existingVendorItem = updatedVendorItems.find(
+      (item) => item.vendorId === addUnitProps.selectedVendorId,
+    )
+
+    if (existingVendorItem?.units?.length === 0 && newValue.ratio !== 1) {
+      showNotification('error', 'New Item Required Ratio of 1');
+      return;
+    }
+
+    const unitRatioExist = existingVendorItem?.units?.find((unit: any) => {
+      return newValue.ratio === unit.ratio;
+    });
+
+    if (unitRatioExist) {
+      showNotification('error', 'Unit ratio already exists');
+      return;
+    }
+
+    const unitNameExist = existingVendorItem?.units?.find((unit: any) => {
+      return newValue.unit === unit.unit;
+    });
+
+    if (unitNameExist) {
+      showNotification('error', 'Unit name already exists');
+      return;
+    }
+
+    const newVendorItemsWithNewUnit = updatedVendorItems.map((item) => {
+      if (item.vendorId === addUnitProps.selectedVendorId) {
+        return {
+          ...item,
+          units: [...item.units, {...newValue, vendorId: addUnitProps.selectedVendorId}],
+        };
+      }
+      return item;
+    });
+
+    setAddUnitProps({ open: false, selectedVendorId: -1 });
+    setUpdatedVendorItems(newVendorItemsWithNewUnit);
+  }
+
+  const removeUnit = (removedUnit: any, selectedVendorId: number) => {
+    if (selectedVendorId === -1) {
+      showNotification('error', 'Missing vendor id');
+      return;
+    }
+
+    if (removedUnit.ratio === 1) {
+      showNotification('error', 'Inventory Item Required Ratio of 1');
+      return;
+    }
+
+    const existingVendorItem = updatedVendorItems.find(
+      (item) => item.vendorId === selectedVendorId,
+    );
+
+    const newUnits = existingVendorItem?.units?.filter((item: any) => {
+      return removedUnit.unit !== item.unit && removedUnit.ratio !== item.ratio;
+    });
+
+    const newVendorItemsWithNewUnit = updatedVendorItems.map((item) => {
+      if (item.vendorId === selectedVendorId) {
+        return {
+          ...item,
+          units: newUnits,
+        };
+      }
+      return item;
+    });
+
+    setUpdatedVendorItems(newVendorItemsWithNewUnit);
+  };
+
+  const updateUnit = (updatedUnit: any, updatedIndex: number) => {
+    if (editUnit.vendorId === -1) {
+      showNotification('error', 'Missing vendor id');
+      return;
+    }
+
+    console.log('editUnit', editUnit);
+
+    const existingVendorItem = updatedVendorItems.find(
+      (item) => item.vendorId === editUnit.vendorId,
+    )
+
+    if (existingVendorItem?.units?.length === 1) {
+      if (updatedUnit.ratio !== 1) {
+        showNotification('error', 'Inventory Item Required Ratio of 1');
+        return;
+      }
+    }
+
+    const unitRatioExist = existingVendorItem?.units?.find((unit: any, index: number) => {
+      return updatedUnit.ratio === unit.ratio && index !== updatedIndex;
+    });
+
+    if (unitRatioExist) {
+      showNotification('error', 'Unit ratio already exists');
+      return;
+    }
+
+    const unitNameExist = existingVendorItem?.units?.find((unit: any, index: number) => {
+      return updatedUnit.unit === unit.unit && index !== updatedIndex;
+    });
+
+    if (unitNameExist) {
+      showNotification('error', 'Unit name already exists');
+      return;
+    }
+
+    const newUnits = existingVendorItem?.units?.map((unit: any, index: number) => {
+      if (index === updatedIndex) {
+        return updatedUnit;
+      }
+
+      return unit;
+    });
+
+    setEditUnit({
+      unit: null,
+      open: false,
+      vendorId: -1,
+      unitIndex: -1
+    });
+
+    const newVendorItemsWithNewUnit = updatedVendorItems.map((item) => {
+      if (item.vendorId === editUnit.vendorId) {
+        return {
+          ...item,
+          units: newUnits,
+        };
+      }
+      return item;
+    });
+
+    setUpdatedVendorItems(newVendorItemsWithNewUnit);
+  };
+  
   return (
     <>
+      <AddUnit
+        addUnit={addUnit}
+        open={addUnitProps.open}
+        onClose={() => setAddUnitProps({ open: false, selectedVendorId: -1 })}
+      />
+      <EditUnit
+        open={editUnit.open}
+        onClose={() =>
+          setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
+        }
+        unit={editUnit.unit}
+        updateUnit={(updatedUnit: any) =>
+          updateUnit(updatedUnit, editUnit.unitIndex)
+        }
+      />
       <Button onClick={() => setOpen(true)}>Edit</Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <BoxModal>
@@ -96,66 +329,27 @@ export default function EditInventory({
             </Box>
 
             <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Quantity</Typography>
-              <TextField
-                fullWidth
-                placeholder="Enter item quantity..."
-                type="number"
-                value={updatedItem.quantity}
-                onChange={(e) =>
-                  setUpdatedItem({ ...updatedItem, quantity: +e.target.value })
-                }
-              />
-            </Box>
-
-            <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Vendor</Typography>
-              <Select
-                value={updatedItem.vendorId}
-                onChange={(e) =>
-                  setUpdatedItem({ ...updatedItem, vendorId: +e.target.value })
-                }
-              >
-                <MenuItem value={-1} disabled>
-                  -- Choose a vendor --
-                </MenuItem>
-                {vendors &&
-                  vendors?.data.map((vendor: any, index: number) => (
-                    <MenuItem key={index} value={vendor.id}>
-                      {vendor.name}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </Box>
-
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Unit</Typography>
-              <Select
-                value={updatedItem.unit}
-                onChange={(e) =>
-                  setUpdatedItem({ ...updatedItem, unit: e.target.value })
-                }
-              >
-                {units.map((unit, index) => (
-                  <MenuItem key={index} value={unit}>
-                    {unit}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Unit Price</Typography>
-              <TextField
-                fullWidth
-                placeholder="Enter item name..."
-                type="number"
-                value={updatedItem.unitPrice}
-                onChange={(e) =>
-                  setUpdatedItem({ ...updatedItem, unitPrice: +e.target.value })
+              <VendorSearch
+                vendors={vendors?.data || []}
+                value={selectedVendors}
+                onChange={(e: any, newValue: any) =>
+                  handleOnChangeVendorSearch(newValue)
                 }
               />
             </Box>
+
+            {updatedVendorItems.map((item: any, index: number) => (
+              <Box key={index} display="flex" flexDirection="column" gap={2}>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Typography variant="h6">{item.vendor.name}</Typography>
+                  <Button onClick={() => setAddUnitProps({ open: true, selectedVendorId: item.vendorId })}>+ New Unit</Button>
+                </Box>
+                <Box display="flex" gap={1} flexDirection="column">
+                  {item?.units?.length > 0 ? <UnitRadio units={item.units} isShowPrice removeUnit={(removedUnit: any) => removeUnit(removedUnit, item.vendorId)} setEditUnit={setEditUnit} /> : <ErrorComponent errorText='No unit found' />}
+                </Box>
+              </Box>
+            ))}
           </Box>
         </BoxModal>
       </Modal>

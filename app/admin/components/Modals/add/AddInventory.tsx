@@ -259,12 +259,6 @@ export default function AddInventory({
     });
 
     setNewVendorItems(newVendorItemsWithNewUnit);
-
-    // setPromptedItem({
-    //   ...promptedItem,
-    //   units: newUnits,
-    //   unit: updatedUnit
-    // });
   };
 
   return (
@@ -272,7 +266,7 @@ export default function AddInventory({
       <AddUnit 
         addUnit={addUnit}
         open={addUnitProps.open}
-        onClose={() => setAddUnitProps({ open: false, selectedVenorId: -1 })}
+        onClose={() => setAddUnitProps({ open: false, selectedVendorId: -1 })}
       />
       <EditUnit
         open={editUnit.open}

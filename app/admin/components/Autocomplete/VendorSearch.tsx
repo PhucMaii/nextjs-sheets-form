@@ -37,6 +37,7 @@ export default function VendorSearch({
           placeholder="Select Vendors"
         />
       )}
+      isOptionEqualToValue={(option, value) => option.name === value.name}
       renderOption={(props, option, { selected }) => {
         const { key, ...optionProps } = props;
         return (
