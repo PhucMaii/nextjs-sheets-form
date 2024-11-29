@@ -5,15 +5,97 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   vendorId?: string;
+  inventoryItemId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { vendorId }: IQuery = req.query;
+    const { vendorId, inventoryItemId }: IQuery = req.query;
 
-    if (!vendorId) {
+    if (vendorId) {
+      const vendorItems = await prisma.vendorItem.findMany({
+        where: {
+          vendorId: Number(vendorId),
+        },
+        include: {
+          inventoryItem: {
+            include: {
+              vendorItem: {
+                include: {
+                  vendor: true,
+                  fifo: true,
+                  unit: true,
+                },
+              },
+            },
+          },
+        },
+      });
+  
+      const formattedInventory: any[] = [];
+  
+      for (const vendorItem of vendorItems) {
+        const existingInventoryItem = formattedInventory.find(
+          (item: any) => item.id === vendorItem.inventoryItemId,
+        );
+  
+        if (existingInventoryItem) {
+          continue;
+        }
+  
+        const formattedItem = formatInventoryWithTotalValueAndStatus([
+          vendorItem.inventoryItem,
+        ]);
+        formattedInventory.push(...formattedItem);
+      }
+  
+      return res.status(200).json({
+        data: formattedInventory,
+        message: 'Fetch Inventory Successfully',
+      });
+    }
+
+    if (inventoryItemId) {
+      const inventoryItem = await prisma.inventoryItem.findUnique({
+        where: {
+          id: Number(inventoryItemId),
+        },
+        include: {
+          vendorItem: {
+            include: {
+              vendor: true,
+              fifo: true,
+              unit: true,
+            },
+          },
+        },
+      });
+
+      if (!inventoryItem) {
+        return res.status(404).json({ error: 'Inventory Item not found' });
+      }
+      
+      const formattedInventory = formatInventoryWithTotalValueAndStatus([
+        inventoryItem,
+      ]);
+      
+      let sellingUnits = inventoryItem.vendorItem.flatMap(
+        (item: any) => item.unit);
+        
+        sellingUnits = Array.from(new Map(
+          sellingUnits.map((unit: any) => [unit.ratio, unit]),
+        ).values());
+        
+        console.log(sellingUnits, 'selling Units');
+
+      return res.status(200).json({
+        data: {...formattedInventory, units: sellingUnits},
+        message: 'Fetch Inventory Successfully',
+      });
+    }
+
       const inventory: any = await prisma.inventoryItem.findMany({
         include: {
           vendorItem: {
@@ -33,56 +115,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         data: formattedInventory,
         message: 'Fetch Inventory Successfully',
       });
-    }
 
-    // const inventory: any = await prisma.inventoryItem.findMany({
-    //   where: {
-    //     vendorId: Number(vendorId),
-    //   },
-    //   include: {
-    //     vendor: true,
-    //   },
-    // });
-    const vendorItems = await prisma.vendorItem.findMany({
-      where: {
-        vendorId: Number(vendorId),
-      },
-      include: {
-        inventoryItem: {
-          include: {
-            vendorItem: {
-              include: {
-                vendor: true,
-                fifo: true,
-                unit: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const formattedInventory: any[] = [];
-
-    for (const vendorItem of vendorItems) {
-      const existingInventoryItem = formattedInventory.find(
-        (item: any) => item.id === vendorItem.inventoryItemId,
-      );
-
-      if (existingInventoryItem) {
-        continue;
-      }
-
-      const formattedItem = formatInventoryWithTotalValueAndStatus([
-        vendorItem.inventoryItem,
-      ]);
-      formattedInventory.push(...formattedItem);
-    }
-
-    return res.status(200).json({
-      data: formattedInventory,
-      message: 'Fetch Inventory Successfully',
-    });
+   
   } catch (error: any) {
     console.log('Internal Server Error :', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

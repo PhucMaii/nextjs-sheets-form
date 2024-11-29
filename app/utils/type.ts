@@ -103,6 +103,7 @@ export interface IItem {
   availability: boolean;
   user?: User;
   inventoryItemId?: number;
+  inventoryItem?: any;
   unit?: any;
   inventoryUnitId?: number;
   inventoryUnit?: any;

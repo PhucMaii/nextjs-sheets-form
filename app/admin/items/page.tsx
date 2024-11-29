@@ -142,9 +142,6 @@ export default function ItemPage() {
         return;
       }
 
-      // Optimistic UI Update
-      handleAddItemUI(response.data.data);
-
       // Update Real Data
       mutateItems();
 
@@ -153,11 +150,6 @@ export default function ItemPage() {
       console.log('There was an error: ', error);
       showNotification('error', error.response.data.error);
     }
-  };
-
-  const handleAddItemUI = (newItem: IItem) => {
-    setItems([...items, newItem]);
-    setBaseItems([...items, newItem]);
   };
 
   const handleDeleteCategory = async (targetObj: any) => {
@@ -256,9 +248,6 @@ export default function ItemPage() {
         return;
       }
 
-      // Optimistic UI Update
-      handleUpdateItemUI(response.data.data);
-
       // Update Real Data
       mutateItems();
 
@@ -267,17 +256,6 @@ export default function ItemPage() {
       console.log('There was an error: ', error);
       showNotification('error', error.response.data.error);
     }
-  };
-
-  const handleUpdateItemUI = (updatedItem: IItem) => {
-    const newItems = items.map((item: IItem) => {
-      if (item.id === updatedItem.id) {
-        return updatedItem;
-      }
-      return item;
-    });
-    setItems(newItems);
-    setBaseItems(newItems);
   };
 
   const saveItemArrangement = async () => {

@@ -72,19 +72,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       })
     }
 
-    let selectedUnit = await prisma.inventoryUnit.findFirst({
+    const selectedUnit = await prisma.inventoryUnit.findFirst({
       where: {
-        vendorItemId: newItem.unit.vendorItemId,
+        vendorItemId: newItem.unit.vendorItemId < 1 ? selectedInvetoryItem.vendorItem[0].id : newItem.unit.vendorItemId,
         unit: newItem.unit.unit,
         ratio: newItem.unit.ratio,
         unitPrice: newItem.unit.unitPrice,
       },
     });
-
-    // If user choose brand new unit as primary unit
-    if (newItem.unit.vendorItemId < 1) {
-      selectedUnit = newItem.unit;
-    }
 
 
     if (!selectedUnit) {
@@ -103,6 +98,27 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         inventoryUnitId: selectedUnit.id,
       },
     });
+
+    // Add new item into all schedule orders related to this category
+    const scheduleOrders = await prisma.scheduleOrders.findMany({
+      where: {
+        user: {
+          categoryId: newItem.categoryId,
+        }
+      },
+    });
+
+    for (const scheduleOrder of scheduleOrders) {
+      await prisma.orderedItems.create({
+        data: {
+          name: newItem.name,
+          price: newItem.price,
+          scheduledOrderId: scheduleOrder.id,
+          inventoryItemId: newItem.inventoryItemId,
+          quantity: 0,
+        }
+      });
+    }
 
     return res.status(201).json({
       data: createdItem,

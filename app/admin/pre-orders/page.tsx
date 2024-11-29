@@ -97,7 +97,7 @@ export default function ScheduledOrderPage() {
     `${API_URL.ROUTES}?day=${days[dayIndex]}`,
   );
 
-  const clientIds = routesResponse?.data[routeIndex].clients?.map(
+  const clientIds = routesResponse?.data[routeIndex]?.clients?.map(
     (userRoute: UserRoute) => {
       return userRoute.userId;
     },

@@ -11,10 +11,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import ModalHead from '@/app/lib/ModalHead';
 import { BoxModal } from '../styled';
 import { IItem } from '@/app/utils/type';
+import UnitRadio from '../../Radio/UnitRadio';
+import { getUniqueUnitRatios } from '@/app/utils/array';
 
 interface IProps {
   targetItem: IItem;
@@ -30,7 +32,7 @@ export enum UPDATE_OPTION {
   ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
+const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedField, setUpdatedField] = useState<string[]>([]);
@@ -39,11 +41,32 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
     UPDATE_OPTION.CURRENT_CATEGORY,
   );
 
+  // const [inventoryItem] = SWRFetchData(`${API_URL.ADMIN}/inventory/?inventoryItemId=${targetItem.inventoryItemId}`);
+
+  // const {
+  //   units,
+  //   selectedUnit,
+  //   UnitDisplay,
+  //   AddUnitModal,
+  //   EditUnitModal,
+  // } = useEditUnit(updatedItem.units, updatedItem.unit, showNotification, true);
+
   useEffect(() => {
     if (Object.keys(targetItem).length > 0) {
-      setUpdatedItem(targetItem);
+      const inventoryItemUnits = targetItem.inventoryItem.vendorItem.flatMap((item: any) => item.unit);
+      const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
+
+      setUpdatedItem({...targetItem, units: sellingUnits});
     }
   }, [targetItem]);
+
+  // useEffect(() => {
+  //   setUpdatedItem((prevState: any) => ({ ...prevState, inventoryUnit: selectedUnit }));
+  // }, [selectedUnit]);
+
+  // useEffect(() => {
+  //   setUpdatedItem((prevState: any) => ({ ...prevState, units }));
+  // }, [units]);
 
   const updateItem = async () => {
     const newUpdatedItem = {
@@ -166,36 +189,26 @@ export default function EditItem({ targetItem, handleUpdateItem }: IProps) {
                 }
               />
             </Grid>
-            {/* <Grid item xs={12} md={6}>
-              <Typography variant="h6">Subcategory:</Typography>
-            </Grid> */}
-            {/* <Grid item xs={12} md={6}>
-              <Select
-                fullWidth
-                disabled={!updatedItem.name.toLowerCase().includes('bean')}
-                value={updatedItem?.subCategoryId}
-                onChange={(e: any) =>
-                  setUpdatedItem({
-                    ...updatedItem,
-                    subCategoryId: +e.target.value,
-                  })
-                }
-              >
-                {subCategories &&
-                  [...subCategories, { name: 'N/A', id: 0 }].map(
-                    (subCategory: SubCategory | any) => {
-                      return (
-                        <MenuItem value={subCategory.id} key={subCategory.id}>
-                          {subCategory.name}
-                        </MenuItem>
-                      );
-                    },
-                  )}
-              </Select>
-            </Grid> */}
+            {updatedItem?.units?.length > 0 && (
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Typography variant="h6">Units:</Typography>
+                  <UnitRadio 
+                    units={updatedItem.units}
+                    value={JSON.stringify(updatedItem.inventoryUnit)}
+                    onChange={(e: any) => setUpdatedItem((prevState: any) => ({ ...prevState, inventoryUnit: JSON.parse(e.target.value), inventoryUnitId: JSON.parse(e.target.value).id }))}
+                    isShowPrice
+                  />
+                </Box>
+              </Grid>
+            )}
           </Grid>
         </BoxModal>
       </Modal>
     </>
   );
 }
+
+export default memo(EditItem, (prev, next) => {
+  return prev.targetItem === next.targetItem;
+});

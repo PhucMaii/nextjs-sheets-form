@@ -27,6 +27,7 @@ export default function UnitRadio({
   setEditUnit,
   isShowPrice,
 }: IProps) {
+  console.log(units, 'UNITS');
   return (
     <RadioGroup row name="unit" value={value} onChange={onChange}>
       {units.map((unit: any, index: number) => {

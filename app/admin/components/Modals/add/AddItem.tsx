@@ -110,9 +110,11 @@ export default function AddItem({
                 }
                 onChange={(e, newValue: any) => {
                   console.log('new value', newValue);
-                  const newUnits = newValue.vendorItem.flatMap((item: any) =>
+                  let newUnits = newValue.vendorItem.flatMap((item: any) =>
                     item.unit,
                   );
+
+                  newUnits = Array.from(new Map(newUnits.map((unit: any) => [unit.ratio, unit])).values());
                   setNewItem({
                     ...newItem,
                     name: newValue.name || '',
