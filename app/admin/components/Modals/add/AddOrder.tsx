@@ -99,20 +99,25 @@ export default function AddOrder({
       const timeString = moment(currentDate).format('HH:mm:ss');
 
       // Format data to have the same structure as backend
-      let submittedData: any = {
-        ['DELIVERY DATE']: deliveryDate,
-        ['NOTE']: note,
+      const submittedData: any = {
+        // ['DELIVERY DATE']: deliveryDate,
+        // ['NOTE']: note,
+        deliveryDate,
+        note,
         orderTime: `${timeString} ${dateString}`,
         isCheckUnavailableRange,
+        items: itemList,
+        createdBy: USER_ROLE.ADMIN, 
+        isForceOrder
       };
 
-      for (const item of itemList) {
-        submittedData = { ...submittedData, [item.name]: item.quantity };
-      }
+      // for (const item of itemList) {
+      //   submittedData = { ...submittedData, [item.name]: item.quantity };
+      // }
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
-        { ...submittedData, createdBy: USER_ROLE.ADMIN, isForceOrder },
+        submittedData,
       );
 
       if (response.data.error) {
@@ -198,7 +203,6 @@ export default function AddOrder({
           ...item,
           quantity: 0,
           totalPrice: 0,
-          inventoryItemId: item.inventoryItemId,
         };
       });
 

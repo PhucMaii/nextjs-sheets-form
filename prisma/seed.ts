@@ -18,13 +18,35 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.vendorItem.deleteMany({
+  await prisma.fifo.deleteMany({
     where: {
-      id: {
-        gt: 106,
-      },
-    },
+      quantity: {
+        lt: 0,
+      }
+    }
   });
+
+  await prisma.vendorItem.updateMany({
+    where: {
+      quantity: {
+        lt: 0
+      }
+    },
+    data: {
+      quantity: 0
+    }
+  })
+
+  await prisma.fifo.create({
+    data: {
+      inventoryItemId: 51,
+      vendorItemId: 24,
+      quantity: 10,
+      createdAt: '01:00:00 11/29/2024',
+      createdBy: 'Admin - Admin Test'
+    }
+  });
+
   // const createdAt = generateCurrentTime();
   // const createdBy = `Admin - Admin Test`;
 

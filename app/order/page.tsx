@@ -111,21 +111,20 @@ export default function OrderForm() {
       const timeString = moment(currentDate).format('HH:mm:ss');
 
       // Format data to have the same structure as backend
-      let submittedData: any = {
-        ['DELIVERY DATE']: deliveryDate,
-        ['NOTE']: note,
+      const submittedData: any = {
+        deliveryDate,
+        note,
         orderTime: `${timeString} ${dateString}`,
         isCheckUnavailableRange,
+        items: itemList,
+        createdBy: USER_ROLE.CLIENT,
       };
 
-      for (const item of itemList) {
-        submittedData = { ...submittedData, [item.name]: item.quantity };
-      }
+      // for (const item of itemList) {
+      //   submittedData = { ...submittedData, [item.name]: item.quantity };
+      // }
 
-      const response = await axios.post(API_URL.IMPORT_SHEETS, {
-        ...submittedData,
-        createdBy: USER_ROLE.CLIENT,
-      });
+      const response = await axios.post(API_URL.IMPORT_SHEETS, submittedData);
 
       if (response.data.warning) {
         showNotification('warning', response.data.warning);

@@ -41,7 +41,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             category: true,
           },
         },
-        items: true,
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          }
+        },
       },
     });
 

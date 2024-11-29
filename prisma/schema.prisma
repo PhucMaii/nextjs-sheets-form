@@ -89,7 +89,7 @@ model OrderedItems {
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   scheduledOrder ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  fifo           Fifo?           @relation(fields: [fifoId], references: [id], onDelete: Cascade)
+  fifo           Fifo?           @relation(fields: [fifoId], references: [id])
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
 }

@@ -115,6 +115,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           price: newItem.price,
           scheduledOrderId: scheduleOrder.id,
           inventoryItemId: newItem.inventoryItemId,
+          inventoryUnitId: selectedUnit.id,
           quantity: 0,
         }
       });

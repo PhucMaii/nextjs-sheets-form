@@ -55,19 +55,21 @@ export default function PlaceOrder({ showNotification }: IProps) {
       const timeString = moment(currentDate).format('HH:mm:ss');
 
       // Format data to have the same structure as backend
-      let submittedData: any = {
-        ['DELIVERY DATE']: deliveryDate,
-        ['NOTE']: note,
+      const submittedData: any = {
+        deliveryDate,
+        note,
         orderTime: `${timeString} ${dateString}`,
+        items: itemList,
+        createdBy: USER_ROLE.DRIVER
       };
 
-      for (const item of itemList) {
-        submittedData = { ...submittedData, [item.name]: item.quantity };
-      }
+      // for (const item of itemList) {
+      //   submittedData = { ...submittedData, [item.name]: item.quantity };
+      // }
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${selectedClient?.id}`,
-        { ...submittedData, createdBy: USER_ROLE.DRIVER },
+       submittedData,
       );
 
       if (response.data.error) {

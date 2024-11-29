@@ -23,6 +23,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         categoryId: existingUser?.categoryId,
       },
+      include: {
+        inventoryItem: true,
+        inventoryUnit: true,
+      }
     });
 
     return res.status(200).json({

@@ -44,159 +44,159 @@ export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
   return userOrders;
 };
 
-export const createOrder = async (
-  body: any,
-  existingUser: any,
-  createdBy: string,
-) => {
-  const prisma = new PrismaClient();
+// export const createOrder = async (
+//   body: any,
+//   existingUser: any,
+//   createdBy: string,
+// ) => {
+//   const prisma = new PrismaClient();
 
-  // Initialize new order
-  const newOrder = await prisma.orders.create({
-    data: {
-      deliveryDate: body['DELIVERY DATE'],
-      orderTime: body.orderTime,
-      userId: existingUser.id,
-      totalPrice: 0,
-      note: body['NOTE'],
-      status: ORDER_STATUS.INCOMPLETED,
-      createdBy,
-    },
-  });
+//   // Initialize new order
+//   const newOrder = await prisma.orders.create({
+//     data: {
+//       deliveryDate: body['DELIVERY DATE'],
+//       orderTime: body.orderTime,
+//       userId: existingUser.id,
+//       totalPrice: 0,
+//       note: body['NOTE'],
+//       status: ORDER_STATUS.INCOMPLETED,
+//       createdBy,
+//     },
+//   });
 
-  let totalPrice = 0;
-  const itemList: any = [];
-  // Loop through each item from request and save it to order
-  for (const item of Object.keys(body)) {
-    if (item === 'DELIVERY DATE') {
-      continue;
-    }
+//   let totalPrice = 0;
+//   const itemList: any = [];
+//   // Loop through each item from request and save it to order
+//   for (const item of Object.keys(body)) {
+//     if (item === 'DELIVERY DATE') {
+//       continue;
+//     }
 
-    if (item === 'NOTE') {
-      continue;
-    }
+//     if (item === 'NOTE') {
+//       continue;
+//     }
 
-    const itemData = await prisma.item.findFirst({
-      where: {
-        name: item,
-        categoryId: existingUser.categoryId,
-      },
-    });
+//     const itemData = await prisma.item.findFirst({
+//       where: {
+//         name: item,
+//         categoryId: existingUser.categoryId,
+//       },
+//     });
 
-    // TODO: Check if item exist when Item page set up correctly
+//     // TODO: Check if item exist when Item page set up correctly
 
-    // if (!itemData?.inventoryItemId) {
-    //   return res.status(500).json({
-    //     error: `Item ${item} has no inventory item`,
-    //   });
-    // }
-    // Get inventory item
-    let inventoryItem: any = null;
+//     // if (!itemData?.inventoryItemId) {
+//     //   return res.status(500).json({
+//     //     error: `Item ${item} has no inventory item`,
+//     //   });
+//     // }
+//     // Get inventory item
+//     let inventoryItem: any = null;
 
-    if (itemData?.inventoryItemId) {
-      inventoryItem = await prisma.inventoryItem.findUnique({
-        where: {
-          id: itemData.inventoryItemId,
-        },
-      });
-    }
+//     if (itemData?.inventoryItemId) {
+//       inventoryItem = await prisma.inventoryItem.findUnique({
+//         where: {
+//           id: itemData.inventoryItemId,
+//         },
+//       });
+//     }
 
-    // TODO: Check if item exist when Item page set up correctly
-    // if (!inventoryItem) {
-    //   return res.status(500).json({
-    //     error: `Inventory Item for item ${item} does not exist`,
-    //   });
-    // }
+//     // TODO: Check if item exist when Item page set up correctly
+//     // if (!inventoryItem) {
+//     //   return res.status(500).json({
+//     //     error: `Inventory Item for item ${item} does not exist`,
+//     //   });
+//     // }
 
-    if (itemData) {
-      totalPrice += itemData.price * body[item];
+//     if (itemData) {
+//       totalPrice += itemData.price * body[item];
 
-      const orderedItems = await prisma.orderedItems.create({
-        data: {
-          name: itemData.name,
-          price: itemData.price,
-          orderId: newOrder.id,
-          quantity: body[item],
-          inventoryItemId: itemData.inventoryItemId,
-        },
-      });
+//       const orderedItems = await prisma.orderedItems.create({
+//         data: {
+//           name: itemData.name,
+//           price: itemData.price,
+//           orderId: newOrder.id,
+//           quantity: body[item],
+//           inventoryItemId: itemData.inventoryItemId,
+//         },
+//       });
 
-      itemList.push({
-        ...orderedItems,
-        totalPrice: itemData.price * body[item],
-      });
+//       itemList.push({
+//         ...orderedItems,
+//         totalPrice: itemData.price * body[item],
+//       });
 
-      if (inventoryItem) {
-        // update inventory item
-        await prisma.inventoryItem.update({
-          where: {
-            id: inventoryItem.id,
-          },
-          data: {
-            quantity: inventoryItem.quantity - body[item],
-          },
-        });
-      }
-    }
-  }
+//       if (inventoryItem) {
+//         // update inventory item
+//         await prisma.inventoryItem.update({
+//           where: {
+//             id: inventoryItem.id,
+//           },
+//           data: {
+//             quantity: inventoryItem.quantity - body[item],
+//           },
+//         });
+//       }
+//     }
+//   }
 
-  // Update the order with the totalPrice
-  const updatedNewOrder = await prisma.orders.update({
-    where: {
-      id: newOrder.id,
-    },
-    data: {
-      totalPrice,
-    },
-    include: {
-      items: true,
-      user: {
-        include: {
-          category: true,
-        },
-      },
-    },
-  });
+//   // Update the order with the totalPrice
+//   const updatedNewOrder = await prisma.orders.update({
+//     where: {
+//       id: newOrder.id,
+//     },
+//     data: {
+//       totalPrice,
+//     },
+//     include: {
+//       items: true,
+//       user: {
+//         include: {
+//           category: true,
+//         },
+//       },
+//     },
+//   });
 
-  await pusherServer?.trigger('admin', 'incoming-order', {
-    ...updatedNewOrder,
-    items: itemList,
-    ...existingUser,
-    id: newOrder.id,
-    totalPrice,
-    category: existingUser.category,
-  });
+//   await pusherServer?.trigger('admin', 'incoming-order', {
+//     ...updatedNewOrder,
+//     items: itemList,
+//     ...existingUser,
+//     id: newOrder.id,
+//     totalPrice,
+//     category: existingUser.category,
+//   });
 
-  const items = await prisma.item.findMany({
-    where: {
-      categoryId: existingUser.categoryId,
-    },
-  });
-  // Generate object of quantity, price, and totalPrice
-  const orderDetails = body;
-  for (const item of items) {
-    if (Object.prototype.hasOwnProperty.call(body, item.name)) {
-      orderDetails[item.name] = {
-        quantity: orderDetails[item.name],
-        price: item.price,
-        totalPrice: orderDetails[item.name] * item.price,
-      };
-    }
-  }
+//   const items = await prisma.item.findMany({
+//     where: {
+//       categoryId: existingUser.categoryId,
+//     },
+//   });
+//   // Generate object of quantity, price, and totalPrice
+//   const orderDetails = body;
+//   for (const item of items) {
+//     if (Object.prototype.hasOwnProperty.call(body, item.name)) {
+//       orderDetails[item.name] = {
+//         quantity: orderDetails[item.name],
+//         price: item.price,
+//         totalPrice: orderDetails[item.name] * item.price,
+//       };
+//     }
+//   }
 
-  // Notify Email for admin
-  const isSendToAdmin = true;
-  await sendEmail(
-    existingUser,
-    updatedNewOrder.items,
-    newOrder.id,
-    body['DELIVERY DATE'],
-    isSendToAdmin,
-    body['NOTE'],
-  );
+//   // Notify Email for admin
+//   const isSendToAdmin = true;
+//   await sendEmail(
+//     existingUser,
+//     updatedNewOrder.items,
+//     newOrder.id,
+//     body['DELIVERY DATE'],
+//     isSendToAdmin,
+//     body['NOTE'],
+//   );
 
-  return updatedNewOrder;
-};
+//   return updatedNewOrder;
+// };
 
 export const overrideOrder = async (
   user: any,
@@ -214,6 +214,10 @@ export const overrideOrder = async (
         where: {
           id: item.id,
         },
+        include: {
+          fifo: true,
+          inventoryUnit: true,
+        }
       });
 
       if (!existingItem) {
@@ -237,9 +241,10 @@ export const overrideOrder = async (
       });
 
       // Update inventory item
-      if (item?.inventoryItemId) {
+      if (existingItem?.fifo && existingItem.inventoryUnit) {
         await updateSingleInventoryItem(
-          item.inventoryItemId,
+          existingItem.fifo,
+          existingItem.inventoryUnit,
           newItem.quantity,
           existingItem.quantity,
         );
@@ -269,9 +274,9 @@ export const overrideOrder = async (
     );
 
     await pusherServer?.trigger('override-order', 'incoming-order', {
+      ...updatedOrder,
       items: itemList,
       ...user,
-      ...updatedOrder,
       totalPrice: total,
       category: user.category,
       isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,

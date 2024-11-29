@@ -2,20 +2,33 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { PrismaClient } from '@prisma/client';
+import { OrderedItems, PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 import {
   checkHasClientOrder,
-  createOrder,
+  // createOrder,
   getCreatedBy,
   overrideOrder,
 } from './utils';
+import { createOrder } from '../admin/orders/POST';
+import { pusherServer } from '@/app/pusher';
+import { sendEmail } from '../utils/email';
 
 interface RequestQuery {
   userId?: string;
+}
+
+interface IBody {
+  deliveryDate: string,
+  note: string,
+  orderTime: string,
+  isCheckUnavailableRange?: boolean;
+  items: any[];
+  createdBy: USER_ROLE;
+  isForceOrder?: boolean;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -26,8 +39,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
     const { userId } = req.query as RequestQuery;
-    const body: any = req.body;
-    const isCheckUnavailableRange = body?.isCheckUnavailableRange;
+    const {deliveryDate, note, isCheckUnavailableRange, items, createdBy, isForceOrder}: IBody = req.body;
 
     let id = userId;
 
@@ -55,17 +67,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }
 
+    const formattedCreatedBy = await getCreatedBy(req, res, createdBy);
+
     // Check is delivery date in client's vacation range
     if (isCheckUnavailableRange) {
-      const deliveryDate = normalizeDate(new Date(body['DELIVERY DATE']));
+      const normalizedDeliveryDate = normalizeDate(new Date(deliveryDate));
       for (const dayRange of existingUser.unavailableDayRange) {
         const normalizedStartDate = normalizeDate(dayRange.startDate);
         const normalizedEndDate = normalizeDate(dayRange.endDate);
 
         normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
         if (
-          deliveryDate >= normalizedStartDate &&
-          deliveryDate <= normalizedEndDate
+          normalizedDeliveryDate >= normalizedStartDate &&
+          normalizedDeliveryDate <= normalizedEndDate
         ) {
           return res.status(200).json({
             warning: `Client ${
@@ -84,45 +98,63 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Check has user already ordered for target delivery date yet
     const userOrder = await checkHasClientOrder(
       existingUser.id,
-      body['DELIVERY DATE'],
+      deliveryDate,
     );
 
+    // Handle is user has already ordered for target date
     if (userOrder) {
-      if (body.createdBy === USER_ROLE.ADMIN && body?.isForceOrder) {
-        const createdBy = await getCreatedBy(req, res, body.createdBy);
-        await createOrder(body, existingUser, createdBy);
+      if (createdBy === USER_ROLE.ADMIN && isForceOrder) {
+        // await createOrder(body, existingUser, formattedCreatedBy);
+        const newOrder: any = await createOrder(existingUser, items, deliveryDate,
+          formattedCreatedBy, note
+        );
+
+        const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {
+          const itemTotalPrice = item.price * item.quantity;
+    
+          return {...item, totalPrice: itemTotalPrice}
+        })
+    
+        await pusherServer?.trigger('admin', 'incoming-order', {
+          ...newOrder,
+          items: itemListWithTotalPrice,
+          ...existingUser,
+          id: newOrder.id,
+          category: existingUser.category,
+        });
       }
 
-      if (body.createdBy !== USER_ROLE.CLIENT) {
+      if (createdBy !== USER_ROLE.CLIENT) {
         return res.status(200).json({
-          warning: `Client ${existingUser.clientName} has ordered for ${body['DELIVERY DATE']}`,
+          warning: `Client ${existingUser.clientName} has ordered for ${deliveryDate}`,
           data: userOrder,
           flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
         });
       }
 
-      const newItems = Object.keys(body).filter((item: string) => {
-        return item !== 'DELIVERY DATE' && item !== 'NOTE';
-      });
+      // TODO: OVERRIDE ORDER
 
-      const items = userOrder.items.map((item: any) => {
-        const targetNewItem = newItems.find(
-          (newItemName: any) => item.name === newItemName,
-        );
+      // const newItems = Object.keys(body).filter((item: string) => {
+      //   return item !== 'DELIVERY DATE' && item !== 'NOTE';
+      // });
 
-        if (targetNewItem) {
-          return { ...item, quantity: body[targetNewItem] };
-        }
+      // const items = userOrder.items.map((item: any) => {
+      //   const targetNewItem = newItems.find(
+      //     (newItemName: any) => item.name === newItemName,
+      //   );
 
-        return item;
-      });
+      //   if (targetNewItem) {
+      //     return { ...item, quantity: body[targetNewItem] };
+      //   }
 
-      const createdBy = await getCreatedBy(req, res, body.createdBy);
+      //   return item;
+      // });
+ 
       await overrideOrder(
         existingUser,
         userOrder.id,
         items,
-        body['NOTE'],
+        note,
         createdBy,
       );
       return res.status(201).json({
@@ -130,161 +162,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const createdBy = await getCreatedBy(req, res, body.createdBy);
-    await createOrder(body, existingUser, createdBy);
-    // const userCategory = await prisma.category.findUnique({
-    //   where: {
-    //     id: existingUser.categoryId,
-    //   },
-    // });
+    // await createOrder(existingUser, items, deliveryDate,
+    //   formattedCreatedBy, note
+    // )
+    const newOrder: any = await createOrder(existingUser, items, deliveryDate, formattedCreatedBy, note);
 
-    // const items = await prisma.item.findMany({
-    //   where: {
-    //     categoryId: existingUser.categoryId,
-    //   },
-    // });
+    const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {
+      const itemTotalPrice = item.price * item.quantity;
 
-    // const createdBy = await getCreatedBy(req, res, body.createdBy);
+      return {...item, totalPrice: itemTotalPrice}
+    })
 
-    // // Initialize new order
-    // const newOrder = await prisma.orders.create({
-    //   data: {
-    //     deliveryDate: body['DELIVERY DATE'],
-    //     orderTime: body.orderTime,
-    //     userId: existingUser.id,
-    //     totalPrice: 0,
-    //     note: body['NOTE'],
-    //     status: ORDER_STATUS.INCOMPLETED,
-    //     createdBy,
-    //   },
-    // });
+    await pusherServer?.trigger('admin', 'incoming-order', {
+      ...newOrder,
+      items: itemListWithTotalPrice,
+      ...existingUser,
+      id: newOrder.id,
+      category: existingUser.category,
+    });
 
-    // let totalPrice = 0;
-    // const itemList: any = [];
-    // // Loop through each item from request and save it to order
-    // for (const item of Object.keys(body)) {
-    //   if (item === 'DELIVERY DATE') {
-    //     continue;
-    //   }
-
-    //   if (item === 'NOTE') {
-    //     continue;
-    //   }
-
-    //   const itemData = await prisma.item.findFirst({
-    //     where: {
-    //       name: item,
-    //       categoryId: existingUser.categoryId,
-    //     },
-    //   });
-
-    //   // TODO: Check if item exist when Item page set up correctly
-
-    //   // if (!itemData?.inventoryItemId) {
-    //   //   return res.status(500).json({
-    //   //     error: `Item ${item} has no inventory item`,
-    //   //   });
-    //   // }
-    //   // Get inventory item
-    //   let inventoryItem: any = null;
-
-    //   if (itemData?.inventoryItemId) {
-    //     inventoryItem = await prisma.inventoryItem.findUnique({
-    //       where: {
-    //         id: itemData.inventoryItemId,
-    //       },
-    //     });
-    //   }
-
-    //   // TODO: Check if item exist when Item page set up correctly
-    //   // if (!inventoryItem) {
-    //   //   return res.status(500).json({
-    //   //     error: `Inventory Item for item ${item} does not exist`,
-    //   //   });
-    //   // }
-
-    //   if (itemData) {
-    //     totalPrice += itemData.price * body[item];
-
-    //     const orderedItems = await prisma.orderedItems.create({
-    //       data: {
-    //         name: itemData.name,
-    //         price: itemData.price,
-    //         orderId: newOrder.id,
-    //         quantity: body[item],
-    //         inventoryItemId: itemData.inventoryItemId,
-    //       },
-    //     });
-
-    //     itemList.push({
-    //       ...orderedItems,
-    //       totalPrice: itemData.price * body[item],
-    //     });
-
-    //     if (inventoryItem) {
-    //       // update inventoryItem
-    //       await prisma.inventoryItem.update({
-    //         where: {
-    //           id: inventoryItem.id,
-    //         },
-    //         data: {
-    //           quantity: inventoryItem.quantity - body[item],
-    //         },
-    //       });
-    //     }
-    //   }
-    // }
-
-    // // Update the order with the totalPrice
-    // const updatedNewOrder = await prisma.orders.update({
-    //   where: {
-    //     id: newOrder.id,
-    //   },
-    //   data: {
-    //     totalPrice,
-    //   },
-    //   include: {
-    //     items: true,
-    //     user: {
-    //       include: {
-    //         category: true,
-    //       },
-    //     },
-    //   },
-    // });
-
-    // await pusherServer?.trigger('admin', 'incoming-order', {
-    //   ...updatedNewOrder,
-    //   items: itemList,
-    //   ...existingUser,
-    //   id: newOrder.id,
-    //   totalPrice,
-    //   category: userCategory,
-    // });
-
-    // // Generate object of quantity, price, and totalPrice
-    // const orderDetails = body;
-    // for (const item of items) {
-    //   if (Object.prototype.hasOwnProperty.call(body, item.name)) {
-    //     orderDetails[item.name] = {
-    //       quantity: orderDetails[item.name],
-    //       price: item.price,
-    //       totalPrice: orderDetails[item.name] * item.price,
-    //     };
-    //   }
-    // }
-
-    // // Notify Email for admin
-    // const isSendToAdmin = true;
-    // await sendEmail(
-    //   existingUser,
-    //   updatedNewOrder.items,
-    //   newOrder.id,
-    //   body['DELIVERY DATE'],
-    //   isSendToAdmin,
-    //   body['NOTE'],
-    // );
-
+    const isSendToAdmin = true;
+    await sendEmail(
+      existingUser,
+      itemListWithTotalPrice,
+      newOrder.id,
+      newOrder.deliveryDate,
+      isSendToAdmin,
+      note,
+    );
     return res.status(200).json({
       // overviewFormattedData,
       message: 'Order Submitted Successfully',

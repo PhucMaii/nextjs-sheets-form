@@ -53,7 +53,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         isVoid: false,
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            fifo: true,
+            inventoryUnit: true,
+          }
+        },
       },
     });
 
@@ -64,9 +69,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedOrder.status === ORDER_STATUS.VOID
     ) {
       for (const item of updatedOrder.items) {
-        if (item?.inventoryItemId) {
-          // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
-          await restockInventoryItem(item.inventoryItemId, item.quantity);
+        if (item?.fifo && item?.inventoryUnit) {
+          await restockInventoryItem(item.fifo, item.inventoryUnit, item.quantity);
         }
       }
     }
@@ -77,9 +81,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedOrder.status !== ORDER_STATUS.VOID
     ) {
       for (const item of updatedOrder.items) {
-        if (item?.inventoryItemId) {
-          // await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
-          await subtractInventoryItem(item.inventoryItemId, item.quantity);
+        if (item?.fifo && item?.inventoryUnit) {
+          await subtractInventoryItem(item.fifo, item.inventoryUnit, item.quantity);
         }
       }
     }

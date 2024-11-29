@@ -99,6 +99,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             quantity: item.quantity,
             price: item.price,
             inventoryItemId: item.inventoryItemId,
+            inventoryUnitId: item.inventoryUnitId,
           },
         });
         continue;
@@ -219,6 +220,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             price: item.price,
             availability: true,
             inventoryItemId: item.inventoryItemId,
+            inventoryUnitId: item.inventoryUnitId,
           },
         });
       }

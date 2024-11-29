@@ -118,6 +118,9 @@ export interface OrderedItems {
   totalPrice: number;
   orderId?: number;
   inventoryItemId?: number;
+  inventoryItem?: any;
+  inventoryUnitId?: number;
+  inventoryUnit?: any;
 }
 
 export interface ScheduledOrder {
