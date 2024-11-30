@@ -72,7 +72,7 @@ export default function InventoryItemSearch({
         );
       }}
       sx={{ width: '100%' }}
-      freeSolo
+      freeSolo={role === USER_ROLE.ADMIN}
       renderInput={(params) => <TextField {...params} label="Item" />}
     />
   );

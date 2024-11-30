@@ -9,6 +9,7 @@ import React from 'react';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
 import { IInventoryUnit } from '@/app/utils/type';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IProps {
   units: IInventoryUnit[];
@@ -17,6 +18,7 @@ interface IProps {
   removeUnit?: any;
   setEditUnit?: any;
   isShowPrice?: boolean;
+  role?: USER_ROLE;
 }
 
 export default function UnitRadio({
@@ -26,6 +28,7 @@ export default function UnitRadio({
   removeUnit,
   setEditUnit,
   isShowPrice,
+  role,
 }: IProps) {
   console.log(units, 'UNITS');
   return (
@@ -42,7 +45,7 @@ export default function UnitRadio({
             />
 
             {removeUnit && (
-              <IconButton onClick={() => removeUnit(unit)} size="small">
+              <IconButton onClick={() => removeUnit(unit)} size="small" disabled={role === USER_ROLE.DRIVER}>
                 <RemoveIcon fontSize="small" />
               </IconButton>
             )}
@@ -57,6 +60,7 @@ export default function UnitRadio({
                     vendorId: unit?.vendorId,
                   }))
                 }
+                disabled={role === USER_ROLE.DRIVER}
                 size="small"
               >
                 <EditIcon fontSize="small" />

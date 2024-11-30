@@ -1,16 +1,13 @@
 import {
   AlertColor,
-  Autocomplete,
   Box,
   Button,
   Divider,
   FormControl,
   Grid,
-  IconButton,
   InputLabel,
   MenuItem,
   Modal,
-  OutlinedInput,
   Select,
   TextField,
   Typography,
@@ -24,15 +21,9 @@ import { Item, Order } from '../../../orders/page';
 import { formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
-import { OrderedItems } from '@/app/utils/type';
-import { errorColor } from '@/theme/color';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { LoadingButton } from '@mui/lab';
-import { SWRFetchData } from '@/app/utils/db';
 import AddVendor from '../add/AddVendor';
-import { filter } from './EditStockPurchased';
 
 interface PropTypes {
   order: Order;
@@ -50,15 +41,16 @@ const EditReportOrder = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
-  const [newItem, setNewItem] = useState<any>({
-    id: -1,
-    price: 0,
-    quantity: 0,
-    totalPrice: 0,
-    inventoryItemId: -1,
-  });
+  // const [newItem, setNewItem] = useState<any>({
+  //   id: -1,
+  //   price: 0,
+  //   quantity: 0,
+  //   totalPrice: 0,
+  //   inventoryItemId: -1,
+  // });
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
-  const [updateOption, setUpdateOption] = useState<UpdateOption>(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [updateOption, _setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );
   // const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
@@ -66,7 +58,7 @@ const EditReportOrder = ({
   // const [vendorItems, setVendorItems] = useState<any[]>([]);
 
   // const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
 
   // const sortedVendors = useMemo(() => {
   //   if (!vendors?.data) {
@@ -102,44 +94,44 @@ const EditReportOrder = ({
   //   }
   // }, [selectedVendorId, vendors]);
 
-  const addNewItem = () => {
-    const newItemName = newItem.name.toUpperCase();
-    const hasNameExisted = itemList.some(
-      (item: OrderedItems) => item.name === newItemName,
-    );
+  // const addNewItem = () => {
+  //   const newItemName = newItem.name.toUpperCase();
+  //   const hasNameExisted = itemList.some(
+  //     (item: OrderedItems) => item.name === newItemName,
+  //   );
 
-    if (newItem.name.trim() === '') {
-      showNotification('error', 'Item Name Is Missing');
-      return;
-    }
+  //   if (newItem.name.trim() === '') {
+  //     showNotification('error', 'Item Name Is Missing');
+  //     return;
+  //   }
 
-    if (!newItem?.id || newItem.id === -1) {
-      showNotification('error', 'Inventory Item Is Required');
-      return;
-    }
-    if (hasNameExisted) {
-      showNotification('error', 'Item Name Existed Already');
-    } else {
-      const totalPrice = newItem.quantity * newItem.price;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...restOfNewItem } = newItem;
-      const newItemData: any = {
-        ...restOfNewItem,
-        totalPrice,
-        name: newItemName,
-        inventoryItemId: id,
-      };
-      setItemList([...itemList, newItemData]);
-      setNewItem({
-        id: -1,
-        name: '',
-        price: 0,
-        quantity: 0,
-        totalPrice: 0,
-        inventoryItemId: -1,
-      });
-    }
-  };
+  //   if (!newItem?.id || newItem.id === -1) {
+  //     showNotification('error', 'Inventory Item Is Required');
+  //     return;
+  //   }
+  //   if (hasNameExisted) {
+  //     showNotification('error', 'Item Name Existed Already');
+  //   } else {
+  //     const totalPrice = newItem.quantity * newItem.price;
+  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //     const { id, ...restOfNewItem } = newItem;
+  //     const newItemData: any = {
+  //       ...restOfNewItem,
+  //       totalPrice,
+  //       name: newItemName,
+  //       inventoryItemId: id,
+  //     };
+  //     setItemList([...itemList, newItemData]);
+  //     setNewItem({
+  //       id: -1,
+  //       name: '',
+  //       price: 0,
+  //       quantity: 0,
+  //       totalPrice: 0,
+  //       inventoryItemId: -1,
+  //     });
+  //   }
+  // };
 
   const handleDateChange = (e: any) => {
     const formattedDate: string = formatDateChanged(e);
@@ -167,9 +159,9 @@ const EditReportOrder = ({
     setItemList(newItemList);
   };
 
-  const handleNewItemOnChange = (key: string, value: any) => {
-    setNewItem({ ...newItem, [key]: value });
-  };
+  // const handleNewItemOnChange = (key: string, value: any) => {
+  //   setNewItem({ ...newItem, [key]: value });
+  // };
 
   const calculateNewTotalPrice = () => {
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
@@ -198,12 +190,6 @@ const EditReportOrder = ({
         showNotification('error', response.data.error);
         return;
       }
-
-      // handleUpdateOrderUI({
-      //   ...order,
-      //   items: itemList,
-      //   totalPrice,
-      // });
 
       showNotification('success', response.data.message);
       setIsSubmitting(false);
@@ -250,37 +236,37 @@ const EditReportOrder = ({
     }
   };
 
-  const removeItem = (itemName: string) => {
-    const newItemList = itemList.filter((item: OrderedItems) => {
-      return item.name !== itemName;
-    });
+  // const removeItem = (itemName: string) => {
+  //   const newItemList = itemList.filter((item: OrderedItems) => {
+  //     return item.name !== itemName;
+  //   });
 
-    setItemList(newItemList);
-  };
+  //   setItemList(newItemList);
+  // };
 
-  const selectInventoryItem = (newValue: any) => {
-    if (newValue?.inputValue) {
-      setNewItem({
-        ...newItem,
-        id: 0,
-        price: 0,
-        unit: 'bags',
-        name: newValue.inputValue,
-        // vendorId: selectedVendorId,
-        inventoryItemId: -1,
-      });
-    } else {
-      setNewItem({
-        ...newItem,
-        id: newValue?.id || 0,
-        price: newValue?.unitPrice || 0,
-        name: newValue?.name,
-        // vendorId: selectedVendorId,
-        unit: newItem?.unit || 'bags',
-        inventoryItemId: newItem?.inventoryItemId || -1,
-      });
-    }
-  };
+  // const selectInventoryItem = (newValue: any) => {
+  //   if (newValue?.inputValue) {
+  //     setNewItem({
+  //       ...newItem,
+  //       id: 0,
+  //       price: 0,
+  //       unit: 'bags',
+  //       name: newValue.inputValue,
+  //       // vendorId: selectedVendorId,
+  //       inventoryItemId: -1,
+  //     });
+  //   } else {
+  //     setNewItem({
+  //       ...newItem,
+  //       id: newValue?.id || 0,
+  //       price: newValue?.unitPrice || 0,
+  //       name: newValue?.name,
+  //       // vendorId: selectedVendorId,
+  //       unit: newItem?.unit || 'bags',
+  //       inventoryItemId: newItem?.inventoryItemId || -1,
+  //     });
+  //   }
+  // };
 
   return (
     <>
@@ -363,11 +349,11 @@ const EditReportOrder = ({
                 </LoadingButton>
               </Grid>
             </Grid>
-            <Divider textAlign="center" sx={{ my: 3 }}>
+            {/* <Divider textAlign="center" sx={{ my: 3 }}>
               Add items
-            </Divider>
+            </Divider> */}
             <Grid container spacing={3} mb={2}>
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <UpdateChoiceSelection
                   updateOption={updateOption}
                   setUpdateOption={setUpdateOption}
@@ -475,7 +461,7 @@ const EditReportOrder = ({
                 <Button fullWidth variant="contained" onClick={addNewItem}>
                   + Add
                 </Button>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12}>
                 <Divider>Items</Divider>
               </Grid>
@@ -503,9 +489,9 @@ const EditReportOrder = ({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          <IconButton onClick={() => removeItem(item.name)}>
+                          {/* <IconButton onClick={() => removeItem(item.name)}>
                             <RemoveCircleIcon sx={{ color: errorColor }} />
-                          </IconButton>
+                          </IconButton> */}
                         </Box>
                       </Grid>
                       <Grid item container columnSpacing={2}>

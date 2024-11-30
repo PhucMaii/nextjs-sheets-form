@@ -1,31 +1,22 @@
 import {
   AlertColor,
-  Autocomplete,
   Box,
   Button,
   Divider,
-  FormControl,
   Grid,
-  IconButton,
-  InputLabel,
   MenuItem,
   Modal,
-  OutlinedInput,
   Select,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
-import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { OrderedItems, IRoutes, ScheduledOrder } from '@/app/utils/type';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import { errorColor } from '@/theme/color';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
-import { SWRFetchData } from '@/app/utils/db';
 
 interface IProps {
   order: ScheduledOrder;
@@ -47,13 +38,13 @@ export default function EditScheduleOrder({
   mutateOrders,
 }: IProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [newItem, setNewItem] = useState<any>({
-    name: '',
-    price: 0,
-    quantity: 0,
-    totalPrice: 0,
-    inventoryItemId: -1,
-  });
+  // const [newItem, setNewItem] = useState<any>({
+  //   name: '',
+  //   price: 0,
+  //   quantity: 0,
+  //   totalPrice: 0,
+  //   inventoryItemId: -1,
+  // });
   const [newRouteId, setNewRouteId] = useState<number>(routeId);
   const [itemList, setItemList] = useState<OrderedItems[]>(() => {
     const formattedItems = order.items.map((item: OrderedItems) => {
@@ -63,46 +54,55 @@ export default function EditScheduleOrder({
     return formattedItems;
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [updateOption, setUpdateOption] = useState<UpdateOption>(
+  const [updateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );
 
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  useEffect(() => {
+    const formattedItems = order.items.map((item: OrderedItems) => {
+      const totalPrice = item.quantity * item.price;
+      return { ...item, totalPrice };
+    });
+    
+    setItemList(formattedItems);
+  }, [order]);
 
-  const addNewItem = (e: any) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
 
-    if (newItem.inventoryItemId === -1) {
-      showNotification('error', 'Inventory Item Is Missing');
-      return;
-    }
+  // const addNewItem = (e: any) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
 
-    const newItemName = newItem.name.toUpperCase();
-    const hasNameExisted = itemList.some(
-      (item: OrderedItems) =>
-        item.name === newItemName ||
-        item.inventoryItemId === newItem.inventoryItemId,
-    );
+  //   if (newItem.inventoryItemId === -1) {
+  //     showNotification('error', 'Inventory Item Is Missing');
+  //     return;
+  //   }
 
-    if (newItem.name.trim() === '') {
-      showNotification('error', 'Item Name Is Missing');
-      return;
-    }
+  //   const newItemName = newItem.name.toUpperCase();
+  //   const hasNameExisted = itemList.some(
+  //     (item: OrderedItems) =>
+  //       item.name === newItemName ||
+  //       item.inventoryItemId === newItem.inventoryItemId,
+  //   );
 
-    if (hasNameExisted) {
-      showNotification('error', 'Inventory Item Existed Already');
-    } else {
-      const totalPrice = newItem.quantity * newItem.price;
-      setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
-      setNewItem({
-        name: '',
-        price: 0,
-        quantity: 0,
-        totalPrice: 0,
-      });
-    }
-  };
+  //   if (newItem.name.trim() === '') {
+  //     showNotification('error', 'Item Name Is Missing');
+  //     return;
+  //   }
+
+  //   if (hasNameExisted) {
+  //     showNotification('error', 'Inventory Item Existed Already');
+  //   } else {
+  //     const totalPrice = newItem.quantity * newItem.price;
+  //     setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
+  //     setNewItem({
+  //       name: '',
+  //       price: 0,
+  //       quantity: 0,
+  //       totalPrice: 0,
+  //     });
+  //   }
+  // };
 
   const calculateNewTotalPrice = () => {
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
@@ -137,17 +137,17 @@ export default function EditScheduleOrder({
     setItemList(newItemList);
   };
 
-  const handleNewItemOnChange = (key: string, value: any) => {
-    setNewItem({ ...newItem, [key]: value });
-  };
+  // const handleNewItemOnChange = (key: string, value: any) => {
+  //   setNewItem({ ...newItem, [key]: value });
+  // };
 
-  const removeItem = (itemName: string) => {
-    const newItemList = itemList.filter((item: OrderedItems) => {
-      return item.name !== itemName;
-    });
+  // const removeItem = (itemName: string) => {
+  //   const newItemList = itemList.filter((item: OrderedItems) => {
+  //     return item.name !== itemName;
+  //   });
 
-    setItemList(newItemList);
-  };
+  //   setItemList(newItemList);
+  // };
 
   const switchRoute = async () => {
     if (newRouteId === routeId) {
@@ -266,12 +266,12 @@ export default function EditScheduleOrder({
               </LoadingButton>
             </Box>
           </Box>
-          <Divider textAlign="center" sx={{ mb: 1 }}>
+          {/* <Divider textAlign="center" sx={{ mb: 1 }}>
             Add items
-          </Divider>
-          <Box overflow="auto" maxHeight="70vh">
+          </Divider> */}
+          <Box>
             <Grid container spacing={3} mb={2}>
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <UpdateChoiceSelection
                   updateOption={updateOption}
                   setUpdateOption={setUpdateOption}
@@ -358,7 +358,7 @@ export default function EditScheduleOrder({
                 >
                   + Add
                 </Button>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12}>
                 <Divider>Items</Divider>
               </Grid>
@@ -371,9 +371,9 @@ export default function EditScheduleOrder({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          <IconButton onClick={() => removeItem(item.name)}>
+                          {/* <IconButton onClick={() => removeItem(item.name)}>
                             <RemoveCircleIcon sx={{ color: errorColor }} />
-                          </IconButton>
+                          </IconButton> */}
                         </Box>
                       </Grid>
                       <Grid item container columnSpacing={2}>

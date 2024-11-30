@@ -54,7 +54,9 @@ export default function AddExpense({
   };
 
   useEffect(() => {
-    fetchAdminsAndDrivers();
+    if (open) {
+      fetchAdminsAndDrivers();
+    }
   }, [open]);
 
   const handleAddExpense = async () => {

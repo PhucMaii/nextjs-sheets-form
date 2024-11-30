@@ -33,11 +33,12 @@ import AddIcon from '@mui/icons-material/Add';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import EditUnit from './EditUnit';
 import UnitRadio from '../../Radio/UnitRadio';
+import { grey } from '@mui/material/colors';
+import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 interface IProps {
   stockPurchased: IExpense;
   showNotification: (type: AlertColor, message: string) => void;
-  adminsAndDrivers: string[];
 }
 
 export const filter = createFilterOptions<any>();
@@ -45,11 +46,8 @@ export const filter = createFilterOptions<any>();
 const EditStockPurchased = ({
   stockPurchased,
   showNotification,
-  adminsAndDrivers,
 }: IProps) => {
-  // const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([
-  //   'Admin - Admin Test',
-  // ]);
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, onChangeOpen] = useMultipleBoolean({
     isOpenAddVendor: false,
@@ -98,9 +96,16 @@ const EditStockPurchased = ({
     return vendorsSorted;
   }, [vendors]);
 
-  // useEffect(() => {
-  //   fetchAdminsAndDrivers();
-  // }, []);
+  const fetchAdminsAndDrivers = async () => {
+    const user: any = getAdminsAndDrivers(showNotification);
+    setAdminsAndDrivers(user);
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchAdminsAndDrivers();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (purchasedItems.length > 0) {
@@ -148,6 +153,7 @@ const EditStockPurchased = ({
         console.log('VENDOR ITEM', { vendorItem, item });
 
         return {
+          ...item,
           id: item.id,
           name: item.name,
           quantity: item.quantity,
@@ -581,23 +587,6 @@ const EditStockPurchased = ({
                         <AddIcon />
                       </IconButton>
                     </Box>
-                    {/* <RadioGroup row name="unit" value={JSON.stringify(promptedItem.unit)} onChange={(e: any) => setPromptedItem({...promptedItem, unit: JSON.parse(e.target.value)})}>
-                  {
-                    promptedItem.units.map((unit: any, index: number) => {
-                      return (
-                        <Box display="flex" alignItems="center" mx={2}>
-                          <FormControlLabel key={index} value={JSON.stringify(unit)} control={<Radio />} label={`1:${unit.ratio} - ${unit.unit}`} />
-                          <IconButton onClick={() => removeUnit(unit)} size="small">
-                            <RemoveIcon fontSize='small' />
-                          </IconButton>
-                          <IconButton onClick={() => setEditUnit({unit: unit, open: true, unitIndex: index})} size="small">
-                            <EditIcon fontSize='small' />
-                          </IconButton>
-                        </Box>
-                      )
-                    })
-                  }
-              </RadioGroup> */}
                     <UnitRadio
                       units={promptedItem.units}
                       onChange={(e: any) =>
@@ -646,6 +635,8 @@ const EditStockPurchased = ({
 
             {purchasedItems.length > 0 &&
               purchasedItems.map((item: any, index) => {
+                console.log(item, 'item');
+                const disabledItem = item?.fifo?.orderedItems?.length > 0;
                 return (
                   <Grid container spacing={1} key={index}>
                     <Grid item xs={12} fontWeight="bold">
@@ -653,8 +644,8 @@ const EditStockPurchased = ({
                         <Typography variant="h6" fontWeight="bold">
                           {item.name}
                         </Typography>
-                        <IconButton onClick={() => removeItem(item.id)}>
-                          <RemoveCircleIcon sx={{ color: errorColor }} />
+                        <IconButton onClick={() => removeItem(item.id)} disabled={disabledItem}>
+                          <RemoveCircleIcon sx={{ color: disabledItem ? grey[500] : errorColor }} />
                         </IconButton>
                       </Box>
                     </Grid>
@@ -669,6 +660,7 @@ const EditStockPurchased = ({
                           }
                           type="number"
                           inputProps={{ min: 0 }}
+                          disabled={disabledItem}
                         />
                       </Grid>
                       <Grid item xs={6}>
@@ -681,6 +673,7 @@ const EditStockPurchased = ({
                           }
                           type="number"
                           inputProps={{ min: 0 }}
+                          disabled={disabledItem}
                         />
                       </Grid>
                     </Grid>
@@ -780,8 +773,8 @@ const EditStockPurchased = ({
                 <MenuItem value={'-- Choose who spent --'} disabled>
                   -- Choose who spent --
                 </MenuItem>
-                {adminsAndDrivers.length > 0 &&
-                  adminsAndDrivers.map((person: string) => {
+                {adminsAndDrivers && adminsAndDrivers?.length > 0 &&
+                  adminsAndDrivers?.map((person: string) => {
                     return <MenuItem value={person}>{person}</MenuItem>;
                   })}
               </Select>

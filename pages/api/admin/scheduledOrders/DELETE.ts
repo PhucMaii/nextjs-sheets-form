@@ -29,6 +29,50 @@ export default async function DELETE(
       userId,
     } = req.body as BodyTypes;
 
+    if (scheduleOrderList && routeId) {
+      const deletedScheduledOrderIds = scheduleOrderList.map((order: any) => Number(order.id));
+      
+      await prisma.scheduleOrders.deleteMany({
+        where: {
+          id: {
+            in: deletedScheduledOrderIds
+          }
+        }
+      });
+
+      await prisma.userRoute.deleteMany({
+        where: {
+          userId: {
+            in: scheduleOrderList.map((order: any) => order.userId)
+          },
+          routeId
+        }
+      })
+      // for (const order of scheduleOrderList) {
+      //   const existingOrder = await prisma.scheduleOrders.findUnique({
+      //     where: {
+      //       id: Number(order.id),
+      //     },
+      //   });
+
+      //   if (!existingOrder) {
+      //     return res.status(404).json({
+      //       error: 'Order Not Found',
+      //     });
+      //   }
+
+      //   await prisma.scheduleOrders.delete({
+      //     where: {
+      //       id: Number(order.id),
+      //     },
+      //   });
+      // }
+
+      return res.status(200).json({
+        message: 'Schedule Orders Deleted Successfully'
+      })
+    }
+
     // get all clients from selected route
     const selectedRoute = await prisma.route.findUnique({
       where: {
@@ -63,31 +107,11 @@ export default async function DELETE(
 
     if (deleteOption === DELETE_OPTION.TEMPORARY) {
       return res.status(200).json({
-        message: `Client Removed From Route Id ${routeId} Successfully`,
+        message: `Client Removed From Route x ${routeId} Successfully`,
       });
     }
 
-    if (scheduleOrderList) {
-      for (const order of scheduleOrderList) {
-        const existingOrder = await prisma.scheduleOrders.findUnique({
-          where: {
-            id: Number(order.id),
-          },
-        });
-
-        if (!existingOrder) {
-          return res.status(404).json({
-            error: 'Order Not Found',
-          });
-        }
-
-        await prisma.scheduleOrders.delete({
-          where: {
-            id: Number(order.id),
-          },
-        });
-      }
-    } else if (scheduleOrderId) {
+   if (scheduleOrderId) {
       const existingOrder = await prisma.scheduleOrders.findUnique({
         where: {
           id: Number(scheduleOrderId),

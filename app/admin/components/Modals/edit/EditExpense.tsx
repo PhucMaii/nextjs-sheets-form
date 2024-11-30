@@ -17,21 +17,20 @@ import { IExpense, IPaymentMethod } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
+import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 interface IProps {
   transaction: IExpense;
   // paymentMethods: IPaymentMethod[];
-  adminsAndDrivers: string[];
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function EditExpense({
   transaction,
   // paymentMethods,
-  adminsAndDrivers,
   showNotification,
 }: IProps) {
-  // const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [updatedExpense, setUpdatedExpense] = useState<IExpense>(transaction);
@@ -52,10 +51,16 @@ export default function EditExpense({
     });
   };
 
-  // useEffect(() => {
-  //   fetchAdmins();
-  //   fetchDrivers();
-  // }, []);
+  const fetchAdminsAndDrivers = async () => {
+    const user: any = await getAdminsAndDrivers(showNotification);
+    setAdminsAndDrivers(user);
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchAdminsAndDrivers()
+    }
+  }, [open]);
 
   // const fetchAdmins = async () => {
   //   try {
@@ -201,7 +206,7 @@ export default function EditExpense({
                 <MenuItem value="-- Choose who spent --" disabled>
                   -- Choose who spent --
                 </MenuItem>
-                {adminsAndDrivers.length > 0 &&
+                {adminsAndDrivers && adminsAndDrivers.length > 0 &&
                   adminsAndDrivers.map(
                     (adminOrDriver: string, index: number) => (
                       <MenuItem key={index} value={adminOrDriver}>

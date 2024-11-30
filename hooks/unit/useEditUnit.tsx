@@ -12,12 +12,14 @@ import AddUnit from '@/app/admin/components/Modals/add/AddUnit';
 import EditUnit from '@/app/admin/components/Modals/edit/EditUnit';
 import UnitRadio from '@/app/admin/components/Radio/UnitRadio';
 import AddIcon from '@mui/icons-material/Add';
+import { USER_ROLE } from '@/app/utils/enum';
 
 const useEditUnit = (
   initialUnits: IInventoryUnit[] = [],
   initialSelectedUnit: IInventoryUnit | null = null,
   showNotification: (type: AlertColor, message: string) => void,
   isShowPrice: boolean = false,
+  role: USER_ROLE = USER_ROLE.ADMIN
 ) => {
   const [addUnitBoolean, onChangeAddUnitBoolean] = useMultipleBoolean({
     open: false,
@@ -36,6 +38,10 @@ const useEditUnit = (
   useEffect(() => {
     setUnits(initialUnits);
   }, [initialUnits]);
+
+  useEffect(() => {
+    setSelectedUnit(initialSelectedUnit);
+  }, [initialSelectedUnit])
 
   const addUnit = (newUnit: IInventoryUnit) => {
     if (units.length === 0) {
@@ -174,7 +180,7 @@ const useEditUnit = (
     <FormControl>
       <Box display="flex" alignItems="center" gap={1}>
         <FormLabel id="unit">Units</FormLabel>
-        <IconButton onClick={() => onChangeAddUnitBoolean('open', true)}>
+        <IconButton onClick={() => onChangeAddUnitBoolean('open', true)} disabled={role === USER_ROLE.DRIVER}>
           <AddIcon />
         </IconButton>
       </Box>
@@ -185,6 +191,7 @@ const useEditUnit = (
         removeUnit={removeUnit}
         setEditUnit={setEditUnit}
         isShowPrice={isShowPrice}
+        role={role}
       />
     </FormControl>
   );

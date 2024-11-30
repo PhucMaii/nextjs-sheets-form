@@ -159,13 +159,11 @@ const TransactionsTable = ({
                           <EditStockPurchased
                             stockPurchased={transaction}
                             showNotification={showNotification}
-                            adminsAndDrivers={adminsAndDrivers}
                           />
                         ) : (
                           <EditExpense
                             transaction={transaction}
                             showNotification={showNotification}
-                            adminsAndDrivers={adminsAndDrivers}
                           />
                         )}
                       </Box>

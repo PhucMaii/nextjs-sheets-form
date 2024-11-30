@@ -89,7 +89,7 @@ export default function StockPurchased({
     EditUnitModal,
     UnitDisplay,
     onChangeAddUnitBoolean,
-  } = useEditUnit(promptedItem.units, promptedItem.unit, showNotification);
+  } = useEditUnit(promptedItem.units, promptedItem.unit, showNotification, false, role);
 
   // console.log(promptedItem?.units, 'promptedItem?.units');
 
@@ -209,9 +209,14 @@ export default function StockPurchased({
       return;
     }
 
+    if (!promptedItem?.unit) {
+      showNotification('error', 'Please select inventory unit');
+      return;
+    }
+
     if (role === USER_ROLE.DRIVER) {
       const existingItemInVendor = vendorItems.find((item: any) => {
-        return item.name === promptedItem.name;
+        return item.inventoryItem.name === promptedItem.name;
       });
 
       if (!existingItemInVendor) {

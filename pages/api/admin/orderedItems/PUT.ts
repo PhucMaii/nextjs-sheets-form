@@ -49,6 +49,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userCategoryId,
     } = updatedData as BodyType;
 
+    console.log(updatedItems, 'updatedItems')
+
     // Bad cases
     if (updateOption === UpdateOption.CREATE) {
       const existingCategory = await prisma.category.findUnique({
@@ -231,7 +233,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       );
 
       // create new items
-      const newItems = await prisma.item.createMany({
+      await prisma.item.createMany({
         data: formattedUpdatedItems,
       });
 
@@ -464,6 +466,7 @@ const formatUpdatedItems = async (
         categoryId: categoryId,
         availability: true,
         inventoryItemId: item?.inventoryItemId || null,
+        inventoryUnitId: item?.inventoryUnitId || null,
       };
     }),
   );
@@ -492,6 +495,8 @@ const generateScheduleOrderItems = (
         price,
         quantity: existingItem.quantity,
         scheduledOrderId: scheduleOrder.id,
+        inventoryItemId: existingItem.inventoryItemId,
+        inventoryUnitId: existingItem.inventoryUnitId,
       };
     }
 
@@ -511,6 +516,8 @@ const generateScheduleOrderItems = (
       price,
       quantity: userId === scheduleOrder.userId ? quantity : 0,
       scheduledOrderId: scheduleOrder.id,
+      inventoryItemId: newItem.inventoryItemId,
+      inventoryUnitId: newItem.inventoryUnitId
     };
   });
 

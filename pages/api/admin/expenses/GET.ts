@@ -44,6 +44,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           orderedItems: {
             include: {
               inventoryUnit: true,
+              fifo: {
+                include: {
+                  orderedItems: true,
+                }
+              }
             },
           },
         },
@@ -74,6 +79,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         orderedItems: {
           include: {
             inventoryUnit: true,
+            fifo: {
+              include: {
+                orderedItems: true,
+              }
+            }
           },
         },
       },

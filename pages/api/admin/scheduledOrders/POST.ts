@@ -61,6 +61,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
               where: {
                 scheduledOrderId: sameDayOrder.id,
                 inventoryItemId: item.inventoryItemId,
+                inventoryUnitId: item.inventoryUnitId,
                 name: item.name,
               },
               data: {

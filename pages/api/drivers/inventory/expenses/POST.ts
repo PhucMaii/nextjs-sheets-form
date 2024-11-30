@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
-import { checkIsExpenseValid } from '@/pages/api/admin/inventory/expenses/POST';
+import { IInventoryUnit } from '@/app/utils/type';
+import { checkAndUpdateUnits, checkIsExpenseValid, createFifo, createOrderedItems, updateVendorItemQuantity } from '@/pages/api/admin/inventory/expenses/POST';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -19,7 +20,9 @@ interface IBody {
     quantity: number;
     unitPrice: number;
     vendorId: number;
-    unit: string;
+    unit: IInventoryUnit;
+    units: IInventoryUnit[];
+    inventoryItemId: number;
   }[];
 }
 
@@ -88,31 +91,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     if (invoice && invoice.trim() !== '') {
       // Check if vendor has expense on that date
-      // const existingVendorExpense = await prisma.expense.findMany({
-      //   where: {
-      //     invoice: invoice,
-      //     date: date,
-      //     vendors: {
-      //       some: {
-      //         vendorId: {
-      //           in: vendors,
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
-
-      // if (existingVendorExpense.length > 0) {
-      //   return res
-      //     .status(409)
-      //     .json({ error: `Expense Already Exists For "${invoice}" On ${date}` });
-      // }
       const isExpenseValid = await checkIsExpenseValid(invoice, date, vendors);
 
       if (!isExpenseValid.ok) {
         return res.status(409).json({ error: isExpenseValid.error });
       }
     }
+
+    const createdBy = `Driver - ${driver.name}`
 
     const newExpense = await prisma.expense.create({
       data: {
@@ -122,50 +108,94 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         description: description,
         status,
         paymentMethodId: paymentMethodId,
-        spentBy: `Driver - ${driver.name}`,
+        spentBy: createdBy,
         createdAt: createdAt,
         codBoardId: dateBoard.id,
-        createdBy: `Driver - ${driver.name}`,
+        createdBy,
       },
     });
 
-    const inventoryItems = await prisma.inventoryItem.findMany({});
+    const vendorItems = await prisma.vendorItem.findMany({});
     // Create ordered items
     if (items.length > 0) {
-      await prisma.orderedItems.createMany({
-        data: items.map((item: any) => {
-          return {
-            name: item.name,
-            price: item.unitPrice,
-            quantity: item.quantity,
-            expenseId: newExpense.id,
-          };
-        }),
+      await createFifo(items, createdAt, createdBy);
+
+      const vendorItems = await prisma.vendorItem.findMany({
+        where: {
+          id: {
+            in: items.map((item: any) => item.id),
+          },
+        },
+        include: {
+          unit: true,
+        },
       });
 
       for (const item of items) {
-        // Only allow driver to select old items, not allow them to create new items -> only inventory items
-        const existedItem = inventoryItems.find((inventoryItem: any) => {
-          return inventoryItem.id === item.id;
-        });
+        // STEP 2: Update quantity in vendor items
+        const existedItem: any = vendorItems.find(
+          (vendorItem) => vendorItem.id === item.id,
+        );
 
-        if (!existedItem) {
-          return res.status(404).json({
-            error:
-              'Driver Can Only Select Inventory Items, Not Allow To Create New Items',
-          });
-        }
+        await updateVendorItemQuantity(existedItem, item);
 
-        await prisma.inventoryItem.update({
-          where: {
-            id: existedItem.id,
-          },
-          data: {
-            quantity: existedItem.quantity + item.quantity,
-            unitPrice: item.unitPrice,
-          },
+        // STEP 3: Check unit price in Inventory Unit (Update if needed)
+        await checkAndUpdateUnits(
+          existedItem.unit,
+          item.units,
+          item.id,
+          createdAt,
+          createdBy,
+        );
+      }
+      // STEP 4: Create OrderedItems
+      // Use item already exist to easy to retrieve unitPrice
+      const response = await createOrderedItems(
+        items,
+        newExpense,
+        createdAt,
+        createdBy,
+      );
+
+      if (!response.ok) {
+        return res.status(404).json({
+          error: response.error,
         });
       }
+      // await prisma.orderedItems.createMany({
+      //   data: items.map((item: any) => {
+      //     return {
+      //       name: item.name,
+      //       price: item.unitPrice,
+      //       quantity: item.quantity,
+      //       expenseId: newExpense.id,
+      //     };
+      //   }),
+      // });
+
+      // for (const item of items) {
+      //   // Only allow driver to select old items, not allow them to create new items -> only inventory items
+      //   const existedItem = vendorItems.find((vendorItem: any) => {
+      //     return vendorItem.id === item.id;
+      //   });
+
+      //   if (!existedItem) {
+      //     return res.status(404).json({
+      //       error:
+      //         'Driver Can Only Select Inventory Items, Not Allow To Create New Items',
+      //     });
+      //   }
+
+      //   // await prisma.inventoryItem.update({
+      //   //   where: {
+      //   //     id: existedItem.id,
+      //   //   },
+      //   //   data: {
+      //   //     quantity: existedItem.quantity + item.quantity,
+      //   //     unitPrice: item.unitPrice,
+      //   //   },
+      //   // });
+      // }
     }
 
     // Connect Vendors and Expense
