@@ -57,6 +57,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
+import RouteStatement from '../components/Modals/RouteStatement';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
@@ -79,6 +80,7 @@ export default function ReportPage() {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
     useState<boolean>(false);
+  const [isOpenRouteStatement, setIsOpenRouteStatement] = useState<boolean>(false);
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
@@ -388,11 +390,16 @@ export default function ReportPage() {
       <Button
         disabled={
           clientOrders.length === 0 ||
-          clientValue?.clientName === 'All Clients' ||
           isFetching
         }
         variant="outlined"
-        onClick={(e) => setStatementAnchor(e.currentTarget)}
+        onClick={(e) => {
+          if (clientValue?.clientName === 'All Clients') {
+            setIsOpenRouteStatement(true);
+          } else {
+            setStatementAnchor(e.currentTarget)
+          }
+        }}
         fullWidth
       >
         <Box display="flex" gap={2}>
@@ -547,6 +554,7 @@ export default function ReportPage() {
   return (
     <Sidebar>
       {NotificationComp}
+      <RouteStatement open={isOpenRouteStatement} onClose={() => setIsOpenRouteStatement(false)} currentDateRange={dateRange} />
       <div style={{ display: 'none' }}>
         <InvoicePrint
           client={clientValue}
