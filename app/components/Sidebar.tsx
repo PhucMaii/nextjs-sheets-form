@@ -31,6 +31,7 @@ import EmailAlert from './EmailAlert';
 import { generateRecommendDate } from '@/app/utils/time';
 import { primary } from '@/theme/color';
 import useNotification from '@/hooks/useNotification';
+import Maintenance from './Maintenance';
 
 interface PropTypes {
   children: ReactNode;
