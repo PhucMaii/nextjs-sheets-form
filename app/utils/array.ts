@@ -185,3 +185,7 @@ export const compareTwoArrays = (arr1: any[], arr2: any[]) => {
 
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 };
+
+export const getUniqueUnitRatios = (units: any[]) => {
+  return Array.from(new Map(units.map((unit: any) => [unit.ratio, unit])).values());
+}

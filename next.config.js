@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true, // Improve performance
+  swcMinify: true, // Improve performance,
+  api: {
+    bodyParser: {
+      sizeLimit: '5mb', // Adjust size as needed
+    },
+  },
 };
 
 const withPWA = require('next-pwa')({

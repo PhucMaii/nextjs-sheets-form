@@ -7,6 +7,7 @@ import {
   subtractInventoryItem,
   updateSingleInventoryItem,
 } from './single';
+import { createOrderedItems } from '../inventory/expenses/POST';
 
 interface UpdatedItem {
   id: number;
@@ -16,6 +17,7 @@ interface UpdatedItem {
   orderId: number;
   totalPrice: number;
   inventoryItemId?: number;
+  inventoryUnitId?: number;
 }
 
 export enum UpdateOption {
@@ -47,6 +49,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userCategoryId,
     } = updatedData as BodyType;
 
+    console.log(updatedItems, 'updatedItems')
+
     // Bad cases
     if (updateOption === UpdateOption.CREATE) {
       const existingCategory = await prisma.category.findUnique({
@@ -73,11 +77,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       newTotalPrice += item.totalPrice;
 
       // Check does system has that item
-      if (item.id) {
+      // if (item.id) {
         const existingItem = await prisma.orderedItems.findUnique({
           where: {
             id: item.id,
           },
+          include: {
+            fifo: true,
+            inventoryUnit: true,
+          }
         });
 
         if (!existingItem) {
@@ -103,93 +111,91 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         orderedItemList = newList;
 
         // Inventory Update
-        if (existingItem?.inventoryItemId) {
+        if (existingItem?.fifo && existingItem.inventoryUnit) {
           await updateSingleInventoryItem(
-            existingItem.inventoryItemId,
+            existingItem.fifo,
+            existingItem.inventoryUnit,
             item.quantity,
             existingItem.quantity,
           );
         }
-      } else {
-        // Check does item name exist already in that order
-        const foundItem = await prisma.orderedItems.findFirst({
-          where: {
-            name: item.name,
-            orderId,
-          },
-        });
-
-        // if yes, override the price and quantity
-        if (foundItem) {
-          await prisma.orderedItems.updateMany({
-            where: {
-              name: item.name,
-              orderId,
-            },
-            data: {
-              price: item.price,
-              quantity: item.quantity,
-            },
-          });
-
-          // Pop the item off the base list in order to track the item
-          const newList = orderedItemList.filter((item: OrderedItems) => {
-            return item.id !== foundItem.id;
-          });
-          orderedItemList = newList;
-
-          // Inventory Update
-          if (foundItem?.inventoryItemId) {
-            await updateSingleInventoryItem(
-              foundItem.inventoryItemId,
-              item.quantity,
-              foundItem.quantity,
-            );
-          }
-        } else {
-          // if not, create it in the same order id
-          await prisma.orderedItems.create({
-            data: {
-              name: item.name,
-              orderId: orderId,
-              price: item.price,
-              quantity: item.quantity,
-              inventoryItemId: item?.inventoryItemId,
-            },
-          });
-
-          if (item?.inventoryItemId) {
-            await subtractInventoryItem(item.inventoryItemId, item.quantity);
-          }
-        }
-      }
-    }
-
-    // Delete the rest of item that admin wants to delete it
-    if (orderedItemList.length > 0) {
-      // for (const item of orderedItemList) {
-      //   await prisma.orderedItems.delete({
+      // } else {
+      //   // Check does item name exist already in that order
+      //   const foundItem = await prisma.orderedItems.findFirst({
       //     where: {
-      //       id: item.id,
+      //       name: item.name,
+      //       orderId,
       //     },
+      //     include: {
+      //       fifo: true,
+      //     }
       //   });
-      // }
-      const idToDelete = orderedItemList.map((order: any) => order.id);
-      await prisma.orderedItems.deleteMany({
-        where: {
-          id: {
-            in: idToDelete,
-          },
-        },
-      });
 
-      // Inventory item update
-      for (const item of orderedItemList) {
-        if (item?.inventoryItemId) {
-          await restockInventoryItem(item.inventoryItemId, item.quantity);
-        }
-      }
+      //   // if yes, override the price and quantity
+      //   if (foundItem) {
+      //     await prisma.orderedItems.updateMany({
+      //       where: {
+      //         name: item.name,
+      //         orderId,
+      //       },
+      //       data: {
+      //         price: item.price,
+      //         quantity: item.quantity,
+      //       },
+      //     });
+
+      //     // Pop the item off the base list in order to track the item
+      //     const newList = orderedItemList.filter((item: OrderedItems) => {
+      //       return item.id !== foundItem.id;
+      //     });
+      //     orderedItemList = newList;
+
+      //     // Inventory Update
+      //     if (foundItem?.fifo) {
+      //       await updateSingleInventoryItem(
+      //         foundItem.fifo,
+      //         item.quantity,
+      //         foundItem.quantity,
+      //       );
+      //     }
+      //   } else {
+      //     // if not, create it in the same order id
+      //     await prisma.orderedItems.create({
+      //       data: {
+      //         name: item.name,
+      //         orderId: orderId,
+      //         price: item.price,
+      //         quantity: item.quantity,
+      //         inventoryItemId: item?.inventoryItemId,
+      //         inventoryUnitId: item?.inventoryUnitId,
+      //       },
+      //     });
+
+      //     if (item?.inventoryItemId) {
+      //       await subtractInventoryItem(item.inventoryItemId, item.quantity);
+      //     }
+      //   }
+      // }
     }
+
+    // // Delete the rest of item that admin wants to delete it
+    // if (orderedItemList.length > 0) {
+    //   const idToDelete = orderedItemList.map((order: any) => order.id);
+    //   await prisma.orderedItems.deleteMany({
+    //     where: {
+    //       id: {
+    //         in: idToDelete,
+    //       },
+    //     },
+    //   });
+
+    //   // Inventory item update
+    //   for (const item of orderedItemList) {
+    //     if (item?.inventoryItemId) {
+    //       await restockInventoryItem(item.inventoryItemId, item.quantity);
+    //     }
+    //   }
+    // }
 
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
@@ -227,7 +233,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       );
 
       // create new items
-      const newItems = await prisma.item.createMany({
+      await prisma.item.createMany({
         data: formattedUpdatedItems,
       });
 
@@ -460,6 +466,7 @@ const formatUpdatedItems = async (
         categoryId: categoryId,
         availability: true,
         inventoryItemId: item?.inventoryItemId || null,
+        inventoryUnitId: item?.inventoryUnitId || null,
       };
     }),
   );
@@ -488,6 +495,8 @@ const generateScheduleOrderItems = (
         price,
         quantity: existingItem.quantity,
         scheduledOrderId: scheduleOrder.id,
+        inventoryItemId: existingItem.inventoryItemId,
+        inventoryUnitId: existingItem.inventoryUnitId,
       };
     }
 
@@ -507,6 +516,8 @@ const generateScheduleOrderItems = (
       price,
       quantity: userId === scheduleOrder.userId ? quantity : 0,
       scheduledOrderId: scheduleOrder.id,
+      inventoryItemId: newItem.inventoryItemId,
+      inventoryUnitId: newItem.inventoryUnitId
     };
   });
 

@@ -57,17 +57,19 @@ model SubCategory {
 }
 
 model Item {
-  id              Int            @id @default(autoincrement())
-  name            String         @db.VarChar(255)
+  id              Int     @id @default(autoincrement())
+  name            String  @db.VarChar(255)
   categoryId      Int
   subCategoryId   Int?
   price           Float
   availability    Boolean
   inventoryItemId Int?
+  inventoryUnitId Int?
 
-  category        Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory     SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
 }
@@ -78,13 +80,17 @@ model OrderedItems {
   price            Float
   orderId          Int?
   scheduledOrderId Int?
-  inventoryItemId  Int?
+  fifoId           Int?
   expenseId        Int?
   quantity         Int
+  inventoryUnitId  Int?
+  inventoryItemId  Int?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
+  scheduledOrder ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  fifo           Fifo?           @relation(fields: [fifoId], references: [id])
+  inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
 }
 
@@ -231,23 +237,59 @@ model Vendor {
   createdBy   String
   joinedDate  String
 
-  inventoryItems InventoryItem[]
-  expense        VendorExpense[]
+  expense    VendorExpense[]
+  vendorItem VendorItem[]
 }
 
 model InventoryItem {
   id        Int    @id @default(autoincrement())
   name      String
-  vendorId  Int
-  quantity  Int
-  unitPrice Float
-  unit      String
-
   createdAt String
   createdBy String
 
-  sellingItems Item[]
-  solItems     OrderedItems[]
+  item         Item[]
+  vendorItem   VendorItem[]
+  fifo         Fifo[]
+  OrderedItems OrderedItems[]
+}
 
-  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+model VendorItem {
+  id              Int    @id @default(autoincrement())
+  inventoryItemId Int
+  vendorId        Int
+  quantity        Int // hidden
+  createdAt       String
+  createdBy       String
+
+  inventoryItem InventoryItem   @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  vendor        Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  fifo          Fifo[]
+  unit          InventoryUnit[]
+}
+
+model Fifo {
+  id              Int    @id @default(autoincrement())
+  inventoryItemId Int
+  vendorItemId    Int
+  quantity        Int
+  createdAt       String
+  createdBy       String
+
+  inventoryItem InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  vendorItem    VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
+  orderedItems  OrderedItems[]
+}
+
+model InventoryUnit {
+  id           Int    @id @default(autoincrement())
+  vendorItemId Int
+  unit         String
+  unitPrice Float @db.Double
+  ratio        Int
+  createdAt    String
+  createdBy    String
+  sellingItem  Item[]
+
+  vendorItem   VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
+  orderedItems OrderedItems[]
 }

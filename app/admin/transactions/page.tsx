@@ -26,18 +26,19 @@ import AddExpense from '../components/Modals/add/AddExpense';
 import useNotification from '@/hooks/useNotification';
 import { IExpense } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
-import { handleSearch } from '@/app/utils/search';
 import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import LoadingModal from '../components/Modals/LoadingModal';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
+import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 export default function Transactions() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
@@ -75,16 +76,27 @@ export default function Transactions() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newTransactions = handleSearch(
-        debouncedKeywords,
-        transactions?.data,
-        ['description', 'spentBy', 'invoice'],
-      );
+      const newTransactions = transactions?.data.filter((transaction: IExpense) => {
+        return transaction.invoice === debouncedKeywords 
+        || (transaction?.vendors || []).some((vendor: any) => vendor?.vendor?.name?.toLowerCase()?.includes(debouncedKeywords.toLowerCase()))
+        || transaction.spentBy.toLowerCase().includes(debouncedKeywords.toLowerCase()) 
+        || transaction.description.toLowerCase().includes(debouncedKeywords.toLowerCase())
+        ;
+      })
       setDisplayTransactions(newTransactions);
     } else {
       setDisplayTransactions(transactions?.data || []);
     }
   }, [debouncedKeywords]);
+
+  useEffect(() => {
+    fetchAdminsAndDrivers();
+  }, []);
+
+  const fetchAdminsAndDrivers = async () => {
+    const users: any = await getAdminsAndDrivers(showNotification);
+    setAdminsAndDrivers(users);
+  };
 
   const handleSelectExpense = (e: any, targetExpense: IExpense) => {
     e.preventDefault();
@@ -268,6 +280,7 @@ export default function Transactions() {
             selectedExpense={selectedExpenses}
             handleSelectExpense={handleSelectExpense}
             handleSelectAll={handleSelectAll}
+            adminsAndDrivers={adminsAndDrivers}
           />
         )}
       </ShadowSection>

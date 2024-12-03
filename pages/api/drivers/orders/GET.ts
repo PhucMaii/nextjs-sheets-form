@@ -30,6 +30,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const session: any = await getServerSession(req, res, authOptions);
+    console.log(session, 'session');
 
     const existingDriver = await prisma.driver.findUnique({
       where: {
@@ -58,7 +59,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     if (!targetRoute) {
-      return res.status(400).json({
+      return res.status(200).json({
         data: {
           driver: existingDriver,
           deliveryOrders: [],
@@ -93,7 +94,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             category: true,
           },
         },
-        items: true,
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          }
+        },
       },
     });
 
@@ -106,6 +113,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         user: true,
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          }
+        }
       },
     });
 

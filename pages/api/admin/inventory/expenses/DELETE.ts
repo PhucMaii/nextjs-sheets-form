@@ -19,7 +19,11 @@ export default async function DELETE(
         id: Number(id),
       },
       include: {
-        orderedItems: true,
+        orderedItems: {
+          include: {
+            fifo: true,
+          },
+        },
       },
     });
 
@@ -27,24 +31,42 @@ export default async function DELETE(
       return res.status(404).json({ error: 'Expense Not Found' });
     }
 
-    const inventoryItems = await prisma.inventoryItem.findMany({});
+    const vendorItems = await prisma.vendorItem.findMany({});
 
     // Decrease quantity
     for (const item of existingExpense.orderedItems) {
-      const inventoryItem = inventoryItems.find((i: any) => {
-        return i.name === item.name;
-      });
-
-      if (!inventoryItem) {
+      if (!item?.fifo) {
+        console.error('No FIFO found');
         continue;
       }
 
-      await prisma.inventoryItem.update({
+      const vendorItem = vendorItems.find((vendorItem: any) => {
+        if (!item.fifo) {
+          return false;
+        }
+
+        return vendorItem.id === item.fifo.vendorItemId;
+      });
+
+      if (!vendorItem) {
+        console.error('No vendor item found');
+        continue;
+      }
+
+      const newQuantity = vendorItem.quantity - item.fifo.quantity;
+
+      await prisma.vendorItem.update({
         where: {
-          id: inventoryItem.id,
+          id: vendorItem.id,
         },
         data: {
-          quantity: inventoryItem.quantity - item.quantity,
+          quantity: newQuantity,
+        },
+      });
+
+      await prisma.fifo.delete({
+        where: {
+          id: item.fifo.id,
         },
       });
     }

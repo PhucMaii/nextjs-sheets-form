@@ -54,6 +54,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         where: {
           id: item.id,
         },
+        include: {
+          fifo: true,
+          inventoryUnit: true,
+        }
       });
 
       if (!existingItem) {
@@ -70,6 +74,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         data: {
           quantity: item.quantity,
         },
+        include: {
+          fifo: true,
+        }
       });
 
       // Update new total price
@@ -80,9 +87,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // Update Inventory Item
-      if (item?.inventoryItemId) {
+      if (existingItem?.fifo && existingItem?.inventoryUnit) {
         await updateSingleInventoryItem(
-          item.inventoryItemId,
+          existingItem.fifo,
+          existingItem.inventoryUnit,
           newItem.quantity,
           existingItem.quantity,
         );

@@ -48,14 +48,16 @@ export default function AddExpense({
     true,
   );
 
-  useEffect(() => {
-    const fetchAdminsAndDrivers = async () => {
-      const users: any = await getAdminsAndDrivers(showNotification);
-      setAdminsAndDrivers(users);
-    };
+  const fetchAdminsAndDrivers = async () => {
+    const users: any = await getAdminsAndDrivers(showNotification);
+    setAdminsAndDrivers(users);
+  };
 
-    fetchAdminsAndDrivers();
-  }, []);
+  useEffect(() => {
+    if (open) {
+      fetchAdminsAndDrivers();
+    }
+  }, [open]);
 
   const handleAddExpense = async () => {
     try {
@@ -150,6 +152,7 @@ export default function AddExpense({
             paymentMethods={paymentMethods?.data || []}
             codBoardId={codBoardId}
             role={USER_ROLE.ADMIN}
+            fetchAdminAndDrivers={fetchAdminsAndDrivers}
           />
         ) : (
           <OtherExpense

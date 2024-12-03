@@ -4,12 +4,8 @@ import {
   Box,
   Button,
   Divider,
-  FormControl,
   Grid,
-  IconButton,
-  InputLabel,
   Modal,
-  OutlinedInput,
   TextField,
   Typography,
 } from '@mui/material';
@@ -20,8 +16,6 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { Order } from '../../../orders/page';
-import { errorColor } from '@/theme/color';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import UpdateChoiceSelection from '../../UpdateChoiceSelection';
 import { LoadingButton } from '@mui/lab';
 
@@ -46,12 +40,12 @@ export default function EditPrice({
     UpdateOption.NONE,
   );
   const [newCategoryName, setNewCategoryName] = useState<string>('');
-  const [newItem, setNewItem] = useState<OrderedItems>({
-    name: '',
-    price: 0,
-    quantity: 0,
-    totalPrice: 0,
-  });
+  // const [newItem, setNewItem] = useState<OrderedItems>({
+  //   name: '',
+  //   price: 0,
+  //   quantity: 0,
+  //   totalPrice: 0,
+  // });
   // const [subcategoryId, setSubcategoryId] = useState<number>(0);
 
   useEffect(() => {
@@ -60,36 +54,37 @@ export default function EditPrice({
     }
   }, [items]);
 
-  const addNewItem = () => {
-    const newItemName = newItem.name.toUpperCase();
-    const hasNameExisted = itemList.some(
-      (item: OrderedItems) => item.name === newItemName,
-    );
 
-    if (newItem.name.trim() === '') {
-      showNotification('error', 'Item Name Is Missing');
-      return;
-    }
+  // const addNewItem = () => {
+  //   const newItemName = newItem.name.toUpperCase();
+  //   const hasNameExisted = itemList.some(
+  //     (item: OrderedItems) => item.name === newItemName,
+  //   );
 
-    if (hasNameExisted) {
-      showNotification('error', 'Item Name Existed Already');
-    } else {
-      const totalPrice = newItem.quantity * newItem.price;
-      const newItemData: any = { ...newItem, totalPrice, name: newItemName };
-      // if (subcategoryId > 0) {
-      //   newItemData.subCategoryId = subcategoryId;
-      // }
-      setItemList([...itemList, newItemData]);
-      setNewItem({
-        name: '',
-        price: 0,
-        quantity: 0,
-        totalPrice: 0,
-      });
-    }
+  //   if (newItem.name.trim() === '') {
+  //     showNotification('error', 'Item Name Is Missing');
+  //     return;
+  //   }
 
-    // setSubcategoryId(0);
-  };
+  //   if (hasNameExisted) {
+  //     showNotification('error', 'Item Name Existed Already');
+  //   } else {
+  //     const totalPrice = newItem.quantity * newItem.price;
+  //     const newItemData: any = { ...newItem, totalPrice, name: newItemName };
+  //     // if (subcategoryId > 0) {
+  //     //   newItemData.subCategoryId = subcategoryId;
+  //     // }
+  //     setItemList([...itemList, newItemData]);
+  //     setNewItem({
+  //       name: '',
+  //       price: 0,
+  //       quantity: 0,
+  //       totalPrice: 0,
+  //     });
+  //   }
+
+  //   // setSubcategoryId(0);
+  // };
 
   const calculateNewTotalPrice = () => {
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
@@ -99,9 +94,9 @@ export default function EditPrice({
     return totalPrice;
   };
 
-  const handleNewItemOnChange = (key: string, value: any) => {
-    setNewItem({ ...newItem, [key]: value });
-  };
+  // const handleNewItemOnChange = (key: string, value: any) => {
+  //   setNewItem({ ...newItem, [key]: value });
+  // };
 
   const handleUpdatePrice = async () => {
     try {
@@ -150,13 +145,13 @@ export default function EditPrice({
     setItemList(newItemList);
   };
 
-  const removeItem = (itemName: string) => {
-    const newItemList = itemList.filter((item: OrderedItems) => {
-      return item.name !== itemName;
-    });
+  // const removeItem = (itemName: string) => {
+  //   const newItemList = itemList.filter((item: OrderedItems) => {
+  //     return item.name !== itemName;
+  //   });
 
-    setItemList(newItemList);
-  };
+  //   setItemList(newItemList);
+  // };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -182,7 +177,7 @@ export default function EditPrice({
           setUpdateOption={setUpdateOption}
         />
         <Box overflow="auto" maxHeight="70vh" mt={1}>
-          <Divider sx={{ mb: 2 }}>Add items</Divider>
+          {/* <Divider sx={{ mb: 2 }}>Add items</Divider>
           <Grid container spacing={3} mb={1}>
             <Grid item xs={12}>
               <FormControl fullWidth>
@@ -225,35 +220,12 @@ export default function EditPrice({
                 />
               </FormControl>
             </Grid>
-            {/* <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="subcategory-label">Subcategory</InputLabel>
-                <Select
-                  disabled={
-                    !newItem.name.toLowerCase().includes('bean') &&
-                    !newItem.name.toLowerCase().includes('egg')
-                  }
-                  value={subcategoryId}
-                  onChange={(e) => setSubcategoryId(+e.target.value)}
-                >
-                  <MenuItem value={0}>-- Choose a subcategory --</MenuItem>
-                  {subcategories.length > 0 &&
-                    subcategories.map((subcategory: SubCategory) => {
-                      return (
-                        <MenuItem key={subcategory.id} value={subcategory.id}>
-                          {subcategory.name}
-                        </MenuItem>
-                      );
-                    })}
-                </Select>
-              </FormControl>
-            </Grid> */}
             <Grid item xs={12}>
               <Button fullWidth onClick={addNewItem} variant="contained">
                 Add
               </Button>
             </Grid>
-          </Grid>
+          </Grid> */}
           <Divider>Items</Divider>
           <Grid
             container
@@ -284,7 +256,7 @@ export default function EditPrice({
                     <Grid item xs={6}>
                       {item.name}:
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={6}>
                       <TextField
                         fullWidth
                         label="Unit Price ($)"
@@ -294,11 +266,11 @@ export default function EditPrice({
                         inputProps={{ min: 0 }}
                       />
                     </Grid>
-                    <Grid item xs={1}>
+                    {/* <Grid item xs={1}>
                       <IconButton onClick={() => removeItem(item.name)}>
                         <RemoveCircleIcon sx={{ color: errorColor }} />
                       </IconButton>
-                    </Grid>
+                    </Grid> */}
                   </Fragment>
                 );
               })}

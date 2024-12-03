@@ -8,6 +8,13 @@ import { groupBy } from '@/app/utils/array';
 import { IItem } from '@/app/utils/type';
 import { checkIsKorean } from '../../utils/korean';
 
+export const config = {
+  api: {
+    responseLimit: false,
+    // responseLimit: '8mb',
+  },
+}
+
 interface IBody {
   day: string;
   orderList: Order[];
@@ -25,6 +32,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const { day, orderList, userRoute } = req.body as IBody;
+    // const buffers = [];
+    //   for await (const chunk of req) {
+    //     buffers.push(chunk);
+    //   }
+    //   const compressedBuffer = Buffer.concat(buffers);
+    //   const decompressedData = zlib.inflateSync(compressedBuffer).toString();
+    //   const parsedData = JSON.parse(decompressedData);
+    //   const { day, orderList, userRoute } = parsedData as IBody;
 
     // if (!userRoute) {
     //     return res.status(404).json({

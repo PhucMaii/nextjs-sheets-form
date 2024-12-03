@@ -77,15 +77,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         price: updatedItem.price,
         categoryId: updatedItem.categoryId,
         availability: updatedItem.availability,
-      },
-      include: {
-        subCategory: true,
+        inventoryUnitId: updatedItem.inventoryUnitId,
       },
     });
 
     const updatedData: any = {
       name: updatedItem.name,
       price: updatedItem.price,
+      inventoryUnitId: updatedItem.inventoryUnitId,
     };
 
     if (
@@ -102,7 +101,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       delete updatedData.price;
     }
 
-    // Update PRICE all items has same inventory id
+    // Update PRICE / NAME all items has same inventory id
     if (
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
       existingItem.inventoryItemId
@@ -114,17 +113,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         data: updatedData,
       });
     }
-    // else if (
-    //   updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-    //   !existingItem.inventoryItemId
-    // ) {
-    //   await prisma.item.updateMany({
-    //     where: {
-    //       name: existingItem.name,
-    //     },
-    //     data: updatedData
-    //   });
-    // }
 
     // Update schedule order items
     const responseUpdate = await updateAllScheduleOrderItems(
@@ -161,25 +149,7 @@ const updateAllScheduleOrderItems = async (
   try {
     const prisma = new PrismaClient();
 
-    // if (updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-    //   !updatedItem?.inventoryItemId) {
-    //   await prisma.orderedItems.updateMany({
-    //     where: {
-    //       scheduledOrderId: {
-    //         not: null,
-    //       },
-    //       name: oldItem.name,
-    //     },
-    //     data: {
-    //       name: updatedItem.name,
-    //       price: updatedItem.price,
-    //     },
-    //   });
-
-    //   return { ok: true };
-    // }
-
-    // if update all item same inventory id
+    // CASE 1: UPDATE ALL ITEM WITH SAME INVENTORY ITEM ID - if update all ordered item in scheduled orders same inventory id
     if (
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
       updatedItem?.inventoryItemId
@@ -189,6 +159,8 @@ const updateAllScheduleOrderItems = async (
           scheduledOrderId: {
             not: null,
           },
+          orderId: null,
+          expenseId: null,
           inventoryItemId: updatedItem.inventoryItemId,
         },
         data: updatedData,
@@ -197,7 +169,7 @@ const updateAllScheduleOrderItems = async (
       return { ok: true };
     }
 
-    // Find all users that has same categoryId
+    // CASE 2: UPDATE ONLY SELECTED ITEM -  Find all users that has same categoryId
     const userList = await prisma.user.findMany({
       where: {
         categoryId: oldItem.categoryId,
@@ -211,9 +183,11 @@ const updateAllScheduleOrderItems = async (
       },
     });
 
-    // Use 2 loops - O(n ^ 2) to update all items that qualified for update
+    // Use 2 loops - O(n ^ 2) to update all items that qualified for update in schedule orders 
     for (const user of userList) {
+      // Access to each user
       for (const scheduleOrder of user.scheduleOrders) {
+        // Access to each schedule order
         if (scheduleOrder) {
           // Get the item to be updated, then subtract it from total price and add the its new price
           const itemToBeUpdated = scheduleOrder.items.find(
@@ -232,10 +206,9 @@ const updateAllScheduleOrderItems = async (
           const newTotalPrice =
             scheduleOrder.totalPrice - oldItemPrice + newItemPrice;
 
-          await prisma.orderedItems.updateMany({
+          await prisma.orderedItems.update({
             where: {
-              scheduledOrderId: scheduleOrder.id,
-              inventoryItemId: itemToBeUpdated.inventoryItemId,
+              id: itemToBeUpdated.id,
             },
             data: updatedData,
           });

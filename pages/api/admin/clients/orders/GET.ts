@@ -41,7 +41,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         include: {
-          items: true,
+          items: {
+            include: {
+              inventoryItem: true,
+              inventoryUnit: true,
+              fifo: true,
+            },
+          },
           user: {
             include: {
               category: true,
@@ -59,7 +65,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           deliveryDate,
         },
         include: {
-          items: true,
+          items: {
+            include: {
+              inventoryItem: true,
+              inventoryUnit: true,
+              fifo: true,
+            }
+          },
           user: {
             include: {
               category: true,

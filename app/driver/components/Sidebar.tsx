@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import {
   BottomNavigation,
@@ -14,7 +13,7 @@ import {
   Toolbar,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -22,11 +21,7 @@ import { blue, blueGrey } from '@mui/material/colors';
 import { driverTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { UserContext } from '@/app/context/UserContextAPI';
-import { Notification } from '@/app/utils/type';
-import { generateRecommendDate } from '@/app/utils/time';
-import { primary, primaryColor } from '@/theme/color';
-import SnackbarPopup from '@/app/components/Snackbar/SnackbarPopup';
+import { primary } from '@/theme/color';
 
 interface IProps {
   children: ReactNode;
@@ -40,10 +35,7 @@ export default function Sidebar({ children }: IProps) {
   const router = useRouter();
   const pathname: any = usePathname();
 
-  const { user, isValidating } = useContext(UserContext);
-  const orderDate = generateRecommendDate();
 
-  const url = process.env.NEXT_PUBLIC_WEB_URL;
 
   useEffect(() => {
     setCurrentTab(pathname);

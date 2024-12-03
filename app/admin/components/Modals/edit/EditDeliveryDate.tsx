@@ -16,7 +16,7 @@ import { Order } from '../../../orders/page';
 import { ScheduledOrder } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
+import { formatDateChanged, generateCurrentTime, generateRecommendDate } from '@/app/utils/time';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LoadingButton } from '@mui/lab';
 
@@ -52,7 +52,8 @@ export default function EditDeliveryDate({
   const handlePreOrder = async () => {
     setIsLoading(true);
     try {
-      const submittedData: any = { deliveryDate: updatedDate };
+      const createdAt = generateCurrentTime();
+      const submittedData: any = { deliveryDate: updatedDate, createdAt };
 
       if (scheduleOrderList) {
         submittedData.scheduleOrderList = scheduleOrderList;

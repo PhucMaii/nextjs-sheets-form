@@ -5,13 +5,16 @@ import {
   DayRange,
   Driver,
   Expense,
+  Fifo,
   InventoryItem,
+  InventoryUnit,
   PaymentMethod,
   Route,
   User,
   UserRoute,
   Vendor,
   VendorExpense,
+  VendorItem,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
@@ -100,6 +103,11 @@ export interface IItem {
   availability: boolean;
   user?: User;
   inventoryItemId?: number;
+  inventoryItem?: any;
+  unit?: any;
+  inventoryUnitId?: number;
+  inventoryUnit?: any;
+  units?: any;
 }
 
 export interface OrderedItems {
@@ -110,6 +118,9 @@ export interface OrderedItems {
   totalPrice: number;
   orderId?: number;
   inventoryItemId?: number;
+  inventoryItem?: any;
+  inventoryUnitId?: number;
+  inventoryUnit?: any;
 }
 
 export interface ScheduledOrder {
@@ -168,6 +179,23 @@ export interface IVendor extends Vendor {
 
 export interface IInventoryItem extends InventoryItem {
   vendor: IVendor;
+  quantity: number;
+  vendorItem: IVendorItem[];
+  fifo: Fifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
+}
+
+export interface IVendorItem extends VendorItem {
+  inventoryItem?: IInventoryItem;
+  vendor?: IVendor;
+  quantity: number;
+  unit?: any;
+  fifo?: Fifo[];
+}
+
+export interface IInventoryUnit extends InventoryUnit {
+  isSelected?: boolean;
+  vendorItem: IVendorItem;
+  inventoryItem: IInventoryItem;
 }

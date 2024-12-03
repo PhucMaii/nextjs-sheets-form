@@ -3,7 +3,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   removedId?: number;
-  removedIdList?: number[];
 }
 
 export default async function DELETE(
@@ -13,7 +12,7 @@ export default async function DELETE(
   try {
     const prisma = new PrismaClient();
 
-    const { removedId, removedIdList }: IBody = req.body;
+    const { removedId }: IBody = req.body;
 
     if (removedId) {
       const deletedItem = await prisma.item.delete({
@@ -21,22 +20,54 @@ export default async function DELETE(
           id: removedId,
         },
       });
+
+      // Remove item from all scheduled orders related to selected category
+      const scheduledOrders = await prisma.scheduleOrders.findMany({
+        where: {
+          user: {
+            categoryId: deletedItem.categoryId,
+          }
+        },
+        include: {
+          items: true,
+        }
+      });
+
+      const scheduleOrderIds: number[] = [];
+      for (const scheduledOrder of scheduledOrders) {
+        const targetdOrderedItems = scheduledOrder.items.find((item: any) => {
+          return item.inventoryItemId === deletedItem.inventoryItemId;
+        });
+
+        if (!targetdOrderedItems) {
+          continue;
+        }
+
+        const newTotalPrice = scheduledOrder.totalPrice - deletedItem.price * targetdOrderedItems.quantity;
+
+        await prisma.scheduleOrders.update({
+          where: {
+            id: scheduledOrder.id,
+          },
+          data: {
+            totalPrice: newTotalPrice,
+          }
+        });
+
+        scheduleOrderIds.push(scheduledOrder.id);
+      }
+
+      await prisma.orderedItems.deleteMany({
+        where: {
+          scheduledOrderId: {
+            in: scheduleOrderIds
+          },
+          inventoryItemId: deletedItem.inventoryItemId
+        }
+      });
+
       return res.status(200).json({
         message: `${deletedItem.name} Deleted Successfully`,
-      });
-    }
-
-    if (removedIdList) {
-      await prisma.item.deleteMany({
-        where: {
-          id: {
-            in: removedIdList,
-          },
-        },
-      });
-
-      return res.status(200).json({
-        message: 'Items Deleted Successfully',
       });
     }
 

@@ -61,6 +61,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
               where: {
                 scheduledOrderId: sameDayOrder.id,
                 inventoryItemId: item.inventoryItemId,
+                inventoryUnitId: item.inventoryUnitId,
                 name: item.name,
               },
               data: {
@@ -76,6 +77,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
                 quantity: item.quantity,
                 scheduledOrderId: sameDayOrder.id,
                 inventoryItemId: item.inventoryItemId,
+                inventoryUnitId: item.inventoryUnitId,
               },
             });
           }
@@ -152,6 +154,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           quantity: item.quantity,
           scheduledOrderId: newScheduleOrder.id,
           inventoryItemId: item.inventoryItemId,
+          inventoryUnitId: item.inventoryUnitId,
         },
       });
     }
