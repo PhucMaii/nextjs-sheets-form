@@ -31,6 +31,8 @@ import EmailAlert from './EmailAlert';
 import { generateRecommendDate } from '@/app/utils/time';
 import { primary } from '@/theme/color';
 import useNotification from '@/hooks/useNotification';
+import { MaintenanceContext } from '../context/MaintenanceProvider';
+import Maintenance from './Maintenance';
 
 interface PropTypes {
   children: ReactNode;
@@ -40,14 +42,22 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
+  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(false);
 
   const router = useRouter();
   const pathname: any = usePathname();
   const { showNotification, NotificationComp } = useNotification();
 
+  const { isMaintenance } = useContext(MaintenanceContext);
+
+  if (isMaintenance) {
+    return (
+      <Maintenance />
+    );
+  }
+
   const { user, isValidating } = useContext(UserContext);
   const orderDate = generateRecommendDate();
-  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(false);
 
   const url = process.env.NEXT_PUBLIC_WEB_URL;
 
@@ -126,6 +136,8 @@ export default function Sidebar({ children }: PropTypes) {
       </Box>
     </>
   );
+
+
 
   if (smDown) {
     return (

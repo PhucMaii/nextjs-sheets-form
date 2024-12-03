@@ -64,6 +64,7 @@ model Item {
   price           Float
   availability    Boolean
   inventoryItemId Int?
+
   category        Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory     SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)

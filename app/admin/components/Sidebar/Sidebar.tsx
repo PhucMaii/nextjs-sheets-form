@@ -5,15 +5,17 @@ import {
   Button,
   Divider,
   Drawer,
+  FormControlLabel,
   IconButton,
   List,
   ListItemIcon,
   ListItemText,
+  Switch,
   Toolbar,
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
+import React, { Fragment, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { adminTabs, tabs } from '../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
@@ -25,6 +27,7 @@ import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primary, primaryColor } from '@/theme/color';
+import { MaintenanceContext } from '@/app/context/MaintenanceProvider';
 
 interface PropTypes {
   children: ReactNode;
@@ -39,6 +42,7 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
+  const { isMaintenance, setIsMaintenance } = useContext(MaintenanceContext);
   const url = process.env.NEXT_PUBLIC_WEB_URL;
 
   const singlePrintRef: any = useRef();
@@ -91,8 +95,18 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
     }
   };
 
+  console.log(isMaintenance, 'isMaintenance');
+
   const content = (
     <>
+    {/* <Box display="flex" justifyContent="center" my={2}>
+      <FormControlLabel
+            value="start"
+            control={<Switch color="primary" checked={isMaintenance} onChange={(e: any) => setIsMaintenance(e.target.checked)} />}
+            label="Under Maintenance"
+            labelPlacement="bottom"
+          />
+    </Box> */}
       <Toolbar sx={{ mt: 6 }}>
         <img
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}

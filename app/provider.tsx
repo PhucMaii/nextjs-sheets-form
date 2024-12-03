@@ -4,6 +4,7 @@ import axios from 'axios';
 import { SessionProvider } from 'next-auth/react';
 import { SWRConfig } from 'swr';
 import AuthenGuard from '../HOC/AuthenGuard';
+import MaintenanceProvider from './context/MaintenanceProvider';
 
 type Props = {
   children?: React.ReactNode;
@@ -18,7 +19,9 @@ export const Providers = ({ children }: Props) => {
             fetcher: (url: string) => axios.get(url).then((r) => r.data),
           }}
         >
-          {children}
+          <MaintenanceProvider>
+            {children}
+          </MaintenanceProvider>
         </SWRConfig>
       </AuthenGuard>
     </SessionProvider>
