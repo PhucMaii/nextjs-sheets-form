@@ -11,7 +11,6 @@ import AddIcon from '@mui/icons-material/Add';
 import InventoryTable from '../Tables/InventoryTable';
 import AddInventory from '../Modals/add/AddInventory';
 import useDebounce from '@/hooks/useDebounce';
-import { handleSearch } from '@/app/utils/search';
 import { IInventoryItem } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
@@ -44,11 +43,11 @@ export default function StockItems({
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newDisplayData = handleSearch(
-        debouncedKeywords,
-        inventoryItems?.data || [],
-        ['name', 'vendor.name'],
-      );
+      const newDisplayData = inventoryItems?.data.filter((item: IInventoryItem) => {
+        return item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) 
+        || item.vendorItem.some((vendorItem: any) => vendorItem.vendor.name.toLowerCase().includes(debouncedKeywords.toLowerCase()))
+        ;
+      })
 
       setDisplayData(newDisplayData);
     } else {

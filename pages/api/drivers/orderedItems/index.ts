@@ -42,12 +42,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         quantity,
         price,
       },
+      include: {
+        fifo: true,
+        inventoryUnit: true,
+      }
     });
 
     // Update Inventory Item Quantity
-    if (updatedOrderedItem?.inventoryItemId) {
+    if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
       await updateSingleInventoryItem(
-        updatedOrderedItem.inventoryItemId,
+        updatedOrderedItem.fifo,
+        updatedOrderedItem.inventoryUnit,
         updatedOrderedItem.quantity,
         existingOrderedItem.quantity,
       );

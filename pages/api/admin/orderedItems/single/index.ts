@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
+import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
 import { updateOrderTotalPrice } from '../PUT';
 import { getUserInfo } from '@/pages/api/utils/auth';
 
@@ -34,11 +34,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         quantity,
         price,
       },
+      include: {
+        fifo: true,
+        inventoryUnit: true
+      }
     });
 
-    if (updatedOrderedItem?.inventoryItemId) {
+    if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
       await updateSingleInventoryItem(
-        updatedOrderedItem.inventoryItemId,
+        updatedOrderedItem.fifo,
+        updatedOrderedItem.inventoryUnit,
         quantity,
         existingOrderedItem.quantity,
       );
@@ -63,54 +68,75 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 export default withAdminAuthGuard(handler);
 
 export const updateSingleInventoryItem = async (
-  inventoryItemId: number,
+  fifo: Fifo,
+  unit: InventoryUnit,
   newQuantity: number,
   previousQuantity: number,
 ) => {
   try {
     const prisma = new PrismaClient();
 
-    const inventoryItem = await prisma.inventoryItem.findUnique({
-      where: {
-        id: inventoryItemId,
-      },
-    });
+    // const inventoryItem = await prisma.inventoryItem.findUnique({
+    //   where: {
+    //     id: inventoryItemId,
+    //   },
+    // });
 
-    if (inventoryItem) {
       // Subtract the new quantity from inventory quantity, then add back the previous quantity
       const updatedQuantity =
-        inventoryItem.quantity - newQuantity + previousQuantity;
-      await prisma.inventoryItem.update({
+        fifo.quantity - (newQuantity * unit.ratio) + (previousQuantity * unit.ratio);
+      await prisma.fifo.update({
         where: {
-          id: inventoryItemId,
+          id: fifo.id,
         },
         data: {
           quantity: updatedQuantity,
         },
       });
-    }
+
+      const targetVendorItem = await prisma.vendorItem.findUnique({
+        where: {
+          id: fifo.vendorItemId
+        }
+      });
+
+      if (!targetVendorItem) {
+        console.error('Comflict Vendor Item Not Found');
+        return;
+      }
+
+      await prisma.vendorItem.update({
+        where: {
+          id: fifo.vendorItemId,
+        },
+        data: {
+          quantity: targetVendorItem?.quantity - fifo.quantity + updatedQuantity 
+        }
+      })
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
 };
 
 export const restockInventoryItem = async (
-  inventoryItemId: number,
+  fifo: Fifo,
+  unit: InventoryUnit,
   restockQuantity: number,
 ) => {
   try {
-    await updateSingleInventoryItem(inventoryItemId, 0, restockQuantity);
+    await updateSingleInventoryItem(fifo, unit, 0, restockQuantity);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
 };
 
 export const subtractInventoryItem = async (
-  inventoryItemId: number,
+  fifo: Fifo,
+  unit: InventoryUnit,
   subtractedQuantity: number,
 ) => {
   try {
-    await updateSingleInventoryItem(inventoryItemId, subtractedQuantity, 0);
+    await updateSingleInventoryItem(fifo, unit, subtractedQuantity, 0);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

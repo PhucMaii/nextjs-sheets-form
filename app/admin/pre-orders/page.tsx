@@ -97,7 +97,7 @@ export default function ScheduledOrderPage() {
     `${API_URL.ROUTES}?day=${days[dayIndex]}`,
   );
 
-  const clientIds = routesResponse?.data[routeIndex].clients?.map(
+  const clientIds = routesResponse?.data[routeIndex]?.clients?.map(
     (userRoute: UserRoute) => {
       return userRoute.userId;
     },
@@ -327,7 +327,7 @@ export default function ScheduledOrderPage() {
   const deleteSelectedOrders = async () => {
     try {
       const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
-        data: { scheduleOrderList: selectedOrders },
+        data: { scheduleOrderList: selectedOrders, routeId: routes[routeIndex].id },
       });
       mutateOrders();
 

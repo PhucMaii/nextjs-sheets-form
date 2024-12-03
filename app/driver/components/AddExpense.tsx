@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import OtherExpenses from './Expense/OtherExpenses';
 import { grey } from '@mui/material/colors';
 import StockPurchased from '@/app/admin/components/Expense/StockPurchased';
-import { PAYMENT_METHOD_TYPE, TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
+import {
+  PAYMENT_METHOD_TYPE,
+  TRANSACTION_STATUS,
+  USER_ROLE,
+} from '@/app/utils/enum';
 import { mainPaymentMethodId } from '@/app/lib/constant';
 
 interface IProps {

@@ -35,6 +35,7 @@ import PasteItemsModal from '../components/Modals/PasteItemsModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
+import { generateCurrentTime } from '@/app/utils/time';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -94,20 +95,19 @@ export default function ItemPage() {
       const newItems = baseItems.filter((item: IItem) => {
         if (
           item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) ||
-          item.price == parseInt(debouncedKeywords)
+          item.price.toString().includes(debouncedKeywords)
         ) {
           return true;
         }
         return false;
       });
       setItems(newItems);
-    } else {
+    } else if (baseItems.length > 0) {
       setItems(baseItems);
     }
   }, [debouncedKeywords]);
 
   const checkIsNewItemValid = (newItem: IItem) => {
-    console.log(newItem, 'new item');
     if (
       newItem.name.trim() === '' ||
       newItem.price < 0 ||
@@ -133,15 +133,14 @@ export default function ItemPage() {
       if (!isNewItemValid) {
         return;
       }
-      const response = await axios.post(API_URL.ITEM, { newItem });
+
+      const createdAt = generateCurrentTime();
+      const response = await axios.post(API_URL.ITEM, { newItem, createdAt });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
         return;
       }
-
-      // Optimistic UI Update
-      handleAddItemUI(response.data.data);
 
       // Update Real Data
       mutateItems();
@@ -151,11 +150,6 @@ export default function ItemPage() {
       console.log('There was an error: ', error);
       showNotification('error', error.response.data.error);
     }
-  };
-
-  const handleAddItemUI = (newItem: IItem) => {
-    setItems([...items, newItem]);
-    setBaseItems([...items, newItem]);
   };
 
   const handleDeleteCategory = async (targetObj: any) => {
@@ -254,9 +248,6 @@ export default function ItemPage() {
         return;
       }
 
-      // Optimistic UI Update
-      handleUpdateItemUI(response.data.data);
-
       // Update Real Data
       mutateItems();
 
@@ -265,17 +256,6 @@ export default function ItemPage() {
       console.log('There was an error: ', error);
       showNotification('error', error.response.data.error);
     }
-  };
-
-  const handleUpdateItemUI = (updatedItem: IItem) => {
-    const newItems = items.map((item: IItem) => {
-      if (item.id === updatedItem.id) {
-        return updatedItem;
-      }
-      return item;
-    });
-    setItems(newItems);
-    setBaseItems(newItems);
   };
 
   const saveItemArrangement = async () => {
@@ -331,6 +311,7 @@ export default function ItemPage() {
         onClose={() => setOpen('isAddItemOpen', false)}
         categoryId={currentCategory?.id}
         addItem={handleAddItem}
+        showNotification={showNotification}
       />
       <DeleteModal
         targetObj={currentCategory}

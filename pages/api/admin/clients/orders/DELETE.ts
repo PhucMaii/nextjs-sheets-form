@@ -37,13 +37,18 @@ export default async function DELETE(
             id: Number(order.id),
           },
           include: {
-            items: true,
+            items: {
+              include: {
+                fifo: true,
+                inventoryUnit: true,
+              }
+            },
           },
         });
 
         for (const item of deletedOrder.items) {
-          if (item?.inventoryItemId) {
-            await restockInventoryItem(item.inventoryItemId, item.quantity);
+          if (item?.fifo && item?.inventoryUnit) {
+            await restockInventoryItem(item.fifo, item.inventoryUnit, item.quantity);
           }
         }
 
@@ -71,13 +76,18 @@ export default async function DELETE(
           id: Number(orderId),
         },
         include: {
-          items: true,
+          items: {
+            include: {
+              fifo: true,
+              inventoryUnit: true,
+            }
+          },
         },
       });
 
       for (const item of deletedOrder.items) {
-        if (item?.inventoryItemId) {
-          await restockInventoryItem(item.inventoryItemId, item.quantity);
+        if (item?.fifo && item?.inventoryUnit) {
+          await restockInventoryItem(item.fifo, item.inventoryUnit, item.quantity);
         }
       }
     } else {

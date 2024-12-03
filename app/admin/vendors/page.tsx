@@ -26,10 +26,13 @@ export default function Vendors() {
   const debouncedKeywords = useDebounce(searchKeywods, 1000);
   const { showNotification, NotificationComp } = useNotification();
 
-  const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [vendors, _mutate, isValidating] = SWRFetchData(
+    `${API_URL.ADMIN}/vendors`,
+  );
 
   useEffect(() => {
-    if (vendors?.data) {
+    if (vendors && !isValidating) {
       setIsLoading(false);
       setDisplayData(vendors.data);
     } else {

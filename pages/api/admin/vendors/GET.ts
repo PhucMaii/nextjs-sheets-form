@@ -7,7 +7,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const vendors = await prisma.vendor.findMany({
       include: {
-        inventoryItems: true,
+        vendorItem: {
+          include: {
+            inventoryItem: true,
+            unit: true,
+            fifo: true,
+          },
+        },
       },
     });
 

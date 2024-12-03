@@ -19,14 +19,11 @@ import {
   Typography,
 } from '@mui/material';
 import { BoxModal } from '../styled';
-import { LoadingButton } from '@mui/lab';
 import { IItem, UserType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ErrorComponent from '../../ErrorComponent';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { OrderedItems } from '@prisma/client';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -99,20 +96,25 @@ export default function AddOrder({
       const timeString = moment(currentDate).format('HH:mm:ss');
 
       // Format data to have the same structure as backend
-      let submittedData: any = {
-        ['DELIVERY DATE']: deliveryDate,
-        ['NOTE']: note,
-        orderTime: `${timeString} ${dateString}`,
+      const submittedData: any = {
+        // ['DELIVERY DATE']: deliveryDate,
+        // ['NOTE']: note,
+        deliveryDate,
+        note,
+        createdAt: `${timeString} ${dateString}`,
         isCheckUnavailableRange,
+        items: itemList,
+        createdBy: USER_ROLE.ADMIN, 
+        isForceOrder
       };
 
-      for (const item of itemList) {
-        submittedData = { ...submittedData, [item.name]: item.quantity };
-      }
+      // for (const item of itemList) {
+      //   submittedData = { ...submittedData, [item.name]: item.quantity };
+      // }
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
-        { ...submittedData, createdBy: USER_ROLE.ADMIN, isForceOrder },
+        submittedData,
       );
 
       if (response.data.error) {
@@ -141,44 +143,44 @@ export default function AddOrder({
     }
   };
 
-  const copyLastOrder = async () => {
-    try {
-      setIsButtonLoading(true);
-      const response = await axios.get(
-        `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
-      );
+  // const copyLastOrder = async () => {
+  //   try {
+  //     setIsButtonLoading(true);
+  //     const response = await axios.get(
+  //       `${API_URL.CLIENTS}/orders?userId=${clientValue?.id}`,
+  //     );
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        setIsButtonLoading(false);
-        return;
-      }
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       setIsButtonLoading(false);
+  //       return;
+  //     }
 
-      const lastOrder = response.data.data[0];
+  //     const lastOrder = response.data.data[0];
 
-      const newItemList = itemList.map((item: IItem) => {
-        const targetItem = lastOrder.items.find((targetItem: OrderedItems) => {
-          return targetItem.name === item.name;
-        });
+  //     const newItemList = itemList.map((item: IItem) => {
+  //       const targetItem = lastOrder.items.find((targetItem: OrderedItems) => {
+  //         return targetItem.name === item.name;
+  //       });
 
-        if (targetItem) {
-          return {
-            ...item,
-            quantity: targetItem.quantity,
-            totalPrice: targetItem.totalPrice,
-          };
-        }
-        return item;
-      });
+  //       if (targetItem) {
+  //         return {
+  //           ...item,
+  //           quantity: targetItem.quantity,
+  //           totalPrice: targetItem.totalPrice,
+  //         };
+  //       }
+  //       return item;
+  //     });
 
-      setItemList(newItemList);
-      setIsButtonLoading(false);
-    } catch (error: any) {
-      console.log('Fail to copy from last order: ', error);
-      showNotification('error', 'Fail to copy from last order: ' + error);
-      setIsButtonLoading(false);
-    }
-  };
+  //     setItemList(newItemList);
+  //     setIsButtonLoading(false);
+  //   } catch (error: any) {
+  //     console.log('Fail to copy from last order: ', error);
+  //     showNotification('error', 'Fail to copy from last order: ' + error);
+  //     setIsButtonLoading(false);
+  //   }
+  // };
 
   const fetchClientItems = async () => {
     try {
@@ -198,7 +200,6 @@ export default function AddOrder({
           ...item,
           quantity: 0,
           totalPrice: 0,
-          inventoryItemId: item.inventoryItemId,
         };
       });
 
@@ -331,7 +332,7 @@ export default function AddOrder({
               <Grid item xs={12}>
                 <Divider textAlign="center">Items</Divider>
               </Grid>
-              <Grid item xs={12} textAlign="right">
+              {/* <Grid item xs={12} textAlign="right">
                 <LoadingButton
                   onClick={copyLastOrder}
                   loading={isButtonLoading}
@@ -342,7 +343,7 @@ export default function AddOrder({
                     <Typography variant="subtitle1">Copy last order</Typography>
                   </Box>
                 </LoadingButton>
-              </Grid>
+              </Grid> */}
               {!createScheduledOrder && (
                 <>
                   <Grid item xs={6}>

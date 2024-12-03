@@ -2,13 +2,15 @@ import { USER_ROLE } from '@/app/utils/enum';
 import { Autocomplete, createFilterOptions, TextField } from '@mui/material';
 import React from 'react';
 
-const filter = createFilterOptions<any>();
+export const filter = createFilterOptions<any>();
 
 interface IProps {
   promptedItem: any;
   handleSelectPromptedItem: any;
   role?: USER_ROLE;
   displayItems: any[];
+  disabled?: boolean;
+  disabledItems?: any[];
 }
 
 export default function InventoryItemSearch({
@@ -16,9 +18,12 @@ export default function InventoryItemSearch({
   handleSelectPromptedItem,
   role,
   displayItems,
+  disabled,
+  disabledItems,
 }: IProps) {
   return (
     <Autocomplete
+      disabled={disabled}
       value={promptedItem.name}
       onChange={(event, newValue) => {
         handleSelectPromptedItem(newValue);
@@ -28,7 +33,9 @@ export default function InventoryItemSearch({
 
         const { inputValue } = params;
         // Suggest the creation of a new value
-        const isExisting = options.some((option) => inputValue === option.name);
+        const isExisting = options.some(
+          (option) => inputValue === option?.inventoryItem?.name,
+        );
         if (role === USER_ROLE.ADMIN && inputValue !== '' && !isExisting) {
           filtered.push({
             inputValue,
@@ -52,18 +59,20 @@ export default function InventoryItemSearch({
           return option.title;
         }
         // Regular option
-        return option.name || '';
+        return option?.inventoryItem?.name || '';
       }}
       renderOption={(props, option) => {
         const { key, ...optionProps } = props;
+
+        const isDisabled = disabledItems?.includes(option?.id);
         return (
-          <li key={key} {...optionProps}>
-            {option.title || option.name}
+          <li key={key} {...optionProps} aria-disabled={isDisabled}>
+            {option.title || option?.inventoryItem?.name}
           </li>
         );
       }}
       sx={{ width: '100%' }}
-      freeSolo
+      freeSolo={role === USER_ROLE.ADMIN}
       renderInput={(params) => <TextField {...params} label="Item" />}
     />
   );

@@ -47,7 +47,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         id: orderId,
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            fifo: true,
+            inventoryUnit: true,
+          }
+        },
       },
     });
 
@@ -92,8 +97,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
       // Restock inventory item
-      if (item?.inventoryItemId) {
-        await restockInventoryItem(item.inventoryItemId, item.quantity);
+      if (item?.fifo && item?.inventoryUnit) {
+        await restockInventoryItem(item.fifo, item?.inventoryUnit, item.quantity);
       }
 
       // Format order to send email

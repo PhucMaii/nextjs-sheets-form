@@ -11,11 +11,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
     const { categoryId } = req.query as RequestQuery;
 
-    let items: any = [];
-    items = await prisma.item.findMany({
+    const items = await prisma.item.findMany({
       where: {
         categoryId: Number(categoryId),
       },
+      include: {
+        inventoryItem: true,
+        inventoryUnit: true,
+      }
     });
 
     return res.status(200).json({
