@@ -5,6 +5,7 @@ import {
   Box,
   Grid,
   IconButton,
+  ListSubheader,
   MenuItem,
   Select,
   Typography,
@@ -26,8 +27,8 @@ import AddIcon from '@mui/icons-material/Add';
 import AddPaymentMethod from '../components/Modals/add/AddPaymentMethod';
 import useNotification from '@/hooks/useNotification';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, PAYMENT_METHOD_TYPE } from '@/app/utils/enum';
-import { IExpense, IPaymentMethod } from '@/app/utils/type';
+import { API_URL, PAYMENT_METHOD_TYPE, VIEW_TYPE } from '@/app/utils/enum';
+import { IExpense, IPaymentMethod, IVendor } from '@/app/utils/type';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ErrorComponent from '../components/ErrorComponent';
 import { normalizeDate } from '@/pages/api/utils/date';
@@ -38,7 +39,10 @@ import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 
 export default function CardManagement() {
-  const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
+  const [selectedViewObj, setSelectedViewObj] = useState<any>({
+    type: null,
+    id: -1,
+  });
   const [currentMethod, setCurrentMethod] = useState<IPaymentMethod | null>(
     null,
   );
@@ -56,8 +60,9 @@ export default function CardManagement() {
   const [paymentMethods, mutateMethod] = SWRFetchData(
     `${API_URL.ADMIN}/paymentMethods`,
   );
+  const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
   const [transactions] = SWRFetchData(
-    `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
+    `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${selectedViewObj.id}&type=${selectedViewObj.type}`,
   );
 
   const listOfDateString = useMemo(() => {
@@ -108,18 +113,36 @@ export default function CardManagement() {
   }, [transactions?.data]);
 
   useEffect(() => {
-    if (currentMethodId !== -1) {
+    if (selectedViewObj.id !== -1) {
       setCurrentMethod(getPaymentMethod());
     }
-  }, [currentMethodId]);
+  }, [selectedViewObj]);
 
   const getPaymentMethod = () => {
-    if (currentMethodId === -1) {
+    if (selectedViewObj.id === -1) {
       return null;
     }
-    return paymentMethods?.data.find(
-      (method: IPaymentMethod) => method.id === currentMethodId,
-    );
+
+    if (selectedViewObj.type === VIEW_TYPE.PAYMENT_METHOD) {
+      return paymentMethods?.data.find(
+        (method: IPaymentMethod) => method.id === selectedViewObj.id,
+      );
+    }
+
+    const selectedVendor = vendors?.data.find(
+      (vendor: IVendor) => vendor.id === selectedViewObj.id,
+    )
+    return {
+      id: -1,
+      name: selectedVendor.name,
+      type: PAYMENT_METHOD_TYPE.CASH,
+      transactions: [],
+      balance: 0,
+      createdAt: '',
+      createdBy: '',
+      updatedBy: null,
+      updatedAt: null,
+    }
   };
 
   const handleDeleteMethod = async (targetMethod: IPaymentMethod) => {
@@ -137,7 +160,10 @@ export default function CardManagement() {
       }
 
       // Update Real Data
-      setCurrentMethodId(-1);
+      setSelectedViewObj({
+        id: -1,
+        type: null
+      });
       setCurrentMethod(null);
 
       showNotification('success', 'Payment method deleted successfully.');
@@ -196,7 +222,7 @@ export default function CardManagement() {
               <IconButton
                 color="primary"
                 onClick={() => setOpenModal({ ...openModal, editModal: true })}
-                disabled={currentMethodId === -1}
+                disabled={selectedViewObj.id === -1}
               >
                 <EditIcon />
               </IconButton>
@@ -205,7 +231,7 @@ export default function CardManagement() {
                 onClick={() =>
                   setOpenModal({ ...openModal, deleteModal: true })
                 }
-                disabled={currentMethodId === -1}
+                disabled={selectedViewObj.id === -1}
               >
                 <DeleteIcon />
               </IconButton>
@@ -214,18 +240,27 @@ export default function CardManagement() {
 
           <Box display="flex" alignItems="center" gap={1}>
             <Select
-              value={currentMethodId}
-              onChange={(e) => setCurrentMethodId(Number(e.target.value))}
+              value={JSON.stringify(selectedViewObj)}
+              onChange={(e) => setSelectedViewObj(JSON.parse(e.target.value))}
             >
-              <MenuItem disabled value={-1}>
+              <MenuItem disabled value={JSON.stringify({type: null, id: -1})}>
                 -- Choose Payment Method --
               </MenuItem>
-              {paymentMethods &&
-                paymentMethods.data.map((method: IPaymentMethod) => (
-                  <MenuItem key={method.id} value={method.id}>
-                    {method.name}
+              <ListSubheader>Payment Methods</ListSubheader>
+                {paymentMethods &&
+                  paymentMethods.data.map((method: IPaymentMethod) => (
+                    <MenuItem key={method.id} value={JSON.stringify({type: VIEW_TYPE.PAYMENT_METHOD, id: method.id})}>
+                      {method.name}
+                    </MenuItem>
+                  ))}
+              <ListSubheader>Vendors</ListSubheader>
+              {
+                vendors && vendors.data.map((vendor: IVendor) => (
+                  <MenuItem key={vendor.id} value={JSON.stringify({type: VIEW_TYPE.VENDOR, id: vendor.id})}>
+                    {vendor.name}
                   </MenuItem>
-                ))}
+                ))
+              }
             </Select>
             <SelectDateRange
               dateRange={dateRange}
@@ -234,7 +269,7 @@ export default function CardManagement() {
           </Box>
         </Box>
 
-        {currentMethodId === -1 ? (
+        {selectedViewObj.id === -1 ? (
           <ErrorComponent errorText="Please select payment method" />
         ) : (
           <>

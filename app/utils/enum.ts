@@ -21,6 +21,11 @@ export enum API_URL {
   DRIVER_ORDERS = '/api/drivers/orders',
 }
 
+export enum VIEW_TYPE {
+  VENDOR = 'vendor',
+  PAYMENT_METHOD = 'paymentMethod',
+}
+
 export enum COD_STATUS {
   IN_PROCESS = 'In Process',
   CLEARED = 'Cleared',
