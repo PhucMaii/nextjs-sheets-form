@@ -1,18 +1,17 @@
 import { PrismaClient } from '@prisma/client';
-import moment from 'moment';
 // import { generateUsers } from './userData';
 // import { hash } from 'bcrypt';
 // import { hash } from 'bcrypt';
 // import { items } from './itemData';
 // import { inputs } from './inputFieldData';
 
-const generateCurrentTime = () => {
-  const currentDate = new Date();
-  const dateString = moment(currentDate).format('YYYY-MM-DD');
-  const timeString = moment(currentDate).format('HH:mm:ss');
+// const generateCurrentTime = () => {
+//   const currentDate = new Date();
+//   const dateString = moment(currentDate).format('YYYY-MM-DD');
+//   const timeString = moment(currentDate).format('HH:mm:ss');
 
-  return `${timeString} ${dateString}`;
-};
+//   return `${timeString} ${dateString}`;
+// };
 
 export const YYYYMMDDFormat = (date: Date) => {
   const month = date.getMonth() + 1;

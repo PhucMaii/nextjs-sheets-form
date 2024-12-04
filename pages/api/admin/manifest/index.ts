@@ -91,7 +91,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const sortedUserIdsMap: any = new Map(
         sortedUserIds.map((id: any, index: number) => [id, index]),
       );
-      // console.log(sortedUserIdsMap, 'sortedUserIdsMap');
 
       const currentRouteOrders = orderByRoutes.filter(
         (order: Order) => order.routeId === route.id,
@@ -103,14 +102,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           sortedUserIdsMap.get(orderB.userId)
         );
       });
-      // console.log(orderByRoutes.length, 'orderByRoutes.length');
-
-      // console.log(orderByRoutes, 'orderByRoutes');
 
       sortedOrderByRoutes.push(...currentRouteOrders);
     }
-
-    // console.log(sortedOrderByRoutes, 'sortedOrderByRoutes');
 
     // Item Manifest
     const items = sortedOrderByRoutes.map((order: Order) => {

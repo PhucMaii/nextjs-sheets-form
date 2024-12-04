@@ -7,7 +7,7 @@ import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Box, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Box, Grid, IconButton, TextField, Typography, useMediaQuery } from '@mui/material';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
@@ -22,6 +22,8 @@ import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
 import OrderOnVacationModal from '../admin/components/Modals/OrderOnVacationModal';
 import useNotification from '@/hooks/useNotification';
+import SearchItem from '../components/Modals/SearchItem';
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -41,6 +43,7 @@ export default function OrderForm() {
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   const [isOpenSecurityModal, setIsOpenSecurityModal] =
     useState<boolean>(false);
+  const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false);
   const [isOverrideOrderOpen, setIsOverrideOrderOpen] =
     useState<boolean>(false);
   const [isOrderOnVacationOpen, setIsOrderOnVacationOpen] =
@@ -176,6 +179,12 @@ export default function OrderForm() {
   return (
     <FadeIn>
       <Sidebar>
+        <SearchItem 
+          open={isOpenSearch}
+          onClose={() => setIsOpenSearch(false)}
+          items={itemList}
+          setItems={setItemList}
+        />
         <NotificationPopup
           notification={notification}
           onClose={closeNotification}
@@ -211,10 +220,24 @@ export default function OrderForm() {
         )}
         <div className="w-full mx-auto pb-6">
           {smDown && <Navbar />}
-          <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <h4 className="text-center font-bold text-4xl px-8 mb-8">
+          {/* <form className="relative bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 overflow-scroll"> */}
+          <Box sx={{position: 'relative', backgroundColor: 'white'}} borderRadius={2} px={4} py={2} >
+            {/* <h4 className="text-center font-bold text-4xl px-8 mb-8">
               {clientName}
-            </h4>
+            </h4> */}
+            <Grid container alignItems="center" rowGap={2} mb={2}>
+              <Grid item xs={2}></Grid>
+              <Grid item xs={8}>
+                <Typography variant="h4" textAlign="center">
+                  {clientName}
+                </Typography>
+              </Grid>
+              <Grid item xs={2} textAlign="right">
+                <IconButton size="large" onClick={() => setIsOpenSearch(true)}>
+                  <SearchIcon fontSize="large" />
+                </IconButton>
+              </Grid>
+            </Grid>
             <Box mb={4}>
               <Typography fontWeight="bold" variant="subtitle1" color="error">
                 DELIVERY DATE
@@ -275,17 +298,21 @@ export default function OrderForm() {
                 />
               </Box>
             </Box>
-            <LoadingButton
-              variant="contained"
-              onClick={handleSubmit}
-              type="submit"
-              loading={isButtonLoading}
-              fullWidth
-              sx={{ mt: 2 }}
-            >
-              Submit
-            </LoadingButton>
-          </form>
+
+            <Box display="flex" justifyContent={'center'}>
+              <LoadingButton
+                variant="contained"
+                onClick={handleSubmit}
+                type="submit"
+                loading={isButtonLoading}
+                fullWidth
+                // sx={{ mt: 2}}
+              >
+                Submit
+              </LoadingButton>
+            </Box>
+          {/* </form> */}
+          </Box>
         </div>
       </Sidebar>
     </FadeIn>
