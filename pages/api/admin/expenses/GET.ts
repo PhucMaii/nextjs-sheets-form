@@ -2,7 +2,7 @@ import { generateListOfDateString } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate, sortExpenseByDate } from '../../utils/date';
-import { VIEW_TYPE } from '@/app/admin/cards/page';
+import { VIEW_TYPE } from '@/app/utils/enum';
 
 interface IQuery {
   startDate?: string;

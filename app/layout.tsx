@@ -5,7 +5,12 @@ import { Providers } from './provider';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import '../styles/reactCalendar.css';
 import UserContextAPI from './context/UserContextAPI';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { theme } from '@/theme';
+// import { CacheProvider } from '@emotion/react';
+
+// Create cache for SSR
+// const clientSideEmotionCache = createEmotionCache();
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -44,17 +49,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      {/* <CacheProvider value={clientSideEmotionCache}> */}
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body id="root" className={inter.className}>
+      <AppRouterCacheProvider options={{ enableCssLayer: true }}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Providers>
             <UserContextAPI>{children}</UserContextAPI>
           </Providers>
         </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
+      {/* </CacheProvider> */}
     </html>
   );
 }

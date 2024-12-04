@@ -27,7 +27,7 @@ import AddIcon from '@mui/icons-material/Add';
 import AddPaymentMethod from '../components/Modals/add/AddPaymentMethod';
 import useNotification from '@/hooks/useNotification';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, PAYMENT_METHOD_TYPE } from '@/app/utils/enum';
+import { API_URL, PAYMENT_METHOD_TYPE, VIEW_TYPE } from '@/app/utils/enum';
 import { IExpense, IPaymentMethod, IVendor } from '@/app/utils/type';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ErrorComponent from '../components/ErrorComponent';
@@ -37,11 +37,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
-
-export enum VIEW_TYPE {
-  VENDOR = 'vendor',
-  PAYMENT_METHOD = 'paymentMethod',
-}
 
 export default function CardManagement() {
   const [selectedViewObj, setSelectedViewObj] = useState<any>({
