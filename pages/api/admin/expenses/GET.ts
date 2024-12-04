@@ -2,30 +2,34 @@ import { generateListOfDateString } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate, sortExpenseByDate } from '../../utils/date';
+import { VIEW_TYPE } from '@/app/admin/cards/page';
 
 interface IQuery {
   startDate?: string;
   endDate?: string;
-  id?: number;
+  id?: string;
+  type?: VIEW_TYPE;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { startDate, endDate, id }: IQuery = req.query;
-
+    const { startDate, endDate, id, type }: IQuery = req.query;
+    
+    
     if (!startDate || !endDate) {
       return res.status(404).json({ error: 'Missing required parameters' });
     }
-
+    
     const formattedStartDate = normalizeDate(new Date(startDate));
     const formattedEndDate = normalizeDate(new Date(endDate));
-
+    
     const listOfDateString = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
     );
+    console.log({ formattedStartDate, formattedEndDate, listOfDateString });
 
     if (!id || Number(id) < 0) {
       const expenses = await prisma.expense.findMany({
@@ -62,7 +66,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const expenses = await prisma.expense.findMany({
+    let expenses = await prisma.expense.findMany({
       where: {
         date: {
           in: listOfDateString,
@@ -88,6 +92,56 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       },
     });
+
+    if (type && type === VIEW_TYPE.VENDOR) {
+      const vendor = await prisma.vendor.findUnique({
+        where: {
+          id: Number(id),
+        },
+        include: {
+          expense: {
+            where: {
+              expense: {
+                date: {
+                  in: listOfDateString,
+                },
+              },
+            },
+            include: {
+              expense: {
+                include: {
+                  paymentMethod: true,
+                  vendors: {
+                    include: {
+                      vendor: true,
+                    },
+                  },
+                  orderedItems: {
+                    include: {
+                      inventoryUnit: true,
+                      fifo: {
+                        include: {
+                          orderedItems: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      
+
+      if (!vendor) {
+        return res.status(404).json({ error: 'Vendor not found' });
+      }
+
+      expenses = vendor.expense.map((expense: any) => expense.expense);
+      console.log(expenses, 'expenses');
+    }
+
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);
 
