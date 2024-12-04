@@ -183,7 +183,7 @@ const updateAllScheduleOrderItems = async (
       },
     });
 
-    // Use 2 loops - O(n ^ 2) to update all items that qualified for update in schedule orders 
+    // Use 2 loops - O(n ^ 2) to update all items that qualified for update in schedule orders
     for (const user of userList) {
       // Access to each user
       for (const scheduleOrder of user.scheduleOrders) {

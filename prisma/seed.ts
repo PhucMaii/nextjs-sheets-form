@@ -44,9 +44,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 
 const prisma = new PrismaClient();
 
-async function main() {
-
-}
+async function main() {}
 
 main()
   .then(() => prisma.$disconnect())

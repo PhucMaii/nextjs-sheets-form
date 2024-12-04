@@ -28,11 +28,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             vendorItem: {
               include: {
                 unit: true,
-              }
+              },
             },
-          }
+          },
         },
-      }
+      },
     });
 
     return res.status(200).json({

@@ -60,7 +60,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
         note,
         createdAt: `${timeString} ${dateString}`,
         items: itemList,
-        createdBy: USER_ROLE.DRIVER
+        createdBy: USER_ROLE.DRIVER,
       };
 
       // for (const item of itemList) {
@@ -69,7 +69,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${selectedClient?.id}`,
-       submittedData,
+        submittedData,
       );
 
       if (response.data.error) {

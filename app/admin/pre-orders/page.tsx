@@ -327,7 +327,10 @@ export default function ScheduledOrderPage() {
   const deleteSelectedOrders = async () => {
     try {
       const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
-        data: { scheduleOrderList: selectedOrders, routeId: routes[routeIndex].id },
+        data: {
+          scheduleOrderList: selectedOrders,
+          routeId: routes[routeIndex].id,
+        },
       });
       mutateOrders();
 

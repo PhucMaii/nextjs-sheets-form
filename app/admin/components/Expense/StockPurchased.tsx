@@ -89,7 +89,13 @@ export default function StockPurchased({
     EditUnitModal,
     UnitDisplay,
     onChangeAddUnitBoolean,
-  } = useEditUnit(promptedItem.units, promptedItem.unit, showNotification, false, role);
+  } = useEditUnit(
+    promptedItem.units,
+    promptedItem.unit,
+    showNotification,
+    false,
+    role,
+  );
 
   // console.log(promptedItem?.units, 'promptedItem?.units');
 

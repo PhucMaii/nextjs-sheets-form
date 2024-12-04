@@ -19,7 +19,7 @@ const useEditUnit = (
   initialSelectedUnit: IInventoryUnit | null = null,
   showNotification: (type: AlertColor, message: string) => void,
   isShowPrice: boolean = false,
-  role: USER_ROLE = USER_ROLE.ADMIN
+  role: USER_ROLE = USER_ROLE.ADMIN,
 ) => {
   const [addUnitBoolean, onChangeAddUnitBoolean] = useMultipleBoolean({
     open: false,
@@ -41,7 +41,7 @@ const useEditUnit = (
 
   useEffect(() => {
     setSelectedUnit(initialSelectedUnit);
-  }, [initialSelectedUnit])
+  }, [initialSelectedUnit]);
 
   const addUnit = (newUnit: IInventoryUnit) => {
     if (units.length === 0) {
@@ -143,7 +143,7 @@ const useEditUnit = (
       unit: null,
       open: false,
     });
-    
+
     setSelectedUnit(updatedUnit);
     setUnits(newUnits);
 
@@ -180,7 +180,10 @@ const useEditUnit = (
     <FormControl>
       <Box display="flex" alignItems="center" gap={1}>
         <FormLabel id="unit">Units</FormLabel>
-        <IconButton onClick={() => onChangeAddUnitBoolean('open', true)} disabled={role === USER_ROLE.DRIVER}>
+        <IconButton
+          onClick={() => onChangeAddUnitBoolean('open', true)}
+          disabled={role === USER_ROLE.DRIVER}
+        >
           <AddIcon />
         </IconButton>
       </Box>

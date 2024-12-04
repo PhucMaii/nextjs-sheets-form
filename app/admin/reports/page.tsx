@@ -80,7 +80,8 @@ export default function ReportPage() {
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
     useState<boolean>(false);
-  const [isOpenRouteStatement, setIsOpenRouteStatement] = useState<boolean>(false);
+  const [isOpenRouteStatement, setIsOpenRouteStatement] =
+    useState<boolean>(false);
   const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
@@ -388,16 +389,13 @@ export default function ReportPage() {
       width="100%"
     >
       <Button
-        disabled={
-          clientOrders.length === 0 ||
-          isFetching
-        }
+        disabled={clientOrders.length === 0 || isFetching}
         variant="outlined"
         onClick={(e) => {
           if (clientValue?.clientName === 'All Clients') {
             setIsOpenRouteStatement(true);
           } else {
-            setStatementAnchor(e.currentTarget)
+            setStatementAnchor(e.currentTarget);
           }
         }}
         fullWidth
@@ -554,7 +552,11 @@ export default function ReportPage() {
   return (
     <Sidebar>
       {NotificationComp}
-      <RouteStatement open={isOpenRouteStatement} onClose={() => setIsOpenRouteStatement(false)} currentDateRange={dateRange} />
+      <RouteStatement
+        open={isOpenRouteStatement}
+        onClose={() => setIsOpenRouteStatement(false)}
+        currentDateRange={dateRange}
+      />
       <div style={{ display: 'none' }}>
         <InvoicePrint
           client={clientValue}

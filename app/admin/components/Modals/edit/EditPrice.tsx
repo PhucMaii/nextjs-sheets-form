@@ -54,7 +54,6 @@ export default function EditPrice({
     }
   }, [items]);
 
-
   // const addNewItem = () => {
   //   const newItemName = newItem.name.toUpperCase();
   //   const hasNameExisted = itemList.some(

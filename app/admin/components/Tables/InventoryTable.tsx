@@ -25,7 +25,6 @@ export default function InventoryTable({
   inventoryItems,
   showNotification,
 }: IProps) {
-
   const handleDelete = async (targetObj: IInventoryItem) => {
     try {
       const response = await axios.delete(

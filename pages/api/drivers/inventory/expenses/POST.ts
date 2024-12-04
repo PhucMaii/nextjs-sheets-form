@@ -2,7 +2,13 @@
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IInventoryUnit } from '@/app/utils/type';
-import { checkAndUpdateUnits, checkIsExpenseValid, createFifo, createOrderedItems, updateVendorItemQuantity } from '@/pages/api/admin/inventory/expenses/POST';
+import {
+  checkAndUpdateUnits,
+  checkIsExpenseValid,
+  createFifo,
+  createOrderedItems,
+  updateVendorItemQuantity,
+} from '@/pages/api/admin/inventory/expenses/POST';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -98,7 +104,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    const createdBy = `Driver - ${driver.name}`
+    const createdBy = `Driver - ${driver.name}`;
 
     const newExpense = await prisma.expense.create({
       data: {

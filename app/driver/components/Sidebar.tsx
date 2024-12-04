@@ -35,8 +35,6 @@ export default function Sidebar({ children }: IProps) {
   const router = useRouter();
   const pathname: any = usePathname();
 
-
-
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);

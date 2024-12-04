@@ -99,7 +99,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryItem: true,
             inventoryUnit: true,
             fifo: true,
-          }
+          },
         },
       },
     });
@@ -118,8 +118,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryItem: true,
             inventoryUnit: true,
             fifo: true,
-          }
-        }
+          },
+        },
       },
     });
 

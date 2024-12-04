@@ -7,7 +7,6 @@ import { days } from '@/app/lib/constant';
 import axios from 'axios';
 import { AlertColor } from '@mui/material';
 
-
 const useManifest = (
   orderList: Order[],
   selectedRoutes: IRoutes[],
@@ -72,10 +71,10 @@ const useManifest = (
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL.ADMIN}/manifest`, {
-          day: givenDay,
-          orderList,
-          userRoute: userRoute?.data,
-        });
+        day: givenDay,
+        orderList,
+        userRoute: userRoute?.data,
+      });
 
       if (response.data.error) {
         showNotification('error', response.data.error);

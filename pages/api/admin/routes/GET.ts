@@ -15,7 +15,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { day, startDate, endDate }: QueryType = req.query;
 
     if (startDate && endDate) {
-      const listOfDayStrings = generateListOfDateString(new Date(startDate), new Date(endDate));
+      const listOfDayStrings = generateListOfDateString(
+        new Date(startDate),
+        new Date(endDate),
+      );
 
       const routes = await prisma.route.findMany({
         where: {
@@ -51,14 +54,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       });
-      
 
       return res.status(200).json({
         data: routes,
         message: 'Fetch Routes Successfully',
-      }); 
+      });
     }
-
 
     const routes: any = await prisma.route.findMany({
       where: {

@@ -54,11 +54,11 @@ export default function EditExpense({
   const fetchAdminsAndDrivers = async () => {
     const user: any = await getAdminsAndDrivers(showNotification);
     setAdminsAndDrivers(user);
-  }
+  };
 
   useEffect(() => {
     if (open) {
-      fetchAdminsAndDrivers()
+      fetchAdminsAndDrivers();
     }
   }, [open]);
 
@@ -206,7 +206,8 @@ export default function EditExpense({
                 <MenuItem value="-- Choose who spent --" disabled>
                   -- Choose who spent --
                 </MenuItem>
-                {adminsAndDrivers && adminsAndDrivers.length > 0 &&
+                {adminsAndDrivers &&
+                  adminsAndDrivers.length > 0 &&
                   adminsAndDrivers.map(
                     (adminOrDriver: string, index: number) => (
                       <MenuItem key={index} value={adminOrDriver}>

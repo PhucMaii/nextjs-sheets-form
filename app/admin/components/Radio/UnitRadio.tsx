@@ -45,7 +45,11 @@ export default function UnitRadio({
             />
 
             {removeUnit && (
-              <IconButton onClick={() => removeUnit(unit)} size="small" disabled={role === USER_ROLE.DRIVER}>
+              <IconButton
+                onClick={() => removeUnit(unit)}
+                size="small"
+                disabled={role === USER_ROLE.DRIVER}
+              >
                 <RemoveIcon fontSize="small" />
               </IconButton>
             )}

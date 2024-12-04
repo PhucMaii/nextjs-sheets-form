@@ -22,14 +22,14 @@ interface RequestQuery {
 }
 
 interface IBody {
-  deliveryDate: string,
-  note: string,
-  orderTime: string,
+  deliveryDate: string;
+  note: string;
+  orderTime: string;
   isCheckUnavailableRange?: boolean;
   items: any[];
   createdBy: USER_ROLE;
   isForceOrder?: boolean;
-  createdAt: string
+  createdAt: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -40,7 +40,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
     const { userId } = req.query as RequestQuery;
-    const {deliveryDate, note, isCheckUnavailableRange, items, createdBy, isForceOrder, createdAt}: IBody = req.body;
+    const {
+      deliveryDate,
+      note,
+      isCheckUnavailableRange,
+      items,
+      createdBy,
+      isForceOrder,
+      createdAt,
+    }: IBody = req.body;
 
     let id = userId;
 
@@ -99,24 +107,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Check has user already ordered for target delivery date yet
-    const userOrder = await checkHasClientOrder(
-      existingUser.id,
-      deliveryDate,
-    );
+    const userOrder = await checkHasClientOrder(existingUser.id, deliveryDate);
 
     // Handle is user has already ordered for target date
     if (userOrder) {
       if (createdBy === USER_ROLE.ADMIN && isForceOrder) {
-        const newOrder: any = await createOrder(existingUser, items, deliveryDate, createdAt,
-          formattedCreatedBy, note
+        const newOrder: any = await createOrder(
+          existingUser,
+          items,
+          deliveryDate,
+          createdAt,
+          formattedCreatedBy,
+          note,
         );
 
-        const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {
-          const itemTotalPrice = item.price * item.quantity;
-    
-          return {...item, totalPrice: itemTotalPrice}
-        })
-    
+        const itemListWithTotalPrice = newOrder?.items.map(
+          (item: OrderedItems) => {
+            const itemTotalPrice = item.price * item.quantity;
+
+            return { ...item, totalPrice: itemTotalPrice };
+          },
+        );
+
         await pusherServer?.trigger('admin', 'incoming-order', {
           ...newOrder,
           items: itemListWithTotalPrice,
@@ -151,14 +163,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       //   return item;
       // });
- 
-      await overrideOrder(
-        existingUser,
-        userOrder.id,
-        items,
-        note,
-        createdBy,
-      );
+
+      await overrideOrder(existingUser, userOrder.id, items, note, createdBy);
       return res.status(201).json({
         message: 'Order Submitted Successfully',
       });
@@ -167,13 +173,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // await createOrder(existingUser, items, deliveryDate,
     //   formattedCreatedBy, note
     // )
-    const newOrder: any = await createOrder(existingUser, items, deliveryDate, createdAt, formattedCreatedBy, note);
+    const newOrder: any = await createOrder(
+      existingUser,
+      items,
+      deliveryDate,
+      createdAt,
+      formattedCreatedBy,
+      note,
+    );
 
     const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {
       const itemTotalPrice = item.price * item.quantity;
 
-      return {...item, totalPrice: itemTotalPrice}
-    })
+      return { ...item, totalPrice: itemTotalPrice };
+    });
 
     await pusherServer?.trigger('admin', 'incoming-order', {
       ...newOrder,

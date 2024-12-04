@@ -19,9 +19,7 @@ export const Providers = ({ children }: Props) => {
             fetcher: (url: string) => axios.get(url).then((r) => r.data),
           }}
         >
-          <MaintenanceProvider>
-            {children}
-          </MaintenanceProvider>
+          <MaintenanceProvider>{children}</MaintenanceProvider>
         </SWRConfig>
       </AuthenGuard>
     </SessionProvider>

@@ -54,16 +54,14 @@ export default function EditScheduleOrder({
     return formattedItems;
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [updateOption] = useState<UpdateOption>(
-    UpdateOption.NONE,
-  );
+  const [updateOption] = useState<UpdateOption>(UpdateOption.NONE);
 
   useEffect(() => {
     const formattedItems = order.items.map((item: OrderedItems) => {
       const totalPrice = item.quantity * item.price;
       return { ...item, totalPrice };
     });
-    
+
     setItemList(formattedItems);
   }, [order]);
 

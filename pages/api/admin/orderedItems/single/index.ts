@@ -36,8 +36,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         fifo: true,
-        inventoryUnit: true
-      }
+        inventoryUnit: true,
+      },
     });
 
     if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
@@ -82,37 +82,37 @@ export const updateSingleInventoryItem = async (
     //   },
     // });
 
-      // Subtract the new quantity from inventory quantity, then add back the previous quantity
-      const updatedQuantity =
-        fifo.quantity - (newQuantity * unit.ratio) + (previousQuantity * unit.ratio);
-      await prisma.fifo.update({
-        where: {
-          id: fifo.id,
-        },
-        data: {
-          quantity: updatedQuantity,
-        },
-      });
+    // Subtract the new quantity from inventory quantity, then add back the previous quantity
+    const updatedQuantity =
+      fifo.quantity - newQuantity * unit.ratio + previousQuantity * unit.ratio;
+    await prisma.fifo.update({
+      where: {
+        id: fifo.id,
+      },
+      data: {
+        quantity: updatedQuantity,
+      },
+    });
 
-      const targetVendorItem = await prisma.vendorItem.findUnique({
-        where: {
-          id: fifo.vendorItemId
-        }
-      });
+    const targetVendorItem = await prisma.vendorItem.findUnique({
+      where: {
+        id: fifo.vendorItemId,
+      },
+    });
 
-      if (!targetVendorItem) {
-        console.error('Comflict Vendor Item Not Found');
-        return;
-      }
+    if (!targetVendorItem) {
+      console.error('Comflict Vendor Item Not Found');
+      return;
+    }
 
-      await prisma.vendorItem.update({
-        where: {
-          id: fifo.vendorItemId,
-        },
-        data: {
-          quantity: targetVendorItem?.quantity - fifo.quantity + updatedQuantity 
-        }
-      })
+    await prisma.vendorItem.update({
+      where: {
+        id: fifo.vendorItemId,
+      },
+      data: {
+        quantity: targetVendorItem?.quantity - fifo.quantity + updatedQuantity,
+      },
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

@@ -57,7 +57,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         include: {
           fifo: true,
           inventoryUnit: true,
-        }
+        },
       });
 
       if (!existingItem) {
@@ -76,7 +76,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           fifo: true,
-        }
+        },
       });
 
       // Update new total price

@@ -45,7 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       include: {
         fifo: true,
         inventoryUnit: true,
-      }
+      },
     });
 
     // Update Inventory Item Quantity

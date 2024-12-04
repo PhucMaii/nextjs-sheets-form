@@ -50,7 +50,6 @@ export default function EditInventory({
 
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
 
-
   useEffect(() => {
     if (inventoryItem) {
       setUpdatedItem(inventoryItem);
@@ -82,7 +81,6 @@ export default function EditInventory({
     }
   }, [inventoryItem]);
 
-
   // console.log(updatedVendorItems, 'updatedVendorItems');
   useEffect(() => {
     // console.log(selectedVendors, 'selectedVendors');
@@ -90,26 +88,28 @@ export default function EditInventory({
     if (selectedVendors.length > 0) {
       const newVItems = selectedVendors.map((vendor) => {
         const existedInNewVendorItems = updatedVendorItems.find(
-            (item: any) => item.vendorId === vendor.id,
-          );
-        
-          if (existedInNewVendorItems) {
-              return {...existedInNewVendorItems, units: existedInNewVendorItems.units};
-            }
-          
-            return {
-                vendorId: vendor.id,
-                vendor: vendor,
-                name: vendor.name,
-                quantity: 0,
-                units: [],
-              };
-            });
+          (item: any) => item.vendorId === vendor.id,
+        );
 
-            setUpdatedVendorItems(newVItems);
-     }
+        if (existedInNewVendorItems) {
+          return {
+            ...existedInNewVendorItems,
+            units: existedInNewVendorItems.units,
+          };
+        }
+
+        return {
+          vendorId: vendor.id,
+          vendor: vendor,
+          name: vendor.name,
+          quantity: 0,
+          units: [],
+        };
+      });
+
+      setUpdatedVendorItems(newVItems);
+    }
   }, [selectedVendors]);
-
 
   const handleUpdate = async () => {
     setIsLoading(true);
@@ -182,7 +182,11 @@ export default function EditInventory({
           ...item,
           units: [
             ...(item?.units || []),
-            { ...newValue, vendorId: addUnitProps.selectedVendorId, vendorItemId: addUnitProps.selectedVendorId },
+            {
+              ...newValue,
+              vendorId: addUnitProps.selectedVendorId,
+              vendorItemId: addUnitProps.selectedVendorId,
+            },
           ],
         };
       }
@@ -303,7 +307,9 @@ export default function EditInventory({
       <AddUnit
         addUnit={addUnit}
         open={addUnitProps.open}
-        onClose={() => setAddUnitProps(() => ({ open: false, selectedVendorId: -1 }))}
+        onClose={() =>
+          setAddUnitProps(() => ({ open: false, selectedVendorId: -1 }))
+        }
       />
       <EditUnit
         open={editUnit.open}

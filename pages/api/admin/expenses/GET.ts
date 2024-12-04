@@ -47,8 +47,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               fifo: {
                 include: {
                   orderedItems: true,
-                }
-              }
+                },
+              },
             },
           },
         },
@@ -82,8 +82,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             fifo: {
               include: {
                 orderedItems: true,
-              }
-            }
+              },
+            },
           },
         },
       },

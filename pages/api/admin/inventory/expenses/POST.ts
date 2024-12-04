@@ -136,7 +136,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           }, {})
         : {};
 
-    
     // CASE 1: ITEM ALREADY EXISTS
     if (itemsAlreadyExist.length > 0) {
       // STEP 1: Create FIFO
@@ -458,7 +457,7 @@ export const checkAndUpdateUnits = async (
   const sortedDBUnits = dbUnits.sort((a, b) => a?.ratio - b?.ratio);
   const sortedNewUnits = newUnits.sort((a, b) => a?.ratio - b?.ratio);
 
-  console.log({sortedDBUnits, sortedNewUnits});
+  console.log({ sortedDBUnits, sortedNewUnits });
 
   let dbIndex = 0;
   let newIndex = 0;
@@ -552,67 +551,70 @@ export const createFifo = async (
   const allNegativeFifo = await prisma.fifo.findMany({
     where: {
       quantity: {
-        lt: 0
-      }
-    }
+        lt: 0,
+      },
+    },
   });
 
   const deletedFifoIds = [];
   const itemHasAlreadyUpdateIds: number[] = [];
   if (allNegativeFifo.length > 0) {
     for (const item of vendorItemList) {
-      const negativeFifo = allNegativeFifo.find((fifo: any) => fifo.vendorItemId === item.id);
+      const negativeFifo = allNegativeFifo.find(
+        (fifo: any) => fifo.vendorItemId === item.id,
+      );
 
       if (!negativeFifo) {
         continue;
       }
 
       const itemQuantity = item.quantity * item?.unit?.ratio;
-        // itemQuantity > negativeFifo.quantity
-        // Delete targeted fifo and create new fifo
-        deletedFifoIds.push(negativeFifo.id);
-        const newFifo = await prisma.fifo.create({
-          data: {
-            quantity: itemQuantity + negativeFifo.quantity, // subtract to negative mean subtract
-            inventoryItemId: item.inventoryItemId,
-            vendorItemId: item.id,
-            createdAt,
-            createdBy
-          }
-        })
-        
-        // Update all ordered items has targeted fifo id
-        await prisma.orderedItems.updateMany({
-          where: {
-            fifoId: negativeFifo.id
-          },
-          data: {
-            fifoId: newFifo.id
-          }
-        });
+      // itemQuantity > negativeFifo.quantity
+      // Delete targeted fifo and create new fifo
+      deletedFifoIds.push(negativeFifo.id);
+      const newFifo = await prisma.fifo.create({
+        data: {
+          quantity: itemQuantity + negativeFifo.quantity, // subtract to negative mean subtract
+          inventoryItemId: item.inventoryItemId,
+          vendorItemId: item.id,
+          createdAt,
+          createdBy,
+        },
+      });
 
-        itemHasAlreadyUpdateIds.push(item.id);
-     }
-    
+      // Update all ordered items has targeted fifo id
+      await prisma.orderedItems.updateMany({
+        where: {
+          fifoId: negativeFifo.id,
+        },
+        data: {
+          fifoId: newFifo.id,
+        },
+      });
+
+      itemHasAlreadyUpdateIds.push(item.id);
+    }
 
     await prisma.fifo.deleteMany({
       where: {
         id: {
-          in: deletedFifoIds
-        }
-      }
-    })
+          in: deletedFifoIds,
+        },
+      },
+    });
   }
 
-  const fifoItems = vendorItemList.filter((vItem: any) => !itemHasAlreadyUpdateIds.includes(vItem.id)).map((item: any) => {
-    return {
-      inventoryItemId: item.inventoryItemId,
-      vendorItemId: item.id,
-      quantity: item.quantity * item?.unit?.ratio,
-      createdAt,
-      createdBy,
-    };
-  });
+  const fifoItems = vendorItemList
+    .filter((vItem: any) => !itemHasAlreadyUpdateIds.includes(vItem.id))
+    .map((item: any) => {
+      return {
+        inventoryItemId: item.inventoryItemId,
+        vendorItemId: item.id,
+        quantity: item.quantity * item?.unit?.ratio,
+        createdAt,
+        createdBy,
+      };
+    });
 
   await prisma.fifo.createMany({
     data: fifoItems,

@@ -30,24 +30,26 @@ export default async function DELETE(
     } = req.body as BodyTypes;
 
     if (scheduleOrderList && routeId) {
-      const deletedScheduledOrderIds = scheduleOrderList.map((order: any) => Number(order.id));
-      
+      const deletedScheduledOrderIds = scheduleOrderList.map((order: any) =>
+        Number(order.id),
+      );
+
       await prisma.scheduleOrders.deleteMany({
         where: {
           id: {
-            in: deletedScheduledOrderIds
-          }
-        }
+            in: deletedScheduledOrderIds,
+          },
+        },
       });
 
       await prisma.userRoute.deleteMany({
         where: {
           userId: {
-            in: scheduleOrderList.map((order: any) => order.userId)
+            in: scheduleOrderList.map((order: any) => order.userId),
           },
-          routeId
-        }
-      })
+          routeId,
+        },
+      });
       // for (const order of scheduleOrderList) {
       //   const existingOrder = await prisma.scheduleOrders.findUnique({
       //     where: {
@@ -69,8 +71,8 @@ export default async function DELETE(
       // }
 
       return res.status(200).json({
-        message: 'Schedule Orders Deleted Successfully'
-      })
+        message: 'Schedule Orders Deleted Successfully',
+      });
     }
 
     // get all clients from selected route
@@ -111,7 +113,7 @@ export default async function DELETE(
       });
     }
 
-   if (scheduleOrderId) {
+    if (scheduleOrderId) {
       const existingOrder = await prisma.scheduleOrders.findUnique({
         where: {
           id: Number(scheduleOrderId),

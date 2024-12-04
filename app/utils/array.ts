@@ -187,5 +187,7 @@ export const compareTwoArrays = (arr1: any[], arr2: any[]) => {
 };
 
 export const getUniqueUnitRatios = (units: any[]) => {
-  return Array.from(new Map(units.map((unit: any) => [unit.ratio, unit])).values());
-}
+  return Array.from(
+    new Map(units.map((unit: any) => [unit.ratio, unit])).values(),
+  );
+};

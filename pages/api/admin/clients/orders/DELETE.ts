@@ -41,14 +41,18 @@ export default async function DELETE(
               include: {
                 fifo: true,
                 inventoryUnit: true,
-              }
+              },
             },
           },
         });
 
         for (const item of deletedOrder.items) {
           if (item?.fifo && item?.inventoryUnit) {
-            await restockInventoryItem(item.fifo, item.inventoryUnit, item.quantity);
+            await restockInventoryItem(
+              item.fifo,
+              item.inventoryUnit,
+              item.quantity,
+            );
           }
         }
 
@@ -80,14 +84,18 @@ export default async function DELETE(
             include: {
               fifo: true,
               inventoryUnit: true,
-            }
+            },
           },
         },
       });
 
       for (const item of deletedOrder.items) {
         if (item?.fifo && item?.inventoryUnit) {
-          await restockInventoryItem(item.fifo, item.inventoryUnit, item.quantity);
+          await restockInventoryItem(
+            item.fifo,
+            item.inventoryUnit,
+            item.quantity,
+          );
         }
       }
     } else {

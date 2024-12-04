@@ -43,10 +43,7 @@ interface IProps {
 
 export const filter = createFilterOptions<any>();
 
-const EditStockPurchased = ({
-  stockPurchased,
-  showNotification,
-}: IProps) => {
+const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, onChangeOpen] = useMultipleBoolean({
@@ -99,7 +96,7 @@ const EditStockPurchased = ({
   const fetchAdminsAndDrivers = async () => {
     const user: any = getAdminsAndDrivers(showNotification);
     setAdminsAndDrivers(user);
-  }
+  };
 
   useEffect(() => {
     if (open) {
@@ -644,8 +641,15 @@ const EditStockPurchased = ({
                         <Typography variant="h6" fontWeight="bold">
                           {item.name}
                         </Typography>
-                        <IconButton onClick={() => removeItem(item.id)} disabled={disabledItem}>
-                          <RemoveCircleIcon sx={{ color: disabledItem ? grey[500] : errorColor }} />
+                        <IconButton
+                          onClick={() => removeItem(item.id)}
+                          disabled={disabledItem}
+                        >
+                          <RemoveCircleIcon
+                            sx={{
+                              color: disabledItem ? grey[500] : errorColor,
+                            }}
+                          />
                         </IconButton>
                       </Box>
                     </Grid>
@@ -773,7 +777,8 @@ const EditStockPurchased = ({
                 <MenuItem value={'-- Choose who spent --'} disabled>
                   -- Choose who spent --
                 </MenuItem>
-                {adminsAndDrivers && adminsAndDrivers?.length > 0 &&
+                {adminsAndDrivers &&
+                  adminsAndDrivers?.length > 0 &&
                   adminsAndDrivers?.map((person: string) => {
                     return <MenuItem value={person}>{person}</MenuItem>;
                   })}

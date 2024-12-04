@@ -49,7 +49,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userCategoryId,
     } = updatedData as BodyType;
 
-    console.log(updatedItems, 'updatedItems')
+    console.log(updatedItems, 'updatedItems');
 
     // Bad cases
     if (updateOption === UpdateOption.CREATE) {
@@ -78,47 +78,47 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Check does system has that item
       // if (item.id) {
-        const existingItem = await prisma.orderedItems.findUnique({
-          where: {
-            id: item.id,
-          },
-          include: {
-            fifo: true,
-            inventoryUnit: true,
-          }
+      const existingItem = await prisma.orderedItems.findUnique({
+        where: {
+          id: item.id,
+        },
+        include: {
+          fifo: true,
+          inventoryUnit: true,
+        },
+      });
+
+      if (!existingItem) {
+        return res.status(404).json({
+          error: `Item ${item.name} with price of ${item.price} Not Found`,
         });
+      }
 
-        if (!existingItem) {
-          return res.status(404).json({
-            error: `Item ${item.name} with price of ${item.price} Not Found`,
-          });
-        }
+      const updatedItem = await prisma.orderedItems.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          price: item.price,
+          quantity: item.quantity,
+        },
+      });
 
-        const updatedItem = await prisma.orderedItems.update({
-          where: {
-            id: item.id,
-          },
-          data: {
-            price: item.price,
-            quantity: item.quantity,
-          },
-        });
+      // Pop the item off the base list in order to track the item
+      const newList = orderedItemList.filter((item: OrderedItems) => {
+        return item.name !== updatedItem.name;
+      });
+      orderedItemList = newList;
 
-        // Pop the item off the base list in order to track the item
-        const newList = orderedItemList.filter((item: OrderedItems) => {
-          return item.name !== updatedItem.name;
-        });
-        orderedItemList = newList;
-
-        // Inventory Update
-        if (existingItem?.fifo && existingItem.inventoryUnit) {
-          await updateSingleInventoryItem(
-            existingItem.fifo,
-            existingItem.inventoryUnit,
-            item.quantity,
-            existingItem.quantity,
-          );
-        }
+      // Inventory Update
+      if (existingItem?.fifo && existingItem.inventoryUnit) {
+        await updateSingleInventoryItem(
+          existingItem.fifo,
+          existingItem.inventoryUnit,
+          item.quantity,
+          existingItem.quantity,
+        );
+      }
       // } else {
       //   // Check does item name exist already in that order
       //   const foundItem = await prisma.orderedItems.findFirst({
@@ -517,7 +517,7 @@ const generateScheduleOrderItems = (
       quantity: userId === scheduleOrder.userId ? quantity : 0,
       scheduledOrderId: scheduleOrder.id,
       inventoryItemId: newItem.inventoryItemId,
-      inventoryUnitId: newItem.inventoryUnitId
+      inventoryUnitId: newItem.inventoryUnitId,
     };
   });
 

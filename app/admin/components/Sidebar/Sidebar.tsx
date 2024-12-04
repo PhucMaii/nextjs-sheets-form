@@ -15,7 +15,14 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { Fragment, ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { adminTabs, tabs } from '../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
@@ -99,7 +106,7 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
 
   const content = (
     <>
-    {/* <Box display="flex" justifyContent="center" my={2}>
+      {/* <Box display="flex" justifyContent="center" my={2}>
       <FormControlLabel
             value="start"
             control={<Switch color="primary" checked={isMaintenance} onChange={(e: any) => setIsMaintenance(e.target.checked)} />}

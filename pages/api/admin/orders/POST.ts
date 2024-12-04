@@ -17,7 +17,8 @@ interface BodyTypes {
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { deliveryDate, scheduleOrderList, createdAt } = req.body as BodyTypes;
+    const { deliveryDate, scheduleOrderList, createdAt } =
+      req.body as BodyTypes;
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];
@@ -151,20 +152,20 @@ export const createOrder = async (
       },
     });
 
-      // STEP 1: Loop through each item
-      const inventoryItems = await prisma.inventoryItem.findMany({
-        include: {
-          vendorItem: true,
-          fifo: {
-            include: {
-              vendorItem: true
-            },
+    // STEP 1: Loop through each item
+    const inventoryItems = await prisma.inventoryItem.findMany({
+      include: {
+        vendorItem: true,
+        fifo: {
+          include: {
+            vendorItem: true,
           },
-        }
-      });
+        },
+      },
+    });
 
-      const allDeletedFifoIds = [];
-      const newOrderedItems = [];
+    const allDeletedFifoIds = [];
+    const newOrderedItems = [];
     for (const item of items) {
       const targetedItem = inventoryItems.find(
         (inventoryItem) => inventoryItem.id === item.inventoryItemId,
@@ -174,8 +175,8 @@ export const createOrder = async (
         console.error('Conflict Inventory Item Not Found');
         continue;
       }
-      
-      console.log({targetedItem, item}, 'targetedItem');
+
+      console.log({ targetedItem, item }, 'targetedItem');
       if (targetedItem.fifo.length === 0) {
         const newFifo = await prisma.fifo.create({
           data: {
@@ -187,16 +188,16 @@ export const createOrder = async (
           },
           include: {
             vendorItem: true,
-          }
+          },
         });
-        
+
         await prisma.vendorItem.update({
           where: {
-            id: targetedItem.vendorItem[0].id
+            id: targetedItem.vendorItem[0].id,
           },
           data: {
             quantity: -item.quantity,
-          }
+          },
         });
 
         newOrderedItems.push({
@@ -208,74 +209,72 @@ export const createOrder = async (
           inventoryUnitId: item.inventoryUnitId,
           inventoryItemId: item.inventoryItemId,
         });
-        
       } else {
         // STEP 2: Get and Sorted from latest date all FIFO from inventory item
         const itemFifo = targetedItem.fifo.map((fifo) => {
           const createdAt = fifo.createdAt.split(' ')[1];
-          return {...fifo, createdAt}
+          return { ...fifo, createdAt };
         });
-  
+
         // Descending fifo - first item would be the latest
         const sortedFifo = sortByDeliveryDate(itemFifo, 'createdAt');
-        console.log({sortedFifo, itemFifo}, 'sortedFifo');
+        console.log({ sortedFifo, itemFifo }, 'sortedFifo');
         // STEP 3: Use while loop to identify which fifo should be used
         //   itemQuantity = item.quantity * item.unit.ratio
         //   while (itemQuantity >= fifo.quantity)
         //     move to next FIFO
         let fifoIndex = 0;
         const deletedFifoIds = [];
-        
+
         let itemQuantity = item.quantity * item.inventoryUnit.ratio;
         // let fifoQuantityLeft = itemQuantity;
         while (fifoIndex < sortedFifo.length - 1) {
           if (itemQuantity >= sortedFifo[fifoIndex].quantity) {
-            deletedFifoIds.push(sortedFifo[fifoIndex].id)
-            itemQuantity -= sortedFifo[fifoIndex].quantity
+            deletedFifoIds.push(sortedFifo[fifoIndex].id);
+            itemQuantity -= sortedFifo[fifoIndex].quantity;
             fifoIndex++;
           } else {
             break;
           }
         }
-  
+
         // STEP 4: fifo.quantity - itemQuantity
         // If users order more than stock has - fifoIndex should reach the second last item
         await prisma.fifo.update({
           where: {
-            id: sortedFifo[fifoIndex].id
+            id: sortedFifo[fifoIndex].id,
           },
           data: {
-            quantity: sortedFifo[fifoIndex].quantity - itemQuantity
-          }
+            quantity: sortedFifo[fifoIndex].quantity - itemQuantity,
+          },
         });
-  
+
         // STEP 5: vendorItem.quantity - (item.quantity * item.inventoryUnit.ratio)
         // Update Vendor Item Quantity
         await prisma.vendorItem.update({
           where: {
-            id: sortedFifo[fifoIndex].vendorItemId
+            id: sortedFifo[fifoIndex].vendorItemId,
           },
           data: {
-            quantity: sortedFifo[fifoIndex].vendorItem.quantity - (item.quantity * item.inventoryUnit.ratio)
-          }
-        }
-        );
-  
+            quantity:
+              sortedFifo[fifoIndex].vendorItem.quantity -
+              item.quantity * item.inventoryUnit.ratio,
+          },
+        });
+
         await prisma.orderedItems.updateMany({
           where: {
             fifoId: {
-              in: deletedFifoIds
-            }
+              in: deletedFifoIds,
+            },
           },
           data: {
-            fifoId: sortedFifo[fifoIndex].id
-          }
-        })
-  
+            fifoId: sortedFifo[fifoIndex].id,
+          },
+        });
+
         allDeletedFifoIds.push(...deletedFifoIds);
-  
-  
-  
+
         // STEP 6: Create ordered item with that fifo id attached
         newOrderedItems.push({
           orderId: newOrder.id,
@@ -287,19 +286,18 @@ export const createOrder = async (
           inventoryItemId: item.inventoryItemId,
         });
       }
-  
+
       await prisma.fifo.deleteMany({
         where: {
           id: {
-            in: allDeletedFifoIds
-          }
-        }
+            in: allDeletedFifoIds,
+          },
+        },
       });
     }
-      
 
     await prisma.orderedItems.createMany({
-      data: newOrderedItems
+      data: newOrderedItems,
     });
     // const inventoryItemQuantityMap: any = {};
     // const itemsToCreate = items.map((item: OrderedItems) => {
@@ -365,4 +363,3 @@ export const createOrder = async (
     console.log('Internal Server Error - Fail to create order: ', error);
   }
 };
-

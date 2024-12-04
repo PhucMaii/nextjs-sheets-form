@@ -3,6 +3,7 @@ import { Order } from '@/app/admin/orders/page';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date';
+import { checkIsKorean } from '@/pages/api/utils/korean';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -191,26 +192,46 @@ export const generateManifest = (orders: any, revenue: number = 0) => {
 
   if (revenue === 0) {
     const manifest = itemList.reduce((acc: any, item: any) => {
-      const key = item.name;
+      const { name } = item;
 
-      if (!acc[key]) {
-        acc[key] = item.quantity;
+      let itemKey = name;
+
+      if (checkIsKorean(itemKey.split(' - ')[0])) {
+        itemKey = itemKey.split(' - ')[1];
+      } else {
+        itemKey = itemKey.includes('KONGNAMUL')
+          ? itemKey.split(' - ')[1]
+          : itemKey;
+      }
+
+      if (!acc[itemKey]) {
+        acc[itemKey] = item.quantity;
         return acc;
       }
 
-      acc[key] += item.quantity;
+      acc[itemKey] += item.quantity;
       return acc;
     }, {});
     return manifest;
   }
 
   const manifest = itemList.reduce((acc: any, item: any) => {
-    const key = item.name;
+    const { name } = item;
+
+    let itemKey = name;
+
+    if (checkIsKorean(itemKey.split(' - ')[0])) {
+      itemKey = itemKey.split(' - ')[1];
+    } else {
+      itemKey = itemKey.includes('KONGNAMUL')
+        ? itemKey.split(' - ')[1]
+        : itemKey;
+    }
     const itemPrice = item.quantity * item.price;
 
-    if (!acc[key]) {
+    if (!acc[itemKey]) {
       const percentageTake = (itemPrice / revenue) * 100;
-      acc[key] = {
+      acc[itemKey] = {
         quantity: item.quantity,
         price: itemPrice,
         percentage: percentageTake.toFixed(2),
@@ -218,10 +239,10 @@ export const generateManifest = (orders: any, revenue: number = 0) => {
       return acc;
     }
 
-    const newTotalPrice = acc[key].price + itemPrice;
+    const newTotalPrice = acc[itemKey].price + itemPrice;
     const newPercentageTake = (newTotalPrice / revenue) * 100;
-    acc[key] = {
-      quantity: acc[key].quantity + item.quantity,
+    acc[itemKey] = {
+      quantity: acc[itemKey].quantity + item.quantity,
       price: newTotalPrice,
       percentage: newPercentageTake.toFixed(2),
     };

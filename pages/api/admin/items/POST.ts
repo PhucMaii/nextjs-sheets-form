@@ -33,10 +33,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         vendorItem: {
           include: {
             unit: true,
-          }
+          },
         },
-
-      }
+      },
     });
 
     if (!selectedInvetoryItem) {
@@ -49,13 +48,23 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const createdBy = `Admin - ${user?.clientName}`;
 
     for (const vItem of selectedInvetoryItem.vendorItem) {
-      const clientVendorItemUnits = newItem.units.filter((unit: any) => unit.vendorItemId === vItem.id);
+      const clientVendorItemUnits = newItem.units.filter(
+        (unit: any) => unit.vendorItemId === vItem.id,
+      );
 
-      await checkAndUpdateUnits(vItem.unit, clientVendorItemUnits, vItem.id, createdAt, createdBy);
+      await checkAndUpdateUnits(
+        vItem.unit,
+        clientVendorItemUnits,
+        vItem.id,
+        createdAt,
+        createdBy,
+      );
     }
 
     // Brand New Unit
-    const brandNewUnit = newItem.units.filter((unit: any) => unit.vendorItemId < 1);
+    const brandNewUnit = newItem.units.filter(
+      (unit: any) => unit.vendorItemId < 1,
+    );
 
     if (brandNewUnit.length > 0) {
       await prisma.inventoryUnit.createMany({
@@ -66,21 +75,23 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             ratio: unit.ratio,
             unitPrice: unit.unitPrice,
             createdAt,
-            createdBy
-          }
-        })
-      })
+            createdBy,
+          };
+        }),
+      });
     }
 
     const selectedUnit = await prisma.inventoryUnit.findFirst({
       where: {
-        vendorItemId: newItem.unit.vendorItemId < 1 ? selectedInvetoryItem.vendorItem[0].id : newItem.unit.vendorItemId,
+        vendorItemId:
+          newItem.unit.vendorItemId < 1
+            ? selectedInvetoryItem.vendorItem[0].id
+            : newItem.unit.vendorItemId,
         unit: newItem.unit.unit,
         ratio: newItem.unit.ratio,
         unitPrice: newItem.unit.unitPrice,
       },
     });
-
 
     if (!selectedUnit) {
       return res.status(500).json({
@@ -104,7 +115,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         user: {
           categoryId: newItem.categoryId,
-        }
+        },
       },
     });
 
@@ -117,7 +128,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           inventoryItemId: newItem.inventoryItemId,
           inventoryUnitId: selectedUnit.id,
           quantity: 0,
-        }
+        },
       });
     }
 

@@ -51,9 +51,7 @@ export default function Sidebar({ children }: PropTypes) {
   const { isMaintenance } = useContext(MaintenanceContext);
 
   if (isMaintenance) {
-    return (
-      <Maintenance />
-    );
+    return <Maintenance />;
   }
 
   const { user, isValidating } = useContext(UserContext);
@@ -136,8 +134,6 @@ export default function Sidebar({ children }: PropTypes) {
       </Box>
     </>
   );
-
-
 
   if (smDown) {
     return (

@@ -53,10 +53,12 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
 
   useEffect(() => {
     if (Object.keys(targetItem).length > 0) {
-      const inventoryItemUnits = targetItem.inventoryItem.vendorItem.flatMap((item: any) => item.unit);
+      const inventoryItemUnits = targetItem.inventoryItem.vendorItem.flatMap(
+        (item: any) => item.unit,
+      );
       const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
 
-      setUpdatedItem({...targetItem, units: sellingUnits});
+      setUpdatedItem({ ...targetItem, units: sellingUnits });
     }
   }, [targetItem]);
 
@@ -193,10 +195,16 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <Typography variant="h6">Units:</Typography>
-                  <UnitRadio 
+                  <UnitRadio
                     units={updatedItem.units}
                     value={JSON.stringify(updatedItem.inventoryUnit)}
-                    onChange={(e: any) => setUpdatedItem((prevState: any) => ({ ...prevState, inventoryUnit: JSON.parse(e.target.value), inventoryUnitId: JSON.parse(e.target.value).id }))}
+                    onChange={(e: any) =>
+                      setUpdatedItem((prevState: any) => ({
+                        ...prevState,
+                        inventoryUnit: JSON.parse(e.target.value),
+                        inventoryUnitId: JSON.parse(e.target.value).id,
+                      }))
+                    }
                     isShowPrice
                   />
                 </Box>
@@ -207,7 +215,7 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
       </Modal>
     </>
   );
-}
+};
 
 export default memo(EditItem, (prev, next) => {
   return prev.targetItem === next.targetItem;

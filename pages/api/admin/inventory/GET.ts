@@ -33,24 +33,24 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       });
-  
+
       const formattedInventory: any[] = [];
-  
+
       for (const vendorItem of vendorItems) {
         const existingInventoryItem = formattedInventory.find(
           (item: any) => item.id === vendorItem.inventoryItemId,
         );
-  
+
         if (existingInventoryItem) {
           continue;
         }
-  
+
         const formattedItem = formatInventoryWithTotalValueAndStatus([
           vendorItem.inventoryItem,
         ]);
         formattedInventory.push(...formattedItem);
       }
-  
+
       return res.status(200).json({
         data: formattedInventory,
         message: 'Fetch Inventory Successfully',
@@ -76,47 +76,46 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       if (!inventoryItem) {
         return res.status(404).json({ error: 'Inventory Item not found' });
       }
-      
+
       const formattedInventory = formatInventoryWithTotalValueAndStatus([
         inventoryItem,
       ]);
-      
+
       let sellingUnits = inventoryItem.vendorItem.flatMap(
-        (item: any) => item.unit);
-        
-        sellingUnits = Array.from(new Map(
-          sellingUnits.map((unit: any) => [unit.ratio, unit]),
-        ).values());
-        
-        console.log(sellingUnits, 'selling Units');
+        (item: any) => item.unit,
+      );
+
+      sellingUnits = Array.from(
+        new Map(sellingUnits.map((unit: any) => [unit.ratio, unit])).values(),
+      );
+
+      console.log(sellingUnits, 'selling Units');
 
       return res.status(200).json({
-        data: {...formattedInventory, units: sellingUnits},
+        data: { ...formattedInventory, units: sellingUnits },
         message: 'Fetch Inventory Successfully',
       });
     }
 
-      const inventory: any = await prisma.inventoryItem.findMany({
-        include: {
-          vendorItem: {
-            include: {
-              vendor: true,
-              fifo: true,
-              unit: true,
-            },
+    const inventory: any = await prisma.inventoryItem.findMany({
+      include: {
+        vendorItem: {
+          include: {
+            vendor: true,
+            fifo: true,
+            unit: true,
           },
         },
-      });
+      },
+    });
 
-      const formattedInventory =
-        formatInventoryWithTotalValueAndStatus(inventory);
+    const formattedInventory =
+      formatInventoryWithTotalValueAndStatus(inventory);
 
-      return res.status(200).json({
-        data: formattedInventory,
-        message: 'Fetch Inventory Successfully',
-      });
-
-   
+    return res.status(200).json({
+      data: formattedInventory,
+      message: 'Fetch Inventory Successfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error :', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

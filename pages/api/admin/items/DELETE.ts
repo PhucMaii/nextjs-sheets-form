@@ -26,11 +26,11 @@ export default async function DELETE(
         where: {
           user: {
             categoryId: deletedItem.categoryId,
-          }
+          },
         },
         include: {
           items: true,
-        }
+        },
       });
 
       const scheduleOrderIds: number[] = [];
@@ -43,7 +43,9 @@ export default async function DELETE(
           continue;
         }
 
-        const newTotalPrice = scheduledOrder.totalPrice - deletedItem.price * targetdOrderedItems.quantity;
+        const newTotalPrice =
+          scheduledOrder.totalPrice -
+          deletedItem.price * targetdOrderedItems.quantity;
 
         await prisma.scheduleOrders.update({
           where: {
@@ -51,7 +53,7 @@ export default async function DELETE(
           },
           data: {
             totalPrice: newTotalPrice,
-          }
+          },
         });
 
         scheduleOrderIds.push(scheduledOrder.id);
@@ -60,10 +62,10 @@ export default async function DELETE(
       await prisma.orderedItems.deleteMany({
         where: {
           scheduledOrderId: {
-            in: scheduleOrderIds
+            in: scheduleOrderIds,
           },
-          inventoryItemId: deletedItem.inventoryItemId
-        }
+          inventoryItemId: deletedItem.inventoryItemId,
+        },
       });
 
       return res.status(200).json({

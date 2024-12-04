@@ -10,11 +10,11 @@ import { checkIsKorean } from '../../utils/korean';
 
 export const config = {
   api: {
-      bodyParser: {
-          sizeLimit: '8mb' // Set desired value here
-      }
-  }
-}
+    bodyParser: {
+      sizeLimit: '8mb', // Set desired value here
+    },
+  },
+};
 
 interface IBody {
   day: string;

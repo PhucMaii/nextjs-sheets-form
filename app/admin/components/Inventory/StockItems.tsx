@@ -43,11 +43,18 @@ export default function StockItems({
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newDisplayData = inventoryItems?.data.filter((item: IInventoryItem) => {
-        return item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) 
-        || item.vendorItem.some((vendorItem: any) => vendorItem.vendor.name.toLowerCase().includes(debouncedKeywords.toLowerCase()))
-        ;
-      })
+      const newDisplayData = inventoryItems?.data.filter(
+        (item: IInventoryItem) => {
+          return (
+            item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) ||
+            item.vendorItem.some((vendorItem: any) =>
+              vendorItem.vendor.name
+                .toLowerCase()
+                .includes(debouncedKeywords.toLowerCase()),
+            )
+          );
+        },
+      );
 
       setDisplayData(newDisplayData);
     } else {

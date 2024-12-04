@@ -19,7 +19,7 @@ import useEditUnit from '@/hooks/unit/useEditUnit';
 interface IProps extends ModalProps {
   categoryId: number;
   addItem: (newItem: IItem) => Promise<void>;
-  showNotification: (type: AlertColor, message: string) => void
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function AddItem({
@@ -27,7 +27,7 @@ export default function AddItem({
   onClose,
   categoryId,
   addItem,
-  showNotification
+  showNotification,
 }: IProps) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<any>({
@@ -41,13 +41,8 @@ export default function AddItem({
     availability: true,
   });
 
-  const {
-    units,
-    selectedUnit,
-    AddUnitModal,
-    EditUnitModal,
-    UnitDisplay,
-  } = useEditUnit(newItem.units, newItem.unit, showNotification, true);
+  const { units, selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
+    useEditUnit(newItem.units, newItem.unit, showNotification, true);
 
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
 
@@ -110,11 +105,15 @@ export default function AddItem({
                 }
                 onChange={(e, newValue: any) => {
                   console.log('new value', newValue);
-                  let newUnits = newValue.vendorItem.flatMap((item: any) =>
-                    item.unit,
+                  let newUnits = newValue.vendorItem.flatMap(
+                    (item: any) => item.unit,
                   );
 
-                  newUnits = Array.from(new Map(newUnits.map((unit: any) => [unit.ratio, unit])).values());
+                  newUnits = Array.from(
+                    new Map(
+                      newUnits.map((unit: any) => [unit.ratio, unit]),
+                    ).values(),
+                  );
                   setNewItem({
                     ...newItem,
                     name: newValue.name || '',
@@ -134,18 +133,19 @@ export default function AddItem({
               <Typography variant="h6">Name:</Typography>
             </Grid>
 
-
             <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Name"
                 value={newItem.name}
-                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                />
+                onChange={(e) =>
+                  setNewItem({ ...newItem, name: e.target.value })
+                }
+              />
             </Grid>
-              
+
             {newItem.units.length > 0 && UnitDisplay}
-            
+
             <Grid item xs={12}>
               <Typography variant="h6">Price:</Typography>
             </Grid>

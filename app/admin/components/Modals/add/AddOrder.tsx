@@ -104,8 +104,8 @@ export default function AddOrder({
         createdAt: `${timeString} ${dateString}`,
         isCheckUnavailableRange,
         items: itemList,
-        createdBy: USER_ROLE.ADMIN, 
-        isForceOrder
+        createdBy: USER_ROLE.ADMIN,
+        isForceOrder,
       };
 
       // for (const item of itemList) {
