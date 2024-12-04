@@ -10,9 +10,10 @@ import { checkIsKorean } from '../../utils/korean';
 
 export const config = {
   api: {
-    responseLimit: false,
-    // responseLimit: '8mb',
-  },
+      bodyParser: {
+          sizeLimit: '8mb' // Set desired value here
+      }
+  }
 }
 
 interface IBody {

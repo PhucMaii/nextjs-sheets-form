@@ -75,11 +75,7 @@ const useManifest = (
           day: givenDay,
           orderList,
           userRoute: userRoute?.data,
-        }, {
-        headers: {
-          'Content-Type': 'application/octet-stream',
-        },
-      });
+        });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
