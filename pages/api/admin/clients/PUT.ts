@@ -89,6 +89,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           where: {
             categoryId: updateFields.categoryId,
           },
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          }
         });
 
         if (updatedUser.scheduleOrders.length > 0) {
@@ -107,6 +111,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                   quantity: 0,
                   price: item.price,
                   scheduledOrderId: scheduleOrder.id,
+                  inventoryItemId: item.inventoryItemId,
+                  inventoryUnitId: item.inventoryUnitId,
                 };
               },
             );
