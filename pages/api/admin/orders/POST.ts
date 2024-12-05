@@ -11,7 +11,7 @@ import { checkHasClientOrder } from '../../import-sheets/utils';
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb', // Set desired value here
+      sizeLimit: '8mb', // Set desired value here
     },
   },
 };
@@ -26,6 +26,8 @@ interface BodyTypes {
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
+    const requestBodySize = Buffer.byteLength(JSON.stringify(req.body));
+    console.log('Request Body Size:', requestBodySize, 'bytes');
     const { deliveryDate, scheduleOrderList, createdAt } =
       req.body as BodyTypes;
 
