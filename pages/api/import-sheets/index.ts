@@ -199,7 +199,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const isSendToAdmin = true;
     await sendEmail(
       existingUser,
-      itemListWithTotalPrice,
+      newOrder,
       newOrder.id,
       newOrder.deliveryDate,
       isSendToAdmin,

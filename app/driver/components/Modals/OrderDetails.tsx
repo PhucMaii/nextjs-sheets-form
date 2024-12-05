@@ -153,7 +153,7 @@ export default function OrderDetails({
                   fullWidth
                   variant="contained"
                 >
-                  Collect Money
+                  Collected
                 </LoadingButton>
               </Grid>
             </Grid>

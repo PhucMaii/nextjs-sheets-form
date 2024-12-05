@@ -209,7 +209,7 @@ export default function OrderAccordion({
                 </Typography>
               </Grid>
               <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography fontWeight="bold">Number of items</Typography>
+                <Typography>Number of items</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">{totalQuantity} items</Typography>
@@ -218,7 +218,40 @@ export default function OrderAccordion({
                 <Divider />
               </Grid>
               <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography fontWeight="bold">Total</Typography>
+                <Typography>Subtotal</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  ${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>PST (7%)</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  ${order?.PST?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>GST (5%)</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  ${order?.GST?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>Total</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">

@@ -1,9 +1,7 @@
 import { transporter } from './transporter';
 import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
-import { generateCurrentTime } from '@/app/utils/time';
-import { OrderedItems, UserType } from '@/app/utils/type';
-import { OrderedItems as PrismaOrderdItems } from '@prisma/client';
+import { UserType } from '@/app/utils/type';
 import InvoiceDocument from '@/app/admin/components/PDF/InvoiceDocument';
 import ReactPDF from '@react-pdf/renderer';
 import React from 'react';
@@ -34,31 +32,32 @@ export default emailHandler;
 
 export const sendEmail = async (
   user: User | UserType,
-  items: OrderedItems[] | PrismaOrderdItems[],
+  // items: OrderedItems[] | PrismaOrderdItems[],
+  order: any,
   invoiceId: number,
   deliveryDate: string,
   sendToAdmin: boolean,
   note = '',
 ) => {
-  const orderDetails: any = {};
-  for (const item of items) {
-    orderDetails[item.name] = {
-      quantity: item.quantity,
-      price: item.price,
-      totalPrice: item.quantity * item.price,
-    };
-  }
+  // const orderDetails: any = {};
+  // for (const item of items) {
+  //   orderDetails[item.name] = {
+  //     quantity: item.quantity,
+  //     price: item.price,
+  //     totalPrice: item.quantity * item.price,
+  //   };
+  // }
 
-  const orderTime = generateCurrentTime();
+  // const orderTime = generateCurrentTime();
 
-  orderDetails['DELIVERY DATE'] = deliveryDate;
-  orderDetails['NOTE'] = note;
-  orderDetails.orderTime = orderTime;
+  // orderDetails['DELIVERY DATE'] = deliveryDate;
+  // orderDetails['NOTE'] = note;
+  // orderDetails.orderTime = orderTime;
 
   const htmlTemplate: string = generateOrderTemplate(
     user.clientName,
     user.clientId,
-    orderDetails,
+    {...order, note, deliveryDate},
     user.contactNumber,
     user.deliveryAddress,
     invoiceId,

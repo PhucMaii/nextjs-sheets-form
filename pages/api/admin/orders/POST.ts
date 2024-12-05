@@ -7,6 +7,7 @@ import { pusherServer } from '@/app/pusher';
 import { normalizeDate, sortByDeliveryDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
 import { checkHasClientOrder } from '../../import-sheets/utils';
+import { gstRate, pstRate } from '@/app/lib/constant';
 
 interface BodyTypes {
   deliveryDate: string;
@@ -95,7 +96,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
       await sendEmail(
         scheduleOrder.user,
-        scheduleOrder.items,
+        scheduleOrder,
         newOrder.id,
         deliveryDate,
         isSendToAdmin,
@@ -135,9 +136,34 @@ export const createOrder = async (
 
     // const orderTime = generateCurrentTime();
 
-    const totalPrice = items.reduce((acc: number, item: OrderedItems) => {
-      return acc + item.price * item.quantity;
-    }, 0);
+    const total = items.reduce((acc: any, item: OrderedItems) => {
+      // return acc + item.price * item.quantity;
+      if (!acc?.subTotal) {
+        acc.subTotal = 0;
+      }
+
+      if (!acc?.PST) {
+        acc.PST = 0;
+      }
+
+      if (!acc?.GST) {
+        acc.GST = 0;
+      }
+
+      acc.subTotal += item.price * item.quantity;
+
+      if (item.inventoryItem.hasPST) {
+        acc.PST += item.price * item.quantity * pstRate;
+      }
+
+      if (item.inventoryItem.hasGST) {
+        acc.GST += item.price * item.quantity * gstRate;
+      }
+
+      return acc;
+    }, {});
+
+    console.log({ total });
 
     // initialize order
     const newOrder = await prisma.orders.create({
@@ -146,7 +172,10 @@ export const createOrder = async (
         note,
         status: ORDER_STATUS.INCOMPLETED,
         userId: user.id,
-        totalPrice,
+        subTotal: total.subTotal,
+        PST: total.PST,
+        GST: total.GST,
+        totalPrice: total.subTotal + total.PST + total.GST,
         orderTime,
         createdBy,
       },

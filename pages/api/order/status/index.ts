@@ -72,6 +72,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         updateTime: new Date(),
         updatedBy: `Client - ${existingUser.clientName}`,
       },
+      include: {
+        items: true,
+      }
     });
 
     let total = 0;
@@ -124,12 +127,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const htmlTemplate: string = generateOrderTemplate(
       existingUser.clientName,
       existingUser.clientId,
-      {
-        ...orderDetails,
-        'DELIVERY DATE': existingOrder.deliveryDate,
-        NOTE: existingOrder.note,
-        orderTime: existingOrder.orderTime,
-      },
+      // {
+      //   ...orderDetails,
+      //   'DELIVERY DATE': existingOrder.deliveryDate,
+      //   NOTE: existingOrder.note,
+      //   orderTime: existingOrder.orderTime,
+      // },
+      updatedOrder,
       existingUser.contactNumber,
       existingUser.deliveryAddress,
       existingOrder.id,

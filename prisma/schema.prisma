@@ -101,6 +101,9 @@ model Orders {
   note          String
   status        String
   userId        Int
+  subTotal      Float?
+  PST           Float?
+  GST           Float?
   totalPrice    Float
   updateTime    DateTime?
   isReplacement Boolean?
@@ -201,6 +204,9 @@ model Expense {
   id              Int     @id @default(autoincrement())
   createdAt       String
   createdBy       String
+  subTotal        Float?
+  PST             Float?
+  GST             Float?
   amount          Float
   description     String
   spentBy         String
@@ -244,6 +250,8 @@ model Vendor {
 model InventoryItem {
   id        Int    @id @default(autoincrement())
   name      String
+  hasPST     Boolean?
+  hasGST     Boolean?
   createdAt String
   createdBy String
 

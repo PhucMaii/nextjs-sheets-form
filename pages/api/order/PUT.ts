@@ -6,6 +6,7 @@ import { pusherServer } from '@/app/pusher';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../utils/email';
 import { updateSingleInventoryItem } from '../admin/orderedItems/single';
+import { gstRate, pstRate } from '@/app/lib/constant';
 
 interface BodyProps {
   deliveryDate: string;
@@ -45,7 +46,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    let total = 0;
+    let subTotal = 0;
+    let PST = 0;
+    let GST = 0;
     const itemList: any = [];
     const orderDetails: any = {};
 
@@ -76,11 +79,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           fifo: true,
+          inventoryItem: true,
         },
       });
 
       // Update new total price
-      total += newItem.quantity * newItem.price;
+      // total += newItem.quantity * newItem.price;
+      subTotal += newItem.quantity * newItem.price;
+      if (newItem.inventoryItem) {
+        if (newItem.inventoryItem.hasPST) {
+          PST += newItem.quantity * newItem.price * pstRate;
+        }
+  
+        if (newItem.inventoryItem.hasGST) {
+          GST += newItem.quantity * newItem.price * gstRate;
+        }
+      }
       itemList.push({
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
@@ -110,11 +124,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: userLastOrder.id,
       },
       data: {
-        totalPrice: total,
+        subTotal,
+        PST,
+        GST,
+        totalPrice: subTotal + PST + GST,
         note: body.note,
         isReplacement: true,
         updateTime: new Date(),
         updatedBy: `Client - ${existingUser.clientId}`,
+      },
+      include: {
+        user: true,
+        items: true,
       },
     });
 
@@ -129,12 +150,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const htmlTemplate: string = generateOrderTemplate(
       existingUser.clientName,
       existingUser.clientId,
-      {
-        ...orderDetails,
-        'DELIVERY DATE': userLastOrder.deliveryDate,
-        NOTE: userLastOrder.note,
-        orderTime: userLastOrder.orderTime,
-      },
+      // {
+      //   ...orderDetails,
+      //   'DELIVERY DATE': userLastOrder.deliveryDate,
+      //   NOTE: userLastOrder.note,
+      //   orderTime: userLastOrder.orderTime,
+      // },
+      newOrder,
       existingUser.contactNumber,
       existingUser.deliveryAddress,
       newOrder.id,
@@ -149,10 +171,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     );
 
     await pusherServer?.trigger('override-order', 'incoming-order', {
-      items: itemList,
       ...existingUser,
       ...newOrder,
-      totalPrice: total,
+      items: itemList,
+      totalPrice: newOrder.totalPrice,
       category: userCategory,
       isReplacement: true,
     });
@@ -160,10 +182,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json({
       message: 'Override Order Successfully',
       data: {
-        items: itemList,
         ...existingUser,
         ...newOrder,
-        totalPrice: total,
+        items: itemList,
+        totalPrice: newOrder.totalPrice,
         category: userCategory,
       },
     });
