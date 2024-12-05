@@ -16,8 +16,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { userId, deliveryDate, startDate, endDate } =
       req.query as RequestQuery;
 
-    console.log({ startDate, endDate });
-
     // Check if there is no userId, then fetch all orders with specific delivery date
     let userOrders: any = [];
     if (userId && !isNaN(Number(userId))) {

@@ -1,4 +1,3 @@
-import { Order } from '@/app/admin/orders/page';
 // import { pusherServer } from '@/app/pusher';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -6,7 +5,7 @@ import { restockInventoryItem } from '../../orderedItems/single';
 
 interface BodyTypes {
   orderId?: string;
-  orderList?: Order[];
+  orderList?: any[];
 }
 
 export default async function DELETE(
@@ -19,34 +18,23 @@ export default async function DELETE(
     const { orderId, orderList } = req.body as BodyTypes;
 
     if (orderList) {
+
       for (const order of orderList) {
-        const existingOrder = await prisma.orders.findUnique({
-          where: {
-            id: Number(order.id),
-          },
-        });
+        // const deletedOrder = await prisma.orders.delete({
+        //   where: {
+        //     id: Number(order.id),
+        //   },
+        //   include: {
+        //     items: {
+        //       include: {
+        //         fifo: true,
+        //         inventoryUnit: true,
+        //       },
+        //     },
+        //   },
+        // });
 
-        if (!existingOrder) {
-          return res.status(404).json({
-            error: 'Order Not Found',
-          });
-        }
-
-        const deletedOrder = await prisma.orders.delete({
-          where: {
-            id: Number(order.id),
-          },
-          include: {
-            items: {
-              include: {
-                fifo: true,
-                inventoryUnit: true,
-              },
-            },
-          },
-        });
-
-        for (const item of deletedOrder.items) {
+        for (const item of order.items) {
           if (item?.fifo && item?.inventoryUnit) {
             await restockInventoryItem(
               item.fifo,
@@ -62,6 +50,15 @@ export default async function DELETE(
         //   deletedOrder,
         // );
       }
+      const deletedOrderIds = orderList.map((order: any) => order.id);
+
+      await prisma.orders.deleteMany({
+        where: {
+          id: {
+            in: deletedOrderIds,
+          },
+        },
+      });
     } else if (orderId) {
       const existingOrder = await prisma.orders.findUnique({
         where: {
