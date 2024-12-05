@@ -36,12 +36,25 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const updatedOrderList: any = [];
 
     for (const scheduleOrder of scheduleOrderList) {
+      const returnOrder = {
+        id: scheduleOrder.id,
+        items: scheduleOrder.items.map((item: OrderedItems) => {
+          return {
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          };
+        }),
+        totalPrice: scheduleOrder.totalPrice,
+        userId: scheduleOrder.user.id,
+        createdAt: createdAt,
+      }
       try {
         if (scheduleOrder.totalPrice === 0) {
           await pusherServer?.trigger(
             'admin-schedule-order',
             'pre-order',
-            scheduleOrder,
+            returnOrder,
           );
           // console.log({ zeroTotalPrice: scheduleOrder });
           continue;
@@ -89,7 +102,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger(
             'admin-schedule-order',
             'pre-order',
-            scheduleOrder,
+            returnOrder,
           );
           // console.log({ unavailableTime: scheduleOrder });
           continue;
