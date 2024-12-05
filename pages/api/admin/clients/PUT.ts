@@ -107,6 +107,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                   quantity: 0,
                   price: item.price,
                   scheduledOrderId: scheduleOrder.id,
+                  inventoryItemId: item.inventoryItemId,
+                  inventoryUnitId: item.inventoryUnitId,
                 };
               },
             );
