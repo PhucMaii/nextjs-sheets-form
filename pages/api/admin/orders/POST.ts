@@ -8,6 +8,15 @@ import { normalizeDate, sortByDeliveryDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
 import { checkHasClientOrder } from '../../import-sheets/utils';
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb', // Set desired value here
+    },
+  },
+};
+
+
 interface BodyTypes {
   deliveryDate: string;
   scheduleOrderList: ScheduledOrder[];
@@ -170,6 +179,8 @@ export const createOrder = async (
       const targetedItem = inventoryItems.find(
         (inventoryItem) => inventoryItem.id === item.inventoryItemId,
       );
+
+      console.log(item, 'item');
 
       if (!targetedItem) {
         console.error('Conflict Inventory Item Not Found');
