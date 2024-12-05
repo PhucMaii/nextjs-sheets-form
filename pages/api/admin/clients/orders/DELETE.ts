@@ -36,11 +36,13 @@ export default async function DELETE(
 
         for (const item of order.items) {
           if (item?.fifo && item?.inventoryUnit) {
-            await restockInventoryItem(
-              item.fifo,
-              item.inventoryUnit,
-              item.quantity,
-            );
+            if (item.quantity > 0) {
+              await restockInventoryItem(
+                item.fifo,
+                item.inventoryUnit,
+                item.quantity,
+              );
+            }
           }
         }
 

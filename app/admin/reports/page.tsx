@@ -58,6 +58,7 @@ import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import RouteStatement from '../components/Modals/RouteStatement';
+import LoadingModal from '../components/Modals/LoadingModal';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
@@ -78,6 +79,7 @@ export default function ReportPage() {
     useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
     useState<boolean>(false);
   const [isOpenRouteStatement, setIsOpenRouteStatement] =
@@ -332,13 +334,18 @@ export default function ReportPage() {
 
   const handleDeleteSelectedOrders = async () => {
     try {
+      setIsLoading(true);
       const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
         data: { orderList: selectedOrders },
       });
 
       showNotification('success', response.data.message);
+      setIsLoading(false);
+      setSelectedOrders([]);
     } catch (error: any) {
-      console.log('Fail to mark all as completed: ', error);
+      console.log('Fail to delete orders: ', error);
+      showNotification('error', 'Fail to delete orders: ' + error);
+      setIsLoading(false);
     }
   };
 
@@ -551,6 +558,7 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
+      <LoadingModal open={isLoading} />
       {NotificationComp}
       <RouteStatement
         open={isOpenRouteStatement}
