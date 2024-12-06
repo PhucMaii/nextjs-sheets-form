@@ -55,7 +55,7 @@ async function main() {
       scheduledOrderId: {
         not: null
       },
-      inventoryItemId: 107
+      inventoryItemId: null
     }
   });
 
@@ -119,6 +119,21 @@ async function main() {
       inventoryUnitIndex = 2;
     }
 
+    if (itemKey === 'FRESH RICE NOODLE 1 LB') {
+      itemKey = 'FRESH RICE NOODLES 1 LB';
+      inventoryUnitIndex = 0;
+    }
+
+    if (itemKey === 'LAGRE EGG') {
+      itemKey = 'LARGE EGG';
+      inventoryUnitIndex = 0;
+    }
+
+    if (itemKey === 'WHITE MUSHROOM') {
+      itemKey = 'No. 1 MUSHROOM WHITE 10 LB';
+      inventoryUnitIndex = 0;
+    }
+
     const sameNameInventory = inventoryItems.find((i: any) => {
       return i.name == itemKey;
     });
@@ -145,7 +160,7 @@ async function main() {
       scheduledOrderId: {
         not: null
       },
-      inventoryItemId: 107
+      inventoryItemId: null
     }
   });
 
