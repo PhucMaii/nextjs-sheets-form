@@ -213,9 +213,10 @@ export const overrideOrder = async (
     let GST = 0;
     const itemList: any = [];
     for (const item of newItems) {
-      const existingItem = await prisma.orderedItems.findUnique({
+      const existingItem = await prisma.orderedItems.findFirst({
         where: {
-          id: item.id,
+          orderId,
+          inventoryItemId: item.inventoryItemId,
         },
         include: {
           fifo: true,
@@ -229,7 +230,7 @@ export const overrideOrder = async (
       // Update each item
       const newItem = await prisma.orderedItems.update({
         where: {
-          id: item.id,
+          id: existingItem.id,
         },
         data: {
           quantity: item.quantity,

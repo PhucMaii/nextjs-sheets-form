@@ -164,7 +164,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       //   return item;
       // });
 
-      await overrideOrder(existingUser, userOrder.id, items, note, createdBy);
+      console.log(items, 'items');
+
+      await overrideOrder(existingUser, userOrder.id, items, note, formattedCreatedBy);
       return res.status(201).json({
         message: 'Order Submitted Successfully',
       });

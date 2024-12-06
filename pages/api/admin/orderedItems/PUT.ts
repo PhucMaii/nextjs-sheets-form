@@ -256,7 +256,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      const formattedUpdatedItems = await formatUpdatedItems(
+      const formattedUpdatedItems = formatUpdatedItems(
         newCategory.id,
         updatedItems,
         // userSubCategoryId,
@@ -522,13 +522,13 @@ export const generateOrderTotalPrice = (
   }
 };
 
-const formatUpdatedItems = async (
+const formatUpdatedItems = (
   categoryId: number = 0,
   updatedItems: any,
   // subcategoryId: number = 0,
 ) => {
-  const formattedUpdatedItems = await Promise.all(
-    updatedItems.map(async (item: UpdatedItem) => {
+  const formattedUpdatedItems = 
+    updatedItems.map((item: UpdatedItem) => {
       return {
         name: item.name,
         price: item.price,
@@ -537,8 +537,7 @@ const formatUpdatedItems = async (
         inventoryItemId: item?.inventoryItemId || null,
         inventoryUnitId: item?.inventoryUnitId || null,
       };
-    }),
-  );
+    });
 
   return formattedUpdatedItems;
 };

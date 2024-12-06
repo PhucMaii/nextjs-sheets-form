@@ -126,7 +126,7 @@ export default function BillPrintModal({
         aria-controls={openManifest ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={openManifest ? 'true' : undefined}
-        disabled={isLoading || selectedRoutes.length === 0}
+        disabled={selectedRoutes.length === 0 || isLoading}
         onClick={(e) => setManifestAnchor(e.currentTarget)}
         endIcon={<ArrowDownwardIcon />}
         variant="outlined"

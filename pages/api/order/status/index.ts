@@ -99,13 +99,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalPrice: newItem.quantity * newItem.price,
       });
 
-      // Restock inventory item
-      if (item?.fifo && item?.inventoryUnit) {
-        await restockInventoryItem(
-          item.fifo,
-          item?.inventoryUnit,
-          item.quantity,
-        );
+      if (existingOrder.status !== ORDER_STATUS.VOID && updatedStatus === ORDER_STATUS.VOID) {
+        // Restock inventory item
+        if (item?.fifo && item?.inventoryUnit) {
+          await restockInventoryItem(
+            item.fifo,
+            item?.inventoryUnit,
+            item.quantity,
+          );
+        }
       }
 
       // Format order to send email
