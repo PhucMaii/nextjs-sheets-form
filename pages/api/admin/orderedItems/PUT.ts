@@ -8,6 +8,9 @@ import {
   updateSingleInventoryItem,
 } from './single';
 import { createOrderedItems } from '../inventory/expenses/POST';
+import { gstRate, pstRate } from '@/app/lib/constant';
+import { IItem } from '@/app/utils/type';
+import { generateCurrentTime } from '@/app/utils/time';
 
 interface UpdatedItem {
   id: number;
@@ -199,11 +202,38 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
-    await updateOrderTotalPrice(
-      orderId,
-      newTotalPrice,
-      `Admin - ${adminUpdate.clientName}`,
-    );
+    // await updateOrderTotalPrice(
+    //   orderId,
+    //   newTotalPrice,
+    //   `Admin - ${adminUpdate.clientName}`,
+    // );
+
+    const orderedItems = await prisma.orderedItems.findMany({
+      where: {
+        orderId,
+      },
+      include: {
+        fifo: true,
+        inventoryItem: true,
+        inventoryUnit: true,
+      },
+    })
+    const orderTotalPrice = generateOrderTotalPrice(orderedItems);
+    const updatedAt = generateCurrentTime();
+
+    await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        totalPrice: orderTotalPrice.totalPrice,
+        subTotal: orderTotalPrice.subTotal,
+        PST: orderTotalPrice.PST,
+        GST: orderTotalPrice.GST,
+        updatedBy: `Admin - ${adminUpdate.clientName}`,
+        updateTime: updatedAt,
+      },
+    });
 
     // First case: No update neither create new category
     if (updateOption === UpdateOption.NONE || !updateOption) {
@@ -413,41 +443,80 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export const updateOrderTotalPrice = async (
-  orderId: number,
-  newTotalPrice: number,
-  updatedBy: string,
+export const generateOrderTotalPrice = (
+  listOfItems: any[],
 ) => {
   try {
-    const prisma = new PrismaClient();
+    const total = listOfItems.reduce(
+      (acc: any, item: any) => {
+        if (!acc?.subTotal) {
+          acc.subTotal = 0;
+        }
 
-    const updateTime = new Date();
-    const updatedOrder: any = await prisma.orders.update({
-      where: {
-        id: orderId,
-      },
-      data: {
-        totalPrice: newTotalPrice,
-        updatedBy,
-        updateTime,
-      },
-      include: {
-        items: true,
-        user: true,
-      },
-    });
+        if (!acc?.PST) {
+          acc.PST = 0;
+        }
 
-    const newItems = updatedOrder.items.map((item: OrderedItems) => {
-      const totalPrice = item.quantity * item.price;
-      return { ...item, totalPrice };
-    });
+        if (!acc?.GST) {
+          acc.GST = 0;
+        }
 
-    return {
-      ...updatedOrder,
-      items: newItems,
-      clientName: updatedOrder.user.clientName,
-      clientId: updatedOrder.user.clientId,
-    };
+        acc.subTotal += item.price * item.quantity;
+
+        if (item.inventoryItem.hasPST) {
+          acc.PST += item.price * item.quantity * pstRate;
+        }
+
+        if (item.inventoryItem.hasGST) {
+          acc.GST += item.price * item.quantity * gstRate;
+        }
+
+        return acc;
+      },
+      {},
+    )
+
+    return {...total, totalPrice: total.subTotal + total.PST + total.GST}
+    // const prisma = new PrismaClient();
+
+    // const updateTime = new Date();
+    // const selectedOrder = await prisma.orders.findUnique({
+    //   where: {
+    //     id: orderId,
+    //   },
+    //   include: {
+    //     items: true,
+    //   },
+    // });
+
+    // const subTotal = 
+
+    // // const updatedOrder: any = await prisma.orders.update({
+    // //   where: {
+    // //     id: orderId,
+    // //   },
+    // //   data: {
+    // //     totalPrice: newTotalPrice,
+    // //     updatedBy,
+    // //     updateTime,
+    // //   },
+    // //   include: {
+    // //     items: true,
+    // //     user: true,
+    // //   },
+    // // });
+
+    // const newItems = updatedOrder.items.map((item: OrderedItems) => {
+    //   const totalPrice = item.quantity * item.price;
+    //   return { ...item, totalPrice };
+    // });
+
+    // return {
+    //   ...updatedOrder,
+    //   items: newItems,
+    //   clientName: updatedOrder.user.clientName,
+    //   clientId: updatedOrder.user.clientId,
+    // };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

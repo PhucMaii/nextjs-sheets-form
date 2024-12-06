@@ -7,7 +7,7 @@ import { pusherServer } from '@/app/pusher';
 import { normalizeDate, sortByDeliveryDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
 import { checkHasClientOrder } from '../../import-sheets/utils';
-import { gstRate, pstRate } from '@/app/lib/constant';
+import { generateOrderTotalPrice } from '../orderedItems/PUT';
 
 export const config = {
   api: {
@@ -173,32 +173,33 @@ export const createOrder = async (
 
     // const orderTime = generateCurrentTime();
 
-    const total = items.reduce((acc: any, item: OrderedItems) => {
-      // return acc + item.price * item.quantity;
-      if (!acc?.subTotal) {
-        acc.subTotal = 0;
-      }
+    // const total = items.reduce((acc: any, item: OrderedItems) => {
+    //   // return acc + item.price * item.quantity;
+    //   if (!acc?.subTotal) {
+    //     acc.subTotal = 0;
+    //   }
 
-      if (!acc?.PST) {
-        acc.PST = 0;
-      }
+    //   if (!acc?.PST) {
+    //     acc.PST = 0;
+    //   }
 
-      if (!acc?.GST) {
-        acc.GST = 0;
-      }
+    //   if (!acc?.GST) {
+    //     acc.GST = 0;
+    //   }
 
-      acc.subTotal += item.price * item.quantity;
+    //   acc.subTotal += item.price * item.quantity;
 
-      if (item.inventoryItem.hasPST) {
-        acc.PST += item.price * item.quantity * pstRate;
-      }
+    //   if (item.inventoryItem.hasPST) {
+    //     acc.PST += item.price * item.quantity * pstRate;
+    //   }
 
-      if (item.inventoryItem.hasGST) {
-        acc.GST += item.price * item.quantity * gstRate;
-      }
+    //   if (item.inventoryItem.hasGST) {
+    //     acc.GST += item.price * item.quantity * gstRate;
+    //   }
 
-      return acc;
-    }, {});
+    //   return acc;
+    // }, {});
+    const total = generateOrderTotalPrice(items);
 
     console.log({ total });
 
@@ -212,7 +213,7 @@ export const createOrder = async (
         subTotal: total.subTotal,
         PST: total.PST,
         GST: total.GST,
-        totalPrice: total.subTotal + total.PST + total.GST,
+        totalPrice: total.totalPrice,
         orderTime,
         createdBy,
       },
