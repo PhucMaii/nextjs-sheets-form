@@ -44,7 +44,6 @@ import ScheduleOrder from '../components/Reorder/ScheduleOrder';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
-import { insertInSortedIdArray } from '@/app/utils/array';
 import { SWRFetchData } from '@/app/utils/db';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import useNotification from '@/hooks/useNotification';
@@ -198,35 +197,35 @@ export default function ScheduledOrderPage() {
     }
   }, [debouncedKeywords, baseOrderList]);
 
-  const addOrderUI = (newOrder: ScheduledOrder) => {
-    const hasOrderExisted = baseOrderList.some(
-      (order: ScheduledOrder) => order.id === newOrder.id,
-    );
+  // const addOrderUI = (newOrder: ScheduledOrder) => {
+  //   const hasOrderExisted = baseOrderList.some(
+  //     (order: ScheduledOrder) => order.id === newOrder.id,
+  //   );
 
-    if (!hasOrderExisted) {
-      const newBaseOrderList = insertInSortedIdArray(baseOrderList, newOrder);
-      setOrderList(newBaseOrderList);
-      setBaseOrderList(newBaseOrderList);
-    } else {
-      const newOrderList = orderList.map((order: ScheduledOrder) => {
-        if (order.id === newOrder.id) {
-          return newOrder;
-        }
-        return order;
-      });
+  //   if (!hasOrderExisted) {
+  //     const newBaseOrderList = insertInSortedIdArray(baseOrderList, newOrder);
+  //     setOrderList(newBaseOrderList);
+  //     setBaseOrderList(newBaseOrderList);
+  //   } else {
+  //     const newOrderList = orderList.map((order: ScheduledOrder) => {
+  //       if (order.id === newOrder.id) {
+  //         return newOrder;
+  //       }
+  //       return order;
+  //     });
 
-      const newBaseOrderList = baseOrderList.map((order: ScheduledOrder) => {
-        if (order.id === newOrder.id) {
-          return newOrder;
-        }
-        return order;
-      });
+  //     const newBaseOrderList = baseOrderList.map((order: ScheduledOrder) => {
+  //       if (order.id === newOrder.id) {
+  //         return newOrder;
+  //       }
+  //       return order;
+  //     });
 
-      setOrderList(newOrderList);
-      setBaseOrderList(newBaseOrderList);
-      mutateOrders();
-    }
-  };
+  //     setOrderList(newOrderList);
+  //     setBaseOrderList(newBaseOrderList);
+  //     mutateOrders();
+  //   }
+  // };
 
   const calculateTotalBill = useCallback((): string => {
     const totalPrice = orderList.reduce(
@@ -282,7 +281,7 @@ export default function ScheduledOrderPage() {
         return;
       }
 
-      addOrderUI(response.data.data);
+      mutateOrders();
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to create scheduled order: ', error);

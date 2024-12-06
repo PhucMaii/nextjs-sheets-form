@@ -23,15 +23,23 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             items: true,
           },
         },
+        routes: true,
       },
     });
 
+    
+    const allRoutes = await prisma.route.findMany({
+      include: {
+        clients: true,
+      },
+    });
+    
     if (!existingUser) {
       return res.status(404).json({
         error: 'User Not Found',
       });
     }
-
+    
     const newTotalPrice = items.reduce(
       (acc: number, item: any) => acc + item.price * item.quantity,
       0,
@@ -46,56 +54,101 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
       // Override same day schedule order if it existed
       if (sameDayOrder) {
-        for (const item of items) {
-          // first, find if there is any of that item
-          const existedItem = await prisma.orderedItems.findFirst({
-            where: {
-              scheduledOrderId: sameDayOrder.id,
-              name: item.name,
+          // Create schedule order for that day
+          const newScheduleOrder = await prisma.scheduleOrders.create({
+            data: {
+              userId,
+              totalPrice: newTotalPrice,
+              day,
             },
           });
 
-          // if yes, then update it, otherwise create new items
-          if (existedItem) {
-            await prisma.orderedItems.updateMany({
+          await prisma.orderedItems.createMany({
+            data: items.map((item: any) => ({
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              inventoryItemId: item.inventoryItemId,
+              inventoryUnitId: item.inventoryUnitId,
+              scheduledOrderId: newScheduleOrder.id,
+            })),
+          });
+
+          // Delete previous schedule order
+          await prisma.scheduleOrders.delete({
+            where: {
+              id: sameDayOrder.id,
+            },
+          });
+
+          const userRouteIds = existingUser.routes.map((route: any) => route.routeId);
+          // Find the route of the same day order
+          const routeOnSameDay = allRoutes.find((route) => {
+            return route.day === sameDayOrder.day && userRouteIds.includes(route.id);
+          });
+
+          if (routeOnSameDay) {
+            await prisma.userRoute.delete({
               where: {
-                scheduledOrderId: sameDayOrder.id,
-                inventoryItemId: item.inventoryItemId,
-                inventoryUnitId: item.inventoryUnitId,
-                name: item.name,
-              },
-              data: {
-                price: item.price,
-                quantity: item.quantity,
-              },
-            });
-          } else {
-            await prisma.orderedItems.create({
-              data: {
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                scheduledOrderId: sameDayOrder.id,
-                inventoryItemId: item.inventoryItemId,
-                inventoryUnitId: item.inventoryUnitId,
-              },
-            });
+                userId_routeId: {
+                  userId: userId,
+                  routeId: routeOnSameDay.id,
+                },
+              }
+            })
           }
-        }
+
+
+        // for (const item of items) {
+        //   // first, find if there is any of that item
+        //   const existedItem = await prisma.orderedItems.findFirst({
+        //     where: {
+        //       scheduledOrderId: sameDayOrder.id,
+        //       name: item.name,
+        //     },
+        //   });
+
+        //   // if yes, then update it, otherwise create new items
+        //   if (existedItem) {
+        //     await prisma.orderedItems.updateMany({
+        //       where: {
+        //         scheduledOrderId: sameDayOrder.id,
+        //         inventoryItemId: item.inventoryItemId,
+        //         inventoryUnitId: item.inventoryUnitId,
+        //         name: item.name,
+        //       },
+        //       data: {
+        //         price: item.price,
+        //         quantity: item.quantity,
+        //       },
+        //     });
+        //   } else {
+        //     await prisma.orderedItems.create({
+        //       data: {
+        //         name: item.name,
+        //         price: item.price,
+        //         quantity: item.quantity,
+        //         scheduledOrderId: sameDayOrder.id,
+        //         inventoryItemId: item.inventoryItemId,
+        //         inventoryUnitId: item.inventoryUnitId,
+        //       },
+        //     });
+        //   }
+        // }
 
         // update schedule order
-        const updatedScheduleOrder = await prisma.scheduleOrders.update({
-          where: {
-            id: sameDayOrder.id,
-          },
-          data: {
-            totalPrice: newTotalPrice,
-          },
-          include: {
-            items: true,
-            user: true,
-          },
-        });
+        // const updatedScheduleOrder = await prisma.scheduleOrders.update({
+        //   where: {
+        //     id: sameDayOrder.id,
+        //   },
+        //   data: {
+        //     totalPrice: newTotalPrice,
+        //   },
+        //   include: {
+        //     items: true,
+        //     user: true,
+        //   },
+        // });
 
         // check then add target client into selected route
         const clientInUserRoute = await prisma.userRoute.findUnique({
@@ -117,7 +170,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
 
         return res.status(200).json({
-          data: updatedScheduleOrder,
+          // data: updatedScheduleOrder,
           message: 'Override Schedule Order Successfully',
         });
       }
