@@ -219,7 +219,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     })
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
-    const updatedAt = generateCurrentTime();
+    const updatedAt = new Date();
 
     await prisma.orders.update({
       where: {

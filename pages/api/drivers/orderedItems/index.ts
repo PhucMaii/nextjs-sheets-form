@@ -4,7 +4,6 @@ import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
 import { getDriverInfo } from '../../utils/auth';
 import { updateSingleInventoryItem } from '../../admin/orderedItems/single';
 import { generateOrderTotalPrice } from '../../admin/orderedItems/PUT';
-import { generateCurrentTime } from '@/app/utils/time';
 
 interface IBody {
   id: number; // ordered item id
@@ -60,7 +59,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Get driver update info
     const driverUpdate: any = await getDriverInfo(req, res);
-    const updatedAt = generateCurrentTime();
+    const updatedAt = new Date();
 
     const orderedItems = await prisma.orderedItems.findMany({
       where: {

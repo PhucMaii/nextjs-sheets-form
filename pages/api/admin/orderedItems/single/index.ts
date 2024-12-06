@@ -3,7 +3,6 @@ import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
 import { generateOrderTotalPrice } from '../PUT';
 import { getUserInfo } from '@/pages/api/utils/auth';
-import { generateCurrentTime } from '@/app/utils/time';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -66,7 +65,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     //   `Admin - ${adminUpdate.clientName}`,
     // );
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
-    const updatedAt = generateCurrentTime();
+    const updatedAt = new Date();
 
     const updatedOrder = await prisma.orders.update({
       where: {
