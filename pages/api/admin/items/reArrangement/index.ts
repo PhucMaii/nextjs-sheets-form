@@ -36,8 +36,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    console.log(updatedItemList, 'updatedItemList');
-
     const formattedNewItems = updatedItemList.map((item: IItem): any => {
       return {
         id: item.id,
