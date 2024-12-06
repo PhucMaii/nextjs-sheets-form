@@ -49,6 +49,18 @@ export const InvoicePrint = forwardRef(
     const ordersPerPage = 15;
     const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
+    const subtotal = filteredOrders.reduce((acc, order) => {
+      return acc + (order?.subTotal || order?.totalPrice || 0);
+    }, 0);
+  
+    const totalPST = filteredOrders.reduce((acc, order) => {
+      return acc + (order?.PST || 0);
+    }, 0);
+  
+    const totalGST = filteredOrders.reduce((acc, order) => {
+      return acc + (order?.GST || 0);
+    }, 0);
+
     return (
       <div ref={ref}>
         {[...Array(totalPages)].map((_, pageIndex) => {
@@ -135,6 +147,30 @@ export const InvoicePrint = forwardRef(
                           </TableRow>
                         );
                       })}
+
+                  <TableRow>
+                    <TableCell colSpan={3}></TableCell>
+                  </TableRow>
+                  <TableRow>
+                      <TableCell></TableCell>
+                      <TableCell>Subtotal:</TableCell>
+                      <TableCell>${subtotal.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                      <TableCell></TableCell>
+                      <TableCell>PST (7%):</TableCell>
+                      <TableCell>${totalPST.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                      <TableCell></TableCell>
+                      <TableCell>GST (5%):</TableCell>
+                      <TableCell>${totalGST.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                      <TableCell></TableCell>
+                      <TableCell>Total Bill:</TableCell>
+                      <TableCell>${(subtotal + totalPST + totalGST).toFixed(2)}</TableCell>
+                  </TableRow>
                   <TableRow>
                     <TableCell colSpan={3}>
                       <Grid

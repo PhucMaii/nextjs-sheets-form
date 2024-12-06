@@ -33,6 +33,18 @@ const InvoiceDocument: React.FC<IProps> = ({
   const ordersPerPage = 25;
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
+  const subtotal = filteredOrders.reduce((acc, order) => {
+    return acc + (order?.subTotal || order?.totalPrice || 0);
+  }, 0);
+
+  const totalPST = filteredOrders.reduce((acc, order) => {
+    return acc + (order?.PST || 0);
+  }, 0);
+
+  const totalGST = filteredOrders.reduce((acc, order) => {
+    return acc + (order?.GST || 0);
+  }, 0);
+
   return (
     <Document>
       {[...Array(totalPages)].map((_, pageIndex) => (
@@ -89,6 +101,69 @@ const InvoiceDocument: React.FC<IProps> = ({
                   </View>
                 </View>
               ))}
+              <View style={styles.tableRow}>
+              <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}></Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                  </View>
+                  <View style={styles.tableCol}>
+                  </View>
+              </View>
+              <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}></Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>Subtotal:</Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>
+                      ${subtotal.toFixed(2)}
+                    </Text>
+                  </View>
+               </View>
+
+               <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}></Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>PST (7%):</Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>
+                      ${totalPST.toFixed(2)}
+                    </Text>
+                  </View>
+               </View>
+
+               <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}></Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>GST (5%):</Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>
+                      ${totalGST.toFixed(2)}
+                    </Text>
+                  </View>
+               </View>
+               <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}></Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>Total Bill:</Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>
+                      ${(subtotal + totalPST + totalGST).toFixed(2)}
+                    </Text>
+                  </View>
+               </View>
           </View>
           <View style={styles.flex_between}>
             {sortDebtKeys &&
@@ -97,7 +172,7 @@ const InvoiceDocument: React.FC<IProps> = ({
                   {index === sortDebtKeys.length - 2
                     ? 'Current Statement'
                     : month}
-                  : ${debtData[month]}
+                  : ${debtData[month]?.toFixed(2)}
                 </Text>
               ))}
           </View>
