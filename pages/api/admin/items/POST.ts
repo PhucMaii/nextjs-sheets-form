@@ -119,18 +119,33 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    for (const scheduleOrder of scheduleOrders) {
-      await prisma.orderedItems.create({
-        data: {
-          name: newItem.name,
-          price: newItem.price,
-          scheduledOrderId: scheduleOrder.id,
-          inventoryItemId: newItem.inventoryItemId,
-          inventoryUnitId: selectedUnit.id,
-          quantity: 0,
-        },
-      });
-    }
+    const scheduledOrderedItems = scheduleOrders.map((scheduleOrder: any) => {
+      return {
+        name: newItem.name,
+        price: newItem.price,
+        scheduledOrderId: scheduleOrder.id,
+        inventoryItemId: newItem.inventoryItemId,
+        inventoryUnitId: selectedUnit.id,
+        quantity: 0,
+      };
+    });
+
+    await prisma.orderedItems.createMany({
+      data: scheduledOrderedItems,
+    });
+
+    // for (const scheduleOrder of scheduleOrders) {
+    //   await prisma.orderedItems.create({
+    //     data: {
+    //       name: newItem.name,
+    //       price: newItem.price,
+    //       scheduledOrderId: scheduleOrder.id,
+    //       inventoryItemId: newItem.inventoryItemId,
+    //       inventoryUnitId: selectedUnit.id,
+    //       quantity: 0,
+    //     },
+    //   });
+    // }
 
     return res.status(201).json({
       data: createdItem,

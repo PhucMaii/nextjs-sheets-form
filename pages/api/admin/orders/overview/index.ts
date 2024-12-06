@@ -34,7 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const formattedStartDate = normalizeDate(new Date(startDate));
     const formattedEndDate = normalizeDate(new Date(endDate));
 
-    formattedEndDate.setDate(formattedEndDate.getDate() - 1);
+    // formattedEndDate.setDate(formattedEndDate.getDate() - 1);
 
     if (formattedStartDate > formattedEndDate) {
       return res.status(404).json({
