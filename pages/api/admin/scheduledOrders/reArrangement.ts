@@ -46,6 +46,8 @@ export default async function reArrangement(
           price: item.price,
           quantity: item.quantity,
           scheduledOrderId: scheduledOrder.id,
+          inventoryItemId: item.inventoryItemId,
+          inventoryUnitId: item.inventoryUnitId,
         };
       });
 
