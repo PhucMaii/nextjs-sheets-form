@@ -28,6 +28,7 @@ import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import useEditUnit from '@/hooks/unit/useEditUnit';
+import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -55,6 +56,9 @@ export default function StockPurchased({
     disabledCloseAddUnit: false,
   });
   const [newExpense, setNewExpense] = useState<any>({
+    subTotal: 0,
+    GST: 0,
+    PST: 0,
     amount: 0,
     description: '',
     paymentMethodId: -1,
@@ -64,7 +68,7 @@ export default function StockPurchased({
     ...(defaultValue ? defaultValue : {}),
   });
   const [vendorItems, setVendorItems] = useState<any[]>([]);
-  const [totalAmount, setTotalAmount] = useState<number>(0);
+  // const [totalAmount, setTotalAmount] = useState<number>(0);
   const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const [promptedItem, setPromptedItem] = useState<any>({
     id: -1,
@@ -124,7 +128,7 @@ export default function StockPurchased({
       // generateDescription();
     } else {
       setNewExpense({ ...newExpense, amount: 0, description: '' });
-      setTotalAmount(0);
+      // setTotalAmount(0);
     }
   }, [purchasedItems]);
 
@@ -205,6 +209,7 @@ export default function StockPurchased({
         inventoryItemId: newValue?.inventoryItemId,
         unit: newValue?.unit[0],
         units: newValue?.unit || [],
+        inventoryItem: newValue?.inventoryItem,
       });
     }
   };
@@ -261,11 +266,13 @@ export default function StockPurchased({
   };
 
   const calculateNewAmount = () => {
-    const newAmount = purchasedItems.reduce((acc: number, item: any) => {
-      return acc + item.unit.unitPrice * item.quantity;
-    }, 0);
+    // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
+    //   return acc + item.unit.unitPrice * item.quantity;
+    // }, 0);
+    const total = generateOrderTotalPrice(purchasedItems);
 
-    setTotalAmount(newAmount);
+    // setTotalAmount(newAmount);
+    setNewExpense({ ...newExpense, amount: total.totalPrice, subTotal: total.subTotal, GST: total.GST, PST: total.PST });
   };
 
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
@@ -344,7 +351,7 @@ export default function StockPurchased({
       return;
     }
 
-    if (totalAmount === 0) {
+    if (newExpense.amount === 0) {
       showNotification('error', 'Please enter amount');
       return;
     }
@@ -370,7 +377,7 @@ export default function StockPurchased({
         `${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/inventory/expenses`,
         {
           date,
-          amount: totalAmount,
+          amount: newExpense.amount,
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
           spentBy: newExpense.spentBy,
@@ -390,7 +397,7 @@ export default function StockPurchased({
 
       showNotification('success', response.data.message);
       setPurchasedItems([]);
-      setTotalAmount(0);
+      // setTotalAmount(0);
       setNewExpense({
         ...newExpense,
         amount: 0,
@@ -559,6 +566,58 @@ export default function StockPurchased({
             );
           })}
 
+        <Divider sx={{ my: 2 }}>Bill</Divider>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Subtotal</Typography>
+              <TextField
+                placeholder="Enter epxense subtotal..."
+                fullWidth
+                type="number"
+                value={newExpense.subtotal}
+                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, subtotal: +e.target.value}))}
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">PST (7%)</Typography>
+              <TextField
+                placeholder="Enter epxense PST..."
+                fullWidth
+                type="number"
+                value={newExpense.PST}
+                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, PST: +e.target.value}))}
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">GST (5%)</Typography>
+              <TextField
+                placeholder="Enter epxense GST..."
+                fullWidth
+                type="number"
+                value={newExpense.GST}
+                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, GST: +e.target.value}))}
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Amount</Typography>
+              <TextField
+                placeholder="Enter epxense amount..."
+                fullWidth
+                type="number"
+                value={newExpense.amount}
+                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, amount: +e.target.value}))}
+              />
+            </Box>
+          </Grid>
+        </Grid>
+
         <Divider sx={{ my: 2 }}>Expense Information</Divider>
 
         <Box display="flex" flexDirection="column" gap={2}>
@@ -575,17 +634,6 @@ export default function StockPurchased({
             onChange={(e) =>
               setNewExpense({ ...newExpense, invoice: e.target.value })
             }
-          />
-        </Box>
-
-        <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="h6">Amount</Typography>
-          <TextField
-            placeholder="Enter epxense amount..."
-            fullWidth
-            type="number"
-            value={totalAmount}
-            onChange={(e) => setTotalAmount(+e.target.value)}
           />
         </Box>
 

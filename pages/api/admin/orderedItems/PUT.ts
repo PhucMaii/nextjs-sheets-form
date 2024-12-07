@@ -463,11 +463,11 @@ export const generateOrderTotalPrice = (
 
         acc.subTotal += item.price * item.quantity;
 
-        if (item.inventoryItem.hasPST) {
+        if (item?.inventoryItem?.hasPST) {
           acc.PST += item.price * item.quantity * pstRate;
         }
 
-        if (item.inventoryItem.hasGST) {
+        if (item?.inventoryItem?.hasGST) {
           acc.GST += item.price * item.quantity * gstRate;
         }
 
