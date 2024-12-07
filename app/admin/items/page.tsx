@@ -127,7 +127,7 @@ export default function ItemPage() {
     setIsFetching(false);
   };
 
-  const handleAddItem = async (newItem: IItem) => {
+  const handleAddItem = async (newItem: IItem, selectedCategoryIds: number[]) => {
     try {
       const isNewItemValid = checkIsNewItemValid(newItem);
       if (!isNewItemValid) {
@@ -135,7 +135,7 @@ export default function ItemPage() {
       }
 
       const createdAt = generateCurrentTime();
-      const response = await axios.post(API_URL.ITEM, { newItem, createdAt });
+      const response = await axios.post(API_URL.ITEM, { newItem, createdAt, categoryIds: selectedCategoryIds });
 
       if (response.data.error) {
         showNotification('error', response.data.error);

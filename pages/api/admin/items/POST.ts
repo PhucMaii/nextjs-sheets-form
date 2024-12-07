@@ -7,13 +7,14 @@ import { getUserInfo } from '../../utils/auth';
 interface IBody {
   newItem: IItem;
   createdAt: string;
+  categoryIds: number[];
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { newItem, createdAt }: IBody = req.body;
+    const { newItem, createdAt, categoryIds }: IBody = req.body;
 
     const isItemValid: any = await checkIsItemValid(newItem);
 
@@ -99,24 +100,65 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const createdItem = await prisma.item.create({
-      data: {
+    const sellingItems = await prisma.item.findMany({
+      where: {
+        categoryId: {
+          in: categoryIds,
+        },
+      }
+    });
+
+    const newItemsInMultiCategory: any = categoryIds.map((categoryId: number) => {
+      // Check if item already exist in that category
+      const isItemExist = sellingItems.find((item: any) => {
+        return item.categoryId === categoryId && item.inventoryItemId === newItem?.inventoryItemId;
+      });
+
+      if (isItemExist) {
+        return null;
+      }
+
+      return {
         name: newItem.name,
-        categoryId: newItem.categoryId,
         price: newItem.price,
         availability: newItem?.availability || true,
         inventoryItemId: newItem?.inventoryItemId || null,
         inventoryUnitId: selectedUnit.id,
-      },
+        categoryId,
+      };
+    }).filter((item: any) => {
+      return item !== null;
     });
+
+    await prisma.item.createMany({
+      data: newItemsInMultiCategory,
+    });
+
+    // Get categories that have been added
+    const addedCategoryIds = newItemsInMultiCategory.map((item: any) => {
+      return item.categoryId;
+    })
+
+    // const createdItem = await prisma.item.create({
+    //   data: {
+    //     name: newItem.name,
+    //     categoryId: newItem.categoryId,
+    //     price: newItem.price,
+    //     availability: newItem?.availability || true,
+    //     inventoryItemId: newItem?.inventoryItemId || null,
+    //     inventoryUnitId: selectedUnit.id,
+    //   },
+    // });
 
     // Add new item into all schedule orders related to this category
     const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
         user: {
-          categoryId: newItem.categoryId,
+          categoryId: {
+            in: addedCategoryIds,
+          },
         },
-      },
+      }
     });
 
     const scheduledOrderedItems = scheduleOrders.map((scheduleOrder: any) => {
@@ -148,7 +190,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // }
 
     return res.status(201).json({
-      data: createdItem,
+      // data: createdItem,
       message: 'Item Created Succesfully',
     });
   } catch (error: any) {

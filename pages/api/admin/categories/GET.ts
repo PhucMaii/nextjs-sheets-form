@@ -6,7 +6,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     // Get all categories
-    const cateogries = await prisma.category.findMany({
+    const categories = await prisma.category.findMany({
       include: {
         users: true,
         items: true,
@@ -14,7 +14,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     return res.status(200).json({
-      data: cateogries,
+      data: categories,
       message: 'Fetch All Categories Successfully',
     });
   } catch (error: any) {

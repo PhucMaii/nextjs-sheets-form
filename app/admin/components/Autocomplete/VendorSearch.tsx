@@ -11,8 +11,8 @@ interface IProps {
   variant?: 'outlined' | 'filled' | 'standard';
 }
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
+export const checkBoxOutlinedIcon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+export const checkedBoxOutlinedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function VendorSearch({
   vendors,
@@ -43,8 +43,8 @@ export default function VendorSearch({
         return (
           <li key={key} {...optionProps}>
             <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
+              icon={checkBoxOutlinedIcon}
+              checkedIcon={checkedBoxOutlinedIcon}
               style={{ marginRight: 8 }}
               checked={selected}
             />
