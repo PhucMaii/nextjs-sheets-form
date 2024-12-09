@@ -107,9 +107,14 @@ export const InvoicePrint = forwardRef(
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="body2">
-                    Page: {pageIndex + 1} / {totalPages}
-                  </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="body2">
+                      Page: {pageIndex + 1} / {totalPages}
+                    </Typography>
+                    <Typography variant="body2">
+                      *: Tax Invoiced
+                    </Typography>
+                  </Box>
                 </Grid>
               </Grid>
               <Table sx={{ mt: 2 }}>
@@ -134,6 +139,7 @@ export const InvoicePrint = forwardRef(
                         (pageIndex + 1) * ordersPerPage,
                       )
                       .map((order: Order) => {
+                        const isTax = order.items.some((item) => item?.inventoryItem?.hasPST || item?.inventoryItem?.hasGST);
                         return (
                           <TableRow
                             key={order.id}
@@ -141,8 +147,8 @@ export const InvoicePrint = forwardRef(
                           >
                             <TableCell>{order.id}</TableCell>
                             <TableCell>{order.deliveryDate}</TableCell>
-                            <TableCell>
-                              ${order.totalPrice.toFixed(2)}
+                            <TableCell sx={{ fontWeight: isTax ? 'bold' : '' }}>
+                              ${order.totalPrice.toFixed(2)} {isTax && '*'}
                             </TableCell>
                           </TableRow>
                         );

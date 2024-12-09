@@ -60,7 +60,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          },
+        },
       },
       orderBy: {
         id: 'desc',

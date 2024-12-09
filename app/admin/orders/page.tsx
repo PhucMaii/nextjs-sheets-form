@@ -73,6 +73,10 @@ export interface Item {
   name: string;
   price: number;
   quantity: number;
+  inventoryItemId: number;
+  inventoryUnitId: number;
+  inventoryItem?: any;
+  unit?: any;
   totalPrice: number;
 }
 

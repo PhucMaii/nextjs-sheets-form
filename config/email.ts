@@ -79,7 +79,7 @@ export const generateOrderTemplate = (
             <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
             <h4 style="text-align: left;font-weight: 300;">NOTE</h4>
-            <h4 style="text-align: left;font-weight: 300;">${order?.NOTE}</h4>
+            <h4 style="text-align: left;font-weight: 300;">${order?.note}</h4>
         </div>
     </div>
     `;

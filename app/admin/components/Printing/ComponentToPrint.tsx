@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { Order } from '../../orders/page';
+import { Item, Order } from '../../orders/page';
 import {
   Box,
   Divider,
@@ -16,6 +16,18 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 
 export const printFontSize = 28;
+
+const generateTaxNote = (item: Item) => {
+  if (item?.inventoryItem?.hasPST && item?.inventoryItem?.hasGST) {
+    return '(P&G)';
+  } else if (item?.inventoryItem?.hasPST) {
+    return '(P)';
+  } else if (item?.inventoryItem?.hasGST) {
+    return '(G)';
+  }
+  return '';
+}
+
 export const ComponentToPrint = forwardRef(
   ({ order }: { order: Order | null }, ref: any) => {
     if (!order) {
@@ -30,8 +42,11 @@ export const ComponentToPrint = forwardRef(
       if (item.quantity > 0) {
         orderDetailsTemplate.push(
           <TableRow key={item.name}>
-            <TableCell sx={{ fontSize: 18, fontWeight: 'bold' }}>
-              {item.name}
+            <TableCell>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography>{generateTaxNote(item)}</Typography>
+                <Typography sx={{ fontSize: 18, fontWeight: 'bold' }}>{item.name}</Typography>
+              </Box>
             </TableCell>
             <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
               {item.quantity}
@@ -218,12 +233,25 @@ export const ComponentToPrint = forwardRef(
             )}
           </Grid>
           <Divider sx={{ my: 3, backgroundColor: 'black' }} />
-          <Typography textAlign="right">Order by: {order.createdBy}</Typography>
-          {order?.updatedBy && (
+          <Grid container alignItems="center">
+            <Grid item xs={6}>
+              <Typography>P: PST (7%)</Typography>
+            </Grid>
+            <Grid item xs={6} textAlign="right">
+              <Typography textAlign="right">Order by: {order.createdBy}</Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography>G: GST (5%)</Typography>
+            </Grid>
+            <Grid item xs={6} textAlign="right">
+            {order?.updatedBy && (
             <Typography textAlign="right">
               Updated by: {order.updatedBy}
             </Typography>
           )}
+            </Grid>
+          </Grid>
+          
         </Box>
       </div>
     );
