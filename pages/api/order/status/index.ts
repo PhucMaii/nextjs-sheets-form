@@ -74,7 +74,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         items: true,
-      }
+      },
     });
 
     let total = 0;
@@ -99,7 +99,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalPrice: newItem.quantity * newItem.price,
       });
 
-      if (existingOrder.status !== ORDER_STATUS.VOID && updatedStatus === ORDER_STATUS.VOID) {
+      if (
+        existingOrder.status !== ORDER_STATUS.VOID &&
+        updatedStatus === ORDER_STATUS.VOID
+      ) {
         // Restock inventory item
         if (item?.fifo && item?.inventoryUnit) {
           await restockInventoryItem(

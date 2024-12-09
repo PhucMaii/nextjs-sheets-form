@@ -15,14 +15,12 @@ export const generateOrderTemplate = (
     ? `<h2 style="text-align: center; font-weight: 300">${flag}</h2>`
     : '';
 
-  for (const item of (order?.items as any[])) {
+  for (const item of order?.items as any[]) {
     const totalPrice = item.price * item.quantity;
-      orderDetailsTemplate += `
+    orderDetailsTemplate += `
         <tr>
           <td style="padding: 8px">${item?.name}</td>
-          <td style="padding: 8px; text-align: center">${
-            item?.quantity
-          }</td>
+          <td style="padding: 8px; text-align: center">${item?.quantity}</td>
           <td style="padding: 8px; text-align: center">$${item.price.toFixed(2)}</td>
           <td style="padding: 8px; text-align: center">$${totalPrice.toFixed(2)}</td>
         </tr>
@@ -81,9 +79,7 @@ export const generateOrderTemplate = (
             <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
             <h4 style="text-align: left;font-weight: 300;">NOTE</h4>
-            <h4 style="text-align: left;font-weight: 300;">${
-              order?.NOTE
-            }</h4>
+            <h4 style="text-align: left;font-weight: 300;">${order?.NOTE}</h4>
         </div>
     </div>
     `;

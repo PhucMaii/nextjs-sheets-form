@@ -48,7 +48,6 @@ const prisma = new PrismaClient();
 //   return koreanRange.test(text);
 // };
 
-
 async function main() {
   // const allScheduledOrderedItemsHasNoInventory = await prisma.orderedItems.findMany({
   //   where: {
@@ -68,7 +67,6 @@ async function main() {
   //     }
   //   }
   // });
-
 
   // const newItems = allScheduledOrderedItemsHasNoInventory.map((item: any) => {
   //   let itemKey = item.name;
@@ -164,50 +162,57 @@ async function main() {
   //   }
   // });
 
-
   // await prisma.orderedItems.createMany({
   //   data: newItems
   // })
 
-  const users = await prisma.user.findMany({
-    include: {
-      scheduleOrders: true,
-      routes: {
-        include: {
-          route: true
-        }
-      },
-    }
-  });
+  // const users = await prisma.user.findMany({
+  //   include: {
+  //     scheduleOrders: true,
+  //     routes: {
+  //       include: {
+  //         route: true,
+  //       },
+  //     },
+  //   },
+  // });
 
-  for (const user of users) {
-    const userRoutes = user.routes.map((route) => {
-      return route.route.day;
-    });
+  // for (const user of users) {
+  //   const userRoutes = user.routes.map((route) => {
+  //     return route.route.day;
+  //   });
 
-    const conflictScheduleOrders = user.scheduleOrders.filter((scheduleOrder) => {
-      return !userRoutes.includes(scheduleOrder.day);
-    });
+  //   const conflictScheduleOrders = user.scheduleOrders.filter(
+  //     (scheduleOrder) => {
+  //       return !userRoutes.includes(scheduleOrder.day);
+  //     },
+  //   );
 
-    if (conflictScheduleOrders.length > 0) {
-      console.log({
-        name: user.clientName,
-        id: user.id,
-        scheduleOrders: conflictScheduleOrders
-      });
-      // const scheduleOrderIds = conflictScheduleOrders.map((scheduleOrder) => {
-      //   return scheduleOrder.id;
-      // });
+  //   if (conflictScheduleOrders.length > 0) {
+  //     console.log({
+  //       name: user.clientName,
+  //       id: user.id,
+  //       scheduleOrders: conflictScheduleOrders,
+  //     });
+  //     // const scheduleOrderIds = conflictScheduleOrders.map((scheduleOrder) => {
+  //     //   return scheduleOrder.id;
+  //     // });
 
-      // await prisma.scheduleOrders.deleteMany({
-      //   where: {
-      //     id: {
-      //       in: scheduleOrderIds
-      //     }
-      //   }
-      // });
-    }
-  }
+  //     // await prisma.scheduleOrders.deleteMany({
+  //     //   where: {
+  //     //     id: {
+  //     //       in: scheduleOrderIds
+  //     //     }
+  //     //   }
+  //     // });
+  //   }
+  // }
+
+  await prisma.$executeRaw`
+  UPDATE "Expense"
+  SET "subTotal" = "amount", "PST" = 0, "GST" = 0
+`;
+
 }
 
 main()

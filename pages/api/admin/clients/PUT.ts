@@ -92,7 +92,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           include: {
             inventoryItem: true,
             inventoryUnit: true,
-          }
+          },
         });
 
         if (updatedUser.scheduleOrders.length > 0) {

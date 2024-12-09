@@ -237,17 +237,17 @@ export const overrideOrder = async (
         },
         include: {
           inventoryItem: true,
-        }
+        },
       });
 
       // Update new total price
       subTotal += newItem.quantity * newItem.price;
       if (newItem.inventoryItem) {
-        if (newItem.inventoryItem.hasPST) {
+        if (newItem?.inventoryItem?.hasPST) {
           PST += newItem.quantity * newItem.price * pstRate;
         }
-  
-        if (newItem.inventoryItem.hasGST) {
+
+        if (newItem?.inventoryItem?.hasGST) {
           GST += newItem.quantity * newItem.price * gstRate;
         }
       }
@@ -283,7 +283,7 @@ export const overrideOrder = async (
       },
       include: {
         items: true,
-      }
+      },
     });
 
     await sendEmail(

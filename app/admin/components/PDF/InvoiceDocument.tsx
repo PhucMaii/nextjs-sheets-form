@@ -101,69 +101,61 @@ const InvoiceDocument: React.FC<IProps> = ({
                   </View>
                 </View>
               ))}
-              <View style={styles.tableRow}>
+            <View style={styles.tableRow}>
               <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}></Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                  </View>
-                  <View style={styles.tableCol}>
-                  </View>
+                <Text style={styles.tableCell}></Text>
               </View>
-              <View style={styles.tableRow}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}></Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>Subtotal:</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>
-                      ${subtotal.toFixed(2)}
-                    </Text>
-                  </View>
-               </View>
+              <View style={styles.tableCol}></View>
+              <View style={styles.tableCol}></View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>Subtotal:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>${subtotal.toFixed(2)}</Text>
+              </View>
+            </View>
 
-               <View style={styles.tableRow}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}></Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>PST (7%):</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>
-                      ${totalPST.toFixed(2)}
-                    </Text>
-                  </View>
-               </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>PST (7%):</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>${totalPST.toFixed(2)}</Text>
+              </View>
+            </View>
 
-               <View style={styles.tableRow}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}></Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>GST (5%):</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>
-                      ${totalGST.toFixed(2)}
-                    </Text>
-                  </View>
-               </View>
-               <View style={styles.tableRow}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}></Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>Total Bill:</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>
-                      ${(subtotal + totalPST + totalGST).toFixed(2)}
-                    </Text>
-                  </View>
-               </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>GST (5%):</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>${totalGST.toFixed(2)}</Text>
+              </View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}></Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>Total Bill:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>
+                  ${(subtotal + totalPST + totalGST).toFixed(2)}
+                </Text>
+              </View>
+            </View>
           </View>
           <View style={styles.flex_between}>
             {sortDebtKeys &&

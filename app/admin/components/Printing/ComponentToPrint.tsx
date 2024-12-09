@@ -131,14 +131,17 @@ export const ComponentToPrint = forwardRef(
             </Table>
             <Divider sx={{ mt: 3, backgroundColor: 'black' }} />
             <Grid container>
-            <Grid item xs={6}>
+              <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   Subtotal:
                 </Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                  $
+                  {order?.subTotal?.toFixed(2) ||
+                    order?.totalPrice?.toFixed(2) ||
+                    0}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -158,20 +161,26 @@ export const ComponentToPrint = forwardRef(
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                ${order?.GST?.toFixed(2) || 0}
+                  ${order?.GST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
-              
-              <Grid item xs={12} sx={{my: 1}}>
+
+              <Grid item xs={12} sx={{ my: 1 }}>
                 <Divider />
               </Grid>
               <Grid item xs={6}>
-                <Typography sx={{ fontSize: printFontSize - 5 }} fontWeight="bold">
+                <Typography
+                  sx={{ fontSize: printFontSize - 5 }}
+                  fontWeight="bold"
+                >
                   Total:
                 </Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
-                <Typography sx={{ fontSize: printFontSize - 5 }} fontWeight="bold">
+                <Typography
+                  sx={{ fontSize: printFontSize - 5 }}
+                  fontWeight="bold"
+                >
                   ${order?.totalPrice?.toFixed(2) || 0}
                 </Typography>
               </Grid>

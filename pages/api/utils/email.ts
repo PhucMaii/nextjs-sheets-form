@@ -57,7 +57,7 @@ export const sendEmail = async (
   const htmlTemplate: string = generateOrderTemplate(
     user.clientName,
     user.clientId,
-    {...order, note, deliveryDate},
+    { ...order, note, deliveryDate },
     user.contactNumber,
     user.deliveryAddress,
     invoiceId,

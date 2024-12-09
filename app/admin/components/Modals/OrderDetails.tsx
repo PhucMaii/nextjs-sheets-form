@@ -146,7 +146,10 @@ export default function OrderDetails({
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">
-                  ${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                  $
+                  {order?.subTotal?.toFixed(2) ||
+                    order?.totalPrice?.toFixed(2) ||
+                    0}
                 </Typography>
               </Grid>
               <Grid item xs={12}>

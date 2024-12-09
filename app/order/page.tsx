@@ -7,7 +7,14 @@ import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Box, Grid, IconButton, TextField, Typography, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Grid,
+  IconButton,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
@@ -179,7 +186,7 @@ export default function OrderForm() {
   return (
     <FadeIn>
       <Sidebar>
-        <SearchItem 
+        <SearchItem
           open={isOpenSearch}
           onClose={() => setIsOpenSearch(false)}
           items={itemList}
@@ -221,7 +228,12 @@ export default function OrderForm() {
         <div className="w-full mx-auto pb-6">
           {smDown && <Navbar />}
           {/* <form className="relative bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 overflow-scroll"> */}
-          <Box sx={{position: 'relative', backgroundColor: 'white'}} borderRadius={2} px={4} py={2} >
+          <Box
+            sx={{ position: 'relative', backgroundColor: 'white' }}
+            borderRadius={2}
+            px={4}
+            py={2}
+          >
             {/* <h4 className="text-center font-bold text-4xl px-8 mb-8">
               {clientName}
             </h4> */}
@@ -311,7 +323,7 @@ export default function OrderForm() {
                 Submit
               </LoadingButton>
             </Box>
-          {/* </form> */}
+            {/* </form> */}
           </Box>
         </div>
       </Sidebar>

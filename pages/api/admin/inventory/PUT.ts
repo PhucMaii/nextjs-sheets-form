@@ -16,7 +16,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, name, hasPST, hasGST, vendorItems, updatedAt }: IBody = req.body;
+    const { id, name, hasPST, hasGST, vendorItems, updatedAt }: IBody =
+      req.body;
 
     const existingInventoryItem = await prisma.inventoryItem.findUnique({
       where: {

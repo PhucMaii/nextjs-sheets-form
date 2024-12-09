@@ -90,7 +90,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (newItem.inventoryItem.hasPST) {
           PST += newItem.quantity * newItem.price * pstRate;
         }
-  
+
         if (newItem.inventoryItem.hasGST) {
           GST += newItem.quantity * newItem.price * gstRate;
         }

@@ -20,7 +20,7 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import React, { useEffect, useMemo, useState } from 'react';
 import { errorColor } from '@/theme/color';
 import AddVendor from '../Modals/add/AddVendor';
-import { mainPaymentMethodId } from '@/app/lib/constant';
+import { gstRate, mainPaymentMethodId, pstRate } from '@/app/lib/constant';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import InventoryItemSearch from '../Autocomplete/InventoryItemSearch';
@@ -28,7 +28,6 @@ import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import useEditUnit from '@/hooks/unit/useEditUnit';
-import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -127,7 +126,14 @@ export default function StockPurchased({
       calculateNewAmount();
       // generateDescription();
     } else {
-      setNewExpense({ ...newExpense, amount: 0, description: '' });
+      setNewExpense({
+        ...newExpense,
+        amount: 0,
+        subTotal: 0,
+        GST: 0,
+        PST: 0,
+        description: '',
+      });
       // setTotalAmount(0);
     }
   }, [purchasedItems]);
@@ -195,6 +201,7 @@ export default function StockPurchased({
         units: [],
         name: newValue.inputValue,
         vendorId: selectedVendorId,
+        quantity: 0,
       });
 
       onChangeAddUnitBoolean('open', true);
@@ -209,6 +216,7 @@ export default function StockPurchased({
         inventoryItemId: newValue?.inventoryItemId,
         unit: newValue?.unit[0],
         units: newValue?.unit || [],
+        quantity: 0,
         inventoryItem: newValue?.inventoryItem,
       });
     }
@@ -269,10 +277,45 @@ export default function StockPurchased({
     // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
     //   return acc + item.unit.unitPrice * item.quantity;
     // }, 0);
-    const total = generateOrderTotalPrice(purchasedItems);
+    console.log(purchasedItems, 'purchasedItems');
+    const total = purchasedItems.reduce((acc: any, item: any) => {
+      if (!acc?.subTotal) {
+        acc.subTotal = 0;
+      }
 
+      if (!acc?.PST) {
+        acc.PST = 0;
+      }
+
+      if (!acc?.GST) {
+        acc.GST = 0;
+      }
+
+      acc.subTotal += item.unit.unitPrice * item.quantity;
+
+      if (item?.inventoryItem?.hasPST) {
+        acc.PST += item.unit.unitPrice * item.quantity * pstRate;
+      }
+
+      if (item?.inventoryItem?.hasGST) {
+        acc.GST += item.unit.unitPrice * item.quantity * gstRate;
+      }
+
+      return acc;
+    }, {});
+
+    console.log(total, 'total');
     // setTotalAmount(newAmount);
-    setNewExpense({ ...newExpense, amount: total.totalPrice, subTotal: total.subTotal, GST: total.GST, PST: total.PST });
+    setNewExpense((prevState: any) => ({
+      ...prevState,
+      amount:
+        parseFloat(total.subTotal.toFixed(2)) +
+        parseFloat(total.PST.toFixed(2)) +
+        parseFloat(total.GST.toFixed(2)),
+      subTotal: parseFloat(total.subTotal.toFixed(2)),
+      GST: parseFloat(total.GST.toFixed(2)),
+      PST: parseFloat(total.PST.toFixed(2)),
+    }));
   };
 
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
@@ -378,6 +421,9 @@ export default function StockPurchased({
         {
           date,
           amount: newExpense.amount,
+          PST: newExpense.PST,
+          GST: newExpense.GST,
+          subTotal: newExpense.subTotal,
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
           spentBy: newExpense.spentBy,
@@ -401,6 +447,9 @@ export default function StockPurchased({
       setNewExpense({
         ...newExpense,
         amount: 0,
+        subTotal: 0,
+        GST: 0,
+        PST: 0,
         description: '',
         paymentMethodId: role === USER_ROLE.ADMIN ? -1 : mainPaymentMethodId,
         spentBy: '-- Choose who spent --',
@@ -575,8 +624,13 @@ export default function StockPurchased({
                 placeholder="Enter epxense subtotal..."
                 fullWidth
                 type="number"
-                value={newExpense.subtotal}
-                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, subtotal: +e.target.value}))}
+                value={newExpense.subTotal}
+                onChange={(e) =>
+                  setNewExpense((prevState: any) => ({
+                    ...prevState,
+                    subTotal: +e.target.value,
+                  }))
+                }
               />
             </Box>
           </Grid>
@@ -588,7 +642,12 @@ export default function StockPurchased({
                 fullWidth
                 type="number"
                 value={newExpense.PST}
-                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, PST: +e.target.value}))}
+                onChange={(e) =>
+                  setNewExpense((prevState: any) => ({
+                    ...prevState,
+                    PST: +e.target.value,
+                  }))
+                }
               />
             </Box>
           </Grid>
@@ -600,7 +659,12 @@ export default function StockPurchased({
                 fullWidth
                 type="number"
                 value={newExpense.GST}
-                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, GST: +e.target.value}))}
+                onChange={(e) =>
+                  setNewExpense((prevState: any) => ({
+                    ...prevState,
+                    GST: +e.target.value,
+                  }))
+                }
               />
             </Box>
           </Grid>
@@ -612,7 +676,12 @@ export default function StockPurchased({
                 fullWidth
                 type="number"
                 value={newExpense.amount}
-                onChange={(e) => setNewExpense((prevState: any) => ({...prevState, amount: +e.target.value}))}
+                onChange={(e) =>
+                  setNewExpense((prevState: any) => ({
+                    ...prevState,
+                    amount: +e.target.value,
+                  }))
+                }
               />
             </Box>
           </Grid>

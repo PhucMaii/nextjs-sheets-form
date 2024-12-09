@@ -5,6 +5,9 @@ import { TRANSACTION_STATUS } from '@/app/utils/enum';
 
 interface IBody {
   amount: number;
+  PST: number;
+  GST: number;
+  subTotal: number;
   description: string;
   createdAt: string;
   spentBy: string;
@@ -20,6 +23,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const {
       createdAt,
       amount,
+      PST,
+      GST,
+      subTotal,
       description,
       date,
       spentBy,
@@ -53,6 +59,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         description,
         createdAt,
         createdBy: `Admin - ${adminUser.clientName}`,
+        PST,
+        GST,
+        subTotal,
         date,
         spentBy,
         paymentMethodId,

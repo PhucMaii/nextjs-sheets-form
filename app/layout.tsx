@@ -54,13 +54,13 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body id="root" className={inter.className}>
-      <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Providers>
-            <UserContextAPI>{children}</UserContextAPI>
-          </Providers>
-        </ThemeProvider>
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Providers>
+              <UserContextAPI>{children}</UserContextAPI>
+            </Providers>
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
       {/* </CacheProvider> */}

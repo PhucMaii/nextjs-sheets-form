@@ -52,11 +52,11 @@ export const InvoicePrint = forwardRef(
     const subtotal = filteredOrders.reduce((acc, order) => {
       return acc + (order?.subTotal || order?.totalPrice || 0);
     }, 0);
-  
+
     const totalPST = filteredOrders.reduce((acc, order) => {
       return acc + (order?.PST || 0);
     }, 0);
-  
+
     const totalGST = filteredOrders.reduce((acc, order) => {
       return acc + (order?.GST || 0);
     }, 0);
@@ -152,24 +152,26 @@ export const InvoicePrint = forwardRef(
                     <TableCell colSpan={3}></TableCell>
                   </TableRow>
                   <TableRow>
-                      <TableCell></TableCell>
-                      <TableCell>Subtotal:</TableCell>
-                      <TableCell>${subtotal.toFixed(2)}</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>Subtotal:</TableCell>
+                    <TableCell>${subtotal.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
-                      <TableCell></TableCell>
-                      <TableCell>PST (7%):</TableCell>
-                      <TableCell>${totalPST.toFixed(2)}</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>PST (7%):</TableCell>
+                    <TableCell>${totalPST.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
-                      <TableCell></TableCell>
-                      <TableCell>GST (5%):</TableCell>
-                      <TableCell>${totalGST.toFixed(2)}</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>GST (5%):</TableCell>
+                    <TableCell>${totalGST.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
-                      <TableCell></TableCell>
-                      <TableCell>Total Bill:</TableCell>
-                      <TableCell>${(subtotal + totalPST + totalGST).toFixed(2)}</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>Total Bill:</TableCell>
+                    <TableCell>
+                      ${(subtotal + totalPST + totalGST).toFixed(2)}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={3}>

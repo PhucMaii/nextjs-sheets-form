@@ -86,7 +86,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         updatedBy: `Driver - ${driverUpdate.name}`,
         updateTime: updatedAt,
       },
-    })
+    });
     // await updateOrderTotalPrice(
     //   orderId,
     //   orderTotalPrice,

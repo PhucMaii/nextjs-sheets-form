@@ -310,17 +310,42 @@ export default function AddInventory({
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" flexDirection="column" gap={3}>
-          <Box display="flex" flexDirection="column" gap={1}>
+            <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Tax</Typography>
               <Divider />
-              <Box display="flex" alignItems="center" justifyContent="space-between" mt={1}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mt={1}
+              >
                 <Typography variant="subtitle1">PST (7%)</Typography>
-                <Switch checked={newItem?.hasPST} onChange={(e: any) => setNewItem((prevState: any) => ({...prevState, hasPST: e.target.checked}))} />
+                <Switch
+                  checked={newItem?.hasPST}
+                  onChange={(e: any) =>
+                    setNewItem((prevState: any) => ({
+                      ...prevState,
+                      hasPST: e.target.checked,
+                    }))
+                  }
+                />
               </Box>
 
-              <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 <Typography variant="subtitle1">GST (5%)</Typography>
-                <Switch checked={newItem?.hasGST} onChange={(e: any) => setNewItem((prevState: any) => ({...prevState, hasGST: e.target.checked}))} />
+                <Switch
+                  checked={newItem?.hasGST}
+                  onChange={(e: any) =>
+                    setNewItem((prevState: any) => ({
+                      ...prevState,
+                      hasGST: e.target.checked,
+                    }))
+                  }
+                />
               </Box>
             </Box>
             <Box display="flex" flexDirection="column" gap={1}>

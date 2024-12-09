@@ -82,7 +82,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       include: {
         items: true,
         user: true,
-      }
+      },
     });
 
     const itemsWithTotalPrice = updatedOrder.items.map((item) => {
@@ -94,7 +94,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     return res.status(200).json({
       data: updatedOrderedItem,
-      updatedOrder: {...updatedOrder, items: itemsWithTotalPrice, clientName: updatedOrder?.user?.clientName, clientId: updatedOrder?.user?.clientId},
+      updatedOrder: {
+        ...updatedOrder,
+        items: itemsWithTotalPrice,
+        clientName: updatedOrder?.user?.clientName,
+        clientId: updatedOrder?.user?.clientId,
+      },
       message: 'Update Data Successfully',
     });
   } catch (error) {

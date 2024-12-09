@@ -217,7 +217,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         inventoryItem: true,
         inventoryUnit: true,
       },
-    })
+    });
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
     const updatedAt = new Date();
 
@@ -443,40 +443,35 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export const generateOrderTotalPrice = (
-  listOfItems: any[],
-) => {
+export const generateOrderTotalPrice = (listOfItems: any[]) => {
   try {
-    const total = listOfItems.reduce(
-      (acc: any, item: any) => {
-        if (!acc?.subTotal) {
-          acc.subTotal = 0;
-        }
+    const total = listOfItems.reduce((acc: any, item: any) => {
+      if (!acc?.subTotal) {
+        acc.subTotal = 0;
+      }
 
-        if (!acc?.PST) {
-          acc.PST = 0;
-        }
+      if (!acc?.PST) {
+        acc.PST = 0;
+      }
 
-        if (!acc?.GST) {
-          acc.GST = 0;
-        }
+      if (!acc?.GST) {
+        acc.GST = 0;
+      }
 
-        acc.subTotal += item.price * item.quantity;
+      acc.subTotal += item.price * item.quantity;
 
-        if (item?.inventoryItem?.hasPST) {
-          acc.PST += item.price * item.quantity * pstRate;
-        }
+      if (item?.inventoryItem?.hasPST) {
+        acc.PST += item.price * item.quantity * pstRate;
+      }
 
-        if (item?.inventoryItem?.hasGST) {
-          acc.GST += item.price * item.quantity * gstRate;
-        }
+      if (item?.inventoryItem?.hasGST) {
+        acc.GST += item.price * item.quantity * gstRate;
+      }
 
-        return acc;
-      },
-      {},
-    )
+      return acc;
+    }, {});
 
-    return {...total, totalPrice: total.subTotal + total.PST + total.GST}
+    return { ...total, totalPrice: total.subTotal + total.PST + total.GST };
     // const prisma = new PrismaClient();
 
     // const updateTime = new Date();
@@ -489,7 +484,7 @@ export const generateOrderTotalPrice = (
     //   },
     // });
 
-    // const subTotal = 
+    // const subTotal =
 
     // // const updatedOrder: any = await prisma.orders.update({
     // //   where: {
@@ -527,17 +522,16 @@ const formatUpdatedItems = (
   updatedItems: any,
   // subcategoryId: number = 0,
 ) => {
-  const formattedUpdatedItems = 
-    updatedItems.map((item: UpdatedItem) => {
-      return {
-        name: item.name,
-        price: item.price,
-        categoryId: categoryId,
-        availability: true,
-        inventoryItemId: item?.inventoryItemId || null,
-        inventoryUnitId: item?.inventoryUnitId || null,
-      };
-    });
+  const formattedUpdatedItems = updatedItems.map((item: UpdatedItem) => {
+    return {
+      name: item.name,
+      price: item.price,
+      categoryId: categoryId,
+      availability: true,
+      inventoryItemId: item?.inventoryItemId || null,
+      inventoryUnitId: item?.inventoryUnitId || null,
+    };
+  });
 
   return formattedUpdatedItems;
 };
