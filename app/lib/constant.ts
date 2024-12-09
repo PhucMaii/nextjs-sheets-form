@@ -38,6 +38,9 @@ import {
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
 
+export const pstRate = 0.07;
+export const gstRate = 0.05;
+
 export const mainItems = [
   'BEAN 10 LB',
   'BEAN 5 LB',

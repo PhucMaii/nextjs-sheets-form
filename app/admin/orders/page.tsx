@@ -89,6 +89,9 @@ export interface Order {
   deliveryAddressLat?: number;
   clientName: string;
   contactNumber: string;
+  subTotal?: number;
+  PST?: number;
+  GST?: number;
   totalPrice: number;
   userId: number;
   items: Item[];

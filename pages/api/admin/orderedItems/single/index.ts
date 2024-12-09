@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
-import { updateOrderTotalPrice } from '../PUT';
+import { generateOrderTotalPrice } from '../PUT';
 import { getUserInfo } from '@/pages/api/utils/auth';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -11,7 +11,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const prisma = new PrismaClient();
-    const { id, orderId, quantity, price, orderTotalPrice } = req.body as any;
+    const { id, orderId, quantity, price } = req.body as any;
 
     const existingOrderedItem = await prisma.orderedItems.findUnique({
       where: {
@@ -49,15 +49,57 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
     }
 
-    const updatedOrder = await updateOrderTotalPrice(
-      orderId,
-      orderTotalPrice,
-      `Admin - ${adminUpdate.clientName}`,
-    );
+    const orderedItems = await prisma.orderedItems.findMany({
+      where: {
+        orderId,
+      },
+      include: {
+        inventoryItem: true,
+        fifo: true,
+        inventoryUnit: true,
+      },
+    });
+    // const updatedOrder = await updateOrderTotalPrice(
+    //   orderId,
+    //   orderTotalPrice,
+    //   `Admin - ${adminUpdate.clientName}`,
+    // );
+    const orderTotalPrice = generateOrderTotalPrice(orderedItems);
+    const updatedAt = new Date();
+
+    const updatedOrder = await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        totalPrice: orderTotalPrice.totalPrice,
+        subTotal: orderTotalPrice.subTotal,
+        PST: orderTotalPrice.PST,
+        GST: orderTotalPrice.GST,
+        updatedBy: `Admin - ${adminUpdate.clientName}`,
+        updateTime: updatedAt,
+      },
+      include: {
+        items: true,
+        user: true,
+      },
+    });
+
+    const itemsWithTotalPrice = updatedOrder.items.map((item) => {
+      return {
+        ...item,
+        totalPrice: item.quantity * item.price,
+      };
+    });
 
     return res.status(200).json({
       data: updatedOrderedItem,
-      updatedOrder,
+      updatedOrder: {
+        ...updatedOrder,
+        items: itemsWithTotalPrice,
+        clientName: updatedOrder?.user?.clientName,
+        clientId: updatedOrder?.user?.clientId,
+      },
       message: 'Update Data Successfully',
     });
   } catch (error) {

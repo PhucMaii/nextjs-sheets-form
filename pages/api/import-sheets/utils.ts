@@ -6,6 +6,7 @@ import { pusherServer } from '@/app/pusher';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { gstRate, pstRate } from '@/app/lib/constant';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -207,7 +208,9 @@ export const overrideOrder = async (
 ) => {
   const prisma = new PrismaClient();
   try {
-    let total = 0;
+    let subTotal = 0;
+    let PST = 0;
+    let GST = 0;
     const itemList: any = [];
     for (const item of newItems) {
       const existingItem = await prisma.orderedItems.findFirst({
@@ -232,10 +235,22 @@ export const overrideOrder = async (
         data: {
           quantity: item.quantity,
         },
+        include: {
+          inventoryItem: true,
+        },
       });
 
       // Update new total price
-      total += newItem.quantity * newItem.price;
+      subTotal += newItem.quantity * newItem.price;
+      if (newItem.inventoryItem) {
+        if (newItem?.inventoryItem?.hasPST) {
+          PST += newItem.quantity * newItem.price * pstRate;
+        }
+
+        if (newItem?.inventoryItem?.hasGST) {
+          GST += newItem.quantity * newItem.price * gstRate;
+        }
+      }
       itemList.push({
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
@@ -257,17 +272,23 @@ export const overrideOrder = async (
         id: orderId,
       },
       data: {
-        totalPrice: total,
+        subTotal: subTotal,
+        PST: PST,
+        GST: GST,
+        totalPrice: subTotal + PST + GST,
         note: newNote,
         isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
         updateTime: new Date(),
         updatedBy,
       },
+      include: {
+        items: true,
+      },
     });
 
     await sendEmail(
       user,
-      itemList,
+      updatedOrder,
       orderId,
       updatedOrder.deliveryDate,
       true,
@@ -278,7 +299,7 @@ export const overrideOrder = async (
       ...updatedOrder,
       items: itemList,
       ...user,
-      totalPrice: total,
+      totalPrice: updatedOrder.totalPrice,
       category: user.category,
       isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
       id: updatedOrder.id,

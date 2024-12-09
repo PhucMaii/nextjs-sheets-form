@@ -25,11 +25,9 @@ export const ComponentToPrint = forwardRef(
     const [announcement] = SWRFetchData(`${API_URL.ADMIN}/announcement`);
 
     const orderDetailsTemplate = [];
-    let totalPrice = 0;
 
     for (const item of order.items) {
       if (item.quantity > 0) {
-        totalPrice += item.totalPrice;
         orderDetailsTemplate.push(
           <TableRow key={item.name}>
             <TableCell sx={{ fontSize: 18, fontWeight: 'bold' }}>
@@ -135,12 +133,55 @@ export const ComponentToPrint = forwardRef(
             <Grid container>
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  Total:
+                  Subtotal:
                 </Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${totalPrice.toFixed(2)}
+                  $
+                  {order?.subTotal?.toFixed(2) ||
+                    order?.totalPrice?.toFixed(2) ||
+                    0}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  PST (7%):
+                </Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  ${order?.PST?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  GST (5%):
+                </Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  ${order?.GST?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} sx={{ my: 1 }}>
+                <Divider />
+              </Grid>
+              <Grid item xs={6}>
+                <Typography
+                  sx={{ fontSize: printFontSize - 5 }}
+                  fontWeight="bold"
+                >
+                  Total:
+                </Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography
+                  sx={{ fontSize: printFontSize - 5 }}
+                  fontWeight="bold"
+                >
+                  ${order?.totalPrice?.toFixed(2) || 0}
                 </Typography>
               </Grid>
             </Grid>

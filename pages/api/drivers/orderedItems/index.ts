@@ -1,16 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
-import { updateOrderTotalPrice } from '../../admin/orderedItems/PUT';
 import { getDriverInfo } from '../../utils/auth';
 import { updateSingleInventoryItem } from '../../admin/orderedItems/single';
+import { generateOrderTotalPrice } from '../../admin/orderedItems/PUT';
 
 interface IBody {
   id: number; // ordered item id
   orderId: number;
   quantity: number;
   price: number;
-  orderTotalPrice: number;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -20,7 +19,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const prisma = new PrismaClient();
-    const { id, orderId, quantity, price, orderTotalPrice } = req.body as IBody;
+    const { id, orderId, quantity, price } = req.body as IBody;
 
     const existingOrderedItem = await prisma.orderedItems.findUnique({
       where: {
@@ -60,12 +59,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Get driver update info
     const driverUpdate: any = await getDriverInfo(req, res);
+    const updatedAt = new Date();
 
-    await updateOrderTotalPrice(
-      orderId,
-      orderTotalPrice,
-      `Driver - ${driverUpdate.name}`,
-    );
+    const orderedItems = await prisma.orderedItems.findMany({
+      where: {
+        orderId,
+      },
+      include: {
+        fifo: true,
+        inventoryItem: true,
+        inventoryUnit: true,
+      },
+    });
+
+    const orderTotalPrice = generateOrderTotalPrice(orderedItems);
+
+    await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        totalPrice: orderTotalPrice.totalPrice,
+        subTotal: orderTotalPrice.subTotal,
+        PST: orderTotalPrice.PST,
+        GST: orderTotalPrice.GST,
+        updatedBy: `Driver - ${driverUpdate.name}`,
+        updateTime: updatedAt,
+      },
+    });
+    // await updateOrderTotalPrice(
+    //   orderId,
+    //   orderTotalPrice,
+    //   `Driver - ${driverUpdate.name}`,
+    // );
 
     return res.status(200).json({
       data: updatedOrderedItem,

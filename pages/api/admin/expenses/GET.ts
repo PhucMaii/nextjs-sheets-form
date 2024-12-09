@@ -16,15 +16,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { startDate, endDate, id, type }: IQuery = req.query;
-    
-    
+
     if (!startDate || !endDate) {
       return res.status(404).json({ error: 'Missing required parameters' });
     }
-    
+
     const formattedStartDate = normalizeDate(new Date(startDate));
     const formattedEndDate = normalizeDate(new Date(endDate));
-    
+
     const listOfDateString = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
@@ -132,7 +131,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       });
-      
 
       if (!vendor) {
         return res.status(404).json({ error: 'Vendor not found' });
@@ -141,7 +139,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       expenses = vendor.expense.map((expense: any) => expense.expense);
       console.log(expenses, 'expenses');
     }
-
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);
 

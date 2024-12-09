@@ -18,7 +18,6 @@ export default async function DELETE(
     const { orderId, orderList } = req.body as BodyTypes;
 
     if (orderList) {
-
       for (const order of orderList) {
         // const deletedOrder = await prisma.orders.delete({
         //   where: {

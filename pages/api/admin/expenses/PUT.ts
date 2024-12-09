@@ -7,13 +7,16 @@ interface IBody {
   date: string;
   paymentMethodId: number;
   amount: number;
+  PST: number;
+  GST: number;
+  subTotal: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, description, date, paymentMethodId, amount }: IBody = req.body;
+    const { id, description, date, paymentMethodId, amount, PST, GST, subTotal }: IBody = req.body;
 
     const existingExpense = await prisma.expense.findUnique({
       where: {
@@ -34,6 +37,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         date: date,
         paymentMethodId,
         amount: amount,
+        subTotal,
+        PST,
+        GST,
+
       },
     });
 

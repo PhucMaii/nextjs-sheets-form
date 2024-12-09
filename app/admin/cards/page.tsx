@@ -131,7 +131,7 @@ export default function CardManagement() {
 
     const selectedVendor = vendors?.data.find(
       (vendor: IVendor) => vendor.id === selectedViewObj.id,
-    )
+    );
     return {
       id: -1,
       name: selectedVendor.name,
@@ -142,7 +142,7 @@ export default function CardManagement() {
       createdBy: '',
       updatedBy: null,
       updatedAt: null,
-    }
+    };
   };
 
   const handleDeleteMethod = async (targetMethod: IPaymentMethod) => {
@@ -162,7 +162,7 @@ export default function CardManagement() {
       // Update Real Data
       setSelectedViewObj({
         id: -1,
-        type: null
+        type: null,
       });
       setCurrentMethod(null);
 
@@ -243,24 +243,35 @@ export default function CardManagement() {
               value={JSON.stringify(selectedViewObj)}
               onChange={(e) => setSelectedViewObj(JSON.parse(e.target.value))}
             >
-              <MenuItem disabled value={JSON.stringify({type: null, id: -1})}>
+              <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
                 -- Choose Payment Method --
               </MenuItem>
               <ListSubheader>Payment Methods</ListSubheader>
-                {paymentMethods &&
-                  paymentMethods.data.map((method: IPaymentMethod) => (
-                    <MenuItem key={method.id} value={JSON.stringify({type: VIEW_TYPE.PAYMENT_METHOD, id: method.id})}>
-                      {method.name}
-                    </MenuItem>
-                  ))}
+              {paymentMethods &&
+                paymentMethods.data.map((method: IPaymentMethod) => (
+                  <MenuItem
+                    key={method.id}
+                    value={JSON.stringify({
+                      type: VIEW_TYPE.PAYMENT_METHOD,
+                      id: method.id,
+                    })}
+                  >
+                    {method.name}
+                  </MenuItem>
+                ))}
               <ListSubheader>Vendors</ListSubheader>
-              {
-                vendors && vendors.data.map((vendor: IVendor) => (
-                  <MenuItem key={vendor.id} value={JSON.stringify({type: VIEW_TYPE.VENDOR, id: vendor.id})}>
+              {vendors &&
+                vendors.data.map((vendor: IVendor) => (
+                  <MenuItem
+                    key={vendor.id}
+                    value={JSON.stringify({
+                      type: VIEW_TYPE.VENDOR,
+                      id: vendor.id,
+                    })}
+                  >
                     {vendor.name}
                   </MenuItem>
-                ))
-              }
+                ))}
             </Select>
             <SelectDateRange
               dateRange={dateRange}

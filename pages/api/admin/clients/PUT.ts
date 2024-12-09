@@ -89,6 +89,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           where: {
             categoryId: updateFields.categoryId,
           },
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          },
         });
 
         if (updatedUser.scheduleOrders.length > 0) {

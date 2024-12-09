@@ -1,42 +1,30 @@
 export const generateOrderTemplate = (
   clientName: string,
   clientNumber: string,
-  orderDetails: any,
+  // orderDetails: any,
+  order: any,
   phoneNumber: string,
   deliveryAddress: string,
   orderId: number,
   flag?: string,
 ) => {
   let orderDetailsTemplate = '';
-  let total = 0;
+  // let total = 0;
 
   const flagText = flag
     ? `<h2 style="text-align: center; font-weight: 300">${flag}</h2>`
     : '';
 
-  for (const key of Object.keys(orderDetails)) {
-    if (
-      key !== 'DELIVERY DATE' &&
-      key !== 'orderTime' &&
-      key !== 'NOTE' &&
-      key !== 'clientId'
-    ) {
-      total += orderDetails[key].totalPrice;
-      orderDetailsTemplate += `
+  for (const item of order?.items as any[]) {
+    const totalPrice = item.price * item.quantity;
+    orderDetailsTemplate += `
         <tr>
-          <td style="padding: 8px">${key}</td>
-          <td style="padding: 8px; text-align: center">${
-            orderDetails[key].quantity
-          }</td>
-          <td style="padding: 8px; text-align: center">$${orderDetails[
-            key
-          ].price.toFixed(2)}</td>
-          <td style="padding: 8px; text-align: center">$${orderDetails[
-            key
-          ].totalPrice.toFixed(2)}</td>
+          <td style="padding: 8px">${item?.name}</td>
+          <td style="padding: 8px; text-align: center">${item?.quantity}</td>
+          <td style="padding: 8px; text-align: center">$${item.price.toFixed(2)}</td>
+          <td style="padding: 8px; text-align: center">$${totalPrice.toFixed(2)}</td>
         </tr>
       `;
-    }
   }
 
   return `
@@ -57,10 +45,10 @@ export const generateOrderTemplate = (
             <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
             <h3 style="text-align: left;font-weight: 300;">Client Number: ${clientNumber}</h3>
             <h3 style="text-align: left;font-weight: 300;">Order Time: ${
-              orderDetails.orderTime
+              order?.orderTime
             }</h3>
             <h3 style="text-align: left;font-weight: 300;">Delivery Date: ${
-              orderDetails['DELIVERY DATE']
+              order?.deliveryDate
             }</h3>
             <h3 style="text-align: left;">ORDER DETAILS</h3>
             <table style="width: 100%"; border-collapse: collapse;>
@@ -77,16 +65,21 @@ export const generateOrderTemplate = (
               </tbody>
             </table>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
-            <h4 style="text-align: right;font-weight: 300;">Total: $${total.toFixed(
+            <h4 style="text-align: right;font-weight: 300;">Subtotal: $${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}</h4>
+            <h4 style="text-align: right;font-weight: 300;">PST: $${order?.PST?.toFixed(
+              2,
+            )}</h4>
+            <h4 style="text-align: right;font-weight: 300;">GST: $${order?.GST?.toFixed(
+              2,
+            )}</h4>
+            <h4 style="text-align: right;font-weight: 300;">Total: $${order?.totalPrice?.toFixed(
               2,
             )}</h4>
             <h4 style="text-align: left;font-weight: 300;">DELIVERY ADDRESS: ${deliveryAddress}</h4>
             <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
             <h4 style="text-align: left;font-weight: 300;">NOTE</h4>
-            <h4 style="text-align: left;font-weight: 300;">${
-              orderDetails.NOTE
-            }</h4>
+            <h4 style="text-align: left;font-weight: 300;">${order?.NOTE}</h4>
         </div>
     </div>
     `;

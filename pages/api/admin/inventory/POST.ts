@@ -4,6 +4,8 @@ import { getUserInfo } from '../../utils/auth';
 
 interface IBody {
   name: string;
+  hasPST: boolean;
+  hasGST: boolean;
   vendorItems: any[];
   createdAt: string;
 }
@@ -12,7 +14,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, vendorItems, createdAt }: IBody = req.body;
+    const { name, hasPST, hasGST, vendorItems, createdAt }: IBody = req.body;
 
     const vendorIds = vendorItems.map((vendorItem: any) => {
       return vendorItem.vendorId;
@@ -50,6 +52,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newInventory = await prisma.inventoryItem.create({
       data: {
         name,
+        hasPST,
+        hasGST,
         createdAt,
         createdBy,
       },

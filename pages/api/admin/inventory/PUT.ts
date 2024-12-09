@@ -6,6 +6,8 @@ import { checkAndUpdateUnits } from './expenses/POST';
 interface IBody {
   id: number;
   name: string;
+  hasPST?: boolean;
+  hasGST?: boolean;
   vendorItems: any[];
   updatedAt: string;
 }
@@ -14,7 +16,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, name, vendorItems, updatedAt }: IBody = req.body;
+    const { id, name, hasPST, hasGST, vendorItems, updatedAt }: IBody =
+      req.body;
 
     const existingInventoryItem = await prisma.inventoryItem.findUnique({
       where: {
@@ -59,6 +62,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: {
           name,
+        },
+      });
+    }
+
+    if (
+      existingInventoryItem.hasPST !== hasPST ||
+      existingInventoryItem.hasGST !== hasGST
+    ) {
+      await prisma.inventoryItem.update({
+        where: {
+          id,
+        },
+        data: {
+          hasPST,
+          hasGST,
         },
       });
     }

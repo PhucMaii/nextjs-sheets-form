@@ -35,6 +35,7 @@ import EditUnit from './EditUnit';
 import UnitRadio from '../../Radio/UnitRadio';
 import { grey } from '@mui/material/colors';
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+import { gstRate, pstRate } from '@/app/lib/constant';
 
 interface IProps {
   stockPurchased: IExpense;
@@ -127,7 +128,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   }, [selectedVendorId, vendors]);
 
   useEffect(() => {
-    console.log('ACCESS USE EFFECT');
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
 
@@ -146,8 +146,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         const vendorItem = allVendorItems?.data?.find((i: any) => {
           return i.inventoryItem.name == item.name;
         });
-
-        console.log('VENDOR ITEM', { vendorItem, item });
 
         return {
           ...item,
@@ -237,11 +235,46 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   };
 
   const calculateNewAmount = () => {
-    const newAmount = purchasedItems.reduce((acc: number, item: any) => {
-      return acc + item.unitPrice * item.quantity;
-    }, 0);
+    // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
+    //   return acc + item.unit.unitPrice * item.quantity;
+    // }, 0);
+    const total = purchasedItems.reduce((acc: any, item: any) => {
+      if (!acc?.subTotal) {
+        acc.subTotal = 0;
+      }
 
-    setUpdatedExpense({ ...updatedExpense, amount: newAmount });
+      if (!acc?.PST) {
+        acc.PST = 0;
+      }
+
+      if (!acc?.GST) {
+        acc.GST = 0;
+      }
+
+      acc.subTotal += item.unitPrice * item.quantity;
+
+      if (item?.inventoryItem?.hasPST) {
+        acc.PST += item.unitPrice * item.quantity * pstRate;
+      }
+
+      if (item?.inventoryItem?.hasGST) {
+        acc.GST += item.unitPrice * item.quantity * gstRate;
+      }
+
+      return acc;
+    }, {});
+
+    // setTotalAmount(newAmount);
+    setUpdatedExpense((prevState: any) => ({
+      ...prevState,
+      amount:
+        parseFloat(total.subTotal.toFixed(2)) +
+        parseFloat(total.PST.toFixed(2)) +
+        parseFloat(total.GST.toFixed(2)),
+      subTotal: parseFloat(total.subTotal.toFixed(2)),
+      GST: parseFloat(total.GST.toFixed(2)),
+      PST: parseFloat(total.PST.toFixed(2)),
+    }));
   };
 
   const handleOnChangeUnitPrice = (e: any) => {
@@ -344,7 +377,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         stockPurchased?.orderedItems,
       );
 
-      console.log(purchasedItems, 'purchasedItems');
       // setIsLoading(false);
       // return;
       const createdAt = generateCurrentTime();
@@ -352,6 +384,9 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         id: updatedExpense.id,
         date,
         amount: updatedExpense.amount,
+        PST: updatedExpense?.PST || 0,
+        GST: updatedExpense?.GST || 0,
+        subTotal: updatedExpense?.subTotal || 0,
         description: updatedExpense.description,
         paymentMethodId: updatedExpense.paymentMethodId,
         spentBy: updatedExpense.spentBy,
@@ -408,6 +443,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         inventoryItemId: newValue?.inventoryItemId,
         unit: newValue?.unit[0],
         units: newValue?.unit || [],
+        inventoryItem: newValue?.inventoryItem,
       });
     }
   };
@@ -599,6 +635,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                   </FormControl>
                 </Grid>
               )}
+              
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -632,7 +669,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
             {purchasedItems.length > 0 &&
               purchasedItems.map((item: any, index) => {
-                console.log(item, 'item');
                 const disabledItem = item?.fifo?.orderedItems?.length > 0;
                 return (
                   <Grid container spacing={1} key={index}>
@@ -685,6 +721,78 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                 );
               })}
 
+<Divider sx={{ my: 2 }}>Bill</Divider>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Subtotal</Typography>
+              <TextField
+                placeholder="Enter epxense subtotal..."
+                fullWidth
+                type="number"
+                value={updatedExpense?.subTotal || 0}
+                onChange={(e) =>
+                  setUpdatedExpense((prevState: any) => ({
+                    ...prevState,
+                    subTotal: +e.target.value,
+                  }))
+                }
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">PST (7%)</Typography>
+              <TextField
+                placeholder="Enter epxense PST..."
+                fullWidth
+                type="number"
+                value={updatedExpense?.PST || 0}
+                onChange={(e) =>
+                  setUpdatedExpense((prevState: any) => ({
+                    ...prevState,
+                    PST: +e.target.value,
+                  }))
+                }
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">GST (5%)</Typography>
+              <TextField
+                placeholder="Enter epxense GST..."
+                fullWidth
+                type="number"
+                value={updatedExpense?.GST || 0}
+                onChange={(e) =>
+                  setUpdatedExpense((prevState: any) => ({
+                    ...prevState,
+                    GST: +e.target.value,
+                  }))
+                }
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Amount</Typography>
+              <TextField
+                placeholder="Enter epxense amount..."
+                fullWidth
+                type="number"
+                value={updatedExpense?.amount || 0}
+                onChange={(e) =>
+                  setUpdatedExpense((prevState: any) => ({
+                    ...prevState,
+                    amount: +e.target.value,
+                  }))
+                }
+              />
+            </Box>
+          </Grid>
+        </Grid>
+
             <Divider sx={{ my: 2 }}>Expense Information</Divider>
 
             <Box display="flex" flexDirection="column" gap={2}>
@@ -702,22 +810,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                   setUpdatedExpense({
                     ...updatedExpense,
                     invoice: e.target.value,
-                  })
-                }
-              />
-            </Box>
-
-            <Box display="flex" flexDirection="column" gap={2}>
-              <Typography variant="h6">Amount</Typography>
-              <TextField
-                placeholder="Enter epxense amount..."
-                fullWidth
-                type="number"
-                value={updatedExpense?.amount}
-                onChange={(e) =>
-                  setUpdatedExpense({
-                    ...updatedExpense,
-                    amount: +e.target.value,
                   })
                 }
               />
