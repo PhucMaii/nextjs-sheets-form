@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {
   removedOrderIdList: number[];
-  // updatedOrderList: ScheduledOrder[];
+  updatedOrderList: {id: number, newId: number}[];
 }
 
 export default async function reArrangement(
@@ -14,10 +14,10 @@ export default async function reArrangement(
   try {
     const prisma = new PrismaClient();
 
-    const { removedOrderIdList }: BodyTypes = req.body;
+    const { removedOrderIdList, updatedOrderList }: BodyTypes = req.body;
 
     // Remove all the scheduled order related in that route
-    const updatedOrderList = await prisma.scheduleOrders.findMany({
+    const updatedOrders = await prisma.scheduleOrders.findMany({
       where: {
         id: {
           in: removedOrderIdList,
@@ -47,24 +47,33 @@ export default async function reArrangement(
     // Add scheduled order back with new id from client
     const returnData: any = [];
     for (const scheduledOrder of updatedOrderList) {
+      const targetOrder = updatedOrders.find(
+        (order: any) => order.id === scheduledOrder.id,
+      );
+
+      if (!targetOrder) {
+        console.error('Target order not found');
+        continue; 
+      }
+
       const updatedScheduleOrder = await prisma.scheduleOrders.create({
         data: {
-          id: scheduledOrder.id,
-          userId: scheduledOrder.userId,
-          totalPrice: scheduledOrder.totalPrice,
-          day: scheduledOrder.day,
+          id: scheduledOrder.newId,
+          userId: targetOrder.userId,
+          totalPrice: targetOrder.totalPrice,
+          day: targetOrder.day,
         },
         include: {
           user: true,
         },
       });
 
-      const newItems = scheduledOrder.items.map((item: any) => {
+      const newItems = targetOrder.items.map((item: any) => {
         return {
           name: item.name,
           price: item.price,
           quantity: item.quantity,
-          scheduledOrderId: scheduledOrder.id,
+          scheduledOrderId: scheduledOrder.newId,
           inventoryItemId: item.inventoryItemId,
           inventoryUnitId: item.inventoryUnitId,
         };

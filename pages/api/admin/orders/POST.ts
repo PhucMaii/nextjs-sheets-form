@@ -1,7 +1,7 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { OrderedItems, ScheduledOrder, UserType } from '@/app/utils/type';
+import { OrderedItems, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
 import { normalizeDate, sortByDeliveryDate } from '../../utils/date';
@@ -19,7 +19,7 @@ export const config = {
 
 interface BodyTypes {
   deliveryDate: string;
-  scheduleOrderList: ScheduledOrder[];
+  scheduleOrderIds: number[];
   createdAt: string;
 }
 
@@ -30,16 +30,33 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log('Content-Length Header:', contentLength);
     const requestBodySize = Buffer.byteLength(JSON.stringify(req.body));
     console.log('Request Body Size:', requestBodySize, 'bytes');
-    const { deliveryDate, scheduleOrderList, createdAt } =
+    const { deliveryDate, scheduleOrderIds, createdAt } =
       req.body as BodyTypes;
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];
 
+    const scheduleOrderList: any = await prisma.scheduleOrders.findMany({
+      where: {
+        id: {
+          in: scheduleOrderIds,
+        },
+      },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          },
+        },
+        user: true,
+      },
+    });
+
     for (const scheduleOrder of scheduleOrderList) {
       const returnOrder = {
         id: scheduleOrder.id,
-        items: scheduleOrder.items.map((item: OrderedItems) => {
+        items: scheduleOrder.items.map((item: any) => {
           return {
             name: item.name,
             quantity: item.quantity,
