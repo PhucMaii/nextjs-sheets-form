@@ -50,9 +50,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       createdAt,
     }: IBody = req.body;
 
-    let id = userId;
+    if (!deliveryDate || !items || !createdAt) {
+      return res.status(400).json({ error: 'Missing required fields. Please refresh and try again' });
+    }
 
-    console.log(createdAt, 'createdAt');
+    let id = userId;
 
     // Check is user authenticated
     if (!userId) {
@@ -163,8 +165,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       //   return item;
       // });
-
-      console.log(items, 'items');
 
       await overrideOrder(
         existingUser,

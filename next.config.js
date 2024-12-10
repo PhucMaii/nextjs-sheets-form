@@ -2,9 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true, // Improve performance,
-  api: {
-    bodyParser: {
-      sizeLimit: '5mb', // Adjust size as needed
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
     },
   },
 };

@@ -236,7 +236,7 @@ export default function Orders() {
       }
       const newOrderList = baseOrders.filter((order: Order) => {
         if (
-          order.user.clientId.includes(debouncedKeywords) ||
+          order?.user?.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
           order.user.clientName
             .toLowerCase()

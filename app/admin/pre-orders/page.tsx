@@ -456,7 +456,7 @@ export default function ScheduledOrderPage() {
 
       const response = await axios.put(API_URL.SCHEDULED_ORDER, {
         removedOrderIdList: updatedIdList,
-        updatedOrderList: newListWithId,
+        // updatedOrderList: newListWithId,
         reArrangement: true,
       });
 

@@ -10,6 +10,14 @@ interface IQuery {
   endDate?: string;
 }
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '8mb', // Set desired value here
+    },
+  },
+};
+
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();

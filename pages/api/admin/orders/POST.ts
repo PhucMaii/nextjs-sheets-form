@@ -423,6 +423,7 @@ export const createOrder = async (
       },
       include: {
         items: true,
+        user: true,
       },
     });
 

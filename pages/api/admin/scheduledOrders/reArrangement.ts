@@ -1,10 +1,10 @@
-import { ScheduledOrder } from '@/app/utils/type';
+// import { ScheduledOrder } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {
   removedOrderIdList: number[];
-  updatedOrderList: ScheduledOrder[];
+  // updatedOrderList: ScheduledOrder[];
 }
 
 export default async function reArrangement(
@@ -14,16 +14,35 @@ export default async function reArrangement(
   try {
     const prisma = new PrismaClient();
 
-    const { removedOrderIdList, updatedOrderList }: BodyTypes = req.body;
+    const { removedOrderIdList }: BodyTypes = req.body;
 
     // Remove all the scheduled order related in that route
-    for (const id of removedOrderIdList) {
-      await prisma.scheduleOrders.delete({
-        where: {
-          id,
+    const updatedOrderList = await prisma.scheduleOrders.findMany({
+      where: {
+        id: {
+          in: removedOrderIdList,
         },
-      });
-    }
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    await prisma.scheduleOrders.deleteMany({
+      where: {
+        id: {
+          in: removedOrderIdList,
+        },
+      },
+    });
+
+    // for (const id of removedOrderIdList) {
+    //   await prisma.scheduleOrders.delete({
+    //     where: {
+    //       id,
+    //     },
+    //   });
+    // }
 
     // Add scheduled order back with new id from client
     const returnData: any = [];
