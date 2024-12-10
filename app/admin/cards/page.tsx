@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
@@ -37,6 +38,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
+// import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 
 export default function CardManagement() {
   const [selectedViewObj, setSelectedViewObj] = useState<any>({
@@ -52,9 +54,16 @@ export default function CardManagement() {
     editModal: false,
     deleteModal: false,
   });
+  const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
+  // const {
+  //   handleUpdateStatus,
+  //   handleBulkUpdateStatus,
+  //   UpdateExpenseStatusComp,
+  //   isUpdating,
+  // } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods, mutateMethod] = SWRFetchData(
@@ -175,6 +184,24 @@ export default function CardManagement() {
         'error',
         'Fail to delete payment method. Please try again later.',
       );
+    }
+  };
+
+  const handleSelectExpense = (e: any, targetExpense: IExpense) => {
+    e.preventDefault();
+    const selectedExpense = selectedExpenses.find((expense: IExpense) => {
+      return expense.id === targetExpense.id;
+    });
+
+    if (selectedExpense) {
+      const newSelectedExpense = selectedExpenses.filter(
+        (expense: IExpense) => {
+          return expense.id !== targetExpense.id;
+        },
+      );
+      setSelectedExpenses(newSelectedExpense);
+    } else {
+      setSelectedExpenses([...selectedExpenses, targetExpense]);
     }
   };
 
@@ -414,7 +441,14 @@ export default function CardManagement() {
                   </Typography>
 
                   {/* Recent Transactions */}
-                  <TransactionsTable transactions={transactions?.data || []} />
+                  <TransactionsTable 
+                    transactions={transactions?.data || []} />             
+                    {/* // handleUpdateStatus={handleUpdateStatus}
+                    // showNotification={showNotification}
+                    // selectedExpense={selectedExpenses}
+                    // handleSelectExpense={handleSelectExpense}
+                    // handleSelectAll={handleSelectAll}
+                    // adminsAndDrivers={adminsAndDrivers} */}
                 </ShadowSection>
               </Grid>
               <Grid item xs={12} md={4}>

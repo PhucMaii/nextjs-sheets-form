@@ -240,9 +240,9 @@ export const createOrder = async (
       include: {
         vendorItem: true,
         fifo: {
-          include: {
-            vendorItem: true,
-          },
+          // include: {
+          //   vendorItem: true,
+          // },
         },
       },
     });
@@ -336,13 +336,24 @@ export const createOrder = async (
 
         // STEP 5: vendorItem.quantity - (item.quantity * item.inventoryUnit.ratio)
         // Update Vendor Item Quantity
+        const targetVendorItem = await prisma.vendorItem.findFirst({
+          where: {
+            id: sortedFifo[fifoIndex].vendorItemId
+          }
+        });
+
+        if (!targetVendorItem) {
+          console.error('COnflict vendor item');
+          continue;
+        }
+
         await prisma.vendorItem.update({
           where: {
             id: sortedFifo[fifoIndex].vendorItemId,
           },
           data: {
             quantity:
-              sortedFifo[fifoIndex].vendorItem.quantity -
+              targetVendorItem.quantity -
               item.quantity * item.inventoryUnit.ratio,
           },
         });
@@ -384,55 +395,6 @@ export const createOrder = async (
     await prisma.orderedItems.createMany({
       data: newOrderedItems,
     });
-    // const inventoryItemQuantityMap: any = {};
-    // const itemsToCreate = items.map((item: OrderedItems) => {
-
-    //   // Track new inventory quantity
-    //   if (inventoryItemQuantityMap[item?.inventoryItemId || -1]) {
-    //     inventoryItemQuantityMap[item?.inventoryItemId || -1] += item.quantity;
-    //   } else {
-    //     inventoryItemQuantityMap[item?.inventoryItemId || -1] = item.quantity;
-    //   }
-
-    //   return {
-    //     name: item.name,
-    //     price: item.price,
-    //     quantity: item.quantity,
-    //     orderId: newOrder.id,
-    //     inventoryItemId: item.inventoryItemId,
-    //   };
-    // });
-
-    // await prisma.orderedItems.createMany({
-    //   data: itemsToCreate,
-    // });
-
-    // // update inventory item quantity
-    // const inventoryItems: any = await prisma.inventoryItem.findMany({
-    //   where: {
-    //     id: {
-    //       in: Object.keys(inventoryItemQuantityMap).map((itemId: string) =>
-    //         Number(itemId),
-    //       ),
-    //     },
-    //   },
-    // });
-
-    // for (const inventoryItem of inventoryItems) {
-    //   console.log({ inventoryItem });
-    //   if (inventoryItemQuantityMap[inventoryItem.id]) {
-    //     await prisma.inventoryItem.update({
-    //       where: {
-    //         id: inventoryItem.id,
-    //       },
-    //       data: {
-    //         quantity:
-    //           inventoryItem.quantity -
-    //           inventoryItemQuantityMap[inventoryItem.id],
-    //       },
-    //     });
-    //   }
-    // }
 
     const updatedOrder = await prisma.orders.findUnique({
       where: {
