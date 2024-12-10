@@ -139,7 +139,7 @@ export const InvoicePrint = forwardRef(
                         (pageIndex + 1) * ordersPerPage,
                       )
                       .map((order: Order) => {
-                        const isTax = order.items.some((item) => item?.inventoryItem?.hasPST || item?.inventoryItem?.hasGST);
+                        const isTax = order?.items?.some((item) => item?.inventoryItem?.hasPST || item?.inventoryItem?.hasGST);
                         return (
                           <TableRow
                             key={order.id}

@@ -207,12 +207,6 @@ async function main() {
   //     // });
   //   }
   // }
-
-  await prisma.$executeRaw`
-  UPDATE "Expense"
-  SET "subTotal" = "amount", "PST" = 0, "GST" = 0
-`;
-
 }
 
 main()

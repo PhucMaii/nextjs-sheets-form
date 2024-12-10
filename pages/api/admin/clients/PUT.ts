@@ -44,11 +44,25 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updateFields: any = {};
 
-    updateFields.clientId = clientId;
-    updateFields.clientName = clientName;
-    updateFields.email = email;
-    updateFields.deliveryAddress = deliveryAddress;
-    updateFields.contactNumber = contactNumber;
+    if (clientId) {
+      updateFields.clientId = clientId;
+    }
+
+    if (clientName) {
+      updateFields.clientName = clientName;
+    }
+
+    if (email) {
+      updateFields.email = email;
+    }
+
+    if (deliveryAddress) {
+      updateFields.deliveryAddress = deliveryAddress;
+    }
+
+    if (contactNumber) {
+      updateFields.contactNumber = contactNumber;
+    }
 
     if (password) {
       updateFields.password = await bcrypt.hash(password, 12);

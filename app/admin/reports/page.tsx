@@ -59,6 +59,7 @@ import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import RouteStatement from '../components/Modals/RouteStatement';
 import LoadingModal from '../components/Modals/LoadingModal';
+import EditEmail from '../components/Modals/edit/EditEmail';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
@@ -74,11 +75,12 @@ export default function ReportPage() {
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
-  const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
+  // const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
   const [isSendAndPrintLoading, setIsSendAndPrintLoading] =
     useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isOpenEditEmail, setIsOpenEditEmail] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
     useState<boolean>(false);
@@ -364,10 +366,10 @@ export default function ReportPage() {
     }
   };
 
-  const handleSendInvoice = async () => {
+  const handleSendInvoice = async (email: string = (clientValue?.email || '')) => {
     try {
       const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
-        client: clientValue,
+        client: {...clientValue, email},
         orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
         endDate: dateRange[1],
       });
@@ -440,13 +442,14 @@ export default function ReportPage() {
         <MenuItem
           disabled={!clientValue?.email || false}
           onClick={async () => {
-            setIsSendLoading(true);
-            await handleSendInvoice();
-            setIsSendLoading(false);
+            setIsOpenEditEmail(true);
+            // setIsSendLoading(true);
+            // await handleSendInvoice();
+            // setIsSendLoading(false);
             // handleCloseStatementAnchor();
           }}
         >
-          {isSendLoading ? <CircularProgress size={20} /> : 'Send to client'}
+          {'Send to client'}
         </MenuItem>
         <MenuItem
           disabled={!clientValue?.email || false}
@@ -558,6 +561,7 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
+      <EditEmail open={isOpenEditEmail} onClose={() => setIsOpenEditEmail(false)} sendInvoice={handleSendInvoice} email={clientValue?.email || ''} showNotification={showNotification} userId={clientValue?.id || -1} />
       <LoadingModal open={isLoading} />
       {NotificationComp}
       <RouteStatement
