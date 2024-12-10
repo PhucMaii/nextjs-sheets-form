@@ -50,6 +50,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       createdAt,
     }: IBody = req.body;
 
+    console.log({
+      body: req.body,
+    })
+
     if (!deliveryDate || !items || !createdAt) {
       return res.status(400).json({ error: 'Missing required fields. Please refresh and try again' });
     }

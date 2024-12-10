@@ -80,6 +80,8 @@ export const generateOrderTemplate = (
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
             <h4 style="text-align: left;font-weight: 300;">NOTE</h4>
             <h4 style="text-align: left;font-weight: 300;">${order?.note}</h4>
+            <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
+            <h4 style="text-align: right;font-weight: 300;">Order by: ${order?.createdBy}</h4>
         </div>
     </div>
     `;

@@ -60,7 +60,9 @@ export default function EditDeliveryDate({
       const submittedData: any = { deliveryDate: updatedDate, createdAt };
 
       if (scheduleOrderList) {
-        submittedData.scheduleOrderList = scheduleOrderList;
+        submittedData.scheduleOrderIds = scheduleOrderList.map((order) => {
+          return order.id;
+        });
       }
 
       const response = await axios.post(API_URL.ORDER, submittedData);
