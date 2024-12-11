@@ -63,6 +63,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: Number(inventoryItemId),
         },
         include: {
+          fifo: {
+            include: {
+              vendorItem: {
+                include: {
+                  vendor: true,
+                }
+              }
+            }
+          },
           vendorItem: {
             include: {
               vendor: true,
@@ -99,6 +108,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const inventory: any = await prisma.inventoryItem.findMany({
       include: {
+        fifo: {
+          include: {
+            vendorItem: {
+              include: {
+                vendor: true
+              }
+            }
+          }
+        },
         vendorItem: {
           include: {
             vendor: true,

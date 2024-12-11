@@ -15,6 +15,7 @@ import EditInventory from '../Modals/edit/EditInventory';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import BatchQuantityModal from '../Inventory/BatchQuantityModal';
 
 interface IProps {
   inventoryItems: IInventoryItem[];
@@ -62,6 +63,7 @@ export default function InventoryTable({
               unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
             }
 
+            console.log(item, 'item');
             return (
               <TableRow key={index}>
                 <TableCell>
@@ -83,9 +85,12 @@ export default function InventoryTable({
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Typography>
-                    {item?.quantity} {unit?.unit}
-                  </Typography>
+                  <Box display="flex" gap={1} alignItems="center">
+                    <Typography>
+                      {item?.quantity} {unit?.unit}
+                    </Typography>
+                    <BatchQuantityModal fifoList={item?.fifo || []} />
+                  </Box>
                 </TableCell>
                 <TableCell>
                   <Typography>${item?.totalValue?.toFixed(2)}</Typography>

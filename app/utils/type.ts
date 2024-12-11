@@ -181,7 +181,7 @@ export interface IInventoryItem extends InventoryItem {
   vendor: IVendor;
   quantity: number;
   vendorItem: IVendorItem[];
-  fifo: Fifo[];
+  fifo: IFifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
 }
@@ -191,11 +191,16 @@ export interface IVendorItem extends VendorItem {
   vendor?: IVendor;
   quantity: number;
   unit?: any;
-  fifo?: Fifo[];
+  fifo?: IFifo[];
 }
 
 export interface IInventoryUnit extends InventoryUnit {
   isSelected?: boolean;
   vendorItem: IVendorItem;
   inventoryItem: IInventoryItem;
+}
+
+export interface IFifo extends Fifo {
+  inventoryItem: IInventoryItem;
+  vendorItem: IVendorItem;
 }
