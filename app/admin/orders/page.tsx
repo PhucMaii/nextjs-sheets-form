@@ -22,7 +22,7 @@ import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { AllPrint } from '../components/Printing/AllPrint';
-import { IRoutes, OrderedItems, UserType } from '@/app/utils/type';
+import { IItem, IRoutes, OrderedItems, UserType } from '@/app/utils/type';
 import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
@@ -68,7 +68,7 @@ interface Category {
   name: string;
 }
 
-export interface Item {
+export interface Item extends IItem {
   id: number;
   name: string;
   price: number;

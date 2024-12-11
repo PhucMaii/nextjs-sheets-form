@@ -77,6 +77,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         name: updatedItem.name,
         price: updatedItem.price,
         categoryId: updatedItem.categoryId,
+        isShowDiscount: updatedItem?.isShowDiscount,
+        prevPrice: updatedItem?.prevPrice,
         availability: updatedItem.availability,
         inventoryUnitId: updatedItem.inventoryUnitId,
         // system do not allow user to update inventory item id in selling item

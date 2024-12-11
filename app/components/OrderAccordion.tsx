@@ -174,11 +174,25 @@ export default function OrderAccordion({
                 </TableHead>
                 <TableBody>
                   {order.items.length > 0 &&
-                    order.items.map((row, index) => (
+                    order.items.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{row.name}</TableCell>
-                        <TableCell>{row.quantity}</TableCell>
-                        <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
+                        <TableCell>{item.name}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>
+                          <Box display="flex" flexDirection="row" gap={1}>
+                            {
+                              item?.prevPrice && (
+                                <Typography
+                                  sx={{ textDecoration: 'line-through' }}
+                                  color="error"
+                                >
+                                  ${(item.prevPrice * item.quantity).toFixed(2)}
+                                </Typography>
+                              )
+                            }
+                            <Typography>${item.totalPrice.toFixed(2)}</Typography>
+                          </Box>
+                        </TableCell>
                       </TableRow>
                     ))}
                 </TableBody>

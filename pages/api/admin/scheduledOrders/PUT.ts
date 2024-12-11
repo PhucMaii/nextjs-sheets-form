@@ -100,6 +100,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             name: item.name,
             quantity: item.quantity,
             price: item.price,
+            isShowDiscount: item?.isShowDiscount,
+            prevPrice: item?.prevPrice,
             inventoryItemId: item.inventoryItemId,
             inventoryUnitId: item.inventoryUnitId,
           },

@@ -261,6 +261,7 @@ export const createOrder = async (
       }
 
       console.log({ targetedItem, item }, 'targetedItem');
+      // Check if vendor item has no batch
       if (targetedItem.fifo.length === 0) {
         const newFifo = await prisma.fifo.create({
           data: {
@@ -275,6 +276,7 @@ export const createOrder = async (
           },
         });
 
+        // Update vendor item quantity
         await prisma.vendorItem.update({
           where: {
             id: targetedItem.vendorItem[0].id,
@@ -377,6 +379,8 @@ export const createOrder = async (
           name: item.name,
           price: item.price,
           quantity: item.quantity,
+          isShowDiscount: item?.isShowDiscount,
+          prevPrice: item?.prevPrice,
           inventoryUnitId: item.inventoryUnitId,
           inventoryItemId: item.inventoryItemId,
         });

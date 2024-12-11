@@ -73,6 +73,8 @@ export default async function reArrangement(
           name: item.name,
           price: item.price,
           quantity: item.quantity,
+          isShowDiscount: item?.isShowDiscount,
+          prevPrice: item?.prevPrice,
           scheduledOrderId: scheduledOrder.newId,
           inventoryItemId: item.inventoryItemId,
           inventoryUnitId: item.inventoryUnitId,

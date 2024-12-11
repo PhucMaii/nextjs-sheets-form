@@ -42,6 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         name: item.name,
         price: item.price,
         availability: item.availability,
+        prevPrice: item?.prevPrice,
+        isShowDiscount: item?.isShowDiscount,
         categoryId: item.categoryId,
         inventoryItemId: item?.inventoryItemId,
         inventoryUnitId: item?.inventoryUnitId,

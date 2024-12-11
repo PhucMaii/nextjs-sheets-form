@@ -118,6 +118,8 @@ export interface OrderedItems {
   price: number;
   quantity: number;
   totalPrice: number;
+  isShowDiscount?: boolean;
+  prevPrice?: number;
   orderId?: number;
   inventoryItemId?: number;
   inventoryItem?: any;

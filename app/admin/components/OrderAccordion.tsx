@@ -97,8 +97,6 @@ const OrderAccordion = ({
     calculateTotalQuantity();
   }, [order]);
 
-  console.log(order, 'order');
-
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
     setIsClientModalOpen(true);

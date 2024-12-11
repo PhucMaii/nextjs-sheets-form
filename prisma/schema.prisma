@@ -86,7 +86,7 @@ model OrderedItems {
   expenseId        Int?
   quantity         Int
   isShowDiscount   Boolean?
-  prevPrice        Boolean?
+  prevPrice        Float?
   inventoryUnitId  Int?
   inventoryItemId  Int?
 
