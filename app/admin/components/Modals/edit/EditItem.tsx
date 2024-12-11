@@ -8,6 +8,7 @@ import {
   Modal,
   Radio,
   RadioGroup,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -17,6 +18,7 @@ import { BoxModal } from '../styled';
 import { IItem } from '@/app/utils/type';
 import UnitRadio from '../../Radio/UnitRadio';
 import { getUniqueUnitRatios } from '@/app/utils/array';
+import ErrorComponent from '../../ErrorComponent';
 
 interface IProps {
   targetItem: IItem;
@@ -41,16 +43,6 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
     UPDATE_OPTION.CURRENT_CATEGORY,
   );
 
-  // const [inventoryItem] = SWRFetchData(`${API_URL.ADMIN}/inventory/?inventoryItemId=${targetItem.inventoryItemId}`);
-
-  // const {
-  //   units,
-  //   selectedUnit,
-  //   UnitDisplay,
-  //   AddUnitModal,
-  //   EditUnitModal,
-  // } = useEditUnit(updatedItem.units, updatedItem.unit, showNotification, true);
-
   useEffect(() => {
     if (Object.keys(targetItem).length > 0) {
       const inventoryItemUnits = targetItem.inventoryItem.vendorItem.flatMap(
@@ -61,14 +53,6 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
       setUpdatedItem({ ...targetItem, units: sellingUnits });
     }
   }, [targetItem]);
-
-  // useEffect(() => {
-  //   setUpdatedItem((prevState: any) => ({ ...prevState, inventoryUnit: selectedUnit }));
-  // }, [selectedUnit]);
-
-  // useEffect(() => {
-  //   setUpdatedItem((prevState: any) => ({ ...prevState, units }));
-  // }, [units]);
 
   const updateItem = async () => {
     const newUpdatedItem = {
@@ -141,7 +125,90 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
               label="Same inventory item"
             />
           </RadioGroup>
-          <Divider />
+          <Divider sx={{ my: 2 }}>Price ($)</Divider>
+          <Grid container rowGap={2} alignItems="center">
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" gap={2}>
+                {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                  <>
+                    <Checkbox
+                      value={updatedField.some((field) => field === 'price')}
+                      onChange={() => addToUpdatedField('price')}
+                    />
+                  </>
+                )}
+                <Typography variant="h6">Price:</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Price"
+                type="number"
+                value={updatedItem.price}
+                onChange={(e) =>
+                  setUpdatedItem({ ...updatedItem, price: +e.target.value })
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                justifyContent="space-between"
+              >
+                <Box display="flex" alignItems="center" gap={1}>
+                  {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                    <>
+                      <Checkbox
+                        value={updatedField.some(
+                          (field) => field === 'isShowDiscount',
+                        )}
+                        onChange={() => addToUpdatedField('isShowDiscount')}
+                      />
+                    </>
+                  )}
+                  <Typography variant="h6">Discount</Typography>
+                </Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={updatedItem.isShowDiscount}
+                      onChange={(e) =>
+                        setUpdatedItem({
+                          ...updatedItem,
+                          isShowDiscount: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Show Discount"
+                  labelPlacement="start"
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              {updatedItem?.isShowDiscount ? (
+                <TextField
+                  fullWidth
+                  label="Previous Price"
+                  type="number"
+                  value={updatedItem?.prevPrice || 0}
+                  onChange={(e) =>
+                    setUpdatedItem({
+                      ...updatedItem,
+                      prevPrice: +e.target.value,
+                    })
+                  }
+                />
+              ) : (
+                <ErrorComponent errorText="No Discount Display" />
+              )}
+            </Grid>
+          </Grid>
+
+          <Divider sx={{ my: 2 }}>Other Details</Divider>
           <Grid container rowGap={2} alignItems="center">
             <Grid item xs={12} md={6}>
               <Box display="flex" gap={2} alignItems="center">
@@ -167,34 +234,22 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
                 }
               />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Box display="flex" alignItems="center" gap={2}>
-                {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
-                  <>
-                    <Checkbox
-                      value={updatedField.some((field) => field === 'price')}
-                      onChange={() => addToUpdatedField('price')}
-                    />
-                  </>
-                )}
-                <Typography variant="h6">Price:</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Price"
-                type="number"
-                value={updatedItem.price}
-                onChange={(e) =>
-                  setUpdatedItem({ ...updatedItem, price: +e.target.value })
-                }
-              />
-            </Grid>
             {updatedItem?.units?.length > 0 && (
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={2}>
-                  <Typography variant="h6">Units:</Typography>
+                  <Box display="flex" gap={2} alignItems="center">
+                    {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                      <>
+                        <Checkbox
+                          value={updatedField.some(
+                            (field) => field === 'inventoryUnitId',
+                          )}
+                          onChange={() => addToUpdatedField('inventoryUnitId')}
+                        />
+                      </>
+                    )}
+                    <Typography variant="h6">Units:</Typography>
+                  </Box>
                   <UnitRadio
                     units={updatedItem.units}
                     value={JSON.stringify(updatedItem.inventoryUnit)}

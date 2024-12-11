@@ -211,14 +211,13 @@ async function main() {
   const itemTrash = await prisma.orderedItems.findMany({
     where: {
       fifoId: {
-        not: null
+        not: null,
       },
-      fifo: null
+      fifo: null,
     },
-    
   });
 
-  console.log(itemTrash)
+  console.log(itemTrash);
 }
 
 main()

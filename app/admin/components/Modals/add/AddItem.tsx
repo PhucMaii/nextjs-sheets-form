@@ -17,7 +17,10 @@ import { IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import useEditUnit from '@/hooks/unit/useEditUnit';
-import { checkBoxOutlinedIcon, checkedBoxOutlinedIcon } from '../../Autocomplete/VendorSearch';
+import {
+  checkBoxOutlinedIcon,
+  checkedBoxOutlinedIcon,
+} from '../../Autocomplete/VendorSearch';
 
 interface IProps extends ModalProps {
   categoryId: number;
@@ -57,7 +60,7 @@ export default function AddItem({
 
       const currentCategory = categories?.data?.find(
         (cat: any) => cat.id === categoryId,
-      )
+      );
       setSelectedCategories(currentCategory ? [currentCategory] : []);
     }
   }, [categoryId]);
@@ -74,7 +77,7 @@ export default function AddItem({
     if (categories) {
       const currentCategory = categories.data.find(
         (cat: any) => cat.id === categoryId,
-      )
+      );
       setSelectedCategories(currentCategory ? [currentCategory] : []);
     }
   }, [categories]);
@@ -104,45 +107,51 @@ export default function AddItem({
             onClose={onClose}
           />
           <Divider sx={{ my: 2 }}>Categories</Divider>
-          
-          <Box display="flex" flexDirection={"column"} gap={1}>
+
+          <Box display="flex" flexDirection={'column'} gap={1}>
             <Typography variant="h6">New Item Categories:</Typography>
-          <Autocomplete
-      multiple
-      value={selectedCategories}
-      onChange={(e: any, newValue: any) => setSelectedCategories(newValue)}
-      id="tags-standard"
-      disableCloseOnSelect
-      options={categories?.data || []}
-      getOptionLabel={(option) => option.name}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          variant='outlined'
-          label="Categories"
-          placeholder="Select Categories..."
-        />
-      )}
-      isOptionEqualToValue={(option, value) => option.id === value.id}
-      renderOption={(props, option, { selected }) => {
-        const { key, ...optionProps } = props;
-        return (
-          <li key={key} {...optionProps} aria-disabled={option.id === categoryId}>
-            <Checkbox
-              icon={checkBoxOutlinedIcon}
-              checkedIcon={checkedBoxOutlinedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
-              disabled={option.id === categoryId}
+            <Autocomplete
+              multiple
+              value={selectedCategories}
+              onChange={(e: any, newValue: any) =>
+                setSelectedCategories(newValue)
+              }
+              id="tags-standard"
+              disableCloseOnSelect
+              options={categories?.data || []}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label="Categories"
+                  placeholder="Select Categories..."
+                />
+              )}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderOption={(props, option, { selected }) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <li
+                    key={key}
+                    {...optionProps}
+                    aria-disabled={option.id === categoryId}
+                  >
+                    <Checkbox
+                      icon={checkBoxOutlinedIcon}
+                      checkedIcon={checkedBoxOutlinedIcon}
+                      style={{ marginRight: 8 }}
+                      checked={selected}
+                      disabled={option.id === categoryId}
+                    />
+                    {option.name}
+                  </li>
+                );
+              }}
             />
-            {option.name}
-          </li>
-        );
-      }}
-    />
           </Box>
 
-      <Divider sx={{my: 2}}>Item</Divider>
+          <Divider sx={{ my: 2 }}>Item</Divider>
           <Grid
             container
             overflow="auto"

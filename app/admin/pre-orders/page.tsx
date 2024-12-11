@@ -450,9 +450,7 @@ export default function ScheduledOrderPage() {
         },
       );
 
-      const updatedIdList = newListWithId.map(
-        (order: any) => order.id,
-      );
+      const updatedIdList = newListWithId.map((order: any) => order.id);
 
       const response = await axios.put(API_URL.SCHEDULED_ORDER, {
         removedOrderIdList: updatedIdList,

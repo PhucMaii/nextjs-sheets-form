@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface BodyTypes {
   removedOrderIdList: number[];
-  updatedOrderList: {id: number, newId: number}[];
+  updatedOrderList: { id: number; newId: number }[];
 }
 
 export default async function reArrangement(
@@ -53,7 +53,7 @@ export default async function reArrangement(
 
       if (!targetOrder) {
         console.error('Target order not found');
-        continue; 
+        continue;
       }
 
       const updatedScheduleOrder = await prisma.scheduleOrders.create({

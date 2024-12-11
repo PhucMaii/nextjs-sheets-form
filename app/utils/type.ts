@@ -108,6 +108,8 @@ export interface IItem {
   inventoryUnitId?: number;
   inventoryUnit?: any;
   units?: any;
+  prevPrice?: number;
+  isShowDiscount?: boolean;
 }
 
 export interface OrderedItems {

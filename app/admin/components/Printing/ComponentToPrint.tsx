@@ -26,7 +26,7 @@ const generateTaxNote = (item: Item) => {
     return '(G)';
   }
   return '';
-}
+};
 
 export const ComponentToPrint = forwardRef(
   ({ order }: { order: Order | null }, ref: any) => {
@@ -45,7 +45,9 @@ export const ComponentToPrint = forwardRef(
             <TableCell>
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography>{generateTaxNote(item)}</Typography>
-                <Typography sx={{ fontSize: 18, fontWeight: 'bold' }}>{item.name}</Typography>
+                <Typography sx={{ fontSize: 18, fontWeight: 'bold' }}>
+                  {item.name}
+                </Typography>
               </Box>
             </TableCell>
             <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
@@ -238,20 +240,21 @@ export const ComponentToPrint = forwardRef(
               <Typography>P: PST (7%)</Typography>
             </Grid>
             <Grid item xs={6} textAlign="right">
-              <Typography textAlign="right">Order by: {order.createdBy}</Typography>
+              <Typography textAlign="right">
+                Order by: {order.createdBy}
+              </Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography>G: GST (5%)</Typography>
             </Grid>
             <Grid item xs={6} textAlign="right">
-            {order?.updatedBy && (
-            <Typography textAlign="right">
-              Updated by: {order.updatedBy}
-            </Typography>
-          )}
+              {order?.updatedBy && (
+                <Typography textAlign="right">
+                  Updated by: {order.updatedBy}
+                </Typography>
+              )}
             </Grid>
           </Grid>
-          
         </Box>
       </div>
     );

@@ -111,20 +111,25 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return item.id;
     });
 
-    console.log({oldItemIds, updatedItems});
+    console.log({ oldItemIds, updatedItems });
 
     // Check is there any changes in ordered items
     let isOrderedItemsChange = false;
 
     for (const item of existingExpense.orderedItems) {
-      const updatedItem = updatedItems.find((newItem: any) => newItem.name === item.name);
+      const updatedItem = updatedItems.find(
+        (newItem: any) => newItem.name === item.name,
+      );
 
       if (!updatedItem) {
         isOrderedItemsChange = true;
         break;
       }
 
-      if (updatedItem.quantity !== item.quantity || updatedItem.unitPrice !== item.price) {
+      if (
+        updatedItem.quantity !== item.quantity ||
+        updatedItem.unitPrice !== item.price
+      ) {
         isOrderedItemsChange = true;
         break;
       }
@@ -140,7 +145,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      const allFifos = await prisma.fifo.findMany({});      
+      const allFifos = await prisma.fifo.findMany({});
       const newAddedItems = [];
       // Update inventory units
       for (const item of updatedItems) {
@@ -151,7 +156,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (!vendorItem) {
           continue;
         }
-        
+
         await checkAndUpdateUnits(
           vendorItem.unit,
           item?.units || [],
@@ -159,9 +164,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           updatedAt,
           createdBy,
         );
-        
+
         // Check if item already existed in bill
-        const existedItem = existingExpense.orderedItems.find((oldItem: OrderedItems) => oldItem.name === item.name);
+        const existedItem = existingExpense.orderedItems.find(
+          (oldItem: OrderedItems) => oldItem.name === item.name,
+        );
         if (!existedItem) {
           newAddedItems.push(item);
           continue;
@@ -169,74 +176,84 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // If quantity is different
         if (existedItem.quantity !== item.quantity) {
-          const existedFifo = allFifos.find((fifo: any) => fifo.id === existedItem?.fifoId);
+          const existedFifo = allFifos.find(
+            (fifo: any) => fifo.id === existedItem?.fifoId,
+          );
 
           if (!existedFifo) {
             continue;
           }
-          
-          console.log({existedFifo, existedItem, item});
-          const newFifoQuantity = existedFifo.quantity - existedItem.quantity + item.quantity;
+
+          console.log({ existedFifo, existedItem, item });
+          const newFifoQuantity =
+            existedFifo.quantity - existedItem.quantity + item.quantity;
 
           await prisma.orderedItems.update({
             where: {
-              id: existedItem.id
+              id: existedItem.id,
             },
             data: {
-              quantity: item.quantity
-            }
-          })
+              quantity: item.quantity,
+            },
+          });
 
           await prisma.fifo.update({
             where: {
-              id: (existedItem?.fifoId || 72)
+              id: existedItem?.fifoId || 72,
             },
             data: {
-              quantity: newFifoQuantity
-            }
+              quantity: newFifoQuantity,
+            },
           });
 
           await prisma.vendorItem.update({
             where: {
-              id: item.vendorItemId
+              id: item.vendorItemId,
             },
             data: {
-              quantity: vendorItem.quantity - existedFifo.quantity + newFifoQuantity
-            }
-          })
+              quantity:
+                vendorItem.quantity - existedFifo.quantity + newFifoQuantity,
+            },
+          });
         }
 
         // If price is different - only change in ordered items because checkAndUpdateUnits already update the unit price
         if (existedItem.price !== item.unitPrice) {
           await prisma.orderedItems.update({
             where: {
-              id: existedItem.id
+              id: existedItem.id,
             },
             data: {
-              price: item.unitPrice
-            }
-          })
+              price: item.unitPrice,
+            },
+          });
         }
       }
 
       // Create new ordered items if there is any
       if (newAddedItems.length > 0) {
-        const vendorItemList = newAddedItems.map((newItem: any) => newItem.vendorItem);
+        const vendorItemList = newAddedItems.map(
+          (newItem: any) => newItem.vendorItem,
+        );
 
         await createFifo(vendorItemList, updatedAt, createdBy);
-        
+
         const newFifos = await prisma.fifo.findMany({
           where: {
             createdAt: updatedAt,
-            createdBy
-          }
+            createdBy,
+          },
         });
 
         const newOrderedItems = newAddedItems.map((newItem: any) => {
-          const selectedFifo = newFifos.find((fifo: Fifo) => fifo.vendorItemId === newItem.vendorItemId);
+          const selectedFifo = newFifos.find(
+            (fifo: Fifo) => fifo.vendorItemId === newItem.vendorItemId,
+          );
 
           if (!selectedFifo) {
-            console.error('Conflict could not find fifo match with new added items');
+            console.error(
+              'Conflict could not find fifo match with new added items',
+            );
             return {
               expenseId: existingExpense.id,
               name: newItem.name,
@@ -255,35 +272,43 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             fifoId: selectedFifo.id,
             inventoryUnitId: newItem.unit.id,
             inventoryItemId: newItem.inventoryItemId,
-          }
+          };
         });
 
         await prisma.orderedItems.createMany({
-          data: newOrderedItems
-        })
+          data: newOrderedItems,
+        });
       }
 
       // Check if there are any removed items
       const updatedItemNames = updatedItems.map((newItem: any) => newItem.name);
-      const removedItems = existingExpense.orderedItems.filter((oldItem: OrderedItems) => {
-        return !updatedItemNames.includes(oldItem.name);
-      });
+      const removedItems = existingExpense.orderedItems.filter(
+        (oldItem: OrderedItems) => {
+          return !updatedItemNames.includes(oldItem.name);
+        },
+      );
 
       if (removedItems.length > 0) {
-        const removedItemIds = removedItems.map((item: OrderedItems) => item.id);
+        const removedItemIds = removedItems.map(
+          (item: OrderedItems) => item.id,
+        );
         // removed items
         await prisma.orderedItems.deleteMany({
           where: {
             id: {
-              in: removedItemIds
-            }
-          }
+              in: removedItemIds,
+            },
+          },
         });
 
         // Restock quantity
         for (const removedItem of removedItems) {
           if (removedItem.fifo && removedItem.inventoryUnit) {
-            await subtractInventoryItem(removedItem.fifo, removedItem.inventoryUnit, removedItem.quantity)
+            await subtractInventoryItem(
+              removedItem.fifo,
+              removedItem.inventoryUnit,
+              removedItem.quantity,
+            );
           }
         }
       }

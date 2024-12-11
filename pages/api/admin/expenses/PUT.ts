@@ -16,7 +16,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, description, date, paymentMethodId, amount, PST, GST, subTotal }: IBody = req.body;
+    const {
+      id,
+      description,
+      date,
+      paymentMethodId,
+      amount,
+      PST,
+      GST,
+      subTotal,
+    }: IBody = req.body;
 
     const existingExpense = await prisma.expense.findUnique({
       where: {
@@ -40,7 +49,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         subTotal,
         PST,
         GST,
-
       },
     });
 

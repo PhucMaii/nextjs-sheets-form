@@ -30,8 +30,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log('Content-Length Header:', contentLength);
     const requestBodySize = Buffer.byteLength(JSON.stringify(req.body));
     console.log('Request Body Size:', requestBodySize, 'bytes');
-    const { deliveryDate, scheduleOrderIds, createdAt } =
-      req.body as BodyTypes;
+    const { deliveryDate, scheduleOrderIds, createdAt } = req.body as BodyTypes;
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];
@@ -338,8 +337,8 @@ export const createOrder = async (
         // Update Vendor Item Quantity
         const targetVendorItem = await prisma.vendorItem.findFirst({
           where: {
-            id: sortedFifo[fifoIndex].vendorItemId
-          }
+            id: sortedFifo[fifoIndex].vendorItemId,
+          },
         });
 
         if (!targetVendorItem) {

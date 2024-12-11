@@ -113,7 +113,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
   console.log(purchasedItems, 'purchased items');
 
-
   useEffect(() => {
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
@@ -641,7 +640,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                   </FormControl>
                 </Grid>
               )}
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -727,77 +726,77 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
                 );
               })}
 
-<Divider sx={{ my: 2 }}>Bill</Divider>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Subtotal</Typography>
-              <TextField
-                placeholder="Enter epxense subtotal..."
-                fullWidth
-                type="number"
-                value={updatedExpense?.subTotal || 0}
-                onChange={(e) =>
-                  setUpdatedExpense((prevState: any) => ({
-                    ...prevState,
-                    subTotal: +e.target.value,
-                  }))
-                }
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">PST (7%)</Typography>
-              <TextField
-                placeholder="Enter epxense PST..."
-                fullWidth
-                type="number"
-                value={updatedExpense?.PST || 0}
-                onChange={(e) =>
-                  setUpdatedExpense((prevState: any) => ({
-                    ...prevState,
-                    PST: +e.target.value,
-                  }))
-                }
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">GST (5%)</Typography>
-              <TextField
-                placeholder="Enter epxense GST..."
-                fullWidth
-                type="number"
-                value={updatedExpense?.GST || 0}
-                onChange={(e) =>
-                  setUpdatedExpense((prevState: any) => ({
-                    ...prevState,
-                    GST: +e.target.value,
-                  }))
-                }
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Amount</Typography>
-              <TextField
-                placeholder="Enter epxense amount..."
-                fullWidth
-                type="number"
-                value={updatedExpense?.amount || 0}
-                onChange={(e) =>
-                  setUpdatedExpense((prevState: any) => ({
-                    ...prevState,
-                    amount: +e.target.value,
-                  }))
-                }
-              />
-            </Box>
-          </Grid>
-        </Grid>
+            <Divider sx={{ my: 2 }}>Bill</Divider>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="h6">Subtotal</Typography>
+                  <TextField
+                    placeholder="Enter epxense subtotal..."
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.subTotal || 0}
+                    onChange={(e) =>
+                      setUpdatedExpense((prevState: any) => ({
+                        ...prevState,
+                        subTotal: +e.target.value,
+                      }))
+                    }
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="h6">PST (7%)</Typography>
+                  <TextField
+                    placeholder="Enter epxense PST..."
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.PST || 0}
+                    onChange={(e) =>
+                      setUpdatedExpense((prevState: any) => ({
+                        ...prevState,
+                        PST: +e.target.value,
+                      }))
+                    }
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="h6">GST (5%)</Typography>
+                  <TextField
+                    placeholder="Enter epxense GST..."
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.GST || 0}
+                    onChange={(e) =>
+                      setUpdatedExpense((prevState: any) => ({
+                        ...prevState,
+                        GST: +e.target.value,
+                      }))
+                    }
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="h6">Amount</Typography>
+                  <TextField
+                    placeholder="Enter epxense amount..."
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.amount || 0}
+                    onChange={(e) =>
+                      setUpdatedExpense((prevState: any) => ({
+                        ...prevState,
+                        amount: +e.target.value,
+                      }))
+                    }
+                  />
+                </Box>
+              </Grid>
+            </Grid>
 
             <Divider sx={{ my: 2 }}>Expense Information</Divider>
 

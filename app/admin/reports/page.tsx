@@ -366,10 +366,12 @@ export default function ReportPage() {
     }
   };
 
-  const handleSendInvoice = async (email: string = (clientValue?.email || '')) => {
+  const handleSendInvoice = async (
+    email: string = clientValue?.email || '',
+  ) => {
     try {
       const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
-        client: {...clientValue, email},
+        client: { ...clientValue, email },
         orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
         endDate: dateRange[1],
       });
@@ -561,7 +563,14 @@ export default function ReportPage() {
 
   return (
     <Sidebar>
-      <EditEmail open={isOpenEditEmail} onClose={() => setIsOpenEditEmail(false)} sendInvoice={handleSendInvoice} email={clientValue?.email || ''} showNotification={showNotification} userId={clientValue?.id || -1} />
+      <EditEmail
+        open={isOpenEditEmail}
+        onClose={() => setIsOpenEditEmail(false)}
+        sendInvoice={handleSendInvoice}
+        email={clientValue?.email || ''}
+        showNotification={showNotification}
+        userId={clientValue?.id || -1}
+      />
       <LoadingModal open={isLoading} />
       {NotificationComp}
       <RouteStatement
