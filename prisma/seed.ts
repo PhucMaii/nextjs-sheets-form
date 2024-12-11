@@ -207,6 +207,18 @@ async function main() {
   //     // });
   //   }
   // }
+
+  const itemTrash = await prisma.orderedItems.findMany({
+    where: {
+      fifoId: {
+        not: null
+      },
+      fifo: null
+    },
+    
+  });
+
+  console.log(itemTrash)
 }
 
 main()

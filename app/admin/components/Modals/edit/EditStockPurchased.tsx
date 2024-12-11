@@ -160,6 +160,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
           units: vendorItem?.unit,
           vendorId: item.vendorId,
           vendorItemId: vendorItem?.id,
+          vendorItem,
           inventoryItemId: item.inventoryItemId,
           inventoryItem: vendorItem?.inventoryItem,
         };
@@ -674,7 +675,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
             {purchasedItems.length > 0 &&
               purchasedItems.map((item: any, index) => {
-                const disabledItem = item?.fifo?.orderedItems?.length > 0;
+                const disabledItem = item?.fifo?.orderedItems?.length > 1;
                 return (
                   <Grid container spacing={1} key={index}>
                     <Grid item xs={12} fontWeight="bold">

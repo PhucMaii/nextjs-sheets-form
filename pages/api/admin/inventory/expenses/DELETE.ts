@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { subtractInventoryItem } from '../../orderedItems/single';
 
 export default async function DELETE(
   req: NextApiRequest,
@@ -22,6 +23,7 @@ export default async function DELETE(
         orderedItems: {
           include: {
             fifo: true,
+            inventoryUnit: true
           },
         },
       },
@@ -53,22 +55,25 @@ export default async function DELETE(
         continue;
       }
 
-      const newQuantity = vendorItem.quantity - item.fifo.quantity;
+      if (item.fifo && item.inventoryUnit) {
+        await subtractInventoryItem(item.fifo, item.inventoryUnit, item.fifo.quantity)
 
-      await prisma.vendorItem.update({
-        where: {
-          id: vendorItem.id,
-        },
-        data: {
-          quantity: newQuantity,
-        },
-      });
+      }
 
-      await prisma.fifo.delete({
-        where: {
-          id: item.fifo.id,
-        },
-      });
+      // await prisma.vendorItem.update({
+      //   where: {
+      //     id: vendorItem.id,
+      //   },
+      //   data: {
+      //     quantity: newQuantity,
+      //   },
+      // });
+
+      // await prisma.fifo.delete({
+      //   where: {
+      //     id: item?.fifoId || -1,
+      //   },
+      // });
     }
 
     await prisma.expense.delete({
