@@ -111,6 +111,9 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     }
   }, [purchasedItems]);
 
+  console.log(purchasedItems, 'purchased items');
+
+
   useEffect(() => {
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });
@@ -376,6 +379,8 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
         purchasedItems,
         stockPurchased?.orderedItems,
       );
+
+      console.log(isUpdatePurchasedItems, 'is update purchased items');
 
       // setIsLoading(false);
       // return;

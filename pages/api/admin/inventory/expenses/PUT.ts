@@ -111,6 +111,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return item.id;
     });
 
+    console.log({oldItemIds, updatedItems})
     if (oldItemIds.length > 0 && updatedItems.length > 0) {
       const user = await getUserInfo(req, res);
       const createdBy = `Admin - ${user?.clientName}`;

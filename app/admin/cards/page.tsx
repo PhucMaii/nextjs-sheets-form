@@ -38,9 +38,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
-// import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
+import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
+import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+import LoadingModal from '../components/Modals/LoadingModal';
 
 export default function CardManagement() {
+  const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [selectedViewObj, setSelectedViewObj] = useState<any>({
     type: null,
     id: -1,
@@ -58,12 +61,11 @@ export default function CardManagement() {
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
-  // const {
-  //   handleUpdateStatus,
-  //   handleBulkUpdateStatus,
-  //   UpdateExpenseStatusComp,
-  //   isUpdating,
-  // } = useUpdateExpenseStatus(showNotification, selectedExpenses);
+  const {
+    handleUpdateStatus,
+    UpdateExpenseStatusComp,
+    isUpdating,
+  } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods, mutateMethod] = SWRFetchData(
@@ -127,6 +129,16 @@ export default function CardManagement() {
     }
   }, [selectedViewObj]);
 
+  useEffect(() => {
+    fetchAdminsAndDrivers();
+  }, []);
+
+  const fetchAdminsAndDrivers = async () => {
+    const users: any = await getAdminsAndDrivers(showNotification);
+    setAdminsAndDrivers(users);
+  };
+
+
   const getPaymentMethod = () => {
     if (selectedViewObj.id === -1) {
       return null;
@@ -187,26 +199,40 @@ export default function CardManagement() {
     }
   };
 
-  const handleSelectExpense = (e: any, targetExpense: IExpense) => {
-    e.preventDefault();
-    const selectedExpense = selectedExpenses.find((expense: IExpense) => {
-      return expense.id === targetExpense.id;
-    });
+  // const handleSelectAll = () => {
+  //   if (!transactions) {
+  //     return;
+  //   }
 
-    if (selectedExpense) {
-      const newSelectedExpense = selectedExpenses.filter(
-        (expense: IExpense) => {
-          return expense.id !== targetExpense.id;
-        },
-      );
-      setSelectedExpenses(newSelectedExpense);
-    } else {
-      setSelectedExpenses([...selectedExpenses, targetExpense]);
-    }
-  };
+  //   if (selectedExpenses.length === transactions?.data.length) {
+  //     setSelectedExpenses([]);
+  //   } else {
+  //     setSelectedExpenses(transactions?.data);
+  //   }
+  // };
+
+  // const handleSelectExpense = (e: any, targetExpense: IExpense) => {
+  //   e.preventDefault();
+  //   const selectedExpense = selectedExpenses.find((expense: IExpense) => {
+  //     return expense.id === targetExpense.id;
+  //   });
+
+  //   if (selectedExpense) {
+  //     const newSelectedExpense = selectedExpenses.filter(
+  //       (expense: IExpense) => {
+  //         return expense.id !== targetExpense.id;
+  //       },
+  //     );
+  //     setSelectedExpenses(newSelectedExpense);
+  //   } else {
+  //     setSelectedExpenses([...selectedExpenses, targetExpense]);
+  //   }
+  // };
 
   return (
     <Sidebar>
+      {UpdateExpenseStatusComp}
+      <LoadingModal open={isUpdating} />
       {NotificationComp}
       <AddPaymentMethod
         open={openModal.addModal}
@@ -442,13 +468,13 @@ export default function CardManagement() {
 
                   {/* Recent Transactions */}
                   <TransactionsTable 
-                    transactions={transactions?.data || []} />             
-                    {/* // handleUpdateStatus={handleUpdateStatus}
-                    // showNotification={showNotification}
+                    transactions={transactions?.data || []}              
+                    handleUpdateStatus={handleUpdateStatus}
+                    showNotification={showNotification}
                     // selectedExpense={selectedExpenses}
                     // handleSelectExpense={handleSelectExpense}
                     // handleSelectAll={handleSelectAll}
-                    // adminsAndDrivers={adminsAndDrivers} */}
+                    adminsAndDrivers={adminsAndDrivers} />
                 </ShadowSection>
               </Grid>
               <Grid item xs={12} md={4}>
