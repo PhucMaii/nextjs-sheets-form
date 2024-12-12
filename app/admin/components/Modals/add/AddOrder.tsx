@@ -27,7 +27,7 @@ import ErrorComponent from '../../ErrorComponent';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
+import { disableChristmasAndNewYear, formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
 import moment from 'moment';
@@ -357,6 +357,7 @@ export default function AddOrder({
                         <DatePicker
                           value={dayjs(deliveryDate)}
                           onChange={handleDateChange}
+                          shouldDisableDate={disableChristmasAndNewYear}
                         />
                       </LocalizationProvider>
                     </FormControl>

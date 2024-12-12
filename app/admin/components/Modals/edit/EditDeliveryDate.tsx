@@ -17,6 +17,7 @@ import { ScheduledOrder } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import {
+  disableChristmasAndNewYear,
   formatDateChanged,
   generateCurrentTime,
   generateRecommendDate,
@@ -155,6 +156,7 @@ export default function EditDeliveryDate({
                   height: '0.1%',
                   borderRadius: 2,
                 }}
+                shouldDisableDate={disableChristmasAndNewYear}
               />
             </LocalizationProvider>
           </FormControl>

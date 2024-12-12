@@ -54,6 +54,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    // console.log(userRoute, 'userRoute');
+    /**
+     * User Route: {
+     * '56': [1, 2, 3],
+     * '57': [4, 5, 6],
+     * etc
+     * }
+     */
+    // console.log(dayRoutes, 'dayRoutes');
+
+    /**
+     * Day Routes: [
+     * {
+     * id: 56, other route info
+     * },
+     * {
+     * id: 57
+     * },
+     * etc
+     * ]
+     */
+
     const nonVoidOrders = orderList.filter(
       (order: Order) => order.status !== ORDER_STATUS.VOID,
     );
@@ -74,37 +96,83 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       })
       .filter((order: Order) => order.routeId);
 
+      // Group order by route id
     const orderByRoutes = _.orderBy(clientRoutes, ['routeId'], ['asc']);
 
-    // console.log(orderByRoutes, 'orderByRoutes');
-    // Arrange as user route
+    // Arrange as user route positions in pre order
     const sortedOrderByRoutes = [];
-    for (const route of dayRoutes) {
-      const sortedUserIds = userRoute[route.id];
-      // console.log(sortedUserIds, 'sortedUserIds');
 
-      if (!sortedUserIds) {
+    // Track order from start to end, since order has same routeId will stand together, so we can use this to sort
+    let trackOrderByRoutesIndex = 0;
+    let currentRouteId = orderByRoutes[0].routeId;
+    let currentRouteOrders: any = []; // to get sort
+
+    while (trackOrderByRoutesIndex <= orderByRoutes.length) {
+      if (!orderByRoutes[trackOrderByRoutesIndex]?.routeId) {
+        // Reach the end of the orderByRoutes - Finalize the currentRouteOrders
+        const sortedUserIds = userRoute[currentRouteId];
+        currentRouteOrders.sort((orderA: Order, orderB: Order) => {
+          return (
+            sortedUserIds.indexOf(orderA.userId) -
+            sortedUserIds.indexOf(orderB.userId)
+          );
+        });
+        sortedOrderByRoutes.push(...currentRouteOrders);
+        
+        trackOrderByRoutesIndex++;
         continue;
       }
+      // If current order route id is same as the previous order -> jump to next order
+      if (orderByRoutes[trackOrderByRoutesIndex].routeId === currentRouteId) {
+        currentRouteOrders.push(orderByRoutes[trackOrderByRoutesIndex]);
+      } else {
+        // If current order route id is different from the previous order
+        // Means we have reached the end of the current route
+        // Sort the current route orders
+        const sortedUserIds = userRoute[currentRouteId];
+        currentRouteOrders.sort((orderA: Order, orderB: Order) => {
+          return (
+            sortedUserIds.indexOf(orderA.userId) -
+            sortedUserIds.indexOf(orderB.userId)
+          );
+        });
+        sortedOrderByRoutes.push(...currentRouteOrders);
+        
+        // Initialize for new route
+        currentRouteOrders = [orderByRoutes[trackOrderByRoutesIndex]];
+        currentRouteId = orderByRoutes[trackOrderByRoutesIndex]?.routeId;
+      }
 
-      // Create a map for qyuick lookup of index positions
-      const sortedUserIdsMap: any = new Map(
-        sortedUserIds.map((id: any, index: number) => [id, index]),
-      );
-
-      const currentRouteOrders = orderByRoutes.filter(
-        (order: Order) => order.routeId === route.id,
-      );
-
-      currentRouteOrders.sort((orderA: Order, orderB: Order) => {
-        return (
-          sortedUserIdsMap.get(orderA.userId) -
-          sortedUserIdsMap.get(orderB.userId)
-        );
-      });
-
-      sortedOrderByRoutes.push(...currentRouteOrders);
+      trackOrderByRoutesIndex++;
     }
+    // for (const route of dayRoutes) {
+    //   const sortedUserIds = userRoute[route.id];
+    //   // console.log(sortedUserIds, 'sortedUserIds');
+
+    //   if (!sortedUserIds) {
+    //     continue;
+    //   }
+
+    //   // Create a map for quick lookup of index positions
+    //   const sortedUserIdsMap: any = new Map(
+    //     sortedUserIds.map((id: any, index: number) => [id, index]),
+    //   );
+
+    //   const currentRouteOrders = orderByRoutes.filter(
+    //     (order: Order) => order.routeId === route.id,
+    //   );
+
+    //   currentRouteOrders.sort((orderA: Order, orderB: Order) => {
+    //     return (
+    //       sortedUserIdsMap.get(orderA.userId) -
+    //       sortedUserIdsMap.get(orderB.userId)
+    //     );
+    //   });
+
+    //   sortedOrderByRoutes.push(...currentRouteOrders);
+    // }
+
+    // console.log(sortedOrderByRoutes, 'sortedOrderByRoutes');
 
     // Item Manifest
     const items = sortedOrderByRoutes.map((order: Order) => {
@@ -173,9 +241,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               : itemKey;
           }
 
-          if (user.clientId === '00303') {
-            console.log({ itemKey, name: item.name }, 'itemKey');
-          }
           // Beginning of new customer
           if (
             index === 0 ||

@@ -15,7 +15,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { YYYYMMDDFormat, formatDateChanged } from '@/app/utils/time';
+import { YYYYMMDDFormat, disableChristmasAndNewYear, formatDateChanged } from '@/app/utils/time';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
 import { limitOrderHour } from '../lib/constant';
@@ -261,6 +261,7 @@ export default function OrderForm() {
                   value={dayjs(deliveryDate)}
                   onChange={handleDateChange}
                   sx={{ width: '100%' }}
+                  shouldDisableDate={disableChristmasAndNewYear}
                 />
               </LocalizationProvider>
             </Box>

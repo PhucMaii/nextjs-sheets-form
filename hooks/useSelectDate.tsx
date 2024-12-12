@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FormControl } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { formatDateChanged, generateRecommendDate } from '@/app/utils/time'; // Assuming this utility exists
+import { disableChristmasAndNewYear, formatDateChanged, generateRecommendDate } from '@/app/utils/time'; // Assuming this utility exists
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
@@ -32,6 +32,7 @@ const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
           sx={{
             borderRadius: 2,
           }}
+          shouldDisableDate={disableChristmasAndNewYear}
         />
       </LocalizationProvider>
     </FormControl>

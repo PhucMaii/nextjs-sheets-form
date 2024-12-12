@@ -18,7 +18,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { Item, Order } from '../../../orders/page';
-import { formatDateChanged } from '@/app/utils/time';
+import { disableChristmasAndNewYear, formatDateChanged } from '@/app/utils/time';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
@@ -309,6 +309,7 @@ const EditReportOrder = ({
                         height: '0.1%',
                         borderRadius: 2,
                       }}
+                      shouldDisableDate={disableChristmasAndNewYear}
                     />
                   </LocalizationProvider>
                 </FormControl>

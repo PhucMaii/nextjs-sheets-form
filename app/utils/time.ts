@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { days, limitOrderHour } from '../lib/constant';
 import moment from 'moment';
 import { PAYMENT_TYPE } from './enum';
@@ -104,4 +104,13 @@ export const getCreatedAt = () => {
   const timeString = moment(currentDate).format('HH:mm:ss');
 
   return `${timeString} ${dateString}`;
+};
+
+
+export const disableChristmasAndNewYear = (date: Dayjs) => {
+  // Disable December 25th and January 1st
+  return (
+    (date.date() === 25 && date.month() === 11) || // December 25th
+    (date.date() === 1 && date.month() === 0)     // January 1st
+  );
 };

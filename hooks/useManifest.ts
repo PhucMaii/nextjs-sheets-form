@@ -13,9 +13,6 @@ const useManifest = (
   date: string,
   showNotification: (type: AlertColor, message: string) => void,
 ) => {
-  // const [debouncedSelectedRoutes, setDebouncedSelectedRoutes] = useState<
-  //   IRoutes[]
-  // >([]);
   const [manifestData, setManifestData] = useState<any>({
     orderPrint: [],
     itemManifest: {},
@@ -37,18 +34,6 @@ const useManifest = (
     `${API_URL.ROUTES}/clients?day=${givenDay}`,
   );
 
-  // useEffect(() => {
-  //   setIsLoading(true);
-  //   const timeoutId = setTimeout(() => {
-  //     setDebouncedSelectedRoutes(selectedRoutes);
-  //     setIsLoading(false);
-  //   }, 1000);
-
-  //   return () => {
-  //     clearTimeout(timeoutId);
-  //   };
-  // }, [selectedRoutes]);
-
   useEffect(() => {
     if (userRoute && orderList.length > 0) {
       handleGetManifest();
@@ -59,14 +44,9 @@ const useManifest = (
     if (manifestData && selectedRoutes.length > 0) {
       handleSelectRoute();
     }
-  }, [selectedRoutes]);
+  }, [selectedRoutes, manifestData]);
 
   const handleGetManifest = async () => {
-    // const compressedData = pako.deflate(JSON.stringify({
-    //   day: givenDay,
-    //   orderList,
-    //   userRoute: userRoute?.data,
-    // }), { to: 'string' });
 
     setIsLoading(true);
     try {
