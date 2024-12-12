@@ -1,4 +1,4 @@
-import { Box, IconButton, Modal, Typography } from '@mui/material';
+import { Box, Divider, IconButton, Modal, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { BoxModal } from '../Modals/styled';
 import { IFifo } from '@/app/utils/type';
@@ -26,7 +26,10 @@ export default function BatchQuantityModal({ fifoList}: IProps) {
           {
             fifoList.length > 0 ? fifoList.map((fifo: IFifo) => {
               return (
-                <BatchQuantity key={fifo.id} fifo={fifo} />
+                <>
+                  <BatchQuantity key={fifo.id} fifo={fifo} />
+                  <Divider flexItem sx={{my: 1}}/>
+                </>
               )
             }) : (
               <ErrorComponent errorText='No Batch Found'/>
