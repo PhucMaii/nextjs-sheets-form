@@ -1,4 +1,4 @@
-import { Box, Divider, IconButton, Modal, Typography } from '@mui/material';
+import { AlertColor, Box, Divider, IconButton, Modal, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { BoxModal } from '../Modals/styled';
 import { IFifo } from '@/app/utils/type';
@@ -6,11 +6,13 @@ import BatchQuantity from './BatchQuantity';
 import ErrorComponent from '../ErrorComponent';
 import EditIcon from '@mui/icons-material/Edit';
 
+
 interface IProps {
   fifoList: IFifo[];
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function BatchQuantityModal({ fifoList}: IProps) {
+export default function BatchQuantityModal({ fifoList, showNotification }: IProps) {
   const [open, setOpen] = useState<boolean>(false);
 
   return (
@@ -24,12 +26,13 @@ export default function BatchQuantityModal({ fifoList}: IProps) {
 
         <Box display="flex" flexDirection="column" gap={2} alignItems="center" justifyContent="center">
           {
-            fifoList.length > 0 ? fifoList.map((fifo: IFifo) => {
+            fifoList.length > 0 ? fifoList.map((fifo: IFifo, index: number) => {
               return (
                 <>
-                  <BatchQuantity key={fifo.id} fifo={fifo} />
-                  <Divider flexItem sx={{my: 1}}/>
+                  <BatchQuantity key={fifo.id} fifo={fifo} showNotification={showNotification} fifoList={fifoList} fifoIndex={index} />
+                  <Divider flexItem sx={{my: 1}}/>  
                 </>
+
               )
             }) : (
               <ErrorComponent errorText='No Batch Found'/>

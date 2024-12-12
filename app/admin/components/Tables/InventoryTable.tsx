@@ -63,7 +63,6 @@ export default function InventoryTable({
               unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
             }
 
-            console.log(item, 'item');
             return (
               <TableRow key={index}>
                 <TableCell>
@@ -89,7 +88,7 @@ export default function InventoryTable({
                     <Typography>
                       {item?.quantity} {unit?.unit}
                     </Typography>
-                    <BatchQuantityModal fifoList={item?.fifo || []} />
+                    <BatchQuantityModal fifoList={item?.fifo || []} showNotification={showNotification}/>
                   </Box>
                 </TableCell>
                 <TableCell>

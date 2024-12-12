@@ -207,4 +207,5 @@ export interface IInventoryUnit extends InventoryUnit {
 export interface IFifo extends Fifo {
   inventoryItem: IInventoryItem;
   vendorItem: IVendorItem;
+  orderedItems: OrderedItems[];
 }

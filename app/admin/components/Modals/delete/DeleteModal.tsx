@@ -1,16 +1,18 @@
 'use client';
-import { Box, Button, Modal, Typography } from '@mui/material';
+import { Box, Button, IconButton, Modal, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import ErrorIcon from '@mui/icons-material/Error';
 import { errorColor } from '@/theme/color';
 import { grey } from '@mui/material/colors';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   targetObj: any;
   handleDelete: (deletedOrder: any) => Promise<void>;
   includedButton?: boolean;
+  includedIconButton?: boolean;
   open?: boolean;
   handleCloseModal?: () => void;
 }
@@ -19,6 +21,7 @@ export default function DeleteModal({
   targetObj,
   handleDelete,
   includedButton = false,
+  includedIconButton = false,
   open,
   handleCloseModal,
 }: PropTypes) {
@@ -51,6 +54,18 @@ export default function DeleteModal({
         >
           DELETE
         </Button>
+      )}
+
+      {includedIconButton && (
+        <IconButton
+          color="error"
+          onClick={(e: any) => {
+            e.stopPropagation();
+            setIsOpen(true);
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
       )}
       <Modal
         open={open || isOpen}
