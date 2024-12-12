@@ -138,7 +138,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         await sendEmail(
           scheduleOrder.user,
-          scheduleOrder.items,
+          scheduleOrder,
           newOrder.id,
           deliveryDate,
           isSendToAdmin,
@@ -228,6 +228,7 @@ export const createOrder = async (
         subTotal: total.subTotal,
         PST: total.PST,
         GST: total.GST,
+        discount: total.discount,
         totalPrice: total.totalPrice,
         orderTime,
         createdBy,

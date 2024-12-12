@@ -207,6 +207,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           name: item.name,
           price: item.price,
           quantity: item.quantity,
+          isShowDiscount: item?.isShowDiscount,
+          prevPrice:  item?.prevPrice,
           scheduledOrderId: newScheduleOrder.id,
           inventoryItemId: item.inventoryItemId,
           inventoryUnitId: item.inventoryUnitId,

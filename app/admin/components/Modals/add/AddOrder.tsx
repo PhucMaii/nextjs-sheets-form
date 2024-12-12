@@ -32,6 +32,8 @@ import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
 import moment from 'moment';
 import ConfirmModal from '../ConfirmModal';
+import { grey } from '@mui/material/colors';
+import SellingItemName from '@/app/components/SellingItemName';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -390,10 +392,7 @@ export default function AddOrder({
                   return (
                     <Fragment key={index}>
                       <Grid item xs={6}>
-                        {item.name} -{' '}
-                        {item.availability
-                          ? `$${item.price.toFixed(2)}`
-                          : 'Out of stock'}
+                          <SellingItemName item={item} />
                       </Grid>
                       <Grid item xs={6}>
                         <TextField

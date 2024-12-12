@@ -106,6 +106,7 @@ model Orders {
   status        String
   userId        Int
   subTotal      Float?
+  discount      Float?
   PST           Float?
   GST           Float?
   totalPrice    Float

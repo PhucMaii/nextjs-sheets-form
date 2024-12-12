@@ -78,6 +78,7 @@ export interface Item extends IItem {
   inventoryItem?: any;
   unit?: any;
   totalPrice: number;
+  totalPrevPrice?: number;
 }
 
 export interface Order {
@@ -96,6 +97,7 @@ export interface Order {
   subTotal?: number;
   PST?: number;
   GST?: number;
+  discount?: number;
   totalPrice: number;
   userId: number;
   items: Item[];

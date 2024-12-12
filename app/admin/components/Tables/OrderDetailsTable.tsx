@@ -70,7 +70,7 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
                 <TableCell>
                   <Box display="flex" flexDirection="row" gap={1}>
                     {
-                      item?.prevPrice && (
+                      item?.isShowDiscount && item?.prevPrice && (item.prevPrice * item.quantity).toFixed(2) !== item.totalPrice.toFixed(2) && (
                         <Typography
                           sx={{ textDecoration: 'line-through' }}
                           color="error"

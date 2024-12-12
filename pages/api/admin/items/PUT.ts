@@ -90,7 +90,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       price: updatedItem.price,
       inventoryUnitId: updatedItem.inventoryUnitId,
       isShowDiscount: updatedItem.isShowDiscount,
-      // prevPrice: updatedItem.prevPrice,
+      prevPrice: updatedItem.prevPrice,
     };
 
     if (
@@ -119,6 +119,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
     ) {
       delete updatedData.isShowDiscount;
+      delete updatedData.prevPrice;
     }
 
     // Update PRICE / NAME all items has same inventory id

@@ -15,15 +15,16 @@ export const generateOrderTemplate = (
     ? `<h2 style="text-align: center; font-weight: 300">${flag}</h2>`
     : '';
 
+    console.log(order?.items);
   for (const item of order?.items as any[]) {
     const totalPrice = item.price * item.quantity;
     orderDetailsTemplate += `
-        <tr>
-          <td style="padding: 8px">${item?.name}</td>
-          <td style="padding: 8px; text-align: center">${item?.quantity}</td>
-          <td style="padding: 8px; text-align: center">$${item.price.toFixed(2)}</td>
-          <td style="padding: 8px; text-align: center">$${totalPrice.toFixed(2)}</td>
-        </tr>
+    <tr>
+    <td style="padding: 8px">${item?.name}</td>
+    <td style="padding: 8px; text-align: center">${item?.quantity}</td>
+    <td style="padding: 8px; text-align: center">$${item.price.toFixed(2)}</td>
+    <td style="padding: 8px; text-align: center">$${totalPrice.toFixed(2)}</td>
+    </tr>
       `;
   }
 

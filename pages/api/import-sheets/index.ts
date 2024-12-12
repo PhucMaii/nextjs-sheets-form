@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { normalizeDate } from '../utils/date';
@@ -16,6 +16,7 @@ import {
 import { createOrder } from '../admin/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
+import { formatItemsWithTotalPrice } from '../utils/order';
 
 interface RequestQuery {
   userId?: string;
@@ -131,13 +132,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           note,
         );
 
-        const itemListWithTotalPrice = newOrder?.items.map(
-          (item: OrderedItems) => {
-            const itemTotalPrice = item.price * item.quantity;
+        // const itemListWithTotalPrice = newOrder?.items.map(
+        //   (item: OrderedItems) => {
+        //     let totalPrevPrice = 0;
 
-            return { ...item, totalPrice: itemTotalPrice };
-          },
-        );
+        //     if (item?.isShowDiscount && item?.prevPrice) {
+        //       totalPrevPrice = item.prevPrice * item.quantity;
+        //     }
+        //     const itemTotalPrice = item.price * item.quantity;
+
+        //     return { ...item, totalPrice: itemTotalPrice, totalPrevPrice };
+        //   },
+        // );
+        const itemListWithTotalPrice = formatItemsWithTotalPrice(newOrder.items);
 
         await pusherServer?.trigger('admin', 'incoming-order', {
           ...newOrder,
@@ -198,11 +205,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       note,
     );
 
-    const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {
-      const itemTotalPrice = item.price * item.quantity;
+    // const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {
+    //   const itemTotalPrice = item.price * item.quantity;
 
-      return { ...item, totalPrice: itemTotalPrice };
-    });
+    //   return { ...item, totalPrice: itemTotalPrice };
+    // });
+    const itemListWithTotalPrice = formatItemsWithTotalPrice(newOrder?.items || []);
 
     await pusherServer?.trigger('admin', 'incoming-order', {
       ...newOrder,

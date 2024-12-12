@@ -211,6 +211,7 @@ export const overrideOrder = async (
     let subTotal = 0;
     let PST = 0;
     let GST = 0;
+    let discount = 0;
     const itemList: any = [];
     for (const item of newItems) {
       const existingItem = await prisma.orderedItems.findFirst({
@@ -241,7 +242,10 @@ export const overrideOrder = async (
       });
 
       // Update new total price
-      subTotal += newItem.quantity * newItem.price;
+      if (newItem.isShowDiscount && newItem.prevPrice) {
+        discount += newItem.quantity * (newItem.prevPrice - newItem.price);
+      }
+      subTotal += newItem.quantity * (newItem?.isShowDiscount && newItem?.prevPrice ? newItem.prevPrice : newItem.price);
       if (newItem.inventoryItem) {
         if (newItem?.inventoryItem?.hasPST) {
           PST += newItem.quantity * newItem.price * pstRate;
@@ -251,6 +255,7 @@ export const overrideOrder = async (
           GST += newItem.quantity * newItem.price * gstRate;
         }
       }
+
       itemList.push({
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
@@ -275,7 +280,8 @@ export const overrideOrder = async (
         subTotal: subTotal,
         PST: PST,
         GST: GST,
-        totalPrice: subTotal + PST + GST,
+        totalPrice: subTotal + PST + GST - discount,
+        discount,
         note: newNote,
         isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
         updateTime: new Date(),

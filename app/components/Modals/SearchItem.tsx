@@ -4,8 +4,8 @@ import { ModalProps } from '@/app/admin/components/Modals/type';
 import { IItem } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import { Box, Modal, TextField, Typography } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import React, { useEffect, useState } from 'react';
+import SellingItemName from '../SellingItemName';
 
 interface IProps extends ModalProps {
   items: IItem[];
@@ -69,7 +69,7 @@ export default function SearchItem({ open, onClose, items, setItems }: IProps) {
           {displayItems.length > 0 ? (
             displayItems.map((item: IItem, index: number) => (
               <Box key={index} display="flex" gap={1} flexDirection="column">
-                <Typography
+                {/* <Typography
                   key={item.id}
                   sx={{ color: item.availability ? 'black' : grey[500] }}
                 >
@@ -80,7 +80,8 @@ export default function SearchItem({ open, onClose, items, setItems }: IProps) {
                         ? ' Variable price'
                         : `$${item.price.toFixed(2)}`
                   }`}
-                </Typography>
+                </Typography> */}
+                <SellingItemName item={item} />
                 <TextField
                   fullWidth
                   variant="outlined"

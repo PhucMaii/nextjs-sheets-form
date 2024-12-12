@@ -53,9 +53,33 @@ export const ComponentToPrint = forwardRef(
             <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
               {item.quantity}
             </TableCell>
-            <TableCell sx={{ fontSize: 18 }}>${item.price}</TableCell>
             <TableCell sx={{ fontSize: 18 }}>
-              ${item.totalPrice?.toFixed(2)}
+              <Box display="flex" alignItems="center" gap={1}>
+                {item?.isShowDiscount && item?.prevPrice && (
+                  <Typography
+                    sx={{ textDecoration: 'line-through' }}
+                  >
+                    ${item.prevPrice}
+                  </Typography>
+                )}
+                <Typography>
+                  ${item.price}
+                </Typography>
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontSize: 18 }}>
+              <Box display="flex" alignItems="center" gap={1}>
+                {item?.isShowDiscount && item?.prevPrice && item?.totalPrevPrice?.toFixed(2) !== item.totalPrice.toFixed(2) && (
+                  <Typography
+                    sx={{ textDecoration: 'line-through' }}
+                  >
+                    ${item?.totalPrevPrice?.toFixed(2)}
+                  </Typography>
+                )}
+                <Typography>
+                  ${item.totalPrice?.toFixed(2)}
+                </Typography>
+              </Box>
             </TableCell>
           </TableRow>,
         );
@@ -161,6 +185,20 @@ export const ComponentToPrint = forwardRef(
                     0}
                 </Typography>
               </Grid>
+             {order?.discount && order?.discount > 0 ? 
+             <>
+             <Grid item xs={6}>
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  Discount ($):
+                </Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  -${order?.discount?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              </> : null
+              }
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   PST (7%):

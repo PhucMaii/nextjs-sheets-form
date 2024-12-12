@@ -49,6 +49,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     let subTotal = 0;
     let PST = 0;
     let GST = 0;
+    let discount = 0;
     const itemList: any = [];
     const orderDetails: any = {};
 
@@ -85,7 +86,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Update new total price
       // total += newItem.quantity * newItem.price;
-      subTotal += newItem.quantity * newItem.price;
+      if (newItem.isShowDiscount && newItem.prevPrice) {
+        discount += newItem.quantity * (newItem.prevPrice - newItem.price);
+      }
+      subTotal += newItem.quantity * (newItem?.isShowDiscount && newItem?.prevPrice ? newItem.prevPrice : newItem.price);
       if (newItem.inventoryItem) {
         if (newItem.inventoryItem.hasPST) {
           PST += newItem.quantity * newItem.price * pstRate;
@@ -127,7 +131,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         subTotal,
         PST,
         GST,
-        totalPrice: subTotal + PST + GST,
+        totalPrice: subTotal + PST + GST - discount,
+        discount,
         note: body.note,
         isReplacement: true,
         updateTime: new Date(),
