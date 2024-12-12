@@ -54,7 +54,7 @@ export const ComponentToPrint = forwardRef(
               {item.quantity}
             </TableCell>
             <TableCell sx={{ fontSize: 18 }}>
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" alignItems="center" gap={1} flexDirection="column">
                 {item?.isShowDiscount && item?.prevPrice && (
                   <Typography
                     sx={{ textDecoration: 'line-through' }}
@@ -62,13 +62,13 @@ export const ComponentToPrint = forwardRef(
                     ${item.prevPrice}
                   </Typography>
                 )}
-                <Typography>
+                <Typography fontWeight="bold">
                   ${item.price}
                 </Typography>
               </Box>
             </TableCell>
             <TableCell sx={{ fontSize: 18 }}>
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" alignItems="center" gap={1} flexDirection="column">
                 {item?.isShowDiscount && item?.prevPrice && item?.totalPrevPrice?.toFixed(2) !== item.totalPrice.toFixed(2) && (
                   <Typography
                     sx={{ textDecoration: 'line-through' }}
@@ -76,7 +76,7 @@ export const ComponentToPrint = forwardRef(
                     ${item?.totalPrevPrice?.toFixed(2)}
                   </Typography>
                 )}
-                <Typography>
+                <Typography fontWeight="bold">
                   ${item.totalPrice?.toFixed(2)}
                 </Typography>
               </Box>

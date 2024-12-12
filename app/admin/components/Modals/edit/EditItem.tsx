@@ -192,7 +192,7 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
               {updatedItem?.isShowDiscount ? (
                 <TextField
                   fullWidth
-                  label="Previous Price"
+                  label="Previous Price - Price Will Be Crossed Out"
                   type="number"
                   value={updatedItem?.prevPrice || 0}
                   onChange={(e) =>
