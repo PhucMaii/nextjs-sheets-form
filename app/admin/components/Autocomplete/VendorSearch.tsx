@@ -11,7 +11,9 @@ interface IProps {
   variant?: 'outlined' | 'filled' | 'standard';
 }
 
-export const checkBoxOutlinedIcon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+export const checkBoxOutlinedIcon = (
+  <CheckBoxOutlineBlankIcon fontSize="small" />
+);
 export const checkedBoxOutlinedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function VendorSearch({

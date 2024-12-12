@@ -62,6 +62,8 @@ model Item {
   categoryId      Int
   subCategoryId   Int?
   price           Float
+  prevPrice       Float?
+  isShowDiscount  Boolean?
   availability    Boolean
   inventoryItemId Int?
   inventoryUnitId Int?
@@ -83,6 +85,8 @@ model OrderedItems {
   fifoId           Int?
   expenseId        Int?
   quantity         Int
+  isShowDiscount   Boolean?
+  prevPrice        Float?
   inventoryUnitId  Int?
   inventoryItemId  Int?
 
@@ -102,6 +106,7 @@ model Orders {
   status        String
   userId        Int
   subTotal      Float?
+  discount      Float?
   PST           Float?
   GST           Float?
   totalPrice    Float

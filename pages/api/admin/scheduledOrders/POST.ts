@@ -7,8 +7,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { userId, items, day, routeId } = req.body;
 
-    console.log(items, ' items');
-
     const existingUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -66,6 +64,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           data: items.map((item: any) => ({
             name: item.name,
             price: item.price,
+            isShowDiscount: item?.isShowDiscount,
+            prevPrice:  item?.prevPrice,
             quantity: item.quantity,
             inventoryItemId: item.inventoryItemId,
             inventoryUnitId: item.inventoryUnitId,
@@ -207,6 +207,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           name: item.name,
           price: item.price,
           quantity: item.quantity,
+          isShowDiscount: item?.isShowDiscount,
+          prevPrice:  item?.prevPrice,
           scheduledOrderId: newScheduleOrder.id,
           inventoryItemId: item.inventoryItemId,
           inventoryUnitId: item.inventoryUnitId,

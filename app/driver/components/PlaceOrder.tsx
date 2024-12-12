@@ -9,13 +9,13 @@ import {
 } from '@mui/material';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
-import { grey } from '@mui/material/colors';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import moment from 'moment';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
+import SellingItemName from '@/app/components/SellingItemName';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -164,7 +164,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
                     flexDirection="column"
                     gap={1}
                   >
-                    <Typography
+                    {/* <Typography
                       sx={{ color: item.availability ? 'black' : grey[500] }}
                       fontWeight="bold"
                       variant="subtitle1"
@@ -176,7 +176,8 @@ export default function PlaceOrder({ showNotification }: IProps) {
                             ? ' Variable price'
                             : `$${item.price.toFixed(2)}`
                       }`}
-                    </Typography>
+                    </Typography> */}
+                    <SellingItemName item={item} />
                     <TextField
                       type="number"
                       value={item.quantity}

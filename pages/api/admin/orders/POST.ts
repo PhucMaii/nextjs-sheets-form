@@ -30,8 +30,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log('Content-Length Header:', contentLength);
     const requestBodySize = Buffer.byteLength(JSON.stringify(req.body));
     console.log('Request Body Size:', requestBodySize, 'bytes');
-    const { deliveryDate, scheduleOrderIds, createdAt } =
-      req.body as BodyTypes;
+    const { deliveryDate, scheduleOrderIds, createdAt } = req.body as BodyTypes;
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];
@@ -139,7 +138,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         await sendEmail(
           scheduleOrder.user,
-          scheduleOrder.items,
+          scheduleOrder,
           newOrder.id,
           deliveryDate,
           isSendToAdmin,
@@ -229,6 +228,7 @@ export const createOrder = async (
         subTotal: total.subTotal,
         PST: total.PST,
         GST: total.GST,
+        discount: total.discount,
         totalPrice: total.totalPrice,
         orderTime,
         createdBy,
@@ -262,6 +262,7 @@ export const createOrder = async (
       }
 
       console.log({ targetedItem, item }, 'targetedItem');
+      // Check if vendor item has no batch
       if (targetedItem.fifo.length === 0) {
         const newFifo = await prisma.fifo.create({
           data: {
@@ -276,6 +277,7 @@ export const createOrder = async (
           },
         });
 
+        // Update vendor item quantity
         await prisma.vendorItem.update({
           where: {
             id: targetedItem.vendorItem[0].id,
@@ -338,8 +340,8 @@ export const createOrder = async (
         // Update Vendor Item Quantity
         const targetVendorItem = await prisma.vendorItem.findFirst({
           where: {
-            id: sortedFifo[fifoIndex].vendorItemId
-          }
+            id: sortedFifo[fifoIndex].vendorItemId,
+          },
         });
 
         if (!targetVendorItem) {
@@ -378,6 +380,8 @@ export const createOrder = async (
           name: item.name,
           price: item.price,
           quantity: item.quantity,
+          isShowDiscount: item?.isShowDiscount,
+          prevPrice: item?.prevPrice,
           inventoryUnitId: item.inventoryUnitId,
           inventoryItemId: item.inventoryItemId,
         });

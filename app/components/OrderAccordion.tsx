@@ -26,6 +26,7 @@ import { errorColor } from '../../theme/color';
 import EditOrder from './Modals/EditOrder';
 import DeleteModal from './Modals/DeleteModal';
 import SellIcon from '@mui/icons-material/Sell';
+import { useDiscount } from '@/hooks/useDiscount';
 
 interface PropTypes {
   handleDeleteOrder?: (orderId: number) => void;
@@ -47,6 +48,7 @@ export default function OrderAccordion({
   const totalQuantity = order.items?.reduce((acc: number, cV: Item) => {
     return acc + cV.quantity;
   }, 0);
+  const { discountPrice, DiscountText } = useDiscount(order.items);
 
   const statusText = {
     text: order.status,
@@ -147,9 +149,15 @@ export default function OrderAccordion({
                     {totalQuantity}
                   </Typography>
                 </Box>
-                <Button variant="outlined">
+                <Box display="flex" alignItems="center" gap={1}>
+                  {discountPrice > 0 && discountPrice !== order.totalPrice && DiscountText}
+                  <Button variant="outlined">
+                    ${order.totalPrice.toFixed(2)}
+                  </Button>
+                </Box>
+                {/* <Button variant="outlined">
                   ${order.totalPrice.toFixed(2)}
-                </Button>
+                </Button> */}
                 {/* <Box display="flex" gap={1} alignItems="center">
                     <LocalShippingIcon color="primary" />
                     <Typography color="primary" variant="subtitle1">{order.deliveryDate}</Typography>
@@ -174,11 +182,25 @@ export default function OrderAccordion({
                 </TableHead>
                 <TableBody>
                   {order.items.length > 0 &&
-                    order.items.map((row, index) => (
+                    order.items.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{row.name}</TableCell>
-                        <TableCell>{row.quantity}</TableCell>
-                        <TableCell>${row.totalPrice.toFixed(2)}</TableCell>
+                        <TableCell>{item.name}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>
+                          <Box display="flex" flexDirection="row" gap={1}>
+                            {
+                              item?.isShowDiscount && item?.prevPrice && (item.prevPrice * item.quantity).toFixed(2) !== item.totalPrice.toFixed(2) && (
+                                <Typography
+                                  sx={{ textDecoration: 'line-through' }}
+                                  color="error"
+                                >
+                                  ${(item.prevPrice * item.quantity).toFixed(2)}
+                                </Typography>
+                              )
+                            }
+                            <Typography>${item.totalPrice.toFixed(2)}</Typography>
+                          </Box>
+                        </TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
@@ -231,6 +253,23 @@ export default function OrderAccordion({
               <Grid item xs={12}>
                 <Divider />
               </Grid>
+              {order?.discount && order.discount > 0 ? 
+              (
+                <>
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>Discount ($)</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  -${order?.discount?.toFixed(2)}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              </>
+              ) : null
+              }
               <Grid item xs={4} textAlign="left" ml={2}>
                 <Typography>PST (7%)</Typography>
               </Grid>
@@ -242,6 +281,8 @@ export default function OrderAccordion({
               <Grid item xs={12}>
                 <Divider />
               </Grid>
+
+
               <Grid item xs={4} textAlign="left" ml={2}>
                 <Typography>GST (5%)</Typography>
               </Grid>

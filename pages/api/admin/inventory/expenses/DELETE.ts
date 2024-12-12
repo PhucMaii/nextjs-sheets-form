@@ -23,7 +23,7 @@ export default async function DELETE(
         orderedItems: {
           include: {
             fifo: true,
-            inventoryUnit: true
+            inventoryUnit: true,
           },
         },
       },
@@ -56,8 +56,11 @@ export default async function DELETE(
       }
 
       if (item.fifo && item.inventoryUnit) {
-        await subtractInventoryItem(item.fifo, item.inventoryUnit, item.fifo.quantity)
-
+        await subtractInventoryItem(
+          item.fifo,
+          item.inventoryUnit,
+          item.fifo.quantity,
+        );
       }
 
       // await prisma.vendorItem.update({

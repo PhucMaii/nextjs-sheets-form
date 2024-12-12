@@ -26,11 +26,11 @@ import Navbar from '../components/Navbar';
 import useSWR from 'swr';
 import NotificationPopup from '../admin/components/Notification';
 import { LoadingButton } from '@mui/lab';
-import { grey } from '@mui/material/colors';
 import OrderOnVacationModal from '../admin/components/Modals/OrderOnVacationModal';
 import useNotification from '@/hooks/useNotification';
 import SearchItem from '../components/Modals/SearchItem';
 import SearchIcon from '@mui/icons-material/Search';
+import SellingItemName from '../components/SellingItemName';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -274,19 +274,7 @@ export default function OrderForm() {
                       flexDirection="column"
                       gap={1}
                     >
-                      <Typography
-                        sx={{ color: item.availability ? 'black' : grey[500] }}
-                        fontWeight="bold"
-                        variant="subtitle1"
-                      >
-                        {`${item.name} - ${
-                          !item.availability
-                            ? 'Out of stock'
-                            : item.price === 0
-                              ? ' Variable price'
-                              : `$${item.price.toFixed(2)}`
-                        }`}
-                      </Typography>
+                      <SellingItemName item={item} />
                       <TextField
                         type="number"
                         value={item.quantity}

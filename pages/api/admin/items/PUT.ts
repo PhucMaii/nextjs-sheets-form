@@ -1,9 +1,10 @@
 import { UPDATE_OPTION } from '@/app/admin/components/Modals/edit/EditItem';
-import { Item, OrderedItems, PrismaClient } from '@prisma/client';
+import { IItem } from '@/app/utils/type';
+import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
-  updatedItem: Item;
+  updatedItem: IItem;
   updateOption: UPDATE_OPTION;
   updatedFields: string[];
 }
@@ -76,8 +77,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         name: updatedItem.name,
         price: updatedItem.price,
         categoryId: updatedItem.categoryId,
+        isShowDiscount: updatedItem?.isShowDiscount,
+        prevPrice: updatedItem?.prevPrice,
         availability: updatedItem.availability,
         inventoryUnitId: updatedItem.inventoryUnitId,
+        // system do not allow user to update inventory item id in selling item
       },
     });
 
@@ -85,6 +89,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       name: updatedItem.name,
       price: updatedItem.price,
       inventoryUnitId: updatedItem.inventoryUnitId,
+      isShowDiscount: updatedItem.isShowDiscount,
+      prevPrice: updatedItem.prevPrice,
     };
 
     if (
@@ -99,6 +105,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
     ) {
       delete updatedData.price;
+    }
+    
+    if (
+      !updatedFields.includes('inventoryUnitId') &&
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
+    ) {
+      delete updatedData.inventoryUnitId;
+    }
+
+    if (
+      !updatedFields.includes('isShowDiscount') &&
+      updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
+    ) {
+      delete updatedData.isShowDiscount;
+      delete updatedData.prevPrice;
     }
 
     // Update PRICE / NAME all items has same inventory id

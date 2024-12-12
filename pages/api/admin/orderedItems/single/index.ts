@@ -3,6 +3,7 @@ import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
 import { generateOrderTotalPrice } from '../PUT';
 import { getUserInfo } from '@/pages/api/utils/auth';
+import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -76,6 +77,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         subTotal: orderTotalPrice.subTotal,
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
+        discount: orderTotalPrice.discount,
         updatedBy: `Admin - ${adminUpdate.clientName}`,
         updateTime: updatedAt,
       },
@@ -85,12 +87,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const itemsWithTotalPrice = updatedOrder.items.map((item) => {
-      return {
-        ...item,
-        totalPrice: item.quantity * item.price,
-      };
-    });
+    // const itemsWithTotalPrice = updatedOrder.items.map((item) => {
+    //   return {
+    //     ...item,
+    //     totalPrice: item.quantity * item.price,
+    //   };
+    // });
+
+    const itemsWithTotalPrice = formatItemsWithTotalPrice(updatedOrder.items);
 
     return res.status(200).json({
       data: updatedOrderedItem,

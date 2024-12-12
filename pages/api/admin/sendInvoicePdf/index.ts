@@ -8,6 +8,7 @@ import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { normalizeDate } from '../../utils/date';
+import { formatItemsWithTotalPrice } from '../../utils/order';
 
 interface IBody {
   client: UserType | null;
@@ -57,10 +58,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const ordersWithItemTotalPrice = incompletedOrders.map((order: Order) => {
-      const items = order.items.map((item: any) => {
-        const totalPrice = item.price * item.quantity;
-        return { ...item, totalPrice };
-      });
+      // const items = order.items.map((item: any) => {
+      //   let totalPrevPrice = 0;
+
+      //   if (item?.isShowDiscount && item?.prevPrice) {
+      //     totalPrevPrice = item.prevPrice * item.quantity;
+      //   }
+      //   const totalPrice = item.price * item.quantity;
+      //   return { ...item, totalPrice, totalPrevPrice };
+      // });
+      const items = formatItemsWithTotalPrice(order.items);
       return { ...order, items };
     });
 

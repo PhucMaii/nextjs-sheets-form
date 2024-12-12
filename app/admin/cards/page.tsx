@@ -61,11 +61,8 @@ export default function CardManagement() {
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
-  const {
-    handleUpdateStatus,
-    UpdateExpenseStatusComp,
-    isUpdating,
-  } = useUpdateExpenseStatus(showNotification, selectedExpenses);
+  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating } =
+    useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods, mutateMethod] = SWRFetchData(
@@ -137,7 +134,6 @@ export default function CardManagement() {
     const users: any = await getAdminsAndDrivers(showNotification);
     setAdminsAndDrivers(users);
   };
-
 
   const getPaymentMethod = () => {
     if (selectedViewObj.id === -1) {
@@ -467,14 +463,15 @@ export default function CardManagement() {
                   </Typography>
 
                   {/* Recent Transactions */}
-                  <TransactionsTable 
-                    transactions={transactions?.data || []}              
+                  <TransactionsTable
+                    transactions={transactions?.data || []}
                     handleUpdateStatus={handleUpdateStatus}
                     showNotification={showNotification}
                     // selectedExpense={selectedExpenses}
                     // handleSelectExpense={handleSelectExpense}
                     // handleSelectAll={handleSelectAll}
-                    adminsAndDrivers={adminsAndDrivers} />
+                    adminsAndDrivers={adminsAndDrivers}
+                  />
                 </ShadowSection>
               </Grid>
               <Grid item xs={12} md={4}>

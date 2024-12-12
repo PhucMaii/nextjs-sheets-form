@@ -105,30 +105,35 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         categoryId: {
           in: categoryIds,
         },
-      }
+      },
     });
 
-    const newItemsInMultiCategory: any = categoryIds.map((categoryId: number) => {
-      // Check if item already exist in that category
-      const isItemExist = sellingItems.find((item: any) => {
-        return item.categoryId === categoryId && item.inventoryItemId === newItem?.inventoryItemId;
+    const newItemsInMultiCategory: any = categoryIds
+      .map((categoryId: number) => {
+        // Check if item already exist in that category
+        const isItemExist = sellingItems.find((item: any) => {
+          return (
+            item.categoryId === categoryId &&
+            item.inventoryItemId === newItem?.inventoryItemId
+          );
+        });
+
+        if (isItemExist) {
+          return null;
+        }
+
+        return {
+          name: newItem.name,
+          price: newItem.price,
+          availability: newItem?.availability || true,
+          inventoryItemId: newItem?.inventoryItemId || null,
+          inventoryUnitId: selectedUnit.id,
+          categoryId,
+        };
+      })
+      .filter((item: any) => {
+        return item !== null;
       });
-
-      if (isItemExist) {
-        return null;
-      }
-
-      return {
-        name: newItem.name,
-        price: newItem.price,
-        availability: newItem?.availability || true,
-        inventoryItemId: newItem?.inventoryItemId || null,
-        inventoryUnitId: selectedUnit.id,
-        categoryId,
-      };
-    }).filter((item: any) => {
-      return item !== null;
-    });
 
     await prisma.item.createMany({
       data: newItemsInMultiCategory,
@@ -137,7 +142,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // Get categories that have been added
     const addedCategoryIds = newItemsInMultiCategory.map((item: any) => {
       return item.categoryId;
-    })
+    });
 
     // const createdItem = await prisma.item.create({
     //   data: {
@@ -158,7 +163,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             in: addedCategoryIds,
           },
         },
-      }
+      },
     });
 
     const scheduledOrderedItems = scheduleOrders.map((scheduleOrder: any) => {

@@ -83,6 +83,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         subTotal: orderTotalPrice.subTotal,
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
+        discount: orderTotalPrice.discount,
         updatedBy: `Driver - ${driverUpdate.name}`,
         updateTime: updatedAt,
       },

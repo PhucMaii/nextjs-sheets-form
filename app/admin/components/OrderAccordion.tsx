@@ -31,6 +31,7 @@ import RememberMeIcon from '@mui/icons-material/RememberMe';
 import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import BlockIcon from '@mui/icons-material/Block';
+import { useDiscount } from '@/hooks/useDiscount';
 
 interface PropTypes {
   order: Order;
@@ -77,6 +78,8 @@ const OrderAccordion = ({
             : COLOR_TYPE.ERROR,
   };
 
+  const { discountPrice, DiscountText } = useDiscount(order.items);
+
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
   );
@@ -96,8 +99,6 @@ const OrderAccordion = ({
   useEffect(() => {
     calculateTotalQuantity();
   }, [order]);
-
-  console.log(order, 'order');
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -134,6 +135,7 @@ const OrderAccordion = ({
 
     setTotalQuantity(quantity);
   };
+  
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     try {
@@ -410,7 +412,12 @@ const OrderAccordion = ({
                   {totalQuantity}
                 </Typography>
               </Box>
-              <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
+              <Box display="flex" alignItems="center" gap={1}>
+                {
+                  discountPrice > 0 && discountPrice !== order.totalPrice && DiscountText
+                }
+                <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
+              </Box>
             </Box>
           </Grid>
         </Grid>

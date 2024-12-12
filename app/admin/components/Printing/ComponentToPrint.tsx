@@ -26,7 +26,7 @@ const generateTaxNote = (item: Item) => {
     return '(G)';
   }
   return '';
-}
+};
 
 export const ComponentToPrint = forwardRef(
   ({ order }: { order: Order | null }, ref: any) => {
@@ -45,15 +45,41 @@ export const ComponentToPrint = forwardRef(
             <TableCell>
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography>{generateTaxNote(item)}</Typography>
-                <Typography sx={{ fontSize: 18, fontWeight: 'bold' }}>{item.name}</Typography>
+                <Typography sx={{ fontSize: 18, fontWeight: 'bold' }}>
+                  {item.name}
+                </Typography>
               </Box>
             </TableCell>
             <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
               {item.quantity}
             </TableCell>
-            <TableCell sx={{ fontSize: 18 }}>${item.price}</TableCell>
             <TableCell sx={{ fontSize: 18 }}>
-              ${item.totalPrice?.toFixed(2)}
+              <Box display="flex" alignItems="center" gap={1} flexDirection="column">
+                {item?.isShowDiscount && item?.prevPrice && (
+                  <Typography
+                    sx={{ textDecoration: 'line-through' }}
+                  >
+                    ${item.prevPrice}
+                  </Typography>
+                )}
+                <Typography fontWeight="bold">
+                  ${item.price}
+                </Typography>
+              </Box>
+            </TableCell>
+            <TableCell sx={{ fontSize: 18 }}>
+              <Box display="flex" alignItems="center" gap={1} flexDirection="column">
+                {item?.isShowDiscount && item?.prevPrice && item?.totalPrevPrice?.toFixed(2) !== item.totalPrice.toFixed(2) && (
+                  <Typography
+                    sx={{ textDecoration: 'line-through' }}
+                  >
+                    ${item?.totalPrevPrice?.toFixed(2)}
+                  </Typography>
+                )}
+                <Typography fontWeight="bold">
+                  ${item.totalPrice?.toFixed(2)}
+                </Typography>
+              </Box>
             </TableCell>
           </TableRow>,
         );
@@ -159,6 +185,20 @@ export const ComponentToPrint = forwardRef(
                     0}
                 </Typography>
               </Grid>
+             {order?.discount && order?.discount > 0 ? 
+             <>
+             <Grid item xs={6}>
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  Discount ($):
+                </Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  -${order?.discount?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              </> : null
+              }
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   PST (7%):
@@ -238,20 +278,21 @@ export const ComponentToPrint = forwardRef(
               <Typography>P: PST (7%)</Typography>
             </Grid>
             <Grid item xs={6} textAlign="right">
-              <Typography textAlign="right">Order by: {order.createdBy}</Typography>
+              <Typography textAlign="right">
+                Order by: {order.createdBy}
+              </Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography>G: GST (5%)</Typography>
             </Grid>
             <Grid item xs={6} textAlign="right">
-            {order?.updatedBy && (
-            <Typography textAlign="right">
-              Updated by: {order.updatedBy}
-            </Typography>
-          )}
+              {order?.updatedBy && (
+                <Typography textAlign="right">
+                  Updated by: {order.updatedBy}
+                </Typography>
+              )}
             </Grid>
           </Grid>
-          
         </Box>
       </div>
     );
