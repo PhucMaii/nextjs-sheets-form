@@ -323,6 +323,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
             return {
               ...item,
+              unitPrice: +e.target.value,
               unit: { ...item.unit, unitPrice: +e.target.value },
               totalPrice,
               units: newUnits,
@@ -352,6 +353,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
 
           return {
             ...item,
+            unitPrice: +e.target.value,
             unit: { ...item.unit, unitPrice: +e.target.value },
             totalPrice,
             units: newUnits,
