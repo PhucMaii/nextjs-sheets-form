@@ -102,8 +102,6 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
     }
   };
 
-  console.log(isMaintenance, 'isMaintenance');
-
   const content = (
     <>
       {/* <Box display="flex" justifyContent="center" my={2}>

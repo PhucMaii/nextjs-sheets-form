@@ -150,7 +150,7 @@ export default function OrderAccordion({
                   </Typography>
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
-                  {discountPrice > 0 && discountPrice !== order.totalPrice && DiscountText}
+                  {discountPrice > 0 && discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) && DiscountText}
                   <Button variant="outlined">
                     ${order.totalPrice.toFixed(2)}
                   </Button>

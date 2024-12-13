@@ -88,8 +88,8 @@ export const ComponentToPrint = forwardRef(
 
     const orderFields: any = {
       Invoice: order.id,
-      'Client Id': order?.clientId,
-      'Client Name': order?.clientName,
+      'Client Id': order?.clientId || order?.user?.clientId,
+      'Client Name': order?.clientName || order?.user?.clientName,
       'Order Time': order.orderTime,
       'Delivery Date': order.deliveryDate,
     };

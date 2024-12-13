@@ -212,9 +212,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // });
     const itemListWithTotalPrice = formatItemsWithTotalPrice(newOrder?.items || []);
 
+    const itemHasQuantity = itemListWithTotalPrice.filter((item: any) => {
+      return item.quantity > 0;
+    })
+
     await pusherServer?.trigger('admin', 'incoming-order', {
       ...newOrder,
-      items: itemListWithTotalPrice,
+      items: itemHasQuantity,
       ...existingUser,
       id: newOrder.id,
       category: existingUser.category,
