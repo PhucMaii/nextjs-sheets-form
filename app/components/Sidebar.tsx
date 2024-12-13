@@ -33,6 +33,7 @@ import { primary } from '@/theme/color';
 import useNotification from '@/hooks/useNotification';
 import { MaintenanceContext } from '../context/MaintenanceProvider';
 import Maintenance from './Maintenance';
+import HolidayText from './HolidayText';
 
 interface PropTypes {
   children: ReactNode;
@@ -138,7 +139,10 @@ export default function Sidebar({ children }: PropTypes) {
   if (smDown) {
     return (
       <>
-        <Box sx={{ pb: 8, m: 1 }}>{children}</Box>
+        <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 8, m: 1 }}>
+          <HolidayText />
+          {children}
+        </Box>
         {isOpenSnackbar && (
           <Snackbar
             open={isOpenSnackbar}
@@ -242,6 +246,7 @@ export default function Sidebar({ children }: PropTypes) {
               m={2}
               gap={2}
             >
+              <HolidayText />
               {children}
             </Box>
           </Box>
@@ -277,6 +282,7 @@ export default function Sidebar({ children }: PropTypes) {
             />
           )}
           <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
+            <HolidayText />
             {children}
           </Box>
         </Box>
