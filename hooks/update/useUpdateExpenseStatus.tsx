@@ -3,9 +3,16 @@ import { otherPaymentMethodId } from '@/app/lib/constant';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IExpense } from '@/app/utils/type';
-import { AlertColor } from '@mui/material';
 import axios from 'axios';
 import { useState } from 'react';
+import { AlertColor, Box, Button, Menu, MenuItem, Typography } from "@mui/material";
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import AddIcon from '@mui/icons-material/Add';
+import { errorColor, primaryColor, successColor } from "@/theme/color";
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import { DropdownItemContainer } from '@/app/admin/orders/styled';
+import AddExpense from '@/app/admin/components/Modals/add/AddExpense';
 
 export const useUpdateExpenseStatus = (
   showNotification: (type: AlertColor, message: string) => void,
@@ -18,6 +25,10 @@ export const useUpdateExpenseStatus = (
     updatedStatus: null,
     isBulk: false,
   });
+  const [actionButtonAnchor, setActionButtonAnchor] =
+  useState<null | HTMLElement>(null);
+  const openDropdown = Boolean(actionButtonAnchor);
+  const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
 
@@ -151,10 +162,78 @@ export const useUpdateExpenseStatus = (
     />
   );
 
+  const Actions = (
+    <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
+      <Button
+        variant="outlined"
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+      >
+        <Box display="flex" alignItems="center" gap={1}>
+          <ArrowDownwardIcon fontSize="small" />
+          <Typography fontWeight="medium">Actions</Typography>
+        </Box>
+      </Button>
+
+      <Menu
+        id="basic-menu"
+        anchorEl={actionButtonAnchor}
+        open={openDropdown}
+        onClose={() => setActionButtonAnchor(null)}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            setIsOpenAddExpense(true);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <AddIcon sx={{ color: primaryColor }} />
+            <Typography>Add Expense</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+
+        <MenuItem
+          disabled={selectedExpenses.length === 0}
+          onClick={() => {
+            handleBulkUpdateStatus(TRANSACTION_STATUS.PAID);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckIcon sx={{ color: successColor }} />
+            <Typography>Mark as Paid</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+
+        <MenuItem
+          disabled={selectedExpenses.length === 0}
+          onClick={() => {
+            handleBulkUpdateStatus(TRANSACTION_STATUS.UNPAID);
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CloseIcon sx={{ color: errorColor }} />
+            <Typography>Mark as Unpaid</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
+
+  const AddExpenseModal = (
+    <AddExpense open={isOpenAddExpense} onClose={() => setIsOpenAddExpense(false)} showNotification={showNotification} />
+  )
+
   return {
     handleUpdateStatus,
     handleBulkUpdateStatus,
     UpdateExpenseStatusComp,
     isUpdating,
+    Actions,
+    AddExpenseModal
   };
 };

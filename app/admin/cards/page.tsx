@@ -61,7 +61,7 @@ export default function CardManagement() {
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
-  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating } =
+  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating, Actions, AddExpenseModal } =
     useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
@@ -195,38 +195,39 @@ export default function CardManagement() {
     }
   };
 
-  // const handleSelectAll = () => {
-  //   if (!transactions) {
-  //     return;
-  //   }
+  const handleSelectAll = () => {
+    if (!transactions) {
+      return;
+    }
 
-  //   if (selectedExpenses.length === transactions?.data.length) {
-  //     setSelectedExpenses([]);
-  //   } else {
-  //     setSelectedExpenses(transactions?.data);
-  //   }
-  // };
+    if (selectedExpenses.length === transactions?.data.length) {
+      setSelectedExpenses([]);
+    } else {
+      setSelectedExpenses(transactions?.data);
+    }
+  };
 
-  // const handleSelectExpense = (e: any, targetExpense: IExpense) => {
-  //   e.preventDefault();
-  //   const selectedExpense = selectedExpenses.find((expense: IExpense) => {
-  //     return expense.id === targetExpense.id;
-  //   });
+  const handleSelectExpense = (e: any, targetExpense: IExpense) => {
+    e.preventDefault();
+    const selectedExpense = selectedExpenses.find((expense: IExpense) => {
+      return expense.id === targetExpense.id;
+    });
 
-  //   if (selectedExpense) {
-  //     const newSelectedExpense = selectedExpenses.filter(
-  //       (expense: IExpense) => {
-  //         return expense.id !== targetExpense.id;
-  //       },
-  //     );
-  //     setSelectedExpenses(newSelectedExpense);
-  //   } else {
-  //     setSelectedExpenses([...selectedExpenses, targetExpense]);
-  //   }
-  // };
+    if (selectedExpense) {
+      const newSelectedExpense = selectedExpenses.filter(
+        (expense: IExpense) => {
+          return expense.id !== targetExpense.id;
+        },
+      );
+      setSelectedExpenses(newSelectedExpense);
+    } else {
+      setSelectedExpenses([...selectedExpenses, targetExpense]);
+    }
+  };
 
   return (
     <Sidebar>
+      {AddExpenseModal}
       {UpdateExpenseStatusComp}
       <LoadingModal open={isUpdating} />
       {NotificationComp}
@@ -453,24 +454,29 @@ export default function CardManagement() {
               </Grid>
               <Grid item xs={12} md={8}>
                 <ShadowSection>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    color={blueGrey[800]}
-                    mb={2}
-                  >
-                    Recent Transactions
-                  </Typography>
+                  <Box display="flex" alignItems="center" gap={2} mb={2}>
+                    <Typography
+                      variant="h5"
+                      fontWeight="bold"
+                      color={blueGrey[800]}
+                      // mb={2}
+                    >
+                      Recent Transactions
+                    </Typography>
+                    {Actions}
+                  </Box>
+
 
                   {/* Recent Transactions */}
                   <TransactionsTable
                     transactions={transactions?.data || []}
                     handleUpdateStatus={handleUpdateStatus}
                     showNotification={showNotification}
-                    // selectedExpense={selectedExpenses}
-                    // handleSelectExpense={handleSelectExpense}
-                    // handleSelectAll={handleSelectAll}
+                    selectedExpense={selectedExpenses}
+                    handleSelectExpense={handleSelectExpense}
+                    handleSelectAll={handleSelectAll}
                     adminsAndDrivers={adminsAndDrivers}
+                    // Actions={Actions}
                   />
                 </ShadowSection>
               </Grid>

@@ -22,7 +22,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       date,
       paymentMethodId,
       description,
-      status,
+      // status
       createdAt,
     }: IBody = req.body;
 
@@ -105,7 +105,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         paymentMethodId: paymentMethodId,
         description: description,
         createdAt,
-        status,
+        status: TRANSACTION_STATUS.PAID,
         spentBy: `Driver - ${driver?.name}`,
         createdBy: `Driver - ${driver?.name}`,
         codBoardId: dateBoard.id,

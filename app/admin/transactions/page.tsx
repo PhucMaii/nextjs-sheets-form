@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
-  Button,
+  // Button,
   Grid,
-  Menu,
+  // Menu,
   MenuItem,
   Select,
   TextField,
@@ -16,28 +16,21 @@ import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/SelectDateRange';
 import { ShadowSection } from '../reports/styled';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
+import { API_URL } from '@/app/utils/enum';
 import TransactionsTable from '../components/Tables/TransactionsTable';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { DropdownItemContainer } from '../orders/styled';
-import { errorColor, primaryColor, successColor } from '@/theme/color';
-import AddIcon from '@mui/icons-material/Add';
-import AddExpense from '../components/Modals/add/AddExpense';
 import useNotification from '@/hooks/useNotification';
 import { IExpense } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import LoadingModal from '../components/Modals/LoadingModal';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 export default function Transactions() {
-  const [actionButtonAnchor, setActionButtonAnchor] =
-    useState<null | HTMLElement>(null);
-  const openDropdown = Boolean(actionButtonAnchor);
+  // const [actionButtonAnchor, setActionButtonAnchor] =
+  //   useState<null | HTMLElement>(null);
+  // const openDropdown = Boolean(actionButtonAnchor);
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
@@ -45,7 +38,7 @@ export default function Transactions() {
     [],
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
+  // const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
 
@@ -53,9 +46,11 @@ export default function Transactions() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const {
     handleUpdateStatus,
-    handleBulkUpdateStatus,
+    // handleBulkUpdateStatus,
     UpdateExpenseStatusComp,
     isUpdating,
+    Actions,
+    AddExpenseModal
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
@@ -139,67 +134,67 @@ export default function Transactions() {
     }
   };
 
-  const actions = (
-    <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
-      <Button
-        variant="outlined"
-        aria-controls={openDropdown ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={openDropdown ? 'true' : undefined}
-        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-      >
-        <Box display="flex" alignItems="center" gap={1}>
-          <ArrowDownwardIcon fontSize="small" />
-          <Typography fontWeight="medium">Actions</Typography>
-        </Box>
-      </Button>
+  // const actions = (
+  //   <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
+  //     <Button
+  //       variant="outlined"
+  //       aria-controls={openDropdown ? 'basic-menu' : undefined}
+  //       aria-haspopup="true"
+  //       aria-expanded={openDropdown ? 'true' : undefined}
+  //       onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+  //     >
+  //       <Box display="flex" alignItems="center" gap={1}>
+  //         <ArrowDownwardIcon fontSize="small" />
+  //         <Typography fontWeight="medium">Actions</Typography>
+  //       </Box>
+  //     </Button>
 
-      <Menu
-        id="basic-menu"
-        anchorEl={actionButtonAnchor}
-        open={openDropdown}
-        onClose={() => setActionButtonAnchor(null)}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            setIsOpenAddExpense(true);
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <AddIcon sx={{ color: primaryColor }} />
-            <Typography>Add Expense</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
+  //     <Menu
+  //       id="basic-menu"
+  //       anchorEl={actionButtonAnchor}
+  //       open={openDropdown}
+  //       onClose={() => setActionButtonAnchor(null)}
+  //       MenuListProps={{
+  //         'aria-labelledby': 'basic-button',
+  //       }}
+  //     >
+  //       <MenuItem
+  //         onClick={() => {
+  //           setIsOpenAddExpense(true);
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <AddIcon sx={{ color: primaryColor }} />
+  //           <Typography>Add Expense</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
 
-        <MenuItem
-          disabled={selectedExpenses.length === 0}
-          onClick={() => {
-            handleBulkUpdateStatus(TRANSACTION_STATUS.PAID);
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <CheckIcon sx={{ color: successColor }} />
-            <Typography>Mark as Paid</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
+  //       <MenuItem
+  //         disabled={selectedExpenses.length === 0}
+  //         onClick={() => {
+  //           handleBulkUpdateStatus(TRANSACTION_STATUS.PAID);
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <CheckIcon sx={{ color: successColor }} />
+  //           <Typography>Mark as Paid</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
 
-        <MenuItem
-          disabled={selectedExpenses.length === 0}
-          onClick={() => {
-            handleBulkUpdateStatus(TRANSACTION_STATUS.UNPAID);
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <CloseIcon sx={{ color: errorColor }} />
-            <Typography>Mark as Unpaid</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
+  //       <MenuItem
+  //         disabled={selectedExpenses.length === 0}
+  //         onClick={() => {
+  //           handleBulkUpdateStatus(TRANSACTION_STATUS.UNPAID);
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <CloseIcon sx={{ color: errorColor }} />
+  //           <Typography>Mark as Unpaid</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
+  //     </Menu>
+  //   </Box>
+  // );
 
   return (
     <Sidebar>
@@ -232,11 +227,12 @@ export default function Transactions() {
       <LoadingModal open={isUpdating} />
       {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
-        <AddExpense
+        {/* <AddExpense
           open={isOpenAddExpense}
           onClose={() => setIsOpenAddExpense(false)}
           showNotification={showNotification}
-        />
+        /> */}
+        {AddExpenseModal}
         <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
           Transactions
         </Typography>
@@ -278,7 +274,7 @@ export default function Transactions() {
             />
           </Grid>
           <Grid item xs={4} md={2} textAlign="center">
-            {actions}
+            {Actions}
           </Grid>
         </Grid>
         {isLoading ? (
