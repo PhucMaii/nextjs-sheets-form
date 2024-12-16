@@ -13,7 +13,7 @@ const useLocalStorage = (key: string, defaultValue: any) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedValue = localStorage.getItem(key);
-      if (storedValue !== null) {
+      if (storedValue) {
         setValue(JSON.parse(storedValue));
       }
       setIsInitialized(true);

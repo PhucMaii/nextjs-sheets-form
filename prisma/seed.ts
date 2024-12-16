@@ -208,9 +208,9 @@ async function main() {
   //   }
   // }
 
-  // const startDate = new Date('2024-12-01');
+  // const startDate = new Date('2024-11-01');
 
-  // const endDate = new Date();
+  // const endDate = new Date('2024-12-01');
   
   // const decemberDayList = generateListOfDateString(startDate, endDate);
 
