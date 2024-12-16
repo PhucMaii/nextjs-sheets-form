@@ -7,7 +7,6 @@ export const MultipleInvoicePrint = forwardRef(
     { clientOrders, endDate }: { clientOrders: any; endDate: Date },
     ref: any,
   ) => {
-    console.log(clientOrders, 'clientOrders');
     return (
       <div ref={ref}>
         {clientOrders.map((order: any, index: number) => {

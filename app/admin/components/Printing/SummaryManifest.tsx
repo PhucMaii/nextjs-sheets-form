@@ -1,4 +1,3 @@
-import { mainItems } from '@/app/lib/constant';
 import { IRoutes } from '@/app/utils/type';
 import {
   Box,
@@ -11,7 +10,6 @@ import {
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import './print.css';
-import { sortedItemKeys } from '@/app/utils/array';
 
 interface PropTypes {
   manifest: any;
@@ -20,7 +18,7 @@ interface PropTypes {
 }
 
 export const SummaryManifest = forwardRef(
-  ({ manifest, routes, currentDate }: PropTypes, ref: any) => {
+  ({ manifest, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
       // return;
       return (
@@ -37,27 +35,24 @@ export const SummaryManifest = forwardRef(
         <Box sx={{ width: '100%', height: '100%', marginRight: 10 }}>
           {Object.keys(manifest).length > 0 &&
             Object.keys(manifest).map((routeId: string, index: number) => {
-              const targetRoute = routes.find(
-                (route: IRoutes) => route.id === Number(routeId),
-              );
+              // const targetRoute = routes.find(
+              //   (route: IRoutes) => route.id === Number(routeId),
+              // );
 
-              if (!targetRoute) {
-                return null;
-              }
+              // if (!targetRoute) {
+              //   return null;
+              // }
 
-              if (!manifest[routeId]) {
-                return null;
-              }
+              // if (!manifest[routeId]) {
+              //   return null;
+              // }
 
-              const sortedItems: any = sortedItemKeys(
-                Object.keys(manifest[routeId].summary),
-                mainItems,
-              );
+              const sortedItems = manifest[routeId]?.itemNames || []
 
               return (
                 <>
                   <Typography variant="h4" textAlign="center" m={2}>
-                    {targetRoute.name}
+                  {manifest[routeId]?.route?.name}
                   </Typography>
                   <Box
                     display="flex"
@@ -66,7 +61,7 @@ export const SummaryManifest = forwardRef(
                     m={2}
                   >
                     <Typography variant="h5" m={2}>
-                      Driver: {targetRoute.driver?.name}
+                    Driver: {manifest[routeId]?.route?.driver?.name}
                     </Typography>
                     <Typography>{currentDate}</Typography>
                   </Box>

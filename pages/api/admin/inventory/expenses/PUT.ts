@@ -116,24 +116,29 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     // Check is there any changes in ordered items
     let isOrderedItemsChange = false;
 
-    for (const item of existingExpense.orderedItems) {
-      const updatedItem = updatedItems.find(
-        (newItem: any) => newItem.name === item.name,
-      );
-
-      if (!updatedItem) {
-        isOrderedItemsChange = true;
-        break;
-      }
-
-      if (
-        updatedItem.quantity !== item.quantity ||
-        updatedItem.unitPrice !== item.price
-      ) {
-        isOrderedItemsChange = true;
-        break;
+    if (oldItemIds.length !== updatedItems.length) {
+      isOrderedItemsChange = true;
+    } else {
+      for (const item of existingExpense.orderedItems) {
+        const updatedItem = updatedItems.find(
+          (newItem: any) => newItem.name === item.name,
+        );
+  
+        if (!updatedItem) {
+          isOrderedItemsChange = true;
+          break;
+        }
+  
+        if (
+          updatedItem.quantity !== item.quantity ||
+          updatedItem.unitPrice !== item.price
+        ) {
+          isOrderedItemsChange = true;
+          break;
+        }
       }
     }
+
 
     if (isOrderedItemsChange) {
       const user = await getUserInfo(req, res);
@@ -170,7 +175,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           (oldItem: OrderedItems) => oldItem.name === item.name,
         );
         if (!existedItem) {
-          newAddedItems.push(item);
+          newAddedItems.push({...item, vendorItem});
           continue;
         }
 
@@ -233,8 +238,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // Create new ordered items if there is any
       if (newAddedItems.length > 0) {
         const vendorItemList = newAddedItems.map(
-          (newItem: any) => newItem.vendorItem,
+          (newItem: any) => ({...newItem.vendorItem, unit: newItem.unit}),
         );
+        console.log(vendorItemList, 'vendorItemList');
 
         await createFifo(vendorItemList, updatedAt, createdBy);
 

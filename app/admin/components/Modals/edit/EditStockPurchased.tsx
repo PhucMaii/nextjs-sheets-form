@@ -111,8 +111,6 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     }
   }, [purchasedItems]);
 
-  console.log(purchasedItems, 'purchased items');
-
   useEffect(() => {
     if (selectedVendorId !== -1) {
       setPromptedItem({ ...promptedItem, vendorId: selectedVendorId });

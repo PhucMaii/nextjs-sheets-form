@@ -1,7 +1,7 @@
 import {
   AlertColor,
   Box,
-  Button,
+  // Button,
   Divider,
   FormControl,
   Grid,
@@ -24,8 +24,9 @@ import axios from 'axios';
 import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { LoadingButton } from '@mui/lab';
 import AddVendor from '../add/AddVendor';
+import { ModalProps } from '../type';
 
-interface PropTypes {
+interface PropTypes extends ModalProps {
   order: Order;
   handleUpdateOrderUI: (updatedOrder: Order) => void;
   showNotification: (type: AlertColor, message: string) => void;
@@ -35,8 +36,11 @@ const EditReportOrder = ({
   order,
   handleUpdateOrderUI,
   showNotification,
+  open,
+  onClose
 }: PropTypes) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  console.log('EDIT REPORT ORDER: ', order);
+  // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
@@ -275,15 +279,15 @@ const EditReportOrder = ({
         open={isOpenAddVendor}
         onClose={() => setIsOpenAddVendor(false)}
       />
-      <Button
+      {/* <Button
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(true);
         }}
       >
         Edit
-      </Button>
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+      </Button> */}
+      <Modal open={open} onClose={onClose}>
         <BoxModal display="flex" flexDirection="column" gap={2}>
           <Box
             display="flex"
@@ -543,6 +547,7 @@ export default memo(EditReportOrder, (prev, next) => {
   return (
     prev.order === next.order,
     prev.showNotification === next.showNotification,
-    prev.handleUpdateOrderUI === next.handleUpdateOrderUI
+    prev.handleUpdateOrderUI === next.handleUpdateOrderUI,
+    prev.open === next.open
   );
 });

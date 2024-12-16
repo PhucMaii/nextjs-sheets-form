@@ -480,7 +480,7 @@ export const checkAndUpdateUnits = async (
       if (Object.keys(updatedField).length > 0) {
         await prisma.inventoryUnit.update({
           where: {
-            id: sortedDBUnits[dbIndex].id,
+            id: sortedDBUnits[dbIndex]?.id,
           },
           data: updatedField,
         });
@@ -493,7 +493,7 @@ export const checkAndUpdateUnits = async (
       if (sortedDBUnits[dbIndex]?.ratio < sortedNewUnits[newIndex]?.ratio) {
         await prisma.inventoryUnit.delete({
           where: {
-            id: sortedDBUnits[dbIndex].id,
+            id: sortedDBUnits[dbIndex]?.id,
           },
         });
         dbIndex++;
@@ -519,7 +519,7 @@ export const checkAndUpdateUnits = async (
   while (dbIndex < sortedDBUnits.length) {
     await prisma.inventoryUnit.delete({
       where: {
-        id: sortedDBUnits[dbIndex].id,
+        id: sortedDBUnits[dbIndex]?.id,
       },
     });
     dbIndex++;
@@ -568,6 +568,7 @@ export const createFifo = async (
         continue;
       }
 
+      console.log({unit: item.unit})
       const itemQuantity = item.quantity * item?.unit?.ratio;
       // itemQuantity > negativeFifo.quantity
       // Delete targeted fifo and create new fifo

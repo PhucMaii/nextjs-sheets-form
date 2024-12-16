@@ -4,9 +4,10 @@ import { PrismaClient } from '@prisma/client';
 import { Order } from '@/app/admin/orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import _ from 'lodash';
-import { groupBy } from '@/app/utils/array';
+import { groupBy, sortedItemKeys } from '@/app/utils/array';
 import { IItem } from '@/app/utils/type';
 import { checkIsKorean } from '../../utils/korean';
+import { mainItems } from '@/app/lib/constant';
 
 export const config = {
   api: {
@@ -52,6 +53,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         day,
       },
+      include: {
+        driver: true,
+      }
     });
 
     // console.log(userRoute, 'userRoute');
@@ -200,6 +204,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const itemManifest: any = {};
     for (const itemRoute in groupItemRoutes) {
+      // console.log(itemRoute, 'itemRoute');
+      const targetRoute = dayRoutes.find((route: any) => route.id == itemRoute);
+      
       const manifestItem = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem) => {
           const { name } = item;
@@ -246,8 +253,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             index === 0 ||
             groupItemRoutes[itemRoute][index - 1].user.id !== user.id
           ) {
+            // Generate display name
+            let displayName = user.clientName.split('-').slice(0, 2).join(' - ');
+
+            if (
+              displayName?.split(' - ')[1] == ' C.O.D' ||
+              displayName?.split(' - ')[1] == ' MONTHLY' ||
+              displayName?.split(' - ')[1] == ' W.C.O.D'
+            ) {
+              displayName = displayName.split(' - ')[0];
+            }
             const newUserManifest = {
-              user,
+              user: {...user, displayName},
               [itemKey]: quantity,
             };
             acc.push(newUserManifest);
@@ -265,9 +282,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         [],
       );
 
+      const itemNameList: string[] = [];
+      for (const userManifest of manifestDetail) {
+        const itemNames: string[] = Object.keys(userManifest);
+
+        for (const itemName of itemNames) {
+          if (itemName === 'user') {
+            continue;
+          }
+  
+          if (itemNameList.includes(itemName)) {
+            continue;
+          }
+  
+          if (manifestDetail[itemName] === 0) {
+            continue;
+          }
+  
+          itemNameList.push(itemName);
+        }
+
+      }
+
+      const sortedItemNames = sortedItemKeys(itemNameList, mainItems);
       itemManifest[itemRoute] = {
         details: manifestDetail,
         summary: manifestItem,
+        route: targetRoute,
+        itemNames: sortedItemNames,
       };
     }
 

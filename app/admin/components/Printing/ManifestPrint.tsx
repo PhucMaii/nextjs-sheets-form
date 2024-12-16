@@ -12,8 +12,7 @@ import {
 import React, { forwardRef, Fragment } from 'react';
 import './print.css';
 import styled from 'styled-components';
-import { mainItems, productColors } from '@/app/lib/constant';
-import { sortedItemKeys } from '@/app/utils/array';
+import { productColors } from '@/app/lib/constant';
 
 interface PropTypes {
   manifest: any;
@@ -34,7 +33,7 @@ const BorderRightTableCell = styled(TableCell)<TableCellProps>`
 `;
 
 export const ManifestPrint = forwardRef(
-  ({ manifest, routes, currentDate }: PropTypes, ref: any) => {
+  ({ manifest, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
       // return;
       return (
@@ -50,65 +49,65 @@ export const ManifestPrint = forwardRef(
       <div ref={ref} className="print-container">
         <Box sx={{ width: '90%', height: '100%' }}>
           {/* Loop through route */}
-          {Object.keys(manifest).length > 0 &&
+          {Object.keys(manifest)?.length > 0 &&
             Object.keys(manifest).map((routeId: string, index: number) => {
-              const targetRoute = routes.find(
-                (route: IRoutes) => route.id === Number(routeId),
-              );
-              if (!targetRoute) {
-                return null;
-              }
+              // const targetRoute = routes.find(
+              //   (route: IRoutes) => route.id === Number(routeId),
+              // );
+              // if (!targetRoute) {
+              //   return null;
+              // }
 
-              if (!manifest[routeId]) {
-                return null;
-              }
-              const generateItemNames = () => {
-                const itemNameList: string[] = [];
+              // if (!manifest[routeId]) {
+              //   return null;
+              // }
+              // const generateItemNames = () => {
+              //   const itemNameList: string[] = [];
 
-                // Get all items with its quantity in format: {itemName: quantity}
-                const currentManifest = manifest[routeId]?.details;
+              //   // Get all items with its quantity in format: {itemName: quantity}
+              //   const currentManifest = manifest[routeId]?.details;
 
-                if (!currentManifest) {
-                  return [];
-                }
+              //   if (!currentManifest) {
+              //     return [];
+              //   }
 
-                // Loop through all items and get its key = name
-                for (const item of currentManifest) {
-                  const itemNames: string[] = Object.keys(item);
-                  for (const itemName of itemNames) {
-                    if (itemName === 'user') {
-                      continue;
-                    }
+              //   // Loop through all items and get its key = name
+              //   for (const item of currentManifest) {
+              //     const itemNames: string[] = Object.keys(item);
+              //     for (const itemName of itemNames) {
+              //       if (itemName === 'user') {
+              //         continue;
+              //       }
 
-                    if (itemNameList.includes(itemName)) {
-                      continue;
-                    }
+              //       if (itemNameList.includes(itemName)) {
+              //         continue;
+              //       }
 
-                    if (item[itemName] === 0) {
-                      continue;
-                    }
+              //       if (item[itemName] === 0) {
+              //         continue;
+              //       }
 
-                    // if (itemName.includes('KONGNAMUL')) {
-                    //   continue;
-                    // }
+              //       // if (itemName.includes('KONGNAMUL')) {
+              //       //   continue;
+              //       // }
 
-                    itemNameList.push(itemName);
-                  }
-                }
+              //       itemNameList.push(itemName);
+              //     }
+              //   }
 
-                return itemNameList;
-              };
+              //   return itemNameList;
+              // };
 
-              const items = generateItemNames();
-              const sortedItems = sortedItemKeys(items, mainItems);
+              // const items = generateItemNames();
+              const sortedItems = manifest[routeId]?.itemNames || []
 
               const columnWidthPercentage =
-                Math.floor(items.length / 100) * 100 - 1;
+                Math.floor(sortedItems?.length / 100) * 100 - 1;
 
               return (
                 <Fragment key={index}>
                   <Typography variant="h4" textAlign="center" m={2}>
-                    {targetRoute.name}
+                    {manifest[routeId]?.route?.name}
                   </Typography>
                   <Box
                     display="flex"
@@ -117,7 +116,7 @@ export const ManifestPrint = forwardRef(
                     m={2}
                   >
                     <Typography variant="h5">
-                      Driver: {targetRoute.driver?.name}
+                      Driver: {manifest[routeId]?.route?.driver?.name}
                     </Typography>
                     <Typography>{currentDate}</Typography>
                   </Box>
@@ -127,7 +126,7 @@ export const ManifestPrint = forwardRef(
                     <TableHead>
                       <TableRow>
                         <BorderRightTableCell align="center"></BorderRightTableCell>
-                        {sortedItems.length > 0 &&
+                        {sortedItems?.length > 0 &&
                           sortedItems.map((item: string, index: number) => {
                             const { summary } = manifest[routeId];
                             if (summary[item] === 0) {
@@ -156,18 +155,18 @@ export const ManifestPrint = forwardRef(
                         manifest[routeId].details.map(
                           (user: any, index: number) => {
                             const { summary } = manifest[routeId];
-                            let clientName = user.user.clientName
-                              .split('-')
-                              .slice(0, 2)
-                              .join(' - ');
+                            // let clientName = user.user.clientName
+                            //   .split('-')
+                            //   .slice(0, 2)
+                            //   .join(' - ');
 
-                            if (
-                              clientName?.split(' - ')[1] == ' C.O.D' ||
-                              clientName?.split(' - ')[1] == ' MONTHLY' ||
-                              clientName?.split(' - ')[1] == ' W.C.O.D'
-                            ) {
-                              clientName = clientName.split(' - ')[0];
-                            }
+                            // if (
+                            //   clientName?.split(' - ')[1] == ' C.O.D' ||
+                            //   clientName?.split(' - ')[1] == ' MONTHLY' ||
+                            //   clientName?.split(' - ')[1] == ' W.C.O.D'
+                            // ) {
+                            //   clientName = clientName.split(' - ')[0];
+                            // }
 
                             return (
                               <TableRow key={index}>
@@ -180,7 +179,7 @@ export const ManifestPrint = forwardRef(
                                     fontWeight: 'bold',
                                   }}
                                 >
-                                  {clientName} -{' '}
+                                  {user?.user?.displayName} -{' '}
                                   {user?.user?.preference?.paymentType} -{' '}
                                   {user.user.clientId}
                                 </BorderRightTableCell>
@@ -236,7 +235,7 @@ export const ManifestPrint = forwardRef(
                         )}
                     </TableBody>
                   </Table>
-                  {index < Object.keys(manifest).length - 1 && (
+                  {index < Object.keys(manifest)?.length - 1 && (
                     <div className="page-break"></div>
                   )}
                 </Fragment>

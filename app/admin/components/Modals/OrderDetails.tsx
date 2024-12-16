@@ -36,6 +36,7 @@ export default function OrderDetails({
   handleUpdateItem,
 }: IProps) {
   const billPrintRef: any = useRef();
+  console.log('ORDER DETAILS RUN');
 
   const handlePrinting = useReactToPrint({
     content: () => billPrintRef.current,

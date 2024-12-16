@@ -2,6 +2,7 @@
 import {
   AlertColor,
   Box,
+  Button,
   Checkbox,
   MenuItem,
   Paper,
@@ -45,6 +46,10 @@ const ClientOrdersTable = ({
   mutateOrders,
 }: PropTypes) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [openEdit, setOpenEdit] = useState<any>({
+    open: false,
+    order: clientOrders[0],
+  });
   const windowDimensions = useWindowDimensions();
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
@@ -187,12 +192,18 @@ const ClientOrdersTable = ({
               targetObj={order}
               handleDelete={handleDeleteOrder}
             />
-            <EditReportOrder
+            <Button onClick={() => {
+              console.log('open edit')
+              setOpenEdit(() => ({order, open: true }))}
+            }>
+                Edit
+            </Button>
+            {/* <EditReportOrder
               // subCategories={subCategories}
               order={order}
               showNotification={showNotification}
               handleUpdateOrderUI={handleUpdateOrderUI}
-            />
+            /> */}
           </Box>
         </TableCell>
       </>
@@ -227,6 +238,14 @@ const ClientOrdersTable = ({
 
   return (
     <>
+      <EditReportOrder 
+        order={openEdit.order}
+        open={openEdit.open}
+        showNotification={showNotification}
+        handleUpdateOrderUI={handleUpdateOrderUI}
+        onClose={() => setOpenEdit((prevState: any) => ({ ...prevState, open: false }))}
+
+      />
       <LoadingModal open={isLoading} />
       <Paper style={{ height: windowDimensions.height - 250, width: '100%' }}>
         <TableVirtuoso
