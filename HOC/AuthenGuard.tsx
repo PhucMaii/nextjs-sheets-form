@@ -50,13 +50,13 @@ export default function AuthenGuard({ children }: any) {
         (!isSessionValidating && Object.keys(session).length === 0)) &&
       pathname !== '/driver/login'
     ) {
-      router.push('/auth/login');
+      router.push('/');
     } else if (
       user &&
       (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
       user.data.role === 'client'
     ) {
-      router.push('/');
+      router.push('/user/overview');
     } else if (
       user &&
       !pathname?.startsWith('/admin') &&

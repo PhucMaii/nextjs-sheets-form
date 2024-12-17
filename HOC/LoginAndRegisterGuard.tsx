@@ -34,7 +34,7 @@ export default function LoginAndRegisterGuard({ children }: any) {
     } else if (user?.data?.role === 'admin') {
       router.push('/admin/orders');
     } else if (user?.data?.role === 'client') {
-      router.push('/');
+      router.push('/user/overview');
     }
   }, [user, driver]);
 

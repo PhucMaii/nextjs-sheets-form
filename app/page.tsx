@@ -1,10 +1,11 @@
 import React from 'react';
-import MainPage from './overview/overviewPage';
+import AuthenGuard from '@/HOC/AuthenGuard';
+import { Typography } from '@mui/material';
 
 export default function page() {
   return (
-    <>
-      <MainPage />
-    </>
+    <AuthenGuard>
+        <Typography>LANDING PAGE</Typography>
+    </AuthenGuard>
   );
 }

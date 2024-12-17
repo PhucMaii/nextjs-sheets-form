@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import { SplashScreen } from '../../HOC/AuthenGuard';
+import Sidebar from '../../components/Sidebar';
+import { SplashScreen } from '../../../HOC/AuthenGuard';
 import {
   Box,
   IconButton,
@@ -11,9 +11,9 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { ShadowSection } from '../admin/reports/styled';
+import { ShadowSection } from '../../admin/reports/styled';
 import axios from 'axios';
-import { API_URL } from '../utils/enum';
+import { API_URL } from '../../utils/enum';
 import { useSession } from 'next-auth/react';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';

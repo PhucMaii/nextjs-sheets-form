@@ -230,22 +230,22 @@ export const clientTabs = [
   {
     name: 'Overview',
     icon: DashboardIcon,
-    path: '/',
+    path: '/user/overview',
   },
   {
     name: 'History',
     icon: HistoryIcon,
-    path: '/history',
+    path: '/user/history',
   },
   {
     name: 'Order',
     icon: AddBoxIcon,
-    path: '/order',
+    path: '/user/order',
   },
   {
     name: 'Account',
     icon: AccountCircleIcon,
-    path: '/account',
+    path: '/user/account',
   },
 ];
 

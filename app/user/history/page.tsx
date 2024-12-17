@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { SplashScreen } from '../../HOC/AuthenGuard';
-import Sidebar from '../components/Sidebar';
+import { SplashScreen } from '../../../HOC/AuthenGuard';
+import Sidebar from '../../components/Sidebar';
 import {
   Box,
   Grid,
@@ -16,26 +16,26 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PendingIcon from '@mui/icons-material/Pending';
-import SelectDateRange from '../admin/components/SelectDateRange';
-import { generateMonthRange } from '../utils/time';
-import { Order } from '../admin/orders/page';
+import SelectDateRange from '../../admin/components/SelectDateRange';
+import { generateMonthRange } from '../../utils/time';
+import { Order } from '../../admin/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';
-import { API_URL, ORDER_STATUS } from '../utils/enum';
-import OrderAccordion from '../components/OrderAccordion';
+import { API_URL, ORDER_STATUS } from '../../utils/enum';
+import OrderAccordion from '../../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
-import { DropdownItemContainer } from '../admin/orders/styled';
+import { DropdownItemContainer } from '../../admin/orders/styled';
 import {
   errorColor,
   infoColor,
   successColor,
   warningColor,
-} from '../../theme/color';
+} from '../../../theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import useSWR from 'swr';
-import ErrorComponent from '../admin/components/ErrorComponent';
+import ErrorComponent from '../../admin/components/ErrorComponent';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
