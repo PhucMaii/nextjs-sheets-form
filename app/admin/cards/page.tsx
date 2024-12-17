@@ -45,8 +45,8 @@ import LoadingModal from '../components/Modals/LoadingModal';
 export default function CardManagement() {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [selectedViewObj, setSelectedViewObj] = useState<any>({
-    type: null,
-    id: -1,
+    type: VIEW_TYPE.ALL,
+    id: 0,
   });
   const [currentMethod, setCurrentMethod] = useState<IPaymentMethod | null>(
     null,

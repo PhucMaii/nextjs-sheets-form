@@ -27,7 +27,7 @@ export default function CardUsedByTable({ data }: IProps) {
             return (
               <TableRow key={index}>
                 <TableCell>{spentBy}</TableCell>
-                <TableCell>${data[spentBy].amount}</TableCell>
+                <TableCell>${data[spentBy].amount?.toFixed(2)}</TableCell>
                 <TableCell>{data[spentBy].count}</TableCell>
               </TableRow>
             );

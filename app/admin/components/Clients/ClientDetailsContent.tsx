@@ -7,7 +7,7 @@ import AreaChart from '../Charts/AreaChart';
 import { ShadowSection } from '../../reports/styled';
 import ClientOrderSummary from './ClientOrderSummary';
 import ManifestTable from '../Tables/ManifestTable';
-import { generateManifest } from '@/pages/api/admin/orders/overview';
+import { generateManifest } from '@/pages/api/utils/overview';
 
 interface IProps {
   orders: any;
