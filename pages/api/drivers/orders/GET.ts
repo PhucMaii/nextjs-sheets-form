@@ -10,8 +10,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
 import { days } from '@/app/lib/constant';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
-import { generateManifest } from '../../admin/orders/overview';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { generateManifest } from '../../utils/overview';
 
 interface IQuery {
   deliveryDate?: string;
