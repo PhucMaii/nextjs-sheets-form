@@ -50,6 +50,10 @@ const ClientOrdersTable = ({
     open: false,
     order: clientOrders[0],
   });
+  const [openDelete, setOpenDelete] = useState<any>({
+    open: false,
+    order: clientOrders[0],
+  })
   const windowDimensions = useWindowDimensions();
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
@@ -187,13 +191,13 @@ const ClientOrdersTable = ({
         </TableCell>
         <TableCell>
           <Box display="flex" gap={1}>
-            <DeleteModal
+            {/* <DeleteModal
               includedButton
               targetObj={order}
               handleDelete={handleDeleteOrder}
-            />
+            /> */}
+            <Button color="error" onClick={() => setOpenDelete(() => ({ order, open: true }))}>Delete</Button>
             <Button onClick={() => {
-              console.log('open edit')
               setOpenEdit(() => ({order, open: true }))}
             }>
                 Edit
@@ -238,6 +242,13 @@ const ClientOrdersTable = ({
 
   return (
     <>
+      <DeleteModal
+        open={openDelete.open}
+        handleCloseModal={() => setOpenDelete((prevState: any) => ({ ...prevState, open: false }))}
+        targetObj={openDelete.order}
+        handleDelete={handleDeleteOrder}
+        showTargetObj={openDelete.order.user.clientName}
+      />
       <EditReportOrder 
         order={openEdit.order}
         open={openEdit.open}

@@ -221,7 +221,7 @@ export const ComponentToPrint = forwardRef(
               </Grid>
 
               <Grid item xs={12} sx={{ my: 1 }}>
-                <Divider />
+                <Divider sx={{backgroundColor: 'black'}}/>
               </Grid>
               <Grid item xs={6}>
                 <Typography

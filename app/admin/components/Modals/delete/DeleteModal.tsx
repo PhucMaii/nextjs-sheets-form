@@ -15,6 +15,7 @@ interface PropTypes {
   includedIconButton?: boolean;
   open?: boolean;
   handleCloseModal?: () => void;
+  showTargetObj?: any;
 }
 
 export default function DeleteModal({
@@ -24,6 +25,7 @@ export default function DeleteModal({
   includedIconButton = false,
   open,
   handleCloseModal,
+  showTargetObj
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -86,7 +88,7 @@ export default function DeleteModal({
         >
           <ErrorIcon sx={{ color: errorColor, fontSize: 50 }} />
           <Typography variant="h6" sx={{ color: grey[600] }} fontWeight="bold">
-            Are you sure to delete ?
+            Are you sure to delete {showTargetObj} ?
           </Typography>
           <Box display="flex" gap={2}>
             <LoadingButton
