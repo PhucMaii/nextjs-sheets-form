@@ -140,6 +140,20 @@ export default function CardManagement() {
       return null;
     }
 
+    if (selectedViewObj.type === VIEW_TYPE.ALL) {
+      return {
+        id: -1,
+        name: 'OVERVIEW',
+        type: PAYMENT_METHOD_TYPE.CASH,
+        transactions: [],
+        balance: 0,
+        createdAt: '',
+        createdBy: '',
+        updatedBy: null,
+        updatedAt: null,
+      }
+    }
+
     if (selectedViewObj.type === VIEW_TYPE.PAYMENT_METHOD) {
       return paymentMethods?.data.find(
         (method: IPaymentMethod) => method.id === selectedViewObj.id,
@@ -151,7 +165,7 @@ export default function CardManagement() {
     );
     return {
       id: -1,
-      name: selectedVendor.name,
+      name: selectedVendor?.name,
       type: PAYMENT_METHOD_TYPE.CASH,
       transactions: [],
       balance: 0,
@@ -272,7 +286,7 @@ export default function CardManagement() {
               <IconButton
                 color="primary"
                 onClick={() => setOpenModal({ ...openModal, editModal: true })}
-                disabled={selectedViewObj.id === -1}
+                disabled={selectedViewObj.id === -1 || selectedViewObj.type === VIEW_TYPE.VENDOR || selectedViewObj.type === VIEW_TYPE.ALL}
               >
                 <EditIcon />
               </IconButton>
@@ -281,7 +295,7 @@ export default function CardManagement() {
                 onClick={() =>
                   setOpenModal({ ...openModal, deleteModal: true })
                 }
-                disabled={selectedViewObj.id === -1}
+                disabled={selectedViewObj.id === -1 || selectedViewObj.type === VIEW_TYPE.VENDOR || selectedViewObj.type === VIEW_TYPE.ALL}
               >
                 <DeleteIcon />
               </IconButton>
@@ -296,6 +310,7 @@ export default function CardManagement() {
               <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
                 -- Choose Payment Method --
               </MenuItem>
+              <MenuItem value={JSON.stringify({ type: VIEW_TYPE.ALL, id: 0 })}>All</MenuItem>
               <ListSubheader>Payment Methods</ListSubheader>
               {paymentMethods &&
                 paymentMethods.data.map((method: IPaymentMethod) => (

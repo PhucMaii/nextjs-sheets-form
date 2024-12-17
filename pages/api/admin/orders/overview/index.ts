@@ -1,9 +1,8 @@
-import { Order } from '@/app/admin/orders/page';
 // import { officiallyStartDate } from '@/app/lib/constant';
-import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date';
-import { checkIsKorean } from '@/pages/api/utils/korean';
+import { generateManifest, getCustomersInDebt, getLastMonthExpenses, getLastMonthRevenue, revenueGroupByDeliveryDate } from '@/pages/api/utils/overview';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -72,6 +71,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    // Calculate overview data
     const sortedThisMonthOrders = sortByDeliveryDate(orders);
 
     const revenue = sortedThisMonthOrders.reduce((acc: number, order: any) => {
@@ -87,10 +87,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const thisMonthRevenueReport: any = revenueGroupByDeliveryDate(
       sortedThisMonthOrders,
     );
-    const lastMonthRevenueReport = await getLastMonthRevenue(
+    const lastMonthRevenueReport: any = await getLastMonthRevenue(
       thisMonthRevenueReport,
       formattedStartDate,
     );
+
+    const revenueChange = ((revenue - lastMonthRevenueReport.revenue) / lastMonthRevenueReport.revenue) * 100;
+
+    
+    // EXPENSES
+    const expenses = await prisma.expense.findMany({
+      where: {
+        date: {
+          in: datesInRange
+        },
+      },
+    });
+    const totalExpenses = expenses.reduce((acc: number, expense: any) => {
+      return acc + expense.amount;
+    }, 0);
+    const lastMonthExpenses: any = await getLastMonthExpenses(formattedStartDate);
+    const totalExpensesChange = ((totalExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
+
+    // PROFIT
+    const profit = revenue - totalExpenses;
+    const lastMonthProfit = lastMonthRevenueReport.revenue - lastMonthExpenses;
+    const profitChange = ((profit - lastMonthProfit) / lastMonthProfit) * 100;
+
+    console.log('profitChange', {profitChange, lastMonthProfit, lastMonthREvenue: lastMonthRevenueReport.revenue, lastMonthExpenses});
 
     const manifest = generateManifest(sortedThisMonthOrders, revenue);
 
@@ -98,20 +122,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       manifest,
       numberOfOrders: sortedThisMonthOrders.length,
       revenue,
+      revenueChange,
       ongoingOrders: ongoingOrders.length,
       unpaidAmount,
+      expenses: totalExpenses,
+      expensesChange: totalExpensesChange,
+      profit,
+      profitChange,
+
     };
 
     // Get beansprout data
     // Loop through each order, count the quantity of beansprouts if user.subCategoryId = 1 and = 2
-    const BKRevenue = 0;
-    const BKQuantity = 0;
-    const PPQuantity = 0;
-    const PPRevenue = 0;
-    const totalItems = 0;
+    // const BKRevenue = 0;
+    // const BKQuantity = 0;
+    // const PPQuantity = 0;
+    // const PPRevenue = 0;
+    // const totalItems = 0;
 
-    const BKPercentage = (BKRevenue / revenue) * 100;
-    const PPPercentage = (PPRevenue / revenue) * 100;
+    // const BKPercentage = (BKRevenue / revenue) * 100;
+    // const PPPercentage = (PPRevenue / revenue) * 100;
 
     // Calculate customers in debt
     const debtRange = generateListOfDateString(
@@ -156,22 +186,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         overviewData,
         reports: {
           thisMonth: thisMonthRevenueReport.values,
-          lastMonth: lastMonthRevenueReport,
+          lastMonth: lastMonthRevenueReport.chartData,
           timeSeries: thisMonthRevenueReport.keys, // Time series for displaying time for the chart
         },
-        beansprouts: {
-          BK: {
-            quantity: BKQuantity,
-            revenue: BKRevenue,
-            percentage: BKPercentage,
-          },
-          PP: {
-            quantity: PPQuantity,
-            revenue: PPRevenue,
-            percentage: PPPercentage,
-          },
-          totalItems,
-        },
+        // beansprouts: {
+        //   BK: {
+        //     quantity: BKQuantity,
+        //     revenue: BKRevenue,
+        //     percentage: BKPercentage,
+        //   },
+        //   PP: {
+        //     quantity: PPQuantity,
+        //     revenue: PPRevenue,
+        //     percentage: PPPercentage,
+        //   },
+        //   totalItems,
+        // },
       },
       message: 'Fetch Overview Data Successfully',
     });
@@ -184,156 +214,3 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAdminAuthGuard(handler);
-
-export const generateManifest = (orders: any, revenue: number = 0) => {
-  const itemList = orders.flatMap((order: any) => {
-    return order.items;
-  });
-
-  if (revenue === 0) {
-    const manifest = itemList.reduce((acc: any, item: any) => {
-      const { name } = item;
-
-      let itemKey = name;
-
-      if (checkIsKorean(itemKey.split(' - ')[0])) {
-        itemKey = itemKey.split(' - ')[1];
-      } else {
-        itemKey = itemKey.includes('KONGNAMUL')
-          ? itemKey.split(' - ')[1]
-          : itemKey;
-      }
-
-      if (!acc[itemKey]) {
-        acc[itemKey] = item.quantity;
-        return acc;
-      }
-
-      acc[itemKey] += item.quantity;
-      return acc;
-    }, {});
-    return manifest;
-  }
-
-  const manifest = itemList.reduce((acc: any, item: any) => {
-    const { name } = item;
-
-    let itemKey = name;
-
-    if (checkIsKorean(itemKey.split(' - ')[0])) {
-      itemKey = itemKey.split(' - ')[1];
-    } else {
-      itemKey = itemKey.includes('KONGNAMUL')
-        ? itemKey.split(' - ')[1]
-        : itemKey;
-    }
-    const itemPrice = item.quantity * item.price;
-
-    if (!acc[itemKey]) {
-      const percentageTake = (itemPrice / revenue) * 100;
-      acc[itemKey] = {
-        quantity: item.quantity,
-        price: itemPrice,
-        percentage: percentageTake.toFixed(2),
-      };
-      return acc;
-    }
-
-    const newTotalPrice = acc[itemKey].price + itemPrice;
-    const newPercentageTake = (newTotalPrice / revenue) * 100;
-    acc[itemKey] = {
-      quantity: acc[itemKey].quantity + item.quantity,
-      price: newTotalPrice,
-      percentage: newPercentageTake.toFixed(2),
-    };
-    return acc;
-  }, {});
-
-  return manifest;
-};
-
-const getLastMonthRevenue = async (
-  // orders: any,
-  // startDate: Date,
-  thisMonthRevenue: any[],
-  startDate: Date,
-) => {
-  const prisma = new PrismaClient();
-  const lastMonth = startDate.getMonth();
-
-  const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 2, 1);
-  const lastMonthEnd = new Date(
-    startDate.getFullYear(),
-    startDate.getMonth() - 1,
-    1,
-  );
-  lastMonthEnd.setDate(0);
-
-  const datesInRange = generateListOfDateString(lastMonthStart, lastMonthEnd);
-  const orders: any = await prisma.orders.findMany({
-    where: {
-      status: {
-        in: [
-          ORDER_STATUS.COMPLETED,
-          ORDER_STATUS.DELIVERED,
-          ORDER_STATUS.INCOMPLETED,
-        ],
-      },
-      deliveryDate: {
-        in: datesInRange,
-      },
-    },
-    include: {
-      items: true,
-      user: true,
-    },
-  });
-  const revenueByDate = revenueGroupByDeliveryDate(orders);
-  const formatLengthRevenue = revenueByDate.values.slice(
-    0,
-    thisMonthRevenue.values.length,
-  );
-  return formatLengthRevenue;
-};
-
-const getCustomersInDebt = (debtOrders: Order[]) => {
-  const customersInDebt = debtOrders.reduce((acc: any, order: any) => {
-    if (order.user.role === USER_ROLE.ADMIN) {
-      return acc;
-    }
-    const key = `${order.user.clientName} __ ${order.user.clientId}`;
-
-    if (!acc[key]) {
-      acc[key] = [1, order.totalPrice];
-      return acc;
-    }
-
-    const newTotalPrice = acc[key][1] + order.totalPrice;
-    const newNumberOfOrders = acc[key][0] + 1;
-    acc[key] = [newNumberOfOrders, newTotalPrice];
-    return acc;
-  }, {});
-
-  return customersInDebt;
-};
-
-const revenueGroupByDeliveryDate = (orders: any) => {
-  const revenueByDate = orders.reduce((acc: any, order: any) => {
-    const key = order.deliveryDate;
-
-    if (acc[key]) {
-      const newTotalPrice =
-        Math.round((acc[key] + order.totalPrice) * 100) / 100;
-      acc[key] = newTotalPrice;
-    } else {
-      acc[key] = Math.round(order.totalPrice * 100) / 100;
-    }
-
-    return acc;
-  }, {});
-
-  return {
-    values: Object.values(revenueByDate),
-    keys: Object.keys(revenueByDate),
-  };
-};

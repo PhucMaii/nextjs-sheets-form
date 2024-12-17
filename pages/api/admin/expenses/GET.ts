@@ -28,9 +28,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedStartDate,
       formattedEndDate,
     );
-    console.log({ formattedStartDate, formattedEndDate, listOfDateString });
 
-    if (!id || Number(id) < 0) {
+    if (!id || Number(id) <= 0) {
       const expenses = await prisma.expense.findMany({
         where: {
           date: {
@@ -59,8 +58,25 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       const sortedExpensesByDate = sortExpenseByDate(expenses);
 
+      const transactionBasedOnDate = sortedExpensesByDate.reduce(
+        (acc: any, expense: any) => {
+          if (!acc[expense.date]) {
+            acc[expense.date] = 0;
+          }
+  
+          acc[expense.date] += expense.amount;
+          return acc;
+        },
+        {},
+      );
+      const chartData = generateChartDataForm(
+        transactionBasedOnDate,
+        listOfDateString,
+      );
+
       return res.status(200).json({
         data: sortedExpensesByDate,
+        chartData,
         message: 'Fetch Expenses successfully',
       });
     }

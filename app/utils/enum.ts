@@ -24,6 +24,7 @@ export enum API_URL {
 export enum VIEW_TYPE {
   VENDOR = 'vendor',
   PAYMENT_METHOD = 'paymentMethod',
+  ALL = 'all',
 }
 
 export enum COD_STATUS {

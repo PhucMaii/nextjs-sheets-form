@@ -13,7 +13,10 @@ interface PropTypes {
   textColor?: string;
   iconBackground?: string;
   extraText?: any;
+  extraTextIcon?: any;
   fullHeight?: boolean;
+  helperTextStyle?: any;
+  extraTextStyle?: any;
 }
 
 export default function OverviewCard({
@@ -26,7 +29,10 @@ export default function OverviewCard({
   textColor,
   iconBackground,
   extraText,
+  extraTextIcon,
   fullHeight,
+  helperTextStyle,
+  extraTextStyle,
 }: PropTypes) {
   return (
     <CardStyled
@@ -43,7 +49,7 @@ export default function OverviewCard({
           </IconBackground>
         </Grid>
         <Grid item xs={8}>
-          <Box display="flex" alignItems="flex-end">
+          <Box display="flex" alignItems="flex-end" gap={1}>
             <Typography
               fontWeight="bold"
               variant="h4"
@@ -52,15 +58,18 @@ export default function OverviewCard({
               {value}
             </Typography>
             {extraText && (
-              <Typography variant="h6" sx={{ color: extraText.color }}>
-                {extraText.text}
-              </Typography>
+              <Box display="flex" alignItems="center">
+                {extraTextIcon}
+                <Typography variant="h6" sx={{ color: extraText.color, ...extraTextStyle }}>
+                  {extraText.text}
+                </Typography>
+              </Box>
             )}
           </Box>
           {helperText && (
             <Typography
               fontWeight="bold"
-              sx={{ color: textColor ? textColor : grey[500] }}
+              sx={{ color: textColor ? textColor : grey[500], ...helperTextStyle }}
               variant="subtitle1"
             >
               {helperText}
