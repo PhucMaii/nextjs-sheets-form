@@ -76,8 +76,8 @@ export default function InventoryTable({
                       );
                       return (
                         <Typography>
-                          {vItem?.vendor?.name} -{' '}
-                          <strong>${smallestUnit?.unitPrice}</strong>
+                          {vItem?.vendor?.name} {' '}
+                          <strong>(${smallestUnit?.unitPrice})</strong>
                         </Typography>
                       );
                     })}
