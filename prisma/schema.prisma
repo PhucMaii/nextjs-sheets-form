@@ -57,8 +57,8 @@ model SubCategory {
 }
 
 model Item {
-  id              Int     @id @default(autoincrement())
-  name            String  @db.VarChar(255)
+  id              Int      @id @default(autoincrement())
+  name            String   @db.VarChar(255)
   categoryId      Int
   subCategoryId   Int?
   price           Float
@@ -77,8 +77,8 @@ model Item {
 }
 
 model OrderedItems {
-  id               Int    @id @default(autoincrement())
-  name             String @db.VarChar(255)
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(255)
   price            Float
   orderId          Int?
   scheduledOrderId Int?
@@ -253,10 +253,11 @@ model Vendor {
 }
 
 model InventoryItem {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
-  hasPST     Boolean?
-  hasGST     Boolean?
+  hasPST    Boolean?
+  hasGST    Boolean?
+  typeId    Int?
   createdAt String
   createdBy String
 
@@ -264,6 +265,13 @@ model InventoryItem {
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
+  type         ItemType?      @relation(fields: [typeId], references: [id])
+}
+
+model ItemType {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  InventoryItem InventoryItem[]
 }
 
 model VendorItem {
@@ -297,7 +305,7 @@ model InventoryUnit {
   id           Int    @id @default(autoincrement())
   vendorItemId Int
   unit         String
-  unitPrice Float @db.Double
+  unitPrice    Float  @db.Double
   ratio        Int
   createdAt    String
   createdBy    String
