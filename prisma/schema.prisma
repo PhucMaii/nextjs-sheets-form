@@ -257,7 +257,7 @@ model InventoryItem {
   name      String
   hasPST    Boolean?
   hasGST    Boolean?
-  typeId    Int?
+  preferenceId    Int?
   createdAt String
   createdBy String
 
@@ -265,7 +265,18 @@ model InventoryItem {
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
-  type         ItemType?      @relation(fields: [typeId], references: [id])
+  preference         ItemPreference?      @relation(fields: [preferenceId], references: [id], onDelete: NoAction)
+}
+
+model ItemPreference {
+  id  Int    @id @default(autoincrement())
+  image  String
+  
+  inventoryItemId Int
+  typeId  Int
+
+  inventoryItem InventoryItem?
+  type   ItemType? @relation(fields: [typeId], references: [id])
 }
 
 model ItemType {

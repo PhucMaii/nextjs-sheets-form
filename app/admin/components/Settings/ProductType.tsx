@@ -20,6 +20,7 @@ import EditProductType from '../Modals/edit/EditProductType';
 import { IProductType } from '@/app/utils/type';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function ProductType() {
   const [menuState, setMenuState] = useState<{
@@ -34,6 +35,7 @@ export default function ProductType() {
   const [edittingType, setEdittingType] = useState<null | IProductType>(null);
   const [deletingType, setDeletingType] = useState<null | IProductType>(null);
   const { showNotification, NotificationComp } = useNotification();
+  const router = useRouter();
 
   const [types] = SWRFetchData(`${API_URL.ADMIN}/productTypes`);
   
@@ -110,6 +112,7 @@ export default function ProductType() {
                   boxShadow: 'rgba(0, 0, 0, 0.24) 0px 3px 8px',
                   ':hover': { cursor: 'pointer' },
                 }}
+                onClick={() => router.push('/admin/productType/' + type.id)}
                 key={index}
               >
                 <Box

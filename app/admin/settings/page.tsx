@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { Box, Tab, Tabs, Typography } from '@mui/material';
 import { settingsTabs } from '@/app/lib/constant';
@@ -8,9 +8,22 @@ import EditProfile from '../components/Settings/EditProfile';
 import ErrorComponent from '../components/ErrorComponent';
 import Announcement from '../components/Settings/Announcement';
 import ProductType from '../components/Settings/ProductType';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SettingsPage() {
   const [tabIndex, setTabIndex] = useState<number>(0);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  console.log(searchParams?.get('tab'), 'searchParams');
+
+  useEffect(() => {
+    const tab = searchParams?.get('tab');
+
+    if (tab) {
+      setTabIndex(parseInt(tab));
+    }
+  }, [searchParams?.get('tab')]);
   return (
     <Sidebar>
       <Typography variant="h5" color={blueGrey[800]} sx={{ mb: 2 }}>
@@ -20,7 +33,7 @@ export default function SettingsPage() {
         <Tabs
           aria-label="basic tabs"
           value={tabIndex}
-          onChange={(e, newValue) => setTabIndex(newValue)}
+          onChange={(e, newValue) => router.push("/admin/settings?tab=" + newValue)}
           variant="scrollable"
           scrollButtons="auto"
           //   sx={{ width: '100%' }}
