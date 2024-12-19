@@ -26,7 +26,6 @@ import { LoadingButton } from '@mui/lab';
 import InventoryItemSearch from '../Autocomplete/InventoryItemSearch';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import useEditUnit from '@/hooks/unit/useEditUnit';
 
 interface IProps {
@@ -36,7 +35,6 @@ interface IProps {
   codBoardId?: number;
   role: USER_ROLE;
   defaultValue?: any;
-  fetchAdminAndDrivers?: () => void;
 }
 
 export default function StockPurchased({
@@ -46,7 +44,6 @@ export default function StockPurchased({
   codBoardId,
   role,
   defaultValue,
-  fetchAdminAndDrivers,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, onChangeOpen] = useMultipleBoolean({
@@ -763,9 +760,6 @@ export default function StockPurchased({
           <Box display="flex" flexDirection="column" gap={2}>
             <Box display="flex" alignItems="center" gap={1}>
               <Typography variant="h6">Driver</Typography>
-              <IconButton onClick={fetchAdminAndDrivers}>
-                <RefreshIcon />
-              </IconButton>
             </Box>
             <Select
               fullWidth

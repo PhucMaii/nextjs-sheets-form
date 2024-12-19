@@ -39,7 +39,6 @@ import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import LoadingModal from '../components/Modals/LoadingModal';
 
 export default function CardManagement() {
@@ -76,6 +75,9 @@ export default function CardManagement() {
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
   const [transactions] = SWRFetchData(
     `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${selectedViewObj.id}&type=${selectedViewObj.type}`,
+  );
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
   );
 
   const listOfDateString = useMemo(() => {
@@ -132,13 +134,19 @@ export default function CardManagement() {
   }, [selectedViewObj]);
 
   useEffect(() => {
-    fetchAdminsAndDrivers();
-  }, []);
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
+    }
+  }, [adminsAndDriversRes]);
 
-  const fetchAdminsAndDrivers = async () => {
-    const users: any = await getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(users);
-  };
+  // useEffect(() => {
+  //   fetchAdminsAndDrivers();
+  // }, []);
+
+  // const fetchAdminsAndDrivers = async () => {
+  //   const users: any = await getAdminsAndDrivers(showNotification);
+  //   setAdminsAndDrivers(users);
+  // };
 
   const getPaymentMethod = () => {
     if (selectedViewObj.id === -1) {

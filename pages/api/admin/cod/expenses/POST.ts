@@ -6,6 +6,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IBody {
   date: string;
   amount: number;
+  subTotal: number;
+  GST: number;
+  PST: number;
   description: string;
   paymentMethodId: number;
   spentBy: string;
@@ -23,6 +26,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       createdBy,
       date,
       amount,
+      subTotal,
+      GST,
+      PST,
       description,
       paymentMethodId,
       spentBy,
@@ -104,6 +110,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         amount,
         description,
         paymentMethodId,
+        subTotal,
+        GST,
+        PST,
         spentBy,
         createdAt,
         createdBy: createdBy ? createdBy : `Admin - ${user?.clientName}`,
