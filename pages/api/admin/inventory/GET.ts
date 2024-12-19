@@ -68,9 +68,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               vendorItem: {
                 include: {
                   vendor: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           vendorItem: {
             include: {
@@ -112,10 +112,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             vendorItem: {
               include: {
-                vendor: true
-              }
-            }
-          }
+                vendor: true,
+              },
+            },
+          },
         },
         vendorItem: {
           include: {

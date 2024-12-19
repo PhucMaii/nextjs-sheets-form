@@ -53,7 +53,7 @@ const ClientOrdersTable = ({
   const [openDelete, setOpenDelete] = useState<any>({
     open: false,
     order: clientOrders[0],
-  })
+  });
   const windowDimensions = useWindowDimensions();
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
@@ -196,11 +196,18 @@ const ClientOrdersTable = ({
               targetObj={order}
               handleDelete={handleDeleteOrder}
             /> */}
-            <Button color="error" onClick={() => setOpenDelete(() => ({ order, open: true }))}>Delete</Button>
-            <Button onClick={() => {
-              setOpenEdit(() => ({order, open: true }))}
-            }>
-                Edit
+            <Button
+              color="error"
+              onClick={() => setOpenDelete(() => ({ order, open: true }))}
+            >
+              Delete
+            </Button>
+            <Button
+              onClick={() => {
+                setOpenEdit(() => ({ order, open: true }));
+              }}
+            >
+              Edit
             </Button>
             {/* <EditReportOrder
               // subCategories={subCategories}
@@ -244,18 +251,21 @@ const ClientOrdersTable = ({
     <>
       <DeleteModal
         open={openDelete.open}
-        handleCloseModal={() => setOpenDelete((prevState: any) => ({ ...prevState, open: false }))}
+        handleCloseModal={() =>
+          setOpenDelete((prevState: any) => ({ ...prevState, open: false }))
+        }
         targetObj={openDelete.order}
         handleDelete={handleDeleteOrder}
         showTargetObj={openDelete.order.user.clientName}
       />
-      <EditReportOrder 
+      <EditReportOrder
         order={openEdit.order}
         open={openEdit.open}
         showNotification={showNotification}
         handleUpdateOrderUI={handleUpdateOrderUI}
-        onClose={() => setOpenEdit((prevState: any) => ({ ...prevState, open: false }))}
-
+        onClose={() =>
+          setOpenEdit((prevState: any) => ({ ...prevState, open: false }))
+        }
       />
       <LoadingModal open={isLoading} />
       <Paper style={{ height: windowDimensions.height - 250, width: '100%' }}>

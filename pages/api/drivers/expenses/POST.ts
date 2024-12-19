@@ -6,6 +6,9 @@ import { TRANSACTION_STATUS } from '@/app/utils/enum';
 
 interface IBody {
   amount: number;
+  PST: number;
+  GST: number;
+  subTotal: number;
   date: string;
   paymentMethodId: number;
   description: string;
@@ -19,6 +22,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const {
       amount,
+      PST,
+      GST,
+      subTotal,
       date,
       paymentMethodId,
       description,
@@ -101,6 +107,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newExpense = await prisma.expense.create({
       data: {
         amount: amount,
+        subTotal: subTotal,
+        PST: PST,
+        GST: GST,
         date: date,
         paymentMethodId: paymentMethodId,
         description: description,

@@ -56,11 +56,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (!deliveryDate || !items || !createdAt) {
-      return res
-        .status(400)
-        .json({
-          error: 'Missing required fields. Please refresh and try again',
-        });
+      return res.status(400).json({
+        error: 'Missing required fields. Please refresh and try again',
+      });
     }
 
     let id = userId;
@@ -144,7 +142,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         //     return { ...item, totalPrice: itemTotalPrice, totalPrevPrice };
         //   },
         // );
-        const itemListWithTotalPrice = formatItemsWithTotalPrice(newOrder.items);
+        const itemListWithTotalPrice = formatItemsWithTotalPrice(
+          newOrder.items,
+        );
 
         await pusherServer?.trigger('admin', 'incoming-order', {
           ...newOrder,
@@ -210,11 +210,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     //   return { ...item, totalPrice: itemTotalPrice };
     // });
-    const itemListWithTotalPrice = formatItemsWithTotalPrice(newOrder?.items || []);
+    const itemListWithTotalPrice = formatItemsWithTotalPrice(
+      newOrder?.items || [],
+    );
 
     const itemHasQuantity = itemListWithTotalPrice.filter((item: any) => {
       return item.quantity > 0;
-    })
+    });
 
     await pusherServer?.trigger('admin', 'incoming-order', {
       ...newOrder,

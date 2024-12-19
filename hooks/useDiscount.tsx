@@ -1,32 +1,36 @@
-import { IItem } from "@/app/utils/type";
-import { Typography } from "@mui/material";
-import { useMemo } from "react";
+import { IItem } from '@/app/utils/type';
+import { Typography } from '@mui/material';
+import { useMemo } from 'react';
 
 export const useDiscount = (items: IItem[]) => {
-    const discountPrice = useMemo(() => {
-        const isDiscount = items.some((item: any) => item?.isShowDiscount && item?.prevPrice);
-    
-        if (!isDiscount) {
-          return 0;
-        }
-    
-        const discount = items.reduce((acc: number, item: any) => {
-          if (item?.isShowDiscount && item?.prevPrice) {
-            return acc + item?.prevPrice * item.quantity;
-          }
-    
-          return acc + item.totalPrice;
-        }, 0);
-    
-        return discount;
-    }, [items]);
-
-    const DiscountText = (
-        <Typography sx={{ textDecoration: 'line-through' }} color="error">${discountPrice.toFixed(2)}</Typography>
+  const discountPrice = useMemo(() => {
+    const isDiscount = items.some(
+      (item: any) => item?.isShowDiscount && item?.prevPrice,
     );
 
-    return {
-        discountPrice,
-        DiscountText
+    if (!isDiscount) {
+      return 0;
     }
-}
+
+    const discount = items.reduce((acc: number, item: any) => {
+      if (item?.isShowDiscount && item?.prevPrice) {
+        return acc + item?.prevPrice * item.quantity;
+      }
+
+      return acc + item.totalPrice;
+    }, 0);
+
+    return discount;
+  }, [items]);
+
+  const DiscountText = (
+    <Typography sx={{ textDecoration: 'line-through' }} color="error">
+      ${discountPrice.toFixed(2)}
+    </Typography>
+  );
+
+  return {
+    discountPrice,
+    DiscountText,
+  };
+};

@@ -17,9 +17,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    return res
-      .status(200)
-      .json({ data: admins, message: 'Fetch Admins Successfully' });
+    const drivers = await prisma.driver.findMany({});
+
+    const adminsAndDrivers = [
+      ...admins.map((admin: any) => `Admin - ${admin.clientName}`),
+      ...drivers.map((driver: any) => `Driver - ${driver.name}`),
+    ];
+
+    return res.status(200).json({
+      data: adminsAndDrivers,
+      message: 'Fetch Admins And Drivers Successfully',
+    });
   } catch (error) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

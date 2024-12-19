@@ -158,7 +158,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       dateOrders,
       newBoards,
       routeOnDate,
-      wcodDay,
+      todayString,
     );
 
     return res.status(200).json({

@@ -31,7 +31,9 @@ export default function RouteStatement({
   currentDateRange,
 }: IProps) {
   const [clientOrders, setClientOrders] = useState<any>([]);
-  const [selectedClientStatement, setSelectedClientStatement] = useState<any>([]);
+  const [selectedClientStatement, setSelectedClientStatement] = useState<any>(
+    [],
+  );
   const [dateRange, setDateRange] = useState<any>(currentDateRange);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedDay, setSelectedDay] = useState<string>(() => {
@@ -41,7 +43,10 @@ export default function RouteStatement({
   const [selectedRouteIds, setSelectedRouteIds] = useState<number[]>([]);
   const routeInvoicePrintRef: any = useRef();
 
-  const [clientAlreadyPrintList, setClientAlreadyPrintList] = useLocalStorage('clientAlreadyPrintList', []);
+  const [clientAlreadyPrintList, setClientAlreadyPrintList] = useLocalStorage(
+    'clientAlreadyPrintList',
+    [],
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [routes, _mutate, isValidating] = SWRFetchData(
@@ -49,9 +54,14 @@ export default function RouteStatement({
   );
 
   const allClientChecked = useMemo(() => {
-    const clientAlreadyPrint = clientOrders.filter((client: any) => clientAlreadyPrintList.includes(client.client.id));
+    const clientAlreadyPrint = clientOrders.filter((client: any) =>
+      clientAlreadyPrintList.includes(client.client.id),
+    );
 
-    return selectedClientStatement.length === clientOrders.length - clientAlreadyPrint.length;
+    return (
+      selectedClientStatement.length ===
+      clientOrders.length - clientAlreadyPrint.length
+    );
   }, [selectedClientStatement, clientOrders, clientAlreadyPrintList]);
 
   useEffect(() => {
@@ -98,10 +108,11 @@ export default function RouteStatement({
 
     setClientOrders(formattedClientOrders);
 
-
-    setSelectedClientStatement(formattedClientOrders.filter(  
-      (client: any) => !clientAlreadyPrintList.includes(client.client.id)
-    ));
+    setSelectedClientStatement(
+      formattedClientOrders.filter(
+        (client: any) => !clientAlreadyPrintList.includes(client.client.id),
+      ),
+    );
   };
 
   const handlePrintInvoices = useReactToPrint({
@@ -129,15 +140,19 @@ export default function RouteStatement({
         ),
       );
     }
-  }
+  };
 
   const handleSelectAllClient = () => {
     if (allClientChecked) {
       setSelectedClientStatement([]);
     } else {
-      setSelectedClientStatement(clientOrders.filter((client: any) => !clientAlreadyPrintList.includes(client.client.id)));
+      setSelectedClientStatement(
+        clientOrders.filter(
+          (client: any) => !clientAlreadyPrintList.includes(client.client.id),
+        ),
+      );
     }
-  }
+  };
 
   return (
     <>
@@ -162,7 +177,12 @@ export default function RouteStatement({
             onClick={() => {
               handlePrintInvoices();
               // Push selected clients just printed to local storage
-              const clientAlreadyPrint = [...clientAlreadyPrintList, ...selectedClientStatement.map((client: any) => client.client.id)];
+              const clientAlreadyPrint = [
+                ...clientAlreadyPrintList,
+                ...selectedClientStatement.map(
+                  (client: any) => client.client.id,
+                ),
+              ];
               setClientAlreadyPrintList(clientAlreadyPrint);
               setSelectedClientStatement([]);
             }}
@@ -173,8 +193,15 @@ export default function RouteStatement({
 
           <Divider />
 
-          <Box display="flex" alignItems="center" justifyContent="flex-end" gap={2}>
-            <Typography fontWeight="bold" variant="h6">Statement Date Range:</Typography>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="flex-end"
+            gap={2}
+          >
+            <Typography fontWeight="bold" variant="h6">
+              Statement Date Range:
+            </Typography>
             <SelectDateRange
               dateRange={dateRange}
               setDateRange={setDateRange}
@@ -235,39 +262,70 @@ export default function RouteStatement({
           )}
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Box display="flex" alignItems="center">
-                <Checkbox disabled={clientOrders?.length === 0} checked={allClientChecked} onChange={handleSelectAllClient} />
+                <Checkbox
+                  disabled={clientOrders?.length === 0}
+                  checked={allClientChecked}
+                  onChange={handleSelectAllClient}
+                />
                 <Typography variant="subtitle1">All</Typography>
               </Box>
               <Button>
                 <Box display="flex" gap={1} alignItems="center">
                   <CleaningServicesIcon />
-                  <Typography sx={{fontWeight: "bold"}} onClick={() => setClientAlreadyPrintList([])}>
+                  <Typography
+                    sx={{ fontWeight: 'bold' }}
+                    onClick={() => setClientAlreadyPrintList([])}
+                  >
                     Clear Memory
                   </Typography>
                 </Box>
               </Button>
             </Box>
-            {
-              clientOrders && clientOrders.map((clientOrder: any, index: number) => {
+            {clientOrders &&
+              clientOrders.map((clientOrder: any, index: number) => {
                 return (
                   <Fragment key={index}>
-                    {clientOrder.route.id !== clientOrders[index - 1]?.route?.id ? (
-                      <Typography variant="h6" sx={{mt: 2}}>{clientOrder?.route?.name} - {clientOrder?.route?.driver?.name}</Typography>
+                    {clientOrder.route.id !==
+                    clientOrders[index - 1]?.route?.id ? (
+                      <Typography variant="h6" sx={{ mt: 2 }}>
+                        {clientOrder?.route?.name} -{' '}
+                        {clientOrder?.route?.driver?.name}
+                      </Typography>
                     ) : null}
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Checkbox disabled={clientAlreadyPrintList?.includes(clientOrder.client.id)} checked={selectedClientStatement.some(
-                        (order: any) => order.client.id === clientOrder.client.id
-                        )} onChange={(e) => handleSelectClient(e, clientOrder)} />
-                      <Typography variant="subtitle1" sx={{color: clientAlreadyPrintList?.includes(clientOrder.client.id) ? grey[500] : 'black'}}>{clientOrder.client.clientName}</Typography>
+                      <Checkbox
+                        disabled={clientAlreadyPrintList?.includes(
+                          clientOrder.client.id,
+                        )}
+                        checked={selectedClientStatement.some(
+                          (order: any) =>
+                            order.client.id === clientOrder.client.id,
+                        )}
+                        onChange={(e) => handleSelectClient(e, clientOrder)}
+                      />
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          color: clientAlreadyPrintList?.includes(
+                            clientOrder.client.id,
+                          )
+                            ? grey[500]
+                            : 'black',
+                        }}
+                      >
+                        {clientOrder.client.clientName}
+                      </Typography>
                     </Box>
                     <Divider />
                   </Fragment>
-                )
-            })
-            }
-
+                );
+              })}
           </Box>
         </BoxModal>
       </Modal>

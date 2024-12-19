@@ -34,7 +34,7 @@ import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import EditUnit from './EditUnit';
 import UnitRadio from '../../Radio/UnitRadio';
 import { grey } from '@mui/material/colors';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+// import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { gstRate, pstRate } from '@/app/lib/constant';
 
 interface IProps {
@@ -79,6 +79,9 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
   const [allVendorItems] = SWRFetchData(`${API_URL.ADMIN}/vendorItems`);
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
+  );
 
   const { date, SelectDate } = useSelectDate(stockPurchased.date, true);
 
@@ -94,16 +97,22 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     return vendorsSorted;
   }, [vendors]);
 
-  const fetchAdminsAndDrivers = async () => {
-    const user: any = getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(user);
-  };
-
   useEffect(() => {
-    if (open) {
-      fetchAdminsAndDrivers();
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
     }
-  }, [open]);
+  }, [adminsAndDriversRes]);
+
+  // const fetchAdminsAndDrivers = async () => {
+  //   const user: any = getAdminsAndDrivers(showNotification);
+  //   setAdminsAndDrivers(user);
+  // };
+
+  // useEffect(() => {
+  //   if (open) {
+  //     fetchAdminsAndDrivers();
+  //   }
+  // }, [open]);
 
   useEffect(() => {
     if (purchasedItems.length > 0) {

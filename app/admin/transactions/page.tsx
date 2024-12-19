@@ -25,12 +25,9 @@ import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+// import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 export default function Transactions() {
-  // const [actionButtonAnchor, setActionButtonAnchor] =
-  //   useState<null | HTMLElement>(null);
-  // const openDropdown = Boolean(actionButtonAnchor);
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
@@ -38,7 +35,6 @@ export default function Transactions() {
     [],
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
 
@@ -50,13 +46,16 @@ export default function Transactions() {
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal
+    AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
   const [transactions] = SWRFetchData(
     `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
+  );
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
   );
 
   useEffect(() => {
@@ -96,13 +95,19 @@ export default function Transactions() {
   }, [debouncedKeywords]);
 
   useEffect(() => {
-    fetchAdminsAndDrivers();
-  }, []);
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
+    }
+  }, [adminsAndDriversRes]);
 
-  const fetchAdminsAndDrivers = async () => {
-    const users: any = await getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(users);
-  };
+  // useEffect(() => {
+  //   fetchAdminsAndDrivers();
+  // }, []);
+
+  // const fetchAdminsAndDrivers = async () => {
+  //   const users: any = await getAdminsAndDrivers(showNotification);
+  //   setAdminsAndDrivers(users);
+  // };
 
   const handleSelectExpense = (e: any, targetExpense: IExpense) => {
     e.preventDefault();
@@ -133,68 +138,6 @@ export default function Transactions() {
       setSelectedExpenses(transactions?.data);
     }
   };
-
-  // const actions = (
-  //   <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
-  //     <Button
-  //       variant="outlined"
-  //       aria-controls={openDropdown ? 'basic-menu' : undefined}
-  //       aria-haspopup="true"
-  //       aria-expanded={openDropdown ? 'true' : undefined}
-  //       onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-  //     >
-  //       <Box display="flex" alignItems="center" gap={1}>
-  //         <ArrowDownwardIcon fontSize="small" />
-  //         <Typography fontWeight="medium">Actions</Typography>
-  //       </Box>
-  //     </Button>
-
-  //     <Menu
-  //       id="basic-menu"
-  //       anchorEl={actionButtonAnchor}
-  //       open={openDropdown}
-  //       onClose={() => setActionButtonAnchor(null)}
-  //       MenuListProps={{
-  //         'aria-labelledby': 'basic-button',
-  //       }}
-  //     >
-  //       <MenuItem
-  //         onClick={() => {
-  //           setIsOpenAddExpense(true);
-  //         }}
-  //       >
-  //         <DropdownItemContainer display="flex" gap={2}>
-  //           <AddIcon sx={{ color: primaryColor }} />
-  //           <Typography>Add Expense</Typography>
-  //         </DropdownItemContainer>
-  //       </MenuItem>
-
-  //       <MenuItem
-  //         disabled={selectedExpenses.length === 0}
-  //         onClick={() => {
-  //           handleBulkUpdateStatus(TRANSACTION_STATUS.PAID);
-  //         }}
-  //       >
-  //         <DropdownItemContainer display="flex" gap={2}>
-  //           <CheckIcon sx={{ color: successColor }} />
-  //           <Typography>Mark as Paid</Typography>
-  //         </DropdownItemContainer>
-  //       </MenuItem>
-
-  //       <MenuItem
-  //         disabled={selectedExpenses.length === 0}
-  //         onClick={() => {
-  //           handleBulkUpdateStatus(TRANSACTION_STATUS.UNPAID);
-  //         }}
-  //       >
-  //         <DropdownItemContainer display="flex" gap={2}>
-  //           <CloseIcon sx={{ color: errorColor }} />
-  //           <Typography>Mark as Unpaid</Typography>
-  //         </DropdownItemContainer>
-  //       </MenuItem>
-  //     </Menu>
-  //   </Box>
-  // );
 
   return (
     <Sidebar>

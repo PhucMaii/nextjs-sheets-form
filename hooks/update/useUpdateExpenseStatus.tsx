@@ -5,10 +5,17 @@ import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IExpense } from '@/app/utils/type';
 import axios from 'axios';
 import { useState } from 'react';
-import { AlertColor, Box, Button, Menu, MenuItem, Typography } from "@mui/material";
+import {
+  AlertColor,
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  Typography,
+} from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import AddIcon from '@mui/icons-material/Add';
-import { errorColor, primaryColor, successColor } from "@/theme/color";
+import { errorColor, primaryColor, successColor } from '@/theme/color';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { DropdownItemContainer } from '@/app/admin/orders/styled';
@@ -26,7 +33,7 @@ export const useUpdateExpenseStatus = (
     isBulk: false,
   });
   const [actionButtonAnchor, setActionButtonAnchor] =
-  useState<null | HTMLElement>(null);
+    useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
 
@@ -225,8 +232,12 @@ export const useUpdateExpenseStatus = (
   );
 
   const AddExpenseModal = (
-    <AddExpense open={isOpenAddExpense} onClose={() => setIsOpenAddExpense(false)} showNotification={showNotification} />
-  )
+    <AddExpense
+      open={isOpenAddExpense}
+      onClose={() => setIsOpenAddExpense(false)}
+      showNotification={showNotification}
+    />
+  );
 
   return {
     handleUpdateStatus,
@@ -234,6 +245,6 @@ export const useUpdateExpenseStatus = (
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal
+    AddExpenseModal,
   };
 };

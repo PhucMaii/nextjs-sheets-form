@@ -47,7 +47,6 @@ const useManifest = (
   }, [selectedRoutes, manifestData]);
 
   const handleGetManifest = async () => {
-
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL.ADMIN}/manifest`, {
