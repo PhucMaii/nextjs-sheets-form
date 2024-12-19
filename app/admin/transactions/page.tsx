@@ -50,7 +50,7 @@ export default function Transactions() {
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal
+    AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching

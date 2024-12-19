@@ -106,7 +106,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     ) {
       delete updatedData.price;
     }
-    
+
     if (
       !updatedFields.includes('inventoryUnitId') &&
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME

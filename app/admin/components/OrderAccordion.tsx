@@ -135,7 +135,6 @@ const OrderAccordion = ({
 
     setTotalQuantity(quantity);
   };
-  
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     try {
@@ -413,10 +412,12 @@ const OrderAccordion = ({
                 </Typography>
               </Box>
               <Box display="flex" alignItems="center" gap={1}>
-                {
-                  discountPrice > 0 && discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) && DiscountText
-                }
-                <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
+                {discountPrice > 0 &&
+                  discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
+                  DiscountText}
+                <Button variant="outlined">
+                  ${order.totalPrice.toFixed(2)}
+                </Button>
               </Box>
             </Box>
           </Grid>

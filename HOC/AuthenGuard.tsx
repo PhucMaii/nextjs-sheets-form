@@ -48,6 +48,7 @@ export default function AuthenGuard({ children }: any) {
     if (
       (sessionError ||
         (!isSessionValidating && Object.keys(session).length === 0)) &&
+      !pathname?.startsWith('/') &&
       pathname !== '/driver/login'
     ) {
       router.push('/');

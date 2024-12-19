@@ -123,12 +123,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const updatedItem = updatedItems.find(
           (newItem: any) => newItem.name === item.name,
         );
-  
+
         if (!updatedItem) {
           isOrderedItemsChange = true;
           break;
         }
-  
+
         if (
           updatedItem.quantity !== item.quantity ||
           updatedItem.unitPrice !== item.price
@@ -138,7 +138,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
       }
     }
-
 
     if (isOrderedItemsChange) {
       const user = await getUserInfo(req, res);
@@ -175,7 +174,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           (oldItem: OrderedItems) => oldItem.name === item.name,
         );
         if (!existedItem) {
-          newAddedItems.push({...item, vendorItem});
+          newAddedItems.push({ ...item, vendorItem });
           continue;
         }
 
@@ -237,9 +236,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Create new ordered items if there is any
       if (newAddedItems.length > 0) {
-        const vendorItemList = newAddedItems.map(
-          (newItem: any) => ({...newItem.vendorItem, unit: newItem.unit}),
-        );
+        const vendorItemList = newAddedItems.map((newItem: any) => ({
+          ...newItem.vendorItem,
+          unit: newItem.unit,
+        }));
         console.log(vendorItemList, 'vendorItemList');
 
         await createFifo(vendorItemList, updatedAt, createdBy);

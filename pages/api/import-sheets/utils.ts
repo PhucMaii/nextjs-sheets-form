@@ -245,7 +245,11 @@ export const overrideOrder = async (
       if (newItem.isShowDiscount && newItem.prevPrice) {
         discount += newItem.quantity * (newItem.prevPrice - newItem.price);
       }
-      subTotal += newItem.quantity * (newItem?.isShowDiscount && newItem?.prevPrice ? newItem.prevPrice : newItem.price);
+      subTotal +=
+        newItem.quantity *
+        (newItem?.isShowDiscount && newItem?.prevPrice
+          ? newItem.prevPrice
+          : newItem.price);
       if (newItem.inventoryItem) {
         if (newItem?.inventoryItem?.hasPST) {
           PST += newItem.quantity * newItem.price * pstRate;

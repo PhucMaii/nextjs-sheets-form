@@ -61,8 +61,13 @@ export default function CardManagement() {
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
-  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating, Actions, AddExpenseModal } =
-    useUpdateExpenseStatus(showNotification, selectedExpenses);
+  const {
+    handleUpdateStatus,
+    UpdateExpenseStatusComp,
+    isUpdating,
+    Actions,
+    AddExpenseModal,
+  } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods, mutateMethod] = SWRFetchData(
@@ -151,7 +156,7 @@ export default function CardManagement() {
         createdBy: '',
         updatedBy: null,
         updatedAt: null,
-      }
+      };
     }
 
     if (selectedViewObj.type === VIEW_TYPE.PAYMENT_METHOD) {
@@ -286,7 +291,11 @@ export default function CardManagement() {
               <IconButton
                 color="primary"
                 onClick={() => setOpenModal({ ...openModal, editModal: true })}
-                disabled={selectedViewObj.id === -1 || selectedViewObj.type === VIEW_TYPE.VENDOR || selectedViewObj.type === VIEW_TYPE.ALL}
+                disabled={
+                  selectedViewObj.id === -1 ||
+                  selectedViewObj.type === VIEW_TYPE.VENDOR ||
+                  selectedViewObj.type === VIEW_TYPE.ALL
+                }
               >
                 <EditIcon />
               </IconButton>
@@ -295,7 +304,11 @@ export default function CardManagement() {
                 onClick={() =>
                   setOpenModal({ ...openModal, deleteModal: true })
                 }
-                disabled={selectedViewObj.id === -1 || selectedViewObj.type === VIEW_TYPE.VENDOR || selectedViewObj.type === VIEW_TYPE.ALL}
+                disabled={
+                  selectedViewObj.id === -1 ||
+                  selectedViewObj.type === VIEW_TYPE.VENDOR ||
+                  selectedViewObj.type === VIEW_TYPE.ALL
+                }
               >
                 <DeleteIcon />
               </IconButton>
@@ -310,7 +323,9 @@ export default function CardManagement() {
               <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
                 -- Choose Payment Method --
               </MenuItem>
-              <MenuItem value={JSON.stringify({ type: VIEW_TYPE.ALL, id: 0 })}>All</MenuItem>
+              <MenuItem value={JSON.stringify({ type: VIEW_TYPE.ALL, id: 0 })}>
+                All
+              </MenuItem>
               <ListSubheader>Payment Methods</ListSubheader>
               {paymentMethods &&
                 paymentMethods.data.map((method: IPaymentMethod) => (
@@ -480,7 +495,6 @@ export default function CardManagement() {
                     </Typography>
                     {Actions}
                   </Box>
-
 
                   {/* Recent Transactions */}
                   <TransactionsTable

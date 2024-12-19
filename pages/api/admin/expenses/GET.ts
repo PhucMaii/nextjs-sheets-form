@@ -63,7 +63,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           if (!acc[expense.date]) {
             acc[expense.date] = 0;
           }
-  
+
           acc[expense.date] += expense.amount;
           return acc;
         },
