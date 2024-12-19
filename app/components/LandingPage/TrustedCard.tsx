@@ -18,7 +18,7 @@ export default function TrustedCard({ trusted }: Props) {
         borderRadius: 2,
         padding: 2,
         width: 500,
-        height: 200,
+        minHeight: 200,
       }}
     >
       <Grid item xs={3}>

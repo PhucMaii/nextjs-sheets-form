@@ -15,7 +15,7 @@ export default function HowItWorks() {
         How It Works
       </Typography>
 
-      <Grid container columnGap={4} rowSpacing={4} mt={4} mx={4}>
+      <Grid container columnGap={4} rowGap={4} mt={4}>
         {howItWorksList.map((hiw: HowItWorksType) => {
           return (
             <Grid
@@ -23,7 +23,7 @@ export default function HowItWorks() {
               xs={12}
               md={5.6}
               textAlign="center"
-              lg={3.6}
+              lg={3.8}
               sx={{
                 backgroundColor: landingPagePrimaryColor,
                 borderRadius: 5,
@@ -39,6 +39,7 @@ export default function HowItWorks() {
                 justifyContent="center"
                 alignItems="center"
                 px={4}
+                mx="auto"
                 py={6}
               >
                 <Image
@@ -47,7 +48,7 @@ export default function HowItWorks() {
                   width={300}
                   height={200}
                   objectFit="contain" // Ensures the image maintains its aspect ratio
-                  style={{ borderRadius: 20 }}
+                  style={{ borderRadius: 20, minWidth: '100%' }}
                 />
 
                 <Typography

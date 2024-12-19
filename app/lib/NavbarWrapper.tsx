@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 export default function NavbarWrapper({ children }: { children: ReactNode }) {
   return (
     <AuthenGuard>
-      <Box display="flex" flexDirection="column" gap={4}>
+      <Box>
         <Navbar />
         {children}
       </Box>

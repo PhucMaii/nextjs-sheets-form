@@ -25,7 +25,7 @@ export default function TrustedBrand() {
             <Grid
               item
               xs={12}
-              sm={6}
+              md={6}
               key={index}
               display="flex"
               justifyContent="center"

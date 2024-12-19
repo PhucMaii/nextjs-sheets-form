@@ -2,28 +2,31 @@ import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography, useMediaQuery } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Image from 'next/image';
 import React from 'react';
 
 export default function Header() {
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
   return (
-    <Grid container alignItems="center" px={4} mt={2}>
+    <Grid container alignItems="center" columnSpacing={2} rowGap={4} px={4} my={2}>
       <Grid item xs={12} md={6}>
         <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="h2" fontWeight="bold">
+          <Typography variant="h2" fontWeight="bold" textAlign={mdDown ? 'center' : 'left'}>
             Freshness You Can Trust, Prices You'll Love
           </Typography>
           <Typography
             variant="h5"
             fontWeight="normal"
+            textAlign={mdDown ? 'center' : 'left'}
             sx={{ color: grey[600], lineHeight: 1.5 }}
           >
             Delivering farm-fresh produce with unmatched quality at competitive
             prices, tailored for your business needs.
           </Typography>
-          <Box display="flex" alignItems="center" gap={2}>
+          <Box display="flex" alignItems="center" justifyContent={mdDown ? 'center' : 'left'} gap={2}>
             <Button
               variant="contained"
               sx={{

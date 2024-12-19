@@ -4,8 +4,8 @@ import Logo from './Logo';
 
 export default function Footer() {
   return (
-    <Grid container alignItems="center" sx={{ py: 8, px: 8 }}>
-      <Grid item xs={6} textAlign="right">
+    <Grid container alignItems="center" rowGap={4} sx={{ py: 8, px: 8 }}>
+      <Grid item xs={12} md={6} textAlign="right">
         <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
           <Logo />
           <Typography variant="h5" fontWeight="bold">
@@ -13,7 +13,7 @@ export default function Footer() {
           </Typography>
         </Box>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={12} md={6}>
         <Box display="flex" justifyContent="center" alignItems="center" gap={4}>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6" fontWeight="bold">
