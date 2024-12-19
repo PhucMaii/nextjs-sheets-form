@@ -60,7 +60,10 @@ export default function OverviewCard({
             {extraText && (
               <Box display="flex" alignItems="center">
                 {extraTextIcon}
-                <Typography variant="h6" sx={{ color: extraText.color, ...extraTextStyle }}>
+                <Typography
+                  variant="h6"
+                  sx={{ color: extraText.color, ...extraTextStyle }}
+                >
                   {extraText.text}
                 </Typography>
               </Box>
@@ -69,7 +72,10 @@ export default function OverviewCard({
           {helperText && (
             <Typography
               fontWeight="bold"
-              sx={{ color: textColor ? textColor : grey[500], ...helperTextStyle }}
+              sx={{
+                color: textColor ? textColor : grey[500],
+                ...helperTextStyle,
+              }}
               variant="subtitle1"
             >
               {helperText}

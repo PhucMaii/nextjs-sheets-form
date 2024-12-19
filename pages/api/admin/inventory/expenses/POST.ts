@@ -568,7 +568,7 @@ export const createFifo = async (
         continue;
       }
 
-      console.log({unit: item.unit})
+      console.log({ unit: item.unit });
       const itemQuantity = item.quantity * item?.unit?.ratio;
       // itemQuantity > negativeFifo.quantity
       // Delete targeted fifo and create new fifo

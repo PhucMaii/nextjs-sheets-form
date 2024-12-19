@@ -25,7 +25,7 @@ export default function DeleteModal({
   includedIconButton = false,
   open,
   handleCloseModal,
-  showTargetObj
+  showTargetObj,
 }: PropTypes) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);

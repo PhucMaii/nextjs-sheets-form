@@ -99,7 +99,7 @@ export const ManifestPrint = forwardRef(
               // };
 
               // const items = generateItemNames();
-              const sortedItems = manifest[routeId]?.itemNames || []
+              const sortedItems = manifest[routeId]?.itemNames || [];
 
               const columnWidthPercentage =
                 Math.floor(sortedItems?.length / 100) * 100 - 1;

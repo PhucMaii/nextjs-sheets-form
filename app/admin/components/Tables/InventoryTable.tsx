@@ -76,7 +76,7 @@ export default function InventoryTable({
                       );
                       return (
                         <Typography>
-                          {vItem?.vendor?.name} {' '}
+                          {vItem?.vendor?.name}{' '}
                           <strong>(${smallestUnit?.unitPrice})</strong>
                         </Typography>
                       );
@@ -88,7 +88,10 @@ export default function InventoryTable({
                     <Typography>
                       {item?.quantity} {unit?.unit}
                     </Typography>
-                    <BatchQuantityModal fifoList={item?.fifo || []} showNotification={showNotification}/>
+                    <BatchQuantityModal
+                      fifoList={item?.fifo || []}
+                      showNotification={showNotification}
+                    />
                   </Box>
                 </TableCell>
                 <TableCell>

@@ -6,7 +6,7 @@ import ModalHead from '@/app/lib/ModalHead';
 import StockPurchased from '../../Expense/StockPurchased';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+// import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -20,15 +20,23 @@ export default function AddStockPurchased({
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
+  );
 
   useEffect(() => {
-    const fetchAdminsAndDrivers = async () => {
-      const users: any = await getAdminsAndDrivers(showNotification);
-      setAdminsAndDrivers(users);
-    };
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
+    }
+  }, [adminsAndDriversRes]);
+  // useEffect(() => {
+  //   const fetchAdminsAndDrivers = async () => {
+  //     const users: any = await getAdminsAndDrivers(showNotification);
+  //     setAdminsAndDrivers(users);
+  //   };
 
-    fetchAdminsAndDrivers();
-  }, []);
+  //   fetchAdminsAndDrivers();
+  // }, []);
 
   return (
     <Modal open={open} onClose={onClose}>

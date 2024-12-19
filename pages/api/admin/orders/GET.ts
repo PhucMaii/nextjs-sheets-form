@@ -106,14 +106,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const formattedItems = order.items.map((item: OrderedItems) => {
         let totalPrevPrice = 0;
         if (item?.isShowDiscount && item?.prevPrice) {
-          totalPrevPrice = item.prevPrice * item.quantity; 
-          
+          totalPrevPrice = item.prevPrice * item.quantity;
         }
         const totalPrice = item.quantity * item.price;
         return {
           ...item,
           totalPrice,
-          totalPrevPrice
+          totalPrevPrice,
         };
       });
 

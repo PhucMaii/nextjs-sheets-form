@@ -461,9 +461,11 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
       if (!acc?.discount) {
         acc.discount = 0;
       }
-      
 
-      acc.subTotal += (item?.isShowDiscount && item?.prevPrice ? item.prevPrice : item.price) * item.quantity;
+      acc.subTotal +=
+        (item?.isShowDiscount && item?.prevPrice
+          ? item.prevPrice
+          : item.price) * item.quantity;
 
       if (item?.inventoryItem?.hasPST) {
         acc.PST += item.price * item.quantity * pstRate;
@@ -480,7 +482,10 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
       return acc;
     }, {});
 
-    return { ...total, totalPrice: total.subTotal + total.PST + total.GST - total.discount };
+    return {
+      ...total,
+      totalPrice: total.subTotal + total.PST + total.GST - total.discount,
+    };
     // const prisma = new PrismaClient();
 
     // const updateTime = new Date();

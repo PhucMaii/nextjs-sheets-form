@@ -27,7 +27,11 @@ import ErrorComponent from '../../ErrorComponent';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { disableChristmasAndNewYear, formatDateChanged, generateRecommendDate } from '@/app/utils/time';
+import {
+  disableChristmasAndNewYear,
+  formatDateChanged,
+  generateRecommendDate,
+} from '@/app/utils/time';
 import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
 import moment from 'moment';
@@ -393,7 +397,7 @@ export default function AddOrder({
                   return (
                     <Fragment key={index}>
                       <Grid item xs={6}>
-                          <SellingItemName item={item} />
+                        <SellingItemName item={item} />
                       </Grid>
                       <Grid item xs={6}>
                         <TextField

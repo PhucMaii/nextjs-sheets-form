@@ -69,16 +69,17 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>
                   <Box display="flex" flexDirection="row" gap={1}>
-                    {
-                      item?.isShowDiscount && item?.prevPrice && (item.prevPrice * item.quantity).toFixed(2) !== item.totalPrice.toFixed(2) && (
+                    {item?.isShowDiscount &&
+                      item?.prevPrice &&
+                      (item.prevPrice * item.quantity).toFixed(2) !==
+                        item.totalPrice.toFixed(2) && (
                         <Typography
                           sx={{ textDecoration: 'line-through' }}
                           color="error"
                         >
                           ${(item.prevPrice * item.quantity).toFixed(2)}
                         </Typography>
-                      )
-                    }
+                      )}
                     <Typography>${item.totalPrice.toFixed(2)}</Typography>
                   </Box>
                 </TableCell>

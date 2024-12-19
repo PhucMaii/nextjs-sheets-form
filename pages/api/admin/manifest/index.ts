@@ -55,7 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         driver: true,
-      }
+      },
     });
 
     // console.log(userRoute, 'userRoute');
@@ -100,7 +100,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       })
       .filter((order: Order) => order.routeId);
 
-      // Group order by route id
+    // Group order by route id
     const orderByRoutes = _.orderBy(clientRoutes, ['routeId'], ['asc']);
 
     // Arrange as user route positions in pre order
@@ -122,7 +122,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           );
         });
         sortedOrderByRoutes.push(...currentRouteOrders);
-        
+
         trackOrderByRoutesIndex++;
         continue;
       }
@@ -141,7 +141,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           );
         });
         sortedOrderByRoutes.push(...currentRouteOrders);
-        
+
         // Initialize for new route
         currentRouteOrders = [orderByRoutes[trackOrderByRoutesIndex]];
         currentRouteId = orderByRoutes[trackOrderByRoutesIndex]?.routeId;
@@ -206,7 +206,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     for (const itemRoute in groupItemRoutes) {
       // console.log(itemRoute, 'itemRoute');
       const targetRoute = dayRoutes.find((route: any) => route.id == itemRoute);
-      
+
       const manifestItem = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem) => {
           const { name } = item;
@@ -254,7 +254,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             groupItemRoutes[itemRoute][index - 1].user.id !== user.id
           ) {
             // Generate display name
-            let displayName = user.clientName.split('-').slice(0, 2).join(' - ');
+            let displayName = user.clientName
+              .split('-')
+              .slice(0, 2)
+              .join(' - ');
 
             if (
               displayName?.split(' - ')[1] == ' C.O.D' ||
@@ -264,7 +267,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               displayName = displayName.split(' - ')[0];
             }
             const newUserManifest = {
-              user: {...user, displayName},
+              user: { ...user, displayName },
               [itemKey]: quantity,
             };
             acc.push(newUserManifest);
@@ -290,18 +293,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           if (itemName === 'user') {
             continue;
           }
-  
+
           if (itemNameList.includes(itemName)) {
             continue;
           }
-  
+
           if (manifestDetail[itemName] === 0) {
             continue;
           }
-  
+
           itemNameList.push(itemName);
         }
-
       }
 
       const sortedItemNames = sortedItemKeys(itemNameList, mainItems);
