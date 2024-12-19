@@ -51,9 +51,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       createdAt,
     }: IBody = req.body;
 
-    console.log({
-      body: req.body,
-    });
+    // console.log({
+    //   body: req.body,
+    // });
+    // console.log({
+    //   items
+    // })
 
     if (!deliveryDate || !items || !createdAt) {
       return res
