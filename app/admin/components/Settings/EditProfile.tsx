@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { ShadowSection } from '../reports/styled';
+import { ShadowSection } from '../../reports/styled';
 import {
   Box,
   IconButton,

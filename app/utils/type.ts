@@ -8,6 +8,7 @@ import {
   Fifo,
   InventoryItem,
   InventoryUnit,
+  ItemType,
   PaymentMethod,
   Route,
   User,
@@ -208,4 +209,8 @@ export interface IFifo extends Fifo {
   inventoryItem: IInventoryItem;
   vendorItem: IVendorItem;
   orderedItems: OrderedItems[];
+}
+
+export interface IProductType extends ItemType {
+  items: IInventoryItem[];
 }

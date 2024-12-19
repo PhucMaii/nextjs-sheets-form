@@ -271,7 +271,7 @@ model InventoryItem {
 model ItemType {
   id            Int             @id @default(autoincrement())
   name          String          @unique
-  InventoryItem InventoryItem[]
+  items InventoryItem[]
 }
 
 model VendorItem {

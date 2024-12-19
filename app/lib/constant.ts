@@ -282,7 +282,7 @@ export const driverTabs = [
   // },
 ];
 
-export const settingsTabs = ['General', 'Announcement'];
+export const settingsTabs = ['General', 'Products', 'Announcement'];
 
 export const statusTabs = [
   {

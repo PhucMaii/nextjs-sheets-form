@@ -1,4 +1,15 @@
-import { Box, Button, Drawer, IconButton, List, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Button,
+  Drawer,
+  IconButton,
+  List,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import Logo from './Logo';
 import { blueGrey, green } from '@mui/material/colors';
@@ -20,12 +31,12 @@ const tabs = [
   {
     label: 'About',
     href: '/about',
-    icon: CircleUserIcon
+    icon: CircleUserIcon,
   },
   {
     label: 'Products',
     href: '/products',
-    icon: ShoppingBagIcon
+    icon: ShoppingBagIcon,
   },
 ];
 const drawerWidth = 250;
@@ -42,7 +53,7 @@ export default function Navbar() {
   const handleChangeTab = (path: string) => {
     setSelectedTab(path);
     window.location.href = path;
-  }
+  };
 
   if (mdDown) {
     return (
@@ -67,44 +78,51 @@ export default function Navbar() {
           >
             <Toolbar sx={{ mt: 6 }}>
               <img
-                style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: '20px',
+                }}
                 alt="Supreme Sprouts Logo"
                 src="/supremesproutsIcon.png"
               />
             </Toolbar>
 
-            <List 
-              sx={{ width: '100%', maxWidth: 300, bgcolor: 'background', mt: 4 }}
+            <List
+              sx={{
+                width: '100%',
+                maxWidth: 300,
+                bgcolor: 'background',
+                mt: 4,
+              }}
               component="nav"
               aria-labelledby="nested-list-subheader"
             >
-            {
-              tabs.map((tab: any, index: any) => {
+              {tabs.map((tab: any, index: any) => {
                 return (
                   <ListItemButtonStyled
-                      $textColor={landingPagePrimaryColor}
-                      $bgColor={green[50]}
-                      $currentTab={selectedTab === tab.href}
-                      key={index}
-                      onClick={() => handleChangeTab(tab.href)}
-                    >
-                      <ListItemIcon>
-                        {tab.icon && (
-                          <tab.icon
-                            style={{
-                              color:
-                                selectedTab === tab.href
-                                  ? landingPagePrimaryColor
-                                  : blueGrey[600],
-                            }}
-                          />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText primary={tab.label} />
-                    </ListItemButtonStyled>
-                )
-              })
-            }
+                    $textColor={landingPagePrimaryColor}
+                    $bgColor={green[50]}
+                    $currentTab={selectedTab === tab.href}
+                    key={index}
+                    onClick={() => handleChangeTab(tab.href)}
+                  >
+                    <ListItemIcon>
+                      {tab.icon && (
+                        <tab.icon
+                          style={{
+                            color:
+                              selectedTab === tab.href
+                                ? landingPagePrimaryColor
+                                : blueGrey[600],
+                          }}
+                        />
+                      )}
+                    </ListItemIcon>
+                    <ListItemText primary={tab.label} />
+                  </ListItemButtonStyled>
+                );
+              })}
             </List>
           </Drawer>
           {/* <Box width="100%">
@@ -135,7 +153,7 @@ export default function Navbar() {
       <Logo />
       {/* The logo of the website */}
       <Box display="flex" alignItems="center" gap={4}>
-      {/* The links to the other pages */}
+        {/* The links to the other pages */}
         {tabs.map((tab: any) => {
           return (
             <Typography

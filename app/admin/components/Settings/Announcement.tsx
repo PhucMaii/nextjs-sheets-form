@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { ShadowSection } from '../reports/styled';
+import { ShadowSection } from '../../reports/styled';
 import {
   Box,
   Divider,
@@ -12,12 +12,12 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { printFontSize } from './Printing/ComponentToPrint';
+import { printFontSize } from '../Printing/ComponentToPrint';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import EditAnnouncement from './Modals/edit/EditAnnouncement';
+import EditAnnouncement from '../Modals/edit/EditAnnouncement';
 import { UserContext } from '@/app/context/UserContextAPI';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';

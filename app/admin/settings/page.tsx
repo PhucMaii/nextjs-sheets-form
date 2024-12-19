@@ -4,9 +4,10 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import { Box, Tab, Tabs, Typography } from '@mui/material';
 import { settingsTabs } from '@/app/lib/constant';
 import { blueGrey } from '@mui/material/colors';
-import EditProfile from '../components/EditProfile';
+import EditProfile from '../components/Settings/EditProfile';
 import ErrorComponent from '../components/ErrorComponent';
-import Announcement from '../components/Announcement';
+import Announcement from '../components/Settings/Announcement';
+import ProductType from '../components/Settings/ProductType';
 
 export default function SettingsPage() {
   const [tabIndex, setTabIndex] = useState<number>(0);
@@ -46,6 +47,8 @@ export default function SettingsPage() {
       {tabIndex === 0 ? (
         <EditProfile />
       ) : tabIndex === 1 ? (
+        <ProductType />
+      ) : tabIndex === 2 ? (
         <Announcement />
       ) : (
         <ErrorComponent errorText="Page Coming Soon" />
