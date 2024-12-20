@@ -32,12 +32,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'You are not authenticated',
       });
     }
+
+    const boards: any = await prisma.codBoard.findMany({
+      where: {
+        date: todayString,
+      },
+      include: {
+        orders: true,
+      },
+    });
+
     const wcodDay: any = getWCODDay(todayString);
+    const last7Days = generate7DaysBefore(todayString);
 
     // Check if boards are added already
-    const boardOrders: any = await prisma.orders.findMany({
+    const newWCODBoardOrders = await prisma.orders.findMany({
       where: {
-        deliveryDate: todayString,
+        deliveryDate: {
+          in: last7Days,
+        },
         status: {
           not: ORDER_STATUS.VOID,
         },
@@ -45,7 +58,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         user: {
           preference: {
             paymentType: {
-              in: [wcodDay, PAYMENT_TYPE.COD],
+              in: [wcodDay],
             },
           },
         },
@@ -62,15 +75,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const boards: any = await prisma.codBoard.findMany({
+    const newCODBoardOrders: any = await prisma.orders.findMany({
       where: {
-        date: todayString,
+        deliveryDate: todayString,
+        status: {
+          not: ORDER_STATUS.VOID,
+        },
+        codBoardId: null,
+        user: {
+          preference: {
+            paymentType: {
+              in: [PAYMENT_TYPE.COD],
+            },
+          },
+        },
+      },
+      include: {
+        items: true,
+        user: {
+          include: {
+            preference: true,
+            category: true,
+            routes: true,
+          },
+        },
       },
     });
 
-    console.log(boardOrders, 'board orders');
+    const newBoardOrders = [...newWCODBoardOrders, ...newCODBoardOrders];
 
-    if (boards.length > 0 && boardOrders.length === 0) {
+    if (boards.length > 0 && newBoardOrders.length === 0) {
       return res.status(200).json({
         message: 'Boards are added already',
       });
@@ -91,9 +125,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     // If there are new orders that have not been added
-    if (boards.length > 0 && boardOrders.length > 0) {
+    if (boards.length > 0 && newBoardOrders.length > 0) {
       await insertOrdersToSelectedBoards(
-        boardOrders,
+        newBoardOrders,
         boards,
         routeOnDate,
         todayString,
