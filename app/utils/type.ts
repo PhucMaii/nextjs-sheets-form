@@ -8,6 +8,7 @@ import {
   Fifo,
   InventoryItem,
   InventoryUnit,
+  ItemPreference,
   ItemType,
   PaymentMethod,
   Route,
@@ -189,6 +190,7 @@ export interface IInventoryItem extends InventoryItem {
   fifo: IFifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
+  preference?: IItemPreference;
 }
 
 export interface IVendorItem extends VendorItem {
@@ -213,4 +215,9 @@ export interface IFifo extends Fifo {
 
 export interface IProductType extends ItemType {
   items: IInventoryItem[];
+}
+
+export interface IItemPreference extends ItemPreference {
+  inventoryItem: IInventoryItem;
+  type: IProductType;
 }

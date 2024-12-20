@@ -17,7 +17,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: Number(id),
         },
         include: {
-          items: true,
+          itemPreferences: true,
         },
       });
 
@@ -29,7 +29,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const productTypes = await prisma.itemType.findMany({
       include: {
-        items: true,
+        itemPreferences: true,
       },
     });
 

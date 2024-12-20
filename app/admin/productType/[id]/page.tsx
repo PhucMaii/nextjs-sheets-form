@@ -7,6 +7,9 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
+import AddItemIntoType from '../../components/Modals/add/AddItemIntoType';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import useNotification from '@/hooks/useNotification';
 
 export default function page() {
     const params = useParams();
@@ -14,12 +17,21 @@ export default function page() {
     const router = useRouter();
 
     const [searchKeywords, setSearchKeywords] = useState<string>('');
-
     
+    const [open, setOpen] = useMultipleBoolean({
+        addItemIntoType: false
+    });
+    const { showNotification, NotificationComp } = useNotification();
     const [type] = SWRFetchData(`${API_URL.ADMIN}/productTypes?id=${id}`);
 
   return (
     <Sidebar>
+        {NotificationComp}
+        <AddItemIntoType 
+            open={open.addItemIntoType}
+            onClose={() => setOpen('addItemIntoType', false)}
+            showNotification={showNotification}
+        />
         <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box display="flex" alignItems="center" gap={2}>
                 <IconButton onClick={() => router.push(`/admin/settings?tab=1`)}>
@@ -49,7 +61,7 @@ export default function page() {
         <Divider sx={{mt: 2}} />
 
         <Box display="flex" justifyContent="flex-end">
-            <Button variant="outlined">
+            <Button variant="outlined" onClick={() => setOpen('addItemIntoType', true)}>
                 + Add Item
             </Button>
         </Box>
