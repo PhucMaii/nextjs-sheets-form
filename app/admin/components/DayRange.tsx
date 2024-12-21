@@ -1,6 +1,6 @@
 import React from 'react';
 import { LoadingButton } from '@mui/lab';
-import { Box, Grid, TextField } from '@mui/material';
+import { Box, Grid, TextField, useMediaQuery } from '@mui/material';
 import { IDayRange } from '@/app/utils/type';
 
 interface IProps {
@@ -28,9 +28,11 @@ export default function DayRange({
   handleEditRange,
   handleDeleteRange,
 }: IProps) {
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
   return (
     <Grid container alignItems="center" gap={1}>
-      <Grid item xs={4.5}>
+      <Grid item xs={5.5} md={4.5}>
         <TextField
           fullWidth
           label="From"
@@ -45,7 +47,7 @@ export default function DayRange({
           }
         />
       </Grid>
-      <Grid item xs={4.5} textAlign="right">
+      <Grid item xs={5.5} md={4.5} textAlign="right">
         <TextField
           disabled={
             targetRange?.id !== range.id || !isEditing || !updatedDateRange
@@ -60,8 +62,18 @@ export default function DayRange({
           onClick={() => setIsSelectRangeOpen(true)}
         />
       </Grid>
-      <Grid item xs={2} textAlign="center">
+      <Grid item xs={12} md={2} textAlign="center">
         <Box display="flex" alignItems="center" gap={1}>
+          <LoadingButton
+            color="error"
+            onClick={() => handleDeleteRange(range)}
+            loading={targetRange?.id === range.id && isDeleting}
+            loadingIndicator="Deleting..."
+            fullWidth={!!mdDown}
+            variant={mdDown ? 'outlined' : 'text'}
+          >
+            Delete
+          </LoadingButton>
           <LoadingButton
             loading={targetRange?.id === range.id && isSaving}
             loadingIndicator="Saving..."
@@ -76,19 +88,14 @@ export default function DayRange({
                 handleEditRange(range);
               }
             }}
+            variant={mdDown ? 'outlined' : 'text'}
+            fullWidth={!!mdDown}
           >
             {targetRange?.id !== range.id || !isEditing || !updatedDateRange
               ? 'EDIT'
               : 'SAVE'}
           </LoadingButton>
-          <LoadingButton
-            color="error"
-            onClick={() => handleDeleteRange(range)}
-            loading={targetRange?.id === range.id && isDeleting}
-            loadingIndicator="Deleting..."
-          >
-            Delete
-          </LoadingButton>
+
         </Box>
       </Grid>
     </Grid>

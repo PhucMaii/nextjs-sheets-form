@@ -7,6 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
@@ -39,6 +40,8 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
     }
   }, [selectedItem]);
 
+  const mdDown = useMediaQuery((them: any) => them.breakpoints.down('md'));
+
   return (
     <>
       <EditItemModal
@@ -52,20 +55,35 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
         handleUpdateItem={handleUpdateItem}
         order={order}
       />
-      <Table sx={{ minWidth: '100%' }}>
+      <Table sx={{ maxWidth: '100%', overflow: 'hidden' }}>
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Price</TableCell>
-            <TableCell></TableCell>
+            {!mdDown && <TableCell></TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
           {order.items.length > 0 &&
             order.items.map((item, index) => (
               <TableRow key={index}>
-                <TableCell>{item.name}</TableCell>
+                <TableCell>
+                  {mdDown ? (<>
+                    <Box display="flex" flexDirection="column" alignItems="center">
+                      <IconButton
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setUpdatedItem(item);
+                      }}
+                      size="small"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <Typography>{item.name}</Typography>
+                    </Box>
+                  </>) : (<>{item.name}</>)}
+                </TableCell>
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>
                   <Box display="flex" flexDirection="row" gap={1}>
@@ -84,7 +102,7 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
                   </Box>
                 </TableCell>
 
-                <TableCell>
+                {!mdDown && <TableCell>
                   <IconButton
                     onClick={() => {
                       setSelectedItem(item);
@@ -93,7 +111,7 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
                   >
                     <EditIcon />
                   </IconButton>
-                </TableCell>
+                </TableCell>}
               </TableRow>
             ))}
         </TableBody>
