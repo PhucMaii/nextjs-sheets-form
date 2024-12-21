@@ -69,20 +69,28 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
             order.items.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  {mdDown ? (<>
-                    <Box display="flex" flexDirection="column" alignItems="center">
-                      <IconButton
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setUpdatedItem(item);
-                      }}
-                      size="small"
+                  {mdDown ? (
+                    <>
+                      <Box
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
                       >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <Typography>{item.name}</Typography>
-                    </Box>
-                  </>) : (<>{item.name}</>)}
+                        <IconButton
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setUpdatedItem(item);
+                          }}
+                          size="small"
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <Typography>{item.name}</Typography>
+                      </Box>
+                    </>
+                  ) : (
+                    <>{item.name}</>
+                  )}
                 </TableCell>
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>
@@ -102,16 +110,18 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
                   </Box>
                 </TableCell>
 
-                {!mdDown && <TableCell>
-                  <IconButton
-                    onClick={() => {
-                      setSelectedItem(item);
-                      setUpdatedItem(item);
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </TableCell>}
+                {!mdDown && (
+                  <TableCell>
+                    <IconButton
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setUpdatedItem(item);
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
         </TableBody>

@@ -6,7 +6,14 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -25,11 +32,7 @@ interface IProps extends ModalProps {
   currentDateRange: any;
 }
 
-export default function RouteStatement({
-  open,
-  onClose,
-  currentDateRange,
-}: IProps) {
+const RouteStatement = ({ open, onClose, currentDateRange }: IProps) => {
   const [clientOrders, setClientOrders] = useState<any>([]);
   const [selectedClientStatement, setSelectedClientStatement] = useState<any>(
     [],
@@ -47,6 +50,8 @@ export default function RouteStatement({
     'clientAlreadyPrintList',
     [],
   );
+
+  console.log('ROUTE STATEMENT RE RENDER', currentDateRange);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [routes, _mutate, isValidating] = SWRFetchData(
@@ -80,11 +85,12 @@ export default function RouteStatement({
     if (routes) {
       initializeClientOrders();
     }
+
+    setSelectedClientStatement([]);
   }, [routes, selectedRouteIds]);
 
-  useEffect(() => {
-    setSelectedClientStatement([]);
-  }, [routes]);
+  // useEffect(() => {
+  // }, [routes]);
 
   const initializeClientOrders = () => {
     if (!routes) {
@@ -331,4 +337,11 @@ export default function RouteStatement({
       </Modal>
     </>
   );
-}
+};
+
+export default memo(RouteStatement, (prev: IProps, next: IProps) => {
+  return (
+    Object.is(prev.currentDateRange, next.currentDateRange) &&
+    prev.open === next.open
+  );
+});

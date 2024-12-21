@@ -93,6 +93,8 @@ export default function ReportPage() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const { showNotification, NotificationComp } = useNotification();
 
+  // const memoizedDateRange = useMemo(() => dateRange, [dateRange]);
+
   // Printing Refs
   const invoicePrint: any = useRef();
   const billPrint: any = useRef();
@@ -573,11 +575,6 @@ export default function ReportPage() {
       />
       <LoadingModal open={isLoading} />
       {NotificationComp}
-      <RouteStatement
-        open={isOpenRouteStatement}
-        onClose={() => setIsOpenRouteStatement(false)}
-        currentDateRange={dateRange}
-      />
       <div style={{ display: 'none' }}>
         <InvoicePrint
           client={clientValue}
@@ -601,14 +598,23 @@ export default function ReportPage() {
         />
       </div>
       {clientValue?.clientName === 'All Clients' && (
-        <BillPrintModal
-          open={isOpenBillPrintModal}
-          onClose={() => setIsOpenBillPrintModal(false)}
-          routes={routes?.data || []}
-          orderList={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          showNotification={showNotification}
-          day={datePicker}
-        />
+        <>
+          <BillPrintModal
+            open={isOpenBillPrintModal}
+            onClose={() => setIsOpenBillPrintModal(false)}
+            routes={routes?.data || []}
+            orderList={
+              selectedOrders.length > 0 ? selectedOrders : clientOrders
+            }
+            showNotification={showNotification}
+            day={datePicker}
+          />
+          <RouteStatement
+            open={isOpenRouteStatement}
+            onClose={() => setIsOpenRouteStatement(false)}
+            currentDateRange={dateRange}
+          />
+        </>
       )}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5" color={blueGrey[800]}>

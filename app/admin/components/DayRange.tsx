@@ -95,7 +95,6 @@ export default function DayRange({
               ? 'EDIT'
               : 'SAVE'}
           </LoadingButton>
-
         </Box>
       </Grid>
     </Grid>

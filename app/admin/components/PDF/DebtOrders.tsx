@@ -102,9 +102,23 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
                         {item.quantity}
                       </Text>
                     </View>
-                    <View style={{...styles.tableColNoBorder, display: 'flex', alignItems: 'center', gap: 1, flexDirection: 'column'}}>
+                    <View
+                      style={{
+                        ...styles.tableColNoBorder,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        flexDirection: 'column',
+                      }}
+                    >
                       {item?.isShowDiscount && item?.prevPrice && (
-                        <Text style={{ margin: 5, fontSize: 8, textDecoration: 'line-through' }}>
+                        <Text
+                          style={{
+                            margin: 5,
+                            fontSize: 8,
+                            textDecoration: 'line-through',
+                          }}
+                        >
                           ${item.prevPrice}
                         </Text>
                       )}
@@ -112,8 +126,16 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
                         {item.price}
                       </Text>
                     </View>
-                    <View style={{...styles.tableColNoBorder, display: 'flex', alignItems: 'center', gap: 1, flexDirection: 'column'}}>
-                    {/* {item?.isShowDiscount &&
+                    <View
+                      style={{
+                        ...styles.tableColNoBorder,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        flexDirection: 'column',
+                      }}
+                    >
+                      {/* {item?.isShowDiscount &&
                   item?.prevPrice &&
                   item?.totalPrevPrice?.toFixed(2) !==
                     item.totalPrice.toFixed(2) && (
@@ -130,16 +152,14 @@ const DebtOrders: React.FC<IProps> = ({ debtOrders }) => {
               })}
             </View>
             <View style={styles.divider}></View>
-            {
-              order?.discount && (
-                <View style={styles.flex_between}>
-                  <Text style={styles.subtitle}>Discount:</Text>
-                  <Text style={styles.subtitle}>
+            {order?.discount && (
+              <View style={styles.flex_between}>
+                <Text style={styles.subtitle}>Discount:</Text>
+                <Text style={styles.subtitle}>
                   ${order?.discount?.toFixed(2)}
-                  </Text>
-                </View>
-              )
-            }
+                </Text>
+              </View>
+            )}
             <View style={styles.flex_between}>
               <Text style={styles.subtitle}>Subtotal:</Text>
               <Text style={styles.subtitle}>

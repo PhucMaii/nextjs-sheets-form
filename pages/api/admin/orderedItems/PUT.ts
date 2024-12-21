@@ -466,9 +466,10 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
         acc.discount = 0;
       }
 
-      acc.totalWithoutDiscount = (item?.isShowDiscount && item?.prevPrice
-        ? item.prevPrice
-        : item.price) * item.quantity;
+      acc.totalWithoutDiscount =
+        (item?.isShowDiscount && item?.prevPrice
+          ? item.prevPrice
+          : item.price) * item.quantity;
 
       acc.subTotal += item.price * item.quantity;
 

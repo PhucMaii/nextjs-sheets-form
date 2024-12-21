@@ -188,13 +188,13 @@ async function main() {
   const ordersInDecember = await prisma.orders.findMany({
     where: {
       deliveryDate: {
-        in: decemberDayList
-      }
+        in: decemberDayList,
+      },
     },
     include: {
       items: true,
       user: true,
-    }
+    },
   });
   for (const order of ordersInDecember) {
     const actualTotalPrice = order.items.reduce((acc: number, item: any) => {
@@ -216,11 +216,10 @@ async function main() {
         clientName: order?.user?.clientName,
         clientId: order?.user?.clientId,
         actualTotalPrice,
-        orderTotalPrice: order.totalPrice
+        orderTotalPrice: order.totalPrice,
       });
     }
   }
-
 }
 
 main()

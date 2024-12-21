@@ -14,7 +14,7 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import StatusText from '../StatusText';
@@ -42,14 +42,14 @@ enum BILL_PRINT_OPTION {
   BY_ROUTE = 'byRoute',
 }
 
-export default function BillPrintModal({
+const BillPrintModal = ({
   open,
   onClose,
   routes,
   orderList,
   day,
   showNotification,
-}: PropTypes) {
+}: PropTypes) => {
   const [manifestAnchor, setManifestAnchor] = useState<HTMLElement | null>(
     null,
   );
@@ -68,6 +68,8 @@ export default function BillPrintModal({
     nonVoidOrders,
     isLoading,
   } = useManifest(orderList, selectedRoutes, day, showNotification);
+
+  console.log('BILL PRINT MODAL RE RENDER');
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -283,4 +285,13 @@ export default function BillPrintModal({
       </BoxModal>
     </Modal>
   );
-}
+};
+
+export default memo(BillPrintModal, (prev: PropTypes, next: PropTypes) => {
+  return (
+    Object.is(prev.orderList, next.orderList) &&
+    Object.is(prev.routes, next.routes) &&
+    prev.day === next.day &&
+    prev.open === next.open
+  );
+});

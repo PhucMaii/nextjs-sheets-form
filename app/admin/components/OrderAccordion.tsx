@@ -80,7 +80,7 @@ const OrderAccordion = ({
 
   const { discountPrice, DiscountText } = useDiscount(order.items, order);
 
-  console.log({order, discountPrice}, 'order');
+  console.log({ order, discountPrice }, 'order');
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,

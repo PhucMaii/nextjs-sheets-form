@@ -2,7 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { Autocomplete, Box, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Grid,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { IDayRange, UserType } from '@/app/utils/type';
@@ -208,7 +215,7 @@ export default function BlockingPage() {
       <ShadowSection>
         <Typography variant="subtitle1">Add Range:</Typography>
         <Grid container alignItems="center" gap={1} mt={2} mb={4}>
-          <Grid item xs={5.5} md={5} textAlign={mdDown ? "center" : "right"}>
+          <Grid item xs={5.5} md={5} textAlign={mdDown ? 'center' : 'right'}>
             <TextField
               fullWidth
               label="From"
@@ -216,7 +223,7 @@ export default function BlockingPage() {
               onClick={() => setIsSelectRangeOpen(true)}
             />
           </Grid>
-          <Grid item xs={5.5} md={5} textAlign={mdDown ? "center" : "right"}>
+          <Grid item xs={5.5} md={5} textAlign={mdDown ? 'center' : 'right'}>
             <TextField
               fullWidth
               label="To"

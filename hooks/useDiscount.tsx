@@ -13,7 +13,6 @@ export const useDiscount = (items: IItem[], order: Order) => {
       return 0;
     }
 
-    
     const discount = items.reduce((acc: number, item: any) => {
       if (item?.isShowDiscount && item?.prevPrice) {
         return acc + item?.prevPrice * item.quantity;

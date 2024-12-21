@@ -34,9 +34,9 @@ export const generateOrderTemplate = (
           <h4>$${totalPrice.toFixed(2)}</h4>
       </td>
       </tr>
-        `;   
+        `;
     } else {
-        orderDetailsTemplate += `
+      orderDetailsTemplate += `
         <tr>
         <td style="padding: 8px">${item?.name}</td>
         <td style="padding: 8px; text-align: center">${item?.quantity}</td>
