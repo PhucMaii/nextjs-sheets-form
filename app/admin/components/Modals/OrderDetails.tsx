@@ -174,22 +174,22 @@ export default function OrderDetails({
                 <Divider />
               </Grid>
               <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>PST (7%)</Typography>
+                <Typography>GST (5%)</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">
-                  ${order?.PST?.toFixed(2) || 0}
+                  ${order?.GST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Divider />
               </Grid>
               <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>GST (5%)</Typography>
+                <Typography>PST (7%)</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">
-                  ${order?.GST?.toFixed(2) || 0}
+                  ${order?.PST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
