@@ -52,7 +52,7 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
         handleUpdateItem={handleUpdateItem}
         order={order}
       />
-      <Table sx={{ minWidth: '100%' }}>
+      <Table sx={{ maxWidth: '100%' }}>
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
