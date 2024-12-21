@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { IDayRange, UserType } from '@/app/utils/type';
@@ -32,6 +32,7 @@ export default function BlockingPage() {
   const [targetRange, setTargetRange] = useState<any>(null);
 
   const { showNotification, NotificationComp } = useNotification();
+  const mdDown = useMediaQuery((them: any) => them.breakpoints.down('md'));
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
@@ -207,7 +208,7 @@ export default function BlockingPage() {
       <ShadowSection>
         <Typography variant="subtitle1">Add Range:</Typography>
         <Grid container alignItems="center" gap={1} mt={2} mb={4}>
-          <Grid item xs={5}>
+          <Grid item xs={5.5} md={5} textAlign={mdDown ? "center" : "right"}>
             <TextField
               fullWidth
               label="From"
@@ -215,7 +216,7 @@ export default function BlockingPage() {
               onClick={() => setIsSelectRangeOpen(true)}
             />
           </Grid>
-          <Grid item xs={5} textAlign="right">
+          <Grid item xs={5.5} md={5} textAlign={mdDown ? "center" : "right"}>
             <TextField
               fullWidth
               label="To"
@@ -223,12 +224,14 @@ export default function BlockingPage() {
               onClick={() => setIsSelectRangeOpen(true)}
             />
           </Grid>
-          <Grid item xs={1} textAlign="center">
+          <Grid item xs={12} md={1} textAlign="center">
             <LoadingButton
               loading={isAdding}
               loadingIndicator="Adding..."
               onClick={handleAddRange}
               disabled={!selectedClient}
+              variant={mdDown ? 'contained' : 'text'}
+              fullWidth={!!mdDown}
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <AddIcon />
@@ -239,7 +242,7 @@ export default function BlockingPage() {
         </Grid>
 
         <Typography variant="subtitle1">Unavailable Ranges:</Typography>
-        <Box display="flex" flexDirection="column" gap={2} mt={2}>
+        <Box display="flex" flexDirection="column" gap={3} mt={2}>
           {isFetching ? (
             <LoadingComponent />
           ) : unavailableRanges && unavailableRanges?.data.length > 0 ? (
