@@ -19,7 +19,6 @@ export const generateOrderTemplate = (
     if (item.quantity === 0) continue;
     const totalPrice = item.price * item.quantity;
     if (item?.isShowDiscount && item?.prevPrice) {
-      const totalPrevPrice = item.prevPrice * item.quantity;
       orderDetailsTemplate += `
       <tr>
       <td style="padding: 8px">${item?.name}</td>
@@ -27,11 +26,11 @@ export const generateOrderTemplate = (
       <td style="padding: 8px; text-align: center">
         <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
           <h4 style="text-decoration: line-through">$${item.prevPrice.toFixed(2)}</h4>
+          <br />
           <h4>$${item.price.toFixed(2)}</h4>
         </div>
       </td>
       <td style="padding: 8px; text-align: center; display: flex; flex-direction: column; align-items: center;">
-          <h4 style="text-decoration: line-through">$${totalPrevPrice.toFixed(2)}</h4>
           <h4>$${totalPrice.toFixed(2)}</h4>
       </td>
       </tr>
@@ -88,12 +87,12 @@ export const generateOrderTemplate = (
               </tbody>
             </table>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
-            <h4 style="text-align: right;font-weight: 300;">Subtotal: $${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}</h4>
             <h4 style="text-align: right;font-weight: 300;">Discount: -$${order?.discount?.toFixed(2)}</h4>
-            <h4 style="text-align: right;font-weight: 300;">PST: $${order?.PST?.toFixed(
+            <h4 style="text-align: right;font-weight: 300;">Subtotal: $${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}</h4>
+            <h4 style="text-align: right;font-weight: 300;">GST: $${order?.GST?.toFixed(
               2,
             )}</h4>
-            <h4 style="text-align: right;font-weight: 300;">GST: $${order?.GST?.toFixed(
+            <h4 style="text-align: right;font-weight: 300;">PST: $${order?.PST?.toFixed(
               2,
             )}</h4>
             <h4 style="text-align: right;font-weight: 300;">Total: $${order?.totalPrice?.toFixed(

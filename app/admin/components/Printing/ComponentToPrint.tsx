@@ -75,14 +75,14 @@ export const ComponentToPrint = forwardRef(
                 gap={1}
                 flexDirection="column"
               >
-                {item?.isShowDiscount &&
+                {/* {item?.isShowDiscount &&
                   item?.prevPrice &&
                   item?.totalPrevPrice?.toFixed(2) !==
                     item.totalPrice.toFixed(2) && (
                     <Typography sx={{ textDecoration: 'line-through' }}>
                       ${item?.totalPrevPrice?.toFixed(2)}
                     </Typography>
-                  )}
+                  )} */}
                 <Typography fontWeight="bold">
                   ${item.totalPrice?.toFixed(2)}
                 </Typography>
@@ -179,19 +179,6 @@ export const ComponentToPrint = forwardRef(
             </Table>
             <Divider sx={{ mt: 3, backgroundColor: 'black' }} />
             <Grid container>
-              <Grid item xs={6}>
-                <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  Subtotal:
-                </Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  $
-                  {order?.subTotal?.toFixed(2) ||
-                    order?.totalPrice?.toFixed(2) ||
-                    0}
-                </Typography>
-              </Grid>
               {order?.discount && order?.discount > 0 ? (
                 <>
                   <Grid item xs={6}>
@@ -208,12 +195,15 @@ export const ComponentToPrint = forwardRef(
               ) : null}
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  PST (7%):
+                  Subtotal:
                 </Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${order?.PST?.toFixed(2) || 0}
+                  $
+                  {order?.subTotal?.toFixed(2) ||
+                    order?.totalPrice?.toFixed(2) ||
+                    0}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -224,6 +214,16 @@ export const ComponentToPrint = forwardRef(
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   ${order?.GST?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  PST (7%):
+                </Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography sx={{ fontSize: printFontSize - 5 }}>
+                  ${order?.PST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
 
@@ -282,7 +282,7 @@ export const ComponentToPrint = forwardRef(
           <Divider sx={{ my: 3, backgroundColor: 'black' }} />
           <Grid container alignItems="center">
             <Grid item xs={6}>
-              <Typography>P: PST (7%)</Typography>
+              <Typography>G: GST (5%)</Typography>
             </Grid>
             <Grid item xs={6} textAlign="right">
               <Typography textAlign="right">
@@ -290,7 +290,7 @@ export const ComponentToPrint = forwardRef(
               </Typography>
             </Grid>
             <Grid item xs={6}>
-              <Typography>G: GST (5%)</Typography>
+              <Typography>P: PST (7%)</Typography>
             </Grid>
             <Grid item xs={6} textAlign="right">
               {order?.updatedBy && (

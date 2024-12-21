@@ -182,44 +182,45 @@ async function main() {
   //     // });
   //   }
   // }
-  // const startDate = new Date('2024-11-01');
-  // const endDate = new Date('2024-12-01');
-  // const decemberDayList = generateListOfDateString(startDate, endDate);
-  // const ordersInDecember = await prisma.orders.findMany({
-  //   where: {
-  //     deliveryDate: {
-  //       in: decemberDayList
-  //     }
-  //   },
-  //   include: {
-  //     items: true,
-  //     user: true,
-  //   }
-  // });
-  // for (const order of ordersInDecember) {
-  //   const actualTotalPrice = order.items.reduce((acc: number, item: any) => {
-  //     return acc + item.price * item.quantity;
-  //   }, 0);
-  //   if (actualTotalPrice.toFixed(2) !== order.totalPrice.toFixed(2)) {
-  //     await prisma.orders.update({
-  //       where: {
-  //         id: order.id
-  //       },
-  //       data: {
-  //         totalPrice: actualTotalPrice,
-  //         subTotal: actualTotalPrice
-  //       }
-  //     })
-  //     console.log({
-  //       id: order.id,
-  //       deliveryDate: order.deliveryDate,
-  //       clientName: order?.user?.clientName,
-  //       clientId: order?.user?.clientId,
-  //       actualTotalPrice,
-  //       orderTotalPrice: order.totalPrice
-  //     });
-  //   }
-  // }
+  const startDate = new Date('2024-12-01');
+  const endDate = new Date('2024-12-31');
+  const decemberDayList = generateListOfDateString(startDate, endDate);
+  const ordersInDecember = await prisma.orders.findMany({
+    where: {
+      deliveryDate: {
+        in: decemberDayList
+      }
+    },
+    include: {
+      items: true,
+      user: true,
+    }
+  });
+  for (const order of ordersInDecember) {
+    const actualTotalPrice = order.items.reduce((acc: number, item: any) => {
+      return acc + item.price * item.quantity;
+    }, 0);
+    if (actualTotalPrice.toFixed(2) !== order.totalPrice.toFixed(2)) {
+      // await prisma.orders.update({
+      //   where: {
+      //     id: order.id
+      //   },
+      //   data: {
+      //     totalPrice: actualTotalPrice,
+      //     subTotal: actualTotalPrice
+      //   }
+      // })
+      console.log({
+        id: order.id,
+        deliveryDate: order.deliveryDate,
+        clientName: order?.user?.clientName,
+        clientId: order?.user?.clientId,
+        actualTotalPrice,
+        orderTotalPrice: order.totalPrice
+      });
+    }
+  }
+
 }
 
 main()

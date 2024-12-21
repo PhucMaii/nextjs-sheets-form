@@ -78,7 +78,9 @@ const OrderAccordion = ({
             : COLOR_TYPE.ERROR,
   };
 
-  const { discountPrice, DiscountText } = useDiscount(order.items);
+  const { discountPrice, DiscountText } = useDiscount(order.items, order);
+
+  console.log({order, discountPrice}, 'order');
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,

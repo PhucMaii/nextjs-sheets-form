@@ -144,20 +144,6 @@ export default function OrderDetails({
               <Grid item xs={12}>
                 <Divider />
               </Grid>
-              <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>Subtotal</Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">
-                  $
-                  {order?.subTotal?.toFixed(2) ||
-                    order?.totalPrice?.toFixed(2) ||
-                    0}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
               {order?.discount && order.discount > 0 ? (
                 <>
                   <Grid item xs={4} textAlign="left" ml={2}>
@@ -173,6 +159,20 @@ export default function OrderDetails({
                   </Grid>
                 </>
               ) : null}
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>Subtotal</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  $
+                  {order?.subTotal?.toFixed(2) ||
+                    order?.totalPrice?.toFixed(2) ||
+                    0}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
               <Grid item xs={4} textAlign="left" ml={2}>
                 <Typography>PST (7%)</Typography>
               </Grid>
