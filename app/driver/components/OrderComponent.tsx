@@ -14,6 +14,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
 import { OrderedItems } from '@/app/utils/type';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DeliveredCapture from './Modals/DeliveredCapture';
 
 interface IProps {
   order: Order;
@@ -39,6 +40,10 @@ export default function OrderComponent({
     color: 'primary',
     updatedStatus: ORDER_STATUS.DELIVERED,
   });
+  const [deliveredCaptureProps, setDeliveredCaptureProps] = useState<any>({
+    on: false,
+    orderId: -1,
+  })
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
@@ -69,6 +74,10 @@ export default function OrderComponent({
 
   return (
     <ShadowSection mt={1}>
+      <DeliveredCapture 
+        open={deliveredCaptureProps.on}
+        onClose={() => setDeliveredCaptureProps({ ...deliveredCaptureProps, on: false })}
+      />
       <ClientDetailsModal
         open={isOpenClientDetails}
         onClose={() => setIsOpenClientDetails(false)}
@@ -94,6 +103,7 @@ export default function OrderComponent({
         totalQuantity={totalQuantity}
         handleUpdateStatus={handleUpdateStatus}
         handleUpdateItem={handleUpdateItem}
+        setDeliveredCaptureProps={setDeliveredCaptureProps}
       />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={1}>
@@ -131,12 +141,13 @@ export default function OrderComponent({
               <Fab
                 sx={{ zIndex: 0 }}
                 onClick={() =>
-                  setConfirmModalProps({
-                    on: true,
-                    heading: `Have you deliver order for ${order.clientName}`,
-                    color: 'primary',
-                    updatedStatus: ORDER_STATUS.DELIVERED,
-                  })
+                  // setConfirmModalProps({
+                  //   on: true,
+                  //   heading: `Have you deliver order for ${order.clientName}`,
+                  //   color: 'primary',
+                  //   updatedStatus: ORDER_STATUS.DELIVERED,
+                  // })
+                  setDeliveredCaptureProps({ on: true, orderId: order.id })
                 }
                 color="primary"
                 size="small"

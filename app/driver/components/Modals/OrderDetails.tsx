@@ -23,6 +23,7 @@ import { OrderedItems } from '@/app/utils/type';
 interface IProps extends ModalProps {
   order: Order;
   totalQuantity: number;
+  setDeliveredCaptureProps: any;
   handleUpdateStatus: (
     orderId: number,
     updatedStatus: ORDER_STATUS,
@@ -41,6 +42,7 @@ export default function OrderDetails({
   totalQuantity,
   handleUpdateStatus,
   handleUpdateItem,
+  setDeliveredCaptureProps
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -137,7 +139,7 @@ export default function OrderDetails({
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={6}>
                 <LoadingButton
-                  onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
+                  onClick={() => setDeliveredCaptureProps({ on: true, orderId: order.id })}
                   loading={isLoading}
                   fullWidth
                   variant="contained"
