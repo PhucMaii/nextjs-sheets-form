@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
-    id?: string;
+  id?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {

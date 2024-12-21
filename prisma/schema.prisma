@@ -268,8 +268,10 @@ model InventoryItem {
 }
 
 model ItemPreference {
-  id    Int    @id @default(autoincrement())
-  image String
+  id           Int     @id @default(autoincrement())
+  image        String
+  description  String
+  isBestSeller Boolean
 
   inventoryItemId Int @unique
   typeId          Int

@@ -72,7 +72,7 @@ export default function EditProductType({
     <Modal open={open} onClose={onClose}>
       <BoxModal>
         <ModalHead
-          heading={"Edit Product Type" + ' - ' + type?.name}
+          heading={'Edit Product Type' + ' - ' + type?.name}
           buttonLabel="EDIT"
           onClick={handleUpdateProductType}
           buttonProps={{ loading: isLoading }}

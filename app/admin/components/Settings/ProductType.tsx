@@ -24,8 +24,8 @@ import { useRouter } from 'next/navigation';
 
 export default function ProductType() {
   const [menuState, setMenuState] = useState<{
-      anchorEl: HTMLElement | null;
-      type: IProductType | null;
+    anchorEl: HTMLElement | null;
+    type: IProductType | null;
   }>({ anchorEl: null, type: null });
   const [open, setOpen] = useMultipleBoolean({
     addProductType: false,
@@ -38,28 +38,33 @@ export default function ProductType() {
   const router = useRouter();
 
   const [types] = SWRFetchData(`${API_URL.ADMIN}/productTypes`);
-  
+
   const handleDeleteType = async (type: IProductType) => {
     try {
-        const response = await axios.delete(`${API_URL.ADMIN}/productTypes?id=${type.id}`);
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/productTypes?id=${type.id}`,
+      );
 
-        if (response.data.error) {
-            showNotification('error', response.data.error);
-            return;
-        }
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
 
-        showNotification('success', 'Product Type deleted successfully');
-        setOpen('deleteProductType', false);
+      showNotification('success', 'Product Type deleted successfully');
+      setOpen('deleteProductType', false);
     } catch (error: any) {
-        console.log('Internal Server Error: ', error);
-        showNotification('error', 'Internal Server Error: ' + error);
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Internal Server Error: ' + error);
     }
-  }
+  };
 
-  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>, type: IProductType) => {
+  const handleMenuOpen = (
+    e: React.MouseEvent<HTMLElement>,
+    type: IProductType,
+  ) => {
     setMenuState({ anchorEl: e.currentTarget, type });
   };
-  
+
   const handleMenuClose = () => {
     setMenuState({ anchorEl: null, type: null });
   };
@@ -67,7 +72,7 @@ export default function ProductType() {
   return (
     <Box>
       {NotificationComp}
-      <DeleteModal 
+      <DeleteModal
         open={open.deleteProductType}
         handleCloseModal={() => setOpen('deleteProductType', false)}
         handleDelete={handleDeleteType}
@@ -194,7 +199,7 @@ export default function ProductType() {
                   </>
                 </Box>
                 <Typography variant="h6" fontWeight="normal">
-                  {type.items.length} products
+                  {type.itemPreferences.length} products
                 </Typography>
               </Box>
             );

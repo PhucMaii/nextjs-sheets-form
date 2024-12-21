@@ -33,7 +33,9 @@ export default function SettingsPage() {
         <Tabs
           aria-label="basic tabs"
           value={tabIndex}
-          onChange={(e, newValue) => router.push("/admin/settings?tab=" + newValue)}
+          onChange={(e, newValue) =>
+            router.push('/admin/settings?tab=' + newValue)
+          }
           variant="scrollable"
           scrollButtons="auto"
           //   sx={{ width: '100%' }}
