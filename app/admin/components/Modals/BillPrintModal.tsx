@@ -21,7 +21,7 @@ import StatusText from '../StatusText';
 import { IRoutes } from '@/app/utils/type';
 import ErrorComponent from '../ErrorComponent';
 import { Order } from '../../orders/page';
-import { AllPrint } from '../Printing/AllPrint';
+import { MemoizedAllPrint } from '../Printing/AllPrint';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import { ManifestPrint } from '../Printing/ManifestPrint';
@@ -165,7 +165,7 @@ const BillPrintModal = ({
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <div style={{ display: 'none' }}>
-          <AllPrint
+          <MemoizedAllPrint
             orders={
               billPrintOption === BILL_PRINT_OPTION.NONE
                 ? nonVoidOrders

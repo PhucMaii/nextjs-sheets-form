@@ -10,9 +10,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
-  TableHead,
-  TablePagination,
   TableRow,
 } from '@mui/material';
 import React, { memo, useState } from 'react';
@@ -23,8 +20,10 @@ import EditReportOrder from '../Modals/edit/EditReportOrder';
 import axios from 'axios';
 import LoadingModal from '../Modals/LoadingModal';
 import DeleteModal from '../Modals/delete/DeleteModal';
+import { TableComponents, TableVirtuoso } from 'react-virtuoso';
+import useWindowDimensions from '@/hooks/useWindowDimensions';
 
-interface PropTypes {
+interface PropTypes { 
   clientOrders: Order[];
   handleUpdateOrderUI: (updatedOrder: Order) => void;
   handleDeleteOrderUI: (deletedOrder: Order) => void;
@@ -55,8 +54,9 @@ const ClientOrdersTable = ({
     open: false,
     order: clientOrders[0],
   });
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);  
-  const [page, setPage] = useState<number>(0);
+  // const [rowsPerPage, setRowsPerPage] = useState<number>(10);  
+  // const [page, setPage] = useState<number>(0);
+  const windowDimensions = useWindowDimensions();
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
     try {
@@ -111,154 +111,154 @@ const ClientOrdersTable = ({
     }
   };
 
-  const handleChangePage = (e: any, newPage: number) => {
-    setPage(newPage);
+  // const handleChangePage = (e: any, newPage: number) => {
+  //   setPage(newPage);
+  // }
+
+  // const handleChangeRowsPerPage = (
+  //   event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  // ) => {
+  //   setRowsPerPage(parseInt(event.target.value, 10));
+  //   setPage(0);
+  // };
+
+  function fixedHeaderContent() {
+    return (
+      <TableRow>
+        <TableCell style={{ width: 100 }}></TableCell>
+        <TableCell padding="checkbox" variant="head">
+          <Checkbox
+            checked={selectedOrders.length === clientOrders.length}
+            onClick={handleSelectAll}
+          />
+        </TableCell>
+        <TableCell variant="head" style={{ width: 100 }}>
+          Invoice Id
+        </TableCell>
+        <TableCell variant="head" style={{ width: 100 }}>
+          Client Id
+        </TableCell>
+        <TableCell variant="head" style={{ width: 150 }}>
+          Client Name
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Delivery Date
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
+          Total Bill
+        </TableCell>
+        <TableCell variant="head" style={{ width: 180 }}>
+          Status
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}></TableCell>
+      </TableRow>
+    );
   }
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  function rowContent(_index: number, order: Order) {
+    const isOrderSelected = selectedOrders.some(
+      (targetOrder: Order) => order.id === targetOrder.id,
+    );
+    return (
+      <>
+        <TableCell>
+          {order.isReplacement ? (
+            <StatusText text="Replaced" type="error" />
+          ) : order.isVoid ? (
+            <StatusText text="Voided" type="error" />
+          ) : (
+            ''
+          )}
+        </TableCell>
+        <TableCell padding="checkbox">
+          <Checkbox
+            onClick={(e) => handleSelectOrder(e, order)}
+            checked={isOrderSelected}
+          />
+        </TableCell>
+        <TableCell>{order.id}</TableCell>
+        <TableCell>{order.user.clientId}</TableCell>
+        <TableCell>{order.user.clientName}</TableCell>
+        <TableCell>{order.deliveryDate}</TableCell>
+        <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
+        <TableCell>
+          <Select
+            value={order.status}
+            onChange={(e) =>
+              updateStatus(order, e.target.value as ORDER_STATUS)
+            }
+          >
+            <MenuItem value={ORDER_STATUS.COMPLETED}>
+              <StatusText text="Completed" type="success" />
+            </MenuItem>
+            <MenuItem value={ORDER_STATUS.DELIVERED}>
+              <StatusText text="Delivered" type="info" />
+            </MenuItem>
+            <MenuItem value={ORDER_STATUS.INCOMPLETED}>
+              <StatusText text="Incompleted" type="warning" />
+            </MenuItem>
+            <MenuItem value={ORDER_STATUS.VOID}>
+              <StatusText text="Void" type="error" />
+            </MenuItem>
+          </Select>
+        </TableCell>
+        <TableCell>
+          <Box display="flex" gap={1}>
+            {/* <DeleteModal
+              includedButton
+              targetObj={order}
+              handleDelete={handleDeleteOrder}
+            /> */}
+            <Button
+              color="error"
+              onClick={() => setOpenDelete(() => ({ order, open: true }))}
+            >
+              Delete
+            </Button>
+            <Button
+              onClick={() => {
+                setOpenEdit(() => ({ order, open: true }));
+              }}
+            >
+              Edit
+            </Button>
+            {/* <EditReportOrder
+              // subCategories={subCategories}
+              order={order}
+              showNotification={showNotification}
+              handleUpdateOrderUI={handleUpdateOrderUI}
+            /> */}
+          </Box>
+        </TableCell>
+      </>
+    );
+  }
+
+  const VirtuosoTableComponents: TableComponents<any> = {
+    Table: (props) => (
+      <Table
+        {...props}
+        sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
+      />
+    ),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    TableRow: ({ item: item, ...props }) => {
+      const isOrderSelected = selectedOrders.some(
+        (targetOrder: Order) => item.id === targetOrder.id,
+      );
+      return (
+        <TableRow
+          aria-checked={isOrderSelected}
+          selected={isOrderSelected}
+          sx={{ cursor: 'pointer' }}
+          {...props}
+        />
+      );
+    },
+    TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
+      <TableBody {...props} ref={ref} />
+    )),
   };
-
-  // function fixedHeaderContent() {
-  //   return (
-  //     <TableRow>
-  //       <TableCell style={{ width: 100 }}></TableCell>
-  //       <TableCell padding="checkbox" variant="head">
-  //         <Checkbox
-  //           checked={selectedOrders.length === clientOrders.length}
-  //           onClick={handleSelectAll}
-  //         />
-  //       </TableCell>
-  //       <TableCell variant="head" style={{ width: 100 }}>
-  //         Invoice Id
-  //       </TableCell>
-  //       <TableCell variant="head" style={{ width: 100 }}>
-  //         Client Id
-  //       </TableCell>
-  //       <TableCell variant="head" style={{ width: 150 }}>
-  //         Client Name
-  //       </TableCell>
-  //       <TableCell variant="head" style={{ width: 120 }}>
-  //         Delivery Date
-  //       </TableCell>
-  //       <TableCell variant="head" style={{ width: 120 }}>
-  //         Total Bill
-  //       </TableCell>
-  //       <TableCell variant="head" style={{ width: 180 }}>
-  //         Status
-  //       </TableCell>
-  //       <TableCell variant="head" style={{ width: 120 }}></TableCell>
-  //     </TableRow>
-  //   );
-  // }
-
-  // function rowContent(_index: number, order: Order) {
-  //   const isOrderSelected = selectedOrders.some(
-  //     (targetOrder: Order) => order.id === targetOrder.id,
-  //   );
-  //   return (
-  //     <>
-  //       <TableCell>
-  //         {order.isReplacement ? (
-  //           <StatusText text="Replaced" type="error" />
-  //         ) : order.isVoid ? (
-  //           <StatusText text="Voided" type="error" />
-  //         ) : (
-  //           ''
-  //         )}
-  //       </TableCell>
-  //       <TableCell padding="checkbox">
-  //         <Checkbox
-  //           onClick={(e) => handleSelectOrder(e, order)}
-  //           checked={isOrderSelected}
-  //         />
-  //       </TableCell>
-  //       <TableCell>{order.id}</TableCell>
-  //       <TableCell>{order.user.clientId}</TableCell>
-  //       <TableCell>{order.user.clientName}</TableCell>
-  //       <TableCell>{order.deliveryDate}</TableCell>
-  //       <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
-  //       <TableCell>
-  //         <Select
-  //           value={order.status}
-  //           onChange={(e) =>
-  //             updateStatus(order, e.target.value as ORDER_STATUS)
-  //           }
-  //         >
-  //           <MenuItem value={ORDER_STATUS.COMPLETED}>
-  //             <StatusText text="Completed" type="success" />
-  //           </MenuItem>
-  //           <MenuItem value={ORDER_STATUS.DELIVERED}>
-  //             <StatusText text="Delivered" type="info" />
-  //           </MenuItem>
-  //           <MenuItem value={ORDER_STATUS.INCOMPLETED}>
-  //             <StatusText text="Incompleted" type="warning" />
-  //           </MenuItem>
-  //           <MenuItem value={ORDER_STATUS.VOID}>
-  //             <StatusText text="Void" type="error" />
-  //           </MenuItem>
-  //         </Select>
-  //       </TableCell>
-  //       <TableCell>
-  //         <Box display="flex" gap={1}>
-  //           {/* <DeleteModal
-  //             includedButton
-  //             targetObj={order}
-  //             handleDelete={handleDeleteOrder}
-  //           /> */}
-  //           <Button
-  //             color="error"
-  //             onClick={() => setOpenDelete(() => ({ order, open: true }))}
-  //           >
-  //             Delete
-  //           </Button>
-  //           <Button
-  //             onClick={() => {
-  //               setOpenEdit(() => ({ order, open: true }));
-  //             }}
-  //           >
-  //             Edit
-  //           </Button>
-  //           {/* <EditReportOrder
-  //             // subCategories={subCategories}
-  //             order={order}
-  //             showNotification={showNotification}
-  //             handleUpdateOrderUI={handleUpdateOrderUI}
-  //           /> */}
-  //         </Box>
-  //       </TableCell>
-  //     </>
-  //   );
-  // }
-
-  // const VirtuosoTableComponents: TableComponents<any> = {
-  //   Table: (props) => (
-  //     <Table
-  //       {...props}
-  //       sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
-  //     />
-  //   ),
-  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //   TableRow: ({ item: item, ...props }) => {
-  //     const isOrderSelected = selectedOrders.some(
-  //       (targetOrder: Order) => item.id === targetOrder.id,
-  //     );
-  //     return (
-  //       <TableRow
-  //         aria-checked={isOrderSelected}
-  //         selected={isOrderSelected}
-  //         sx={{ cursor: 'pointer' }}
-  //         {...props}
-  //       />
-  //     );
-  //   },
-  //   TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
-  //     <TableBody {...props} ref={ref} />
-  //   )),
-  // };
 
   return (
     <>
@@ -281,8 +281,8 @@ const ClientOrdersTable = ({
         }
       />
       <LoadingModal open={isLoading} />
-      <Paper style={{ width: '100%', overflow: 'scroll' }}>
-        <Table sx={{ tableLayout: 'fixed', overflow: 'scroll' }}>
+      <Paper style={{ height: windowDimensions.height - 250 , width: '100%', overflow: 'scroll' }}>
+        {/* <Table sx={{ tableLayout: 'fixed', overflow: 'scroll' }}>
           <TableHead>
             <TableRow>
               <TableCell style={{ width: 100 }}></TableCell>
@@ -407,13 +407,13 @@ const ClientOrdersTable = ({
             />
           </TableRow>
         </TableFooter>
-        </Table>
-        {/* <TableVirtuoso
+        </Table> */}
+        <TableVirtuoso
           data={clientOrders}
           components={VirtuosoTableComponents}
           fixedHeaderContent={fixedHeaderContent}
           itemContent={rowContent}
-        /> */}
+        />
       </Paper>
     </>
   );
