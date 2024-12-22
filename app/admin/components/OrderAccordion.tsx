@@ -32,6 +32,8 @@ import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import BlockIcon from '@mui/icons-material/Block';
 import { useDiscount } from '@/hooks/useDiscount';
+import ConfirmModal from './Modals/ConfirmModal';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 
 interface PropTypes {
   order: Order;
@@ -46,6 +48,7 @@ interface PropTypes {
   mutateOrders: any;
   handleOpenDetails?: any;
   isMarkDateDifference?: boolean;
+  handleRemoveOrder?: (order: Order[]) => Promise<void>;
 }
 
 const OrderAccordion = ({
@@ -57,6 +60,7 @@ const OrderAccordion = ({
   mutateOrders,
   handleOpenDetails,
   isMarkDateDifference,
+  handleRemoveOrder
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -65,6 +69,9 @@ const OrderAccordion = ({
     useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
+  const [open, setOpen] = useMultipleBoolean({
+    isOpenConfirmModal: false,
+  })
   const [totalQuantity, setTotalQuantity] = useState(0);
   const statusText = {
     text: order.status,
@@ -79,8 +86,6 @@ const OrderAccordion = ({
   };
 
   const { discountPrice, DiscountText } = useDiscount(order.items, order);
-
-  console.log({ order, discountPrice }, 'order');
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
@@ -211,10 +216,20 @@ const OrderAccordion = ({
         >
           Print
         </MenuItem>
+        {
+          handleRemoveOrder && <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemoveOrder([order]);
+          }}
+          >
+            Remove
+          </MenuItem>
+        }
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
-            handleDeleteOrder(order);
+            setOpen('isOpenConfirmModal', true);
           }}
         >
           Delete
@@ -280,6 +295,15 @@ const OrderAccordion = ({
         showNotification={showNotification}
         order={order}
         mutateOrders={mutateOrders}
+      />
+      <ConfirmModal 
+        open={open.isOpenConfirmModal}
+        onClose={() => setOpen('isOpenConfirmModal', false)}
+        title="Are you sure to delete this order ?"
+        buttonLabel="Delete"
+        handleSubmit={() => handleDeleteOrder(order)}
+        showNotification={showNotification}
+        color="error"
       />
       {handleUpdateItem && (
         <OrderDetails
