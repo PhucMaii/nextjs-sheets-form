@@ -98,10 +98,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const userRelatedRoute = { ...order, routeId: relatedRoute?.routeId };
         return userRelatedRoute;
       })
-      .filter((order: Order) => order.routeId);
+      .filter((order: Order) => !!order.routeId);
+
+    // console.log(clientRoutes.length, 'clientRoutes');
 
     // Group order by route id
     const orderByRoutes = _.orderBy(clientRoutes, ['routeId'], ['asc']);
+    // console.log(orderByRoutes.length, 'orderByRoutes');
 
     // Arrange as user route positions in pre order
     const sortedOrderByRoutes = [];
@@ -112,7 +115,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let currentRouteOrders: any = []; // to get sort
 
     while (trackOrderByRoutesIndex <= orderByRoutes.length) {
+      // console.log(currentRouteOrders.length, 'currentRouteOrders');
       if (!orderByRoutes[trackOrderByRoutesIndex]?.routeId) {
+        console.log(orderByRoutes[trackOrderByRoutesIndex], 'orderByRoutes');
         // Reach the end of the orderByRoutes - Finalize the currentRouteOrders
         const sortedUserIds = userRoute[currentRouteId];
         currentRouteOrders.sort((orderA: Order, orderB: Order) => {
@@ -149,6 +154,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       trackOrderByRoutesIndex++;
     }
+
+    // console.log(sortedOrderByRoutes.length, 'sortedOrderByRoutes');
     // for (const route of dayRoutes) {
     //   const sortedUserIds = userRoute[route.id];
     //   // console.log(sortedUserIds, 'sortedUserIds');
@@ -180,10 +187,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Item Manifest
     const items = sortedOrderByRoutes.map((order: Order) => {
+      // console.log(order.routeId , 'order.routeId');
+      // if (!order.routeId) {
+      //   console.log(order, 'order no route id');
+      // }
+      // if (order?.routeId === 82) {
+      //   console.log(order, 'order');
+      // }
       return order?.items.map((item: any) => {
         return {
           ...item,
-          routeId: order.routeId,
+          routeId: order?.routeId,
           client: order.clientName,
           user: order.user,
         };
@@ -202,8 +216,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ({ routeId }: any) => routeId,
     );
 
+    // console.log(groupItemRoutes, 'groupItemRoutes');
+
     const itemManifest: any = {};
+    // console.log(groupItemRoutes, 'groupItemRoutes');
     for (const itemRoute in groupItemRoutes) {
+      // console.log(itemRoute, 'itemRoute');
       // console.log(itemRoute, 'itemRoute');
       const targetRoute = dayRoutes.find((route: any) => route.id == itemRoute);
 
@@ -230,6 +248,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         {},
       );
+
+      // console.log({manifestItem, itemRoute}, 'manifestItem');
 
       const manifestDetail = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem, index: number) => {
@@ -270,6 +290,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               user: { ...user, displayName },
               [itemKey]: quantity,
             };
+
             acc.push(newUserManifest);
             return acc;
           }
@@ -279,6 +300,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             ...currentUserManifest,
             [itemKey]: quantity,
           };
+
+          // console.log(updatedUserManifest.user.clientName, 'updatedUserManifest');
           acc[acc.length - 1] = updatedUserManifest;
           return acc;
         },
@@ -315,7 +338,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       };
     }
 
-    // console.log('Manifest: ', {orderPrint: sortedOrderByRoutes, itemmani});
+    // console.log('Manifest: ', {orderPrint: sortedOrderByRoutes, itemManifest});
 
     return res.status(200).json({
       data: { orderPrint: sortedOrderByRoutes, itemManifest },
