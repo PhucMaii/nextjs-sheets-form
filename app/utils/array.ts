@@ -191,3 +191,11 @@ export const getUniqueUnitRatios = (units: any[]) => {
     new Map(units.map((unit: any) => [unit.ratio, unit])).values(),
   );
 };
+
+export const getDifferentItems = (baseItems: any, toCompareItems: any, key: string[]) => {
+  return baseItems.filter((baseItem: any) => {
+    return !toCompareItems.some((toCompareItem: any) => {
+      return key.every((keyItem: any) => baseItem[keyItem] === toCompareItem[keyItem]);
+    });
+  });
+}
