@@ -53,7 +53,11 @@ export default function ConfirmModal({
         </Typography>
 
         <Box display="flex" gap={1} alignItems="center">
-          <Button variant="outlined" onClick={onClose} color={color ? color : 'primary'}>
+          <Button
+            variant="outlined"
+            onClick={onClose}
+            color={color ? color : 'primary'}
+          >
             CANCEL
           </Button>
           <LoadingButton

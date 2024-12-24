@@ -34,8 +34,7 @@ const BorderRightTableCell = styled(TableCell)<TableCellProps>`
 
 export const ManifestPrint = forwardRef(
   ({ manifest, currentDate }: PropTypes, ref: any) => {
-
-    console.log(manifest, 'manifest')
+    console.log(manifest, 'manifest');
     if (!manifest || Object.keys(manifest).length === 0) {
       // return;
       return (

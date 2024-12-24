@@ -25,7 +25,6 @@ import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
-// import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 export default function Transactions() {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
@@ -66,7 +65,9 @@ export default function Transactions() {
       setIsLoading(false);
       setDisplayTransactions(transactions?.data || []);
     }
-  }, [transactions, dateRange]);
+  }, [transactions?.data, dateRange]);
+
+  // console.log(displayTransactions, 'displayTransactions');
 
   useEffect(() => {
     if (debouncedKeywords) {

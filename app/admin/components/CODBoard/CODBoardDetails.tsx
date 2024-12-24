@@ -67,7 +67,7 @@ interface IProps {
 export default function CODBoardDetails({
   boardData,
   onClose,
-  isAutoAddBoard
+  isAutoAddBoard,
   // showNotification,
 }: IProps) {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -543,7 +543,11 @@ export default function CODBoardDetails({
 
         {isAutoAddBoard && (
           <Box mt={2}>
-            <StatusText text="We are checking for new boards..." type="info" icon={<InfoIcon style={{ color: infoColor }} />} />
+            <StatusText
+              text="We are checking for new boards..."
+              type="info"
+              icon={<InfoIcon style={{ color: infoColor }} />}
+            />
           </Box>
         )}
 

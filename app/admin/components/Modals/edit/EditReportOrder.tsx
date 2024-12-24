@@ -80,10 +80,12 @@ const EditReportOrder = ({
   // }, [vendors]);
 
   useEffect(() => {
-    if (order.items) {
+    if (order) {
       setItemList(order.items);
+      setUpdatedDate(order.deliveryDate);
+      setStatus(order.status);
     }
-  }, [order.items]);
+  }, [order]);
 
   // useEffect(() => {
   //   if (selectedVendorId !== -1) {

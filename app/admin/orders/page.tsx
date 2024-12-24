@@ -210,8 +210,6 @@ export default function Orders() {
     }
   }, [baseOrderData]);
 
-  console.log('ORDER PAGE RE RENDER');
-
   // Subscribe admin whenever they logged in
   useEffect(() => {
     pusherClient?.subscribe('admin');

@@ -23,7 +23,7 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 
-interface PropTypes { 
+interface PropTypes {
   clientOrders: Order[];
   handleUpdateOrderUI: (updatedOrder: Order) => void;
   handleDeleteOrderUI: (deletedOrder: Order) => void;
@@ -54,7 +54,7 @@ const ClientOrdersTable = ({
     open: false,
     order: clientOrders[0],
   });
-  // const [rowsPerPage, setRowsPerPage] = useState<number>(10);  
+  // const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   // const [page, setPage] = useState<number>(0);
   const windowDimensions = useWindowDimensions();
 
@@ -281,7 +281,13 @@ const ClientOrdersTable = ({
         }
       />
       <LoadingModal open={isLoading} />
-      <Paper style={{ height: windowDimensions.height - 250 , width: '100%', overflow: 'scroll' }}>
+      <Paper
+        style={{
+          height: windowDimensions.height - 250,
+          width: '100%',
+          overflow: 'scroll',
+        }}
+      >
         {/* <Table sx={{ tableLayout: 'fixed', overflow: 'scroll' }}>
           <TableHead>
             <TableRow>
