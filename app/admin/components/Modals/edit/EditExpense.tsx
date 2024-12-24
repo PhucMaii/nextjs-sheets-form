@@ -104,7 +104,7 @@ export default function EditExpense({
           <ModalHead
             heading="Edit Expense"
             buttonLabel="EDIT"
-            onClose={onClose}
+            onClose={() => console.log('CLOSE PRESSED')}
             onClick={handleUpdateExpense}
             buttonProps={{
               loading: isLoading,
@@ -174,7 +174,7 @@ export default function EditExpense({
                   <TextField
                     placeholder="Total"
                     fullWidth
-                    value={updatedExpense.amount}
+                    value={updatedExpense?.amount}
                     type="number"
                     onChange={(e) => onChangeExpense('amount', +e.target.value)}
                   />
@@ -187,14 +187,14 @@ export default function EditExpense({
                 multiline
                 placeholder="Enter description..."
                 fullWidth
-                value={updatedExpense.description}
+                value={updatedExpense?.description}
                 onChange={(e) => onChangeExpense('description', e.target.value)}
               />
             </Box>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Payment Method</Typography>
               <Select
-                value={updatedExpense.paymentMethodId}
+                value={updatedExpense?.paymentMethodId}
                 onChange={(e: any) =>
                   onChangeExpense('paymentMethodId', +e.target.value)
                 }
@@ -218,7 +218,7 @@ export default function EditExpense({
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Spent By</Typography>
               <Select
-                value={updatedExpense.spentBy}
+                value={updatedExpense?.spentBy}
                 onChange={(e) => onChangeExpense('spentBy', e.target.value)}
               >
                 <MenuItem value="-- Choose who spent --" disabled>

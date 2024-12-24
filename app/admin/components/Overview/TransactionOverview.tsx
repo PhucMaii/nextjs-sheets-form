@@ -13,7 +13,7 @@ interface IProps {
 
 export default function TransactionOverview({ transactions }: IProps) {
   const totalBill = useMemo(() => {
-    if (transactions.length === 0) {
+    if (!transactions || transactions?.length === 0) {
       return 0;
     }
     return transactions.reduce(
@@ -44,7 +44,7 @@ export default function TransactionOverview({ transactions }: IProps) {
           backgroundColor={primary.lightest}
           icon={<PointOfSaleIcon fontSize="large" color="primary" />}
           text="Total Transactions"
-          value={transactions.length || 0}
+          value={transactions?.length || 0}
         />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
@@ -53,7 +53,7 @@ export default function TransactionOverview({ transactions }: IProps) {
           backgroundColor={primary.lightest}
           icon={<PaidIcon fontSize="large" color="primary" />}
           text="Total Bill"
-          value={totalBill.toFixed(2) || 0}
+          value={totalBill?.toFixed(2) || 0}
         />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
@@ -62,7 +62,7 @@ export default function TransactionOverview({ transactions }: IProps) {
           backgroundColor={primary.lightest}
           icon={<MoneyIcon fontSize="large" color="primary" />}
           text="Avg Spend Per Day"
-          value={avgSpendPerDay.toFixed(2) || 0}
+          value={avgSpendPerDay?.toFixed(2) || 0}
         />
       </Grid>
     </Grid>

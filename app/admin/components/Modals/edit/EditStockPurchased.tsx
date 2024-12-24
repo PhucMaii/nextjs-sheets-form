@@ -578,7 +578,7 @@ const EditStockPurchased = ({
             buttonLabel="EDIT"
             onClick={handleSubmit}
             buttonProps={{ loading: isLoading }}
-            onClose={() => onChangeOpen('isOpen', false)}
+            onClose={onClose}
           />
 
           <Divider sx={{ my: 2 }} />

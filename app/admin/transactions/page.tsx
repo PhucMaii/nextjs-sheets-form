@@ -58,12 +58,12 @@ export default function Transactions() {
   );
 
   useEffect(() => {
-    if (!transactions) {
-      setIsLoading(true);
-      setSelectedExpenses([]);
-    } else {
+    if (transactions) {
       setIsLoading(false);
       setDisplayTransactions(transactions?.data || []);
+    } else {
+      setIsLoading(true);
+      setSelectedExpenses([]);
     }
   }, [transactions?.data, dateRange]);
 
@@ -93,7 +93,7 @@ export default function Transactions() {
     } else {
       setDisplayTransactions(transactions?.data || []);
     }
-  }, [debouncedKeywords]);
+  }, [debouncedKeywords, transactions]);
 
   useEffect(() => {
     if (adminsAndDriversRes) {

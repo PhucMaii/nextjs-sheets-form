@@ -111,7 +111,7 @@ const TransactionsTable = ({
         <EditStockPurchased
           open={editProps.open}
           onClose={() =>
-            setEditProps((prevState: any) => ({ ...prevState, open: false }))
+            setEditProps((prevState: any) => ({ ...prevState, open: false, type: null }))
           }
           stockPurchased={editProps.transaction}
           showNotification={showNotification}
@@ -122,7 +122,7 @@ const TransactionsTable = ({
         <EditExpense
           open={editProps.open}
           onClose={() =>
-            setEditProps((prevState: any) => ({ ...prevState, open: false }))
+            setEditProps((prevState: any) => ({ ...prevState, open: false, type: null }))
           }
           transaction={editProps.transaction}
           showNotification={showNotification}
