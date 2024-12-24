@@ -254,14 +254,14 @@ export const createOrder = async (
         (inventoryItem) => inventoryItem.id === item.inventoryItemId,
       );
 
-      console.log(item, 'item');
+      // console.log(item, 'item');
 
       if (!targetedItem) {
         console.error('Conflict Inventory Item Not Found');
         continue;
       }
 
-      console.log({ targetedItem, item }, 'targetedItem');
+      // console.log({ targetedItem, item }, 'targetedItem');
       // Check if vendor item has no batch
       if (targetedItem.fifo.length === 0) {
         const newFifo = await prisma.fifo.create({
@@ -305,7 +305,7 @@ export const createOrder = async (
 
         // Descending fifo - first item would be the latest
         const sortedFifo = sortByDeliveryDate(itemFifo, 'createdAt');
-        console.log({ sortedFifo, itemFifo }, 'sortedFifo');
+        // console.log({ sortedFifo, itemFifo }, 'sortedFifo');
         // STEP 3: Use while loop to identify which fifo should be used
         //   itemQuantity = item.quantity * item.unit.ratio
         //   while (itemQuantity >= fifo.quantity)
