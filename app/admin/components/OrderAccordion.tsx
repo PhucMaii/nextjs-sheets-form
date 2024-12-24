@@ -60,7 +60,7 @@ const OrderAccordion = ({
   mutateOrders,
   handleOpenDetails,
   isMarkDateDifference,
-  handleRemoveOrder
+  handleRemoveOrder,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -71,7 +71,7 @@ const OrderAccordion = ({
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [open, setOpen] = useMultipleBoolean({
     isOpenConfirmModal: false,
-  })
+  });
   const [totalQuantity, setTotalQuantity] = useState(0);
   const statusText = {
     text: order.status,
@@ -216,16 +216,16 @@ const OrderAccordion = ({
         >
           Print
         </MenuItem>
-        {
-          handleRemoveOrder && <MenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRemoveOrder([order]);
-          }}
+        {handleRemoveOrder && (
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveOrder([order]);
+            }}
           >
             Remove
           </MenuItem>
-        }
+        )}
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
@@ -296,7 +296,7 @@ const OrderAccordion = ({
         order={order}
         mutateOrders={mutateOrders}
       />
-      <ConfirmModal 
+      <ConfirmModal
         open={open.isOpenConfirmModal}
         onClose={() => setOpen('isOpenConfirmModal', false)}
         title="Are you sure to delete this order ?"

@@ -589,26 +589,30 @@ export default function ReportPage() {
       {NotificationComp}
 
       {/* PRINT SLOWS DOWN THE PAGE */}
-      {clientValue?.clientName !== 'All Clients' && <div style={{ display: 'none' }}>
-        <InvoicePrint
-          client={clientValue}
-          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          endDate={dateRange[1]}
-          ref={invoicePrint}
-        />
-        <WeeklyStatement
-          client={clientValue}
-          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          endDate={dateRange[1]}
-          ref={weeklyPrint}
-        />
-      </div>}
-      {clientValue?.clientName === 'All Clients' && <div style={{ display: 'none' }}>
-        <MemoizedAllPrint
-          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          ref={billPrint}
-        />
-      </div>}
+      {clientValue?.clientName !== 'All Clients' && (
+        <div style={{ display: 'none' }}>
+          <InvoicePrint
+            client={clientValue}
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            endDate={dateRange[1]}
+            ref={invoicePrint}
+          />
+          <WeeklyStatement
+            client={clientValue}
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            endDate={dateRange[1]}
+            ref={weeklyPrint}
+          />
+        </div>
+      )}
+      {clientValue?.clientName === 'All Clients' && (
+        <div style={{ display: 'none' }}>
+          <MemoizedAllPrint
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            ref={billPrint}
+          />
+        </div>
+      )}
       {clientValue?.clientName === 'All Clients' && (
         <>
           <BillPrintModal

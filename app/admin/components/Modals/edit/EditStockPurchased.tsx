@@ -36,18 +36,24 @@ import UnitRadio from '../../Radio/UnitRadio';
 import { grey } from '@mui/material/colors';
 // import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { gstRate, pstRate } from '@/app/lib/constant';
+import { ModalProps } from '../type';
 
-interface IProps {
+interface IProps extends ModalProps {
   stockPurchased: IExpense;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 export const filter = createFilterOptions<any>();
 
-const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
+const EditStockPurchased = ({
+  open,
+  onClose,
+  stockPurchased,
+  showNotification,
+}: IProps) => {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [open, onChangeOpen] = useMultipleBoolean({
+  const [openBooleans, onChangeOpen] = useMultipleBoolean({
     isOpenAddVendor: false,
     isOpenAddUnit: false,
     disabledCloseAddUnit: false,
@@ -83,7 +89,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     `${API_URL.ADMIN}/adminsAndDrivers`,
   );
 
-  const { date, SelectDate } = useSelectDate(stockPurchased.date, true);
+  const { date, SelectDate } = useSelectDate(stockPurchased?.date, true);
 
   const sortedVendors = useMemo(() => {
     if (!vendors?.data) {
@@ -551,7 +557,7 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
     <>
       <AddVendor
         showNotification={showNotification}
-        open={open.isOpenAddVendor}
+        open={openBooleans.isOpenAddVendor}
         onClose={() => onChangeOpen('isOpenAddVendor', false)}
       />
       <EditUnit
@@ -564,8 +570,8 @@ const EditStockPurchased = ({ stockPurchased, showNotification }: IProps) => {
           updateUnit(updatedUnit, editUnit.unitIndex)
         }
       />
-      <Button onClick={() => onChangeOpen('isOpen', true)}>Edit</Button>
-      <Modal open={open.isOpen} onClose={() => onChangeOpen('isOpen', false)}>
+      {/* <Button onClick={() => onChangeOpen('isOpen', true)}>Edit</Button> */}
+      <Modal open={open} onClose={onClose}>
         <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Stock Purchased"

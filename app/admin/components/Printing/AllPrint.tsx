@@ -5,7 +5,7 @@ import './print.css';
 const MemoizedComponentToPrint = memo(ComponentToPrint);
 
 const AllPrint = forwardRef(({ orders }: { orders: any }, ref: any) => {
-  console.log('ALL PRINT RE RENDER')
+  console.log('ALL PRINT RE RENDER');
   return (
     <div ref={ref}>
       {orders.map((order: any, index: number) => {
