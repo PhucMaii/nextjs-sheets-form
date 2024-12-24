@@ -48,7 +48,7 @@ export default function OrderAccordion({
   const totalQuantity = order.items?.reduce((acc: number, cV: Item) => {
     return acc + cV.quantity;
   }, 0);
-  const { discountPrice, DiscountText } = useDiscount(order.items);
+  const { discountPrice, DiscountText } = useDiscount(order.items, order);
 
   const statusText = {
     text: order.status,
@@ -244,20 +244,6 @@ export default function OrderAccordion({
               <Grid item xs={12}>
                 <Divider />
               </Grid>
-              <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>Subtotal</Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">
-                  $
-                  {order?.subTotal?.toFixed(2) ||
-                    order?.totalPrice?.toFixed(2) ||
-                    0}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
               {order?.discount && order.discount > 0 ? (
                 <>
                   <Grid item xs={4} textAlign="left" ml={2}>
@@ -274,17 +260,19 @@ export default function OrderAccordion({
                 </>
               ) : null}
               <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>PST (7%)</Typography>
+                <Typography>Subtotal</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">
-                  ${order?.PST?.toFixed(2) || 0}
+                  $
+                  {order?.subTotal?.toFixed(2) ||
+                    order?.totalPrice?.toFixed(2) ||
+                    0}
                 </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Divider />
               </Grid>
-
               <Grid item xs={4} textAlign="left" ml={2}>
                 <Typography>GST (5%)</Typography>
               </Grid>
@@ -293,6 +281,18 @@ export default function OrderAccordion({
                   ${order?.GST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>PST (7%)</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  ${order?.PST?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+
               <Grid item xs={12}>
                 <Divider />
               </Grid>

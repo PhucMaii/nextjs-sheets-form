@@ -170,13 +170,13 @@ export const InvoicePrint = forwardRef(
                   </TableRow>
                   <TableRow>
                     <TableCell></TableCell>
-                    <TableCell>PST (7%):</TableCell>
-                    <TableCell>${totalPST.toFixed(2)}</TableCell>
+                    <TableCell>GST (5%):</TableCell>
+                    <TableCell>${totalGST.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell></TableCell>
-                    <TableCell>GST (5%):</TableCell>
-                    <TableCell>${totalGST.toFixed(2)}</TableCell>
+                    <TableCell>PST (7%):</TableCell>
+                    <TableCell>${totalPST.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell></TableCell>

@@ -122,6 +122,7 @@ export default function CodBoard() {
         <CODBoardDetails
           boardData={selectedBoard}
           onClose={() => setSelectedBoard(null)}
+          isAutoAddBoard={loading.isCheckingAutoAddBoard}
         />
       </Sidebar>
     );

@@ -58,7 +58,7 @@ export default function OrderDetails({
         flexDirection="column"
         gap={2}
         maxHeight="80vh"
-        overflow="auto"
+        sx={{ overflowY: 'auto', overflowX: 'hidden', p: 2 }}
       >
         <Grid container alignItems="center">
           <Grid item xs={4}>

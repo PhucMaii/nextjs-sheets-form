@@ -23,6 +23,17 @@ export default async function handler(
       where: {
         id: categoryId,
       },
+      include: {
+        users: {
+          include: {
+            scheduleOrders: {
+              include: {
+                items: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!existingCategory) {
@@ -52,6 +63,68 @@ export default async function handler(
     // Create new items
     await prisma.item.createMany({
       data: formattedNewItems,
+    });
+
+    // Set up new schedule order items
+    const oldScheduledOrders = existingCategory.users.flatMap((user) => {
+      return user.scheduleOrders;
+    });
+    const newScheduledOrderItems = [];
+    for (const oldScheduledOrder of oldScheduledOrders) {
+      const newCategoryItems = formattedNewItems.map((item) => {
+        const existingItem = oldScheduledOrder.items.find(
+          (oldItem) => oldItem.name === item.name,
+        );
+
+        return {
+          name: item.name,
+          price: item.price,
+          quantity: existingItem?.quantity || 0,
+          inventoryItemId: item?.inventoryItemId || null,
+          inventoryUnitId: item?.inventoryUnitId || null,
+          scheduledOrderId: oldScheduledOrder.id,
+        };
+      });
+      newScheduledOrderItems.push(...newCategoryItems);
+
+      const newTotalPrice = newCategoryItems.reduce(
+        (acc: number, newItem: any) => {
+          const itemTotalPrice = newItem.price * newItem.quantity;
+          return acc + itemTotalPrice;
+        },
+        0,
+      );
+
+      if (newTotalPrice !== oldScheduledOrder.totalPrice) {
+        await prisma.scheduleOrders.update({
+          where: {
+            id: oldScheduledOrder.id,
+          },
+          data: {
+            totalPrice: newTotalPrice,
+          },
+        });
+      }
+    }
+
+    // Delete old items from schedule orders
+    const scheduleOrderIds = existingCategory.users.flatMap((user) => {
+      return user.scheduleOrders.map((scheduleOrder) => {
+        return scheduleOrder.id;
+      });
+    });
+
+    await prisma.orderedItems.deleteMany({
+      where: {
+        scheduledOrderId: {
+          in: scheduleOrderIds,
+        },
+      },
+    });
+
+    // Create new schedule order items
+    await prisma.orderedItems.createMany({
+      data: newScheduledOrderItems,
     });
 
     return res.status(200).json({

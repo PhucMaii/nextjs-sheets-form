@@ -14,14 +14,14 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import StatusText from '../StatusText';
 import { IRoutes } from '@/app/utils/type';
 import ErrorComponent from '../ErrorComponent';
 import { Order } from '../../orders/page';
-import { AllPrint } from '../Printing/AllPrint';
+import { MemoizedAllPrint } from '../Printing/AllPrint';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import { ManifestPrint } from '../Printing/ManifestPrint';
@@ -42,14 +42,14 @@ enum BILL_PRINT_OPTION {
   BY_ROUTE = 'byRoute',
 }
 
-export default function BillPrintModal({
+const BillPrintModal = ({
   open,
   onClose,
   routes,
   orderList,
   day,
   showNotification,
-}: PropTypes) {
+}: PropTypes) => {
   const [manifestAnchor, setManifestAnchor] = useState<HTMLElement | null>(
     null,
   );
@@ -68,6 +68,8 @@ export default function BillPrintModal({
     nonVoidOrders,
     isLoading,
   } = useManifest(orderList, selectedRoutes, day, showNotification);
+
+  console.log('BILL PRINT MODAL RE RENDER');
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -163,7 +165,7 @@ export default function BillPrintModal({
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <div style={{ display: 'none' }}>
-          <AllPrint
+          <MemoizedAllPrint
             orders={
               billPrintOption === BILL_PRINT_OPTION.NONE
                 ? nonVoidOrders
@@ -283,4 +285,13 @@ export default function BillPrintModal({
       </BoxModal>
     </Modal>
   );
-}
+};
+
+export default memo(BillPrintModal, (prev: PropTypes, next: PropTypes) => {
+  return (
+    Object.is(prev.orderList, next.orderList) &&
+    Object.is(prev.routes, next.routes) &&
+    prev.day === next.day &&
+    prev.open === next.open
+  );
+});

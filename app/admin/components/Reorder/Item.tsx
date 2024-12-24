@@ -41,7 +41,7 @@ export default function Item({
               handleDelete={handleDeleteItem}
               includedButton
             />
-            <EditItem targetItem={item} handleUpdateItem={handleUpdateItem} />
+            <EditItem targetItem={item} handleUpdateItem={handleUpdateItem} showNotification={showNotification} />
           </Box>
         </Grid>
       </Grid>

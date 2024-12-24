@@ -1,8 +1,9 @@
+import { Order } from '@/app/admin/orders/page';
 import { IItem } from '@/app/utils/type';
 import { Typography } from '@mui/material';
 import { useMemo } from 'react';
 
-export const useDiscount = (items: IItem[]) => {
+export const useDiscount = (items: IItem[], order: Order) => {
   const discountPrice = useMemo(() => {
     const isDiscount = items.some(
       (item: any) => item?.isShowDiscount && item?.prevPrice,
@@ -20,7 +21,7 @@ export const useDiscount = (items: IItem[]) => {
       return acc + item.totalPrice;
     }, 0);
 
-    return discount;
+    return discount + (order?.GST || 0) + (order?.PST || 0);
   }, [items]);
 
   const DiscountText = (

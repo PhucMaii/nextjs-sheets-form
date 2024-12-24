@@ -1,7 +1,6 @@
 import {
   AlertColor,
   Box,
-  Button,
   Divider,
   Grid,
   MenuItem,
@@ -18,9 +17,10 @@ import { IExpense, IPaymentMethod } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
+import { ModalProps } from '../type';
 // import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
-interface IProps {
+interface IProps extends ModalProps {
   transaction: IExpense;
   // paymentMethods: IPaymentMethod[];
   showNotification: (type: AlertColor, message: string) => void;
@@ -30,12 +30,14 @@ export default function EditExpense({
   transaction,
   // paymentMethods,
   showNotification,
+  open,
+  onClose,
 }: IProps) {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
+  // const [open, setOpen] = useState<boolean>(false);
   const [updatedExpense, setUpdatedExpense] = useState<IExpense>(transaction);
-  const { date, SelectDate } = useSelectDate(transaction.date, true);
+  const { date, SelectDate } = useSelectDate(transaction?.date, true);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
   const [adminsAndDriversRes] = SWRFetchData(
@@ -83,7 +85,7 @@ export default function EditExpense({
       }
 
       showNotification('success', response.data.message);
-      setOpen(false);
+      onClose();
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -95,14 +97,14 @@ export default function EditExpense({
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Edit</Button>
+      {/* <Button onClick={() => setOpen(true)}>Edit</Button> */}
 
-      <Modal open={open} onClose={() => setOpen(false)}>
+      <Modal open={open} onClose={onClose}>
         <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Expense"
             buttonLabel="EDIT"
-            onClose={() => setOpen(false)}
+            onClose={() => console.log('CLOSE PRESSED')}
             onClick={handleUpdateExpense}
             buttonProps={{
               loading: isLoading,
@@ -172,7 +174,7 @@ export default function EditExpense({
                   <TextField
                     placeholder="Total"
                     fullWidth
-                    value={updatedExpense.amount}
+                    value={updatedExpense?.amount}
                     type="number"
                     onChange={(e) => onChangeExpense('amount', +e.target.value)}
                   />
@@ -185,14 +187,14 @@ export default function EditExpense({
                 multiline
                 placeholder="Enter description..."
                 fullWidth
-                value={updatedExpense.description}
+                value={updatedExpense?.description}
                 onChange={(e) => onChangeExpense('description', e.target.value)}
               />
             </Box>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Payment Method</Typography>
               <Select
-                value={updatedExpense.paymentMethodId}
+                value={updatedExpense?.paymentMethodId}
                 onChange={(e: any) =>
                   onChangeExpense('paymentMethodId', +e.target.value)
                 }
@@ -216,7 +218,7 @@ export default function EditExpense({
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Spent By</Typography>
               <Select
-                value={updatedExpense.spentBy}
+                value={updatedExpense?.spentBy}
                 onChange={(e) => onChangeExpense('spentBy', e.target.value)}
               >
                 <MenuItem value="-- Choose who spent --" disabled>

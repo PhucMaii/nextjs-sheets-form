@@ -48,97 +48,20 @@ const EditReportOrder = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
-  // const [newItem, setNewItem] = useState<any>({
-  //   id: -1,
-  //   price: 0,
-  //   quantity: 0,
-  //   totalPrice: 0,
-  //   inventoryItemId: -1,
-  // });
   const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [updateOption, _setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );
-  // const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
   const [status, setStatus] = useState<ORDER_STATUS>(order.status);
-  // const [vendorItems, setVendorItems] = useState<any[]>([]);
-
-  // const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
-  // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
-
-  // const sortedVendors = useMemo(() => {
-  //   if (!vendors?.data) {
-  //     return [];
-  //   }
-
-  //   const vendorsSorted = [...vendors.data].sort((a: any, b: any) => {
-  //     return a?.name?.localeCompare(b?.name);
-  //   });
-
-  //   return vendorsSorted;
-  // }, [vendors]);
 
   useEffect(() => {
-    if (order.items) {
+    if (order) {
       setItemList(order.items);
+      setUpdatedDate(order.deliveryDate);
+      setStatus(order.status);
     }
-  }, [order.items]);
-
-  // useEffect(() => {
-  //   if (selectedVendorId !== -1) {
-  //     if (vendors) {
-  //       const targetVendor = vendors?.data.find((vendor: any) => {
-  //         return vendor.id === selectedVendorId;
-  //       });
-
-  //       if (targetVendor) {
-  //         setVendorItems(targetVendor?.inventoryItems);
-  //       }
-  //     }
-  //   } else {
-  //     setVendorItems([]);
-  //   }
-  // }, [selectedVendorId, vendors]);
-
-  // const addNewItem = () => {
-  //   const newItemName = newItem.name.toUpperCase();
-  //   const hasNameExisted = itemList.some(
-  //     (item: OrderedItems) => item.name === newItemName,
-  //   );
-
-  //   if (newItem.name.trim() === '') {
-  //     showNotification('error', 'Item Name Is Missing');
-  //     return;
-  //   }
-
-  //   if (!newItem?.id || newItem.id === -1) {
-  //     showNotification('error', 'Inventory Item Is Required');
-  //     return;
-  //   }
-  //   if (hasNameExisted) {
-  //     showNotification('error', 'Item Name Existed Already');
-  //   } else {
-  //     const totalPrice = newItem.quantity * newItem.price;
-  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //     const { id, ...restOfNewItem } = newItem;
-  //     const newItemData: any = {
-  //       ...restOfNewItem,
-  //       totalPrice,
-  //       name: newItemName,
-  //       inventoryItemId: id,
-  //     };
-  //     setItemList([...itemList, newItemData]);
-  //     setNewItem({
-  //       id: -1,
-  //       name: '',
-  //       price: 0,
-  //       quantity: 0,
-  //       totalPrice: 0,
-  //       inventoryItemId: -1,
-  //     });
-  //   }
-  // };
+  }, [order]);
 
   const handleDateChange = (e: any) => {
     const formattedDate: string = formatDateChanged(e);
@@ -165,10 +88,6 @@ const EditReportOrder = ({
 
     setItemList(newItemList);
   };
-
-  // const handleNewItemOnChange = (key: string, value: any) => {
-  //   setNewItem({ ...newItem, [key]: value });
-  // };
 
   const calculateNewTotalPrice = () => {
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
@@ -243,38 +162,6 @@ const EditReportOrder = ({
     }
   };
 
-  // const removeItem = (itemName: string) => {
-  //   const newItemList = itemList.filter((item: OrderedItems) => {
-  //     return item.name !== itemName;
-  //   });
-
-  //   setItemList(newItemList);
-  // };
-
-  // const selectInventoryItem = (newValue: any) => {
-  //   if (newValue?.inputValue) {
-  //     setNewItem({
-  //       ...newItem,
-  //       id: 0,
-  //       price: 0,
-  //       unit: 'bags',
-  //       name: newValue.inputValue,
-  //       // vendorId: selectedVendorId,
-  //       inventoryItemId: -1,
-  //     });
-  //   } else {
-  //     setNewItem({
-  //       ...newItem,
-  //       id: newValue?.id || 0,
-  //       price: newValue?.unitPrice || 0,
-  //       name: newValue?.name,
-  //       // vendorId: selectedVendorId,
-  //       unit: newItem?.unit || 'bags',
-  //       inventoryItemId: newItem?.inventoryItemId || -1,
-  //     });
-  //   }
-  // };
-
   return (
     <>
       <AddVendor
@@ -282,14 +169,6 @@ const EditReportOrder = ({
         open={isOpenAddVendor}
         onClose={() => setIsOpenAddVendor(false)}
       />
-      {/* <Button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(true);
-        }}
-      >
-        Edit
-      </Button> */}
       <Modal open={open} onClose={onClose}>
         <BoxModal display="flex" flexDirection="column" gap={2}>
           <Box
@@ -361,115 +240,6 @@ const EditReportOrder = ({
               Add items
             </Divider> */}
             <Grid container spacing={3} mb={2}>
-              {/* <Grid item xs={12}>
-                <UpdateChoiceSelection
-                  updateOption={updateOption}
-                  setUpdateOption={setUpdateOption}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Autocomplete
-                  value={newItem.name}
-                  onChange={(event, newValue) => {
-                    selectInventoryItem(newValue);
-                  }}
-                  filterOptions={(options, params) => {
-                    const filtered = filter(options, params);
-
-                    // const { inputValue } = params;
-                    // // Suggest the creation of a new value
-                    // const isExisting = options.some(
-                    //   (option) => inputValue === option.name,
-                    // );
-                    // if (inputValue !== '' && !isExisting) {
-                    //   filtered.push({
-                    //     inputValue,
-                    //     title: `Add "${inputValue}"`,
-                    //   });
-                    // }
-
-                    return filtered;
-                  }}
-                  selectOnFocus
-                  clearOnBlur
-                  handleHomeEndKeys
-                  id="autocomplete"
-                  options={
-                    [
-                      { id: -1, name: '-- Choose an item --' },
-                      ...(inventoryItems?.data || []),
-                    ] || []
-                  }
-                  getOptionLabel={(option) => {
-                    // Check if the option has a custom title (for new item suggestion)
-                    if (option.title) {
-                      return option.title;
-                    }
-                    // Regular option
-                    return option.name || '';
-                  }}
-                  renderOption={(props, option) => {
-                    const { key, ...optionProps } = props;
-                    return (
-                      <li key={key} {...optionProps}>
-                        {option.title || option.name}
-                      </li>
-                    );
-                  }}
-                  sx={{ width: '100%' }}
-                  freeSolo
-                  renderInput={(params) => (
-                    <TextField {...params} label="Item" />
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="item-name-label">Name</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    label="Name"
-                    value={newItem.name}
-                    onChange={(e) =>
-                      handleNewItemOnChange('name', e.target.value)
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="item-price-label">Unit price ($)</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    label="Unit price"
-                    type="number"
-                    value={newItem.price}
-                    onChange={(e) =>
-                      handleNewItemOnChange('price', +e.target.value)
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="item-quantity-label">Quantity</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    label="Quantity"
-                    type="number"
-                    value={newItem.quantity}
-                    onChange={(e) =>
-                      handleNewItemOnChange('quantity', +e.target.value)
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <Button fullWidth variant="contained" onClick={addNewItem}>
-                  + Add
-                </Button>
-              </Grid> */}
               <Grid item xs={12}>
                 <Divider>Items</Divider>
               </Grid>

@@ -187,9 +187,7 @@ async function main() {
   // const decemberDayList = generateListOfDateString(startDate, endDate);
   // const ordersInDecember = await prisma.orders.findMany({
   //   where: {
-  //     deliveryDate: {
-  //       in: decemberDayList
-  //     }
+  //     deliveryDate: '12/23/2024'
   //   },
   //   include: {
   //     items: true,
@@ -201,24 +199,78 @@ async function main() {
   //     return acc + item.price * item.quantity;
   //   }, 0);
   //   if (actualTotalPrice.toFixed(2) !== order.totalPrice.toFixed(2)) {
-  //     await prisma.orders.update({
-  //       where: {
-  //         id: order.id
-  //       },
-  //       data: {
-  //         totalPrice: actualTotalPrice,
-  //         subTotal: actualTotalPrice
-  //       }
-  //     })
+  //     // await prisma.orders.update({
+  //     //   where: {
+  //     //     id: order.id
+  //     //   },
+  //     //   data: {
+  //     //     totalPrice: actualTotalPrice,
+  //     //     subTotal: actualTotalPrice
+  //     //   }
+  //     // })
   //     console.log({
   //       id: order.id,
   //       deliveryDate: order.deliveryDate,
   //       clientName: order?.user?.clientName,
   //       clientId: order?.user?.clientId,
   //       actualTotalPrice,
-  //       orderTotalPrice: order.totalPrice
+  //       orderTotalPrice: order.totalPrice,
   //     });
   //   }
+  // }
+
+  const orders = await prisma.orders.findMany({
+    where: {
+      orderTime: {
+        not: '23:39:32 2024-12-22',
+      },
+      deliveryDate: '12/31/2024',
+    },
+  });
+
+  console.log(orders, 'orders');
+
+  // const scheduledOrders = await prisma.scheduleOrders.findMany({
+  //   include: {
+  //     items: true,
+  //     user: {
+  //       include: {
+  //         category: {
+  //           include: {
+  //             items: true,
+  //           }
+  //         }
+  //       }
+  //     }
+  //   },
+  // });
+
+  // for (const scheduledOrder of scheduledOrders) {
+  //   console.log({id: scheduledOrder.id, clientName: scheduledOrder.user.clientName, day: scheduledOrder.day})
+  //   const newItems = scheduledOrder.user.category.items.map((item) => {
+  //     const previousItem = scheduledOrder.items.find((prevItem) => {
+  //       return prevItem.name === item.name;
+  //     });
+
+  //     return {
+  //       name: item.name,
+  //       price: item.price,
+  //       quantity: previousItem?.quantity || 0,
+  //       inventoryItemId: item?.inventoryItemId,
+  //       inventoryUnitId: item?.inventoryUnitId,
+  //       scheduledOrderId: scheduledOrder.id
+  //     }
+  //   });
+
+  //   await prisma.orderedItems.deleteMany({
+  //     where: {
+  //       scheduledOrderId: scheduledOrder.id
+  //     }
+  //   });
+
+  //   await prisma.orderedItems.createMany({
+  //     data: newItems,
+  //   });
   // }
 }
 

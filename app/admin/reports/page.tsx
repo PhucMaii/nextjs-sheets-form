@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Autocomplete,
@@ -46,7 +46,7 @@ import {
 import { days } from '@/app/lib/constant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { AllPrint } from '../components/Printing/AllPrint';
+import { MemoizedAllPrint } from '../components/Printing/AllPrint';
 import { pusherClient } from '@/app/pusher';
 import {
   convertDeliveryDateStringToDate,
@@ -75,7 +75,6 @@ export default function ReportPage() {
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
-  // const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
   const [isSendAndPrintLoading, setIsSendAndPrintLoading] =
     useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
@@ -86,7 +85,6 @@ export default function ReportPage() {
     useState<boolean>(false);
   const [isOpenRouteStatement, setIsOpenRouteStatement] =
     useState<boolean>(false);
-  const [totalBill, setTotalBill] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
 
@@ -113,6 +111,25 @@ export default function ReportPage() {
     `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
   );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
+
+  const totalBill = useMemo(() => {
+    if (!clientOrders || clientOrders.length === 0) {
+      return 0;
+    }
+
+    const bill = clientOrders.reduce((acc: number, cV: Order) => {
+      // Only calculate total incompleted and completed orders
+      if (
+        cV.status === ORDER_STATUS.DELIVERED ||
+        cV.status === ORDER_STATUS.INCOMPLETED
+      ) {
+        return acc + cV.totalPrice;
+      }
+      return acc + 0;
+    }, 0);
+
+    return bill;
+  }, [clientOrders]);
 
   useEffect(() => {
     pusherClient?.subscribe('admin-delete-order');
@@ -145,12 +162,9 @@ export default function ReportPage() {
     }
   }, [deletedOrder]);
 
+  // Reset display data
   useEffect(() => {
-    if (clientOrders.length > 0) {
-      calculateTotalBill();
-    } else {
-      // Reset Display Data
-      setTotalBill(0);
+    if (clientOrders.length === 0) {
       setSelectedOrders([]);
     }
   }, [clientOrders]);
@@ -197,20 +211,20 @@ export default function ReportPage() {
     }
   }, [debouncedKeywords, baseClientOrders]);
 
-  const calculateTotalBill = () => {
-    const bill = clientOrders.reduce((acc: number, cV: Order) => {
-      // Only calculate total incompleted and completed orders
-      if (
-        cV.status === ORDER_STATUS.DELIVERED ||
-        cV.status === ORDER_STATUS.INCOMPLETED
-      ) {
-        return acc + cV.totalPrice;
-      }
-      return acc + 0;
-    }, 0);
+  // const calculateTotalBill = () => {
+  //   const bill = clientOrders.reduce((acc: number, cV: Order) => {
+  //     // Only calculate total incompleted and completed orders
+  //     if (
+  //       cV.status === ORDER_STATUS.DELIVERED ||
+  //       cV.status === ORDER_STATUS.INCOMPLETED
+  //     ) {
+  //       return acc + cV.totalPrice;
+  //     }
+  //     return acc + 0;
+  //   }, 0);
 
-    setTotalBill(bill);
-  };
+  //   setTotalBill(bill);
+  // };
 
   const initializeOrders = () => {
     let orderData = orders.data;
@@ -573,42 +587,50 @@ export default function ReportPage() {
       />
       <LoadingModal open={isLoading} />
       {NotificationComp}
-      <RouteStatement
-        open={isOpenRouteStatement}
-        onClose={() => setIsOpenRouteStatement(false)}
-        currentDateRange={dateRange}
-      />
-      <div style={{ display: 'none' }}>
-        <InvoicePrint
-          client={clientValue}
-          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          endDate={dateRange[1]}
-          ref={invoicePrint}
-        />
-      </div>
-      <div style={{ display: 'none' }}>
-        <WeeklyStatement
-          client={clientValue}
-          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          endDate={dateRange[1]}
-          ref={weeklyPrint}
-        />
-      </div>
-      <div style={{ display: 'none' }}>
-        <AllPrint
-          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          ref={billPrint}
-        />
-      </div>
+
+      {/* PRINT SLOWS DOWN THE PAGE */}
+      {clientValue?.clientName !== 'All Clients' && (
+        <div style={{ display: 'none' }}>
+          <InvoicePrint
+            client={clientValue}
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            endDate={dateRange[1]}
+            ref={invoicePrint}
+          />
+          <WeeklyStatement
+            client={clientValue}
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            endDate={dateRange[1]}
+            ref={weeklyPrint}
+          />
+        </div>
+      )}
       {clientValue?.clientName === 'All Clients' && (
-        <BillPrintModal
-          open={isOpenBillPrintModal}
-          onClose={() => setIsOpenBillPrintModal(false)}
-          routes={routes?.data || []}
-          orderList={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          showNotification={showNotification}
-          day={datePicker}
-        />
+        <div style={{ display: 'none' }}>
+          <MemoizedAllPrint
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            ref={billPrint}
+          />
+        </div>
+      )}
+      {clientValue?.clientName === 'All Clients' && (
+        <>
+          <BillPrintModal
+            open={isOpenBillPrintModal}
+            onClose={() => setIsOpenBillPrintModal(false)}
+            routes={routes?.data || []}
+            orderList={
+              selectedOrders.length > 0 ? selectedOrders : clientOrders
+            }
+            showNotification={showNotification}
+            day={datePicker}
+          />
+          <RouteStatement
+            open={isOpenRouteStatement}
+            onClose={() => setIsOpenRouteStatement(false)}
+            currentDateRange={dateRange}
+          />
+        </>
       )}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5" color={blueGrey[800]}>

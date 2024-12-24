@@ -25,7 +25,6 @@ import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
-// import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 export default function Transactions() {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
@@ -59,14 +58,16 @@ export default function Transactions() {
   );
 
   useEffect(() => {
-    if (!transactions) {
-      setIsLoading(true);
-      setSelectedExpenses([]);
-    } else {
+    if (transactions) {
       setIsLoading(false);
       setDisplayTransactions(transactions?.data || []);
+    } else {
+      setIsLoading(true);
+      setSelectedExpenses([]);
     }
-  }, [transactions, dateRange]);
+  }, [transactions?.data, dateRange]);
+
+  // console.log(displayTransactions, 'displayTransactions');
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -92,7 +93,7 @@ export default function Transactions() {
     } else {
       setDisplayTransactions(transactions?.data || []);
     }
-  }, [debouncedKeywords]);
+  }, [debouncedKeywords, transactions]);
 
   useEffect(() => {
     if (adminsAndDriversRes) {
