@@ -92,13 +92,13 @@ const OrderAccordion = ({
   );
 
   const latestUpdatePerson = useMemo(() => {
-    if (!order.createdBy && !order.updatedBy) {
-      return 'Unknown';
-    }
+    // if (!order.createdBy && !order.updatedBy) {
+    //   return 'Unknown';
+    // }
 
-    if (order.updatedBy) {
-      return order.updatedBy;
-    }
+    // if (order.updatedBy) {
+    //   return order.updatedBy;
+    // }
 
     return order.createdBy;
   }, [order]);

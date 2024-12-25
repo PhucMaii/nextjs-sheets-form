@@ -366,6 +366,7 @@ export default function ReportPage() {
   };
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+    setIsLoading(true);
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status,
@@ -375,8 +376,14 @@ export default function ReportPage() {
       mutateOrders();
 
       showNotification('success', response.data.message);
+      setIsLoading(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
+      showNotification(
+        'error',
+        'Something went wrong: ' + error.response.data.error,
+      );
+      setIsLoading(false);
     }
   };
 
