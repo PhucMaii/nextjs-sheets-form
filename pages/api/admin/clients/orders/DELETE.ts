@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem } from '../../orderedItems/single';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface BodyTypes {
   orderId?: string;
@@ -35,7 +36,7 @@ export default async function DELETE(
 
         for (const item of order.items) {
           if (item?.fifo && item?.inventoryUnit) {
-            if (item.quantity > 0) {
+            if (item.quantity > 0 && order.status !== ORDER_STATUS.VOID) {
               await restockInventoryItem(
                 item.fifo,
                 item.inventoryUnit,
@@ -88,7 +89,7 @@ export default async function DELETE(
       });
 
       for (const item of deletedOrder.items) {
-        if (item?.fifo && item?.inventoryUnit) {
+        if (item?.fifo && item?.inventoryUnit && existingOrder.status !== ORDER_STATUS.VOID) {
           await restockInventoryItem(
             item.fifo,
             item.inventoryUnit,

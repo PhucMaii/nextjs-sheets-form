@@ -132,6 +132,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (!order?.items) {
           continue;
         }
+        
 
         // var order is the previous state of order
         if (order.status === ORDER_STATUS.VOID) {
@@ -139,9 +140,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
 
         for (const item of order.items) {
+          if (item.quantity === 0) {
+            continue;
+          }
+          console.log({id: item.id, fifo: item.fifo.id, inventoryUnit: item.inventoryUnit.id, name: item.name, quantity: item.quantity}, 'item - FROM OTHER TO VOID ');
           if (!item?.fifo || !item?.inventoryUnit) {
             continue;
           }
+
 
           // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
           await restockInventoryItem(
@@ -165,9 +171,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
 
         for (const item of order.items) {
+          if (item.quantity === 0) {
+            continue;
+          }
+          
           if (!item?.fifo || !item?.inventoryUnit) {
             continue;
           }
+          console.log({id: item.id, fifo: item.fifo.id, inventoryUnit: item.inventoryUnit.id, name: item.name, quantity: item.quantity}, 'item - FROM VOID TO OTHER ');
 
           // await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
           await subtractInventoryItem(

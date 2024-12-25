@@ -129,8 +129,20 @@ export const updateSingleInventoryItem = async (
     // });
 
     // Subtract the new quantity from inventory quantity, then add back the previous quantity
+    const lastUpdatedFifo = await prisma.fifo.findUnique({
+      where: {
+        id: fifo.id,
+      },
+    });
+
+    if (!lastUpdatedFifo) {
+      console.error('Comflict FIFO Not Found');
+      return;
+    }
+
     const updatedQuantity =
-      fifo.quantity - newQuantity * unit.ratio + previousQuantity * unit.ratio;
+      lastUpdatedFifo.quantity - (newQuantity * unit.ratio) + (previousQuantity * unit.ratio);
+      console.log({updatedQuantity, fifo, newQuantity, previousQuantity, ratio: unit.ratio});
     await prisma.fifo.update({
       where: {
         id: fifo.id,
