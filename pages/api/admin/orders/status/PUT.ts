@@ -72,6 +72,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         for (const item of updatedOrder.items) {
           if (item?.fifo && item?.inventoryUnit) {
             await restockInventoryItem(
+              existingOrder.id,
               item.fifo,
               item.inventoryUnit,
               item.quantity,
@@ -88,6 +89,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         for (const item of updatedOrder.items) {
           if (item?.fifo && item?.inventoryUnit) {
             await subtractInventoryItem(
+              existingOrder.id,
               item.fifo,
               item.inventoryUnit,
               item.quantity,
@@ -134,7 +136,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
         
 
-        // var order is the previous state of order
+        // Skip order with VOID status because updated status is VOID
         if (order.status === ORDER_STATUS.VOID) {
           continue;
         }
@@ -143,7 +145,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           if (item.quantity === 0) {
             continue;
           }
-          console.log({id: item.id, fifo: item.fifo.id, inventoryUnit: item.inventoryUnit.id, name: item.name, quantity: item.quantity}, 'item - FROM OTHER TO VOID ');
           if (!item?.fifo || !item?.inventoryUnit) {
             continue;
           }
@@ -151,6 +152,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
           // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
           await restockInventoryItem(
+            order.id,
             item.fifo,
             item.inventoryUnit,
             item.quantity,
@@ -165,7 +167,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           continue;
         }
 
-        // var order is the previous state of order
+        // Skip order if order status is not VOID because only update inventory quantity if order status is changed from VOID to other status
+        // Ex: From VOID to DELIVERED (Update Inventory Quantity), From INCOMPLETE to DELIVERED (Not Update Inventory Quantity)
         if (order.status !== ORDER_STATUS.VOID) {
           continue;
         }
@@ -174,14 +177,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           if (item.quantity === 0) {
             continue;
           }
-          
+
           if (!item?.fifo || !item?.inventoryUnit) {
             continue;
           }
-          console.log({id: item.id, fifo: item.fifo.id, inventoryUnit: item.inventoryUnit.id, name: item.name, quantity: item.quantity}, 'item - FROM VOID TO OTHER ');
 
           // await updateSingleInventoryItem(item.inventoryItemId, item.quantity, 0);
           await subtractInventoryItem(
+            order.id,
             item.fifo,
             item.inventoryUnit,
             item.quantity,

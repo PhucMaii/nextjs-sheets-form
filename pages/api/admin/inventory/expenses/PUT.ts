@@ -311,6 +311,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         for (const removedItem of removedItems) {
           if (removedItem.fifo && removedItem.inventoryUnit) {
             await subtractInventoryItem(
+              -1,
               removedItem.fifo,
               removedItem.inventoryUnit,
               removedItem.quantity,

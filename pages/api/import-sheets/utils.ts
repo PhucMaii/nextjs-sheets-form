@@ -268,6 +268,7 @@ export const overrideOrder = async (
       // Update inventory item
       if (existingItem?.fifo && existingItem.inventoryUnit) {
         await updateSingleInventoryItem(
+          orderId,
           existingItem.fifo,
           existingItem.inventoryUnit,
           newItem.quantity,

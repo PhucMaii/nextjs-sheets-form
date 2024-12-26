@@ -12,7 +12,7 @@ import {
   TableCell,
   TableRow,
 } from '@mui/material';
-import React, { memo, useState } from 'react';
+import React, { useState } from 'react';
 import StatusText from '../StatusText';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
@@ -425,9 +425,4 @@ const ClientOrdersTable = ({
   );
 };
 
-export default memo(ClientOrdersTable, (prev, next) => {
-  return (
-    prev.clientOrders === next.clientOrders &&
-    prev.selectedOrders === next.selectedOrders
-  );
-});
+export default ClientOrdersTable;

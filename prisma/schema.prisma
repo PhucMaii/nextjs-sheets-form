@@ -99,22 +99,23 @@ model OrderedItems {
 }
 
 model Orders {
-  id            Int       @id @default(autoincrement())
-  orderTime     String
-  deliveryDate  String
-  note          String
-  status        String
-  userId        Int
-  subTotal      Float?
-  discount      Float?
-  PST           Float?
-  GST           Float?
-  totalPrice    Float
-  updateTime    DateTime?
-  isReplacement Boolean?
-  isVoid        Boolean?
-  createdBy     String?
-  updatedBy     String?
+  id                  Int       @id @default(autoincrement())
+  orderTime           String
+  deliveryDate        String
+  note                String
+  status              String
+  userId              Int
+  subTotal            Float?
+  discount            Float?
+  PST                 Float?
+  GST                 Float?
+  totalPrice          Float
+  updateTime          DateTime?
+  isReplacement       Boolean?
+  isVoid              Boolean?
+  avoidInventory Boolean?
+  createdBy           String?
+  updatedBy           String?
 
   user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderedItems[]
@@ -264,6 +265,27 @@ model InventoryItem {
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
+  preference   ItemPreference? @relation("InventoryItemToPreference")
+}
+
+model ItemPreference {
+  id           Int     @id @default(autoincrement())
+  image        String
+  description  String
+  isBestSeller Boolean
+
+  inventoryItemId Int @unique
+  typeId          Int
+
+  inventoryItem InventoryItem @relation("InventoryItemToPreference", fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  type          ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
+}
+
+model ItemType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  itemPreferences ItemPreference[]
 }
 
 model VendorItem {

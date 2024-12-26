@@ -69,6 +69,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       for (const item of updatedOrder.items) {
         if (item?.fifo && item?.inventoryUnit) {
           await restockInventoryItem(
+            updatedOrder.id,
             item.fifo,
             item.inventoryUnit,
             item.quantity,
@@ -85,6 +86,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       for (const item of updatedOrder.items) {
         if (item?.fifo && item?.inventoryUnit) {
           await subtractInventoryItem(
+            updatedOrder.id,
             item.fifo,
             item.inventoryUnit,
             item.quantity,

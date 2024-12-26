@@ -107,6 +107,8 @@ export interface IItem {
   unit?: any;
   inventoryUnitId?: number;
   inventoryUnit?: any;
+  fifo?: IFifo;
+  fifoId?: number;
   units?: any;
   prevPrice?: number;
   isShowDiscount?: boolean;
