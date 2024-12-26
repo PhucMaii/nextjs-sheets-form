@@ -246,18 +246,7 @@ async function main() {
   //     });
   //   }
   // }
-
-  const orders = await prisma.orders.findMany({
-    where: {
-      orderTime: {
-        not: '23:39:32 2024-12-22',
-      },
-      deliveryDate: '12/31/2024',
-    },
-  });
-
-  console.log(orders, 'orders');
-
+ 
   // const scheduledOrders = await prisma.scheduleOrders.findMany({
   //   include: {
   //     items: true,
