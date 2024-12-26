@@ -112,7 +112,7 @@ export interface Order {
   updatedBy?: string;
   previousUnpaidOrders?: { numberOfOrders: number; totalPrice: number };
   multipleOrders?: boolean;
-  avoidInventory?: boolean;
+  isAffectInventory?: boolean;
 }
 
 const orderPerPage = 10;

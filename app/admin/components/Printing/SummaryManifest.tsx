@@ -61,7 +61,7 @@ export const SummaryManifest = forwardRef(
                     m={2}
                   >
                     <Typography variant="h5" m={2}>
-                      Driver: {manifest[routeId]?.route?.driver?.name}
+                      Driver: {manifest[routeId]?.route?.driver?.name || 'Unknown'}
                     </Typography>
                     <Typography>{currentDate}</Typography>
                   </Box>

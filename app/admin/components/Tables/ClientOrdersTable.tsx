@@ -12,7 +12,7 @@ import {
   TableCell,
   TableRow,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
 import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
@@ -57,6 +57,8 @@ const ClientOrdersTable = ({
   // const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   // const [page, setPage] = useState<number>(0);
   const windowDimensions = useWindowDimensions();
+
+  console.log('TABLE RE RENDER')
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
     try {
@@ -425,4 +427,9 @@ const ClientOrdersTable = ({
   );
 };
 
-export default ClientOrdersTable;
+export default memo(ClientOrdersTable, (prevProps, nextProps) => {
+  return (
+    prevProps.clientOrders === nextProps.clientOrders &&
+    prevProps.selectedOrders === nextProps.selectedOrders
+  );
+});

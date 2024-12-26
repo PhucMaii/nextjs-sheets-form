@@ -49,6 +49,11 @@ const prisma = new PrismaClient();
 // };
 
 async function main() {
+  await prisma.orders.updateMany({
+    data: {
+      isAffectInventory: true
+    }
+  })
   // const allScheduledOrderedItemsHasNoInventory = await prisma.orderedItems.findMany({
   //   where: {
   //     scheduledOrderId: {

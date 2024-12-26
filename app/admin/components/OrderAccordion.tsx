@@ -115,9 +115,9 @@ const OrderAccordion = ({
   const handleAvoidInventory = async (e: any) => {
     setIsLoading(true);
     try {
-      const response = await axios.put(`${API_URL.ADMIN}/orders/avoidInventory`, {
+      const response = await axios.put(`${API_URL.ADMIN}/orders/isAffectInventory`, {
         id: order.id,
-        avoidInventory: e.target.checked,
+        isAffectInventory: e.target.checked,
       });
 
       if (response.data.error) {
@@ -240,8 +240,8 @@ const OrderAccordion = ({
       >
         <MenuItem>
           <FormControlLabel 
-            control={<Switch checked={order?.avoidInventory} onChange={handleAvoidInventory}/>} 
-            label="Avoid Inventory" 
+            control={<Switch checked={order?.isAffectInventory} onChange={handleAvoidInventory}/>} 
+            label="Affect Inventory" 
             labelPlacement='end' 
           />
         </MenuItem>

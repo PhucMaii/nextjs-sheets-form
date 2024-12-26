@@ -139,7 +139,7 @@ export const updateSingleInventoryItem = async (
         return;
       }
   
-      if (order?.avoidInventory) {
+      if (!order?.isAffectInventory) {
         console.log('Inventory Avoided');
         return;
       }

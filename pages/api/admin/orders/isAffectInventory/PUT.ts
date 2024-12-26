@@ -3,14 +3,14 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 interface IBody {
     id: number;
-    avoidInventory: boolean
+    isAffectInventory: boolean
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     try {
         const prisma = new PrismaClient();  
 
-        const { id, avoidInventory }: IBody = req.body;    
+        const { id, isAffectInventory }: IBody = req.body;    
 
         const updatedOrder = await prisma.orders.findUnique({
             where: {
@@ -27,7 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                 id
             },
             data: {
-                avoidInventory
+                isAffectInventory
             }
         });
 

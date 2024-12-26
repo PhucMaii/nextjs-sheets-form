@@ -62,7 +62,7 @@ const EditReportOrder = ({
 
   useEffect(() => {
     if (order) {
-      setOrderData(() => ({deliveryDate: order.deliveryDate, status: order.status, avoidInventory: order.avoidInventory}));
+      setOrderData(() => ({deliveryDate: order.deliveryDate, status: order.status, isAffectInventory: order.isAffectInventory}));
       setItemList(order.items);
       // setUpdatedDate(order.deliveryDate);
       // setStatus(order.status);
@@ -106,10 +106,10 @@ const EditReportOrder = ({
   const handleAvoidInventory = async (e: any) => {
     setIsUpdatingAvoidInventory(true);
     try {
-      setOrderData((prevState: any) => ({...prevState, avoidInventory: e.target.checked}));
-      const response = await axios.put(`${API_URL.ADMIN}/orders/avoidInventory`, {
+      setOrderData((prevState: any) => ({...prevState, isAffectInventory: e.target.checked}));
+      const response = await axios.put(`${API_URL.ADMIN}/orders/isAffectInventory`, {
         id: order.id,
-        avoidInventory: e.target.checked,
+        isAffectInventory: e.target.checked,
       });
 
       if (response.data.error) {
@@ -210,7 +210,7 @@ const EditReportOrder = ({
             alignItems="center"
           >
             <Typography variant="h4">Edit Order {order.id}</Typography>
-            <FormControlLabel control={<Switch checked={orderData?.avoidInventory} onChange={handleAvoidInventory} />} label={isUpdatingAvoidInventory ? "Updating..." : "Avoid Inventory"} />
+            <FormControlLabel control={<Switch checked={orderData?.isAffectInventory} onChange={handleAvoidInventory} />} label={isUpdatingAvoidInventory ? "Updating..." : "Affect Inventory"} />
           </Box>
           <Divider />
           <Box overflow="auto" maxHeight="70vh">

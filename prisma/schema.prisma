@@ -99,23 +99,23 @@ model OrderedItems {
 }
 
 model Orders {
-  id                  Int       @id @default(autoincrement())
-  orderTime           String
-  deliveryDate        String
-  note                String
-  status              String
-  userId              Int
-  subTotal            Float?
-  discount            Float?
-  PST                 Float?
-  GST                 Float?
-  totalPrice          Float
-  updateTime          DateTime?
-  isReplacement       Boolean?
-  isVoid              Boolean?
-  avoidInventory Boolean?
-  createdBy           String?
-  updatedBy           String?
+  id                Int       @id @default(autoincrement())
+  orderTime         String
+  deliveryDate      String
+  note              String
+  status            String
+  userId            Int
+  subTotal          Float?
+  discount          Float?
+  PST               Float?
+  GST               Float?
+  totalPrice        Float
+  updateTime        DateTime?
+  isReplacement     Boolean?
+  isVoid            Boolean?
+  isAffectInventory Boolean?
+  createdBy         String?
+  updatedBy         String?
 
   user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderedItems[]
