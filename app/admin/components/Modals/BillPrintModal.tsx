@@ -67,9 +67,10 @@ const BillPrintModal = ({
     setItemManifest,
     nonVoidOrders,
     isLoading,
+    manifestData
   } = useManifest(orderList, selectedRoutes, day, showNotification);
 
-  console.log('BILL PRINT MODAL RE RENDER');
+  const routesLength = manifestData.itemManifest['-1'] ? routes.length + 1 : routes.length;
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -108,11 +109,15 @@ const BillPrintModal = ({
   });
 
   const handleSelectAll = () => {
-    if (selectedRoutes.length === routes.length) {
+    if (selectedRoutes.length === routesLength) {
       setItemManifest({});
       setSelectedRoutes([]);
     } else {
-      setSelectedRoutes(routes);
+      const newSelectRoutes: any = [...routes];
+      if (manifestData.itemManifest['-1']) {
+        newSelectRoutes.push({id: '-1', name: 'No Route Orders'});
+      }
+      setSelectedRoutes(newSelectRoutes);
     }
   };
 
@@ -160,6 +165,8 @@ const BillPrintModal = ({
       </Menu>
     </Box>
   );
+
+  // console.log(itemManifest, 'itemManifest');
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -249,13 +256,14 @@ const BillPrintModal = ({
                     label="All"
                     control={
                       <Checkbox
-                        checked={selectedRoutes.length === routes.length}
+                        checked={selectedRoutes.length === routesLength}
                         onChange={handleSelectAll}
                       />
                     }
                   />
                   <Box display="flex" flexDirection="column" ml={3}>
                     {routes.map((route: IRoutes) => {
+                      if (route.id == -1) return null;
                       const isChecked = selectedRoutes.some(
                         (baseRoute: IRoutes) => route.id === baseRoute.id,
                       );
@@ -272,6 +280,22 @@ const BillPrintModal = ({
                         />
                       );
                     })}
+
+                    {
+                      Object.keys(manifestData.itemManifest).includes('-1') && manifestData.itemManifest[-1] && (
+                        <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedRoutes.some(
+                              (baseRoute: IRoutes) => manifestData.itemManifest['-1'].route.id === baseRoute.id,
+                            )}
+                            onChange={(e: any) => handleSelectRoute(e, manifestData.itemManifest['-1'].route)}
+                          />
+                        }
+                        label={manifestData.itemManifest['-1'].route.name}
+                      />
+                      )
+                    }
                   </Box>
                 </>
               ) : (
