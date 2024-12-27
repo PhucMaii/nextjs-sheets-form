@@ -4,15 +4,17 @@ import {
   // Button,
   Divider,
   FormControl,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
   Modal,
   Select,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Fragment, memo, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -42,30 +44,34 @@ const EditReportOrder = ({
   open,
   onClose,
 }: PropTypes) => {
-  console.log('EDIT REPORT ORDER: ', order);
   // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
+  const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] = useState<boolean>(
+    false,
+  )
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
-  const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
+  const [orderData, setOrderData] = useState<any>(order);
+  // const [updatedDate, setUpdatedDate] = useState<string>(order.deliveryDate);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [updateOption, _setUpdateOption] = useState<UpdateOption>(
     UpdateOption.NONE,
   );
-  const [status, setStatus] = useState<ORDER_STATUS>(order.status);
+  // const [status, setStatus] = useState<ORDER_STATUS>(order.status);
 
   useEffect(() => {
     if (order) {
+      setOrderData(() => ({deliveryDate: order.deliveryDate, status: order.status, isAffectInventory: order.isAffectInventory}));
       setItemList(order.items);
-      setUpdatedDate(order.deliveryDate);
-      setStatus(order.status);
+      // setUpdatedDate(order.deliveryDate);
+      // setStatus(order.status);
     }
   }, [order]);
 
   const handleDateChange = (e: any) => {
     const formattedDate: string = formatDateChanged(e);
-    setUpdatedDate(formattedDate);
+    setOrderData((prevState: any) => ({...prevState, deliveryDate: formattedDate}));
   };
 
   const handleChangeItem = (e: any, targetItem: Item, keyChange: string) => {
@@ -96,6 +102,33 @@ const EditReportOrder = ({
 
     return totalPrice;
   };
+
+  const handleAvoidInventory = async (e: any) => {
+    setIsUpdatingAvoidInventory(true);
+    try {
+      setOrderData((prevState: any) => ({...prevState, isAffectInventory: e.target.checked}));
+      const response = await axios.put(`${API_URL.ADMIN}/orders/isAffectInventory`, {
+        id: order.id,
+        isAffectInventory: e.target.checked,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsUpdatingAvoidInventory(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsUpdatingAvoidInventory(false);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error.response.data.error);
+      showNotification(
+        'error',
+        'Internal Server Error: ' + error.response.data.error,
+      );
+      setIsUpdatingAvoidInventory(false);
+    }
+  }
 
   const handleUpdateItems = async () => {
     try {
@@ -129,11 +162,11 @@ const EditReportOrder = ({
   const handleUpdateOrder = async () => {
     try {
       setIsSubmitting(true);
-      if (updatedDate !== order.deliveryDate || status !== order.status) {
+      if (orderData.deliveryDate !== order.deliveryDate || orderData.status !== order.status) {
         const orderUpdateResponse = await axios.put(API_URL.ORDER, {
           orderId: order.id,
-          deliveryDate: updatedDate,
-          status,
+          deliveryDate: orderData.deliveryDate,
+          status: orderData.status,
         });
 
         if (orderUpdateResponse.data.error) {
@@ -150,8 +183,8 @@ const EditReportOrder = ({
 
       handleUpdateOrderUI({
         ...order,
-        deliveryDate: updatedDate,
-        status,
+        deliveryDate: orderData.deliveryDate,
+        status: orderData.status,
       });
       showNotification('success', 'Update Order Successfully');
       setIsSubmitting(false);
@@ -176,7 +209,8 @@ const EditReportOrder = ({
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h4">Edit Order</Typography>
+            <Typography variant="h4">Edit Order {order.id}</Typography>
+            <FormControlLabel control={<Switch checked={orderData?.isAffectInventory} onChange={handleAvoidInventory} />} label={isUpdatingAvoidInventory ? "Updating..." : "Affect Inventory"} />
           </Box>
           <Divider />
           <Box overflow="auto" maxHeight="70vh">
@@ -188,7 +222,7 @@ const EditReportOrder = ({
                 <FormControl fullWidth>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
-                      value={dayjs(updatedDate)}
+                      value={dayjs(orderData.deliveryDate)}
                       onChange={(e: any) => handleDateChange(e)}
                       sx={{
                         width: '100%',
@@ -208,9 +242,9 @@ const EditReportOrder = ({
                   <InputLabel id="select-status">Status</InputLabel>
                   <Select
                     labelId="select-status"
-                    value={status}
+                    value={orderData.status}
                     label="Status"
-                    onChange={(e) => setStatus(e.target.value as ORDER_STATUS)}
+                    onChange={(e) => setOrderData((prevState: any) => ({ ...prevState, status: e.target.value as ORDER_STATUS}))}
                   >
                     <MenuItem value={ORDER_STATUS.COMPLETED}>
                       Completed
@@ -316,11 +350,4 @@ const EditReportOrder = ({
   );
 };
 
-export default memo(EditReportOrder, (prev, next) => {
-  return (
-    prev.order === next.order,
-    prev.showNotification === next.showNotification,
-    prev.handleUpdateOrderUI === next.handleUpdateOrderUI,
-    prev.open === next.open
-  );
-});
+export default EditReportOrder;

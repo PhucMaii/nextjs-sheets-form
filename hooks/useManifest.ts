@@ -23,7 +23,7 @@ const useManifest = (
 
   const selectedRouteIds = useMemo(() => {
     return selectedRoutes.map((route: IRoutes) => {
-      return route.id;
+      return Number(route.id);
     });
   }, [selectedRoutes]);
 
@@ -62,22 +62,26 @@ const useManifest = (
       }
 
       setManifestData(response.data.data);
+      console.log(response.data.data, 'data');
 
       setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification(
-        'error',
-        'There was an error: ' + error.response.data.error,
-      );
+      // showNotification(
+      //   'error',
+      //   'There was an error: ' + error.response.data.error,
+      // );
       setIsLoading(false);
     }
   };
 
   const handleSelectRoute = () => {
-    const newOrderPrint = manifestData.orderPrint.filter((order: any) =>
-      selectedRouteIds.includes(order.routeId),
+    const newOrderPrint = manifestData.orderPrint.filter((order: any) => {
+      return selectedRouteIds.includes(order.routeId);
+    }
     );
+
+    console.log({selectedRouteIds}, 'newOrderPrint');
 
     setOrderPrint(newOrderPrint);
 
@@ -108,6 +112,7 @@ const useManifest = (
     setItemManifest,
     nonVoidOrders,
     isLoading,
+    manifestData,
   };
 };
 

@@ -57,6 +57,7 @@ export default async function DELETE(
 
       if (item.fifo && item.inventoryUnit) {
         await subtractInventoryItem(
+          -1,
           item.fifo,
           item.inventoryUnit,
           item.fifo.quantity,

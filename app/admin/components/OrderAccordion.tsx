@@ -5,10 +5,13 @@ import {
   Box,
   Button,
   Checkbox,
+  Divider,
+  FormControlLabel,
   Grid,
   IconButton,
   Menu,
   MenuItem,
+  Switch,
   Typography,
 } from '@mui/material';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
@@ -34,6 +37,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import { useDiscount } from '@/hooks/useDiscount';
 import ConfirmModal from './Modals/ConfirmModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import LoadingModal from './Modals/LoadingModal';
 
 interface PropTypes {
   order: Order;
@@ -67,6 +71,7 @@ const OrderAccordion = ({
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [open, setOpen] = useMultipleBoolean({
@@ -92,13 +97,13 @@ const OrderAccordion = ({
   );
 
   const latestUpdatePerson = useMemo(() => {
-    if (!order.createdBy && !order.updatedBy) {
-      return 'Unknown';
-    }
+    // if (!order.createdBy && !order.updatedBy) {
+    //   return 'Unknown';
+    // }
 
-    if (order.updatedBy) {
-      return order.updatedBy;
-    }
+    // if (order.updatedBy) {
+    //   return order.updatedBy;
+    // }
 
     return order.createdBy;
   }, [order]);
@@ -106,6 +111,32 @@ const OrderAccordion = ({
   useEffect(() => {
     calculateTotalQuantity();
   }, [order]);
+
+  const handleAvoidInventory = async (e: any) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.put(`${API_URL.ADMIN}/orders/isAffectInventory`, {
+        id: order.id,
+        isAffectInventory: e.target.checked,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsLoading(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error.response.data.error);
+      showNotification(
+        'error',
+        'Internal Server Error: ' + error.response.data.error,
+      );
+      setIsLoading(false);
+    }
+  }
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -207,6 +238,14 @@ const OrderAccordion = ({
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
+        <MenuItem>
+          <FormControlLabel 
+            control={<Switch checked={order?.isAffectInventory} onChange={handleAvoidInventory}/>} 
+            label="Affect Inventory" 
+            labelPlacement='end' 
+          />
+        </MenuItem>
+        <Divider />
         <MenuItem onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -234,7 +273,9 @@ const OrderAccordion = ({
         >
           Delete
         </MenuItem>
-
+        
+        <Divider />
+        
         <MenuItem
           disabled={
             isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
@@ -271,6 +312,7 @@ const OrderAccordion = ({
 
   return (
     <>
+      <LoadingModal open={isLoading}/>
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={componentRef} />
       </div>
@@ -327,7 +369,7 @@ const OrderAccordion = ({
               <Typography variant="body2">{latestUpdatePerson}</Typography>
             </Box>
           </Grid>
-          <Grid item xs={10} md={8}>
+          <Grid item xs={10} md={7}>
             <Box display="flex" alignItems="center" gap={1}>
               {order?.previousUnpaidOrders && (
                 <StatusText
@@ -366,16 +408,19 @@ const OrderAccordion = ({
               )}
             </Box>
           </Grid>
-          <Grid item xs={12} md={1.5} textAlign="right">
-            {actions}
+          <Grid item xs={12} md={2.5} textAlign="right">
+              {actions}
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
+            <StatusText text={statusText.text} type={statusText.type} />
+          </Grid>
+          <Grid item xs={6}>
             <Box
               display="flex"
-              justifyContent="space-between"
+              justifyContent="flex-end"
               alignItems="center"
+              gap={2}
             >
-              <StatusText text={statusText.text} type={statusText.type} />
               <IconButton
                 onClick={() => {
                   if (handleOpenDetails) {

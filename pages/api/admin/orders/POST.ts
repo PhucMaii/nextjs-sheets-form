@@ -230,6 +230,7 @@ export const createOrder = async (
         GST: total.GST,
         discount: total.discount,
         totalPrice: total.totalPrice,
+        isAffectInventory: true,
         orderTime,
         createdBy,
       },

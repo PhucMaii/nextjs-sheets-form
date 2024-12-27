@@ -3,8 +3,6 @@ import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
 import {
-  restockInventoryItem,
-  subtractInventoryItem,
   updateSingleInventoryItem,
 } from './single';
 import { createOrderedItems } from '../inventory/expenses/POST';
@@ -12,6 +10,7 @@ import { gstRate, pstRate } from '@/app/lib/constant';
 import { IItem } from '@/app/utils/type';
 import { generateCurrentTime } from '@/app/utils/time';
 import { getDifferentItems } from '@/app/utils/array';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface UpdatedItem {
   id: number;
@@ -76,6 +75,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         fifo: true,
         inventoryUnit: true,
         inventoryItem: true,
+        Orders: true,
       }
     });
 
@@ -110,8 +110,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // Inventory Update
-      if (existingItem?.fifo && existingItem.inventoryUnit) {
+      if (existingItem?.fifo && existingItem.inventoryUnit && existingItem?.Orders?.status !== ORDER_STATUS.VOID) {
         await updateSingleInventoryItem(
+          item.orderId,
           existingItem.fifo,
           existingItem.inventoryUnit,
           item.quantity,

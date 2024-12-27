@@ -43,6 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
       await updateSingleInventoryItem(
+        orderId,
         updatedOrderedItem.fifo,
         updatedOrderedItem.inventoryUnit,
         quantity,
@@ -114,6 +115,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 export default withAdminAuthGuard(handler);
 
 export const updateSingleInventoryItem = async (
+  orderId: number,
   fifo: Fifo,
   unit: InventoryUnit,
   newQuantity: number,
@@ -122,15 +124,42 @@ export const updateSingleInventoryItem = async (
   try {
     const prisma = new PrismaClient();
 
-    // const inventoryItem = await prisma.inventoryItem.findUnique({
-    //   where: {
-    //     id: inventoryItemId,
-    //   },
-    // });
+    // Handle if expense quantity change or admin just force update the inventory => orderId = -1
+    // Only check if orderId is a valid id
+    console.log(orderId, 'order id');
+    if (orderId > 0) {
+      const order = await prisma.orders.findUnique({
+        where: {
+          id: orderId,
+        },
+      });
+  
+      if (!order) {
+        console.error('Conflict Order Not Found');
+        return;
+      }
+  
+      if (!order?.isAffectInventory) {
+        console.log('Inventory Avoided');
+        return;
+      }
+    }
 
     // Subtract the new quantity from inventory quantity, then add back the previous quantity
+    const lastUpdatedFifo = await prisma.fifo.findUnique({
+      where: {
+        id: fifo.id,
+      },
+    });
+
+    if (!lastUpdatedFifo) {
+      console.error('Comflict FIFO Not Found');
+      return;
+    }
+
     const updatedQuantity =
-      fifo.quantity - newQuantity * unit.ratio + previousQuantity * unit.ratio;
+      lastUpdatedFifo.quantity - (newQuantity * unit.ratio) + (previousQuantity * unit.ratio);
+      console.log({updatedQuantity, fifo, newQuantity, previousQuantity, ratio: unit.ratio});
     await prisma.fifo.update({
       where: {
         id: fifo.id,
@@ -165,24 +194,26 @@ export const updateSingleInventoryItem = async (
 };
 
 export const restockInventoryItem = async (
+  orderId: number,
   fifo: Fifo,
   unit: InventoryUnit,
   restockQuantity: number,
 ) => {
   try {
-    await updateSingleInventoryItem(fifo, unit, 0, restockQuantity);
+    await updateSingleInventoryItem(orderId, fifo, unit, 0, restockQuantity);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
 };
 
 export const subtractInventoryItem = async (
+  orderId: number,
   fifo: Fifo,
   unit: InventoryUnit,
   subtractedQuantity: number,
 ) => {
   try {
-    await updateSingleInventoryItem(fifo, unit, subtractedQuantity, 0);
+    await updateSingleInventoryItem(orderId, fifo, unit, subtractedQuantity, 0);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

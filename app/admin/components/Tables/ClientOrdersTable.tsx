@@ -56,6 +56,8 @@ const ClientOrdersTable = ({
   });
   const windowDimensions = useWindowDimensions();
 
+  console.log('TABLE RE RENDER')
+
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
     try {
       setIsLoading(true);
@@ -423,9 +425,9 @@ const ClientOrdersTable = ({
   );
 };
 
-export default memo(ClientOrdersTable, (prev, next) => {
+export default memo(ClientOrdersTable, (prevProps, nextProps) => {
   return (
-    prev.clientOrders === next.clientOrders &&
-    prev.selectedOrders === next.selectedOrders
+    prevProps.clientOrders === nextProps.clientOrders &&
+    prevProps.selectedOrders === nextProps.selectedOrders
   );
 });

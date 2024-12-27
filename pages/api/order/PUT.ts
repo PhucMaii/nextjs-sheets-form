@@ -111,6 +111,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // Update Inventory Item
       if (existingItem?.fifo && existingItem?.inventoryUnit) {
         await updateSingleInventoryItem(
+          body.orderId,
           existingItem.fifo,
           existingItem.inventoryUnit,
           newItem.quantity,

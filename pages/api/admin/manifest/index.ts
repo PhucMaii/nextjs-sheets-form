@@ -87,18 +87,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Create Route Map
     const routeMap = new Map(dayRoutes.map((route: any) => [route.id, route]));
     // console.log(routeMap, 'routeMap');
+  
+    const listOfOrdersWithRouteAttached = nonVoidOrders
+    .map((order: Order) => {
+      // Check if user has the related route
+      const relatedRoute = order.user?.routes?.find((route: any) =>
+        routeMap.has(route.routeId),
+      );
+      // console.log(relatedRoute, 'relatedRoute');
+      const userRelatedRoute = { ...order, routeId: relatedRoute?.routeId || -1 };
+      return userRelatedRoute;
+    });
 
-    const clientRoutes = nonVoidOrders
-      .map((order: Order) => {
-        // Check if user has the related route
-        const relatedRoute = order.user?.routes?.find((route: any) =>
-          routeMap.has(route.routeId),
-        );
-        // console.log(relatedRoute, 'relatedRoute');
-        const userRelatedRoute = { ...order, routeId: relatedRoute?.routeId };
-        return userRelatedRoute;
-      })
-      .filter((order: Order) => !!order.routeId);
+    // const clientRoutes = listOfOrdersWithRouteAttached.filter((order: Order) => !!order.routeId);
+    // const noRouteOrders = listOfOrdersWithRouteAttached.filter((order: Order) => !order.routeId);
+
+    // const clientRoutes = nonVoidOrders
+    //   .map((order: Order) => {
+    //     // Check if user has the related route
+    //     const relatedRoute = order.user?.routes?.find((route: any) =>
+    //       routeMap.has(route.routeId),
+    //     );
+    //     // console.log(relatedRoute, 'relatedRoute');
+    //     const userRelatedRoute = { ...order, routeId: relatedRoute?.routeId };
+    //     return userRelatedRoute;
+    //   })
+    //   .filter((order: Order) => !!order.routeId);
 
 <<<<<<< HEAD
 =======
@@ -106,7 +120,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 >>>>>>> 4f1fa44ea8638e87692dbc1c91c65bd8ef02157f
     // Group order by route id
-    const orderByRoutes = _.orderBy(clientRoutes, ['routeId'], ['asc']);
+    const orderByRoutes = _.orderBy(listOfOrdersWithRouteAttached, ['routeId'], ['asc']);
     // console.log(orderByRoutes.length, 'orderByRoutes');
 
     // Arrange as user route positions in pre order
@@ -125,8 +139,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const sortedUserIds = userRoute[currentRouteId];
         currentRouteOrders.sort((orderA: Order, orderB: Order) => {
           return (
-            sortedUserIds.indexOf(orderA.userId) -
-            sortedUserIds.indexOf(orderB.userId)
+            sortedUserIds?.indexOf(orderA.userId) -
+            sortedUserIds?.indexOf(orderB.userId)
           );
         });
         sortedOrderByRoutes.push(...currentRouteOrders);
@@ -144,8 +158,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const sortedUserIds = userRoute[currentRouteId];
         currentRouteOrders.sort((orderA: Order, orderB: Order) => {
           return (
-            sortedUserIds.indexOf(orderA.userId) -
-            sortedUserIds.indexOf(orderB.userId)
+            sortedUserIds?.indexOf(orderA.userId) -
+            sortedUserIds?.indexOf(orderB.userId)
           );
         });
         sortedOrderByRoutes.push(...currentRouteOrders);
@@ -158,45 +172,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       trackOrderByRoutesIndex++;
     }
 
-    // console.log(sortedOrderByRoutes.length, 'sortedOrderByRoutes');
-    // for (const route of dayRoutes) {
-    //   const sortedUserIds = userRoute[route.id];
-    //   // console.log(sortedUserIds, 'sortedUserIds');
-
-    //   if (!sortedUserIds) {
-    //     continue;
-    //   }
-
-    //   // Create a map for quick lookup of index positions
-    //   const sortedUserIdsMap: any = new Map(
-    //     sortedUserIds.map((id: any, index: number) => [id, index]),
-    //   );
-
-    //   const currentRouteOrders = orderByRoutes.filter(
-    //     (order: Order) => order.routeId === route.id,
-    //   );
-
-    //   currentRouteOrders.sort((orderA: Order, orderB: Order) => {
-    //     return (
-    //       sortedUserIdsMap.get(orderA.userId) -
-    //       sortedUserIdsMap.get(orderB.userId)
-    //     );
-    //   });
-
-    //   sortedOrderByRoutes.push(...currentRouteOrders);
-    // }
-
-    // console.log(sortedOrderByRoutes, 'sortedOrderByRoutes');
-
     // Item Manifest
     const items = sortedOrderByRoutes.map((order: Order) => {
-      // console.log(order.routeId , 'order.routeId');
-      // if (!order.routeId) {
-      //   console.log(order, 'order no route id');
-      // }
-      // if (order?.routeId === 82) {
-      //   console.log(order, 'order');
-      // }
       return order?.items.map((item: any) => {
         return {
           ...item,
@@ -213,20 +190,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    // *** Attach routeId to items and Flat items in no route orders ***
+
     // Group items by route
     const groupItemRoutes: any = groupBy(
       items.flat(),
       ({ routeId }: any) => routeId,
     );
 
-    // console.log(groupItemRoutes, 'groupItemRoutes');
-
+    // Generate Item Manifest
     const itemManifest: any = {};
-    // console.log(groupItemRoutes, 'groupItemRoutes');
     for (const itemRoute in groupItemRoutes) {
-      // console.log(itemRoute, 'itemRoute');
-      // console.log(itemRoute, 'itemRoute');
-      const targetRoute = dayRoutes.find((route: any) => route.id == itemRoute);
+      console.log(itemRoute, 'itemRoute');
+      let targetRoute: any = dayRoutes.find((route: any) => route.id == itemRoute);
+
+      if (!targetRoute) {
+        targetRoute = {
+          id: itemRoute,
+          name: `No Route Orders`,
+        };
+      }
 
       const manifestItem = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem) => {
