@@ -87,15 +87,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Create Route Map
     const routeMap = new Map(dayRoutes.map((route: any) => [route.id, route]));
     // console.log(routeMap, 'routeMap');
-  
-    const listOfOrdersWithRouteAttached = nonVoidOrders
-    .map((order: Order) => {
+
+    const listOfOrdersWithRouteAttached = nonVoidOrders.map((order: Order) => {
       // Check if user has the related route
       const relatedRoute = order.user?.routes?.find((route: any) =>
         routeMap.has(route.routeId),
       );
       // console.log(relatedRoute, 'relatedRoute');
-      const userRelatedRoute = { ...order, routeId: relatedRoute?.routeId || -1 };
+      const userRelatedRoute = {
+        ...order,
+        routeId: relatedRoute?.routeId || -1,
+      };
       return userRelatedRoute;
     });
 
@@ -114,13 +116,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     //   })
     //   .filter((order: Order) => !!order.routeId);
 
-<<<<<<< HEAD
-=======
     // console.log(clientRoutes.length, 'clientRoutes');
 
->>>>>>> 4f1fa44ea8638e87692dbc1c91c65bd8ef02157f
     // Group order by route id
-    const orderByRoutes = _.orderBy(listOfOrdersWithRouteAttached, ['routeId'], ['asc']);
+    const orderByRoutes = _.orderBy(
+      listOfOrdersWithRouteAttached,
+      ['routeId'],
+      ['asc'],
+    );
     // console.log(orderByRoutes.length, 'orderByRoutes');
 
     // Arrange as user route positions in pre order
@@ -202,7 +205,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const itemManifest: any = {};
     for (const itemRoute in groupItemRoutes) {
       console.log(itemRoute, 'itemRoute');
-      let targetRoute: any = dayRoutes.find((route: any) => route.id == itemRoute);
+      let targetRoute: any = dayRoutes.find(
+        (route: any) => route.id == itemRoute,
+      );
 
       if (!targetRoute) {
         targetRoute = {

@@ -36,7 +36,10 @@ export default function InsertOrderToCodBoard({
 }: IProps) {
   const [isInserting, setIsInserting] = useState<boolean>(false);
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
-  const [selectedClient, setSelectedClient] = useState<any>({id: -1, clientName: '-- Choose Client --'});
+  const [selectedClient, setSelectedClient] = useState<any>({
+    id: -1,
+    clientName: '-- Choose Client --',
+  });
   const [tabIndex, setTabIndex] = useState<number>(0);
   const { date, SelectDate } = useSelectDate(currentDate, true);
 
@@ -54,7 +57,7 @@ export default function InsertOrderToCodBoard({
 
   useEffect(() => {
     if (tabIndex === 0) {
-      setSelectedClient({id: -1, clientName: '-- Choose Client --'});
+      setSelectedClient({ id: -1, clientName: '-- Choose Client --' });
     }
   }, [tabIndex]);
 
@@ -145,15 +148,18 @@ export default function InsertOrderToCodBoard({
           <Box display="flex" flexDirection={'column'} gap={2}>
             <Box display="flex" flexDirection={'column'} gap={1}>
               <Typography variant="h6">Clients</Typography>
-              <Autocomplete 
-                options={[{id: -1, clientName: '-- Choose Client --'} , ...(clients?.data || [])]}
+              <Autocomplete
+                options={[
+                  { id: -1, clientName: '-- Choose Client --' },
+                  ...(clients?.data || []),
+                ]}
                 getOptionLabel={(option: any) => option.clientName}
                 renderOption={(props, option) => (
                   <li {...props} aria-disabled={option.id === -1}>
                     {option.clientName}
                   </li>
                 )}
-                style={{width: '100%'}}
+                style={{ width: '100%' }}
                 renderInput={(params) => (
                   <TextField {...params} label="Select Client" />
                 )}

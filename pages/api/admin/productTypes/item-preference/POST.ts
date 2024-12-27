@@ -1,46 +1,53 @@
 import { generateCurrentTime } from '@/app/utils/time';
+import { getUserInfo } from '@/pages/api/utils/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '../../utils/auth';
 
 interface IBody {
-  name: string;
-  icon: string;
+  inventoryItemId: number;
+  image?: string;
+  description: string;
+  isBestSeller: boolean;
+  typeId: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, icon }: IBody = req.body;
+    const { inventoryItemId, image, description, isBestSeller, typeId }: IBody =
+      req.body;
 
-    const sameNameProductType = await prisma.itemType.findFirst({
+    const existingPreference = await prisma.itemPreference.findFirst({
       where: {
-        name: name,
+        inventoryItemId,
       },
     });
 
-    if (sameNameProductType) {
+    if (existingPreference) {
       return res.status(400).json({
-        error: 'Product Type already exists',
+        error: 'Preference already exists either in this type or other type',
       });
     }
 
     const createdAt = generateCurrentTime();
     const createdBy: any = await getUserInfo(req, res);
 
-    const newProductType = await prisma.itemType.create({
+    const newPreference = await prisma.itemPreference.create({
       data: {
-        name: name,
-        icon: icon,
+        inventoryItemId,
+        image: image || '',
+        description,
+        isBestSeller,
+        typeId,
         createdAt,
         createdBy: `Admin - ${createdBy.clientName}`,
       },
     });
 
     return res.status(200).json({
-      message: 'Product Type created successfully',
-      data: newProductType,
+      message: 'Product preference created successfully',
+      data: newPreference,
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

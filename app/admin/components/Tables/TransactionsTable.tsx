@@ -59,7 +59,7 @@ const TransactionsTable = ({
         open: false,
         transaction: transactions[0],
         type: ExpenseType.other,
-      })
+      });
     }
   }, [transactions]);
 
@@ -94,8 +94,6 @@ const TransactionsTable = ({
     }
   };
 
-  console.log(editProps, 'editProps');
-
   return (
     <>
       <DeleteModal
@@ -111,7 +109,11 @@ const TransactionsTable = ({
         <EditStockPurchased
           open={editProps.open}
           onClose={() =>
-            setEditProps((prevState: any) => ({ ...prevState, open: false, type: null }))
+            setEditProps((prevState: any) => ({
+              ...prevState,
+              open: false,
+              type: null,
+            }))
           }
           stockPurchased={editProps.transaction}
           showNotification={showNotification}
@@ -122,7 +124,11 @@ const TransactionsTable = ({
         <EditExpense
           open={editProps.open}
           onClose={() =>
-            setEditProps((prevState: any) => ({ ...prevState, open: false, type: null }))
+            setEditProps((prevState: any) => ({
+              ...prevState,
+              open: false,
+              type: null,
+            }))
           }
           transaction={editProps.transaction}
           showNotification={showNotification}

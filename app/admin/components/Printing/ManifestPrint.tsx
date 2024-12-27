@@ -117,7 +117,8 @@ export const ManifestPrint = forwardRef(
                     m={2}
                   >
                     <Typography variant="h5">
-                      Driver: {manifest[routeId]?.route?.driver?.name || 'Unknown'}
+                      Driver:{' '}
+                      {manifest[routeId]?.route?.driver?.name || 'Unknown'}
                     </Typography>
                     <Typography>{currentDate}</Typography>
                   </Box>

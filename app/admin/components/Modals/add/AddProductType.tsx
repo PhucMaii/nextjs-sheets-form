@@ -5,6 +5,7 @@ import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import SelectIcons from '../../Select/SelectIcons';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -15,8 +16,26 @@ export default function AddProductType({
   onClose,
   showNotification,
 }: IProps) {
+  // const icons = Object.entries(LucideIcons).slice(0, 20);
+  // const [displayIcons, setDisplayIcons] = useState<any[]>(icons);
   const [newProductType, setNewProductType] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const [selectedIcon, setSelectedIcon] = useState<string>('');
+
+  // const debouncedKeywords = useDebounce(searchKeywords, 1000);
+
+  // useEffect(() => {
+  //   if (debouncedKeywords) {
+  //     const filteredIcons = Object.entries(LucideIcons).filter(([name]) => {
+  //       return name.toLowerCase().includes(debouncedKeywords.toLowerCase());
+  //     });
+
+  //     setDisplayIcons(filteredIcons);
+  //   } else {
+  //     setDisplayIcons(icons);
+  //   }
+  // }, [debouncedKeywords]);
 
   const handleAddProductType = async () => {
     if (!newProductType || newProductType.trim() === '') {
@@ -27,6 +46,7 @@ export default function AddProductType({
     try {
       const response = await axios.post(`${API_URL.ADMIN}/productTypes`, {
         name: newProductType,
+        icon: selectedIcon,
       });
 
       if (response.data.error) {
@@ -49,7 +69,7 @@ export default function AddProductType({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="scroll">
         <ModalHead
           heading="Add Product Type"
           buttonLabel="ADD"
@@ -59,7 +79,10 @@ export default function AddProductType({
         />
 
         <Divider sx={{ my: 2 }} />
-
+        <SelectIcons
+          selectedIcon={selectedIcon}
+          setSelectedIcon={setSelectedIcon}
+        />
         <TextField
           label="Product Type"
           variant="outlined"

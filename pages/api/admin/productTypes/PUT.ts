@@ -4,13 +4,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IBody {
   id: number;
   name: string;
+  icon: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, name }: IBody = req.body;
+    const { id, name, icon }: IBody = req.body;
 
     const existingProductType = await prisma.itemType.findUnique({
       where: {
@@ -24,21 +25,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (existingProductType.name === name) {
-      return res.status(400).json({
-        error: 'New Name Does Not Change',
-      });
-    }
+    // if (existingProductType.name === name) {
+    //   return res.status(400).json({
+    //     error: 'New Name Does Not Change',
+    //   });
+    // }
 
     const sameNameProductType = await prisma.itemType.findFirst({
       where: {
         name,
+        icon,
       },
     });
 
     if (sameNameProductType) {
       return res.status(400).json({
-        error: 'Product Type Name Existed',
+        error: 'Please Update At Least 1 Field',
       });
     }
 
@@ -48,6 +50,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         name,
+        icon,
       },
     });
 

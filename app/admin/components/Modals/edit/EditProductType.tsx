@@ -6,6 +6,7 @@ import ModalHead from '@/app/lib/ModalHead';
 import { IProductType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import SelectIcons from '../../Select/SelectIcons';
 
 interface IProps extends ModalProps {
   type: IProductType | null;
@@ -19,11 +20,11 @@ export default function EditProductType({
   showNotification,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [newName, setNewName] = useState<string>(type?.name || '');
+  const [updatedType, setUpdatedType] = useState<any>(type);
 
   useEffect(() => {
     if (type) {
-      setNewName(type.name);
+      setUpdatedType(type);
     }
   }, [type]);
 
@@ -32,20 +33,21 @@ export default function EditProductType({
       showNotification('error', 'Product Type Not Found');
       return;
     }
-    if (!newName || newName.trim() === '') {
+    if (!updatedType.name || updatedType.name.trim() === '') {
       showNotification('error', 'Product Type Name is required');
       return;
     }
-    if (newName === type?.name) {
-      showNotification('error', 'Product Type Name Does Not Change');
-      return;
-    }
+    // if (updatedType.name === type?.name) {
+    //   showNotification('error', 'Product Type Name Does Not Change');
+    //   return;
+    // }
 
     setIsLoading(true);
     try {
       const response = await axios.put(`${API_URL.ADMIN}/productTypes`, {
         id: type?.id,
-        name: newName,
+        name: updatedType.name,
+        icon: updatedType?.icon,
       });
 
       if (response.data.error) {
@@ -81,12 +83,27 @@ export default function EditProductType({
 
         <Divider sx={{ my: 2 }} />
 
+        <SelectIcons
+          selectedIcon={updatedType?.icon}
+          setSelectedIcon={(newValue: string) =>
+            setUpdatedType((prevState: any) => ({
+              ...prevState,
+              icon: newValue,
+            }))
+          }
+        />
+
         <TextField
           label="Product Type Name"
           variant="outlined"
           fullWidth
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
+          value={updatedType?.name || ''}
+          onChange={(e) =>
+            setUpdatedType((prevState: any) => ({
+              ...prevState,
+              name: e.target.value,
+            }))
+          }
         />
       </BoxModal>
     </Modal>

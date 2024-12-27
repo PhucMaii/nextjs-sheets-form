@@ -4,76 +4,84 @@ import {
   Box,
   Divider,
   FormControlLabel,
+  MenuItem,
   Modal,
+  Select,
   Switch,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
-import { ModalProps } from '../type';
+import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
+import { IInventoryItem, IItemPreference } from '@/app/utils/type';
+import { filter } from './EditStockPurchased';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import { filter } from '../../Autocomplete/InventoryItemSearch';
-import FileUpload from '../../FileUpload';
 import { generateImgUrl } from '@/app/lib/s3';
+import FileUpload from '../../FileUpload';
+import { ModalProps } from '../type';
 import axios from 'axios';
 
 interface IProps extends ModalProps {
+  itemPreference?: IItemPreference;
   showNotification: (type: AlertColor, message: string) => void;
-  typeId: number;
 }
 
-export default function AddItemIntoType({
+export default function EditItemPreference({
   open,
   onClose,
+  itemPreference,
   showNotification,
-  typeId,
 }: IProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [promptedItem, setPromptedItem] = useState<IInventoryItem | any>(
+    itemPreference?.inventoryItem || { id: -1, name: '-- Choose an item --' },
+  );
+  const [updatedItem, setUpdatedItem] = useState<IItemPreference | null>(
+    itemPreference || null,
+  );
+
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
-  const [promptedItem, setPromptedItem] = useState<any>({
-    id: -1,
-    name: '',
-    image: '',
-    description: '',
-    isBestSeller: false,
-    typeId,
-  });
+  const [types] = SWRFetchData(`${API_URL.ADMIN}/productTypes`);
 
-  const handleAddItemIntoType = async () => {
-    if (promptedItem.id === -1) {
-      showNotification('error', 'Please select item');
-      return;
+  useEffect(() => {
+    if (itemPreference) {
+      setPromptedItem({
+        ...itemPreference.inventoryItem,
+        image: itemPreference.image,
+      });
+      setUpdatedItem(itemPreference);
     }
+  }, [itemPreference]);
 
-    setIsLoading(true);
+  const handleUpdateItemPreference = async () => {
+    setIsUpdating(true);
     try {
-      console.log(promptedItem, 'promptedItem');
-      const response = await axios.post(
+      const response = await axios.put(
         `${API_URL.ADMIN}/productTypes/item-preference`,
         {
-          ...promptedItem,
+          ...updatedItem,
+          image: promptedItem.image,
           inventoryItemId: promptedItem.id,
         },
       );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
-        setIsLoading(false);
+        setIsUpdating(false);
         return;
       }
 
       showNotification('success', response.data.message);
-      setIsLoading(false);
+      setIsUpdating(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification(
         'error',
         'Internal Server Error: ' + error?.response?.data?.error,
       );
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -81,16 +89,34 @@ export default function AddItemIntoType({
     <Modal open={open} onClose={onClose}>
       <BoxModal>
         <ModalHead
-          heading="Add Item Into Type"
-          buttonLabel="ADD"
-          onClick={handleAddItemIntoType}
-          buttonProps={{ loading: isLoading }}
+          heading="Edit Item Preference"
+          buttonLabel="Save"
           onClose={onClose}
+          buttonProps={{ loading: isUpdating }}
+          onClick={handleUpdateItemPreference}
         />
 
         <Divider sx={{ my: 2 }} />
 
         <Box display="flex" gap={2} flexDirection="column">
+          <Typography>Move To</Typography>
+          <Select
+            value={updatedItem?.typeId}
+            onChange={(e: any) =>
+              setUpdatedItem((prevState: any) => ({
+                ...prevState,
+                typeId: e.target.value,
+              }))
+            }
+          >
+            {types?.data?.map((type: any) => (
+              <MenuItem key={type.id} value={type.id}>
+                {type.name}
+              </MenuItem>
+            ))}
+          </Select>
+
+          <Divider sx={{ my: 2 }} />
           <Box
             display="flex"
             justifyContent="space-between"
@@ -101,9 +127,9 @@ export default function AddItemIntoType({
               label="Best Seller"
               control={
                 <Switch
-                  checked={promptedItem.isBestSeller}
+                  checked={updatedItem?.isBestSeller}
                   onChange={(e: any) =>
-                    setPromptedItem((prevState: any) => ({
+                    setUpdatedItem((prevState: any) => ({
                       ...prevState,
                       isBestSeller: e.target.checked,
                     }))
@@ -158,9 +184,9 @@ export default function AddItemIntoType({
             placeholder="Enter item description..."
             multiline
             rows={2}
-            value={promptedItem?.description}
+            value={updatedItem?.description}
             onChange={(e) => {
-              setPromptedItem((prevState: any) => ({
+              setUpdatedItem((prevState: any) => ({
                 ...prevState,
                 description: e.target.value,
               }));
@@ -178,7 +204,7 @@ export default function AddItemIntoType({
                 width={100}
                 height={100}
               />
-              <Typography>{promptedItem.image}</Typography>
+              <Typography>{promptedItem?.image}</Typography>
             </Box>
           )}
           <FileUpload

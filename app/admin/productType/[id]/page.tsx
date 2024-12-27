@@ -9,6 +9,7 @@ import {
   InputAdornment,
   OutlinedInput,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { useParams, useRouter } from 'next/navigation';
 import { SWRFetchData } from '@/app/utils/db';
@@ -18,6 +19,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddItemIntoType from '../../components/Modals/add/AddItemIntoType';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useNotification from '@/hooks/useNotification';
+import Product from '../../components/Settings/ProductType/Product';
+import ErrorComponent from '../../components/ErrorComponent';
 
 export default function page() {
   const params = useParams();
@@ -28,9 +31,12 @@ export default function page() {
 
   const [open, setOpen] = useMultipleBoolean({
     addItemIntoType: false,
+    editItemPreference: false,
   });
   const { showNotification, NotificationComp } = useNotification();
   const [type] = SWRFetchData(`${API_URL.ADMIN}/productTypes?id=${id}`);
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   return (
     <Sidebar>
@@ -39,6 +45,7 @@ export default function page() {
         open={open.addItemIntoType}
         onClose={() => setOpen('addItemIntoType', false)}
         showNotification={showNotification}
+        typeId={Number(id)}
       />
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Box display="flex" alignItems="center" gap={2}>
@@ -49,9 +56,6 @@ export default function page() {
             {type?.data?.name}
           </Typography>
         </Box>
-        {/* <Button variant="contained">
-                + Add Item
-            </Button> */}
         <OutlinedInput
           size="small"
           placeholder="Search"
@@ -76,6 +80,25 @@ export default function page() {
           + Add Item
         </Button>
       </Box>
+
+      {type?.data && type?.data?.itemPreferences?.length > 0 ? (
+        <Box
+          display="flex"
+          justifyContent={mdDown ? 'center' : 'flex-start'}
+          alignItems="center"
+          gap={2}
+          flexWrap={'wrap'}
+        >
+          {type?.data.itemPreferences.map((item: any) => (
+              <Product
+                itemPreference={item}
+                showNotification={showNotification}
+              />
+          ))}
+        </Box>
+      ) : (
+        <ErrorComponent errorText="No Item Found" />
+      )}
     </Sidebar>
   );
 }

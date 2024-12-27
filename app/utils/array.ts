@@ -192,10 +192,16 @@ export const getUniqueUnitRatios = (units: any[]) => {
   );
 };
 
-export const getDifferentItems = (baseItems: any, toCompareItems: any, key: string[]) => {
+export const getDifferentItems = (
+  baseItems: any,
+  toCompareItems: any,
+  key: string[],
+) => {
   return baseItems.filter((baseItem: any) => {
     return !toCompareItems.some((toCompareItem: any) => {
-      return key.every((keyItem: any) => baseItem[keyItem] === toCompareItem[keyItem]);
+      return key.every(
+        (keyItem: any) => baseItem[keyItem] === toCompareItem[keyItem],
+      );
     });
   });
-}
+};

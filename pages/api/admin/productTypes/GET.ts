@@ -17,7 +17,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: Number(id),
         },
         include: {
-          itemPreferences: true,
+          itemPreferences: {
+            include: {
+              inventoryItem: true,
+            },
+          },
         },
       });
 

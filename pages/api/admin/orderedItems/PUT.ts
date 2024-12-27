@@ -2,9 +2,7 @@
 import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
-import {
-  updateSingleInventoryItem,
-} from './single';
+import { updateSingleInventoryItem } from './single';
 import { createOrderedItems } from '../inventory/expenses/POST';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { IItem } from '@/app/utils/type';
@@ -76,22 +74,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         inventoryUnit: true,
         inventoryItem: true,
         Orders: true,
-      }
+      },
     });
 
-    const acutalUpdatedItems = getDifferentItems(updatedItems, orderedItemList, [
-      'quantity',
-      'price',
-    ]);
+    const acutalUpdatedItems = getDifferentItems(
+      updatedItems,
+      orderedItemList,
+      ['quantity', 'price'],
+    );
 
     console.log(acutalUpdatedItems, 'acutalUpdatedItems');
 
     for (const item of acutalUpdatedItems) {
-
       // Check does system has that item
       const existingItem = orderedItemList.find((orderedItem: OrderedItems) => {
         return item.id === orderedItem.id;
-      })
+      });
 
       if (!existingItem) {
         return res.status(404).json({
@@ -110,7 +108,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // Inventory Update
-      if (existingItem?.fifo && existingItem.inventoryUnit && existingItem?.Orders?.status !== ORDER_STATUS.VOID) {
+      if (
+        existingItem?.fifo &&
+        existingItem.inventoryUnit &&
+        existingItem?.Orders?.status !== ORDER_STATUS.VOID
+      ) {
         await updateSingleInventoryItem(
           item.orderId,
           existingItem.fifo,

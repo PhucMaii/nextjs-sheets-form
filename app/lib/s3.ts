@@ -1,6 +1,10 @@
 import AWS from 'aws-sdk';
 
-export default async function uploadToS3(file: File, itemName: string, onProgress: any) {
+export default async function uploadToS3(
+  file: File,
+  itemName: string,
+  onProgress: any,
+) {
   try {
     AWS.config.update({
       accessKeyId: process.env.NEXT_PUBLIC_S3_ACCESS_KEY_ID,
@@ -15,13 +19,13 @@ export default async function uploadToS3(file: File, itemName: string, onProgres
     });
 
     const fileKey = `products/${itemName}/${Date.now()}-${file.name.replace(' ', '-')}`;
-    
+
     if (!process.env.NEXT_PUBLIC_S3_BUCKET_NAME) {
       throw new Error(
         'Missing NEXT_PUBLIC_S3_BUCKET_NAME environment variable',
       );
     }
-    
+
     console.log(fileKey, 'fileKey');
     console.log(s3, 's3');
     const params = {
@@ -39,7 +43,9 @@ export default async function uploadToS3(file: File, itemName: string, onProgres
         );
 
         if (onProgress) {
-          onProgress(parseInt(((evt.loaded / evt.total) * 100).toString() + '%'));
+          onProgress(
+            parseInt(((evt.loaded / evt.total) * 100).toString() + '%'),
+          );
         }
       })
       .promise();
@@ -59,5 +65,5 @@ export default async function uploadToS3(file: File, itemName: string, onProgres
 }
 
 export const generateImgUrl = (fileKey: string) => {
-  return `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com/${fileKey}`
-}
+  return `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com/${fileKey}`;
+};

@@ -21,6 +21,7 @@ import { IProductType } from '@/app/utils/type';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import * as LucideIcons from 'lucide-react';
 
 export default function ProductType() {
   const [menuState, setMenuState] = useState<{
@@ -70,13 +71,14 @@ export default function ProductType() {
   };
 
   return (
-    <Box>
+    <Box sx={{ pb: 2 }}>
       {NotificationComp}
       <DeleteModal
         open={open.deleteProductType}
         handleCloseModal={() => setOpen('deleteProductType', false)}
         handleDelete={handleDeleteType}
         targetObj={deletingType}
+        showTargetObj={deletingType?.name}
       />
       <AddProductType
         open={open.addProductType}
@@ -106,6 +108,9 @@ export default function ProductType() {
       <Box display="flex" gap={3} flexWrap="wrap" alignItems="center" mt={3}>
         {types ? (
           types.data.map((type: any, index: number) => {
+            const IconComponent: any = type?.icon
+              ? LucideIcons[type.icon as keyof typeof LucideIcons]
+              : () => <></>;
             return (
               <Box
                 display="flex"
@@ -126,9 +131,13 @@ export default function ProductType() {
                   gap={2}
                   justifyContent="space-between"
                 >
-                  <Typography variant="h6" fontWeight="bold">
-                    {type.name}
-                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <IconComponent />
+                    <Typography variant="h6" fontWeight="bold">
+                      {type.name}
+                    </Typography>
+                  </Box>
+
                   <>
                     <IconButton
                       onClick={(e) => {
@@ -172,26 +181,30 @@ export default function ProductType() {
                       anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                     >
                       <MenuItem
-                        onClick={() => {
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          e.preventDefault();
                           setOpen('editProductType', true);
                           setEdittingType(menuState.type);
                           handleMenuClose();
                         }}
                       >
                         <Box display="flex" alignItems="center" gap={2}>
-                          <EditIcon fontSize="small" />
+                          <EditIcon color="primary" fontSize="small" />
                           <Typography>Edit</Typography>
                         </Box>
                       </MenuItem>
                       <MenuItem
-                        onClick={() => {
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          e.preventDefault();
                           setOpen('deleteProductType', true);
                           setDeletingType(menuState.type);
                           handleMenuClose();
                         }}
                       >
                         <Box display="flex" alignItems="center" gap={2}>
-                          <DeleteIcon fontSize="small" />
+                          <DeleteIcon color="error" fontSize="small" />
                           <Typography>Delete</Typography>
                         </Box>
                       </MenuItem>

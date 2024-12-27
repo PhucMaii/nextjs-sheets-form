@@ -27,11 +27,11 @@ export default function OrderStockTable({
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
     stockPurchased: stockOrders[0],
-  })
+  });
   const [editProps, setEditProps] = useState<any>({
     open: false,
     stockPurchased: stockOrders[0],
-  })
+  });
 
   const handleDelete = async (targetObj: IExpense) => {
     try {
@@ -53,15 +53,19 @@ export default function OrderStockTable({
 
   return (
     <>
-      <EditStockPurchased 
+      <EditStockPurchased
         stockPurchased={editProps.stockPurchased}
         showNotification={showNotification}
         open={editProps.open}
-        onClose={() => setEditProps({ open: false, stockPurchased: stockOrders[0] })}
+        onClose={() =>
+          setEditProps({ open: false, stockPurchased: stockOrders[0] })
+        }
       />
-      <DeleteModal 
+      <DeleteModal
         open={deleteProps.open}
-        handleCloseModal={() => setDeleteProps({ open: false, stockPurchased: stockOrders[0] })}
+        handleCloseModal={() =>
+          setDeleteProps({ open: false, stockPurchased: stockOrders[0] })
+        }
         handleDelete={handleDelete}
         targetObj={deleteProps.stockPurchased}
         showTargetObj={deleteProps.stockPurchased?.invoice}
@@ -105,7 +109,17 @@ export default function OrderStockTable({
                   <TableCell>{expense.date}</TableCell>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Button color="error" onClick={() => setDeleteProps({ open: true, stockPurchased: expense })}>Delete</Button>
+                      <Button
+                        color="error"
+                        onClick={() =>
+                          setDeleteProps({
+                            open: true,
+                            stockPurchased: expense,
+                          })
+                        }
+                      >
+                        Delete
+                      </Button>
                       {/* <DeleteModal
                         targetObj={expense}
                         handleDelete={handleDelete}
@@ -115,7 +129,13 @@ export default function OrderStockTable({
                         stockPurchased={expense}
                         showNotification={showNotification}
                       /> */}
-                      <Button onClick={() => setEditProps({ open: true, stockPurchased: expense })}>Edit</Button>
+                      <Button
+                        onClick={() =>
+                          setEditProps({ open: true, stockPurchased: expense })
+                        }
+                      >
+                        Edit
+                      </Button>
                     </Box>
                   </TableCell>
                 </TableRow>

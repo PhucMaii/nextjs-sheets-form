@@ -56,7 +56,7 @@ const ClientOrdersTable = ({
   });
   const windowDimensions = useWindowDimensions();
 
-  console.log('TABLE RE RENDER')
+  console.log('TABLE RE RENDER');
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
     try {

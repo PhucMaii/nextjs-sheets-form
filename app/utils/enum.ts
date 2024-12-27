@@ -18,6 +18,7 @@ export enum API_URL {
   SUBCATEGORIES = '/api/admin/subcategories',
   ROUTES = '/api/admin/routes',
   ADMIN_DRIVERS = '/api/admin/drivers',
+  PUBLIC = '/api/public',
   DRIVER_ORDERS = '/api/drivers/orders',
 }
 

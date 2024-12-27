@@ -9,6 +9,7 @@ import {
   InventoryItem,
   InventoryUnit,
   ItemPreference,
+  ItemType,
   PaymentMethod,
   Route,
   User,
@@ -212,4 +213,12 @@ export interface IFifo extends Fifo {
   inventoryItem: IInventoryItem;
   vendorItem: IVendorItem;
   orderedItems: OrderedItems[];
+}
+
+export interface IProductType extends ItemType {
+  itemPreferences: IItemPreference[];
+}
+
+export interface IItemPreference extends ItemPreference {
+  inventoryItem: IInventoryItem;
 }
