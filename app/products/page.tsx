@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import Navbar from '../components/LandingPage/Navbar';
 import ProductHeader from '../components/ProductListingPage/ProductHeader';
@@ -10,35 +10,79 @@ import { grey } from '@mui/material/colors';
 import { landingPageSecondaryColor } from '@/constant/landingPage';
 import * as LucideIcons from 'lucide-react';
 import ProductListing from '../components/ProductListingPage/ProductListing';
+import useDebounce from '@/hooks/useDebounce';
+import ErrorComponent from '../admin/components/ErrorComponent';
 
 export default function ProductPage() {
+  const [bestSellerItems, setBestSellerItems] = useState<IItemPreference[]>([]);
+  const [displayItems, setDisplayItems] = useState<IItemPreference[]>([]);
   const [selectedType, setSelectedType] = useState<
     IProductType | any
   >({ id: 0, name: 'All' });
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`)
   const [types] = SWRFetchData(`${API_URL.PUBLIC}/types`);
 
-  const filteredItems: any = useMemo(() => {
-    if (selectedType?.id !== 0) {
-      return [];
+  useEffect(() => {
+    if (selectedType?.id === 0) {
+      const bestSeller = allItemPreferences?.data?.filter(
+        (item: IItemPreference) => item.isBestSeller
+      );
+      const nonBestSeller = allItemPreferences?.data?.filter(
+        (item: IItemPreference) => !item.isBestSeller
+      );
+
+      setBestSellerItems(bestSeller);
+      setDisplayItems(nonBestSeller);
+    } else {
+      setBestSellerItems([]);
+      setDisplayItems(selectedType.itemPreferences);
     }
-
-
-    const bestSeller = allItemPreferences?.data?.filter((item: IItemPreference) => item.isBestSeller);
-    const nonBestSeller = allItemPreferences?.data?.filter((item: IItemPreference) => !item.isBestSeller);
-
-    return {
-      bestSeller,
-      nonBestSeller,
-    };
   }, [allItemPreferences, selectedType]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newDisplayItems = (selectedType?.id === 0 ? allItemPreferences?.data : selectedType?.itemPreferences)?.filter(
+        (item: IItemPreference) => {
+          return (
+            item.inventoryItem.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) || 
+            item.description.toLowerCase().includes(debouncedKeywords.toLowerCase())
+          )}
+          );
+      const bestSeller = newDisplayItems?.filter(
+        (item: IItemPreference) => item.isBestSeller
+      )
+      const nonBestSeller = newDisplayItems?.filter(
+        (item: IItemPreference) => !item.isBestSeller
+      )
+      setBestSellerItems(bestSeller);
+      setDisplayItems(nonBestSeller);
+    } else {
+      if (selectedType?.id === 0) {
+        const bestSeller = allItemPreferences?.data?.filter(
+          (item: IItemPreference) => item.isBestSeller
+        )
+        const nonBestSeller = allItemPreferences?.data?.filter(
+          (item: IItemPreference) => !item.isBestSeller
+        )
+        setBestSellerItems(bestSeller);
+        setDisplayItems(nonBestSeller);
+      } else {
+        setBestSellerItems([]);
+        setDisplayItems(selectedType?.itemPreferences);
+      }
+    }
+    
+    }, [debouncedKeywords]);
 
   return (
     <Box sx={{pb: 2}}>
       <Navbar />
       <Box display="flex" flexDirection="column" gap={2} py={3} px={6}>
-        <ProductHeader />
+        <ProductHeader searchKeywords={searchKeywords} setSearchKeywords={setSearchKeywords} />
       </Box>
 
       <Box
@@ -57,6 +101,7 @@ export default function ProductPage() {
             backgroundColor:
               selectedType?.id === 0 ? landingPageSecondaryColor : grey[200],
             color: selectedType?.id === 0 ? 'white' : 'black',
+            boxShadow: 'none',
             '&:hover': {
               backgroundColor:
                 selectedType?.id === 0 ? landingPageSecondaryColor : grey[300],
@@ -84,6 +129,7 @@ export default function ProductPage() {
                     ? landingPageSecondaryColor
                     : grey[200],
                 color: selectedType?.id === type.id ? 'white' : 'black',
+                boxShadow: 'none',
                 '&:hover': {
                   backgroundColor:
                     selectedType?.id === type.id
@@ -109,7 +155,7 @@ export default function ProductPage() {
             <Grid item xs={12}>
               <Typography variant="h5" fontWeight="bold" sx={{px: 6}}>Best Sellers</Typography>
             </Grid>
-              {filteredItems?.bestSeller?.map((product: IItemPreference, index: number) => {
+              {bestSellerItems?.map((product: IItemPreference, index: number) => {
                 return (
                   <Grid item xs={12} md={4} lg={3} xl={2} key={index}>
                     <ProductListing product={product} />
@@ -119,7 +165,7 @@ export default function ProductPage() {
               <Grid item xs={12}>
               <Typography variant="h5" fontWeight="bold" sx={{px: 6, mt: 2}}>Top Notch Quality Item</Typography> 
             </Grid>
-                {filteredItems?.nonBestSeller?.map((product: IItemPreference, index: number) => {
+                {displayItems?.map((product: IItemPreference, index: number) => {
                 return (
                   <Grid item xs={12} md={4} lg={3} xl={2} key={index}>
                     <ProductListing product={product} />
@@ -128,13 +174,17 @@ export default function ProductPage() {
               })}
             </>
           ) : (
-              selectedType.itemPreferences.map((product: IItemPreference, index: number) => {
+              displayItems?.length > 0 ? displayItems?.map((product: IItemPreference, index: number) => {
                 return (
                   <Grid item xs={12} sm={4} md={2} key={index}>
                     <ProductListing product={product} />
                   </Grid>
                 );
-              })
+              }) : (
+                <Grid item xs={12}>
+                  <ErrorComponent errorText='No Product Available' />
+                </Grid>
+              )
             
           )
         }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import {
   Box,
   Button,
@@ -11,7 +11,12 @@ import { green, orange } from '@mui/material/colors';
 import SearchIcon from '@mui/icons-material/Search';
 import { landingPageSecondaryColor } from '@/constant/landingPage';
 
-export default function ProductHeader() {
+interface IProps{
+  searchKeywords: string;
+  setSearchKeywords: Dispatch<SetStateAction<string>>
+}
+
+export default function ProductHeader({searchKeywords, setSearchKeywords}: IProps) {
   return (
     <Box
       display="flex"
@@ -38,6 +43,8 @@ export default function ProductHeader() {
             size="small"
             sx={{ borderRadius: 2, backgroundColor: 'white' }}
             fullWidth
+            value={searchKeywords}
+            onChange={(e) => setSearchKeywords(e.target.value)}
             startAdornment={
               <InputAdornment position="start">
                 <SearchIcon />
