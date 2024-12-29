@@ -249,10 +249,10 @@ export const ComponentToPrint = forwardRef(
             </Grid>
             <Box display="flex" flexDirection="column" gap={2} mt={2}>
               <Typography sx={{ fontSize: printFontSize - 5 }}>
-                <strong>DELIVERY ADDRESS:</strong> {order.deliveryAddress}
+                <strong>DELIVERY ADDRESS:</strong> {order?.deliveryAddress || order?.user?.deliveryAddress || 'Not Provided'}
               </Typography>
               <Typography sx={{ fontSize: printFontSize - 5 }}>
-                <strong>CONTACT:</strong> {order.contactNumber}
+                <strong>CONTACT:</strong> {order?.contactNumber || order?.user?.contactNumber || 'Not Provided'}
               </Typography>
             </Box>
             {order.note && (
