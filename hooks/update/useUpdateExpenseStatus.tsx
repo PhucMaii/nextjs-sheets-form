@@ -4,7 +4,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IExpense } from '@/app/utils/type';
 import axios from 'axios';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -86,7 +86,7 @@ export const useUpdateExpenseStatus = (
     }
   };
 
-  const handleBulkUpdateStatus = async (
+  const handleBulkUpdateStatus = useCallback(async (
     newStatus: TRANSACTION_STATUS,
     newPaymentMethodId: number = otherPaymentMethodId,
   ) => {
@@ -139,7 +139,7 @@ export const useUpdateExpenseStatus = (
       );
       setIsUpdating(false);
     }
-  };
+  }, [selectedExpenses, showNotification]);
 
   const UpdateExpenseStatusComp = (
     <SingleFieldEdit
