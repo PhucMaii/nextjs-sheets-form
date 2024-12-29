@@ -94,8 +94,6 @@ const TransactionsTable = ({
     }
   };
 
-  console.log(editProps, 'editProps');
-
   return (
     <>
       <DeleteModal

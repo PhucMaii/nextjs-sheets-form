@@ -71,6 +71,7 @@ export default function OrderForm() {
   }
 
   const minDate = today.startOf('day');
+  console.log(minDate, 'min date');
   const { data: items, isValidating } = useSWR(API_URL.CLIENT_ITEM);
 
   useEffect(() => {
@@ -115,6 +116,13 @@ export default function OrderForm() {
     const checkUserHasInput = handleCheckUserHasInput();
     if (!checkUserHasInput) {
       showNotification('error', 'Please enter your order');
+      return;
+    }
+
+    // Check is delivery date valid
+    const deliveryDateObj = dayjs(deliveryDate);
+    if (deliveryDateObj.isBefore(minDate)) {
+      showNotification('error', 'Delivery date is not valid');
       return;
     }
 

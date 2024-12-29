@@ -72,13 +72,12 @@ export default function Transactions() {
   useEffect(() => {
     if (debouncedKeywords) {
       const newTransactions = transactions?.data.filter(
-        (transaction: IExpense) => {
+        (transaction: any) => {
           return (
             transaction.invoice === debouncedKeywords ||
-            (transaction?.vendors || []).some((vendor: any) =>
-              vendor?.vendor?.name
+            (transaction?.vendors ? transaction?.vendors[0]?.vendor?.name
                 ?.toLowerCase()
-                ?.includes(debouncedKeywords.toLowerCase()),
+                ?.includes(debouncedKeywords.toLowerCase()) : false
             ) ||
             transaction.spentBy
               .toLowerCase()
@@ -93,7 +92,7 @@ export default function Transactions() {
     } else {
       setDisplayTransactions(transactions?.data || []);
     }
-  }, [debouncedKeywords, transactions]);
+  }, [debouncedKeywords]);
 
   useEffect(() => {
     if (adminsAndDriversRes) {
