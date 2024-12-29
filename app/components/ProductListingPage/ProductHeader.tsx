@@ -6,6 +6,7 @@ import {
   InputAdornment,
   OutlinedInput,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { green, orange } from '@mui/material/colors';
 import SearchIcon from '@mui/icons-material/Search';
@@ -17,6 +18,8 @@ interface IProps{
 }
 
 export default function ProductHeader({searchKeywords, setSearchKeywords}: IProps) {
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
   return (
     <Box
       display="flex"
@@ -36,7 +39,7 @@ export default function ProductHeader({searchKeywords, setSearchKeywords}: IProp
         Selection Today!
       </Typography>
 
-      <Box display="flex" alignItems="center" gap={2} px={6}>
+      <Box display="flex" flexDirection={smDown ? 'column' : 'row'} alignItems="center" gap={2} px={smDown ? 1 : 6}>
         <FormControl fullWidth>
           <OutlinedInput
             placeholder="Search items you like..."
@@ -59,6 +62,7 @@ export default function ProductHeader({searchKeywords, setSearchKeywords}: IProp
             backgroundColor: landingPageSecondaryColor,
             ':hover': { backgroundColor: orange[800] },
           }}
+          fullWidth={smDown}
         >
           Search
         </Button>

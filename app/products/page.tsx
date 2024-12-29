@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography, useMediaQuery } from '@mui/material';
 import Navbar from '../components/LandingPage/Navbar';
 import ProductHeader from '../components/ProductListingPage/ProductHeader';
 import { SWRFetchData } from '../utils/db';
@@ -25,6 +25,8 @@ export default function ProductPage() {
 
   const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`)
   const [types] = SWRFetchData(`${API_URL.PUBLIC}/types`);
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (selectedType?.id === 0) {
@@ -89,7 +91,7 @@ export default function ProductPage() {
         display="flex"
         alignItems="center"
         gap={2}
-        sx={{ maxWidth: '100%', overflowX: 'auto', px: 6, py: 2 }}
+        sx={{ overflowX: 'auto', whiteSpace: 'nowrap', px: 6, py: 2 }}
       >
         <Button
           onClick={() => setSelectedType({ id: 0, name: 'All' })}
@@ -98,6 +100,7 @@ export default function ProductPage() {
             px: 2,
             py: 1,
             borderRadius: 2,
+            minWidth: 150,
             backgroundColor:
               selectedType?.id === 0 ? landingPageSecondaryColor : grey[200],
             color: selectedType?.id === 0 ? 'white' : 'black',
@@ -108,7 +111,7 @@ export default function ProductPage() {
             },
           }}
         >
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" flexDirection={smDown ? 'column' : 'row'} alignItems="center" gap={1} >
             <LucideIcons.ShoppingBasketIcon />
             <Typography>All</Typography>
           </Box>
@@ -124,12 +127,14 @@ export default function ProductPage() {
                 px: 2,
                 py: 1,
                 borderRadius: 2,
+                width: 'fit-content',
                 backgroundColor:
                   selectedType?.id === type.id
                     ? landingPageSecondaryColor
                     : grey[200],
                 color: selectedType?.id === type.id ? 'white' : 'black',
                 boxShadow: 'none',
+                minWidth: 150,
                 '&:hover': {
                   backgroundColor:
                     selectedType?.id === type.id
@@ -138,7 +143,7 @@ export default function ProductPage() {
                 },
               }}
             >
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" flexDirection={smDown ? 'column' : 'row'} alignItems="center" gap={1}>
                 <IconComponent />
                 <Typography>{type.name}</Typography>
               </Box>
