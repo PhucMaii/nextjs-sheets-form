@@ -39,6 +39,8 @@ export const useUpdateExpenseStatus = (
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
 
+  console.log('hook re rendered');
+
   const handleUpdateStatus = async (
     transaction: any,
     newStatus: TRANSACTION_STATUS,
@@ -146,7 +148,7 @@ export const useUpdateExpenseStatus = (
       title="Select Payment Method"
       open={selectPaymentMethod.isOpenModal}
       onClose={() =>
-        setSelectPaymentMethod({ ...selectPaymentMethod, isOpenModal: false })
+        setSelectPaymentMethod((prevState: any) => ({ ...prevState, isOpenModal: false }))
       }
       handleUpdate={(newPaymentMethod: any) => {
         if (selectPaymentMethod.isBulk) {
