@@ -1,45 +1,34 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import emailHandler from '../utils/email';
+import { signUpRequest } from '@/config/email';
 
-type UserForm = {
-  sheetName: string;
-  clientId: string;
-  password: string;
-};
+interface IBody {
+  name: string;
+  email: string;
+  contactNumber: string;
+  deliveryAddress: string;
+}
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const prisma = new PrismaClient();
   if (req.method !== 'POST') {
     return res.status(500).json({ error: 'Only POST method allowed' });
   }
   try {
-    const userData: UserForm = req.body;
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        clientId: userData.clientId,
-      },
-    });
+    const { name, email, contactNumber, deliveryAddress }: IBody = req.body;
 
-    if (existingUser) {
-      return res.status(400).json({ error: 'Client ID Already Existed' });
-    }
+    // Send Email to Admin
+    const template = signUpRequest({ name, email, contactNumber, deliveryAddress });
+    await emailHandler(
+      'maithienphuc0102@gmail.com',
+      'New Client Sign Up Request',
+      'New Client Sign Up Request',
+      template,
+    );
 
-    const password = await hash(userData.password, 12);
-    const newUser = await prisma.user.create({
-      data: {
-        sheetName: userData.sheetName,
-        clientId: userData.clientId,
-        password,
-      } as any,
-    });
-    return res.status(201).json({
-      data: newUser,
-      message: `Register Successfully, Let's Log Back In`,
-    });
+    return res.status(200).json({ message: 'Your Request has been sent successfully' });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: 'Internal Server Error' });

@@ -6,7 +6,11 @@ import { Box, Button, Typography } from '@mui/material';
 import { orange } from '@mui/material/colors';
 import React from 'react';
 
-export default function InvitationSection() {
+interface IProps {
+  setIsOpenSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function InvitationSection({setIsOpenSignUp}: IProps) {
   return (
     <Box
       display="flex"
@@ -44,6 +48,7 @@ export default function InvitationSection() {
           py: 2,
           ':hover': { backgroundColor: orange[800] },
         }}
+        onClick={() => setIsOpenSignUp(true)}
       >
         JOIN US TODAY
       </Button>

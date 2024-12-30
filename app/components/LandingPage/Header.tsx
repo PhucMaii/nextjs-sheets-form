@@ -7,7 +7,11 @@ import { grey } from '@mui/material/colors';
 import Image from 'next/image';
 import React from 'react';
 
-export default function Header() {
+interface IProps {
+  setIsOpenSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function Header({setIsOpenSignUp}: IProps) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   return (
@@ -44,6 +48,7 @@ export default function Header() {
             gap={2}
           >
             <Button
+              onClick={() => setIsOpenSignUp(true)}
               variant="contained"
               sx={{
                 width: 'fit-content',

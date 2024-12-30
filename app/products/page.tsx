@@ -12,10 +12,12 @@ import * as LucideIcons from 'lucide-react';
 import ProductListing from '../components/ProductListingPage/ProductListing';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../admin/components/ErrorComponent';
+import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
 
 export default function ProductPage() {
   const [bestSellerItems, setBestSellerItems] = useState<IItemPreference[]>([]);
   const [displayItems, setDisplayItems] = useState<IItemPreference[]>([]);
+  const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
   const [selectedType, setSelectedType] = useState<
     IProductType | any
   >({ id: 0, name: 'All' });
@@ -81,8 +83,10 @@ export default function ProductPage() {
     }, [debouncedKeywords]);
 
   return (
+    <>
+    <RequestToJoinModal open={isOpenSignUp} onClose={() => setIsOpenSignUp(false)} />
     <Box sx={{pb: 2}}>
-      <Navbar />
+      <Navbar setIsOpenSignUp={setIsOpenSignUp} />
       <Box display="flex" flexDirection="column" gap={2} py={3} px={6}>
         <ProductHeader searchKeywords={searchKeywords} setSearchKeywords={setSearchKeywords} />
       </Box>
@@ -155,7 +159,7 @@ export default function ProductPage() {
       {/* Product Display */}
       <Grid container columnSpacing={2} rowGap={2} width="100%" sx={{my: 2}}>
         {
-          selectedType?.id === 0 ? (
+          selectedType?.id === 0 && bestSellerItems?.length > 0 ? (
             <>
             <Grid item xs={12}>
               <Typography variant="h5" fontWeight="bold" sx={{px: 6}}>Best Sellers</Typography>
@@ -195,5 +199,6 @@ export default function ProductPage() {
         }
       </Grid>
     </Box>
+    </>
   );
 }

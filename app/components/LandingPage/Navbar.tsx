@@ -40,7 +40,11 @@ const tabs = [
   },
 ];
 const drawerWidth = 250;
-export default function Navbar() {
+
+interface IProps {
+  setIsOpenSignUp: any;
+}
+export default function Navbar({setIsOpenSignUp}: IProps) {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
 
@@ -179,18 +183,23 @@ export default function Navbar() {
           );
         })}
       </Box>
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: landingPagePrimaryColor,
-          ':hover': { backgroundColor: landingPageSecondaryColor },
-          px: 2,
-          py: 1,
-          borderRadius: 2,
-        }}
-      >
-        Book an appointment
-      </Button>
+
+      <Box display="flex" alignItems="center" gap={2}>
+        <Button sx={{ color: landingPageSecondaryColor }}>Sign in</Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: landingPagePrimaryColor,
+            ':hover': { backgroundColor: landingPageSecondaryColor },
+            px: 2,
+            py: 1,
+            borderRadius: 2,
+          }}
+          onClick={() => setIsOpenSignUp(true)}
+        >
+          Sign Up
+        </Button>
+      </Box>
     </Box>
   );
 }
