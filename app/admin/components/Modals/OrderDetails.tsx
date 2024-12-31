@@ -7,7 +7,7 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import CloseIcon from '@mui/icons-material/Close';
@@ -19,6 +19,7 @@ import { OrderedItems } from '@/app/utils/type';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
+import AddCustomAmount from './add/AddCustomAmount';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -35,8 +36,13 @@ export default function OrderDetails({
   order,
   handleUpdateItem,
 }: IProps) {
+  const [items, setItems] = useState<OrderedItems[]>(order.items);
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] = useState<boolean>(false);
   const billPrintRef: any = useRef();
-  console.log('ORDER DETAILS RUN');
+
+  useEffect(() => {
+    setItems(order.items);
+  }, [order]);
 
   const handlePrinting = useReactToPrint({
     content: () => billPrintRef.current,
@@ -50,10 +56,13 @@ export default function OrderDetails({
     return quantity;
   }, [order]);
 
-  console.log(order.discount, 'discount');
-
   return (
     <>
+      <AddCustomAmount 
+        open={isOpenAddCustomAmount}
+        onClose={() => setIsOpenAddCustomAmount(false)}
+        setItemList={setItems}
+      />
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />
       </div>
@@ -102,13 +111,22 @@ export default function OrderDetails({
             <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
           </Box>
           <Divider />
-          <Grid container rowGap={4} alignItems="flex-start">
-            <Grid item textAlign="center" xs={12}>
-              <Typography fontWeight="bold" variant="h6">
+          <Grid container rowGap={4} alignItems="center">
+            <Grid item xs={4} />
+            <Grid item xs={4} textAlign="center">
+              <Typography textAlign="center" fontWeight="bold" variant="h6">
                 ORDER
               </Typography>
+            </Grid>
+            <Grid item xs={4} textAlign="right">
+              <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                + Custom Amount
+              </Button>
+            </Grid>
+            <Grid item textAlign="center" xs={12}>
               <OrderDetailsTable
                 order={order}
+                items={items}
                 handleUpdateItem={handleUpdateItem}
               />
             </Grid>

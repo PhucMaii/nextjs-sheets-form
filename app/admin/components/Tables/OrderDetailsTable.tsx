@@ -17,6 +17,7 @@ import EditItemModal from '../Modals/edit/EditOrderItem';
 
 interface IProps {
   order: Order;
+  items: OrderedItems[];
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
@@ -24,7 +25,7 @@ interface IProps {
   ) => Promise<void>;
 }
 
-export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
+export default function OrderDetailsTable({ order, items, handleUpdateItem }: IProps) {
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
   const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
@@ -65,8 +66,8 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {order.items.length > 0 &&
-            order.items.map((item, index) => (
+          {items.length > 0 &&
+            items.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>
                   {mdDown ? (
@@ -106,7 +107,7 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
                           ${(item.prevPrice * item.quantity).toFixed(2)}
                         </Typography>
                       )}
-                    <Typography>${item.totalPrice.toFixed(2)}</Typography>
+                    <Typography>${item?.totalPrice?.toFixed(2) || 0}</Typography>
                   </Box>
                 </TableCell>
 

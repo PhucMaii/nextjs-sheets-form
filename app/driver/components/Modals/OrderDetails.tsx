@@ -111,6 +111,7 @@ export default function OrderDetails({
             </Typography>
             <OrderDetailsTable
               order={order}
+              items={order.items}
               handleUpdateItem={handleUpdateItem}
             />
           </Grid>

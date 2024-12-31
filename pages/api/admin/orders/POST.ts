@@ -186,37 +186,7 @@ export const createOrder = async (
   try {
     const prisma = new PrismaClient();
 
-    // const orderTime = generateCurrentTime();
-
-    // const total = items.reduce((acc: any, item: OrderedItems) => {
-    //   // return acc + item.price * item.quantity;
-    //   if (!acc?.subTotal) {
-    //     acc.subTotal = 0;
-    //   }
-
-    //   if (!acc?.PST) {
-    //     acc.PST = 0;
-    //   }
-
-    //   if (!acc?.GST) {
-    //     acc.GST = 0;
-    //   }
-
-    //   acc.subTotal += item.price * item.quantity;
-
-    //   if (item.inventoryItem.hasPST) {
-    //     acc.PST += item.price * item.quantity * pstRate;
-    //   }
-
-    //   if (item.inventoryItem.hasGST) {
-    //     acc.GST += item.price * item.quantity * gstRate;
-    //   }
-
-    //   return acc;
-    // }, {});
     const total = generateOrderTotalPrice(items);
-
-    console.log({ total });
 
     // initialize order
     const newOrder = await prisma.orders.create({
@@ -251,6 +221,17 @@ export const createOrder = async (
     const allDeletedFifoIds = [];
     const newOrderedItems = [];
     for (const item of items) {
+      // Custom Amount Item
+      if (!item?.inventoryItemId && !item?.inventoryUnitId) {
+        newOrderedItems.push({
+          orderId: newOrder.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        });
+        continue;
+      }
+
       const targetedItem = inventoryItems.find(
         (inventoryItem) => inventoryItem.id === item.inventoryItemId,
       );
