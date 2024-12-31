@@ -5,27 +5,40 @@ import { ModalProps } from "../type";
 import ModalHead from "@/app/lib/ModalHead";
 
 interface IProps extends ModalProps {
-    setItemList: any;
+    setItemList?: any;
+    addCustomAmount?: (customAmount: any) => Promise<void>;
 }
 
-export default function AddCustomAmount({open, onClose, setItemList}: IProps) {
-    const [customAmount, setCustomAmount] = useState<{price: number, description: string}>({
+export default function AddCustomAmount({open, onClose, setItemList, addCustomAmount}: IProps) {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [customAmount, setCustomAmount] = useState<{price: number, name: string, quantity: number}>({
+        name: '',
         price: 0,
-        description: ''
+        quantity: 1,
     });
 
-    const handleAddCustomAmount = () => {
-        setItemList((prevState: any) => [
-        {
-            id: 0,
-            name: customAmount.description,
-            quantity: 1,
-            price: customAmount.price,
-            totalPrice: customAmount.price,
-            availability: true
-        }, ...prevState]);
-        
-        onClose();
+    const handleAddCustomAmount = async () => {
+        if (addCustomAmount) {
+            setIsLoading(true);
+            await addCustomAmount(customAmount);
+            setIsLoading(false);
+            onClose();
+            return;
+        }
+
+        if (setItemList) {
+            setItemList((prevState: any) => [
+            {
+                id: 0,
+                name: customAmount.name,
+                quantity: 1,
+                price: customAmount.price,
+                totalPrice: customAmount.price,
+                availability: true
+            }, ...prevState]);
+            onClose();
+            return;
+        }
     }
 
     return (
@@ -35,7 +48,7 @@ export default function AddCustomAmount({open, onClose, setItemList}: IProps) {
                     heading="Add Custom Amount"
                     buttonLabel="ADD"
                     onClick={handleAddCustomAmount}
-                    buttonProps={{}}
+                    buttonProps={{loading: isLoading}}
                     onClose={onClose}
                 />
 
@@ -52,12 +65,22 @@ export default function AddCustomAmount({open, onClose, setItemList}: IProps) {
                         fullWidth
                     />
 
-                    <Typography>Description</Typography>
+                    <Typography>Name</Typography>
                     <TextField 
-                        label="Description"
-                        value={customAmount.description}
-                        onChange={(e: any) => setCustomAmount((prevState: any) => ({...prevState, description: e.target.value}))}
-                        placeholder="Enter description"
+                        label="Name"
+                        value={customAmount.name}
+                        onChange={(e: any) => setCustomAmount((prevState: any) => ({...prevState, name: e.target.value}))}
+                        placeholder="Enter name"
+                        fullWidth
+                    />
+
+                    <Typography>Quantity</Typography>
+                    <TextField 
+                        label="Quantity"
+                        type="number"
+                        value={customAmount.quantity}
+                        onChange={(e: any) => setCustomAmount((prevState: any) => ({...prevState, quantity: +e.target.value}))}
+                        placeholder="Enter quantity"
                         fullWidth
                     />
                 </Box>

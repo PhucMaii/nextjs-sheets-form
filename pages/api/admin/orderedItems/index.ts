@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
 import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
 import PUT from './PUT';
+import DELETE from './DELETE';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -15,6 +16,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return response;
     }
 
+    if (req.method === 'DELETE') {
+      const response = await DELETE(req, res);
+      return response;
+    }
+    
     return res.status(404).json({ error: 'Your method is not supported' });
   } catch (error) {
     console.log('Internal Server Error: ', error);

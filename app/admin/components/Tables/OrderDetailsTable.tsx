@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   IconButton,
   Table,
@@ -14,6 +15,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Order } from '../../orders/page';
 import { OrderedItems } from '@/app/utils/type';
 import EditItemModal from '../Modals/edit/EditOrderItem';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteModal from '../Modals/delete/DeleteModal';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface IProps {
   order: Order;
@@ -24,9 +29,14 @@ interface IProps {
     updatedItem: OrderedItems,
   ) => Promise<void>;
   abilityToEdit?: boolean;
+  showNotification?: (type: AlertColor, message: string) => void;
 }
 
-export default function OrderDetailsTable({ order, items, handleUpdateItem, abilityToEdit }: IProps) {
+export default function OrderDetailsTable({ order, items, handleUpdateItem, abilityToEdit, showNotification }: IProps) {
+  const [deleteModalProps, setDeleteModalProps] = useState<any>({
+    open: false,
+    targetObj: {},
+  });
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
   const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
@@ -44,8 +54,32 @@ export default function OrderDetailsTable({ order, items, handleUpdateItem, abil
 
   const mdDown = useMediaQuery((them: any) => them.breakpoints.down('md'));
 
+  const handleDeleteItem = async (targetObj: OrderedItems) => {
+    if (!showNotification) return;
+    try {
+      const response = await axios.delete(`${API_URL.ADMIN}/orderedItems?id=${targetObj.id}`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  }
+
   return (
     <>
+      <DeleteModal 
+        targetObj={deleteModalProps.targetObj}
+        handleDelete={handleDeleteItem}
+        open={deleteModalProps.open}
+        handleCloseModal={() => setDeleteModalProps({ open: false, targetObj: {} })}
+        showTargetObj={deleteModalProps.targetObj?.name}
+      />
       <EditItemModal
         open={isOpenEditModal}
         onClose={() => {
@@ -114,14 +148,20 @@ export default function OrderDetailsTable({ order, items, handleUpdateItem, abil
 
                 {!mdDown && abilityToEdit && (
                   <TableCell>
-                    <IconButton
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setUpdatedItem(item);
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <IconButton
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setUpdatedItem(item);
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      {!item?.inventoryItemId && showNotification &&
+                        <IconButton color="error" onClick={() => setDeleteModalProps({ open: true, targetObj: item })}>
+                          <DeleteIcon />
+                        </IconButton>}
+                    </Box>
                   </TableCell>
                 )}
               </TableRow>

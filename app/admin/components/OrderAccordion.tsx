@@ -361,6 +361,7 @@ const OrderAccordion = ({
           onClose={() => setIsOpenDetails(false)}
           order={order}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       <ShadowSection>

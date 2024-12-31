@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -20,6 +21,8 @@ import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
 import AddCustomAmount from './add/AddCustomAmount';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -28,6 +31,7 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function OrderDetails({
@@ -35,6 +39,7 @@ export default function OrderDetails({
   onClose,
   order,
   handleUpdateItem,
+  showNotification,
 }: IProps) {
   const [items, setItems] = useState<OrderedItems[]>(order.items);
   const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] = useState<boolean>(false);
@@ -56,12 +61,31 @@ export default function OrderDetails({
     return quantity;
   }, [order]);
 
+  const handleAddCustomAmount = async (customAmount: any) => {
+    try {
+      const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
+        orderId: order.id,
+        customAmount
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  }
+
   return (
     <>
       <AddCustomAmount 
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
-        setItemList={setItems}
+        addCustomAmount={handleAddCustomAmount}
       />
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />
@@ -129,6 +153,7 @@ export default function OrderDetails({
                 items={items}
                 handleUpdateItem={handleUpdateItem}
                 abilityToEdit
+                showNotification={showNotification}
               />
             </Grid>
             <Grid
