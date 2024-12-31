@@ -22,9 +22,10 @@ interface IProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  abilityToEdit?: boolean;
 }
 
-export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
+export default function OrderDetailsTable({ order, handleUpdateItem, abilityToEdit }: IProps) {
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
   const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
@@ -69,7 +70,7 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
             order.items.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  {mdDown ? (
+                  {mdDown && abilityToEdit ? (
                     <>
                       <Box
                         display="flex"
@@ -110,7 +111,7 @@ export default function OrderDetailsTable({ order, handleUpdateItem }: IProps) {
                   </Box>
                 </TableCell>
 
-                {!mdDown && (
+                {!mdDown && abilityToEdit && (
                   <TableCell>
                     <IconButton
                       onClick={() => {

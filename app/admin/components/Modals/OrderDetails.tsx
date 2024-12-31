@@ -110,6 +110,7 @@ export default function OrderDetails({
               <OrderDetailsTable
                 order={order}
                 handleUpdateItem={handleUpdateItem}
+                abilityToEdit
               />
             </Grid>
             <Grid
