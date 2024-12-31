@@ -28,6 +28,7 @@ import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 
 export default function Transactions() {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  const [baseTransactions, setBaseTransactions] = useState<IExpense[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
@@ -60,7 +61,7 @@ export default function Transactions() {
   useEffect(() => {
     if (transactions) {
       setIsLoading(false);
-      setDisplayTransactions(transactions?.data || []);
+      initializeTransactions();
     } else {
       setIsLoading(true);
       setSelectedExpenses([]);
@@ -71,28 +72,27 @@ export default function Transactions() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newTransactions = transactions?.data.filter(
-        (transaction: any) => {
-          return (
-            transaction.invoice === debouncedKeywords ||
-            (transaction?.vendors ? transaction?.vendors[0]?.vendor?.name
+      const newTransactions = baseTransactions.filter((transaction: any) => {
+        return (
+          transaction.invoice === debouncedKeywords ||
+          (transaction?.vendors
+            ? transaction?.vendors[0]?.vendor?.name
                 ?.toLowerCase()
-                ?.includes(debouncedKeywords.toLowerCase()) : false
-            ) ||
-            transaction.spentBy
-              .toLowerCase()
-              .includes(debouncedKeywords.toLowerCase()) ||
-            transaction.description
-              .toLowerCase()
-              .includes(debouncedKeywords.toLowerCase())
-          );
-        },
-      );
+                ?.includes(debouncedKeywords.toLowerCase())
+            : false) ||
+          transaction.spentBy
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
+          transaction.description
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        );
+      });
       setDisplayTransactions(newTransactions);
     } else {
-      setDisplayTransactions(transactions?.data || []);
+      setDisplayTransactions(baseTransactions);
     }
-  }, [debouncedKeywords]);
+  }, [debouncedKeywords, baseTransactions]);
 
   useEffect(() => {
     if (adminsAndDriversRes) {
@@ -108,6 +108,11 @@ export default function Transactions() {
   //   const users: any = await getAdminsAndDrivers(showNotification);
   //   setAdminsAndDrivers(users);
   // };
+
+  const initializeTransactions = () => {
+    setBaseTransactions(transactions?.data || []);
+    setDisplayTransactions(transactions?.data || []);
+  };
 
   const handleSelectExpense = (e: any, targetExpense: IExpense) => {
     e.preventDefault();
@@ -132,49 +137,19 @@ export default function Transactions() {
       return;
     }
 
-    if (selectedExpenses.length === transactions?.data.length) {
+    if (selectedExpenses.length === baseTransactions.length) {
       setSelectedExpenses([]);
     } else {
-      setSelectedExpenses(transactions?.data);
+      setSelectedExpenses(baseTransactions);
     }
   };
 
   return (
     <Sidebar>
       {UpdateExpenseStatusComp}
-      {/* <SingleFieldEdit
-        title="Select Payment Method"
-        open={selectPaymentMethod.isOpenModal}
-        onClose={() =>
-          setSelectPaymentMethod({ ...selectPaymentMethod, isOpenModal: false })
-        }
-        handleUpdate={(newPaymentMethod: any) => {
-          if (selectPaymentMethod.isBulk) {
-            handleBulkUpdateStatus(
-              selectPaymentMethod.updatedStatus,
-              newPaymentMethod,
-            );
-          } else {
-            handleUpdateStatus(
-              selectPaymentMethod.selectedTransaction,
-              selectPaymentMethod.updatedStatus,
-              newPaymentMethod,
-            );
-          }
-        }}
-        renderField="name"
-        inputLabel="Payment Method"
-        menuList={paymentMethods?.data || []}
-        defaultValue={otherPaymentMethodId}
-      /> */}
       <LoadingModal open={isUpdating} />
       {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
-        {/* <AddExpense
-          open={isOpenAddExpense}
-          onClose={() => setIsOpenAddExpense(false)}
-          showNotification={showNotification}
-        /> */}
         {AddExpenseModal}
         <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
           Transactions
@@ -227,7 +202,7 @@ export default function Transactions() {
             transactions={displayTransactions}
             handleUpdateStatus={handleUpdateStatus}
             showNotification={showNotification}
-            selectedExpense={selectedExpenses}
+            selectedExpense={selectedExpenses || []}
             handleSelectExpense={handleSelectExpense}
             handleSelectAll={handleSelectAll}
             adminsAndDrivers={adminsAndDrivers}

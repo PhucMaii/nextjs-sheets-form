@@ -13,6 +13,7 @@ import ProductListing from '../components/ProductListingPage/ProductListing';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../admin/components/ErrorComponent';
 import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
+import NavbarWrapper from '../lib/NavbarWrapper';
 
 export default function ProductPage() {
   const [bestSellerItems, setBestSellerItems] = useState<IItemPreference[]>([]);
@@ -81,6 +82,15 @@ export default function ProductPage() {
     }
     
     }, [debouncedKeywords]);
+
+  return (
+    <>
+      <RequestToJoinModal open={isOpenSignUp} onClose={() => setIsOpenSignUp(false)} />
+      <NavbarWrapper setIsOpenSignUp={setIsOpenSignUp}>
+          <ErrorComponent errorText="This page is under construction" />
+      </NavbarWrapper>
+    </> 
+  )
 
   return (
     <>

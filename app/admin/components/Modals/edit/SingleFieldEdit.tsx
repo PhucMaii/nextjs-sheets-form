@@ -7,7 +7,7 @@ import {
   Select,
   TextField,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 
@@ -22,7 +22,7 @@ interface IProps {
   defaultValue?: any;
 }
 
-export default function SingleFieldEdit({
+const SingleFieldEdit = ({
   open,
   onClose,
   handleUpdate,
@@ -31,7 +31,8 @@ export default function SingleFieldEdit({
   renderField,
   menuList,
   defaultValue,
-}: IProps) {
+}: IProps) => {
+  console.log('SINGLE FIELD EDIT RE RENDERED');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [value, setValue] = useState<any>(defaultValue ? defaultValue : null);
 
@@ -98,4 +99,12 @@ export default function SingleFieldEdit({
       </BoxModal>
     </Modal>
   );
-}
+};
+
+export default memo(SingleFieldEdit, (prev, next) => {
+  return (
+    prev.title === next.title &&
+    prev.inputLabel === next.inputLabel &&
+    prev.renderField === next.renderField
+  );
+});

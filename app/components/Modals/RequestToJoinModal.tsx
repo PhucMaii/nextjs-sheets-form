@@ -50,10 +50,10 @@ export default function RequestToJoinModal({open, onClose}: IProps ) {
   return (
     <>
     {NotificationComp}
-    <Modal sx={{maxHeight: '80vh', overflow: 'scroll'}} open={open} onClose={onClose}>
-        <BoxModal>
+    <Modal open={open} onClose={onClose}>
+        <BoxModal sx={{maxHeight: '80vh', overflow: 'scroll'}}>
             <Box display="flex" flexDirection="column" gap={2} justifyContent="center">
-                <Typography textAlign="center" variant="h3">Welcome To Supreme Sprouts !</Typography>
+                <Typography textAlign="center" variant="h3">Welcome To Supreme Sprouts! 👋</Typography>
                 <Typography textAlign="center" variant="h5" fontWeight="normal">
                     Here Is Your First Step To Grow Your Business
                 </Typography>

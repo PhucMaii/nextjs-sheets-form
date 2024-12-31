@@ -21,6 +21,7 @@ import {
 } from '@/constant/landingPage';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import { CircleUserIcon, HomeIcon, ShoppingBagIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const tabs = [
   {
@@ -47,6 +48,7 @@ interface IProps {
 export default function Navbar({setIsOpenSignUp}: IProps) {
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     setSelectedTab(window.location.pathname);
@@ -128,6 +130,27 @@ export default function Navbar({setIsOpenSignUp}: IProps) {
                 );
               })}
             </List>
+
+            <Box display="flex" flexDirection="column" gap={1} sx={{ m: 2, mt: 4 }}>
+              <Button
+                onClick={() =>
+                {}
+                }
+                fullWidth
+                sx={{ color: landingPageSecondaryColor }}
+              >
+                Sign in
+              </Button>
+              <Button variant="contained" sx={{
+            backgroundColor: landingPagePrimaryColor,
+            ':hover': { backgroundColor: landingPageSecondaryColor },
+            px: 2,
+            py: 1,
+            borderRadius: 2,
+          }} onClick={() => setIsOpenSignUp(true)}>
+                Sign up
+              </Button>
+            </Box>
           </Drawer>
           {/* <Box width="100%">
             <Box
@@ -185,7 +208,7 @@ export default function Navbar({setIsOpenSignUp}: IProps) {
       </Box>
 
       <Box display="flex" alignItems="center" gap={2}>
-        <Button sx={{ color: landingPageSecondaryColor }}>Sign in</Button>
+        <Button onClick={() => router.push('/auth/login')} sx={{ color: landingPageSecondaryColor }}>Sign in</Button>
         <Button
           variant="contained"
           sx={{

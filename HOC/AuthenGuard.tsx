@@ -54,7 +54,7 @@ export default function AuthenGuard({ children }: any) {
       router.push('/');
     } else if (
       user &&
-      (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
+      !pathname?.startsWith('/user') &&
       user.data.role === 'client'
     ) {
       router.push('/user/overview');
