@@ -73,6 +73,7 @@ export const generateMonthRange = () => {
   const firstDayOfNextMonth = new Date(year, month + 1, 1);
   const lastDayOfThisMonth = new Date(firstDayOfNextMonth);
   lastDayOfThisMonth.setDate(0);
+  lastDayOfThisMonth.setHours(23, 59, 59);
 
   return [firstDayOfThisMonth, lastDayOfThisMonth];
 };
