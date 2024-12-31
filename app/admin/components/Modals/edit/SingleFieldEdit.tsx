@@ -32,7 +32,7 @@ const SingleFieldEdit = ({
   menuList,
   defaultValue,
 }: IProps) => {
-  console.log('SINGLE FIELD EDIT RE RENDERED')
+  console.log('SINGLE FIELD EDIT RE RENDERED');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [value, setValue] = useState<any>(defaultValue ? defaultValue : null);
 
@@ -99,12 +99,12 @@ const SingleFieldEdit = ({
       </BoxModal>
     </Modal>
   );
-}
+};
 
 export default memo(SingleFieldEdit, (prev, next) => {
   return (
     prev.title === next.title &&
     prev.inputLabel === next.inputLabel &&
     prev.renderField === next.renderField
-  )
+  );
 });

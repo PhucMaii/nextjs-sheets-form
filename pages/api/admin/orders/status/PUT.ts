@@ -134,7 +134,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (!order?.items) {
           continue;
         }
-        
 
         // Skip order with VOID status because updated status is VOID
         if (order.status === ORDER_STATUS.VOID) {
@@ -148,7 +147,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           if (!item?.fifo || !item?.inventoryUnit) {
             continue;
           }
-
 
           // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
           await restockInventoryItem(

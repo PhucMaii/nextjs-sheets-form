@@ -67,10 +67,12 @@ const BillPrintModal = ({
     setItemManifest,
     nonVoidOrders,
     isLoading,
-    manifestData
+    manifestData,
   } = useManifest(orderList, selectedRoutes, day, showNotification);
 
-  const routesLength = manifestData.itemManifest['-1'] ? routes.length + 1 : routes.length;
+  const routesLength = manifestData.itemManifest['-1']
+    ? routes.length + 1
+    : routes.length;
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -115,7 +117,7 @@ const BillPrintModal = ({
     } else {
       const newSelectRoutes: any = [...routes];
       if (manifestData.itemManifest['-1']) {
-        newSelectRoutes.push({id: '-1', name: 'No Route Orders'});
+        newSelectRoutes.push({ id: '-1', name: 'No Route Orders' });
       }
       setSelectedRoutes(newSelectRoutes);
     }
@@ -281,21 +283,27 @@ const BillPrintModal = ({
                       );
                     })}
 
-                    {
-                      Object.keys(manifestData.itemManifest).includes('-1') && manifestData.itemManifest[-1] && (
+                    {Object.keys(manifestData.itemManifest).includes('-1') &&
+                      manifestData.itemManifest[-1] && (
                         <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={selectedRoutes.some(
-                              (baseRoute: IRoutes) => manifestData.itemManifest['-1'].route.id === baseRoute.id,
-                            )}
-                            onChange={(e: any) => handleSelectRoute(e, manifestData.itemManifest['-1'].route)}
-                          />
-                        }
-                        label={manifestData.itemManifest['-1'].route.name}
-                      />
-                      )
-                    }
+                          control={
+                            <Checkbox
+                              checked={selectedRoutes.some(
+                                (baseRoute: IRoutes) =>
+                                  manifestData.itemManifest['-1'].route.id ===
+                                  baseRoute.id,
+                              )}
+                              onChange={(e: any) =>
+                                handleSelectRoute(
+                                  e,
+                                  manifestData.itemManifest['-1'].route,
+                                )
+                              }
+                            />
+                          }
+                          label={manifestData.itemManifest['-1'].route.name}
+                        />
+                      )}
                   </Box>
                 </>
               ) : (

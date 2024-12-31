@@ -148,7 +148,10 @@ export const useUpdateExpenseStatus = (
       title="Select Payment Method"
       open={selectPaymentMethod.isOpenModal}
       onClose={() =>
-        setSelectPaymentMethod((prevState: any) => ({ ...prevState, isOpenModal: false }))
+        setSelectPaymentMethod((prevState: any) => ({
+          ...prevState,
+          isOpenModal: false,
+        }))
       }
       handleUpdate={(newPaymentMethod: any) => {
         if (selectPaymentMethod.isBulk) {

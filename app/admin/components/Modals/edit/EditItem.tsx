@@ -36,7 +36,11 @@ export enum UPDATE_OPTION {
   ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-const EditItem = ({ targetItem, handleUpdateItem, showNotification }: IProps) => {
+const EditItem = ({
+  targetItem,
+  handleUpdateItem,
+  showNotification,
+}: IProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedField, setUpdatedField] = useState<string[]>([]);

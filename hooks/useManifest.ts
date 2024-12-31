@@ -78,10 +78,9 @@ const useManifest = (
   const handleSelectRoute = () => {
     const newOrderPrint = manifestData.orderPrint.filter((order: any) => {
       return selectedRouteIds.includes(order.routeId);
-    }
-    );
+    });
 
-    console.log({selectedRouteIds}, 'newOrderPrint');
+    console.log({ selectedRouteIds }, 'newOrderPrint');
 
     setOrderPrint(newOrderPrint);
 
