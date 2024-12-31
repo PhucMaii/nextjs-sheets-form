@@ -133,12 +133,12 @@ export const updateSingleInventoryItem = async (
           id: orderId,
         },
       });
-  
+
       if (!order) {
         console.error('Conflict Order Not Found');
         return;
       }
-  
+
       if (!order?.isAffectInventory) {
         console.log('Inventory Avoided');
         return;
@@ -158,8 +158,16 @@ export const updateSingleInventoryItem = async (
     }
 
     const updatedQuantity =
-      lastUpdatedFifo.quantity - (newQuantity * unit.ratio) + (previousQuantity * unit.ratio);
-      console.log({updatedQuantity, fifo, newQuantity, previousQuantity, ratio: unit.ratio});
+      lastUpdatedFifo.quantity -
+      newQuantity * unit.ratio +
+      previousQuantity * unit.ratio;
+    console.log({
+      updatedQuantity,
+      fifo,
+      newQuantity,
+      previousQuantity,
+      ratio: unit.ratio,
+    });
     await prisma.fifo.update({
       where: {
         id: fifo.id,

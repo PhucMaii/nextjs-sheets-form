@@ -128,6 +128,7 @@ export default function OrderDetails({
                 order={order}
                 items={items}
                 handleUpdateItem={handleUpdateItem}
+                abilityToEdit
               />
             </Grid>
             <Grid

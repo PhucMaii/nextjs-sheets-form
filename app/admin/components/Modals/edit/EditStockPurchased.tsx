@@ -689,7 +689,7 @@ const EditStockPurchased = ({
 
             {purchasedItems.length > 0 &&
               purchasedItems.map((item: any, index) => {
-                const disabledItem = item?.fifo?.orderedItems?.length > 1;
+                const disabledItem = item?.fifo?._count?.orderedItems > 1;
                 return (
                   <Grid container spacing={1} key={index}>
                     <Grid item xs={12} fontWeight="bold">

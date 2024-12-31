@@ -46,9 +46,8 @@ const EditReportOrder = ({
 }: PropTypes) => {
   // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
-  const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] = useState<boolean>(
-    false,
-  )
+  const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] =
+    useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [itemList, setItemList] = useState<Item[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
@@ -62,7 +61,11 @@ const EditReportOrder = ({
 
   useEffect(() => {
     if (order) {
-      setOrderData(() => ({deliveryDate: order.deliveryDate, status: order.status, isAffectInventory: order.isAffectInventory}));
+      setOrderData(() => ({
+        deliveryDate: order.deliveryDate,
+        status: order.status,
+        isAffectInventory: order.isAffectInventory,
+      }));
       setItemList(order.items);
       // setUpdatedDate(order.deliveryDate);
       // setStatus(order.status);
@@ -71,7 +74,10 @@ const EditReportOrder = ({
 
   const handleDateChange = (e: any) => {
     const formattedDate: string = formatDateChanged(e);
-    setOrderData((prevState: any) => ({...prevState, deliveryDate: formattedDate}));
+    setOrderData((prevState: any) => ({
+      ...prevState,
+      deliveryDate: formattedDate,
+    }));
   };
 
   const handleChangeItem = (e: any, targetItem: Item, keyChange: string) => {
@@ -106,11 +112,17 @@ const EditReportOrder = ({
   const handleAvoidInventory = async (e: any) => {
     setIsUpdatingAvoidInventory(true);
     try {
-      setOrderData((prevState: any) => ({...prevState, isAffectInventory: e.target.checked}));
-      const response = await axios.put(`${API_URL.ADMIN}/orders/isAffectInventory`, {
-        id: order.id,
+      setOrderData((prevState: any) => ({
+        ...prevState,
         isAffectInventory: e.target.checked,
-      });
+      }));
+      const response = await axios.put(
+        `${API_URL.ADMIN}/orders/isAffectInventory`,
+        {
+          id: order.id,
+          isAffectInventory: e.target.checked,
+        },
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -128,7 +140,7 @@ const EditReportOrder = ({
       );
       setIsUpdatingAvoidInventory(false);
     }
-  }
+  };
 
   const handleUpdateItems = async () => {
     try {
@@ -162,7 +174,10 @@ const EditReportOrder = ({
   const handleUpdateOrder = async () => {
     try {
       setIsSubmitting(true);
-      if (orderData.deliveryDate !== order.deliveryDate || orderData.status !== order.status) {
+      if (
+        orderData.deliveryDate !== order.deliveryDate ||
+        orderData.status !== order.status
+      ) {
         const orderUpdateResponse = await axios.put(API_URL.ORDER, {
           orderId: order.id,
           deliveryDate: orderData.deliveryDate,
@@ -210,7 +225,17 @@ const EditReportOrder = ({
             alignItems="center"
           >
             <Typography variant="h4">Edit Order {order.id}</Typography>
-            <FormControlLabel control={<Switch checked={orderData?.isAffectInventory} onChange={handleAvoidInventory} />} label={isUpdatingAvoidInventory ? "Updating..." : "Affect Inventory"} />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={orderData?.isAffectInventory}
+                  onChange={handleAvoidInventory}
+                />
+              }
+              label={
+                isUpdatingAvoidInventory ? 'Updating...' : 'Affect Inventory'
+              }
+            />
           </Box>
           <Divider />
           <Box overflow="auto" maxHeight="70vh">
@@ -244,7 +269,12 @@ const EditReportOrder = ({
                     labelId="select-status"
                     value={orderData.status}
                     label="Status"
-                    onChange={(e) => setOrderData((prevState: any) => ({ ...prevState, status: e.target.value as ORDER_STATUS}))}
+                    onChange={(e) =>
+                      setOrderData((prevState: any) => ({
+                        ...prevState,
+                        status: e.target.value as ORDER_STATUS,
+                      }))
+                    }
                   >
                     <MenuItem value={ORDER_STATUS.COMPLETED}>
                       Completed

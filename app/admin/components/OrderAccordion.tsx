@@ -115,10 +115,13 @@ const OrderAccordion = ({
   const handleAvoidInventory = async (e: any) => {
     setIsLoading(true);
     try {
-      const response = await axios.put(`${API_URL.ADMIN}/orders/isAffectInventory`, {
-        id: order.id,
-        isAffectInventory: e.target.checked,
-      });
+      const response = await axios.put(
+        `${API_URL.ADMIN}/orders/isAffectInventory`,
+        {
+          id: order.id,
+          isAffectInventory: e.target.checked,
+        },
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -136,7 +139,7 @@ const OrderAccordion = ({
       );
       setIsLoading(false);
     }
-  }
+  };
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -239,10 +242,15 @@ const OrderAccordion = ({
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem>
-          <FormControlLabel 
-            control={<Switch checked={order?.isAffectInventory} onChange={handleAvoidInventory}/>} 
-            label="Affect Inventory" 
-            labelPlacement='end' 
+          <FormControlLabel
+            control={
+              <Switch
+                checked={order?.isAffectInventory}
+                onChange={handleAvoidInventory}
+              />
+            }
+            label="Affect Inventory"
+            labelPlacement="end"
           />
         </MenuItem>
         <Divider />
@@ -273,9 +281,9 @@ const OrderAccordion = ({
         >
           Delete
         </MenuItem>
-        
+
         <Divider />
-        
+
         <MenuItem
           disabled={
             isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
@@ -312,7 +320,7 @@ const OrderAccordion = ({
 
   return (
     <>
-      <LoadingModal open={isLoading}/>
+      <LoadingModal open={isLoading} />
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={componentRef} />
       </div>
@@ -409,7 +417,7 @@ const OrderAccordion = ({
             </Box>
           </Grid>
           <Grid item xs={12} md={2.5} textAlign="right">
-              {actions}
+            {actions}
           </Grid>
           <Grid item xs={6}>
             <StatusText text={statusText.text} type={statusText.type} />

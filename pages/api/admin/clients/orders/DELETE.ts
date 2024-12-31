@@ -60,7 +60,7 @@ export default async function DELETE(
               inventoryUnit: true,
             },
           },
-        }
+        },
       });
 
       if (!existingOrder) {
@@ -70,7 +70,12 @@ export default async function DELETE(
       }
 
       for (const item of existingOrder.items) {
-        if (item?.fifo && item?.inventoryUnit && existingOrder.status !== ORDER_STATUS.VOID && item.quantity > 0) {
+        if (
+          item?.fifo &&
+          item?.inventoryUnit &&
+          existingOrder.status !== ORDER_STATUS.VOID &&
+          item.quantity > 0
+        ) {
           await restockInventoryItem(
             Number(orderId),
             item.fifo,
@@ -79,7 +84,7 @@ export default async function DELETE(
           );
         }
       }
-      
+
       await prisma.orders.delete({
         where: {
           id: Number(orderId),

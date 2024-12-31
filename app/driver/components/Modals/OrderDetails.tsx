@@ -32,6 +32,7 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  abilityToEdit: boolean;
 }
 
 export default function OrderDetails({
@@ -41,6 +42,7 @@ export default function OrderDetails({
   totalQuantity,
   handleUpdateStatus,
   handleUpdateItem,
+  abilityToEdit,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -113,6 +115,7 @@ export default function OrderDetails({
               order={order}
               items={order.items}
               handleUpdateItem={handleUpdateItem}
+              abilityToEdit={abilityToEdit}
             />
           </Grid>
           <Grid
@@ -134,7 +137,7 @@ export default function OrderDetails({
               </Typography>
             </Grid>
           </Grid>
-          <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
+          {abilityToEdit && <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={6}>
                 <LoadingButton
@@ -158,7 +161,7 @@ export default function OrderDetails({
                 </LoadingButton>
               </Grid>
             </Grid>
-          </Box>
+          </Box>}
         </Grid>
       </BoxModal>
     </Modal>

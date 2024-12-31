@@ -11,6 +11,12 @@ interface IQuery {
   type?: VIEW_TYPE;
 }
 
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+};
+
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
@@ -47,8 +53,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             include: {
               inventoryUnit: true,
               fifo: {
-                include: {
-                  orderedItems: true,
+                select: {
+                  _count: {
+                    select: {
+                      orderedItems: true,
+                    },
+                  },
                 },
               },
             },
@@ -99,8 +109,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             inventoryUnit: true,
             fifo: {
-              include: {
-                orderedItems: true,
+              select: {
+                _count: {
+                  select: {
+                    orderedItems: true,
+                  },
+                },
               },
             },
           },
@@ -135,8 +149,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                     include: {
                       inventoryUnit: true,
                       fifo: {
-                        include: {
-                          orderedItems: true,
+                        select: {
+                          _count: {
+                            select: {
+                              orderedItems: true,
+                            },
+                          },
                         },
                       },
                     },
