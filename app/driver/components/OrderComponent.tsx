@@ -42,6 +42,13 @@ export default function OrderComponent({
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
+  
+  const abilityToEdit = useMemo(() => {
+    const today = new Date();
+    const deliveryDate = new Date(order.deliveryDate);
+
+    return today.getDate() === deliveryDate.getDate() && today.getMonth() === deliveryDate.getMonth() && today.getFullYear() === deliveryDate.getFullYear();
+  }, [order]);
 
   const statusText = {
     text: order.status,
@@ -94,6 +101,7 @@ export default function OrderComponent({
         totalQuantity={totalQuantity}
         handleUpdateStatus={handleUpdateStatus}
         handleUpdateItem={handleUpdateItem}
+        abilityToEdit={abilityToEdit}
       />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={1}>
@@ -105,7 +113,7 @@ export default function OrderComponent({
           <StatusText text={statusText.text} type={statusText.type} />
         </Grid>
         <Grid item xs={6} textAlign="right">
-          <Box
+          {abilityToEdit && <Box
             display="flex"
             justifyContent="flex-end"
             alignItems="center"
@@ -161,7 +169,7 @@ export default function OrderComponent({
                 <CreditScoreIcon />
               </Fab>
             )}
-          </Box>
+          </Box>}
         </Grid>
         <Grid item xs={6}>
           <Typography variant="subtitle1">#{order.id}</Typography>
