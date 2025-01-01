@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/track-inventory",
+      "schedule": "0 5 * * *"
+    }
+  ],
   "functions": {
     "pages/api/**/*": {
       "maxDuration": 300
