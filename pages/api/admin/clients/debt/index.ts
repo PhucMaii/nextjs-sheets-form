@@ -6,6 +6,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   userId?: string;
   endMonth?: string;
+  endYear?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -17,9 +18,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const prisma = new PrismaClient();
 
-    const { userId, endMonth }: IQuery = req.query;
+    const { userId, endMonth, endYear }: IQuery = req.query;
+    console.log(endMonth, 'end month');
 
-    if (!userId || !endMonth) {
+    if (!userId || !endMonth || !endYear) {
       return res.status(404).json({
         error: 'Parameters are missing',
       });
@@ -42,7 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Group order by mm/yyyy
-    const debtOrdersByMonth = groupOrderByMMYYYY(incompletedOrders, endMonth);
+    const debtOrdersByMonth = groupOrderByMMYYYY(incompletedOrders, endMonth, endYear);
 
     return res.status(200).json({
       data: debtOrdersByMonth,
@@ -58,13 +60,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-export const groupOrderByMMYYYY = (orders: Orders[], endDate: string) => {
-  const endMonth = endDate.split('/')[0];
+export const groupOrderByMMYYYY = (orders: Orders[], endMonth: string, endYear: string) => {
   const debtOrdersByMonth = orders.reduce((acc: any, order: Orders) => {
     const splitDeliveryDate = order.deliveryDate.split('/');
+    if (Number(splitDeliveryDate[2]) > Number(endYear)) {
+      return acc;
+    }
+
     if (Number(splitDeliveryDate[0]) > Number(endMonth)) {
       return acc;
     }
+
     // key is mm/yyyy
     const key = `${splitDeliveryDate[0]}/${splitDeliveryDate[2]}`;
 
@@ -72,8 +78,11 @@ export const groupOrderByMMYYYY = (orders: Orders[], endDate: string) => {
       acc[key] = 0;
     }
 
+    console.log(order.deliveryDate, 'order.deliveryDate');
     acc[key] = acc[key] + order.totalPrice;
     return acc;
   }, {});
+
+  console.log(debtOrdersByMonth, 'debtOrdersByMonth');
   return debtOrdersByMonth;
 };

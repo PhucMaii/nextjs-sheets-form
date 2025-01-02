@@ -29,11 +29,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const formattedStartDate = normalizeDate(new Date(startDate));
     const formattedEndDate = normalizeDate(new Date(endDate));
+    console.log({ formattedStartDate, formattedEndDate, startDate, endDate });
 
     const listOfDateString = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
     );
+
+    console.log(listOfDateString, 'listOfDateString');
 
     if (!id || Number(id) <= 0) {
       const expenses = await prisma.expense.findMany({
@@ -171,7 +174,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
 
       expenses = vendor.expense.map((expense: any) => expense.expense);
-      console.log(expenses, 'expenses');
     }
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);

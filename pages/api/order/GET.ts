@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
+import { normalizeDate } from '../utils/date';
 
 interface IQuery {
   startDate?: string;
@@ -43,8 +44,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ error: 'User Not Found' });
     }
 
-    const formattedStartDate = new Date(startDate);
-    const formattedEndDate = new Date(endDate);
+    const formattedStartDate = normalizeDate(new Date(startDate));
+    const formattedEndDate = normalizeDate(new Date(endDate));
 
     // formattedEndDate.setDate(formattedEndDate.getDate() + 1);
 

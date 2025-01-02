@@ -73,7 +73,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Group order by mm/yyyy
     const endMonth = YYYYMMDDFormat(normalizedEndDate);
-    const debtOrders = groupOrderByMMYYYY(incompletedOrders, endMonth);
+    const debtOrders = groupOrderByMMYYYY(incompletedOrders, endMonth.split('/')[0], endMonth.split('/')[2]);
     const balanceDue = calculateTotalPrice(debtOrders);
     const debtData = { ...debtOrders, 'Balance Due': balanceDue };
 
