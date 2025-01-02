@@ -91,7 +91,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return dates.slice(0, dates.length - 1);
+  return dates;
 };
 
 export const getWCODDay = (date: string) => {
