@@ -87,3 +87,22 @@ export const generate7DaysBefore = (deliveryDate: string) => {
 
   return dayList;
 };
+
+export const getTodayDate = (dateStyle: "short" | "long" | "full" | "medium" | undefined = 'short', timeStyle: "short" | "long" = 'long') => {
+  const pstDate = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    dateStyle,
+    timeStyle,
+    // timeStyle,
+  }).format(new Date());
+
+  const date = pstDate.split(',')[0];
+  const dateSplitted = date.split('/');
+
+  const month = dateSplitted[0].padStart(2, '0');
+  const day = dateSplitted[1].padStart(2, '0');
+  const year = dateSplitted[2]
+
+
+  return {date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1]};
+}

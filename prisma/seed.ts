@@ -49,11 +49,6 @@ const prisma = new PrismaClient();
 // };
 
 async function main() {
-  await prisma.orders.updateMany({
-    data: {
-      isAffectInventory: true,
-    },
-  });
   // const allScheduledOrderedItemsHasNoInventory = await prisma.orderedItems.findMany({
   //   where: {
   //     scheduledOrderId: {
@@ -294,6 +289,19 @@ async function main() {
   //     data: newItems,
   //   });
   // }
+
+  const orderedItems = await prisma.orderedItems.findMany({
+    where: {
+        quantity: {
+            gt: 0
+        },
+        Orders: {
+            deliveryDate: '12/09/2024'
+        }
+    }
+  });
+
+  console.log(orderedItems.length)
 }
 
 main()

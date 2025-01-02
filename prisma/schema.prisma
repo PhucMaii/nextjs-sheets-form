@@ -273,6 +273,8 @@ model ItemPreference {
   image        String
   description  String
   isBestSeller Boolean
+  createdAt    String?
+  createdBy    String?
 
   inventoryItemId Int @unique
   typeId          Int
@@ -284,6 +286,9 @@ model ItemPreference {
 model ItemType {
   id   Int    @id @default(autoincrement())
   name String @unique
+  icon      String?
+  createdAt String?
+  createdBy String?
 
   itemPreferences ItemPreference[]
 }
@@ -327,4 +332,13 @@ model InventoryUnit {
 
   vendorItem   VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems OrderedItems[]
+}
+
+model Action {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  date        String
+  createdAt   String
+  createdBy   String?
 }

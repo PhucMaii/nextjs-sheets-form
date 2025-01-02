@@ -97,3 +97,7 @@ export enum TRANSACTION_STATUS {
   PAID = 'Paid',
   UNPAID = 'Unpaid',
 }
+
+export enum ACTION {
+  TRACK_INVENTORY = 'Track Inventory',
+}
