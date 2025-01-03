@@ -167,21 +167,23 @@ const EditReportOrder = ({
       }
 
       setItemList((prevState: any) => {
-        return [
-          ...prevState,
-          response.data.data
-        ]
-      })
+        return [...prevState, response.data.data];
+      });
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', 'Fail to update item: ' + error?.response?.data?.error);
+      showNotification(
+        'error',
+        'Fail to update item: ' + error?.response?.data?.error,
+      );
     }
   };
 
   const handleDeleteCustomAmount = async (item: any) => {
     try {
-      const response = await axios.delete(`${API_URL.ADMIN}/orderedItems?id=${item.id}`);
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/orderedItems?id=${item.id}`,
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -194,9 +196,12 @@ const EditReportOrder = ({
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', 'Fail to update item: ' + error?.response?.data?.error);
+      showNotification(
+        'error',
+        'Fail to update item: ' + error?.response?.data?.error,
+      );
     }
-  }
+  };
 
   const handleUpdateItems = async () => {
     try {
@@ -268,12 +273,14 @@ const EditReportOrder = ({
 
   return (
     <>
-      <DeleteModal 
+      <DeleteModal
         open={deleteItemProps.open}
-        handleCloseModal={() => setDeleteItemProps((prevState: any) => ({
-          ...prevState,
-          open: false
-        }))}
+        handleCloseModal={() =>
+          setDeleteItemProps((prevState: any) => ({
+            ...prevState,
+            open: false,
+          }))
+        }
         targetObj={deleteItemProps.targetObj}
         handleDelete={handleDeleteCustomAmount}
         showTargetObj={deleteItemProps.targetObj.name}
@@ -409,7 +416,14 @@ const EditReportOrder = ({
                             {item.name}
                           </Typography>
                           {!item?.inventoryItemId ? (
-                            <IconButton onClick={() => setDeleteItemProps({open: true, targetObj: item})}>
+                            <IconButton
+                              onClick={() =>
+                                setDeleteItemProps({
+                                  open: true,
+                                  targetObj: item,
+                                })
+                              }
+                            >
                               <RemoveCircleIcon sx={{ color: errorColor }} />
                             </IconButton>
                           ) : null}

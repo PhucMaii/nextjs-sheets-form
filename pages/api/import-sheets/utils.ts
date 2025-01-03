@@ -112,7 +112,7 @@ export const overrideOrder = async (
       },
       include: {
         items: true,
-      }
+      },
     });
 
     if (!existingOrder) {

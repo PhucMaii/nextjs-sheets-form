@@ -75,11 +75,8 @@ export default function OrderDetails({
       }
 
       setItems((prevState: any) => {
-        return [
-          ...prevState,
-          response.data.data
-        ]
-      })
+        return [...prevState, response.data.data];
+      });
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
