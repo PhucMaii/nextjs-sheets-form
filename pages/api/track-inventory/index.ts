@@ -63,14 +63,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     gt: 0
                 },
                 orderId: {
-                    not: null
+                    not: null // Make sure the orderId is not null
                 },
                 inventoryItemId: {
-                    not: null
+                    not: null // Make sure do not touhch any custom amount
                 },
                 Orders: {
-                    deliveryDate: date.date,
-                    isAffectInventory: true,
+                    deliveryDate: date.date, // Only the selected date
+                    isAffectInventory: true, // Make sure the order is affect inventory
                 }
             },
             include: {
@@ -80,15 +80,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         });
 
-        console.log(orderedItems, 'ORDERED ITEMS');
-
         if (orderedItems.length === 0) {
             return res.status(200).json({ message: 'No Items Ordered Today' });
         }
 
         // Create a set of same items and quantity
         const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
-            if (!item.inventoryItemId) return acc;
+            if (!item.inventoryItemId) return acc; // Make sure again not touching the custom amount
             if (!acc[item.inventoryItemId]) {
                 acc[item.inventoryItemId] = {
                     quantity: item.quantity,

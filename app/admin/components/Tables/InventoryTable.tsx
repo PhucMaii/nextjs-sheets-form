@@ -2,6 +2,7 @@ import { IInventoryItem } from '@/app/utils/type';
 import {
   AlertColor,
   Box,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -10,12 +11,14 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import EditInventory from '../Modals/edit/EditInventory';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import BatchQuantityModal from '../Inventory/BatchQuantityModal';
+import { PhoneIcon } from 'lucide-react';
+import ViewItemMissing from '../Modals/ViewItemMissing';
 
 interface IProps {
   inventoryItems: IInventoryItem[];
@@ -26,6 +29,12 @@ export default function InventoryTable({
   inventoryItems,
   showNotification,
 }: IProps) {
+  const[viewItemMissingProps, setViewItemMissingProps] = useState<any>({
+    open: false,
+    inventoryItem: inventoryItems[0],
+    quantity: inventoryItems[0]?.quantity || 0
+  })
+
   const handleDelete = async (targetObj: IInventoryItem) => {
     try {
       const response = await axios.delete(
@@ -45,10 +54,20 @@ export default function InventoryTable({
   };
 
   return (
+    <>
+      {viewItemMissingProps && 
+        <ViewItemMissing 
+          open={viewItemMissingProps.open} 
+          onClose={() => setViewItemMissingProps((prevState: any) => ({...prevState, open: false}))} 
+          inventoryItem={viewItemMissingProps.inventoryItem} 
+          quantity={viewItemMissingProps.quantity} 
+          />
+      }
     <Paper sx={{ overflow: 'scroll' }}>
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell style={{ width: 50 }}></TableCell>
             <TableCell>Name</TableCell>
             <TableCell>Vendor - Unit Value</TableCell>
             <TableCell>Quantity</TableCell>
@@ -65,6 +84,11 @@ export default function InventoryTable({
 
             return (
               <TableRow key={index}>
+                <TableCell>
+                  {item.quantity < 0 ? <IconButton size="small" color="primary" onClick={() => setViewItemMissingProps((prevState: any) => ({...prevState, open: true, inventoryItem: item, quantity: item.quantity}))}>
+                    <PhoneIcon size={20} />
+                  </IconButton> : null}
+                </TableCell>
                 <TableCell>
                   <Typography>{item.name}</Typography>
                 </TableCell>
@@ -116,5 +140,6 @@ export default function InventoryTable({
         </TableBody>
       </Table>
     </Paper>
+    </>
   );
 }
