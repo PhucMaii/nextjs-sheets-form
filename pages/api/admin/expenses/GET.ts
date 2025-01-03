@@ -27,9 +27,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Missing required parameters' });
     }
 
-    const formattedStartDate = normalizeDate(`${startDate.split(' ')[1]} ${startDate.split(' ')[2]} ${startDate.split(' ')[3]}`);
-    const formattedEndDate = normalizeDate(`${endDate.split(' ')[1]} ${endDate.split(' ')[2]} ${endDate.split(' ')[3]}`);
-    console.log({ formattedStartDate, formattedEndDate, startDate: `${startDate.split(' ')[1]}${startDate.split(' ')[2]}${startDate.split(' ')[3]}`, endDate: new Date(endDate) });
+    const formattedStartDate = normalizeDate(
+      `${startDate.split(' ')[1]} ${startDate.split(' ')[2]} ${startDate.split(' ')[3]}`,
+    );
+    const formattedEndDate = normalizeDate(
+      `${endDate.split(' ')[1]} ${endDate.split(' ')[2]} ${endDate.split(' ')[3]}`,
+    );
 
     const listOfDateString = generateListOfDateString(
       formattedStartDate,

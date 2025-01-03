@@ -32,7 +32,13 @@ interface IProps {
   showNotification?: (type: AlertColor, message: string) => void;
 }
 
-export default function OrderDetailsTable({ order, items, handleUpdateItem, abilityToEdit, showNotification }: IProps) {
+export default function OrderDetailsTable({
+  order,
+  items,
+  handleUpdateItem,
+  abilityToEdit,
+  showNotification,
+}: IProps) {
   const [deleteModalProps, setDeleteModalProps] = useState<any>({
     open: false,
     targetObj: {},
@@ -57,7 +63,9 @@ export default function OrderDetailsTable({ order, items, handleUpdateItem, abil
   const handleDeleteItem = async (targetObj: OrderedItems) => {
     if (!showNotification) return;
     try {
-      const response = await axios.delete(`${API_URL.ADMIN}/orderedItems?id=${targetObj.id}`);
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/orderedItems?id=${targetObj.id}`,
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -69,15 +77,17 @@ export default function OrderDetailsTable({ order, items, handleUpdateItem, abil
       console.log('There was an error: ', error);
       showNotification('error', error.response.data.error);
     }
-  }
+  };
 
   return (
     <>
-      <DeleteModal 
+      <DeleteModal
         targetObj={deleteModalProps.targetObj}
         handleDelete={handleDeleteItem}
         open={deleteModalProps.open}
-        handleCloseModal={() => setDeleteModalProps({ open: false, targetObj: {} })}
+        handleCloseModal={() =>
+          setDeleteModalProps({ open: false, targetObj: {} })
+        }
         showTargetObj={deleteModalProps.targetObj?.name}
       />
       <EditItemModal
@@ -142,7 +152,9 @@ export default function OrderDetailsTable({ order, items, handleUpdateItem, abil
                           ${(item.prevPrice * item.quantity).toFixed(2)}
                         </Typography>
                       )}
-                    <Typography>${item?.totalPrice?.toFixed(2) || 0}</Typography>
+                    <Typography>
+                      ${item?.totalPrice?.toFixed(2) || 0}
+                    </Typography>
                   </Box>
                 </TableCell>
 
@@ -157,10 +169,16 @@ export default function OrderDetailsTable({ order, items, handleUpdateItem, abil
                       >
                         <EditIcon />
                       </IconButton>
-                      {!item?.inventoryItemId && showNotification &&
-                        <IconButton color="error" onClick={() => setDeleteModalProps({ open: true, targetObj: item })}>
+                      {!item?.inventoryItemId && showNotification && (
+                        <IconButton
+                          color="error"
+                          onClick={() =>
+                            setDeleteModalProps({ open: true, targetObj: item })
+                          }
+                        >
                           <DeleteIcon />
-                        </IconButton>}
+                        </IconButton>
+                      )}
                     </Box>
                   </TableCell>
                 )}

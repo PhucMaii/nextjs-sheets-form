@@ -39,7 +39,9 @@ import SellingItemName from '../components/SellingItemName';
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
   const [clientName, setClientName] = useState<string>('');
-  const [deliveryDate, setDeliveryDate] = useState<string>(() => generateRecommendDate())
+  const [deliveryDate, setDeliveryDate] = useState<string>(() =>
+    generateRecommendDate(),
+  );
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [note, setNote] = useState<string>('');
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
@@ -113,7 +115,10 @@ export default function OrderForm() {
     // Check is delivery date valid
     const deliveryDateObj = dayjs(deliveryDate);
     console.log(deliveryDateObj.month(), 'DELIVERY DATE OBJ');
-    if (deliveryDateObj.isBefore(minDate) || deliveryDateObj.date() === 1 && deliveryDateObj.month() === 0) {
+    if (
+      deliveryDateObj.isBefore(minDate) ||
+      (deliveryDateObj.date() === 1 && deliveryDateObj.month() === 0)
+    ) {
       showNotification('error', 'Delivery date is not valid');
       return;
     }

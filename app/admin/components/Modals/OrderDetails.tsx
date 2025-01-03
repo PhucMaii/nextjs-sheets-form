@@ -42,7 +42,8 @@ export default function OrderDetails({
   showNotification,
 }: IProps) {
   const [items, setItems] = useState<OrderedItems[]>(order.items);
-  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] = useState<boolean>(false);
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
+    useState<boolean>(false);
   const billPrintRef: any = useRef();
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function OrderDetails({
     try {
       const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
         orderId: order.id,
-        customAmount
+        customAmount,
       });
 
       if (response.data.error) {
@@ -78,11 +79,11 @@ export default function OrderDetails({
       console.log('Internal Server Error: ', error);
       showNotification('error', error.response.data.error);
     }
-  }
+  };
 
   return (
     <>
-      <AddCustomAmount 
+      <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         addCustomAmount={handleAddCustomAmount}

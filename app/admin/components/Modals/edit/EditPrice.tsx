@@ -141,10 +141,12 @@ export default function EditPrice({
             </LoadingButton>
           </Box>
         </Box>
-        {!hasCustomAmount && <UpdateChoiceSelection
-          updateOption={updateOption}
-          setUpdateOption={setUpdateOption}
-        />}
+        {!hasCustomAmount && (
+          <UpdateChoiceSelection
+            updateOption={updateOption}
+            setUpdateOption={setUpdateOption}
+          />
+        )}
         <Box overflow="auto" maxHeight="70vh" mt={1}>
           <Divider>Items</Divider>
           <Grid

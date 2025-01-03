@@ -215,7 +215,7 @@ export default function AddOrder({
         };
       });
 
-      setItemList((prevState: any) => ([...prevState, ...quantitySetUp]));
+      setItemList((prevState: any) => [...prevState, ...quantitySetUp]);
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client items: ', error);
@@ -273,13 +273,13 @@ export default function AddOrder({
   };
 
   const removeItemFromItemList = (item: any) => {
-    const newItems = itemList.filter((i: any) => (i.name !== item.name));
+    const newItems = itemList.filter((i: any) => i.name !== item.name);
     setItemList(newItems);
-  }
+  };
 
   return (
     <>
-      <AddCustomAmount 
+      <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         setItemList={setItemList}
@@ -370,7 +370,9 @@ export default function AddOrder({
               {!createScheduledOrder && (
                 <>
                   <Grid item xs={12} textAlign="right">
-                    <Button onClick={() => setIsOpenAddCustomAmount(true)}>+ Custom Amount</Button>
+                    <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                      + Custom Amount
+                    </Button>
                   </Grid>
                   <Grid item xs={6}>
                     DELIVERY DATE
@@ -419,9 +421,14 @@ export default function AddOrder({
                       <Grid item xs={6}>
                         <Box display="flex" alignItems="center" gap={1}>
                           <SellingItemName item={item} />
-                          {item?.id < 1 && <IconButton onClick={() => removeItemFromItemList(item)} color="error">
-                            <RemoveCircleIcon color='error' />
-                          </IconButton>}
+                          {item?.id < 1 && (
+                            <IconButton
+                              onClick={() => removeItemFromItemList(item)}
+                              color="error"
+                            >
+                              <RemoveCircleIcon color="error" />
+                            </IconButton>
+                          )}
                         </Box>
                       </Grid>
                       <Grid item xs={6}>

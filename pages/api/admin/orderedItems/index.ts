@@ -20,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const response = await DELETE(req, res);
       return response;
     }
-    
+
     return res.status(404).json({ error: 'Your method is not supported' });
   } catch (error) {
     console.log('Internal Server Error: ', error);

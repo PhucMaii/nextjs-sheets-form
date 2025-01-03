@@ -50,7 +50,8 @@ const EditReportOrder = ({
   onClose,
 }: PropTypes) => {
   // const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] = useState<boolean>(false);
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
+    useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
   const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] =
     useState<boolean>(false);
@@ -153,7 +154,6 @@ const EditReportOrder = ({
       const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
         orderId: order.id,
         customAmount,
-      
       });
 
       if (response.data.error) {
@@ -166,7 +166,7 @@ const EditReportOrder = ({
       console.log('There was an error: ', error);
       showNotification('error', 'Fail to update item: ' + error);
     }
-  }
+  };
 
   const handleUpdateItems = async () => {
     try {
@@ -238,7 +238,7 @@ const EditReportOrder = ({
 
   return (
     <>
-      <AddCustomAmount 
+      <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         addCustomAmount={handleAddCustomAmount}
@@ -340,7 +340,9 @@ const EditReportOrder = ({
                 <Divider>Items</Divider>
               </Grid>
               <Grid item xs={12} textAlign="right">
-                <Button onClick={() => setIsOpenAddCustomAmount(true)}>+ Custom Amount</Button>
+                <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                  + Custom Amount
+                </Button>
               </Grid>
               {updateOption === UpdateOption.CREATE && (
                 <>
@@ -366,9 +368,11 @@ const EditReportOrder = ({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          {!item?.inventoryItemId ? <IconButton onClick={() => {}}>
-                            <RemoveCircleIcon sx={{ color: errorColor }} />
-                          </IconButton> : null}
+                          {!item?.inventoryItemId ? (
+                            <IconButton onClick={() => {}}>
+                              <RemoveCircleIcon sx={{ color: errorColor }} />
+                            </IconButton>
+                          ) : null}
                         </Box>
                       </Grid>
                       <Grid item container columnSpacing={2}>
