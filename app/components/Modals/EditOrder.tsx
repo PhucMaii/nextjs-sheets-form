@@ -107,7 +107,13 @@ export default function EditOrder({
               itemList.map((item: Item) => {
                 return (
                   <Grid key={item.id} container item spacing={1}>
-                    <Grid item xs={12} sx={{color: !item.inventoryItemId ? grey[600] : 'black'}}>
+                    <Grid
+                      item
+                      xs={12}
+                      sx={{
+                        color: !item.inventoryItemId ? grey[600] : 'black',
+                      }}
+                    >
                       {item.name} - ${item.price}
                     </Grid>
                     <Grid item xs={12}>

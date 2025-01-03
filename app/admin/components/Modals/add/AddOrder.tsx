@@ -215,7 +215,7 @@ export default function AddOrder({
         };
       });
 
-      setItemList((prevState: any) => [...prevState, ...quantitySetUp]);
+      setItemList(quantitySetUp);
       setIsFetching(false);
     } catch (error: any) {
       console.log('Fail to fetch client items: ', error);

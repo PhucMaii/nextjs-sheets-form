@@ -251,6 +251,41 @@ async function main() {
   //     });
   //   }
   // }
+
+  // const orders = await prisma.orders.findMany({
+  //   where: {
+  //     deliveryDate: '01/03/2025'
+  //   },
+  //   include: {
+  //     items: true,
+  //     user: {
+  //       include: {
+  //         category: {
+  //           include: {
+  //             items: true
+  //           }
+  //         }
+  //       }
+  //     },
+  //   }
+  // });
+  
+  // for (const order of orders) {
+  //   if (order.items.length !== order.user?.category.items.length) {
+  //     console.log({
+  //       id: order.id,
+  //       deliveryDate: order.deliveryDate,
+  //       clientName: order?.user?.clientName,
+  //       clientId: order?.user?.clientId,
+  //     });
+
+  //     // const newItems = order.user?.category.items.map((item: any) => {
+  //     //   const itemInOrder = order.items.find((orderItem: any) => {
+  //     //     return orderItem.name === item.name && orderItem;
+  //     //   })
+  //     // });
+  //   }
+  // }
 }
 
 main()
