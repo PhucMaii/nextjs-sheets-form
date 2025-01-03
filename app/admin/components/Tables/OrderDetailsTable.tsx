@@ -10,7 +10,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { Order } from '../../orders/page';
 import { OrderedItems } from '@/app/utils/type';
@@ -18,11 +18,12 @@ import EditItemModal from '../Modals/edit/EditOrderItem';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 
 interface IProps {
   order: Order;
   items: OrderedItems[];
+  setItems?: Dispatch<SetStateAction<OrderedItems[]>>;
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
@@ -30,14 +31,17 @@ interface IProps {
   ) => Promise<void>;
   abilityToEdit?: boolean;
   showNotification?: (type: AlertColor, message: string) => void;
+  role?: USER_ROLE;
 }
 
 export default function OrderDetailsTable({
   order,
   items,
+  setItems,
   handleUpdateItem,
   abilityToEdit,
   showNotification,
+  role,
 }: IProps) {
   const [deleteModalProps, setDeleteModalProps] = useState<any>({
     open: false,
@@ -62,6 +66,9 @@ export default function OrderDetailsTable({
 
   const handleDeleteItem = async (targetObj: OrderedItems) => {
     if (!showNotification) return;
+    if (role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER) {
+      showNotification('error', 'You do not have permission to delete items');
+    }
     try {
       const response = await axios.delete(
         `${API_URL.ADMIN}/orderedItems?id=${targetObj.id}`,
@@ -72,6 +79,10 @@ export default function OrderDetailsTable({
         return;
       }
 
+      if (setItems) {
+        const newItems = items.filter((i: any) => i.id !== targetObj.id);
+        setItems(newItems);
+      }
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -172,6 +183,7 @@ export default function OrderDetailsTable({
                       {!item?.inventoryItemId && showNotification && (
                         <IconButton
                           color="error"
+                          disabled={role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER}
                           onClick={() =>
                             setDeleteModalProps({ open: true, targetObj: item })
                           }

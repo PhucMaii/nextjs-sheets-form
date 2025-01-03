@@ -22,7 +22,7 @@ import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
 import AddCustomAmount from './add/AddCustomAmount';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -74,10 +74,16 @@ export default function OrderDetails({
         return;
       }
 
+      setItems((prevState: any) => {
+        return [
+          ...prevState,
+          response.data.data
+        ]
+      })
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', error.response.data.error);
+      showNotification('error', error?.response?.data?.error);
     }
   };
 
@@ -153,9 +159,11 @@ export default function OrderDetails({
               <OrderDetailsTable
                 order={order}
                 items={items}
+                setItems={setItems}
                 handleUpdateItem={handleUpdateItem}
                 abilityToEdit
                 showNotification={showNotification}
+                role={USER_ROLE.ADMIN}
               />
             </Grid>
             <Grid

@@ -17,7 +17,7 @@ import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { LoadingButton } from '@mui/lab';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
@@ -116,6 +116,7 @@ export default function OrderDetails({
               items={order.items}
               handleUpdateItem={handleUpdateItem}
               abilityToEdit={abilityToEdit}
+              role={USER_ROLE.DRIVER}
             />
           </Grid>
           <Grid

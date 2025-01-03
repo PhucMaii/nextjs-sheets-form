@@ -35,18 +35,21 @@ export default async function DELETE(
       });
     }
 
-    await prisma.orderedItems.delete({
-      where: {
-        id: existingItem.id,
-      },
-    });
-
     const existingOrder = await prisma.orders.findUnique({
       where: {
         id: existingItem.orderId,
       },
       include: {
-        items: true,
+        items: {
+          where: {
+            id: {
+              not: Number(id),
+            },
+            quantity: {
+              gt: 0
+            }
+          }
+        },
       },
     });
 
@@ -56,8 +59,23 @@ export default async function DELETE(
       });
     }
 
+    if (existingOrder.items.length === 0) {
+      return res.status(400).json({
+        error: 'Order Cannot Be Empty',
+      })
+    }
+
+    await prisma.orderedItems.delete({
+      where: {
+        id: existingItem.id,
+      },
+    });
+
     const totalAmount = existingOrder.items.reduce((acc: number, item: any) => {
-      return acc + item.amount;
+      if (item.id === existingItem.id) {
+        return acc; // Skip the deleted item
+      }
+      return acc + (item.price * item.quantity);
     }, 0);
 
     await prisma.orders.update({

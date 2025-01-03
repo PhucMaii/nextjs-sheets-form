@@ -35,6 +35,7 @@ import { ModalProps } from '../type';
 import AddCustomAmount from '../add/AddCustomAmount';
 import { errorColor } from '@/theme/color';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import DeleteModal from '../delete/DeleteModal';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -50,6 +51,10 @@ const EditReportOrder = ({
   onClose,
 }: PropTypes) => {
   // const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [deleteItemProps, setDeleteItemProps] = useState<any>({
+    open: false,
+    targetObj: order.items[0],
+  });
   const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
     useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
@@ -161,12 +166,37 @@ const EditReportOrder = ({
         return;
       }
 
+      setItemList((prevState: any) => {
+        return [
+          ...prevState,
+          response.data.data
+        ]
+      })
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      showNotification('error', 'Fail to update item: ' + error);
+      showNotification('error', 'Fail to update item: ' + error?.response?.data?.error);
     }
   };
+
+  const handleDeleteCustomAmount = async (item: any) => {
+    try {
+      const response = await axios.delete(`${API_URL.ADMIN}/orderedItems?id=${item.id}`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      const newItems = itemList.filter((i: any) => i.id !== item.id);
+      setItemList(newItems);
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', 'Fail to update item: ' + error?.response?.data?.error);
+    }
+  }
 
   const handleUpdateItems = async () => {
     try {
@@ -238,6 +268,16 @@ const EditReportOrder = ({
 
   return (
     <>
+      <DeleteModal 
+        open={deleteItemProps.open}
+        handleCloseModal={() => setDeleteItemProps((prevState: any) => ({
+          ...prevState,
+          open: false
+        }))}
+        targetObj={deleteItemProps.targetObj}
+        handleDelete={handleDeleteCustomAmount}
+        showTargetObj={deleteItemProps.targetObj.name}
+      />
       <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
@@ -369,7 +409,7 @@ const EditReportOrder = ({
                             {item.name}
                           </Typography>
                           {!item?.inventoryItemId ? (
-                            <IconButton onClick={() => {}}>
+                            <IconButton onClick={() => setDeleteItemProps({open: true, targetObj: item})}>
                               <RemoveCircleIcon sx={{ color: errorColor }} />
                             </IconButton>
                           ) : null}
