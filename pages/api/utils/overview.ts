@@ -89,7 +89,10 @@ export const getLastMonthRevenue = async (
   );
   lastMonthEnd.setDate(0);
 
-  const datesInRange = generateListOfDateString(normalizeDate(lastMonthStart), normalizeDate(lastMonthEnd));
+  const datesInRange = generateListOfDateString(
+    normalizeDate(lastMonthStart),
+    normalizeDate(lastMonthEnd),
+  );
   const orders: any = await prisma.orders.findMany({
     where: {
       status: {
@@ -178,7 +181,10 @@ export const getLastMonthExpenses = async (startDate: Date) => {
   );
   lastMonthEnd.setDate(0);
 
-  const datesInRange = generateListOfDateString(normalizeDate(lastMonthStart), normalizeDate(lastMonthEnd));
+  const datesInRange = generateListOfDateString(
+    normalizeDate(lastMonthStart),
+    normalizeDate(lastMonthEnd),
+  );
   const transactions: any = await prisma.expense.findMany({
     where: {
       date: {

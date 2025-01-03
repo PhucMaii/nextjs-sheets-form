@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   IconButton,
   Table,
@@ -9,23 +10,43 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { Order } from '../../orders/page';
 import { OrderedItems } from '@/app/utils/type';
 import EditItemModal from '../Modals/edit/EditOrderItem';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteModal from '../Modals/delete/DeleteModal';
+import axios from 'axios';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 
 interface IProps {
   order: Order;
+  items: OrderedItems[];
+  setItems?: Dispatch<SetStateAction<OrderedItems[]>>;
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
   abilityToEdit?: boolean;
+  showNotification?: (type: AlertColor, message: string) => void;
+  role?: USER_ROLE;
 }
 
-export default function OrderDetailsTable({ order, handleUpdateItem, abilityToEdit }: IProps) {
+export default function OrderDetailsTable({
+  order,
+  items,
+  setItems,
+  handleUpdateItem,
+  abilityToEdit,
+  showNotification,
+  role,
+}: IProps) {
+  const [deleteModalProps, setDeleteModalProps] = useState<any>({
+    open: false,
+    targetObj: {},
+  });
   const [isOpenEditModal, setIsOpenEditModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderedItems | object>({});
   const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
@@ -43,8 +64,43 @@ export default function OrderDetailsTable({ order, handleUpdateItem, abilityToEd
 
   const mdDown = useMediaQuery((them: any) => them.breakpoints.down('md'));
 
+  const handleDeleteItem = async (targetObj: OrderedItems) => {
+    if (!showNotification) return;
+    if (role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER) {
+      showNotification('error', 'You do not have permission to delete items');
+    }
+    try {
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/orderedItems?id=${targetObj.id}`,
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      if (setItems) {
+        const newItems = items.filter((i: any) => i.id !== targetObj.id);
+        setItems(newItems);
+      }
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  };
+
   return (
     <>
+      <DeleteModal
+        targetObj={deleteModalProps.targetObj}
+        handleDelete={handleDeleteItem}
+        open={deleteModalProps.open}
+        handleCloseModal={() =>
+          setDeleteModalProps({ open: false, targetObj: {} })
+        }
+        showTargetObj={deleteModalProps.targetObj?.name}
+      />
       <EditItemModal
         open={isOpenEditModal}
         onClose={() => {
@@ -66,8 +122,8 @@ export default function OrderDetailsTable({ order, handleUpdateItem, abilityToEd
           </TableRow>
         </TableHead>
         <TableBody>
-          {order.items.length > 0 &&
-            order.items.map((item, index) => (
+          {items.length > 0 &&
+            items.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>
                   {mdDown && abilityToEdit ? (
@@ -107,20 +163,35 @@ export default function OrderDetailsTable({ order, handleUpdateItem, abilityToEd
                           ${(item.prevPrice * item.quantity).toFixed(2)}
                         </Typography>
                       )}
-                    <Typography>${item.totalPrice.toFixed(2)}</Typography>
+                    <Typography>
+                      ${item?.totalPrice?.toFixed(2) || 0}
+                    </Typography>
                   </Box>
                 </TableCell>
 
                 {!mdDown && abilityToEdit && (
                   <TableCell>
-                    <IconButton
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setUpdatedItem(item);
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <IconButton
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setUpdatedItem(item);
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      {!item?.inventoryItemId && showNotification && (
+                        <IconButton
+                          color="error"
+                          disabled={role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER}
+                          onClick={() =>
+                            setDeleteModalProps({ open: true, targetObj: item })
+                          }
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </Box>
                   </TableCell>
                 )}
               </TableRow>

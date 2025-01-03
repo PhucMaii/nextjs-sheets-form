@@ -808,6 +808,7 @@ export default function Orders() {
           onClose={() => setSelectedOrderDetails(null)}
           order={selectedOrderDetails}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       {isLoading ? (

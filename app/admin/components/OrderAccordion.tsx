@@ -1,5 +1,5 @@
 'use client';
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -362,6 +362,7 @@ const OrderAccordion = ({
           onClose={() => setIsOpenDetails(false)}
           order={order}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       <ShadowSection>
@@ -514,4 +515,4 @@ const OrderAccordion = ({
 };
 
 // only re renders if th order data change
-export default memo(OrderAccordion);
+export default OrderAccordion;

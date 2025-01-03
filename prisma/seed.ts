@@ -251,49 +251,6 @@ async function main() {
   //     });
   //   }
   // }
-
-  // const scheduledOrders = await prisma.scheduleOrders.findMany({
-  //   include: {
-  //     items: true,
-  //     user: {
-  //       include: {
-  //         category: {
-  //           include: {
-  //             items: true,
-  //           }
-  //         }
-  //       }
-  //     }
-  //   },
-  // });
-
-  // for (const scheduledOrder of scheduledOrders) {
-  //   console.log({id: scheduledOrder.id, clientName: scheduledOrder.user.clientName, day: scheduledOrder.day})
-  //   const newItems = scheduledOrder.user.category.items.map((item) => {
-  //     const previousItem = scheduledOrder.items.find((prevItem) => {
-  //       return prevItem.name === item.name;
-  //     });
-
-  //     return {
-  //       name: item.name,
-  //       price: item.price,
-  //       quantity: previousItem?.quantity || 0,
-  //       inventoryItemId: item?.inventoryItemId,
-  //       inventoryUnitId: item?.inventoryUnitId,
-  //       scheduledOrderId: scheduledOrder.id
-  //     }
-  //   });
-
-  //   await prisma.orderedItems.deleteMany({
-  //     where: {
-  //       scheduledOrderId: scheduledOrder.id
-  //     }
-  //   });
-
-  //   await prisma.orderedItems.createMany({
-  //     data: newItems,
-  //   });
-  // }
 }
 
 main()

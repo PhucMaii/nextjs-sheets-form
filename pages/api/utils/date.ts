@@ -34,7 +34,6 @@ export const sortByDeliveryDate = (
   orders: any[],
   field: string = 'deliveryDate',
 ): any => {
-  console.log({ orders, field }, 'SORT FUNCTION');
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(orderA[field]);
     const deliveryDateB: any = convertDeliveryDateStringToDate(orderB[field]);

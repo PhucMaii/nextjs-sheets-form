@@ -4,7 +4,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IExpense } from '@/app/utils/type';
 import axios from 'axios';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -88,60 +88,63 @@ export const useUpdateExpenseStatus = (
     }
   };
 
-  const handleBulkUpdateStatus = async (
-    newStatus: TRANSACTION_STATUS,
-    newPaymentMethodId: number = otherPaymentMethodId,
-  ) => {
-    try {
-      const idsToUpdate = selectedExpenses.map(
-        (expense: IExpense) => expense.id,
-      );
-
-      if (
-        newStatus === TRANSACTION_STATUS.PAID &&
-        newPaymentMethodId === otherPaymentMethodId
-      ) {
-        const isOtherPaymentMethod = selectedExpenses.some(
-          (expense: IExpense) =>
-            expense.paymentMethodId === otherPaymentMethodId,
+  const handleBulkUpdateStatus = useCallback(
+    async (
+      newStatus: TRANSACTION_STATUS,
+      newPaymentMethodId: number = otherPaymentMethodId,
+    ) => {
+      try {
+        const idsToUpdate = selectedExpenses.map(
+          (expense: IExpense) => expense.id,
         );
 
-        if (isOtherPaymentMethod) {
-          setSelectPaymentMethod({
-            isOpenModal: true,
-            selectedTransaction: null,
-            updatedStatus: newStatus,
-            isBulk: true,
-          });
-          showNotification('warning', 'Please choose a different method');
+        if (
+          newStatus === TRANSACTION_STATUS.PAID &&
+          newPaymentMethodId === otherPaymentMethodId
+        ) {
+          const isOtherPaymentMethod = selectedExpenses.some(
+            (expense: IExpense) =>
+              expense.paymentMethodId === otherPaymentMethodId,
+          );
+
+          if (isOtherPaymentMethod) {
+            setSelectPaymentMethod({
+              isOpenModal: true,
+              selectedTransaction: null,
+              updatedStatus: newStatus,
+              isBulk: true,
+            });
+            showNotification('warning', 'Please choose a different method');
+            return;
+          }
+        }
+
+        setIsUpdating(true);
+        const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
+          idsToUpdate,
+          status: newStatus,
+          newPaymentMethodId,
+        });
+
+        if (response.data.error) {
+          showNotification('error', response.data.error);
+          setIsUpdating(false);
           return;
         }
-      }
 
-      setIsUpdating(true);
-      const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
-        idsToUpdate,
-        status: newStatus,
-        newPaymentMethodId,
-      });
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
+        showNotification('success', response.data.message);
         setIsUpdating(false);
-        return;
+      } catch (error: any) {
+        console.log('Internal Server Error: ', error);
+        showNotification(
+          'error',
+          'Fail to bulk update status: ' + error.response.data.error,
+        );
+        setIsUpdating(false);
       }
-
-      showNotification('success', response.data.message);
-      setIsUpdating(false);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification(
-        'error',
-        'Fail to bulk update status: ' + error.response.data.error,
-      );
-      setIsUpdating(false);
-    }
-  };
+    },
+    [selectedExpenses, showNotification],
+  );
 
   const UpdateExpenseStatusComp = (
     <SingleFieldEdit
