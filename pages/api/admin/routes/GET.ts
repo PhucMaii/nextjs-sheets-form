@@ -2,6 +2,7 @@ import { PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { normalizeDate } from '../../utils/date';
 
 interface QueryType {
   day?: string;
@@ -15,9 +16,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { day, startDate, endDate }: QueryType = req.query;
 
     if (startDate && endDate) {
+      const normalizedStartDate = normalizeDate(new Date(startDate));
+      const normalizedEndDate = normalizeDate(new Date(endDate));
+
       const listOfDayStrings = generateListOfDateString(
-        new Date(startDate),
-        new Date(endDate),
+        normalizedStartDate,
+        normalizedEndDate,
       );
 
       const routes = await prisma.route.findMany({

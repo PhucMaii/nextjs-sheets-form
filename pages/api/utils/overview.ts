@@ -3,6 +3,7 @@ import { checkIsKorean } from './korean';
 import { generateListOfDateString } from '@/prisma/seed';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { Order } from '@/app/admin/orders/page';
+import { normalizeDate } from './date';
 
 export const generateManifest = (orders: any, revenue: number = 0) => {
   const itemList = orders.flatMap((order: any) => {
@@ -88,7 +89,7 @@ export const getLastMonthRevenue = async (
   );
   lastMonthEnd.setDate(0);
 
-  const datesInRange = generateListOfDateString(lastMonthStart, lastMonthEnd);
+  const datesInRange = generateListOfDateString(normalizeDate(lastMonthStart), normalizeDate(lastMonthEnd));
   const orders: any = await prisma.orders.findMany({
     where: {
       status: {
@@ -177,7 +178,7 @@ export const getLastMonthExpenses = async (startDate: Date) => {
   );
   lastMonthEnd.setDate(0);
 
-  const datesInRange = generateListOfDateString(lastMonthStart, lastMonthEnd);
+  const datesInRange = generateListOfDateString(normalizeDate(lastMonthStart), normalizeDate(lastMonthEnd));
   const transactions: any = await prisma.expense.findMany({
     where: {
       date: {
