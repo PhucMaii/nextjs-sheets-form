@@ -38,6 +38,7 @@ import { useDiscount } from '@/hooks/useDiscount';
 import ConfirmModal from './Modals/ConfirmModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import LoadingModal from './Modals/LoadingModal';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 interface PropTypes {
   order: Order;
@@ -488,6 +489,12 @@ const OrderAccordion = ({
                 <SellIcon color="primary" />
                 <Typography color="primary" variant="subtitle1">
                   {totalQuantity}
+                </Typography>
+              </Box>
+              <Box display="flex" gap={1} alignItems="center">
+                <LocalShippingIcon color="primary" />
+                <Typography variant="subtitle2">
+                  {order?.orderRoute || ''}
                 </Typography>
               </Box>
               <Box display="flex" alignItems="center" gap={1}>

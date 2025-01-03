@@ -113,6 +113,7 @@ export interface Order {
   previousUnpaidOrders?: { numberOfOrders: number; totalPrice: number };
   multipleOrders?: boolean;
   isAffectInventory?: boolean;
+  orderRoute?: string;
 }
 
 const orderPerPage = 10;
@@ -243,7 +244,8 @@ export default function Orders() {
           debouncedKeywords == order.id.toString() ||
           order.user.clientName
             .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
+            .includes(debouncedKeywords.toLowerCase()) ||
+          order?.orderRoute?.toLowerCase().includes(debouncedKeywords.toLowerCase())
         ) {
           return true;
         }
