@@ -245,7 +245,9 @@ export default function Orders() {
           order.user.clientName
             .toLowerCase()
             .includes(debouncedKeywords.toLowerCase()) ||
-          order?.orderRoute?.toLowerCase().includes(debouncedKeywords.toLowerCase())
+          order?.orderRoute
+            ?.toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
         ) {
           return true;
         }

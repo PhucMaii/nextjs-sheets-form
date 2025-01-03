@@ -16,6 +16,7 @@ const emailHandler = async (
   template: string,
 ) => {
   try {
+    console.log({email, includesYahoo: email.includes('@yahoo.com')}, 'EMAIL');
     if (email.includes('@yahoo.ca') || email.includes('@yahoo.com')) {
       await yahooTransporter.sendMail({
         from: process.env.NODEMAILER_EMAIL,

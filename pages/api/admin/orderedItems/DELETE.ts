@@ -46,9 +46,9 @@ export default async function DELETE(
               not: Number(id),
             },
             quantity: {
-              gt: 0
-            }
-          }
+              gt: 0,
+            },
+          },
         },
       },
     });
@@ -62,7 +62,7 @@ export default async function DELETE(
     if (existingOrder.items.length === 0) {
       return res.status(400).json({
         error: 'Order Cannot Be Empty',
-      })
+      });
     }
 
     await prisma.orderedItems.delete({
@@ -75,7 +75,7 @@ export default async function DELETE(
       if (item.id === existingItem.id) {
         return acc; // Skip the deleted item
       }
-      return acc + (item.price * item.quantity);
+      return acc + item.price * item.quantity;
     }, 0);
 
     await prisma.orders.update({

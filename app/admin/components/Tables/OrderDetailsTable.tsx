@@ -183,7 +183,10 @@ export default function OrderDetailsTable({
                       {!item?.inventoryItemId && showNotification && (
                         <IconButton
                           color="error"
-                          disabled={role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER}
+                          disabled={
+                            role === USER_ROLE.CLIENT ||
+                            role === USER_ROLE.DRIVER
+                          }
                           onClick={() =>
                             setDeleteModalProps({ open: true, targetObj: item })
                           }

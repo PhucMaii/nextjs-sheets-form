@@ -153,7 +153,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           ? previousUnpaidCodOrdersMap[order.user.clientId]
           : null,
         multipleOrders: sameClientOrder.length > 1 ? true : false,
-        orderRoute: orderRoute ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}` : 'No route',
+        orderRoute: orderRoute
+          ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
+          : 'No route',
       };
     });
 

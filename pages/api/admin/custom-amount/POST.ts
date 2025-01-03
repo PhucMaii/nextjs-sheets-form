@@ -52,7 +52,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     const newOrderTotalPrice = existingOrder.items.reduce((total, item) => {
-      return total + (item.price * item.quantity);
+      return total + item.price * item.quantity;
     }, 0);
 
     await prisma.orders.update({
@@ -66,7 +66,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
     return res
       .status(200)
-      .json({ message: 'Custom Amount Added Successfully', data: {...customAmountItem, totalPrice: customAmount.price * customAmount.quantity} });
+      .json({
+        message: 'Custom Amount Added Successfully',
+        data: {
+          ...customAmountItem,
+          totalPrice: customAmount.price * customAmount.quantity,
+        },
+      });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
