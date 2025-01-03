@@ -64,7 +64,7 @@ export const getSameDateLastWeek = (currentDate: string | Date) => {
   return sameDateLastWeek;
 };
 
-export const normalizeDate = (date: Date) => {
+export const normalizeDate = (date: Date | string) => {
   const normalized = new Date(date);
   normalized.setHours(0, 0, 0, 0);
   return normalized;
