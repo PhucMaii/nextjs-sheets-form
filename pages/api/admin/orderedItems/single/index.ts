@@ -3,7 +3,7 @@ import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
 import { generateOrderTotalPrice } from '../PUT';
 import { getUserInfo } from '@/pages/api/utils/auth';
-import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import { checkOrderValidToAffectInventory, formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -126,9 +126,8 @@ export const updateSingleInventoryItem = async (
 
     // Handle if expense quantity change or admin just force update the inventory => orderId = -1
     // Only check if orderId is a valid id
-    console.log(orderId, 'order id');
     if (orderId > 0) {
-      const order = await prisma.orders.findUnique({
+      const order: any = await prisma.orders.findUnique({
         where: {
           id: orderId,
         },
@@ -138,8 +137,10 @@ export const updateSingleInventoryItem = async (
         console.error('Conflict Order Not Found');
         return;
       }
+      
+      const isValidToCheckInventory = checkOrderValidToAffectInventory(order.deliveryDate);
 
-      if (!order?.isAffectInventory) {
+      if (!order?.isAffectInventory || !isValidToCheckInventory) {
         console.log('Inventory Avoided');
         return;
       }
@@ -161,13 +162,6 @@ export const updateSingleInventoryItem = async (
       lastUpdatedFifo.quantity -
       newQuantity * unit.ratio +
       previousQuantity * unit.ratio;
-    console.log({
-      updatedQuantity,
-      fifo,
-      newQuantity,
-      previousQuantity,
-      ratio: unit.ratio,
-    });
     await prisma.fifo.update({
       where: {
         id: fifo.id,

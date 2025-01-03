@@ -69,7 +69,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     not: null
                 },
                 Orders: {
-                    deliveryDate: date.date
+                    deliveryDate: date.date,
+                    isAffectInventory: true,
                 }
             },
             include: {

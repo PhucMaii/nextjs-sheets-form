@@ -1,4 +1,3 @@
-import { Order } from "@/app/admin/orders/page";
 import { getTodayDate, normalizeDate } from "./date";
 
 export const formatItemsWithTotalPrice = (items: any[]) => {
@@ -15,17 +14,35 @@ export const formatItemsWithTotalPrice = (items: any[]) => {
   });
 };
 
-export const checkOrderValidToAffectInventory = (order: Order) => {
-  const today = getTodayDate();
+export const checkOrderValidToAffectInventory = (deliveryDate: string) => {
+  const trackInventoryHour = 5;
+  const {date, time: currentTime} = getTodayDate();
 
-  const normalizedToday = normalizeDate(new Date(today.date));
-  const normalizedOrderDate = normalizeDate(new Date(order.deliveryDate));
+  const normalizedToday = normalizeDate(new Date(date));
+  const normalizedOrderDate = normalizeDate(new Date(deliveryDate));
 
-  if (normalizedOrderDate > normalizedToday) {
+  if (normalizedOrderDate.getTime() > normalizedToday.getTime()) {
     return false;
   }
 
-  // if (normalizedOrderDate === normalizedToday) {
-    
-  // }
+  // If same date
+  if (normalizedOrderDate.getTime() === normalizedToday.getTime()) {
+    if (currentTime.includes('AM')) {
+      const hour = currentTime.split(':')[0];
+      const minute = currentTime.split(':')[1];
+
+      console.log({ hour, minute });
+      if (Number(hour) < trackInventoryHour) {
+        return false;
+      }
+
+      if (Number(hour) === trackInventoryHour) {
+        if (Number(minute) < 30) {
+          return false;
+        }
+      } 
+    }
+  }
+
+  return true;
 }
