@@ -1,11 +1,13 @@
 import {
   AlertColor,
   Box,
+  Button,
   // Button,
   Divider,
   FormControl,
   FormControlLabel,
   Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   Modal,
@@ -30,6 +32,9 @@ import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { LoadingButton } from '@mui/lab';
 import AddVendor from '../add/AddVendor';
 import { ModalProps } from '../type';
+import AddCustomAmount from '../add/AddCustomAmount';
+import { errorColor } from '@/theme/color';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -45,6 +50,7 @@ const EditReportOrder = ({
   onClose,
 }: PropTypes) => {
   // const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] = useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
   const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] =
     useState<boolean>(false);
@@ -142,6 +148,26 @@ const EditReportOrder = ({
     }
   };
 
+  const handleAddCustomAmount = async (customAmount: any) => {
+    try {
+      const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
+        orderId: order.id,
+        customAmount,
+      
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', 'Fail to update item: ' + error);
+    }
+  }
+
   const handleUpdateItems = async () => {
     try {
       setIsSubmitting(true);
@@ -212,6 +238,12 @@ const EditReportOrder = ({
 
   return (
     <>
+      <AddCustomAmount 
+        open={isOpenAddCustomAmount}
+        onClose={() => setIsOpenAddCustomAmount(false)}
+        addCustomAmount={handleAddCustomAmount}
+        showNotification={showNotification}
+      />
       <AddVendor
         showNotification={showNotification}
         open={isOpenAddVendor}
@@ -307,6 +339,9 @@ const EditReportOrder = ({
               <Grid item xs={12}>
                 <Divider>Items</Divider>
               </Grid>
+              <Grid item xs={12} textAlign="right">
+                <Button onClick={() => setIsOpenAddCustomAmount(true)}>+ Custom Amount</Button>
+              </Grid>
               {updateOption === UpdateOption.CREATE && (
                 <>
                   <Grid container item xs={12} rowGap={1}>
@@ -331,9 +366,9 @@ const EditReportOrder = ({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          {/* <IconButton onClick={() => removeItem(item.name)}>
+                          {!item?.inventoryItemId ? <IconButton onClick={() => {}}>
                             <RemoveCircleIcon sx={{ color: errorColor }} />
-                          </IconButton> */}
+                          </IconButton> : null}
                         </Box>
                       </Grid>
                       <Grid item container columnSpacing={2}>

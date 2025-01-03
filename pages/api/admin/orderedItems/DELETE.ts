@@ -17,9 +17,12 @@ export default async function DELETE(req: NextApiRequest, res: NextApiResponse) 
             });
         }
 
-        const existingItem = await prisma.orderedItems.findUnique({
+        const existingItem: any = await prisma.orderedItems.findUnique({
             where: {
                 id: Number(id),
+                orderId: {
+                    not: null,
+                }
             },
         });
 
@@ -33,6 +36,35 @@ export default async function DELETE(req: NextApiRequest, res: NextApiResponse) 
             where: {
                 id: existingItem.id,
             },
+        });
+
+        const existingOrder = await prisma.orders.findUnique({
+            where: {
+                id: existingItem.orderId,
+            },
+            include: {
+                items: true,
+            }
+        });
+
+
+        if (!existingOrder) {
+            return res.status(404).json({
+                error: 'Order Not Found',
+            });
+        }
+
+        const totalAmount = existingOrder.items.reduce((acc: number, item: any) => {
+            return acc + item.amount;
+        }, 0);
+
+        await prisma.orders.update({
+            where: {
+                id: existingOrder.id,
+            },
+            data: {
+                totalPrice: totalAmount,
+            }
         });
 
         return res.status(200).json({

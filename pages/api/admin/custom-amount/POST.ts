@@ -20,6 +20,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             where: {
                 id: orderId,
             },
+            include: {
+                items: true,
+            },
         });
 
         if (!existingOrder) {
@@ -46,6 +49,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             }
         });
 
+        const newOrderTotalPrice = existingOrder.items.reduce((total, item) => {
+            return total + (item.price * item.quantity);
+        }, 0);
+
+        await prisma.orders.update({
+            where: {
+                id: orderId,
+            },
+            data: {
+                totalPrice: newOrderTotalPrice + (customAmount.price * customAmount.quantity),
+            },
+        })
         return res.status(200).json({ message: 'Custom Amount Added Successfully' });
     } catch (error: any) {
         console.log('Internal Server Error: ', error);

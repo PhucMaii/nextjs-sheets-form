@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import { BoxModal } from "../styled";
-import { Box, Divider, Modal, TextField, Typography } from "@mui/material";
+import { AlertColor, Box, Divider, Modal, TextField, Typography } from "@mui/material";
 import { ModalProps } from "../type";
 import ModalHead from "@/app/lib/ModalHead";
 
 interface IProps extends ModalProps {
     setItemList?: any;
     addCustomAmount?: (customAmount: any) => Promise<void>;
+    showNotification: (type: AlertColor, message: string) => void
 }
 
-export default function AddCustomAmount({open, onClose, setItemList, addCustomAmount}: IProps) {
+export default function AddCustomAmount({open, onClose, setItemList, addCustomAmount, showNotification}: IProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [customAmount, setCustomAmount] = useState<{price: number, name: string, quantity: number}>({
         name: '',
@@ -18,6 +19,11 @@ export default function AddCustomAmount({open, onClose, setItemList, addCustomAm
     });
 
     const handleAddCustomAmount = async () => {
+        if (customAmount.price <= 0 || !customAmount.name) {
+            showNotification('error', 'Please fill all the fields');
+            return;
+        }
+
         if (addCustomAmount) {
             setIsLoading(true);
             await addCustomAmount(customAmount);
@@ -31,7 +37,7 @@ export default function AddCustomAmount({open, onClose, setItemList, addCustomAm
             {
                 id: 0,
                 name: customAmount.name,
-                quantity: 1,
+                quantity: customAmount.quantity,
                 price: customAmount.price,
                 totalPrice: customAmount.price,
                 availability: true

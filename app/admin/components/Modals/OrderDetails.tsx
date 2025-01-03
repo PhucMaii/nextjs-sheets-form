@@ -47,7 +47,7 @@ export default function OrderDetails({
 
   useEffect(() => {
     setItems(order.items);
-  }, [order]);
+  }, [order.items]);
 
   const handlePrinting = useReactToPrint({
     content: () => billPrintRef.current,
@@ -86,6 +86,7 @@ export default function OrderDetails({
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         addCustomAmount={handleAddCustomAmount}
+        showNotification={showNotification}
       />
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />

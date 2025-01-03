@@ -273,7 +273,7 @@ export default function AddOrder({
   };
 
   const removeItemFromItemList = (item: any) => {
-    const newItems = itemList.filter((i: any) => (i.id !== item.id && i.name !== item.name));
+    const newItems = itemList.filter((i: any) => (i.name !== item.name));
     setItemList(newItems);
   }
 
@@ -283,6 +283,7 @@ export default function AddOrder({
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         setItemList={setItemList}
+        showNotification={showNotification}
       />
       <ConfirmModal
         open={isOpenConfirmModal}
