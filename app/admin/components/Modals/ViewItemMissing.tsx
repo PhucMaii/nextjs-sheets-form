@@ -31,7 +31,6 @@ export default function ViewItemMissing({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [updatedQuantity, setUpdatedQuantity] = useState<number>(0);
 
-  console.log(inventoryItem, 'INVENTORY ITEM');
   const todayDate = getTodayDate();
 
   const [localStorageItem, setLocalStorageItem] = useLocalStorage(
@@ -44,14 +43,14 @@ export default function ViewItemMissing({
       return 0;
     }
 
-    return quantity + localStorageItem.preOrderQuantity < 0
-      ? Math.abs(quantity + localStorageItem.preOrderQuantity)
+    return quantity + updatedQuantity < 0
+      ? Math.abs(quantity + updatedQuantity)
       : 0;
-  }, [quantity, localStorageItem]);
+  }, [quantity, updatedQuantity]);
 
   useEffect(() => {
     if (localStorageItem) {
-      setUpdatedQuantity(localStorageItem.preOrderQuantity);
+      setUpdatedQuantity(localStorageItem.date !== todayDate.date ? 0 : localStorageItem.preOrderQuantity);
     }
   }, [localStorageItem]);
 
