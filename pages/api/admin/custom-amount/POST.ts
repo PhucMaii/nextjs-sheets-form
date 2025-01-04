@@ -64,13 +64,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           newOrderTotalPrice + customAmount.price * customAmount.quantity,
       },
     });
-    return res.status(200).json({
-      message: 'Custom Amount Added Successfully',
-      data: {
-        ...customAmountItem,
-        totalPrice: customAmount.price * customAmount.quantity,
-      },
-    });
+    return res
+      .status(200)
+      .json({
+        message: 'Custom Amount Added Successfully',
+        data: {
+          ...customAmountItem,
+          totalPrice: customAmount.price * customAmount.quantity,
+        },
+      });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
