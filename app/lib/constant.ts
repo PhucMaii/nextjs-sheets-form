@@ -28,6 +28,7 @@ import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import {
   errorColor,
   infoColor,
@@ -125,6 +126,11 @@ export const adminTabs = {
       name: 'Reports',
       icon: ArticleIcon,
       path: '/admin/reports',
+    },
+    {
+      name: 'Statements',
+      icon: DocumentScannerIcon,
+      path: '/admin/statements',
     },
     {
       name: 'Settings',
