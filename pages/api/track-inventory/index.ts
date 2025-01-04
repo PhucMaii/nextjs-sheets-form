@@ -30,9 +30,6 @@ export default async function handler(
     //     isJobScheduled = true;
     // }
 
-    if (req.method !== 'POST') {
-      return res.status(404).json({ error: 'Your method is not supported' });
-    }
     const prisma = new PrismaClient();
 
     const date: { date: string; time: string } = getTodayDate();

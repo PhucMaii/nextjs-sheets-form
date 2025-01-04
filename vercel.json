@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/track-inventory",
-      "schedule": "52 16 * * *"
+      "schedule": "45 7 * * *"
     }
   ],
   "functions": {

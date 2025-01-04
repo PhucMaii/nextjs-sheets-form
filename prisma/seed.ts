@@ -247,58 +247,40 @@ async function main() {
   //   }
   // }
 
-  // const scheduledOrders = await prisma.scheduleOrders.findMany({
+  // const orders = await prisma.orders.findMany({
+  //   where: {
+  //     deliveryDate: '01/03/2025'
+  //   },
   //   include: {
   //     items: true,
   //     user: {
   //       include: {
   //         category: {
   //           include: {
-  //             items: true,
+  //             items: true
   //           }
   //         }
   //       }
-  //     }
-  //   },
+  //     },
+  //   }
   // });
-
-  // for (const scheduledOrder of scheduledOrders) {
-  //   console.log({id: scheduledOrder.id, clientName: scheduledOrder.user.clientName, day: scheduledOrder.day})
-  //   const newItems = scheduledOrder.user.category.items.map((item) => {
-  //     const previousItem = scheduledOrder.items.find((prevItem) => {
-  //       return prevItem.name === item.name;
+  
+  // for (const order of orders) {
+  //   if (order.items.length !== order.user?.category.items.length) {
+  //     console.log({
+  //       id: order.id,
+  //       deliveryDate: order.deliveryDate,
+  //       clientName: order?.user?.clientName,
+  //       clientId: order?.user?.clientId,
   //     });
 
-  //     return {
-  //       name: item.name,
-  //       price: item.price,
-  //       quantity: previousItem?.quantity || 0,
-  //       inventoryItemId: item?.inventoryItemId,
-  //       inventoryUnitId: item?.inventoryUnitId,
-  //       scheduledOrderId: scheduledOrder.id
-  //     }
-  //   });
-
-  //   await prisma.orderedItems.deleteMany({
-  //     where: {
-  //       scheduledOrderId: scheduledOrder.id
-  //     }
-  //   });
-
-  //   await prisma.orderedItems.createMany({
-  //     data: newItems,
-  //   });
+  //     // const newItems = order.user?.category.items.map((item: any) => {
+  //     //   const itemInOrder = order.items.find((orderItem: any) => {
+  //     //     return orderItem.name === item.name && orderItem;
+  //     //   })
+  //     // });
+  //   }
   // }
-
-  const orderedItems = await prisma.orderedItems.findMany({
-    where: {
-      Orders: {
-        deliveryDate: '12/09/2024',
-      },
-    },
-  });
-
-  console.log(orderedItems.length);
 }
 
 main()
