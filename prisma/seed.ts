@@ -292,13 +292,13 @@ async function main() {
 
   const orderedItems = await prisma.orderedItems.findMany({
     where: {
-        Orders: {
-            deliveryDate: '12/09/2024'
-        }
-    }
+      Orders: {
+        deliveryDate: '12/09/2024',
+      },
+    },
   });
 
-  console.log(orderedItems.length)
+  console.log(orderedItems.length);
 }
 
 main()

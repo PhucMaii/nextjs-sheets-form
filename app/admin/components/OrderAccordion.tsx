@@ -1,5 +1,5 @@
 'use client';
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -38,6 +38,7 @@ import { useDiscount } from '@/hooks/useDiscount';
 import ConfirmModal from './Modals/ConfirmModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import LoadingModal from './Modals/LoadingModal';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 interface PropTypes {
   order: Order;
@@ -361,6 +362,7 @@ const OrderAccordion = ({
           onClose={() => setIsOpenDetails(false)}
           order={order}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       <ShadowSection>
@@ -490,6 +492,12 @@ const OrderAccordion = ({
                   {totalQuantity}
                 </Typography>
               </Box>
+              <Box display="flex" gap={1} alignItems="center">
+                <LocalShippingIcon color="primary" />
+                <Typography variant="subtitle2">
+                  {order?.orderRoute || ''}
+                </Typography>
+              </Box>
               <Box display="flex" alignItems="center" gap={1}>
                 {discountPrice > 0 &&
                   discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
@@ -507,4 +515,4 @@ const OrderAccordion = ({
 };
 
 // only re renders if th order data change
-export default memo(OrderAccordion);
+export default OrderAccordion;

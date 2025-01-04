@@ -1,11 +1,13 @@
 import {
   AlertColor,
   Box,
+  Button,
   // Button,
   Divider,
   FormControl,
   FormControlLabel,
   Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   Modal,
@@ -30,6 +32,10 @@ import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
 import { LoadingButton } from '@mui/lab';
 import AddVendor from '../add/AddVendor';
 import { ModalProps } from '../type';
+import AddCustomAmount from '../add/AddCustomAmount';
+import { errorColor } from '@/theme/color';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import DeleteModal from '../delete/DeleteModal';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -45,6 +51,12 @@ const EditReportOrder = ({
   onClose,
 }: PropTypes) => {
   // const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [deleteItemProps, setDeleteItemProps] = useState<any>({
+    open: false,
+    targetObj: order.items[0],
+  });
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
+    useState<boolean>(false);
   const [isOpenAddVendor, setIsOpenAddVendor] = useState<boolean>(false);
   const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] =
     useState<boolean>(false);
@@ -142,6 +154,55 @@ const EditReportOrder = ({
     }
   };
 
+  const handleAddCustomAmount = async (customAmount: any) => {
+    try {
+      const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
+        orderId: order.id,
+        customAmount,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      setItemList((prevState: any) => {
+        return [...prevState, response.data.data];
+      });
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification(
+        'error',
+        'Fail to update item: ' + error?.response?.data?.error,
+      );
+    }
+  };
+
+  const handleDeleteCustomAmount = async (item: any) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/orderedItems?id=${item.id}`,
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      const newItems = itemList.filter((i: any) => i.id !== item.id);
+      setItemList(newItems);
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification(
+        'error',
+        'Fail to update item: ' + error?.response?.data?.error,
+      );
+    }
+  };
+
   const handleUpdateItems = async () => {
     try {
       setIsSubmitting(true);
@@ -212,6 +273,24 @@ const EditReportOrder = ({
 
   return (
     <>
+      <DeleteModal
+        open={deleteItemProps.open}
+        handleCloseModal={() =>
+          setDeleteItemProps((prevState: any) => ({
+            ...prevState,
+            open: false,
+          }))
+        }
+        targetObj={deleteItemProps.targetObj}
+        handleDelete={handleDeleteCustomAmount}
+        showTargetObj={deleteItemProps.targetObj.name}
+      />
+      <AddCustomAmount
+        open={isOpenAddCustomAmount}
+        onClose={() => setIsOpenAddCustomAmount(false)}
+        addCustomAmount={handleAddCustomAmount}
+        showNotification={showNotification}
+      />
       <AddVendor
         showNotification={showNotification}
         open={isOpenAddVendor}
@@ -307,6 +386,11 @@ const EditReportOrder = ({
               <Grid item xs={12}>
                 <Divider>Items</Divider>
               </Grid>
+              <Grid item xs={12} textAlign="right">
+                <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                  + Custom Amount
+                </Button>
+              </Grid>
               {updateOption === UpdateOption.CREATE && (
                 <>
                   <Grid container item xs={12} rowGap={1}>
@@ -331,9 +415,18 @@ const EditReportOrder = ({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          {/* <IconButton onClick={() => removeItem(item.name)}>
-                            <RemoveCircleIcon sx={{ color: errorColor }} />
-                          </IconButton> */}
+                          {!item?.inventoryItemId ? (
+                            <IconButton
+                              onClick={() =>
+                                setDeleteItemProps({
+                                  open: true,
+                                  targetObj: item,
+                                })
+                              }
+                            >
+                              <RemoveCircleIcon sx={{ color: errorColor }} />
+                            </IconButton>
+                          ) : null}
                         </Box>
                       </Grid>
                       <Grid item container columnSpacing={2}>

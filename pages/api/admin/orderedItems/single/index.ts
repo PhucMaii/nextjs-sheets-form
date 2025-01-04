@@ -3,7 +3,10 @@ import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
 import { generateOrderTotalPrice } from '../PUT';
 import { getUserInfo } from '@/pages/api/utils/auth';
-import { checkOrderValidToAffectInventory, formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import {
+  checkOrderValidToAffectInventory,
+  formatItemsWithTotalPrice,
+} from '@/pages/api/utils/order';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -137,8 +140,10 @@ export const updateSingleInventoryItem = async (
         console.error('Conflict Order Not Found');
         return;
       }
-      
-      const isValidToCheckInventory = checkOrderValidToAffectInventory(order.deliveryDate);
+
+      const isValidToCheckInventory = checkOrderValidToAffectInventory(
+        order.deliveryDate,
+      );
 
       if (!order?.isAffectInventory || !isValidToCheckInventory) {
         console.log('Inventory Avoided');

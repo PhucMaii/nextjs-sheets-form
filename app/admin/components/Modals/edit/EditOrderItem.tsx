@@ -90,7 +90,7 @@ export default function EditItemModal({
           </Grid>
           <Grid item xs={6}>
             <TextField
-              label="Quantity"
+              label="Unit Price"
               value={item.price}
               onChange={(e: any) =>
                 setItem((prevOrder: OrderedItems) => ({

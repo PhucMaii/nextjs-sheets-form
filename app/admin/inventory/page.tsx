@@ -15,7 +15,8 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 
 export default function InventoryPage() {
-  const [isTrackingInventory, setIsTrackingInventory] = useState<boolean>(false);
+  const [isTrackingInventory, setIsTrackingInventory] =
+    useState<boolean>(false);
   const [isOpenAddStockPurchased, setIsOpenAddStockPurchased] =
     useState<boolean>(false);
   const [tabIndex, setTabIndex] = useState<number>(0);
@@ -41,7 +42,7 @@ export default function InventoryPage() {
       showNotification('error', 'Internal Server Error: ' + error);
       setIsTrackingInventory(false);
     }
-  }
+  };
 
   return (
     <Sidebar>
@@ -57,7 +58,12 @@ export default function InventoryPage() {
       <Divider sx={{ my: 2 }} />
 
       <InventoryOverview inventoryItems={inventoryItems?.data || []} />
-      <LoadingButton loading={isTrackingInventory} onClick={handleTrackInventory}>Check Inventory Quantity</LoadingButton>
+      <LoadingButton
+        loading={isTrackingInventory}
+        onClick={handleTrackInventory}
+      >
+        Check Inventory Quantity
+      </LoadingButton>
       <Tabs
         sx={{ borderBottom: 1, borderColor: 'divider' }}
         value={tabIndex}

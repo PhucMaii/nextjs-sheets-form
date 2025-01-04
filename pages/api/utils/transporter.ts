@@ -11,10 +11,23 @@ export const emailTransporter = nodemailer.createTransport({
   },
 });
 
+// export const yahooTransporter = nodemailer.createTransport({
+//   service: 'yahoo',
+//   auth: {
+//     user: email,
+//     pass,
+//   },
+// });
+
+const yahooEmail = process.env.YAHOO_EMAIL;
+
 export const yahooTransporter = nodemailer.createTransport({
+  host: 'smtp.mail.yahoo.com',
+  port: 465,
   service: 'yahoo',
+  secure: false,
   auth: {
-    user: email,
-    pass,
+    user: yahooEmail,
+    pass: 'maithienphuc0102',
   },
 });

@@ -1,6 +1,8 @@
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { normalizeDate } from '../../utils/date';
+import { days } from '@/app/lib/constant';
 
 interface RequestQuery {
   date?: string;
@@ -36,7 +38,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         user: {
           include: {
-            routes: true,
+            routes: {
+              include: {
+                route: {
+                  include: {
+                    driver: true,
+                  },
+                },
+              },
+            },
             preference: true,
             category: true,
           },
@@ -116,6 +126,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         };
       });
 
+      // Get same order in same date
       const sameClientOrder = orders.filter(
         (sameOrder: any) =>
           sameOrder.userId === order.userId &&
@@ -123,6 +134,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           sameOrder.status !== ORDER_STATUS.VOID &&
           order.status !== ORDER_STATUS.VOID,
       );
+
+      // Get order route
+      const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
+      const orderDayIndex = orderDeliveryDate.getDay();
+      const orderDay = days[orderDayIndex];
+      const orderRoute = order.user.routes.find((route: any) => {
+        return route.route.day === orderDay;
+      });
 
       return {
         ...order,
@@ -134,6 +153,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           ? previousUnpaidCodOrdersMap[order.user.clientId]
           : null,
         multipleOrders: sameClientOrder.length > 1 ? true : false,
+        orderRoute: orderRoute
+          ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
+          : 'No route',
       };
     });
 

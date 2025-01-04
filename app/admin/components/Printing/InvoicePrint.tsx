@@ -146,7 +146,8 @@ export const InvoicePrint = forwardRef(
                         const isTax = order?.items?.some(
                           (item) =>
                             item?.inventoryItem?.hasPST &&
-                            item?.inventoryItem?.hasGST && item?.quantity > 0,
+                            item?.inventoryItem?.hasGST &&
+                            item?.quantity > 0,
                         );
                         return (
                           <TableRow

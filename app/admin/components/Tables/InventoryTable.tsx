@@ -29,11 +29,11 @@ export default function InventoryTable({
   inventoryItems,
   showNotification,
 }: IProps) {
-  const[viewItemMissingProps, setViewItemMissingProps] = useState<any>({
+  const [viewItemMissingProps, setViewItemMissingProps] = useState<any>({
     open: false,
     inventoryItem: inventoryItems[0],
-    quantity: inventoryItems[0]?.quantity || 0
-  })
+    quantity: inventoryItems[0]?.quantity || 0,
+  });
 
   const handleDelete = async (targetObj: IInventoryItem) => {
     try {
@@ -55,91 +55,109 @@ export default function InventoryTable({
 
   return (
     <>
-      {viewItemMissingProps && 
-        <ViewItemMissing 
-          open={viewItemMissingProps.open} 
-          onClose={() => setViewItemMissingProps((prevState: any) => ({...prevState, open: false}))} 
-          inventoryItem={viewItemMissingProps.inventoryItem} 
-          quantity={viewItemMissingProps.quantity} 
-          />
-      }
-    <Paper sx={{ overflow: 'scroll' }}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell style={{ width: 50 }}></TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Vendor - Unit Value</TableCell>
-            <TableCell>Quantity</TableCell>
-            <TableCell>Total Value</TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {inventoryItems.map((item: IInventoryItem, index: number) => {
-            let unit;
-            for (const vendorItem of item.vendorItem) {
-              unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
-            }
+      {viewItemMissingProps && (
+        <ViewItemMissing
+          open={viewItemMissingProps.open}
+          onClose={() =>
+            setViewItemMissingProps((prevState: any) => ({
+              ...prevState,
+              open: false,
+            }))
+          }
+          inventoryItem={viewItemMissingProps.inventoryItem}
+          quantity={viewItemMissingProps.quantity}
+        />
+      )}
+      <Paper sx={{ overflow: 'scroll' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell style={{ width: 50 }}></TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Vendor - Unit Value</TableCell>
+              <TableCell>Quantity</TableCell>
+              <TableCell>Total Value</TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {inventoryItems.map((item: IInventoryItem, index: number) => {
+              let unit;
+              for (const vendorItem of item.vendorItem) {
+                unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
+              }
 
-            return (
-              <TableRow key={index}>
-                <TableCell>
-                  {item.quantity < 0 ? <IconButton size="small" color="primary" onClick={() => setViewItemMissingProps((prevState: any) => ({...prevState, open: true, inventoryItem: item, quantity: item.quantity}))}>
-                    <PhoneIcon size={20} />
-                  </IconButton> : null}
-                </TableCell>
-                <TableCell>
-                  <Typography>{item.name}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" flexDirection="column" gap={3}>
-                    {item?.vendorItem?.map((vItem) => {
-                      const smallestUnit = vItem?.unit.find(
-                        (unit: any) => unit?.ratio === 1,
-                      );
-                      return (
-                        <Typography>
-                          {vItem?.vendor?.name}{' '}
-                          <strong>(${smallestUnit?.unitPrice})</strong>
-                        </Typography>
-                      );
-                    })}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" gap={1} alignItems="center">
-                    <Typography>
-                      {item?.quantity} {unit?.unit}
-                    </Typography>
-                    <BatchQuantityModal
-                      fifoList={item?.fifo || []}
-                      showNotification={showNotification}
-                    />
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Typography>${item?.totalValue?.toFixed(2)}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" gap={2}>
-                    <DeleteModal
-                      includedButton
-                      targetObj={item}
-                      handleDelete={handleDelete}
-                    />
-                    <EditInventory
-                      inventoryItem={item}
-                      showNotification={showNotification}
-                    />
-                  </Box>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </Paper>
+              return (
+                <TableRow key={index}>
+                  <TableCell>
+                    {item.quantity < 0 ? (
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() =>
+                          setViewItemMissingProps((prevState: any) => ({
+                            ...prevState,
+                            open: true,
+                            inventoryItem: item,
+                            quantity: item.quantity,
+                          }))
+                        }
+                      >
+                        <PhoneIcon size={20} />
+                      </IconButton>
+                    ) : null}
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{item.name}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Box display="flex" flexDirection="column" gap={3}>
+                      {item?.vendorItem?.map((vItem) => {
+                        const smallestUnit = vItem?.unit.find(
+                          (unit: any) => unit?.ratio === 1,
+                        );
+                        return (
+                          <Typography>
+                            {vItem?.vendor?.name}{' '}
+                            <strong>(${smallestUnit?.unitPrice})</strong>
+                          </Typography>
+                        );
+                      })}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box display="flex" gap={1} alignItems="center">
+                      <Typography>
+                        {item?.quantity} {unit?.unit}
+                      </Typography>
+                      <BatchQuantityModal
+                        fifoList={item?.fifo || []}
+                        showNotification={showNotification}
+                      />
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>${item?.totalValue?.toFixed(2)}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Box display="flex" gap={2}>
+                      <DeleteModal
+                        includedButton
+                        targetObj={item}
+                        handleDelete={handleDelete}
+                      />
+                      <EditInventory
+                        inventoryItem={item}
+                        showNotification={showNotification}
+                      />
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Paper>
     </>
   );
 }

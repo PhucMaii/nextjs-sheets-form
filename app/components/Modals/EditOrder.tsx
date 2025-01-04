@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import { grey } from '@mui/material/colors';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -106,7 +107,13 @@ export default function EditOrder({
               itemList.map((item: Item) => {
                 return (
                   <Grid key={item.id} container item spacing={1}>
-                    <Grid item xs={12}>
+                    <Grid
+                      item
+                      xs={12}
+                      sx={{
+                        color: !item.inventoryItemId ? grey[600] : 'black',
+                      }}
+                    >
                       {item.name} - ${item.price}
                     </Grid>
                     <Grid item xs={12}>
@@ -115,6 +122,7 @@ export default function EditOrder({
                         label="Quantity"
                         type="number"
                         value={item.quantity}
+                        disabled={!item.inventoryItemId}
                         onChange={(e) => handleChangeItem(e, item.id)}
                       />
                     </Grid>

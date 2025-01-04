@@ -1,4 +1,4 @@
-import { getTodayDate, normalizeDate } from "./date";
+import { getTodayDate, normalizeDate } from './date';
 
 export const formatItemsWithTotalPrice = (items: any[]) => {
   return items.map((item: any) => {
@@ -16,7 +16,7 @@ export const formatItemsWithTotalPrice = (items: any[]) => {
 
 export const checkOrderValidToAffectInventory = (deliveryDate: string) => {
   const trackInventoryHour = 5;
-  const {date, time: currentTime} = getTodayDate();
+  const { date, time: currentTime } = getTodayDate();
 
   const normalizedToday = normalizeDate(new Date(date));
   const normalizedOrderDate = normalizeDate(new Date(deliveryDate));
@@ -40,9 +40,9 @@ export const checkOrderValidToAffectInventory = (deliveryDate: string) => {
         if (Number(minute) < 30) {
           return false;
         }
-      } 
+      }
     }
   }
 
   return true;
-}
+};

@@ -44,7 +44,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Group order by mm/yyyy
-    const debtOrdersByMonth = groupOrderByMMYYYY(incompletedOrders, endMonth, endYear);
+    const debtOrdersByMonth = groupOrderByMMYYYY(
+      incompletedOrders,
+      endMonth,
+      endYear,
+    );
 
     return res.status(200).json({
       data: debtOrdersByMonth,
@@ -60,7 +64,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-export const groupOrderByMMYYYY = (orders: Orders[], endMonth: string, endYear: string) => {
+export const groupOrderByMMYYYY = (
+  orders: Orders[],
+  endMonth: string,
+  endYear: string,
+) => {
   const debtOrdersByMonth = orders.reduce((acc: any, order: Orders) => {
     const splitDeliveryDate = order.deliveryDate.split('/');
     if (Number(splitDeliveryDate[2]) > Number(endYear)) {

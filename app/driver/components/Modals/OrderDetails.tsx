@@ -17,7 +17,7 @@ import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { LoadingButton } from '@mui/lab';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
@@ -113,8 +113,10 @@ export default function OrderDetails({
             </Typography>
             <OrderDetailsTable
               order={order}
+              items={order.items}
               handleUpdateItem={handleUpdateItem}
               abilityToEdit={abilityToEdit}
+              role={USER_ROLE.DRIVER}
             />
           </Grid>
           <Grid
@@ -136,31 +138,33 @@ export default function OrderDetails({
               </Typography>
             </Grid>
           </Grid>
-          {abilityToEdit && <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={6}>
-                <LoadingButton
-                  onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
-                  loading={isLoading}
-                  fullWidth
-                  variant="contained"
-                >
-                  Delivered
-                </LoadingButton>
+          {abilityToEdit && (
+            <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={6}>
+                  <LoadingButton
+                    onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
+                    loading={isLoading}
+                    fullWidth
+                    variant="contained"
+                  >
+                    Delivered
+                  </LoadingButton>
+                </Grid>
+                <Grid item xs={6}>
+                  <LoadingButton
+                    onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
+                    loading={isLoading}
+                    color="success"
+                    fullWidth
+                    variant="contained"
+                  >
+                    Collected
+                  </LoadingButton>
+                </Grid>
               </Grid>
-              <Grid item xs={6}>
-                <LoadingButton
-                  onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
-                  loading={isLoading}
-                  color="success"
-                  fullWidth
-                  variant="contained"
-                >
-                  Collected
-                </LoadingButton>
-              </Grid>
-            </Grid>
-          </Box>}
+            </Box>
+          )}
         </Grid>
       </BoxModal>
     </Modal>

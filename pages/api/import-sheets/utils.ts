@@ -6,7 +6,7 @@ import { pusherServer } from '@/app/pusher';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { gstRate, pstRate } from '@/app/lib/constant';
+import { generateOrderTotalPrice } from '../admin/orderedItems/PUT';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -45,160 +45,6 @@ export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
   return userOrders;
 };
 
-// export const createOrder = async (
-//   body: any,
-//   existingUser: any,
-//   createdBy: string,
-// ) => {
-//   const prisma = new PrismaClient();
-
-//   // Initialize new order
-//   const newOrder = await prisma.orders.create({
-//     data: {
-//       deliveryDate: body['DELIVERY DATE'],
-//       orderTime: body.orderTime,
-//       userId: existingUser.id,
-//       totalPrice: 0,
-//       note: body['NOTE'],
-//       status: ORDER_STATUS.INCOMPLETED,
-//       createdBy,
-//     },
-//   });
-
-//   let totalPrice = 0;
-//   const itemList: any = [];
-//   // Loop through each item from request and save it to order
-//   for (const item of Object.keys(body)) {
-//     if (item === 'DELIVERY DATE') {
-//       continue;
-//     }
-
-//     if (item === 'NOTE') {
-//       continue;
-//     }
-
-//     const itemData = await prisma.item.findFirst({
-//       where: {
-//         name: item,
-//         categoryId: existingUser.categoryId,
-//       },
-//     });
-
-//     // TODO: Check if item exist when Item page set up correctly
-
-//     // if (!itemData?.inventoryItemId) {
-//     //   return res.status(500).json({
-//     //     error: `Item ${item} has no inventory item`,
-//     //   });
-//     // }
-//     // Get inventory item
-//     let inventoryItem: any = null;
-
-//     if (itemData?.inventoryItemId) {
-//       inventoryItem = await prisma.inventoryItem.findUnique({
-//         where: {
-//           id: itemData.inventoryItemId,
-//         },
-//       });
-//     }
-
-//     // TODO: Check if item exist when Item page set up correctly
-//     // if (!inventoryItem) {
-//     //   return res.status(500).json({
-//     //     error: `Inventory Item for item ${item} does not exist`,
-//     //   });
-//     // }
-
-//     if (itemData) {
-//       totalPrice += itemData.price * body[item];
-
-//       const orderedItems = await prisma.orderedItems.create({
-//         data: {
-//           name: itemData.name,
-//           price: itemData.price,
-//           orderId: newOrder.id,
-//           quantity: body[item],
-//           inventoryItemId: itemData.inventoryItemId,
-//         },
-//       });
-
-//       itemList.push({
-//         ...orderedItems,
-//         totalPrice: itemData.price * body[item],
-//       });
-
-//       if (inventoryItem) {
-//         // update inventory item
-//         await prisma.inventoryItem.update({
-//           where: {
-//             id: inventoryItem.id,
-//           },
-//           data: {
-//             quantity: inventoryItem.quantity - body[item],
-//           },
-//         });
-//       }
-//     }
-//   }
-
-//   // Update the order with the totalPrice
-//   const updatedNewOrder = await prisma.orders.update({
-//     where: {
-//       id: newOrder.id,
-//     },
-//     data: {
-//       totalPrice,
-//     },
-//     include: {
-//       items: true,
-//       user: {
-//         include: {
-//           category: true,
-//         },
-//       },
-//     },
-//   });
-
-//   await pusherServer?.trigger('admin', 'incoming-order', {
-//     ...updatedNewOrder,
-//     items: itemList,
-//     ...existingUser,
-//     id: newOrder.id,
-//     totalPrice,
-//     category: existingUser.category,
-//   });
-
-//   const items = await prisma.item.findMany({
-//     where: {
-//       categoryId: existingUser.categoryId,
-//     },
-//   });
-//   // Generate object of quantity, price, and totalPrice
-//   const orderDetails = body;
-//   for (const item of items) {
-//     if (Object.prototype.hasOwnProperty.call(body, item.name)) {
-//       orderDetails[item.name] = {
-//         quantity: orderDetails[item.name],
-//         price: item.price,
-//         totalPrice: orderDetails[item.name] * item.price,
-//       };
-//     }
-//   }
-
-//   // Notify Email for admin
-//   const isSendToAdmin = true;
-//   await sendEmail(
-//     existingUser,
-//     updatedNewOrder.items,
-//     newOrder.id,
-//     body['DELIVERY DATE'],
-//     isSendToAdmin,
-//     body['NOTE'],
-//   );
-
-//   return updatedNewOrder;
-// };
-
 export const overrideOrder = async (
   user: any,
   orderId: number,
@@ -208,9 +54,6 @@ export const overrideOrder = async (
 ) => {
   const prisma = new PrismaClient();
   try {
-    let subTotal = 0;
-    let PST = 0;
-    let GST = 0;
     let discount = 0;
     const itemList: any = [];
     for (const item of newItems) {
@@ -245,20 +88,6 @@ export const overrideOrder = async (
       if (newItem.isShowDiscount && newItem.prevPrice) {
         discount += newItem.quantity * (newItem.prevPrice - newItem.price);
       }
-      subTotal +=
-        newItem.quantity *
-        (newItem?.isShowDiscount && newItem?.prevPrice
-          ? newItem.prevPrice
-          : newItem.price);
-      if (newItem.inventoryItem) {
-        if (newItem?.inventoryItem?.hasPST) {
-          PST += newItem.quantity * newItem.price * pstRate;
-        }
-
-        if (newItem?.inventoryItem?.hasGST) {
-          GST += newItem.quantity * newItem.price * gstRate;
-        }
-      }
 
       itemList.push({
         ...newItem,
@@ -277,15 +106,31 @@ export const overrideOrder = async (
       }
     }
 
+    const existingOrder = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!existingOrder) {
+      console.error('Order not found');
+      return;
+    }
+
+    const total = generateOrderTotalPrice(existingOrder.items);
+
     const updatedOrder = await prisma.orders.update({
       where: {
         id: orderId,
       },
       data: {
-        subTotal: subTotal,
-        PST: PST,
-        GST: GST,
-        totalPrice: subTotal + PST + GST - discount,
+        subTotal: total.subTotal,
+        PST: total.PST,
+        GST: total.GST,
+        totalPrice: total.totalPrice,
         discount,
         note: newNote,
         isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,

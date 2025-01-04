@@ -34,7 +34,6 @@ export const sortByDeliveryDate = (
   orders: any[],
   field: string = 'deliveryDate',
 ): any => {
-  console.log({ orders, field }, 'SORT FUNCTION');
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(orderA[field]);
     const deliveryDateB: any = convertDeliveryDateStringToDate(orderB[field]);
@@ -64,7 +63,7 @@ export const getSameDateLastWeek = (currentDate: string | Date) => {
   return sameDateLastWeek;
 };
 
-export const normalizeDate = (date: Date) => {
+export const normalizeDate = (date: Date | string) => {
   const normalized = new Date(date);
   normalized.setHours(0, 0, 0, 0);
   return normalized;
@@ -88,7 +87,10 @@ export const generate7DaysBefore = (deliveryDate: string) => {
   return dayList;
 };
 
-export const getTodayDate = (dateStyle: "short" | "long" | "full" | "medium" | undefined = 'short', timeStyle: "short" | "long" = 'long') => {
+export const getTodayDate = (
+  dateStyle: 'short' | 'long' | 'full' | 'medium' | undefined = 'short',
+  timeStyle: 'short' | 'long' = 'long',
+) => {
   const pstDate = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Los_Angeles',
     dateStyle,
@@ -101,8 +103,7 @@ export const getTodayDate = (dateStyle: "short" | "long" | "full" | "medium" | u
 
   const month = dateSplitted[0].padStart(2, '0');
   const day = dateSplitted[1].padStart(2, '0');
-  const year = dateSplitted[2]
+  const year = dateSplitted[2];
 
-
-  return {date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1]};
-}
+  return { date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1] };
+};

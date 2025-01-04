@@ -2,7 +2,12 @@ import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-const useApiDebtData = (userId: number, endMonth: number, endYear: number, orderList: any) => {
+const useApiDebtData = (
+  userId: number,
+  endMonth: number,
+  endYear: number,
+  orderList: any,
+) => {
   const [debtData, setDebtData] = useState<any>();
   const [sortDebtKeys, setSortDebtKeys] = useState<any>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
