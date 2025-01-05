@@ -7,6 +7,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { generateOrderTotalPrice } from '../admin/orderedItems/PUT';
+import { checkOrderDeliveryDateValid } from '../utils/date';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -53,6 +54,23 @@ export const overrideOrder = async (
   updatedBy: string,
 ) => {
   const prisma = new PrismaClient();
+
+  const order = await prisma.orders.findUnique({
+    where: {
+      id: orderId,
+    },
+    include: {
+      items: true,
+    },
+  });
+
+  if (order && updatedBy.split(' - ')[0] === 'Client') {
+    const isValidDate = checkOrderDeliveryDateValid(order.deliveryDate);
+    if (!isValidDate.ok) {
+      throw new Error(isValidDate.message);
+    }
+  }
+
   try {
     let discount = 0;
     const itemList: any = [];

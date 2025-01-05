@@ -1,4 +1,5 @@
 import { Order } from '@/app/admin/orders/page';
+import { limitOrderHour } from '@/app/lib/constant';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Expense } from '@prisma/client';
 
@@ -107,3 +108,30 @@ export const getTodayDate = (
 
   return { date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1] };
 };
+
+export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
+  const selectedDate = normalizeDate(deliveryDate);
+  const today = getTodayDate();
+  const currentDate = new Date(today.date);
+  console.log(currentDate.getHours())
+
+  console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime()});
+
+  if (selectedDate.getTime() < currentDate.getTime()) {
+    return {ok: false, message: 'Cannot create order for past date'}
+    // return res.status(400).json({
+    //   error: 'Cannot create order for past date',
+    // });
+  }
+
+  if (selectedDate.getTime() === currentDate.getTime()) {
+    if (Number(today.time.split(':')[0]) >= limitOrderHour) {
+      return {ok: false, message: 'Cannot create order for past date'}
+      // return res.status(400).json({
+      //   error: 'Cannot create order for past date',
+      // });
+    }
+  }
+
+  return {ok: true};
+}

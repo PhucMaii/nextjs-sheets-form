@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
-import { normalizeDate, sortByDeliveryDate } from '../../utils/date';
+import { checkOrderDeliveryDateValid, normalizeDate, sortByDeliveryDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
 import { checkHasClientOrder } from '../../import-sheets/utils';
 import { generateOrderTotalPrice } from '../orderedItems/PUT';
@@ -186,6 +186,13 @@ export const createOrder = async (
 ) => {
   try {
     const prisma = new PrismaClient();
+
+    if (createdBy.split(' - ')[0] === 'Client') {
+      const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
+      if (!isValidDate.ok) {
+        throw new Error(isValidDate.message);
+      }
+    }
 
     const total = generateOrderTotalPrice(items);
 

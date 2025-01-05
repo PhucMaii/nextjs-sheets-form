@@ -281,6 +281,39 @@ async function main() {
   //     // });
   //   }
   // }
+
+    const startDate = new Date('2024-12-01');
+    const endDate = new Date('2025-01-31');
+    const decemberDayList = generateListOfDateString(startDate, endDate);
+  const orders: any = await prisma.orders.findMany({
+    where: {
+      deliveryDate: {
+        in: decemberDayList,
+      },
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  for (const order of orders) {
+    const createdAt = new Date(order.orderTime.split(' ')[1]);
+    const deliveryDate = new Date(order.deliveryDate);
+    createdAt.setHours(0, 0, 0, 0);
+    deliveryDate.setHours(0, 0, 0, 0);
+    // console.log({createdAt, deliveryDate});
+    if (createdAt.getTime() >= deliveryDate.getTime() && order.createdBy.split(' - ')[0] === 'Client') {
+      console.log({
+        id: order.id,
+        deliveryDate: order.deliveryDate,
+        orderTime: order.orderTime,
+        clientName: order?.user?.clientName,
+        clientId: order?.user?.clientId,
+        createdAt,
+        deliveryDateFormat: deliveryDate
+      });
+    }
+  }
 }
 
 main()
