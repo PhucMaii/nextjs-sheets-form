@@ -5,7 +5,7 @@ import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
-import { normalizeDate } from '../utils/date';
+import { getTodayDate, normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 import {
   checkHasClientOrder,
@@ -17,6 +17,7 @@ import { createOrder } from '../admin/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
 import { formatItemsWithTotalPrice } from '../utils/order';
+import { limitOrderHour } from '@/app/lib/constant';
 
 interface RequestQuery {
   userId?: string;
@@ -66,6 +67,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(401).json({ error: 'You are not authenticated' });
       }
       id = session.user.id;
+    }
+
+    if (createdBy === USER_ROLE.CLIENT) {
+      const selectedDate = normalizeDate(deliveryDate);
+      const today = getTodayDate();
+      const currentDate = new Date(today.date);
+      console.log(currentDate.getHours())
+
+      console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime()});
+
+      if (selectedDate.getTime() < currentDate.getTime()) {
+        return res.status(400).json({
+          error: 'Cannot create order for past date',
+        });
+      }
+
+      if (selectedDate.getTime() === currentDate.getTime()) {
+        if (Number(today.time.split(':')[0]) >= limitOrderHour) {
+          return res.status(400).json({
+            error: 'Cannot create order for past date',
+          });
+        }
+      }
     }
 
     // Check does user exist
