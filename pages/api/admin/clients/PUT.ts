@@ -4,6 +4,7 @@ import { IItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
+import { generateLatLng } from './POST';
 
 interface BodyTypes {
   userId: number;
@@ -34,8 +35,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       password,
     }: BodyTypes = req.body;
 
-    console.log(email, 'email');
-
     const existingUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -44,23 +43,26 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updateFields: any = {};
 
-    if (clientId) {
+    if (clientId !== existingUser?.clientId) {
       updateFields.clientId = clientId;
     }
 
-    if (clientName) {
+    if (clientName !== existingUser?.clientName) {
       updateFields.clientName = clientName;
     }
 
-    if (email) {
+    if (email !== existingUser?.email) {
       updateFields.email = email;
     }
 
-    if (deliveryAddress) {
+    if (deliveryAddress && deliveryAddress !== existingUser?.deliveryAddress) {
       updateFields.deliveryAddress = deliveryAddress;
+      const addresss = await generateLatLng(deliveryAddress);
+      updateFields.deliveryAddressLat = addresss.latitude;
+      updateFields.deliveryAddressLng = addresss.longitude;
     }
 
-    if (contactNumber) {
+    if (contactNumber !== existingUser?.contactNumber) {
       updateFields.contactNumber = contactNumber;
     }
 
