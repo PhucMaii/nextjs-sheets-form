@@ -85,14 +85,12 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   currentDate.setDate(currentDate.getDate() + 1);
 
   while (currentDate.getTime() <= endDate.getTime()) {
-    console.log({ currentDate, endDate, dates });
     // dates.push(currentDate);
     const currentDateString = YYYYMMDDFormat(currentDate);
     dates.push(currentDateString);
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  console.log(dates, 'dates');
   return dates;
 };
 

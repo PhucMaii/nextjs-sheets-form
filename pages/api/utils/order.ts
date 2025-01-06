@@ -32,14 +32,8 @@ export const checkOrderValidToAffectInventory = (deliveryDate: string) => {
       const minute = currentTime.split(':')[1];
 
       console.log({ hour, minute });
-      if (Number(hour) < trackInventoryHour) {
+      if (Number(hour) < trackInventoryHour || Number(hour) === 12) {
         return false;
-      }
-
-      if (Number(hour) === trackInventoryHour) {
-        if (Number(minute) < 30) {
-          return false;
-        }
       }
     }
   }

@@ -25,6 +25,9 @@ interface IBody {
   paymentMethodId: number;
   spentBy: string;
   invoice: string;
+  PST?: number;
+  GST?: number;
+  subTotal?: number;
   // oldItemIds: number[]; // Ordered items ids
   oldItems: IPurchasedItem[];
   updatedItems: IPurchasedItem[];
@@ -42,11 +45,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       description,
       date,
       paymentMethodId,
+      PST,
+      GST,
+      subTotal,
       spentBy,
       oldItems,
       updatedItems,
       updatedAt,
     }: IBody = req.body;
+
 
     const existingExpense = await prisma.expense.findUnique({
       where: {
@@ -92,6 +99,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         amount: amount,
+        PST: PST,
+        GST: GST,
+        subTotal: subTotal,
         description: description,
         date: date,
         invoice,

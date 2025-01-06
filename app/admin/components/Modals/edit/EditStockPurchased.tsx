@@ -34,7 +34,7 @@ import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import EditUnit from './EditUnit';
 import UnitRadio from '../../Radio/UnitRadio';
 // import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
-import { gstRate, pstRate } from '@/app/lib/constant';
+// import { gstRate, pstRate } from '@/app/lib/constant';
 import { ModalProps } from '../type';
 
 interface IProps extends ModalProps {
@@ -108,6 +108,8 @@ const EditStockPurchased = ({
     }
   }, [adminsAndDriversRes]);
 
+  console.log('stockPurchased', stockPurchased);
+
   // const fetchAdminsAndDrivers = async () => {
   //   const user: any = getAdminsAndDrivers(showNotification);
   //   setAdminsAndDrivers(user);
@@ -119,11 +121,11 @@ const EditStockPurchased = ({
   //   }
   // }, [open]);
 
-  useEffect(() => {
-    if (purchasedItems.length > 0) {
-      calculateNewAmount();
-    }
-  }, [purchasedItems]);
+  // useEffect(() => {
+  //   if (purchasedItems.length > 0) {
+  //     calculateNewAmount();
+  //   }
+  // }, [purchasedItems]);
 
   useEffect(() => {
     if (selectedVendorId !== -1) {
@@ -249,48 +251,48 @@ const EditStockPurchased = ({
     });
   };
 
-  const calculateNewAmount = () => {
-    // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
-    //   return acc + item.unit.unitPrice * item.quantity;
-    // }, 0);
-    const total = purchasedItems.reduce((acc: any, item: any) => {
-      if (!acc?.subTotal) {
-        acc.subTotal = 0;
-      }
+  // const calculateNewAmount = () => {
+  //   // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
+  //   //   return acc + item.unit.unitPrice * item.quantity;
+  //   // }, 0);
+  //   const total = purchasedItems.reduce((acc: any, item: any) => {
+  //     if (!acc?.subTotal) {
+  //       acc.subTotal = 0;
+  //     }
 
-      if (!acc?.PST) {
-        acc.PST = 0;
-      }
+  //     if (!acc?.PST) {
+  //       acc.PST = 0;
+  //     }
 
-      if (!acc?.GST) {
-        acc.GST = 0;
-      }
+  //     if (!acc?.GST) {
+  //       acc.GST = 0;
+  //     }
 
-      acc.subTotal += item.unitPrice * item.quantity;
+  //     acc.subTotal += item.unitPrice * item.quantity;
 
-      if (item?.inventoryItem?.hasPST) {
-        acc.PST += item.unitPrice * item.quantity * pstRate;
-      }
+  //     if (item?.inventoryItem?.hasPST) {
+  //       acc.PST += item.unitPrice * item.quantity * pstRate;
+  //     }
 
-      if (item?.inventoryItem?.hasGST) {
-        acc.GST += item.unitPrice * item.quantity * gstRate;
-      }
+  //     if (item?.inventoryItem?.hasGST) {
+  //       acc.GST += item.unitPrice * item.quantity * gstRate;
+  //     }
 
-      return acc;
-    }, {});
+  //     return acc;
+  //   }, {});
 
-    // setTotalAmount(newAmount);
-    setUpdatedExpense((prevState: any) => ({
-      ...prevState,
-      amount:
-        parseFloat(total.subTotal.toFixed(2)) +
-        parseFloat(total.PST.toFixed(2)) +
-        parseFloat(total.GST.toFixed(2)),
-      subTotal: parseFloat(total.subTotal.toFixed(2)),
-      GST: parseFloat(total.GST.toFixed(2)),
-      PST: parseFloat(total.PST.toFixed(2)),
-    }));
-  };
+  //   // setTotalAmount(newAmount);
+  //   setUpdatedExpense((prevState: any) => ({
+  //     ...prevState,
+  //     amount:
+  //       parseFloat(total.subTotal.toFixed(2)) +
+  //       parseFloat(total.PST.toFixed(2)) +
+  //       parseFloat(total.GST.toFixed(2)),
+  //     subTotal: parseFloat(total.subTotal.toFixed(2)),
+  //     GST: parseFloat(total.GST.toFixed(2)),
+  //     PST: parseFloat(total.PST.toFixed(2)),
+  //   }));
+  // };
 
   const handleOnChangeUnitPrice = (e: any) => {
     const newUnitPrice = +e.target.value;

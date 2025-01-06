@@ -282,38 +282,117 @@ async function main() {
   //   }
   // }
 
-    const startDate = new Date('2024-12-01');
-    const endDate = new Date('2025-01-31');
-    const decemberDayList = generateListOfDateString(startDate, endDate);
-  const orders: any = await prisma.orders.findMany({
-    where: {
-      deliveryDate: {
-        in: decemberDayList,
-      },
-    },
-    include: {
-      user: true,
-    },
-  });
+  /**CHECK IF SCHEDULED ORDERS ITEMS ARE MATCH WITH CATEGORY */
+  // const scheduleOrderItems = await prisma.orderedItems.findMany({
+  //   where: {
+  //     scheduledOrderId: {
+  //       not: null
+  //     }
+  //   },
+  //   include: {
+  //     ScheduleOrders: {
+  //       include: {
+  //         user: true
+  //       }
+  //     }
+  //   }
+  // });
 
-  for (const order of orders) {
-    const createdAt = new Date(order.orderTime.split(' ')[1]);
-    const deliveryDate = new Date(order.deliveryDate);
-    createdAt.setHours(0, 0, 0, 0);
-    deliveryDate.setHours(0, 0, 0, 0);
-    // console.log({createdAt, deliveryDate});
-    if (createdAt.getTime() >= deliveryDate.getTime() && order.createdBy.split(' - ')[0] === 'Client') {
-      console.log({
-        id: order.id,
-        deliveryDate: order.deliveryDate,
-        orderTime: order.orderTime,
-        clientName: order?.user?.clientName,
-        clientId: order?.user?.clientId,
-        createdAt,
-        deliveryDateFormat: deliveryDate
-      });
-    }
-  }
+  // const categoryItems = await prisma.item.findMany({});
+
+  // for (const scheduleOrderItem of scheduleOrderItems) {
+  //   const categoryItem = categoryItems.find((categoryItem: any) => {
+  //     return categoryItem.inventoryItemId === scheduleOrderItem.inventoryItemId && categoryItem.categoryId === scheduleOrderItem?.ScheduleOrders?.user.categoryId;
+  //   })
+
+  //     if (!categoryItem) {
+  //       // console.log({
+  //       //   scheduleOrderId: scheduleOrderItem.id,
+  //       //   name: scheduleOrderItem.name,
+  //       //   clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName
+  //       // });
+  //       continue;
+  //     };
+
+  //     // if (scheduleOrderItem.price !== categoryItem.price) {
+  //     //   console.log({
+  //     //     clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
+  //     //     name: scheduleOrderItem.name,
+  //     //     scheduleOrderId: scheduleOrderItem.id,
+  //     //     day: scheduleOrderItem?.ScheduleOrders?.day,
+  //     //     price: scheduleOrderItem.price,
+  //     //     categoryPrice: categoryItem.price
+  //     //   }, 'price');
+  //     // }
+
+  //     if (scheduleOrderItem.isShowDiscount !== categoryItem.isShowDiscount) {
+  //       console.log({
+  //         clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
+  //         name: scheduleOrderItem.name,
+  //         scheduleOrderId: scheduleOrderItem.id,
+  //         day: scheduleOrderItem?.ScheduleOrders?.day,
+  //         isShowDiscount: scheduleOrderItem.isShowDiscount,
+  //         categoryIsShowDiscount: categoryItem.isShowDiscount
+  //       }, 'isShowDiscount');
+  //       // await prisma.orderedItems.update({
+  //       //   where: {
+  //       //     id: scheduleOrderItem.id
+  //       //   },
+  //       //   data: {
+  //       //     isShowDiscount: categoryItem.isShowDiscount,
+  //       //     prevPrice: categoryItem.prevPrice
+  //       //   }
+  //       // });
+  //       continue;
+  //     }
+
+  //     if (scheduleOrderItem.prevPrice !== categoryItem.prevPrice) {
+  //       console.log({
+  //         clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
+  //         name: scheduleOrderItem.name,  
+  //         scheduleOrderId: scheduleOrderItem.id,  
+  //         day: scheduleOrderItem?.ScheduleOrders?.day,
+  //         prevPrice: scheduleOrderItem.prevPrice, 
+  //         categoryPrevPrice: categoryItem.prevPrice
+  //       }, 'prevPrice');
+  //       // await prisma.orderedItems.update({
+  //       //   where: {
+  //       //     id: scheduleOrderItem.id
+  //       //   },
+  //       //   data: {
+  //       //     isShowDiscount: categoryItem.isShowDiscount,
+  //       //     prevPrice: categoryItem.prevPrice
+  //       //   }
+  //       // });
+  //       continue;
+  //     }
+  // }
+
+  // CHECK IF SCHEDULED ORDERS TOTAL PRICE IS CORRECT
+  // const scheduleOrders = await prisma.scheduleOrders.findMany({
+  //   include: {
+  //     user: true,
+  //     items: true,
+  //   }
+  // });
+
+  // for (const scheduleOrder of scheduleOrders) {
+  //   const actualTotalPrice = scheduleOrder.items.reduce((acc: number, item: any) => {
+  //     return acc + (item.price * item.quantity);
+  //   }, 0);
+
+  //   if (scheduleOrder.totalPrice.toFixed(2) !== actualTotalPrice.toFixed(2)) {
+  //     console.log({
+  //       id: scheduleOrder.id,
+  //       clientName: scheduleOrder.user.clientName,
+  //       clientId: scheduleOrder.user.clientId,
+  //       day: scheduleOrder.day,
+  //       totalPrice: scheduleOrder.totalPrice,
+  //       actualTotalPrice
+  //     })
+  //   }
+  // }
+
 }
 
 main()
