@@ -71,6 +71,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const createdBy = `Admin - ${user?.clientName}`;
+    console.log(codBoardId, 'codBoardId');
 
     const newExpense = await prisma.expense.create({
       data: {
