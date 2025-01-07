@@ -453,6 +453,9 @@ export const checkAndUpdateUnits = async (
   createdAt: string,
   createdBy: string,
 ) => {
+  if (newUnits.length === 0) {
+    return;
+  }
   const prisma = new PrismaClient();
 
   const sortedDBUnits = dbUnits.sort((a, b) => a?.ratio - b?.ratio);
