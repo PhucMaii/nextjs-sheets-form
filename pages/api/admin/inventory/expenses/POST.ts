@@ -1,6 +1,7 @@
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IInventoryUnit, IVendorItem } from '@/app/utils/type';
 import { getUserInfo } from '@/pages/api/utils/auth';
+import { deleteInventoryUnit } from '@/pages/api/utils/inventoryUnit';
 import { InventoryUnit, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -495,11 +496,12 @@ export const checkAndUpdateUnits = async (
     } else {
       // CASE 1: dbUnit.ratio < newUnit.ratio
       if (sortedDBUnits[dbIndex]?.ratio < sortedNewUnits[newIndex]?.ratio) {
-        await prisma.inventoryUnit.delete({
-          where: {
-            id: sortedDBUnits[dbIndex]?.id,
-          },
-        });
+        await deleteInventoryUnit([sortedDBUnits[dbIndex]?.id], vendorItemId);
+        // await prisma.inventoryUnit.delete({
+        //   where: {
+        //     id: sortedDBUnits[dbIndex]?.id,
+        //   },
+        // });
         dbIndex++;
       }
 
@@ -520,14 +522,58 @@ export const checkAndUpdateUnits = async (
     }
   }
 
+  const deletedIds = [];
   while (dbIndex < sortedDBUnits.length) {
-    await prisma.inventoryUnit.delete({
-      where: {
-        id: sortedDBUnits[dbIndex]?.id,
-      },
-    });
+    deletedIds.push(sortedDBUnits[dbIndex]?.id);
     dbIndex++;
   }
+
+  await deleteInventoryUnit(deletedIds, vendorItemId);
+  // const vendorItem = await prisma.vendorItem.findUnique({
+  //   where: {
+  //     id: vendorItemId,
+  //   },
+  // })
+  // const inventoryUnits = await prisma.inventoryUnit.findMany({
+  //   where: {
+  //     id: {
+  //       notIn: deletedIds,
+  //     },
+  //     vendorItem: {
+  //       inventoryItemId: vendorItem?.inventoryItemId 
+  //     },
+  //   },
+  // });
+
+  // await prisma.orderedItems.updateMany({
+  //   where: {
+  //     inventoryUnitId: {
+  //       in: deletedIds,
+  //     }
+  //   },
+  //   data: {
+  //     inventoryUnitId: inventoryUnits[0]?.id
+  //   }
+  // })
+
+  // await prisma.item.updateMany({
+  //   where: {
+  //     inventoryUnitId: {
+  //       in: deletedIds,
+  //     }
+  //   },
+  //   data: {
+  //     inventoryUnitId: inventoryUnits[0]?.id
+  //   }
+  // })
+
+  // await prisma.inventoryUnit.deleteMany({
+  //   where: {
+  //     id: {
+  //       in: deletedIds,
+  //     }
+  //   },
+  // });
 
   console.log(newIndex, sortedNewUnits.length);
   while (newIndex < sortedNewUnits.length) {

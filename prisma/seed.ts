@@ -393,6 +393,48 @@ async function main() {
   //   }
   // }
 
+  // const scheduledOrders = await prisma.scheduleOrders.findMany({
+  //   include: {
+  //     user: true,
+  //     items: true,
+  //   }
+  // });
+
+  // const itemsSameName = [];
+  // const deletedIds = [];
+  // for (const scheduledOrder of scheduledOrders) {
+  //   const items = [...scheduledOrder.items];
+
+  //   for (const item of items) {
+  //     const sameItemInOneOrder = scheduledOrder.items.filter((sItem) => {
+  //       return item.name === sItem.name && item.inventoryItemId == sItem.inventoryItemId
+  //     });
+
+  //     if (sameItemInOneOrder.length === 2) {
+  //       itemsSameName.push(item);
+  //       deletedIds.push(sameItemInOneOrder[1].id);
+  //       console.log({
+  //         clientName: scheduledOrder.user.clientName,
+  //         orderId: scheduledOrder.id,
+  //         day: scheduledOrder.day,
+  //         name: item.name,
+  //         inventoryItemId: item.inventoryItemId,
+  //         // sameInventoryItemId: sameItemInOneOrder.inventoryItemId
+  //       });
+  //       break;
+  //     }
+  //   }
+
+  // }
+  // console.log(itemsSameName.length);
+
+  // await prisma.orderedItems.deleteMany({
+  //   where: {
+  //     id: {
+  //       in: deletedIds
+  //     }
+  //   }
+  // });
 }
 
 main()

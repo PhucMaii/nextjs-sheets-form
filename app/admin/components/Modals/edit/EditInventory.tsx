@@ -115,6 +115,12 @@ export default function EditInventory({
   const handleUpdate = async () => {
     setIsLoading(true);
 
+    if (updatedVendorItems.length === 0) {
+      showNotification('error', 'Please add at least one vendor');
+      setIsLoading(false);
+      return;
+    }
+
     if (updatedVendorItems.some((item: any) => item.units.length === 0)) {
       showNotification(
         'error',

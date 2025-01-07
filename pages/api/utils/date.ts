@@ -115,7 +115,7 @@ export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
   const currentDate = new Date(today.date);
   console.log(currentDate.getHours())
 
-  console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime()});
+  console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime(), today});
 
   if (selectedDate.getTime() < currentDate.getTime()) {
     return {ok: false, message: 'Cannot create order for past date'}
@@ -129,7 +129,7 @@ export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
       return {ok: false, message: 'Cannot create order for past date'}
     }
 
-    if (Number(today.time.split(':')[0]) >= limitOrderHour && Number(today.time.split(':')[1]) !== 12) {
+    if (Number(today.time.split(':')[0]) >= limitOrderHour && Number(today.time.split(':')[0]) !== 12) {
       return {ok: false, message: 'Cannot create order for past date'}
       // return res.status(400).json({
       //   error: 'Cannot create order for past date',

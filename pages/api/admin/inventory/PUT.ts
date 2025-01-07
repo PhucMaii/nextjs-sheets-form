@@ -138,6 +138,49 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Delete old vendor items
     if (dbInventoryItemLeft.length > 0) {
+      const inventoryUnits = await prisma.inventoryUnit.findMany({
+        where: {
+          vendorItemId: {
+            notIn: dbInventoryItemLeft.map((item: any) => item.id),
+          },
+          vendorItem: {
+            inventoryItemId: existingInventoryItem.id
+          }
+        },
+      });
+
+      const inventoryUnitsWillBeDeleted = await prisma.inventoryUnit.findMany({
+        where: {
+          vendorItemId: {
+            in: dbInventoryItemLeft.map((item: any) => item.id),
+          },
+        },
+      })
+
+      // Move all item have inventory unit that will be deleted to first inventory unit
+      await prisma.item.updateMany({
+        where: {
+          inventoryUnitId: {
+            in: inventoryUnitsWillBeDeleted.map((item: any) => item.id),
+          },
+        },
+        data: {
+          inventoryUnitId: inventoryUnits[0].id,
+        }
+      });
+
+      // Move all ordered item have inventory unit that will be deleted to first inventory unit
+      await prisma.orderedItems.updateMany({
+        where: {
+          inventoryUnitId: {
+            in: inventoryUnitsWillBeDeleted.map((item: any) => item.id),
+          },
+        },
+        data: {
+          inventoryUnitId: inventoryUnits[0].id,
+        }
+      });
+
       await prisma.vendorItem.deleteMany({
         where: {
           id: {
