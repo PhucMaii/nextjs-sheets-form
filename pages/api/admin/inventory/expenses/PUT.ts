@@ -54,7 +54,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedAt,
     }: IBody = req.body;
 
-
     const existingExpense = await prisma.expense.findUnique({
       where: {
         id: id,

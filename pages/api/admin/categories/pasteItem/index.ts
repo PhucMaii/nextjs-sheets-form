@@ -84,7 +84,8 @@ export default async function handler(
           quantity: existingItem?.quantity || 0,
           inventoryItemId: item?.inventoryItemId || null,
           inventoryUnitId: item?.inventoryUnitId || null,
-          isShowDiscount: existingItem?.isShowDiscount || item?.isShowDiscount || false,
+          isShowDiscount:
+            existingItem?.isShowDiscount || item?.isShowDiscount || false,
           prevPrice: existingItem?.prevPrice || item?.prevPrice || null,
           scheduledOrderId: oldScheduledOrder.id,
         };

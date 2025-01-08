@@ -113,12 +113,16 @@ export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
   const selectedDate = normalizeDate(deliveryDate);
   const today = getTodayDate();
   const currentDate = new Date(today.date);
-  console.log(currentDate.getHours())
+  console.log(currentDate.getHours());
 
-  console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime()});
+  console.log({
+    selectedDate,
+    currentDate,
+    compare: selectedDate.getTime() === currentDate.getTime(),
+  });
 
   if (selectedDate.getTime() < currentDate.getTime()) {
-    return {ok: false, message: 'Cannot create order for past date'}
+    return { ok: false, message: 'Cannot create order for past date' };
     // return res.status(400).json({
     //   error: 'Cannot create order for past date',
     // });
@@ -126,16 +130,19 @@ export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
 
   if (selectedDate.getTime() === currentDate.getTime()) {
     if (today.time.includes('PM')) {
-      return {ok: false, message: 'Cannot create order for past date'}
+      return { ok: false, message: 'Cannot create order for past date' };
     }
 
-    if (Number(today.time.split(':')[0]) >= limitOrderHour && Number(today.time.split(':')[1]) !== 12) {
-      return {ok: false, message: 'Cannot create order for past date'}
+    if (
+      Number(today.time.split(':')[0]) >= limitOrderHour &&
+      Number(today.time.split(':')[1]) !== 12
+    ) {
+      return { ok: false, message: 'Cannot create order for past date' };
       // return res.status(400).json({
       //   error: 'Cannot create order for past date',
       // });
     }
   }
 
-  return {ok: true};
-}
+  return { ok: true };
+};

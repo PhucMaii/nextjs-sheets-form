@@ -68,7 +68,6 @@ export default function InventoryPage() {
   //   setIsOpenOrderPrompt(false);
   // }
 
-
   return (
     <Sidebar>
       {/* <BSOrderPrompt open={isOpenOrderPrompt} onClose={() => setIsOpenOrderPrompt(false)} handlePreOrderForBSKing={handlePreOrderForBSKing}/> */}

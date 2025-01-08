@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import React, { useEffect, useState } from 'react';
 
 export interface ILocalNoti {
   title: string;

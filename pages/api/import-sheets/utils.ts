@@ -52,26 +52,25 @@ export const overrideOrder = async (
   newItems: any,
   newNote: string,
   updatedBy: string,
-) => {
-  const prisma = new PrismaClient();
-
-  const order = await prisma.orders.findUnique({
-    where: {
-      id: orderId,
-    },
-    include: {
-      items: true,
-    },
-  });
-
-  if (order && updatedBy.split(' - ')[0] === 'Client') {
-    const isValidDate = checkOrderDeliveryDateValid(order.deliveryDate);
-    if (!isValidDate.ok) {
-      throw new Error(isValidDate.message);
-    }
-  }
-
+) => {  
   try {
+    const prisma = new PrismaClient();
+  
+    const order = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+      include: {
+        items: true,
+      },
+    });
+  
+    if (order && updatedBy.split(' - ')[0] === 'Client') {
+      const isValidDate = checkOrderDeliveryDateValid(order.deliveryDate);
+      if (!isValidDate.ok) {
+        throw new Error('Cannot override order for past date');
+      }
+    }
     let discount = 0;
     const itemList: any = [];
     for (const item of newItems) {
@@ -135,7 +134,7 @@ export const overrideOrder = async (
 
     if (!existingOrder) {
       console.error('Order not found');
-      return;
+      return {ok: false, error: 'Order not found'};
     }
 
     const total = generateOrderTotalPrice(existingOrder.items);
@@ -178,8 +177,11 @@ export const overrideOrder = async (
       isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
       id: updatedOrder.id,
     });
+
+    return {ok: true, message: 'Order Override Successfully'};
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
+    return {ok: false, error: error.message};
   }
 };
 

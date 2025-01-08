@@ -1,3 +1,4 @@
+import React from 'react';
 import NotificationPopup from '@/app/admin/components/Notification';
 import { Notification } from '@/app/utils/type';
 import { AlertColor } from '@mui/material';

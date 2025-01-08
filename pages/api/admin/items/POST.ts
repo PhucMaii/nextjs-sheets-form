@@ -52,7 +52,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const clientVendorItemUnits = newItem.units.filter(
         (unit: any) => unit.vendorItemId === vItem.id,
       );
-      
+
       await checkAndUpdateUnits(
         vItem.unit,
         clientVendorItemUnits,

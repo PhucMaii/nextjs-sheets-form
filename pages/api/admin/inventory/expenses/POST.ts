@@ -540,7 +540,7 @@ export const checkAndUpdateUnits = async (
   //       notIn: deletedIds,
   //     },
   //     vendorItem: {
-  //       inventoryItemId: vendorItem?.inventoryItemId 
+  //       inventoryItemId: vendorItem?.inventoryItemId
   //     },
   //   },
   // });

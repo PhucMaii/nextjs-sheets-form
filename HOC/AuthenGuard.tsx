@@ -1,4 +1,4 @@
-import { useRouter, usePathname } from 'next/navigation';
+import React, { useRouter, usePathname } from 'next/navigation';
 import { FC, useEffect } from 'react';
 import LoadingComponent from '../app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';

@@ -613,12 +613,12 @@ export default function ReportPage() {
         </div>
       )}
       {/* {clientValue?.clientName === 'All Clients' && ( */}
-        <div style={{ display: 'none' }}>
-          <MemoizedAllPrint
-            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-            ref={billPrint}
-          />
-        </div>
+      <div style={{ display: 'none' }}>
+        <MemoizedAllPrint
+          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+          ref={billPrint}
+        />
+      </div>
       {/* )} */}
       {clientValue?.clientName === 'All Clients' && (
         <>

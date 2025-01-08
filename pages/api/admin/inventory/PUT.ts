@@ -144,8 +144,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             notIn: dbInventoryItemLeft.map((item: any) => item.id),
           },
           vendorItem: {
-            inventoryItemId: existingInventoryItem.id
-          }
+            inventoryItemId: existingInventoryItem.id,
+          },
         },
       });
 
@@ -155,7 +155,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             in: dbInventoryItemLeft.map((item: any) => item.id),
           },
         },
-      })
+      });
 
       // Move all item have inventory unit that will be deleted to first inventory unit
       await prisma.item.updateMany({
@@ -166,7 +166,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: {
           inventoryUnitId: inventoryUnits[0].id,
-        }
+        },
       });
 
       // Move all ordered item have inventory unit that will be deleted to first inventory unit
@@ -178,7 +178,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: {
           inventoryUnitId: inventoryUnits[0].id,
-        }
+        },
       });
 
       await prisma.vendorItem.deleteMany({

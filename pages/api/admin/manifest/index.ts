@@ -332,7 +332,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // console.log('Manifest: ', {orderPrint: sortedOrderByRoutes, itemManifest});
 
-    console.log({orderPrint: sortedOrderByRoutes, itemManifest})
+    console.log({ orderPrint: sortedOrderByRoutes, itemManifest });
     return res.status(200).json({
       data: { orderPrint: sortedOrderByRoutes, itemManifest },
     });

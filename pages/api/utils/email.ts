@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/render-result-naming-convention */
 import { emailTransporter, yahooTransporter } from './transporter';
 import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';

@@ -13,16 +13,25 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./*"]
     },
     "types": ["react-dnd", "react-dnd-html5-backend", "jest"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "babel.config.js",
+    "__test__/*.ts",
+    "__test__/**/*.tsx"
+  ],
   "exclude": ["node_modules"]
 }

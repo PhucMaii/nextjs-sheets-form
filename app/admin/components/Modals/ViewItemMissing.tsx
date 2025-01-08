@@ -50,7 +50,11 @@ export default function ViewItemMissing({
 
   useEffect(() => {
     if (localStorageItem) {
-      setUpdatedQuantity(localStorageItem.date !== todayDate.date ? 0 : localStorageItem.preOrderQuantity);
+      setUpdatedQuantity(
+        localStorageItem.date !== todayDate.date
+          ? 0
+          : localStorageItem.preOrderQuantity,
+      );
     }
   }, [localStorageItem]);
 
