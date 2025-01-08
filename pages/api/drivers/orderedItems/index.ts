@@ -50,6 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Update Inventory Item Quantity
     if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
       await updateSingleInventoryItem(
+        orderId,
         updatedOrderedItem.fifo,
         updatedOrderedItem.inventoryUnit,
         updatedOrderedItem.quantity,

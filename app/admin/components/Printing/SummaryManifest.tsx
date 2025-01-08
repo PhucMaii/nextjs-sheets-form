@@ -47,12 +47,12 @@ export const SummaryManifest = forwardRef(
               //   return null;
               // }
 
-              const sortedItems = manifest[routeId]?.itemNames || []
+              const sortedItems = manifest[routeId]?.itemNames || [];
 
               return (
                 <>
                   <Typography variant="h4" textAlign="center" m={2}>
-                  {manifest[routeId]?.route?.name}
+                    {manifest[routeId]?.route?.name}
                   </Typography>
                   <Box
                     display="flex"
@@ -61,7 +61,8 @@ export const SummaryManifest = forwardRef(
                     m={2}
                   >
                     <Typography variant="h5" m={2}>
-                    Driver: {manifest[routeId]?.route?.driver?.name}
+                      Driver:{' '}
+                      {manifest[routeId]?.route?.driver?.name || 'Unknown'}
                     </Typography>
                     <Typography>{currentDate}</Typography>
                   </Box>

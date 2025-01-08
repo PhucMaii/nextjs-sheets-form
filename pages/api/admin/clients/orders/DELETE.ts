@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem } from '../../orderedItems/single';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface BodyTypes {
   orderId?: string;
@@ -19,24 +20,11 @@ export default async function DELETE(
 
     if (orderList) {
       for (const order of orderList) {
-        // const deletedOrder = await prisma.orders.delete({
-        //   where: {
-        //     id: Number(order.id),
-        //   },
-        //   include: {
-        //     items: {
-        //       include: {
-        //         fifo: true,
-        //         inventoryUnit: true,
-        //       },
-        //     },
-        //   },
-        // });
-
         for (const item of order.items) {
           if (item?.fifo && item?.inventoryUnit) {
-            if (item.quantity > 0) {
+            if (item.quantity > 0 && order.status !== ORDER_STATUS.VOID) {
               await restockInventoryItem(
+                Number(order.id),
                 item.fifo,
                 item.inventoryUnit,
                 item.quantity,
@@ -65,6 +53,14 @@ export default async function DELETE(
         where: {
           id: Number(orderId),
         },
+        include: {
+          items: {
+            include: {
+              fifo: true,
+              inventoryUnit: true,
+            },
+          },
+        },
       });
 
       if (!existingOrder) {
@@ -73,7 +69,23 @@ export default async function DELETE(
         });
       }
 
-      const deletedOrder = await prisma.orders.delete({
+      for (const item of existingOrder.items) {
+        if (
+          item?.fifo &&
+          item?.inventoryUnit &&
+          existingOrder.status !== ORDER_STATUS.VOID &&
+          item.quantity > 0
+        ) {
+          await restockInventoryItem(
+            Number(orderId),
+            item.fifo,
+            item.inventoryUnit,
+            item.quantity,
+          );
+        }
+      }
+
+      await prisma.orders.delete({
         where: {
           id: Number(orderId),
         },
@@ -86,16 +98,6 @@ export default async function DELETE(
           },
         },
       });
-
-      for (const item of deletedOrder.items) {
-        if (item?.fifo && item?.inventoryUnit) {
-          await restockInventoryItem(
-            item.fifo,
-            item.inventoryUnit,
-            item.quantity,
-          );
-        }
-      }
     } else {
       return res.status(500).json({
         error: 'Please provide either order list or order id to be deleted',

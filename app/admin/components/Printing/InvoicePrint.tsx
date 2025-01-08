@@ -38,9 +38,11 @@ export const InvoicePrint = forwardRef(
 
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
+    const endYear = endDate.getFullYear();
     const { debtData, sortDebtKeys } = useApiDebtData(
       client.id,
       endMonth,
+      endYear,
       orders,
     );
 
@@ -143,8 +145,9 @@ export const InvoicePrint = forwardRef(
                       .map((order: Order) => {
                         const isTax = order?.items?.some(
                           (item) =>
-                            item?.inventoryItem?.hasPST ||
-                            item?.inventoryItem?.hasGST,
+                            item?.inventoryItem?.hasPST &&
+                            item?.inventoryItem?.hasGST &&
+                            item?.quantity > 0,
                         );
                         return (
                           <TableRow
@@ -170,13 +173,13 @@ export const InvoicePrint = forwardRef(
                   </TableRow>
                   <TableRow>
                     <TableCell></TableCell>
-                    <TableCell>PST (7%):</TableCell>
-                    <TableCell>${totalPST.toFixed(2)}</TableCell>
+                    <TableCell>GST (5%):</TableCell>
+                    <TableCell>${totalGST.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell></TableCell>
-                    <TableCell>GST (5%):</TableCell>
-                    <TableCell>${totalGST.toFixed(2)}</TableCell>
+                    <TableCell>PST (7%):</TableCell>
+                    <TableCell>${totalPST.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell></TableCell>

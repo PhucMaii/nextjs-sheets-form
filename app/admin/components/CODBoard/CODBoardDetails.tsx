@@ -54,16 +54,20 @@ import PaidIcon from '@mui/icons-material/Paid';
 import AddExpense from '../Modals/add/AddExpense';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useNotification from '@/hooks/useNotification';
+import StatusText from '../StatusText';
+import { InfoIcon } from 'lucide-react';
 
 interface IProps {
   boardData: IBoard;
   onClose: () => void;
+  isAutoAddBoard?: boolean;
   // showNotification: any;
 }
 
 export default function CODBoardDetails({
   boardData,
   onClose,
+  isAutoAddBoard,
   // showNotification,
 }: IProps) {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -130,8 +134,8 @@ export default function CODBoardDetails({
     }
   }, [debouncedKeywords]);
 
-  const handleRemoveOrders = async () => {
-    if (selectedOrders.length === 0) {
+  const handleRemoveOrders = async (orders: Order[] = selectedOrders) => {
+    if (orders.length === 0) {
       showNotification('error', 'Please select at least one order');
       return;
     }
@@ -142,7 +146,7 @@ export default function CODBoardDetails({
         `${API_URL.ADMIN}/cod/remove-orders`,
         {
           data: {
-            orders: selectedOrders,
+            orders: orders,
           },
         },
       );
@@ -153,12 +157,12 @@ export default function CODBoardDetails({
         return;
       }
 
-      showNotification('success', response.data.message);
+      showNotification('success', response?.data?.message);
       mutateBoard();
       setIsUpdating(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', error.response.data.error);
+      showNotification('error', error?.response?.data?.error);
       setIsUpdating(false);
       return;
     }
@@ -309,7 +313,7 @@ export default function CODBoardDetails({
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
-          onClick={handleRemoveOrders}
+          onClick={() => handleRemoveOrders()}
           disabled={selectedOrders.length === 0}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -537,6 +541,16 @@ export default function CODBoardDetails({
           </Grid>
         </Grid>
 
+        {isAutoAddBoard && (
+          <Box mt={2}>
+            <StatusText
+              text="We are checking for new boards..."
+              type="info"
+              icon={<InfoIcon style={{ color: infoColor }} />}
+            />
+          </Box>
+        )}
+
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <FormControlLabel
             control={
@@ -589,6 +603,7 @@ export default function CODBoardDetails({
               handleSelectOrder={handleSelectOrder}
               mutateOrders={mutateBoard}
               isMarkDateDifference={order.deliveryDate !== boardData.date}
+              handleRemoveOrder={handleRemoveOrders}
             />
           ))
         )}

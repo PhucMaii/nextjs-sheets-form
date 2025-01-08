@@ -2,15 +2,13 @@
 import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
-import {
-  restockInventoryItem,
-  subtractInventoryItem,
-  updateSingleInventoryItem,
-} from './single';
+import { updateSingleInventoryItem } from './single';
 import { createOrderedItems } from '../inventory/expenses/POST';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { IItem } from '@/app/utils/type';
 import { generateCurrentTime } from '@/app/utils/time';
+import { getDifferentItems } from '@/app/utils/array';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface UpdatedItem {
   id: number;
@@ -52,8 +50,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       userCategoryId,
     } = updatedData as BodyType;
 
-    console.log(updatedItems, 'updatedItems');
-
     // Bad cases
     if (updateOption === UpdateOption.CREATE) {
       const existingCategory = await prisma.category.findUnique({
@@ -69,26 +65,30 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Track order items
-    let orderedItemList = await prisma.orderedItems.findMany({
+    const orderedItemList = await prisma.orderedItems.findMany({
       where: {
         orderId,
       },
+      include: {
+        fifo: true,
+        inventoryUnit: true,
+        inventoryItem: true,
+        Orders: true,
+      },
     });
 
-    let newTotalPrice = 0;
-    for (const item of updatedItems) {
-      newTotalPrice += item.totalPrice;
+    const acutalUpdatedItems = getDifferentItems(
+      updatedItems,
+      orderedItemList,
+      ['quantity', 'price'],
+    );
 
+    console.log(acutalUpdatedItems, 'acutalUpdatedItems');
+
+    for (const item of acutalUpdatedItems) {
       // Check does system has that item
-      // if (item.id) {
-      const existingItem = await prisma.orderedItems.findUnique({
-        where: {
-          id: item.id,
-        },
-        include: {
-          fifo: true,
-          inventoryUnit: true,
-        },
+      const existingItem = orderedItemList.find((orderedItem: OrderedItems) => {
+        return item.id === orderedItem.id;
       });
 
       if (!existingItem) {
@@ -97,7 +97,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const updatedItem = await prisma.orderedItems.update({
+      await prisma.orderedItems.update({
         where: {
           id: item.id,
         },
@@ -107,98 +107,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      // Pop the item off the base list in order to track the item
-      const newList = orderedItemList.filter((item: OrderedItems) => {
-        return item.name !== updatedItem.name;
-      });
-      orderedItemList = newList;
-
       // Inventory Update
-      if (existingItem?.fifo && existingItem.inventoryUnit) {
+      if (
+        existingItem?.fifo &&
+        existingItem.inventoryUnit &&
+        existingItem?.Orders?.status !== ORDER_STATUS.VOID
+      ) {
         await updateSingleInventoryItem(
+          item.orderId,
           existingItem.fifo,
           existingItem.inventoryUnit,
           item.quantity,
           existingItem.quantity,
         );
       }
-      // } else {
-      //   // Check does item name exist already in that order
-      //   const foundItem = await prisma.orderedItems.findFirst({
-      //     where: {
-      //       name: item.name,
-      //       orderId,
-      //     },
-      //     include: {
-      //       fifo: true,
-      //     }
-      //   });
-
-      //   // if yes, override the price and quantity
-      //   if (foundItem) {
-      //     await prisma.orderedItems.updateMany({
-      //       where: {
-      //         name: item.name,
-      //         orderId,
-      //       },
-      //       data: {
-      //         price: item.price,
-      //         quantity: item.quantity,
-      //       },
-      //     });
-
-      //     // Pop the item off the base list in order to track the item
-      //     const newList = orderedItemList.filter((item: OrderedItems) => {
-      //       return item.id !== foundItem.id;
-      //     });
-      //     orderedItemList = newList;
-
-      //     // Inventory Update
-      //     if (foundItem?.fifo) {
-      //       await updateSingleInventoryItem(
-      //         foundItem.fifo,
-      //         item.quantity,
-      //         foundItem.quantity,
-      //       );
-      //     }
-      //   } else {
-      //     // if not, create it in the same order id
-      //     await prisma.orderedItems.create({
-      //       data: {
-      //         name: item.name,
-      //         orderId: orderId,
-      //         price: item.price,
-      //         quantity: item.quantity,
-      //         inventoryItemId: item?.inventoryItemId,
-      //         inventoryUnitId: item?.inventoryUnitId,
-      //       },
-      //     });
-
-      //     if (item?.inventoryItemId) {
-      //       await subtractInventoryItem(item.inventoryItemId, item.quantity);
-      //     }
-      //   }
-      // }
     }
-
-    // // Delete the rest of item that admin wants to delete it
-    // if (orderedItemList.length > 0) {
-    //   const idToDelete = orderedItemList.map((order: any) => order.id);
-    //   await prisma.orderedItems.deleteMany({
-    //     where: {
-    //       id: {
-    //         in: idToDelete,
-    //       },
-    //     },
-    //   });
-
-    //   // Inventory item update
-    //   for (const item of orderedItemList) {
-    //     if (item?.inventoryItemId) {
-    //       await restockInventoryItem(item.inventoryItemId, item.quantity);
-    //     }
-    //   }
-    // }
 
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
@@ -450,6 +373,10 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
         acc.subTotal = 0;
       }
 
+      if (!acc?.totalWithoutDiscount) {
+        acc.totalWithoutDiscount = 0;
+      }
+
       if (!acc?.PST) {
         acc.PST = 0;
       }
@@ -461,9 +388,13 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
       if (!acc?.discount) {
         acc.discount = 0;
       }
-      
 
-      acc.subTotal += (item?.isShowDiscount && item?.prevPrice ? item.prevPrice : item.price) * item.quantity;
+      acc.totalWithoutDiscount =
+        (item?.isShowDiscount && item?.prevPrice
+          ? item.prevPrice
+          : item.price) * item.quantity;
+
+      acc.subTotal += item.price * item.quantity;
 
       if (item?.inventoryItem?.hasPST) {
         acc.PST += item.price * item.quantity * pstRate;
@@ -480,7 +411,10 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
       return acc;
     }, {});
 
-    return { ...total, totalPrice: total.subTotal + total.PST + total.GST - total.discount };
+    return {
+      ...total,
+      totalPrice: total.subTotal + total.PST + total.GST,
+    };
     // const prisma = new PrismaClient();
 
     // const updateTime = new Date();

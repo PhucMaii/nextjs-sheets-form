@@ -45,7 +45,18 @@ export const generateRecommendDate = () => {
   // format initial date
   const dateObj = new Date();
   // if current hour is greater limit hour, then recommend the next day
-  if (dateObj.getHours() >= limitOrderHour) {
+  if (
+    dateObj.getHours() >= limitOrderHour ||
+    (dateObj.getMonth() === 11 && dateObj.getDate() === 25) || // December 25th
+    (dateObj.getMonth() === 0 && dateObj.getDate() === 1) // January 1st
+  ) {
+    dateObj.setDate(dateObj.getDate() + 1);
+  }
+
+  if (
+    (dateObj.getMonth() === 11 && dateObj.getDate() === 25) || // December 25th
+    (dateObj.getMonth() === 0 && dateObj.getDate() === 1) // January 1st
+  ) {
     dateObj.setDate(dateObj.getDate() + 1);
   }
 
@@ -62,6 +73,7 @@ export const generateMonthRange = () => {
   const firstDayOfNextMonth = new Date(year, month + 1, 1);
   const lastDayOfThisMonth = new Date(firstDayOfNextMonth);
   lastDayOfThisMonth.setDate(0);
+  lastDayOfThisMonth.setHours(23, 59, 59);
 
   return [firstDayOfThisMonth, lastDayOfThisMonth];
 };
@@ -72,14 +84,14 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   const currentDate = startDate;
   currentDate.setDate(currentDate.getDate() + 1);
 
-  while (currentDate <= endDate) {
+  while (currentDate.getTime() <= endDate.getTime()) {
     // dates.push(currentDate);
     const currentDateString = YYYYMMDDFormat(currentDate);
     dates.push(currentDateString);
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return dates.slice(0, dates.length - 1);
+  return dates;
 };
 
 export const getWCODDay = (date: string) => {
@@ -106,11 +118,10 @@ export const getCreatedAt = () => {
   return `${timeString} ${dateString}`;
 };
 
-
 export const disableChristmasAndNewYear = (date: Dayjs) => {
   // Disable December 25th and January 1st
   return (
     (date.date() === 25 && date.month() === 11) || // December 25th
-    (date.date() === 1 && date.month() === 0)     // January 1st
+    (date.date() === 1 && date.month() === 0) // January 1st
   );
 };

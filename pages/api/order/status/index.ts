@@ -23,7 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    // Updated Status will always be VOID
+    // Updated Status will always be VOID - Delete order button on client side
     const { orderId, updatedStatus }: BodyTypes = req.body;
 
     const session: any = await getServerSession(req, res, authOptions);
@@ -106,6 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Restock inventory item
         if (item?.fifo && item?.inventoryUnit) {
           await restockInventoryItem(
+            orderId,
             item.fifo,
             item?.inventoryUnit,
             item.quantity,

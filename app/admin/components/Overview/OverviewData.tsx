@@ -77,10 +77,19 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
           // iconBackground={blue[50]}
           textColor={primary.main}
           value={revenue}
-          extraTextIcon={overviewData?.revenueChange > 0 ? <ArrowUpwardIcon fontSize="small" sx={{color: green[500]}} /> : <ArrowDownwardIcon fontSize="small" sx={{color: red[500]}} />}
-          extraText={{text: `${overviewData?.revenueChange?.toFixed(2)}%`, color: overviewData?.revenueChange > 0 ? green[500] : red[500]}}
+          extraTextIcon={
+            overviewData?.revenueChange > 0 ? (
+              <ArrowUpwardIcon fontSize="small" sx={{ color: green[500] }} />
+            ) : (
+              <ArrowDownwardIcon fontSize="small" sx={{ color: red[500] }} />
+            )
+          }
+          extraText={{
+            text: `${overviewData?.revenueChange?.toFixed(2)}%`,
+            color: overviewData?.revenueChange > 0 ? green[500] : red[500],
+          }}
           extraTextStyle={{
-            fontSize: 'small'
+            fontSize: 'small',
           }}
         />
       </Grid>
@@ -92,10 +101,19 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
           // iconBackground={blue[50]}
           textColor={primary.main}
           value={expenses}
-          extraTextIcon={overviewData?.expensesChange > 0 ? <ArrowUpwardIcon fontSize="small" sx={{color: red[500]}} /> : <ArrowDownwardIcon fontSize="small" sx={{color: green[500]}} />}
-          extraText={{text: `${overviewData?.expensesChange?.toFixed(2)}%`, color: overviewData?.expensesChange > 0 ? red[500] : green[500]}}
+          extraTextIcon={
+            overviewData?.expensesChange > 0 ? (
+              <ArrowUpwardIcon fontSize="small" sx={{ color: red[500] }} />
+            ) : (
+              <ArrowDownwardIcon fontSize="small" sx={{ color: green[500] }} />
+            )
+          }
+          extraText={{
+            text: `${overviewData?.expensesChange?.toFixed(2)}%`,
+            color: overviewData?.expensesChange > 0 ? red[500] : green[500],
+          }}
           extraTextStyle={{
-            fontSize: 'small'
+            fontSize: 'small',
           }}
         />
       </Grid>
@@ -107,10 +125,19 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
           // iconBackground={blue[50]}
           textColor={primary.main}
           value={profit}
-          extraTextIcon={overviewData?.profitChange > 0 ? <ArrowUpwardIcon fontSize="small" sx={{color: green[500]}} /> : <ArrowDownwardIcon fontSize="small" sx={{color: red[500]}} />}
-          extraText={{text: `${overviewData?.profitChange?.toFixed(2)}%`, color: overviewData?.profitChange > 0 ? green[500] : red[500]}}
+          extraTextIcon={
+            overviewData?.profitChange > 0 ? (
+              <ArrowUpwardIcon fontSize="small" sx={{ color: green[500] }} />
+            ) : (
+              <ArrowDownwardIcon fontSize="small" sx={{ color: red[500] }} />
+            )
+          }
+          extraText={{
+            text: `${overviewData?.profitChange?.toFixed(2)}%`,
+            color: overviewData?.profitChange > 0 ? green[500] : red[500],
+          }}
           extraTextStyle={{
-            fontSize: 'small'
+            fontSize: 'small',
           }}
         />
       </Grid>

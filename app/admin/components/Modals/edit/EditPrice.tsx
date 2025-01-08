@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import axios from 'axios';
@@ -40,50 +40,20 @@ export default function EditPrice({
     UpdateOption.NONE,
   );
   const [newCategoryName, setNewCategoryName] = useState<string>('');
-  // const [newItem, setNewItem] = useState<OrderedItems>({
-  //   name: '',
-  //   price: 0,
-  //   quantity: 0,
-  //   totalPrice: 0,
-  // });
-  // const [subcategoryId, setSubcategoryId] = useState<number>(0);
+
+  const hasCustomAmount = useMemo(() => {
+    if (itemList.length === 0) {
+      return false;
+    }
+
+    return itemList.some((item: OrderedItems) => !item?.inventoryItemId);
+  }, [itemList]);
 
   useEffect(() => {
     if (items) {
       setItemList(items);
     }
   }, [items]);
-
-  // const addNewItem = () => {
-  //   const newItemName = newItem.name.toUpperCase();
-  //   const hasNameExisted = itemList.some(
-  //     (item: OrderedItems) => item.name === newItemName,
-  //   );
-
-  //   if (newItem.name.trim() === '') {
-  //     showNotification('error', 'Item Name Is Missing');
-  //     return;
-  //   }
-
-  //   if (hasNameExisted) {
-  //     showNotification('error', 'Item Name Existed Already');
-  //   } else {
-  //     const totalPrice = newItem.quantity * newItem.price;
-  //     const newItemData: any = { ...newItem, totalPrice, name: newItemName };
-  //     // if (subcategoryId > 0) {
-  //     //   newItemData.subCategoryId = subcategoryId;
-  //     // }
-  //     setItemList([...itemList, newItemData]);
-  //     setNewItem({
-  //       name: '',
-  //       price: 0,
-  //       quantity: 0,
-  //       totalPrice: 0,
-  //     });
-  //   }
-
-  //   // setSubcategoryId(0);
-  // };
 
   const calculateNewTotalPrice = () => {
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
@@ -171,60 +141,13 @@ export default function EditPrice({
             </LoadingButton>
           </Box>
         </Box>
-        <UpdateChoiceSelection
-          updateOption={updateOption}
-          setUpdateOption={setUpdateOption}
-        />
+        {!hasCustomAmount && (
+          <UpdateChoiceSelection
+            updateOption={updateOption}
+            setUpdateOption={setUpdateOption}
+          />
+        )}
         <Box overflow="auto" maxHeight="70vh" mt={1}>
-          {/* <Divider sx={{ mb: 2 }}>Add items</Divider>
-          <Grid container spacing={3} mb={1}>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="item-name-label">Item name</InputLabel>
-                <OutlinedInput
-                  fullWidth
-                  label="Item name"
-                  value={newItem.name}
-                  onChange={(e) =>
-                    handleNewItemOnChange('name', e.target.value)
-                  }
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel id="item-price-label">Unit price ($)</InputLabel>
-                <OutlinedInput
-                  fullWidth
-                  label="Unit price"
-                  type="number"
-                  value={newItem.price}
-                  onChange={(e) =>
-                    handleNewItemOnChange('price', +e.target.value)
-                  }
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel id="item-quantity-label">Quantity</InputLabel>
-                <OutlinedInput
-                  fullWidth
-                  label="Quantity"
-                  type="number"
-                  value={newItem.quantity}
-                  onChange={(e) =>
-                    handleNewItemOnChange('quantity', +e.target.value)
-                  }
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <Button fullWidth onClick={addNewItem} variant="contained">
-                Add
-              </Button>
-            </Grid>
-          </Grid> */}
           <Divider>Items</Divider>
           <Grid
             container

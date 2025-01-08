@@ -10,7 +10,7 @@ import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
 import StockPurchased from '../../Expense/StockPurchased';
 import OtherExpense from '../../Expense/OtherExpense';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+// import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { mainPaymentMethodId } from '@/app/lib/constant';
 
 interface IProps extends ModalProps {
@@ -30,6 +30,9 @@ export default function AddExpense({
   const [currentTabIndex, setCurrentTabIndex] = useState<number>(0);
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
+    GST: 0,
+    PST: 0,
+    subTotal: 0,
     description: '',
     paymentMethodId: codBoardId ? 4 : -1,
     spentBy: '-- Choose who spent --',
@@ -40,6 +43,9 @@ export default function AddExpense({
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
+  );
 
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
@@ -48,16 +54,29 @@ export default function AddExpense({
     true,
   );
 
-  const fetchAdminsAndDrivers = async () => {
-    const users: any = await getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(users);
-  };
+  // const fetchAdminsAndDrivers = async () => {
+  //   const users: any = await getAdminsAndDrivers(showNotification);
+  //   setAdminsAndDrivers(users);
+  // };
+
+  // useEffect(() => {
+  //   if (open) {
+  //     fetchAdminsAndDrivers();
+  //   }
+  // }, [open]);
 
   useEffect(() => {
-    if (open) {
-      fetchAdminsAndDrivers();
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
     }
-  }, [open]);
+  }, [adminsAndDriversRes]);
+
+  useEffect(() => {
+    setNewExpense({
+      ...newExpense,
+      amount: newExpense.subTotal + newExpense.GST + newExpense.PST,
+    });
+  }, [newExpense.PST, newExpense.GST, newExpense.subTotal]);
 
   const handleAddExpense = async () => {
     try {
@@ -75,6 +94,9 @@ export default function AddExpense({
           amount: newExpense.amount,
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
+          subTotal: newExpense.subTotal,
+          GST: newExpense.GST,
+          PST: newExpense.PST,
           status: newExpense.status,
           codBoardId,
         });
@@ -84,6 +106,9 @@ export default function AddExpense({
           createdAt,
           spentBy: newExpense.spentBy,
           amount: newExpense.amount,
+          subTotal: newExpense.subTotal,
+          GST: newExpense.GST,
+          PST: newExpense.PST,
           description: newExpense.description,
           paymentMethodId: newExpense.paymentMethodId,
           status: newExpense.status,
@@ -108,15 +133,16 @@ export default function AddExpense({
   };
 
   const onChangeNewExpense = (field: string, value: any) => {
-    setNewExpense({
-      ...newExpense,
-      [field]: value,
-    });
-
     if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
       setNewExpense({
         ...newExpense,
+        [field]: value,
         status: TRANSACTION_STATUS.PAID,
+      });
+    } else {
+      setNewExpense({
+        ...newExpense,
+        [field]: value,
       });
     }
   };
@@ -152,7 +178,7 @@ export default function AddExpense({
             paymentMethods={paymentMethods?.data || []}
             codBoardId={codBoardId}
             role={USER_ROLE.ADMIN}
-            fetchAdminAndDrivers={fetchAdminsAndDrivers}
+            // fetchAdminAndDrivers={fetchAdminsAndDrivers}
           />
         ) : (
           <OtherExpense

@@ -11,9 +11,11 @@ import {
   AlertColor,
   Autocomplete,
   Box,
+  Button,
   Divider,
   FormControl,
   Grid,
+  IconButton,
   Modal,
   TextField,
   Typography,
@@ -27,13 +29,19 @@ import ErrorComponent from '../../ErrorComponent';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { disableChristmasAndNewYear, formatDateChanged, generateRecommendDate } from '@/app/utils/time';
+import {
+  disableChristmasAndNewYear,
+  formatDateChanged,
+  generateRecommendDate,
+} from '@/app/utils/time';
 import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
 import moment from 'moment';
 import ConfirmModal from '../ConfirmModal';
 import { grey } from '@mui/material/colors';
 import SellingItemName from '@/app/components/SellingItemName';
+import AddCustomAmount from './AddCustomAmount';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -59,6 +67,8 @@ export default function AddOrder({
   const [isOrderOnVacationOpen, setIsOrderOnVacationOpen] =
     useState<boolean>(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
+    useState<boolean>(false);
 
   const [itemList, setItemList] = useState<IItem[]>([]);
   const [note, setNote] = useState<string>('');
@@ -262,8 +272,19 @@ export default function AddOrder({
     }
   };
 
+  const removeItemFromItemList = (item: any) => {
+    const newItems = itemList.filter((i: any) => i.name !== item.name);
+    setItemList(newItems);
+  };
+
   return (
     <>
+      <AddCustomAmount
+        open={isOpenAddCustomAmount}
+        onClose={() => setIsOpenAddCustomAmount(false)}
+        setItemList={setItemList}
+        showNotification={showNotification}
+      />
       <ConfirmModal
         open={isOpenConfirmModal}
         onClose={() => setIsOpenConfirmModal(false)}
@@ -348,6 +369,11 @@ export default function AddOrder({
               </Grid> */}
               {!createScheduledOrder && (
                 <>
+                  <Grid item xs={12} textAlign="right">
+                    <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                      + Custom Amount
+                    </Button>
+                  </Grid>
                   <Grid item xs={6}>
                     DELIVERY DATE
                   </Grid>
@@ -393,7 +419,17 @@ export default function AddOrder({
                   return (
                     <Fragment key={index}>
                       <Grid item xs={6}>
+                        <Box display="flex" alignItems="center" gap={1}>
                           <SellingItemName item={item} />
+                          {item?.id < 1 && (
+                            <IconButton
+                              onClick={() => removeItemFromItemList(item)}
+                              color="error"
+                            >
+                              <RemoveCircleIcon color="error" />
+                            </IconButton>
+                          )}
+                        </Box>
                       </Grid>
                       <Grid item xs={6}>
                         <TextField

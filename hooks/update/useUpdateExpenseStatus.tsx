@@ -4,11 +4,18 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IExpense } from '@/app/utils/type';
 import axios from 'axios';
-import { useState } from 'react';
-import { AlertColor, Box, Button, Menu, MenuItem, Typography } from "@mui/material";
+import { useCallback, useState } from 'react';
+import {
+  AlertColor,
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  Typography,
+} from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import AddIcon from '@mui/icons-material/Add';
-import { errorColor, primaryColor, successColor } from "@/theme/color";
+import { errorColor, primaryColor, successColor } from '@/theme/color';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { DropdownItemContainer } from '@/app/admin/orders/styled';
@@ -26,11 +33,13 @@ export const useUpdateExpenseStatus = (
     isBulk: false,
   });
   const [actionButtonAnchor, setActionButtonAnchor] =
-  useState<null | HTMLElement>(null);
+    useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+
+  console.log('hook re rendered');
 
   const handleUpdateStatus = async (
     transaction: any,
@@ -79,67 +88,73 @@ export const useUpdateExpenseStatus = (
     }
   };
 
-  const handleBulkUpdateStatus = async (
-    newStatus: TRANSACTION_STATUS,
-    newPaymentMethodId: number = otherPaymentMethodId,
-  ) => {
-    try {
-      const idsToUpdate = selectedExpenses.map(
-        (expense: IExpense) => expense.id,
-      );
-
-      if (
-        newStatus === TRANSACTION_STATUS.PAID &&
-        newPaymentMethodId === otherPaymentMethodId
-      ) {
-        const isOtherPaymentMethod = selectedExpenses.some(
-          (expense: IExpense) =>
-            expense.paymentMethodId === otherPaymentMethodId,
+  const handleBulkUpdateStatus = useCallback(
+    async (
+      newStatus: TRANSACTION_STATUS,
+      newPaymentMethodId: number = otherPaymentMethodId,
+    ) => {
+      try {
+        const idsToUpdate = selectedExpenses.map(
+          (expense: IExpense) => expense.id,
         );
 
-        if (isOtherPaymentMethod) {
-          setSelectPaymentMethod({
-            isOpenModal: true,
-            selectedTransaction: null,
-            updatedStatus: newStatus,
-            isBulk: true,
-          });
-          showNotification('warning', 'Please choose a different method');
+        if (
+          newStatus === TRANSACTION_STATUS.PAID &&
+          newPaymentMethodId === otherPaymentMethodId
+        ) {
+          const isOtherPaymentMethod = selectedExpenses.some(
+            (expense: IExpense) =>
+              expense.paymentMethodId === otherPaymentMethodId,
+          );
+
+          if (isOtherPaymentMethod) {
+            setSelectPaymentMethod({
+              isOpenModal: true,
+              selectedTransaction: null,
+              updatedStatus: newStatus,
+              isBulk: true,
+            });
+            showNotification('warning', 'Please choose a different method');
+            return;
+          }
+        }
+
+        setIsUpdating(true);
+        const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
+          idsToUpdate,
+          status: newStatus,
+          newPaymentMethodId,
+        });
+
+        if (response.data.error) {
+          showNotification('error', response.data.error);
+          setIsUpdating(false);
           return;
         }
-      }
 
-      setIsUpdating(true);
-      const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
-        idsToUpdate,
-        status: newStatus,
-        newPaymentMethodId,
-      });
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
+        showNotification('success', response.data.message);
         setIsUpdating(false);
-        return;
+      } catch (error: any) {
+        console.log('Internal Server Error: ', error);
+        showNotification(
+          'error',
+          'Fail to bulk update status: ' + error.response.data.error,
+        );
+        setIsUpdating(false);
       }
-
-      showNotification('success', response.data.message);
-      setIsUpdating(false);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification(
-        'error',
-        'Fail to bulk update status: ' + error.response.data.error,
-      );
-      setIsUpdating(false);
-    }
-  };
+    },
+    [selectedExpenses, showNotification],
+  );
 
   const UpdateExpenseStatusComp = (
     <SingleFieldEdit
       title="Select Payment Method"
       open={selectPaymentMethod.isOpenModal}
       onClose={() =>
-        setSelectPaymentMethod({ ...selectPaymentMethod, isOpenModal: false })
+        setSelectPaymentMethod((prevState: any) => ({
+          ...prevState,
+          isOpenModal: false,
+        }))
       }
       handleUpdate={(newPaymentMethod: any) => {
         if (selectPaymentMethod.isBulk) {
@@ -225,8 +240,12 @@ export const useUpdateExpenseStatus = (
   );
 
   const AddExpenseModal = (
-    <AddExpense open={isOpenAddExpense} onClose={() => setIsOpenAddExpense(false)} showNotification={showNotification} />
-  )
+    <AddExpense
+      open={isOpenAddExpense}
+      onClose={() => setIsOpenAddExpense(false)}
+      showNotification={showNotification}
+    />
+  );
 
   return {
     handleUpdateStatus,
@@ -234,6 +253,6 @@ export const useUpdateExpenseStatus = (
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal
+    AddExpenseModal,
   };
 };

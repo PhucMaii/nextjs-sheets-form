@@ -9,6 +9,7 @@ import { LoadingButton } from '@mui/lab';
 import {
   AlertColor,
   Box,
+  Grid,
   MenuItem,
   Select,
   TextField,
@@ -25,6 +26,9 @@ export default function OtherExpenses({ showNotification }: IProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newExpense, setNewExpense] = useState<any>({
     amount: 0,
+    PST: 0,
+    GST: 0,
+    subTotal: 0,
     description: '',
     paymentMethodId: mainPaymentMethodId,
     status: TRANSACTION_STATUS.PAID,
@@ -79,7 +83,7 @@ export default function OtherExpenses({ showNotification }: IProps) {
         <Typography variant="h6">Date</Typography>
         {SelectDate}
       </Box>
-      <Box display="flex" flexDirection="column" gap={2}>
+      {/* <Box display="flex" flexDirection="column" gap={2}>
         <Typography variant="h6">Amount</Typography>
         <TextField
           placeholder="Enter epxense amount..."
@@ -89,7 +93,58 @@ export default function OtherExpenses({ showNotification }: IProps) {
           onChange={(e) => onChangeNewExpense('amount', +e.target.value)}
           inputProps={{ min: 0 }}
         />
-      </Box>
+      </Box> */}
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Subtotal</Typography>
+            <TextField
+              label="Subtotal"
+              placeholder="Subtotal"
+              fullWidth
+              value={newExpense.subTotal}
+              type="number"
+              onChange={(e) => onChangeNewExpense('subTotal', +e.target.value)}
+            />
+          </Box>
+        </Grid>
+        <Grid item md={6} xs={12}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">GST (5%)</Typography>
+            <TextField
+              placeholder="GST (5%)"
+              fullWidth
+              value={newExpense.GST}
+              type="number"
+              onChange={(e) => onChangeNewExpense('GST', +e.target.value)}
+            />
+          </Box>
+        </Grid>
+        <Grid item md={6} xs={12}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">PST (7%)</Typography>
+            <TextField
+              placeholder="PST (7%)"
+              fullWidth
+              value={newExpense.PST}
+              type="number"
+              onChange={(e) => onChangeNewExpense('PST', +e.target.value)}
+            />
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Total</Typography>
+            <TextField
+              placeholder="Total"
+              fullWidth
+              value={newExpense.amount}
+              type="number"
+              onChange={(e) => onChangeNewExpense('amount', +e.target.value)}
+            />
+          </Box>
+        </Grid>
+      </Grid>
       <Box display="flex" flexDirection="column" gap={2}>
         <Typography variant="h6">Description</Typography>
         <TextField

@@ -1,11 +1,11 @@
 import {
+  Autocomplete,
   Box,
   Divider,
-  MenuItem,
   Modal,
-  Select,
   Tab,
   Tabs,
+  TextField,
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -36,7 +36,10 @@ export default function InsertOrderToCodBoard({
 }: IProps) {
   const [isInserting, setIsInserting] = useState<boolean>(false);
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
-  const [selectedClientId, setSelectedClientId] = useState<number>(-1);
+  const [selectedClient, setSelectedClient] = useState<any>({
+    id: -1,
+    clientName: '-- Choose Client --',
+  });
   const [tabIndex, setTabIndex] = useState<number>(0);
   const { date, SelectDate } = useSelectDate(currentDate, true);
 
@@ -45,8 +48,8 @@ export default function InsertOrderToCodBoard({
   startDate.setDate(startDate.getDate() - 30);
 
   const [orders] = SWRFetchData(
-    selectedClientId !== -1
-      ? `${API_URL.ADMIN}/clients/orders?userId=${selectedClientId}&startDate=${startDate}&endDate=${endDate}`
+    selectedClient && selectedClient?.id !== -1
+      ? `${API_URL.ADMIN}/clients/orders?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
       : `${API_URL.ORDER}?date=${date}&status=${ORDER_STATUS.NONE}`,
   );
 
@@ -54,7 +57,7 @@ export default function InsertOrderToCodBoard({
 
   useEffect(() => {
     if (tabIndex === 0) {
-      setSelectedClientId(-1);
+      setSelectedClient({ id: -1, clientName: '-- Choose Client --' });
     }
   }, [tabIndex]);
 
@@ -145,22 +148,24 @@ export default function InsertOrderToCodBoard({
           <Box display="flex" flexDirection={'column'} gap={2}>
             <Box display="flex" flexDirection={'column'} gap={1}>
               <Typography variant="h6">Clients</Typography>
-              <Select
-                value={selectedClientId}
-                onChange={(e) => setSelectedClientId(Number(e.target.value))}
-              >
-                <MenuItem value={-1} disabled>
-                  -- Choose Client --
-                </MenuItem>
-                {clients &&
-                  clients?.data?.map((client: any, index: number) => {
-                    return (
-                      <MenuItem key={index} value={client.id}>
-                        {client.clientName}
-                      </MenuItem>
-                    );
-                  })}
-              </Select>
+              <Autocomplete
+                options={[
+                  { id: -1, clientName: '-- Choose Client --' },
+                  ...(clients?.data || []),
+                ]}
+                getOptionLabel={(option: any) => option.clientName}
+                renderOption={(props, option) => (
+                  <li {...props} aria-disabled={option.id === -1}>
+                    {option.clientName}
+                  </li>
+                )}
+                style={{ width: '100%' }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Select Client" />
+                )}
+                value={selectedClient}
+                onChange={(e: any, value: any) => setSelectedClient(value)}
+              />
             </Box>
 
             <Box display="flex" flexDirection={'column'} gap={1}>

@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Button,
   Divider,
@@ -7,7 +8,7 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import CloseIcon from '@mui/icons-material/Close';
@@ -19,6 +20,9 @@ import { OrderedItems } from '@/app/utils/type';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
+import AddCustomAmount from './add/AddCustomAmount';
+import axios from 'axios';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -27,6 +31,7 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function OrderDetails({
@@ -34,9 +39,16 @@ export default function OrderDetails({
   onClose,
   order,
   handleUpdateItem,
+  showNotification,
 }: IProps) {
+  const [items, setItems] = useState<OrderedItems[]>(order.items);
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
+    useState<boolean>(false);
   const billPrintRef: any = useRef();
-  console.log('ORDER DETAILS RUN');
+
+  useEffect(() => {
+    setItems(order.items);
+  }, [order.items]);
 
   const handlePrinting = useReactToPrint({
     content: () => billPrintRef.current,
@@ -50,10 +62,36 @@ export default function OrderDetails({
     return quantity;
   }, [order]);
 
-  console.log(order.discount, 'discount');
+  const handleAddCustomAmount = async (customAmount: any) => {
+    try {
+      const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
+        orderId: order.id,
+        customAmount,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      setItems((prevState: any) => {
+        return [...prevState, response.data.data];
+      });
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error?.response?.data?.error);
+    }
+  };
 
   return (
     <>
+      <AddCustomAmount
+        open={isOpenAddCustomAmount}
+        onClose={() => setIsOpenAddCustomAmount(false)}
+        addCustomAmount={handleAddCustomAmount}
+        showNotification={showNotification}
+      />
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />
       </div>
@@ -102,14 +140,27 @@ export default function OrderDetails({
             <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
           </Box>
           <Divider />
-          <Grid container rowGap={4} alignItems="flex-start">
-            <Grid item textAlign="center" xs={12}>
-              <Typography fontWeight="bold" variant="h6">
+          <Grid container rowGap={4} alignItems="center">
+            <Grid item xs={4} />
+            <Grid item xs={4} textAlign="center">
+              <Typography textAlign="center" fontWeight="bold" variant="h6">
                 ORDER
               </Typography>
+            </Grid>
+            <Grid item xs={4} textAlign="right">
+              <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                + Custom Amount
+              </Button>
+            </Grid>
+            <Grid item textAlign="center" xs={12}>
               <OrderDetailsTable
                 order={order}
+                items={items}
+                setItems={setItems}
                 handleUpdateItem={handleUpdateItem}
+                abilityToEdit
+                showNotification={showNotification}
+                role={USER_ROLE.ADMIN}
               />
             </Grid>
             <Grid
@@ -144,6 +195,21 @@ export default function OrderDetails({
               <Grid item xs={12}>
                 <Divider />
               </Grid>
+              {order?.discount && order.discount > 0 ? (
+                <>
+                  <Grid item xs={4} textAlign="left" ml={2}>
+                    <Typography>Discount ($)</Typography>
+                  </Grid>
+                  <Grid item xs={6} textAlign="right">
+                    <Typography fontWeight="bold">
+                      -${order?.discount?.toFixed(2)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Divider />
+                  </Grid>
+                </>
+              ) : null}
               <Grid item xs={4} textAlign="left" ml={2}>
                 <Typography>Subtotal</Typography>
               </Grid>
@@ -158,40 +224,23 @@ export default function OrderDetails({
               <Grid item xs={12}>
                 <Divider />
               </Grid>
-              {order?.discount && order.discount > 0 ? 
-              (
-                <>
-              <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>Discount ($)</Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">
-                  -${order?.discount?.toFixed(2)}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-              </>
-              ) : null
-              }
-              <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>PST (7%)</Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">
-                  ${order?.PST?.toFixed(2) || 0}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
               <Grid item xs={4} textAlign="left" ml={2}>
                 <Typography>GST (5%)</Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography fontWeight="bold">
                   ${order?.GST?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>PST (7%)</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  ${order?.PST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
               <Grid item xs={12}>

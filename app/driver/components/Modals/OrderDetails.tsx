@@ -17,7 +17,7 @@ import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { LoadingButton } from '@mui/lab';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
@@ -32,6 +32,7 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  abilityToEdit: boolean;
 }
 
 export default function OrderDetails({
@@ -41,6 +42,7 @@ export default function OrderDetails({
   totalQuantity,
   handleUpdateStatus,
   handleUpdateItem,
+  abilityToEdit,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -58,7 +60,7 @@ export default function OrderDetails({
         flexDirection="column"
         gap={2}
         maxHeight="80vh"
-        overflow="auto"
+        sx={{ overflowY: 'auto', overflowX: 'hidden', p: 2 }}
       >
         <Grid container alignItems="center">
           <Grid item xs={4}>
@@ -111,7 +113,10 @@ export default function OrderDetails({
             </Typography>
             <OrderDetailsTable
               order={order}
+              items={order.items}
               handleUpdateItem={handleUpdateItem}
+              abilityToEdit={abilityToEdit}
+              role={USER_ROLE.DRIVER}
             />
           </Grid>
           <Grid
@@ -133,31 +138,33 @@ export default function OrderDetails({
               </Typography>
             </Grid>
           </Grid>
-          <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={6}>
-                <LoadingButton
-                  onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
-                  loading={isLoading}
-                  fullWidth
-                  variant="contained"
-                >
-                  Delivered
-                </LoadingButton>
+          {abilityToEdit && (
+            <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={6}>
+                  <LoadingButton
+                    onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
+                    loading={isLoading}
+                    fullWidth
+                    variant="contained"
+                  >
+                    Delivered
+                  </LoadingButton>
+                </Grid>
+                <Grid item xs={6}>
+                  <LoadingButton
+                    onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
+                    loading={isLoading}
+                    color="success"
+                    fullWidth
+                    variant="contained"
+                  >
+                    Collected
+                  </LoadingButton>
+                </Grid>
               </Grid>
-              <Grid item xs={6}>
-                <LoadingButton
-                  onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
-                  loading={isLoading}
-                  color="success"
-                  fullWidth
-                  variant="contained"
-                >
-                  Collected
-                </LoadingButton>
-              </Grid>
-            </Grid>
-          </Box>
+            </Box>
+          )}
         </Grid>
       </BoxModal>
     </Modal>

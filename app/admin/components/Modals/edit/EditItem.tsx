@@ -1,4 +1,5 @@
 import {
+  AlertColor,
   Box,
   Button,
   Checkbox,
@@ -27,6 +28,7 @@ interface IProps {
     updateOption: UPDATE_OPTION,
     updatedFields: string[],
   ) => Promise<void>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export enum UPDATE_OPTION {
@@ -34,7 +36,11 @@ export enum UPDATE_OPTION {
   ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
+const EditItem = ({
+  targetItem,
+  handleUpdateItem,
+  showNotification,
+}: IProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedField, setUpdatedField] = useState<string[]>([]);
@@ -64,6 +70,7 @@ const EditItem = ({ targetItem, handleUpdateItem }: IProps) => {
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
       updatedField.length === 0
     ) {
+      showNotification('error', 'Please select at least one field to update');
       return;
     }
 

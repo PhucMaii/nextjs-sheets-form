@@ -57,8 +57,8 @@ model SubCategory {
 }
 
 model Item {
-  id              Int     @id @default(autoincrement())
-  name            String  @db.VarChar(255)
+  id              Int      @id @default(autoincrement())
+  name            String   @db.VarChar(255)
   categoryId      Int
   subCategoryId   Int?
   price           Float
@@ -77,8 +77,8 @@ model Item {
 }
 
 model OrderedItems {
-  id               Int    @id @default(autoincrement())
-  name             String @db.VarChar(255)
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(255)
   price            Float
   orderId          Int?
   scheduledOrderId Int?
@@ -91,30 +91,31 @@ model OrderedItems {
   inventoryItemId  Int?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  scheduledOrder ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   fifo           Fifo?           @relation(fields: [fifoId], references: [id])
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
+  ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
 }
 
 model Orders {
-  id            Int       @id @default(autoincrement())
-  orderTime     String
-  deliveryDate  String
-  note          String
-  status        String
-  userId        Int
-  subTotal      Float?
-  discount      Float?
-  PST           Float?
-  GST           Float?
-  totalPrice    Float
-  updateTime    DateTime?
-  isReplacement Boolean?
-  isVoid        Boolean?
-  createdBy     String?
-  updatedBy     String?
+  id                Int       @id @default(autoincrement())
+  orderTime         String
+  deliveryDate      String
+  note              String
+  status            String
+  userId            Int
+  subTotal          Float?
+  discount          Float?
+  PST               Float?
+  GST               Float?
+  totalPrice        Float
+  updateTime        DateTime?
+  isReplacement     Boolean?
+  isVoid            Boolean?
+  isAffectInventory Boolean?
+  createdBy         String?
+  updatedBy         String?
 
   user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderedItems[]
@@ -253,10 +254,10 @@ model Vendor {
 }
 
 model InventoryItem {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
-  hasPST     Boolean?
-  hasGST     Boolean?
+  hasPST    Boolean?
+  hasGST    Boolean?
   createdAt String
   createdBy String
 
@@ -264,6 +265,32 @@ model InventoryItem {
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
+  preference   ItemPreference? @relation("InventoryItemToPreference")
+}
+
+model ItemPreference {
+  id           Int     @id @default(autoincrement())
+  image        String
+  description  String
+  isBestSeller Boolean
+  createdAt    String?
+  createdBy    String?
+
+  inventoryItemId Int @unique
+  typeId          Int
+
+  inventoryItem InventoryItem @relation("InventoryItemToPreference", fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  type          ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
+}
+
+model ItemType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  icon      String?
+  createdAt String?
+  createdBy String?
+
+  itemPreferences ItemPreference[]
 }
 
 model VendorItem {
@@ -297,7 +324,7 @@ model InventoryUnit {
   id           Int    @id @default(autoincrement())
   vendorItemId Int
   unit         String
-  unitPrice Float @db.Double
+  unitPrice    Float  @db.Double
   ratio        Int
   createdAt    String
   createdBy    String
@@ -305,4 +332,13 @@ model InventoryUnit {
 
   vendorItem   VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems OrderedItems[]
+}
+
+model Action {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  date        String
+  createdAt   String
+  createdBy   String?
 }

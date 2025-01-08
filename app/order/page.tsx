@@ -15,7 +15,11 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { YYYYMMDDFormat, disableChristmasAndNewYear, formatDateChanged } from '@/app/utils/time';
+import {
+  disableChristmasAndNewYear,
+  formatDateChanged,
+  generateRecommendDate,
+} from '@/app/utils/time';
 import ChangePasswordModal from '../components/Modals/ChangePasswordModal';
 import moment from 'moment';
 import { limitOrderHour } from '../lib/constant';
@@ -35,16 +39,9 @@ import SellingItemName from '../components/SellingItemName';
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
   const [clientName, setClientName] = useState<string>('');
-  const [deliveryDate, setDeliveryDate] = useState<string>(() => {
-    // format initial date
-    const dateObj = new Date();
-    // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
-      dateObj.setDate(dateObj.getDate() + 1);
-    }
-    const formattedDate = YYYYMMDDFormat(dateObj);
-    return formattedDate;
-  });
+  const [deliveryDate, setDeliveryDate] = useState<string>(() =>
+    generateRecommendDate(),
+  );
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [note, setNote] = useState<string>('');
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
@@ -67,6 +64,7 @@ export default function OrderForm() {
   }
 
   const minDate = today.startOf('day');
+  console.log(minDate, 'min date');
   const { data: items, isValidating } = useSWR(API_URL.CLIENT_ITEM);
 
   useEffect(() => {
@@ -111,6 +109,17 @@ export default function OrderForm() {
     const checkUserHasInput = handleCheckUserHasInput();
     if (!checkUserHasInput) {
       showNotification('error', 'Please enter your order');
+      return;
+    }
+
+    // Check is delivery date valid
+    const deliveryDateObj = dayjs(deliveryDate);
+    console.log(deliveryDateObj.month(), 'DELIVERY DATE OBJ');
+    if (
+      deliveryDateObj.isBefore(minDate) ||
+      (deliveryDateObj.date() === 1 && deliveryDateObj.month() === 0)
+    ) {
+      showNotification('error', 'Delivery date is not valid');
       return;
     }
 

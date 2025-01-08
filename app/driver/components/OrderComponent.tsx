@@ -43,6 +43,17 @@ export default function OrderComponent({
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
 
+  const abilityToEdit = useMemo(() => {
+    const today = new Date();
+    const deliveryDate = new Date(order.deliveryDate);
+
+    return (
+      today.getDate() === deliveryDate.getDate() &&
+      today.getMonth() === deliveryDate.getMonth() &&
+      today.getFullYear() === deliveryDate.getFullYear()
+    );
+  }, [order]);
+
   const statusText = {
     text: order.status,
     type:
@@ -94,6 +105,7 @@ export default function OrderComponent({
         totalQuantity={totalQuantity}
         handleUpdateStatus={handleUpdateStatus}
         handleUpdateItem={handleUpdateItem}
+        abilityToEdit={abilityToEdit}
       />
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={1}>
@@ -105,63 +117,65 @@ export default function OrderComponent({
           <StatusText text={statusText.text} type={statusText.type} />
         </Grid>
         <Grid item xs={6} textAlign="right">
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            alignItems="center"
-            gap={1}
-            width="100%"
-          >
-            <Fab
-              sx={{ zIndex: 0 }}
-              onClick={() =>
-                setConfirmModalProps({
-                  on: true,
-                  heading: `Are you sure to void order for ${order.clientName}`,
-                  color: 'error',
-                  updatedStatus: ORDER_STATUS.VOID,
-                })
-              }
-              color="error"
-              size="small"
+          {abilityToEdit && (
+            <Box
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="center"
+              gap={1}
+              width="100%"
             >
-              <DeleteIcon />
-            </Fab>
-            {order.status === ORDER_STATUS.INCOMPLETED && (
               <Fab
                 sx={{ zIndex: 0 }}
                 onClick={() =>
                   setConfirmModalProps({
                     on: true,
-                    heading: `Have you deliver order for ${order.clientName}`,
-                    color: 'primary',
-                    updatedStatus: ORDER_STATUS.DELIVERED,
+                    heading: `Are you sure to void order for ${order.clientName}`,
+                    color: 'error',
+                    updatedStatus: ORDER_STATUS.VOID,
                   })
                 }
-                color="primary"
+                color="error"
                 size="small"
               >
-                <LocalShippingIcon />
+                <DeleteIcon />
               </Fab>
-            )}
-            {order.status !== ORDER_STATUS.COMPLETED && (
-              <Fab
-                sx={{ zIndex: 0 }}
-                onClick={() =>
-                  setConfirmModalProps({
-                    on: true,
-                    heading: `Have you deliver and collect money from order for ${order.clientName}`,
-                    color: 'success',
-                    updatedStatus: ORDER_STATUS.COMPLETED,
-                  })
-                }
-                color="success"
-                size="small"
-              >
-                <CreditScoreIcon />
-              </Fab>
-            )}
-          </Box>
+              {order.status === ORDER_STATUS.INCOMPLETED && (
+                <Fab
+                  sx={{ zIndex: 0 }}
+                  onClick={() =>
+                    setConfirmModalProps({
+                      on: true,
+                      heading: `Have you deliver order for ${order.clientName}`,
+                      color: 'primary',
+                      updatedStatus: ORDER_STATUS.DELIVERED,
+                    })
+                  }
+                  color="primary"
+                  size="small"
+                >
+                  <LocalShippingIcon />
+                </Fab>
+              )}
+              {order.status !== ORDER_STATUS.COMPLETED && (
+                <Fab
+                  sx={{ zIndex: 0 }}
+                  onClick={() =>
+                    setConfirmModalProps({
+                      on: true,
+                      heading: `Have you deliver and collect money from order for ${order.clientName}`,
+                      color: 'success',
+                      updatedStatus: ORDER_STATUS.COMPLETED,
+                    })
+                  }
+                  color="success"
+                  size="small"
+                >
+                  <CreditScoreIcon />
+                </Fab>
+              )}
+            </Box>
+          )}
         </Grid>
         <Grid item xs={6}>
           <Typography variant="subtitle1">#{order.id}</Typography>

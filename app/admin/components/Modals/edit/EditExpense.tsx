@@ -1,8 +1,8 @@
 import {
   AlertColor,
   Box,
-  Button,
   Divider,
+  Grid,
   MenuItem,
   Modal,
   Select,
@@ -17,9 +17,10 @@ import { IExpense, IPaymentMethod } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
+import { ModalProps } from '../type';
+// import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
-interface IProps {
+interface IProps extends ModalProps {
   transaction: IExpense;
   // paymentMethods: IPaymentMethod[];
   showNotification: (type: AlertColor, message: string) => void;
@@ -29,14 +30,19 @@ export default function EditExpense({
   transaction,
   // paymentMethods,
   showNotification,
+  open,
+  onClose,
 }: IProps) {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
+  // const [open, setOpen] = useState<boolean>(false);
   const [updatedExpense, setUpdatedExpense] = useState<IExpense>(transaction);
-  const { date, SelectDate } = useSelectDate(transaction.date, true);
+  const { date, SelectDate } = useSelectDate(transaction?.date, true);
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
+  );
 
   useEffect(() => {
     if (transaction) {
@@ -51,55 +57,11 @@ export default function EditExpense({
     });
   };
 
-  const fetchAdminsAndDrivers = async () => {
-    const user: any = await getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(user);
-  };
-
   useEffect(() => {
-    if (open) {
-      fetchAdminsAndDrivers();
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
     }
-  }, [open]);
-
-  // const fetchAdmins = async () => {
-  //   try {
-  //     const admins = await fetchApi(
-  //       `${API_URL.ADMIN}/admins`,
-  //       showNotification,
-  //     );
-
-  //     const formattedAdmins = admins.map((admin: any) => {
-  //       return `Admin - ${admin.clientName}`;
-  //     });
-  //     setAdminsAndDrivers(formattedAdmins);
-  //   } catch (error) {
-  //     console.log(error);
-  //     showNotification('error', 'Something went wrong');
-  //     return;
-  //   }
-  // };
-
-  // const fetchDrivers = async () => {
-  //   try {
-  //     const drivers = await fetchApi(
-  //       `${API_URL.ADMIN}/drivers`,
-  //       showNotification,
-  //     );
-
-  //     const formattedDrivers = drivers.map((driver: any) => {
-  //       return `Driver - ${driver.name}`;
-  //     });
-  //     setAdminsAndDrivers((prevAdminAndDrivers) => [
-  //       ...prevAdminAndDrivers,
-  //       ...formattedDrivers,
-  //     ]);
-  //   } catch (error) {
-  //     console.log(error);
-  //     showNotification('error', 'Something went wrong');
-  //     return;
-  //   }
-  // };
+  }, [adminsAndDriversRes]);
 
   const handleUpdateExpense = async () => {
     setIsLoading(true);
@@ -108,6 +70,9 @@ export default function EditExpense({
         id: updatedExpense.id,
         date: date,
         amount: updatedExpense.amount,
+        subTotal: updatedExpense.subTotal,
+        GST: updatedExpense.GST,
+        PST: updatedExpense.PST,
         description: updatedExpense.description,
         paymentMethodId: updatedExpense.paymentMethodId,
         spentBy: updatedExpense.spentBy,
@@ -120,7 +85,7 @@ export default function EditExpense({
       }
 
       showNotification('success', response.data.message);
-      setOpen(false);
+      onClose();
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -132,14 +97,14 @@ export default function EditExpense({
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Edit</Button>
+      {/* <Button onClick={() => setOpen(true)}>Edit</Button> */}
 
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <BoxModal>
+      <Modal open={open} onClose={onClose}>
+        <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Expense"
             buttonLabel="EDIT"
-            onClose={() => setOpen(false)}
+            onClose={() => console.log('CLOSE PRESSED')}
             onClick={handleUpdateExpense}
             buttonProps={{
               loading: isLoading,
@@ -153,7 +118,7 @@ export default function EditExpense({
               <Typography variant="h6">Date</Typography>
               {SelectDate}
             </Box>
-            <Box display="flex" flexDirection="column" gap={2}>
+            {/* <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Amount</Typography>
               <TextField
                 placeholder="Enter epxense amount..."
@@ -162,21 +127,74 @@ export default function EditExpense({
                 type="number"
                 onChange={(e) => onChangeExpense('amount', +e.target.value)}
               />
-            </Box>
+            </Box> */}
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Typography variant="h6">Subtotal</Typography>
+                  <TextField
+                    label="Subtotal"
+                    placeholder="Subtotal"
+                    fullWidth
+                    value={updatedExpense?.subTotal || 0}
+                    type="number"
+                    onChange={(e) =>
+                      onChangeExpense('subTotal', +e.target.value)
+                    }
+                  />
+                </Box>
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Typography variant="h6">GST (5%)</Typography>
+                  <TextField
+                    placeholder="GST (5%)"
+                    fullWidth
+                    value={updatedExpense?.GST || 0}
+                    type="number"
+                    onChange={(e) => onChangeExpense('GST', +e.target.value)}
+                  />
+                </Box>
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Typography variant="h6">PST (7%)</Typography>
+                  <TextField
+                    placeholder="PST (7%)"
+                    fullWidth
+                    value={updatedExpense?.PST || 0}
+                    type="number"
+                    onChange={(e) => onChangeExpense('PST', +e.target.value)}
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Typography variant="h6">Total</Typography>
+                  <TextField
+                    placeholder="Total"
+                    fullWidth
+                    value={updatedExpense?.amount}
+                    type="number"
+                    onChange={(e) => onChangeExpense('amount', +e.target.value)}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Description</Typography>
               <TextField
                 multiline
                 placeholder="Enter description..."
                 fullWidth
-                value={updatedExpense.description}
+                value={updatedExpense?.description}
                 onChange={(e) => onChangeExpense('description', e.target.value)}
               />
             </Box>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Payment Method</Typography>
               <Select
-                value={updatedExpense.paymentMethodId}
+                value={updatedExpense?.paymentMethodId}
                 onChange={(e: any) =>
                   onChangeExpense('paymentMethodId', +e.target.value)
                 }
@@ -200,7 +218,7 @@ export default function EditExpense({
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Spent By</Typography>
               <Select
-                value={updatedExpense.spentBy}
+                value={updatedExpense?.spentBy}
                 onChange={(e) => onChangeExpense('spentBy', e.target.value)}
               >
                 <MenuItem value="-- Choose who spent --" disabled>

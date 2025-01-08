@@ -14,14 +14,14 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import StatusText from '../StatusText';
 import { IRoutes } from '@/app/utils/type';
 import ErrorComponent from '../ErrorComponent';
 import { Order } from '../../orders/page';
-import { AllPrint } from '../Printing/AllPrint';
+import { MemoizedAllPrint } from '../Printing/AllPrint';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import { ManifestPrint } from '../Printing/ManifestPrint';
@@ -42,14 +42,14 @@ enum BILL_PRINT_OPTION {
   BY_ROUTE = 'byRoute',
 }
 
-export default function BillPrintModal({
+const BillPrintModal = ({
   open,
   onClose,
   routes,
   orderList,
   day,
   showNotification,
-}: PropTypes) {
+}: PropTypes) => {
   const [manifestAnchor, setManifestAnchor] = useState<HTMLElement | null>(
     null,
   );
@@ -67,7 +67,12 @@ export default function BillPrintModal({
     setItemManifest,
     nonVoidOrders,
     isLoading,
+    manifestData,
   } = useManifest(orderList, selectedRoutes, day, showNotification);
+
+  const routesLength = manifestData.itemManifest['-1']
+    ? routes.length + 1
+    : routes.length;
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -106,11 +111,15 @@ export default function BillPrintModal({
   });
 
   const handleSelectAll = () => {
-    if (selectedRoutes.length === routes.length) {
+    if (selectedRoutes.length === routesLength) {
       setItemManifest({});
       setSelectedRoutes([]);
     } else {
-      setSelectedRoutes(routes);
+      const newSelectRoutes: any = [...routes];
+      if (manifestData.itemManifest['-1']) {
+        newSelectRoutes.push({ id: '-1', name: 'No Route Orders' });
+      }
+      setSelectedRoutes(newSelectRoutes);
     }
   };
 
@@ -159,11 +168,13 @@ export default function BillPrintModal({
     </Box>
   );
 
+  // console.log(itemManifest, 'itemManifest');
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={2}>
         <div style={{ display: 'none' }}>
-          <AllPrint
+          <MemoizedAllPrint
             orders={
               billPrintOption === BILL_PRINT_OPTION.NONE
                 ? nonVoidOrders
@@ -247,13 +258,14 @@ export default function BillPrintModal({
                     label="All"
                     control={
                       <Checkbox
-                        checked={selectedRoutes.length === routes.length}
+                        checked={selectedRoutes.length === routesLength}
                         onChange={handleSelectAll}
                       />
                     }
                   />
                   <Box display="flex" flexDirection="column" ml={3}>
                     {routes.map((route: IRoutes) => {
+                      if (route.id == -1) return null;
                       const isChecked = selectedRoutes.some(
                         (baseRoute: IRoutes) => route.id === baseRoute.id,
                       );
@@ -270,6 +282,28 @@ export default function BillPrintModal({
                         />
                       );
                     })}
+
+                    {Object.keys(manifestData.itemManifest).includes('-1') &&
+                      manifestData.itemManifest[-1] && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={selectedRoutes.some(
+                                (baseRoute: IRoutes) =>
+                                  manifestData.itemManifest['-1'].route.id ===
+                                  baseRoute.id,
+                              )}
+                              onChange={(e: any) =>
+                                handleSelectRoute(
+                                  e,
+                                  manifestData.itemManifest['-1'].route,
+                                )
+                              }
+                            />
+                          }
+                          label={manifestData.itemManifest['-1'].route.name}
+                        />
+                      )}
                   </Box>
                 </>
               ) : (
@@ -283,4 +317,13 @@ export default function BillPrintModal({
       </BoxModal>
     </Modal>
   );
-}
+};
+
+export default memo(BillPrintModal, (prev: PropTypes, next: PropTypes) => {
+  return (
+    Object.is(prev.orderList, next.orderList) &&
+    Object.is(prev.routes, next.routes) &&
+    prev.day === next.day &&
+    prev.open === next.open
+  );
+});

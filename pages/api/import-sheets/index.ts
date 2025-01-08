@@ -5,7 +5,7 @@ import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
-import { normalizeDate } from '../utils/date';
+import { checkOrderDeliveryDateValid, normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 import {
   checkHasClientOrder,
@@ -51,19 +51,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       createdAt,
     }: IBody = req.body;
 
-    // console.log({
-    //   body: req.body,
-    // });
-    // console.log({
-    //   items
-    // })
-
     if (!deliveryDate || !items || !createdAt) {
-      return res
-        .status(400)
-        .json({
-          error: 'Missing required fields. Please refresh and try again',
-        });
+      return res.status(400).json({
+        error: 'Missing required fields. Please refresh and try again',
+      });
     }
 
     let id = userId;
@@ -75,6 +66,35 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(401).json({ error: 'You are not authenticated' });
       }
       id = session.user.id;
+    }
+
+    if (createdBy === USER_ROLE.CLIENT) {
+      // const selectedDate = normalizeDate(deliveryDate);
+      // const today = getTodayDate();
+      // const currentDate = new Date(today.date);
+      // console.log(currentDate.getHours())
+
+      // console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime()});
+
+      // if (selectedDate.getTime() < currentDate.getTime()) {
+      //   return res.status(400).json({
+      //     error: 'Cannot create order for past date',
+      //   });
+      // }
+
+      // if (selectedDate.getTime() === currentDate.getTime()) {
+      //   if (Number(today.time.split(':')[0]) >= limitOrderHour) {
+      //     return res.status(400).json({
+      //       error: 'Cannot create order for past date',
+      //     });
+      //   }
+      // }
+      const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
+      if (!isValidDate.ok) {
+        return res.status(400).json({
+          error: isValidDate.message,
+        })
+      }
     }
 
     // Check does user exist
@@ -147,7 +167,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         //     return { ...item, totalPrice: itemTotalPrice, totalPrevPrice };
         //   },
         // );
-        const itemListWithTotalPrice = formatItemsWithTotalPrice(newOrder.items);
+        const itemListWithTotalPrice = formatItemsWithTotalPrice(
+          newOrder.items,
+        );
 
         await pusherServer?.trigger('admin', 'incoming-order', {
           ...newOrder,
@@ -213,11 +235,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     //   return { ...item, totalPrice: itemTotalPrice };
     // });
-    const itemListWithTotalPrice = formatItemsWithTotalPrice(newOrder?.items || []);
+    const itemListWithTotalPrice = formatItemsWithTotalPrice(
+      newOrder?.items || [],
+    );
 
     const itemHasQuantity = itemListWithTotalPrice.filter((item: any) => {
       return item.quantity > 0;
-    })
+    });
 
     await pusherServer?.trigger('admin', 'incoming-order', {
       ...newOrder,

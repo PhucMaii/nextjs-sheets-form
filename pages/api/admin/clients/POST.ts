@@ -94,7 +94,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const generateLatLng = async (deliveryAddress: string) => {
+export const generateLatLng = async (deliveryAddress: string) => {
   if (deliveryAddress === 'N/A') {
     return { latitude: null, longitude: null };
   }

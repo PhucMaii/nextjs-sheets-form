@@ -2,7 +2,13 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date';
-import { generateManifest, getCustomersInDebt, getLastMonthExpenses, getLastMonthRevenue, revenueGroupByDeliveryDate } from '@/pages/api/utils/overview';
+import {
+  generateManifest,
+  getCustomersInDebt,
+  getLastMonthExpenses,
+  getLastMonthRevenue,
+  revenueGroupByDeliveryDate,
+} from '@/pages/api/utils/overview';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -92,29 +98,38 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedStartDate,
     );
 
-    const revenueChange = ((revenue - lastMonthRevenueReport.revenue) / lastMonthRevenueReport.revenue) * 100;
+    const revenueChange =
+      ((revenue - lastMonthRevenueReport.revenue) /
+        lastMonthRevenueReport.revenue) *
+      100;
 
-    
     // EXPENSES
     const expenses = await prisma.expense.findMany({
       where: {
         date: {
-          in: datesInRange
+          in: datesInRange,
         },
       },
     });
     const totalExpenses = expenses.reduce((acc: number, expense: any) => {
       return acc + expense.amount;
     }, 0);
-    const lastMonthExpenses: any = await getLastMonthExpenses(formattedStartDate);
-    const totalExpensesChange = ((totalExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
+    const lastMonthExpenses: any =
+      await getLastMonthExpenses(formattedStartDate);
+    const totalExpensesChange =
+      ((totalExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
 
     // PROFIT
     const profit = revenue - totalExpenses;
     const lastMonthProfit = lastMonthRevenueReport.revenue - lastMonthExpenses;
     const profitChange = ((profit - lastMonthProfit) / lastMonthProfit) * 100;
 
-    console.log('profitChange', {profitChange, lastMonthProfit, lastMonthREvenue: lastMonthRevenueReport.revenue, lastMonthExpenses});
+    console.log('profitChange', {
+      profitChange,
+      lastMonthProfit,
+      lastMonthREvenue: lastMonthRevenueReport.revenue,
+      lastMonthExpenses,
+    });
 
     const manifest = generateManifest(sortedThisMonthOrders, revenue);
 
@@ -129,7 +144,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       expensesChange: totalExpensesChange,
       profit,
       profitChange,
-
     };
 
     // Get beansprout data
@@ -145,7 +159,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Calculate customers in debt
     const debtRange = generateListOfDateString(
-      officiallyStartDate,
+      normalizeDate(officiallyStartDate),
       formattedEndDate,
     );
 

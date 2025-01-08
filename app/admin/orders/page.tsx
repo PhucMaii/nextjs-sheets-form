@@ -21,7 +21,6 @@ import {
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import { AllPrint } from '../components/Printing/AllPrint';
 import { IItem, IRoutes, OrderedItems, UserType } from '@/app/utils/type';
 import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
@@ -62,6 +61,7 @@ import {
   warningColor,
 } from '@/theme/color';
 import LoadingModal from '../components/Modals/LoadingModal';
+import { MemoizedAllPrint } from '../components/Printing/AllPrint';
 
 interface Category {
   id: number;
@@ -112,6 +112,8 @@ export interface Order {
   updatedBy?: string;
   previousUnpaidOrders?: { numberOfOrders: number; totalPrice: number };
   multipleOrders?: boolean;
+  isAffectInventory?: boolean;
+  orderRoute?: string;
 }
 
 const orderPerPage = 10;
@@ -242,6 +244,9 @@ export default function Orders() {
           debouncedKeywords == order.id.toString() ||
           order.user.clientName
             .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
+          order?.orderRoute
+            ?.toLowerCase()
             .includes(debouncedKeywords.toLowerCase())
         ) {
           return true;
@@ -775,7 +780,7 @@ export default function Orders() {
       <LoadingModal open={isExecutingAction} />
       {NotificationComp}
       <div style={{ display: 'none' }}>
-        <AllPrint
+        <MemoizedAllPrint
           orders={selectedOrders.length > 0 ? selectedOrders : orderData}
           ref={componentRef}
         />
@@ -805,6 +810,7 @@ export default function Orders() {
           onClose={() => setSelectedOrderDetails(null)}
           order={selectedOrderDetails}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       {isLoading ? (

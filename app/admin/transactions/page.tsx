@@ -25,20 +25,16 @@ import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 export default function Transactions() {
-  // const [actionButtonAnchor, setActionButtonAnchor] =
-  //   useState<null | HTMLElement>(null);
-  // const openDropdown = Boolean(actionButtonAnchor);
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  const [baseTransactions, setBaseTransactions] = useState<IExpense[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
     [],
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
 
@@ -50,7 +46,7 @@ export default function Transactions() {
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal
+    AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
@@ -58,50 +54,64 @@ export default function Transactions() {
   const [transactions] = SWRFetchData(
     `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
   );
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
+  );
 
   useEffect(() => {
-    if (!transactions) {
+    if (transactions) {
+      setIsLoading(false);
+      initializeTransactions();
+    } else {
       setIsLoading(true);
       setSelectedExpenses([]);
-    } else {
-      setIsLoading(false);
-      setDisplayTransactions(transactions?.data || []);
     }
-  }, [transactions, dateRange]);
+  }, [transactions?.data, dateRange]);
+
+  // console.log(displayTransactions, 'displayTransactions');
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newTransactions = transactions?.data.filter(
-        (transaction: IExpense) => {
-          return (
-            transaction.invoice === debouncedKeywords ||
-            (transaction?.vendors || []).some((vendor: any) =>
-              vendor?.vendor?.name
+      const newTransactions = baseTransactions.filter((transaction: any) => {
+        return (
+          transaction.invoice === debouncedKeywords ||
+          (transaction?.vendors
+            ? transaction?.vendors[0]?.vendor?.name
                 ?.toLowerCase()
-                ?.includes(debouncedKeywords.toLowerCase()),
-            ) ||
-            transaction.spentBy
-              .toLowerCase()
-              .includes(debouncedKeywords.toLowerCase()) ||
-            transaction.description
-              .toLowerCase()
-              .includes(debouncedKeywords.toLowerCase())
-          );
-        },
-      );
+                ?.includes(debouncedKeywords.toLowerCase())
+            : false) ||
+          transaction.spentBy
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
+          transaction.description
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        );
+      });
       setDisplayTransactions(newTransactions);
     } else {
-      setDisplayTransactions(transactions?.data || []);
+      setDisplayTransactions(baseTransactions);
     }
-  }, [debouncedKeywords]);
+  }, [debouncedKeywords, baseTransactions]);
 
   useEffect(() => {
-    fetchAdminsAndDrivers();
-  }, []);
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
+    }
+  }, [adminsAndDriversRes]);
 
-  const fetchAdminsAndDrivers = async () => {
-    const users: any = await getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(users);
+  // useEffect(() => {
+  //   fetchAdminsAndDrivers();
+  // }, []);
+
+  // const fetchAdminsAndDrivers = async () => {
+  //   const users: any = await getAdminsAndDrivers(showNotification);
+  //   setAdminsAndDrivers(users);
+  // };
+
+  const initializeTransactions = () => {
+    setBaseTransactions(transactions?.data || []);
+    setDisplayTransactions(transactions?.data || []);
   };
 
   const handleSelectExpense = (e: any, targetExpense: IExpense) => {
@@ -127,111 +137,19 @@ export default function Transactions() {
       return;
     }
 
-    if (selectedExpenses.length === transactions?.data.length) {
+    if (selectedExpenses.length === baseTransactions.length) {
       setSelectedExpenses([]);
     } else {
-      setSelectedExpenses(transactions?.data);
+      setSelectedExpenses(baseTransactions);
     }
   };
-
-  // const actions = (
-  //   <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
-  //     <Button
-  //       variant="outlined"
-  //       aria-controls={openDropdown ? 'basic-menu' : undefined}
-  //       aria-haspopup="true"
-  //       aria-expanded={openDropdown ? 'true' : undefined}
-  //       onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-  //     >
-  //       <Box display="flex" alignItems="center" gap={1}>
-  //         <ArrowDownwardIcon fontSize="small" />
-  //         <Typography fontWeight="medium">Actions</Typography>
-  //       </Box>
-  //     </Button>
-
-  //     <Menu
-  //       id="basic-menu"
-  //       anchorEl={actionButtonAnchor}
-  //       open={openDropdown}
-  //       onClose={() => setActionButtonAnchor(null)}
-  //       MenuListProps={{
-  //         'aria-labelledby': 'basic-button',
-  //       }}
-  //     >
-  //       <MenuItem
-  //         onClick={() => {
-  //           setIsOpenAddExpense(true);
-  //         }}
-  //       >
-  //         <DropdownItemContainer display="flex" gap={2}>
-  //           <AddIcon sx={{ color: primaryColor }} />
-  //           <Typography>Add Expense</Typography>
-  //         </DropdownItemContainer>
-  //       </MenuItem>
-
-  //       <MenuItem
-  //         disabled={selectedExpenses.length === 0}
-  //         onClick={() => {
-  //           handleBulkUpdateStatus(TRANSACTION_STATUS.PAID);
-  //         }}
-  //       >
-  //         <DropdownItemContainer display="flex" gap={2}>
-  //           <CheckIcon sx={{ color: successColor }} />
-  //           <Typography>Mark as Paid</Typography>
-  //         </DropdownItemContainer>
-  //       </MenuItem>
-
-  //       <MenuItem
-  //         disabled={selectedExpenses.length === 0}
-  //         onClick={() => {
-  //           handleBulkUpdateStatus(TRANSACTION_STATUS.UNPAID);
-  //         }}
-  //       >
-  //         <DropdownItemContainer display="flex" gap={2}>
-  //           <CloseIcon sx={{ color: errorColor }} />
-  //           <Typography>Mark as Unpaid</Typography>
-  //         </DropdownItemContainer>
-  //       </MenuItem>
-  //     </Menu>
-  //   </Box>
-  // );
 
   return (
     <Sidebar>
       {UpdateExpenseStatusComp}
-      {/* <SingleFieldEdit
-        title="Select Payment Method"
-        open={selectPaymentMethod.isOpenModal}
-        onClose={() =>
-          setSelectPaymentMethod({ ...selectPaymentMethod, isOpenModal: false })
-        }
-        handleUpdate={(newPaymentMethod: any) => {
-          if (selectPaymentMethod.isBulk) {
-            handleBulkUpdateStatus(
-              selectPaymentMethod.updatedStatus,
-              newPaymentMethod,
-            );
-          } else {
-            handleUpdateStatus(
-              selectPaymentMethod.selectedTransaction,
-              selectPaymentMethod.updatedStatus,
-              newPaymentMethod,
-            );
-          }
-        }}
-        renderField="name"
-        inputLabel="Payment Method"
-        menuList={paymentMethods?.data || []}
-        defaultValue={otherPaymentMethodId}
-      /> */}
       <LoadingModal open={isUpdating} />
       {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
-        {/* <AddExpense
-          open={isOpenAddExpense}
-          onClose={() => setIsOpenAddExpense(false)}
-          showNotification={showNotification}
-        /> */}
         {AddExpenseModal}
         <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
           Transactions
@@ -284,7 +202,7 @@ export default function Transactions() {
             transactions={displayTransactions}
             handleUpdateStatus={handleUpdateStatus}
             showNotification={showNotification}
-            selectedExpense={selectedExpenses}
+            selectedExpense={selectedExpenses || []}
             handleSelectExpense={handleSelectExpense}
             handleSelectAll={handleSelectAll}
             adminsAndDrivers={adminsAndDrivers}

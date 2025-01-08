@@ -1,4 +1,5 @@
 import { Order } from '@/app/admin/orders/page';
+import { limitOrderHour } from '@/app/lib/constant';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Expense } from '@prisma/client';
 
@@ -34,7 +35,6 @@ export const sortByDeliveryDate = (
   orders: any[],
   field: string = 'deliveryDate',
 ): any => {
-  console.log({ orders, field }, 'SORT FUNCTION');
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(orderA[field]);
     const deliveryDateB: any = convertDeliveryDateStringToDate(orderB[field]);
@@ -64,7 +64,7 @@ export const getSameDateLastWeek = (currentDate: string | Date) => {
   return sameDateLastWeek;
 };
 
-export const normalizeDate = (date: Date) => {
+export const normalizeDate = (date: Date | string) => {
   const normalized = new Date(date);
   normalized.setHours(0, 0, 0, 0);
   return normalized;
@@ -87,3 +87,55 @@ export const generate7DaysBefore = (deliveryDate: string) => {
 
   return dayList;
 };
+
+export const getTodayDate = (
+  dateStyle: 'short' | 'long' | 'full' | 'medium' | undefined = 'short',
+  timeStyle: 'short' | 'long' = 'long',
+) => {
+  const pstDate = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    dateStyle,
+    timeStyle,
+    // timeStyle,
+  }).format(new Date());
+
+  const date = pstDate.split(',')[0];
+  const dateSplitted = date.split('/');
+
+  const month = dateSplitted[0].padStart(2, '0');
+  const day = dateSplitted[1].padStart(2, '0');
+  const year = dateSplitted[2];
+
+  return { date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1] };
+};
+
+export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
+  const selectedDate = normalizeDate(deliveryDate);
+  const today = getTodayDate();
+  const currentDate = new Date(today.date);
+  console.log(currentDate.getHours())
+
+  console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime()});
+
+  if (selectedDate.getTime() < currentDate.getTime()) {
+    return {ok: false, message: 'Cannot create order for past date'}
+    // return res.status(400).json({
+    //   error: 'Cannot create order for past date',
+    // });
+  }
+
+  if (selectedDate.getTime() === currentDate.getTime()) {
+    if (today.time.includes('PM')) {
+      return {ok: false, message: 'Cannot create order for past date'}
+    }
+
+    if (Number(today.time.split(':')[0]) >= limitOrderHour && Number(today.time.split(':')[1]) !== 12) {
+      return {ok: false, message: 'Cannot create order for past date'}
+      // return res.status(400).json({
+      //   error: 'Cannot create order for past date',
+      // });
+    }
+  }
+
+  return {ok: true};
+}

@@ -25,6 +25,9 @@ interface IBody {
   paymentMethodId: number;
   spentBy: string;
   invoice: string;
+  PST?: number;
+  GST?: number;
+  subTotal?: number;
   // oldItemIds: number[]; // Ordered items ids
   oldItems: IPurchasedItem[];
   updatedItems: IPurchasedItem[];
@@ -42,11 +45,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       description,
       date,
       paymentMethodId,
+      PST,
+      GST,
+      subTotal,
       spentBy,
       oldItems,
       updatedItems,
       updatedAt,
     }: IBody = req.body;
+
 
     const existingExpense = await prisma.expense.findUnique({
       where: {
@@ -92,6 +99,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         amount: amount,
+        PST: PST,
+        GST: GST,
+        subTotal: subTotal,
         description: description,
         date: date,
         invoice,
@@ -123,12 +133,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const updatedItem = updatedItems.find(
           (newItem: any) => newItem.name === item.name,
         );
-  
+
         if (!updatedItem) {
           isOrderedItemsChange = true;
           break;
         }
-  
+
         if (
           updatedItem.quantity !== item.quantity ||
           updatedItem.unitPrice !== item.price
@@ -138,7 +148,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
       }
     }
-
 
     if (isOrderedItemsChange) {
       const user = await getUserInfo(req, res);
@@ -175,7 +184,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           (oldItem: OrderedItems) => oldItem.name === item.name,
         );
         if (!existedItem) {
-          newAddedItems.push({...item, vendorItem});
+          newAddedItems.push({ ...item, vendorItem });
           continue;
         }
 
@@ -237,9 +246,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Create new ordered items if there is any
       if (newAddedItems.length > 0) {
-        const vendorItemList = newAddedItems.map(
-          (newItem: any) => ({...newItem.vendorItem, unit: newItem.unit}),
-        );
+        const vendorItemList = newAddedItems.map((newItem: any) => ({
+          ...newItem.vendorItem,
+          unit: newItem.unit,
+        }));
         console.log(vendorItemList, 'vendorItemList');
 
         await createFifo(vendorItemList, updatedAt, createdBy);
@@ -311,6 +321,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         for (const removedItem of removedItems) {
           if (removedItem.fifo && removedItem.inventoryUnit) {
             await subtractInventoryItem(
+              -1,
               removedItem.fifo,
               removedItem.inventoryUnit,
               removedItem.quantity,

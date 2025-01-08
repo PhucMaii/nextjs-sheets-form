@@ -60,7 +60,7 @@ export default function StockItems({
     } else {
       setDisplayData(inventoryItems?.data || []);
     }
-  }, [debouncedKeywords]);
+  }, [debouncedKeywords, inventoryItems?.data]);
 
   return (
     <>

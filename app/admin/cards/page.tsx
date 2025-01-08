@@ -39,7 +39,6 @@ import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
-import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import LoadingModal from '../components/Modals/LoadingModal';
 
 export default function CardManagement() {
@@ -61,8 +60,13 @@ export default function CardManagement() {
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
-  const { handleUpdateStatus, UpdateExpenseStatusComp, isUpdating, Actions, AddExpenseModal } =
-    useUpdateExpenseStatus(showNotification, selectedExpenses);
+  const {
+    handleUpdateStatus,
+    UpdateExpenseStatusComp,
+    isUpdating,
+    Actions,
+    AddExpenseModal,
+  } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods, mutateMethod] = SWRFetchData(
@@ -71,6 +75,9 @@ export default function CardManagement() {
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
   const [transactions] = SWRFetchData(
     `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${selectedViewObj.id}&type=${selectedViewObj.type}`,
+  );
+  const [adminsAndDriversRes] = SWRFetchData(
+    `${API_URL.ADMIN}/adminsAndDrivers`,
   );
 
   const listOfDateString = useMemo(() => {
@@ -127,13 +134,19 @@ export default function CardManagement() {
   }, [selectedViewObj]);
 
   useEffect(() => {
-    fetchAdminsAndDrivers();
-  }, []);
+    if (adminsAndDriversRes) {
+      setAdminsAndDrivers(adminsAndDriversRes?.data);
+    }
+  }, [adminsAndDriversRes]);
 
-  const fetchAdminsAndDrivers = async () => {
-    const users: any = await getAdminsAndDrivers(showNotification);
-    setAdminsAndDrivers(users);
-  };
+  // useEffect(() => {
+  //   fetchAdminsAndDrivers();
+  // }, []);
+
+  // const fetchAdminsAndDrivers = async () => {
+  //   const users: any = await getAdminsAndDrivers(showNotification);
+  //   setAdminsAndDrivers(users);
+  // };
 
   const getPaymentMethod = () => {
     if (selectedViewObj.id === -1) {
@@ -151,7 +164,7 @@ export default function CardManagement() {
         createdBy: '',
         updatedBy: null,
         updatedAt: null,
-      }
+      };
     }
 
     if (selectedViewObj.type === VIEW_TYPE.PAYMENT_METHOD) {
@@ -286,7 +299,11 @@ export default function CardManagement() {
               <IconButton
                 color="primary"
                 onClick={() => setOpenModal({ ...openModal, editModal: true })}
-                disabled={selectedViewObj.id === -1 || selectedViewObj.type === VIEW_TYPE.VENDOR || selectedViewObj.type === VIEW_TYPE.ALL}
+                disabled={
+                  selectedViewObj.id === -1 ||
+                  selectedViewObj.type === VIEW_TYPE.VENDOR ||
+                  selectedViewObj.type === VIEW_TYPE.ALL
+                }
               >
                 <EditIcon />
               </IconButton>
@@ -295,7 +312,11 @@ export default function CardManagement() {
                 onClick={() =>
                   setOpenModal({ ...openModal, deleteModal: true })
                 }
-                disabled={selectedViewObj.id === -1 || selectedViewObj.type === VIEW_TYPE.VENDOR || selectedViewObj.type === VIEW_TYPE.ALL}
+                disabled={
+                  selectedViewObj.id === -1 ||
+                  selectedViewObj.type === VIEW_TYPE.VENDOR ||
+                  selectedViewObj.type === VIEW_TYPE.ALL
+                }
               >
                 <DeleteIcon />
               </IconButton>
@@ -310,7 +331,9 @@ export default function CardManagement() {
               <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
                 -- Choose Payment Method --
               </MenuItem>
-              <MenuItem value={JSON.stringify({ type: VIEW_TYPE.ALL, id: 0 })}>All</MenuItem>
+              <MenuItem value={JSON.stringify({ type: VIEW_TYPE.ALL, id: 0 })}>
+                All
+              </MenuItem>
               <ListSubheader>Payment Methods</ListSubheader>
               {paymentMethods &&
                 paymentMethods.data.map((method: IPaymentMethod) => (
@@ -480,7 +503,6 @@ export default function CardManagement() {
                     </Typography>
                     {Actions}
                   </Box>
-
 
                   {/* Recent Transactions */}
                   <TransactionsTable

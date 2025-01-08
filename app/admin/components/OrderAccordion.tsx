@@ -1,14 +1,17 @@
 'use client';
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertColor,
   Box,
   Button,
   Checkbox,
+  Divider,
+  FormControlLabel,
   Grid,
   IconButton,
   Menu,
   MenuItem,
+  Switch,
   Typography,
 } from '@mui/material';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
@@ -32,6 +35,10 @@ import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import BlockIcon from '@mui/icons-material/Block';
 import { useDiscount } from '@/hooks/useDiscount';
+import ConfirmModal from './Modals/ConfirmModal';
+import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
+import LoadingModal from './Modals/LoadingModal';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 interface PropTypes {
   order: Order;
@@ -46,6 +53,7 @@ interface PropTypes {
   mutateOrders: any;
   handleOpenDetails?: any;
   isMarkDateDifference?: boolean;
+  handleRemoveOrder?: (order: Order[]) => Promise<void>;
 }
 
 const OrderAccordion = ({
@@ -57,14 +65,19 @@ const OrderAccordion = ({
   mutateOrders,
   handleOpenDetails,
   isMarkDateDifference,
+  handleRemoveOrder,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
+  const [open, setOpen] = useMultipleBoolean({
+    isOpenConfirmModal: false,
+  });
   const [totalQuantity, setTotalQuantity] = useState(0);
   const statusText = {
     text: order.status,
@@ -78,20 +91,20 @@ const OrderAccordion = ({
             : COLOR_TYPE.ERROR,
   };
 
-  const { discountPrice, DiscountText } = useDiscount(order.items);
+  const { discountPrice, DiscountText } = useDiscount(order.items, order);
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
   );
 
   const latestUpdatePerson = useMemo(() => {
-    if (!order.createdBy && !order.updatedBy) {
-      return 'Unknown';
-    }
+    // if (!order.createdBy && !order.updatedBy) {
+    //   return 'Unknown';
+    // }
 
-    if (order.updatedBy) {
-      return order.updatedBy;
-    }
+    // if (order.updatedBy) {
+    //   return order.updatedBy;
+    // }
 
     return order.createdBy;
   }, [order]);
@@ -99,6 +112,35 @@ const OrderAccordion = ({
   useEffect(() => {
     calculateTotalQuantity();
   }, [order]);
+
+  const handleAvoidInventory = async (e: any) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.put(
+        `${API_URL.ADMIN}/orders/isAffectInventory`,
+        {
+          id: order.id,
+          isAffectInventory: e.target.checked,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsLoading(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error.response.data.error);
+      showNotification(
+        'error',
+        'Internal Server Error: ' + error.response.data.error,
+      );
+      setIsLoading(false);
+    }
+  };
 
   const handleOpenClientModal = (e: any) => {
     e.stopPropagation();
@@ -135,7 +177,6 @@ const OrderAccordion = ({
 
     setTotalQuantity(quantity);
   };
-  
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     try {
@@ -201,6 +242,19 @@ const OrderAccordion = ({
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
+        <MenuItem>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={order?.isAffectInventory}
+                onChange={handleAvoidInventory}
+              />
+            }
+            label="Affect Inventory"
+            labelPlacement="end"
+          />
+        </MenuItem>
+        <Divider />
         <MenuItem onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -210,14 +264,26 @@ const OrderAccordion = ({
         >
           Print
         </MenuItem>
+        {handleRemoveOrder && (
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveOrder([order]);
+            }}
+          >
+            Remove
+          </MenuItem>
+        )}
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
-            handleDeleteOrder(order);
+            setOpen('isOpenConfirmModal', true);
           }}
         >
           Delete
         </MenuItem>
+
+        <Divider />
 
         <MenuItem
           disabled={
@@ -255,6 +321,7 @@ const OrderAccordion = ({
 
   return (
     <>
+      <LoadingModal open={isLoading} />
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={componentRef} />
       </div>
@@ -280,12 +347,22 @@ const OrderAccordion = ({
         order={order}
         mutateOrders={mutateOrders}
       />
+      <ConfirmModal
+        open={open.isOpenConfirmModal}
+        onClose={() => setOpen('isOpenConfirmModal', false)}
+        title="Are you sure to delete this order ?"
+        buttonLabel="Delete"
+        handleSubmit={() => handleDeleteOrder(order)}
+        showNotification={showNotification}
+        color="error"
+      />
       {handleUpdateItem && (
         <OrderDetails
           open={isOpenDetails}
           onClose={() => setIsOpenDetails(false)}
           order={order}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       <ShadowSection>
@@ -302,7 +379,7 @@ const OrderAccordion = ({
               <Typography variant="body2">{latestUpdatePerson}</Typography>
             </Box>
           </Grid>
-          <Grid item xs={10} md={8}>
+          <Grid item xs={10} md={7}>
             <Box display="flex" alignItems="center" gap={1}>
               {order?.previousUnpaidOrders && (
                 <StatusText
@@ -341,16 +418,19 @@ const OrderAccordion = ({
               )}
             </Box>
           </Grid>
-          <Grid item xs={12} md={1.5} textAlign="right">
+          <Grid item xs={12} md={2.5} textAlign="right">
             {actions}
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
+            <StatusText text={statusText.text} type={statusText.type} />
+          </Grid>
+          <Grid item xs={6}>
             <Box
               display="flex"
-              justifyContent="space-between"
+              justifyContent="flex-end"
               alignItems="center"
+              gap={2}
             >
-              <StatusText text={statusText.text} type={statusText.type} />
               <IconButton
                 onClick={() => {
                   if (handleOpenDetails) {
@@ -412,11 +492,19 @@ const OrderAccordion = ({
                   {totalQuantity}
                 </Typography>
               </Box>
+              <Box display="flex" gap={1} alignItems="center">
+                <LocalShippingIcon color="primary" />
+                <Typography variant="subtitle2">
+                  {order?.orderRoute || ''}
+                </Typography>
+              </Box>
               <Box display="flex" alignItems="center" gap={1}>
-                {
-                  discountPrice > 0 && discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) && DiscountText
-                }
-                <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
+                {discountPrice > 0 &&
+                  discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
+                  DiscountText}
+                <Button variant="outlined">
+                  ${order.totalPrice.toFixed(2)}
+                </Button>
               </Box>
             </Box>
           </Grid>
@@ -427,4 +515,4 @@ const OrderAccordion = ({
 };
 
 // only re renders if th order data change
-export default memo(OrderAccordion);
+export default OrderAccordion;

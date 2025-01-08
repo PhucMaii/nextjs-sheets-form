@@ -74,11 +74,13 @@ export default function PlaceOrder({ showNotification }: IProps) {
 
       if (response.data.error) {
         showNotification('error', response.data.error);
+        setIsSubmitting(false);
         return;
       }
 
       if (response.data.warning) {
         showNotification('warning', response.data.warning);
+        setIsSubmitting(false);
         return;
       }
 

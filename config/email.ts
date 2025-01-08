@@ -16,15 +16,37 @@ export const generateOrderTemplate = (
     : '';
 
   for (const item of order?.items as any[]) {
+    if (item.quantity === 0) continue;
     const totalPrice = item.price * item.quantity;
-    orderDetailsTemplate += `
-    <tr>
-    <td style="padding: 8px">${item?.name}</td>
-    <td style="padding: 8px; text-align: center">${item?.quantity}</td>
-    <td style="padding: 8px; text-align: center">$${item.price.toFixed(2)}</td>
-    <td style="padding: 8px; text-align: center">$${totalPrice.toFixed(2)}</td>
-    </tr>
-      `;
+    if (item?.isShowDiscount && item?.prevPrice) {
+      orderDetailsTemplate += `
+      <tr>
+      <td style="padding: 8px">${item?.name}</td>
+      <td style="padding: 8px; text-align: center">${item?.quantity}</td>
+      <td style="padding: 8px; text-align: center">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
+          <h4 style="text-decoration: line-through">$${item.prevPrice.toFixed(2)}</h4>
+          <br />
+          <h4>$${item.price.toFixed(2)}</h4>
+        </div>
+      </td>
+      <td style="padding: 8px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+          <h4>$${totalPrice.toFixed(2)}</h4>
+      </td>
+      </tr>
+        `;
+    } else {
+      orderDetailsTemplate += `
+        <tr>
+        <td style="padding: 8px">${item?.name}</td>
+        <td style="padding: 8px; text-align: center">${item?.quantity}</td>
+        <td style="padding: 8px; text-align: center">
+          $${item.price.toFixed(2)}
+        </td>
+        <td style="padding: 8px; text-align: center">$${totalPrice.toFixed(2)}</td>
+        </tr>
+          `;
+    }
   }
 
   return `
@@ -65,11 +87,12 @@ export const generateOrderTemplate = (
               </tbody>
             </table>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
+            <h4 style="text-align: right;font-weight: 300;">Discount: -$${order?.discount?.toFixed(2)}</h4>
             <h4 style="text-align: right;font-weight: 300;">Subtotal: $${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}</h4>
-            <h4 style="text-align: right;font-weight: 300;">PST: $${order?.PST?.toFixed(
+            <h4 style="text-align: right;font-weight: 300;">GST: $${order?.GST?.toFixed(
               2,
             )}</h4>
-            <h4 style="text-align: right;font-weight: 300;">GST: $${order?.GST?.toFixed(
+            <h4 style="text-align: right;font-weight: 300;">PST: $${order?.PST?.toFixed(
               2,
             )}</h4>
             <h4 style="text-align: right;font-weight: 300;">Total: $${order?.totalPrice?.toFixed(
@@ -78,8 +101,7 @@ export const generateOrderTemplate = (
             <h4 style="text-align: left;font-weight: 300;">DELIVERY ADDRESS: ${deliveryAddress}</h4>
             <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
-            <h4 style="text-align: left;font-weight: 300;">NOTE</h4>
-            <h4 style="text-align: left;font-weight: 300;">${order?.note}</h4>
+            <h4 style="text-align: left;font-weight: 300;">NOTE: ${order?.note}</h4>
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
             <h4 style="text-align: right;font-weight: 300;">Order by: ${order?.createdBy}</h4>
         </div>

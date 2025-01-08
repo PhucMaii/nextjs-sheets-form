@@ -11,6 +11,12 @@ interface IQuery {
   type?: VIEW_TYPE;
 }
 
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+};
+
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
@@ -21,13 +27,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Missing required parameters' });
     }
 
-    const formattedStartDate = normalizeDate(new Date(startDate));
-    const formattedEndDate = normalizeDate(new Date(endDate));
+    const formattedStartDate = normalizeDate(
+      `${startDate.split(' ')[1]} ${startDate.split(' ')[2]} ${startDate.split(' ')[3]}`,
+    );
+    const formattedEndDate = normalizeDate(
+      `${endDate.split(' ')[1]} ${endDate.split(' ')[2]} ${endDate.split(' ')[3]}`,
+    );
 
     const listOfDateString = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
     );
+
+    console.log(listOfDateString, 'listOfDateString');
 
     if (!id || Number(id) <= 0) {
       const expenses = await prisma.expense.findMany({
@@ -47,8 +59,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             include: {
               inventoryUnit: true,
               fifo: {
-                include: {
-                  orderedItems: true,
+                select: {
+                  _count: {
+                    select: {
+                      orderedItems: true,
+                    },
+                  },
                 },
               },
             },
@@ -63,7 +79,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           if (!acc[expense.date]) {
             acc[expense.date] = 0;
           }
-  
+
           acc[expense.date] += expense.amount;
           return acc;
         },
@@ -99,8 +115,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             inventoryUnit: true,
             fifo: {
-              include: {
-                orderedItems: true,
+              select: {
+                _count: {
+                  select: {
+                    orderedItems: true,
+                  },
+                },
               },
             },
           },
@@ -135,8 +155,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                     include: {
                       inventoryUnit: true,
                       fifo: {
-                        include: {
-                          orderedItems: true,
+                        select: {
+                          _count: {
+                            select: {
+                              orderedItems: true,
+                            },
+                          },
                         },
                       },
                     },
@@ -153,7 +177,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
 
       expenses = vendor.expense.map((expense: any) => expense.expense);
-      console.log(expenses, 'expenses');
     }
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);
