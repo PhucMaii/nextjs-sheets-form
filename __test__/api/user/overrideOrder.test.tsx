@@ -1,14 +1,15 @@
-jest.mock('next-auth', () => {
-  console.log('MOCK next-auth');
-  ({
-  getServerSession: jest.fn().mockResolvedValue({
-      user: { name: 'Test User 2', id: 223 },
-  }),
-})});
+// jest.mock('next-auth', () => {
+//   console.log('MOCK next-auth');
+//   ({
+//   getServerSession: jest.fn().mockResolvedValue({
+//       user: { name: 'Test User 2', id: 223 },
+//   }),
+// })});
+import { loginTestAccountBeforeAll } from "@/__test__/setUpAuth";
+loginTestAccountBeforeAll()
 
 import { overrideOrder } from "@/pages/api/import-sheets/utils"
 import { testClient, testOrderData } from "./createOrder.test";
-import { loginTestAccountBeforeAll } from "@/__test__/setUpAuth";
 import { createOrder } from "@/pages/api/admin/orders/POST";
 import { ORDER_STATUS } from '../../../app/utils/enum';
 import { generateRecommendDate } from "@/app/utils/time";

@@ -13,6 +13,9 @@ interface IBody {
   spentBy: string;
   createdAt: string;
   invoice: string;
+  subTotal?: number;
+  GST?: number;
+  PST?: number;
   codBoardId?: number;
   status: TRANSACTION_STATUS;
   items: {
@@ -38,6 +41,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       spentBy,
       createdAt,
       status,
+      subTotal,
+      GST,
+      PST,
       invoice,
       codBoardId,
       items,
@@ -79,6 +85,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         invoice,
         date: date,
         amount: amount,
+        subTotal: subTotal,
+        PST: PST,
+        GST: GST,
         description: description,
         paymentMethodId: paymentMethodId,
         spentBy: spentBy,

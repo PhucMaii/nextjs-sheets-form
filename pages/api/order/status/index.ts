@@ -7,7 +7,6 @@ import { authOptions } from '../../auth/[...nextauth]';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../../utils/email';
 import { restockInventoryItem } from '../../admin/orderedItems/single';
-import withAuthGuard from '../../utils/withAuthGuard';
 
 interface BodyTypes {
   orderId: number;
@@ -26,8 +25,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Updated Status will always be VOID - Delete order button on client side
     const { orderId, updatedStatus }: BodyTypes = req.body;
-    console.log(orderId, updatedStatus, "BODY");
-
     const session: any = await getServerSession(req, res, authOptions);
     console.log(session, 'SESSION');
 
