@@ -4,7 +4,7 @@ import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import TrackInventoryRecordTable from '../Tables/TrackInventoryRecordTable';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { ACTION, API_URL } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 interface IProps extends ModalProps {}
@@ -14,7 +14,7 @@ export default function TrackInventoryRecord({ open, onClose }: IProps) {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [actionRecords, _mutate, isValidating] = SWRFetchData(
-    `${API_URL.ADMIN}/actions`,
+    `${API_URL.ADMIN}/actions?name=${ACTION.TRACK_INVENTORY}`,
   );
 
   useEffect(() => {

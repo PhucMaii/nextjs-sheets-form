@@ -34,12 +34,13 @@ export const filterDateRangeOrders = (
 export const sortByDeliveryDate = (
   orders: any[],
   field: string = 'deliveryDate',
+  direction: string = 'asc',
 ): any => {
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(orderA[field]);
     const deliveryDateB: any = convertDeliveryDateStringToDate(orderB[field]);
 
-    return deliveryDateA - deliveryDateB;
+    return direction === 'asc' ? deliveryDateA - deliveryDateB : deliveryDateB - deliveryDateA;
   });
 
   return sortedOrders;
