@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-describe('Check scheduled order items are same as category items', () => {
+describe('Pre order check', () => {
   test('Check scheduled order items are same as category items', async () => {
     const scheduleOrderItems = await getScheduleOrderItems();
     const categoryItems = await getCategoryItems();
@@ -123,6 +123,41 @@ describe('Check scheduled order items are same as category items', () => {
   })
 
   // Check if multiple of same items in one scheduled order
+  test('Check if multiple of same items in one scheduled order', async () => {
+    const prisma = new PrismaClient();
+
+    const scheduledOrders = await prisma.scheduleOrders.findMany({
+        include: {
+          items: true,
+          user: true,
+        }
+    });
+
+    const incorrectOrders: any = [];
+    for (const order of scheduledOrders) {
+      const items = [...order.items];
+
+      for (const item of items) {
+        const sameItem = order.items.filter((orderedItem: any) => {
+          return item.inventoryItemId === orderedItem.inventoryItemId && item.name === orderedItem.name;
+        });
+
+        if (sameItem.length > 2) {
+          incorrectOrders.push({
+            clientName: order.user.clientName,
+            orderId: order.id,
+            day: order.day,
+            name: item.name,
+            inventoryItemId: item.inventoryItemId,
+          })
+        }
+      }
+    }
+    
+    console.log(incorrectOrders);
+    expect(incorrectOrders.length).toBe(0);
+
+  })
 });
 
 
