@@ -11,7 +11,7 @@ export const loginTestAccountBeforeAll = () => {
         user: { name: 'Test User 2', id: 223 },
       }),
     }));
-    
+
     jest.mock('../pages/api/auth/[...nextauth]', () => ({
       authOptions: {
         providers: [],
@@ -24,7 +24,6 @@ export const loginTestAccountBeforeAll = () => {
       },
     }));
 
-
     jest.mock('../pages/api/utils/withAuthGuard', () => {
       return {
         __esModule: true,
@@ -34,5 +33,5 @@ export const loginTestAccountBeforeAll = () => {
         }),
       };
     });
-  })
+  });
 };

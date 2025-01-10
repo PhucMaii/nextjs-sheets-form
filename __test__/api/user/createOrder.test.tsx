@@ -2,7 +2,6 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { createOrder } from '@/pages/api/admin/orders/POST';
 import { loginTestAccountBeforeAll } from '../../setUpAuth';
 
-
 loginTestAccountBeforeAll();
 
 // jest.mock('@prisma/client', () => {
@@ -104,13 +103,11 @@ export const testClient: any = {
   id: 223,
   clientName: 'Test User 2',
   clientId: '00030',
-  email: 'maithienphuc0102@gmail.com'
+  email: 'maithienphuc0102@gmail.com',
 };
 
 describe('Create Order', () => {
-
   test('Do not allow client to create order in the past', async () => {
-
     const newOrder = await createOrder(
       testClient,
       testOrderData.body.items,
@@ -134,10 +131,10 @@ describe('Create Order', () => {
       testOrderData.body.createdAt,
       'Client - 00030',
       testOrderData.body.note,
-    )
+    );
 
     expect(newOrder.deliveryDate).toBe('01/01/3000');
     expect(newOrder.status).toBe(ORDER_STATUS.INCOMPLETED);
     expect(newOrder.items.length).toBe(5);
-  }, 10000); 
+  }, 10000);
 });

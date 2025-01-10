@@ -87,6 +87,7 @@ export const productColors = [
   lightPaleGreen, // LIME NO. 1
 ];
 export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (0 = January)
+export const testAccountId = 223;
 
 export const sendChequeMsg = `
 * Please send your payment by cheque to:

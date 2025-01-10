@@ -381,7 +381,8 @@ export default function ReportPage() {
       console.log('Fail to mark all as completed: ', error);
       showNotification(
         'error',
-        'Something went wrong. Please try again later - ERROR: ' + (error?.response?.data?.error || error),
+        'Something went wrong. Please try again later - ERROR: ' +
+          (error?.response?.data?.error || error),
       );
       setIsLoading(false);
     }

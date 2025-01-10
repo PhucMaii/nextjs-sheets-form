@@ -52,10 +52,10 @@ export const overrideOrder = async (
   newItems: any,
   newNote: string,
   updatedBy: string,
-) => {  
+) => {
   try {
     const prisma = new PrismaClient();
-  
+
     const order = await prisma.orders.findUnique({
       where: {
         id: orderId,
@@ -64,7 +64,7 @@ export const overrideOrder = async (
         items: true,
       },
     });
-  
+
     if (order && updatedBy.split(' - ')[0] === 'Client') {
       const isValidDate = checkOrderDeliveryDateValid(order.deliveryDate);
       if (!isValidDate.ok) {
@@ -134,7 +134,7 @@ export const overrideOrder = async (
 
     if (!existingOrder) {
       console.error('Order not found');
-      return {ok: false, error: 'Order not found'};
+      return { ok: false, error: 'Order not found' };
     }
 
     const total = generateOrderTotalPrice(existingOrder.items);
@@ -178,10 +178,10 @@ export const overrideOrder = async (
       id: updatedOrder.id,
     });
 
-    return {ok: true, message: 'Order Override Successfully'};
+    return { ok: true, message: 'Order Override Successfully' };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
-    return {ok: false, error: error.message};
+    return { ok: false, error: error.message };
   }
 };
 
