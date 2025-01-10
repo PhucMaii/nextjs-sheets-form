@@ -27,7 +27,7 @@ export default function TrackInventoryRecord({ open, onClose }: IProps) {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal maxHeight="80vh" overflow="scroll">
+      <BoxModal maxHeight="80vh" overflow="scroll" width="800px">
         <Typography variant="h6" textAlign="center" sx={{ mb: 2 }}>
           Track Inventory Record
         </Typography>
