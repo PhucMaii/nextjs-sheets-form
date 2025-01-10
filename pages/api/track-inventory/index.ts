@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../utils/date';
-import { ACTION } from '@/app/utils/enum';
+import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
 import { subtractInventoryItem } from '../admin/orderedItems/single';
 
 // let isJobScheduled = false;
@@ -34,10 +34,10 @@ export default async function handler(
 
     const date: { date: string; time: string } = getTodayDate();
 
-    console.log(date, 'DATE');
     // Check in DB if the action is taken already
     const action = await prisma.action.findFirst({
       where: {
+        name: ACTION.TRACK_INVENTORY,
         date: date.date,
       },
     });
@@ -48,15 +48,6 @@ export default async function handler(
         .status(200)
         .json({ message: 'Track Inventory Action Already Taken' });
     }
-
-    // Flag the action as taken
-    await prisma.action.create({
-      data: {
-        name: ACTION.TRACK_INVENTORY,
-        date: date.date,
-        createdAt: `${date.time} ${date.date}`,
-      },
-    });
 
     // Get all items that has been ordered today that quantity is greater than 0
     const orderedItems = await prisma.orderedItems.findMany({
@@ -71,8 +62,11 @@ export default async function handler(
           not: null, // Make sure do not touhch any custom amount
         },
         Orders: {
+          status: {
+            not: ORDER_STATUS.VOID, // Make sure the order is able to affect inventory
+          },
           deliveryDate: date.date, // Only the selected date
-          isAffectInventory: true, // Make sure the order is affect inventory
+          isAffectInventory: true, // Make sure the order is able to affect inventory
         },
       },
       include: {
@@ -91,28 +85,41 @@ export default async function handler(
       if (!item.inventoryItemId) return acc; // Make sure again not touching the custom amount
       if (!acc[item.inventoryItemId]) {
         acc[item.inventoryItemId] = {
-          quantity: item.quantity,
+          quantity: item.quantity * item.inventoryUnit.ratio,
           inventoryItem: item.inventoryItem,
           fifo: item.fifo,
           inventoryUnit: item.inventoryUnit,
         };
       } else {
-        acc[item.inventoryItemId].quantity += item.quantity;
+        acc[item.inventoryItemId].quantity +=
+          (item.quantity * item.inventoryUnit.ratio);
       }
-
       return acc;
     }, {});
 
+    let actionDescription: string = '';
     // Loop through that item set, update inventory item quantity
     for (const inventoryItem of Object.values(itemMap)) {
       await subtractInventoryItem(
         -1, // Force to subtract the inventory quantity
         inventoryItem.fifo,
-        inventoryItem.inventoryUnit,
+        { ratio: 1 }, // Already calculate correct quantity above
         inventoryItem.quantity,
       );
+
+      // Transform itemMap to a string
+      actionDescription += `${inventoryItem.inventoryItem.name}: ${inventoryItem.quantity} || `;
     }
 
+    // Flag the action as taken
+    await prisma.action.create({
+      data: {
+        name: ACTION.TRACK_INVENTORY,
+        date: date.date,
+        description: actionDescription,
+        createdAt: `${date.time} ${date.date}`,
+      },
+    });
     return res.status(200).json({ message: 'Success CRON JOBS' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

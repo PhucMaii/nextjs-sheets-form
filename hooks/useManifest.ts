@@ -62,7 +62,6 @@ const useManifest = (
       }
 
       setManifestData(response.data.data);
-      console.log(response.data.data, 'data');
 
       setIsLoading(false);
     } catch (error: any) {
@@ -79,8 +78,6 @@ const useManifest = (
     const newOrderPrint = manifestData.orderPrint.filter((order: any) => {
       return selectedRouteIds.includes(order.routeId);
     });
-
-    console.log({ selectedRouteIds }, 'newOrderPrint');
 
     setOrderPrint(newOrderPrint);
 

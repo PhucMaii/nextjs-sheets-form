@@ -381,6 +381,14 @@ async function main() {
   //     items: true,
   //   }
   // });
+  // const itemsSameName = [];
+  // const deletedIds = [];
+  // for (const scheduledOrder of scheduledOrders) {
+  //   const items = [...scheduledOrder.items];
+  //   for (const item of items) {
+  //     const sameItemInOneOrder = scheduledOrder.items.filter((sItem) => {
+  //       return item.name === sItem.name && item.inventoryItemId == sItem.inventoryItemId
+  //     });
   //     if (sameItemInOneOrder.length === 2) {
   //       itemsSameName.push(item);
   //       deletedIds.push(sameItemInOneOrder[1].id);
