@@ -93,7 +93,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (!isValidDate.ok) {
         return res.status(400).json({
           error: isValidDate.message,
-        })
+        });
       }
     }
 

@@ -803,7 +803,7 @@ const EditStockPurchased = ({
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">Amount</Typography>
-                  <TextField  
+                  <TextField
                     disabled
                     placeholder="Enter epxense amount..."
                     fullWidth

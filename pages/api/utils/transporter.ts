@@ -30,4 +30,4 @@ export const yahooTransporter = nodemailer.createTransport({
     user: yahooEmail,
     pass: 'maithienphuc0102',
   },
-})
+});

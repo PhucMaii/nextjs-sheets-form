@@ -122,10 +122,7 @@ export default function EditInventory({
     }
 
     if (updatedVendorItems.some((item: any) => item.units.length === 0)) {
-      showNotification(
-        'error',
-        'Please add at least one unit for each vendor',
-      );
+      showNotification('error', 'Please add at least one unit for each vendor');
       setIsLoading(false);
       return;
     }

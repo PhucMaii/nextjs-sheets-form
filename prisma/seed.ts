@@ -182,7 +182,6 @@ async function main() {
   //     // });
   //   }
   // }
-
   // const orders = await prisma.orders.findMany({
   //   where: {
   //     deliveryDate: '12/23/2024'
@@ -192,13 +191,11 @@ async function main() {
   //     user: true,
   //   }
   // });
-
   // const orderNoItems = orders.filter((order) => {
   //   return order.items.length === 0;
   // }).map((order) => {
   //   return order?.id
   // });
-
   // console.log(orderNoItems)
   // await prisma.orders.deleteMany({
   //   where: {
@@ -207,7 +204,6 @@ async function main() {
   //     }
   //   }
   // })
-
   // const startDate = new Date('2024-12-01');
   // const endDate = new Date('2024-12-31');
   // const decemberDayList = generateListOfDateString(startDate, endDate);
@@ -246,7 +242,6 @@ async function main() {
   //     });
   //   }
   // }
-
   // const orders = await prisma.orders.findMany({
   //   where: {
   //     deliveryDate: '01/03/2025'
@@ -264,7 +259,6 @@ async function main() {
   //     },
   //   }
   // });
-  
   // for (const order of orders) {
   //   if (order.items.length !== order.user?.category.items.length) {
   //     console.log({
@@ -273,7 +267,6 @@ async function main() {
   //       clientName: order?.user?.clientName,
   //       clientId: order?.user?.clientId,
   //     });
-
   //     // const newItems = order.user?.category.items.map((item: any) => {
   //     //   const itemInOrder = order.items.find((orderItem: any) => {
   //     //     return orderItem.name === item.name && orderItem;
@@ -281,7 +274,6 @@ async function main() {
   //     // });
   //   }
   // }
-
   /**CHECK IF SCHEDULED ORDERS ITEMS ARE MATCH WITH CATEGORY */
   // const scheduleOrderItems = await prisma.orderedItems.findMany({
   //   where: {
@@ -297,14 +289,11 @@ async function main() {
   //     }
   //   }
   // });
-
   // const categoryItems = await prisma.item.findMany({});
-
   // for (const scheduleOrderItem of scheduleOrderItems) {
   //   const categoryItem = categoryItems.find((categoryItem: any) => {
   //     return categoryItem.inventoryItemId === scheduleOrderItem.inventoryItemId && categoryItem.categoryId === scheduleOrderItem?.ScheduleOrders?.user.categoryId;
   //   })
-
   //     if (!categoryItem) {
   //       // console.log({
   //       //   scheduleOrderId: scheduleOrderItem.id,
@@ -313,7 +302,6 @@ async function main() {
   //       // });
   //       continue;
   //     };
-
   //     // if (scheduleOrderItem.price !== categoryItem.price) {
   //     //   console.log({
   //     //     clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
@@ -324,7 +312,6 @@ async function main() {
   //     //     categoryPrice: categoryItem.price
   //     //   }, 'price');
   //     // }
-
   //     if (scheduleOrderItem.isShowDiscount !== categoryItem.isShowDiscount) {
   //       console.log({
   //         clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
@@ -345,14 +332,13 @@ async function main() {
   //       // });
   //       continue;
   //     }
-
   //     if (scheduleOrderItem.prevPrice !== categoryItem.prevPrice) {
   //       console.log({
   //         clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
-  //         name: scheduleOrderItem.name,  
-  //         scheduleOrderId: scheduleOrderItem.id,  
+  //         name: scheduleOrderItem.name,
+  //         scheduleOrderId: scheduleOrderItem.id,
   //         day: scheduleOrderItem?.ScheduleOrders?.day,
-  //         prevPrice: scheduleOrderItem.prevPrice, 
+  //         prevPrice: scheduleOrderItem.prevPrice,
   //         categoryPrevPrice: categoryItem.prevPrice
   //       }, 'prevPrice');
   //       // await prisma.orderedItems.update({
@@ -367,7 +353,6 @@ async function main() {
   //       continue;
   //     }
   // }
-
   // CHECK IF SCHEDULED ORDERS TOTAL PRICE IS CORRECT
   // const scheduleOrders = await prisma.scheduleOrders.findMany({
   //   include: {
@@ -375,12 +360,10 @@ async function main() {
   //     items: true,
   //   }
   // });
-
   // for (const scheduleOrder of scheduleOrders) {
   //   const actualTotalPrice = scheduleOrder.items.reduce((acc: number, item: any) => {
   //     return acc + (item.price * item.quantity);
   //   }, 0);
-
   //   if (scheduleOrder.totalPrice.toFixed(2) !== actualTotalPrice.toFixed(2)) {
   //     console.log({
   //       id: scheduleOrder.id,
@@ -392,24 +375,20 @@ async function main() {
   //     })
   //   }
   // }
-
   // const scheduledOrders = await prisma.scheduleOrders.findMany({
   //   include: {
   //     user: true,
   //     items: true,
   //   }
   // });
-
   // const itemsSameName = [];
   // const deletedIds = [];
   // for (const scheduledOrder of scheduledOrders) {
   //   const items = [...scheduledOrder.items];
-
   //   for (const item of items) {
   //     const sameItemInOneOrder = scheduledOrder.items.filter((sItem) => {
   //       return item.name === sItem.name && item.inventoryItemId == sItem.inventoryItemId
   //     });
-
   //     if (sameItemInOneOrder.length === 2) {
   //       itemsSameName.push(item);
   //       deletedIds.push(sameItemInOneOrder[1].id);
@@ -424,10 +403,8 @@ async function main() {
   //       break;
   //     }
   //   }
-
   // }
   // console.log(itemsSameName.length);
-
   // await prisma.orderedItems.deleteMany({
   //   where: {
   //     id: {

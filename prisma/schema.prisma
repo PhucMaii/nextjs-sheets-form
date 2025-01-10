@@ -337,7 +337,7 @@ model InventoryUnit {
 model Action {
   id          Int     @id @default(autoincrement())
   name        String
-  description String?
+  description String? @db.Text
   date        String
   createdAt   String
   createdBy   String?

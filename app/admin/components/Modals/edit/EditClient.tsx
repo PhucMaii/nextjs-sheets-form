@@ -43,7 +43,6 @@ const EditClient = ({
     password: '',
   });
 
-
   const handleOnChangeClient = (key: string, value: any) => {
     if (key === 'category') {
       setUpdatedClient({

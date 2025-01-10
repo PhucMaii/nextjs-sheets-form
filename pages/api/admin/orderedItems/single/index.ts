@@ -120,7 +120,7 @@ export default withAdminAuthGuard(handler);
 export const updateSingleInventoryItem = async (
   orderId: number,
   fifo: Fifo,
-  unit: InventoryUnit,
+  unit: InventoryUnit | any,
   newQuantity: number,
   previousQuantity: number,
 ) => {
@@ -163,10 +163,9 @@ export const updateSingleInventoryItem = async (
       return;
     }
 
+    const ratio = unit?.ratio || 1;
     const updatedQuantity =
-      lastUpdatedFifo.quantity -
-      newQuantity * unit.ratio +
-      previousQuantity * unit.ratio;
+      lastUpdatedFifo.quantity - newQuantity * ratio + previousQuantity * ratio;
     await prisma.fifo.update({
       where: {
         id: fifo.id,
@@ -216,7 +215,7 @@ export const restockInventoryItem = async (
 export const subtractInventoryItem = async (
   orderId: number,
   fifo: Fifo,
-  unit: InventoryUnit,
+  unit: InventoryUnit | any,
   subtractedQuantity: number,
 ) => {
   try {

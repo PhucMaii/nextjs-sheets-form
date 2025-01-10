@@ -14,7 +14,7 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import StatusText from '../StatusText';
@@ -70,9 +70,18 @@ const BillPrintModal = ({
     manifestData,
   } = useManifest(orderList, selectedRoutes, day, showNotification);
 
-  const routesLength = manifestData.itemManifest['-1']
-    ? routes.length + 1
-    : routes.length;
+  const routesLength = useMemo(() => {
+    if (manifestData.itemManifest['-1'] && manifestData.itemManifest['-2']) {
+      return routes.length + 2;
+    } else if (
+      manifestData.itemManifest['-1'] ||
+      manifestData.itemManifest['-2']
+    ) {
+      return routes.length + 1;
+    } else {
+      return routes.length;
+    }
+  }, [routes, manifestData]);
 
   useEffect(() => {
     setSelectedRoutes([]);
@@ -119,6 +128,11 @@ const BillPrintModal = ({
       if (manifestData.itemManifest['-1']) {
         newSelectRoutes.push({ id: '-1', name: 'No Route Orders' });
       }
+
+      if (manifestData.itemManifest['-2']) {
+        newSelectRoutes.push({ id: '-2', name: 'All Summary' });
+      }
+
       setSelectedRoutes(newSelectRoutes);
     }
   };
@@ -167,8 +181,6 @@ const BillPrintModal = ({
       </Menu>
     </Box>
   );
-
-  // console.log(itemManifest, 'itemManifest');
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -264,6 +276,27 @@ const BillPrintModal = ({
                     }
                   />
                   <Box display="flex" flexDirection="column" ml={3}>
+                    {Object.keys(manifestData.itemManifest).includes('-2') &&
+                      manifestData.itemManifest[-2] && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={selectedRoutes.some(
+                                (baseRoute: IRoutes) =>
+                                  manifestData.itemManifest['-2'].route.id ===
+                                  baseRoute.id,
+                              )}
+                              onChange={(e: any) =>
+                                handleSelectRoute(
+                                  e,
+                                  manifestData.itemManifest['-2'].route,
+                                )
+                              }
+                            />
+                          }
+                          label={manifestData.itemManifest['-2'].route.name}
+                        />
+                      )}
                     {routes.map((route: IRoutes) => {
                       if (route.id == -1) return null;
                       const isChecked = selectedRoutes.some(
