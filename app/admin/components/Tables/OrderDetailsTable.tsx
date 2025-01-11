@@ -31,7 +31,7 @@ interface IProps {
   ) => Promise<void>;
   abilityToEdit?: boolean;
   showNotification?: (type: AlertColor, message: string) => void;
-  role?: USER_ROLE;
+  role: USER_ROLE;
 }
 
 export default function OrderDetailsTable({
@@ -111,6 +111,7 @@ export default function OrderDetailsTable({
         setItem={setUpdatedItem}
         handleUpdateItem={handleUpdateItem}
         order={order}
+        // role={role as USER_ROLE}
       />
       <Table sx={{ maxWidth: '100%', overflow: 'hidden' }}>
         <TableHead>

@@ -12,6 +12,7 @@ import { OrderedItems } from '@/app/utils/type';
 import { Item, Order } from '../../../orders/page';
 import { ModalProps } from '../type';
 import { LoadingButton } from '@mui/lab';
+// import { USER_ROLE } from '@/app/utils/enum';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -22,6 +23,7 @@ interface PropTypes extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  // role: USER_ROLE;
 }
 
 export default function EditItemModal({
@@ -31,6 +33,7 @@ export default function EditItemModal({
   item,
   setItem,
   handleUpdateItem,
+  // role
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
