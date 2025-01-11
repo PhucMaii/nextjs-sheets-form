@@ -141,7 +141,7 @@ export const updateSingleInventoryItem = async (
         return;
       }
 
-      const isValidToCheckInventory = checkOrderValidToAffectInventory(
+      const isValidToCheckInventory = await checkOrderValidToAffectInventory(
         order.deliveryDate,
       );
 

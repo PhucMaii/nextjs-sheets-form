@@ -91,7 +91,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       //     });
       //   }
       // }
-      const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
+      const isValidDate =  checkOrderDeliveryDateValid(deliveryDate);
       if (!isValidDate.ok) {
         return res.status(400).json({
           error: isValidDate.message,

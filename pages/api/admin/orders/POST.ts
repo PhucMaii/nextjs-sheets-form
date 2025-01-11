@@ -253,7 +253,7 @@ const createOrderedItems = async (order: any, items: any) => {
   });
 
   // // Check is order valid to affect inventory
-  const isValidToCheckInventory = checkOrderValidToAffectInventory(
+  const isValidToCheckInventory = await checkOrderValidToAffectInventory(
     order.deliveryDate,
   );
 
