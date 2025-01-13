@@ -23,7 +23,7 @@ export default async function handler(
   console.log(authHeader, 'AUTH HEADER');
 
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
     // if (!isJobScheduled) {
@@ -98,7 +98,7 @@ export default async function handler(
         };
       } else {
         acc[item.inventoryItemId].quantity +=
-          (item.quantity * item.inventoryUnit.ratio);
+          item.quantity * item.inventoryUnit.ratio;
       }
       return acc;
     }, {});

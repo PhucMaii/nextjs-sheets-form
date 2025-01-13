@@ -16,7 +16,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PendingIcon from '@mui/icons-material/Pending';
-import SelectDateRange from '../admin/components/SelectDateRange';
+import SelectDateRange from '../admin/components/Select/SelectDateRange';
 import { generateMonthRange } from '../utils/time';
 import { Order } from '../admin/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';

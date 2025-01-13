@@ -255,7 +255,12 @@ const OrderAccordion = ({
           />
         </MenuItem>
         <Divider />
-        <MenuItem disabled={order?.type === TYPE.FIXED} onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
+        <MenuItem
+          disabled={order?.type === TYPE.FIXED}
+          onClick={() => setIsOpenEditPrice(true)}
+        >
+          Edit price
+        </MenuItem>
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();

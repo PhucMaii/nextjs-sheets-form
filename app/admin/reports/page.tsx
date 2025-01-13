@@ -20,7 +20,7 @@ import axios from 'axios';
 import { Order } from '../orders/page';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import SelectDateRange from '../components/SelectDateRange';
+import SelectDateRange from '../components/Select/SelectDateRange';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';

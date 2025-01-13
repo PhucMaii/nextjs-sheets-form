@@ -1,13 +1,21 @@
-import { PAYMENT_TYPE } from '@/app/utils/enum';
+import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
+import { UserType } from '@/app/utils/type';
+import { Order } from '@/app/admin/orders/page';
 
 interface QueryType {
   day?: string;
   startDate?: string;
   endDate?: string;
+}
+
+export interface ClientStatementType {
+  client: UserType;
+  orders: Order[];
+  route: Route;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
@@ -47,6 +55,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   routes: true,
                   Orders: {
                     where: {
+                      status: {
+                        notIn: [ORDER_STATUS.VOID, ORDER_STATUS.COMPLETED],
+                      },
                       deliveryDate: {
                         in: listOfDayStrings,
                       },
@@ -59,8 +70,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      const formattedClientOrders: any = {};
+      routes.forEach((route: any) => {
+        formattedClientOrders[route.id] = route.clients.map((client: any) => {
+          return {
+            client: client.user,
+            orders: client.user.Orders,
+            route: route,
+          };
+        });
+      });
+
       return res.status(200).json({
         data: routes,
+        formattedClientOrders,
         message: 'Fetch Routes Successfully',
       });
     }
@@ -86,8 +109,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // const formattedClientOrders: any = {};
+    // routes.forEach((route: any) => {
+    //   formattedClientOrders[route.id] = route.clients.map((client: any) => {
+    //     return {
+    //       client: client.user,
+    //       orders: client.user.Orders,
+    //       route: route,
+    //     };
+    //   })
+    // })
+
     return res.status(200).json({
       data: routes,
+      // formattedClientOrders,
       message: 'Fetch Routes Successfully',
     });
   } catch (error: any) {

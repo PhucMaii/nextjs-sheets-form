@@ -61,7 +61,12 @@ export const ComponentToPrint = forwardRef(
                 flexDirection="column"
               >
                 {item?.isShowDiscount && item?.prevPrice && (
-                  <Typography sx={{ textDecoration: 'line-through', textDecorationThickness: 4 }}>
+                  <Typography
+                    sx={{
+                      textDecoration: 'line-through',
+                      textDecorationThickness: 4,
+                    }}
+                  >
                     ${item.prevPrice}
                   </Typography>
                 )}

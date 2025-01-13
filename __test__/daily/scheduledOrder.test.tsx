@@ -6,10 +6,10 @@ describe('Pre order check', () => {
     const categoryItems = await getCategoryItems();
 
     const checkMap: any = {
-        categoryItemNotFound: [],
-        incorrectIsShowDiscount: [],
-        incorrectPrevPrice: [],
-    }
+      categoryItemNotFound: [],
+      incorrectIsShowDiscount: [],
+      incorrectPrevPrice: [],
+    };
     for (const scheduleOrderItem of scheduleOrderItems) {
       const categoryItem = categoryItems.find((categoryItem: any) => {
         return (
@@ -19,21 +19,24 @@ describe('Pre order check', () => {
         );
       });
       if (!categoryItem) {
-        console.error({
-          scheduleOrderId: scheduleOrderItem.id,
-          name: scheduleOrderItem.name,
-          itemCategoryId: scheduleOrderItem?.ScheduleOrders?.user.categoryId,
-          inventoryItemId: scheduleOrderItem.inventoryItemId,
-          clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName
-        }, 'CATEGORY ITEM NOT FOUND');
+        console.error(
+          {
+            scheduleOrderId: scheduleOrderItem.id,
+            name: scheduleOrderItem.name,
+            itemCategoryId: scheduleOrderItem?.ScheduleOrders?.user.categoryId,
+            inventoryItemId: scheduleOrderItem.inventoryItemId,
+            clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
+          },
+          'CATEGORY ITEM NOT FOUND',
+        );
 
         checkMap.categoryItemNotFound.push({
           scheduleOrderId: scheduleOrderItem.id,
           name: scheduleOrderItem.name,
           itemCategoryId: scheduleOrderItem?.ScheduleOrders?.user.categoryId,
           inventoryItemId: scheduleOrderItem.inventoryItemId,
-          clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName
-        })
+          clientName: scheduleOrderItem?.ScheduleOrders?.user.clientName,
+        });
         continue;
       }
       if (scheduleOrderItem.isShowDiscount !== categoryItem.isShowDiscount) {
@@ -56,7 +59,7 @@ describe('Pre order check', () => {
           day: scheduleOrderItem?.ScheduleOrders?.day,
           isShowDiscount: scheduleOrderItem.isShowDiscount,
           categoryIsShowDiscount: categoryItem.isShowDiscount,
-        })
+        });
         continue;
       }
       if (scheduleOrderItem.prevPrice !== categoryItem.prevPrice) {
@@ -93,44 +96,45 @@ describe('Pre order check', () => {
     const prisma = new PrismaClient();
 
     const scheduleOrders = await prisma.scheduleOrders.findMany({
-        include: {
-          user: true,
-          items: true,
-        }
+      include: {
+        user: true,
+        items: true,
+      },
     });
 
     const incorrectOrders = [];
     for (const scheduleOrder of scheduleOrders) {
-      const totalPrice = scheduleOrder.items.reduce((acc: number, item: any) => {
-        return acc + item.price * item.quantity;
-      }, 0);
+      const totalPrice = scheduleOrder.items.reduce(
+        (acc: number, item: any) => {
+          return acc + item.price * item.quantity;
+        },
+        0,
+      );
 
       if (totalPrice?.toFixed(2) !== scheduleOrder.totalPrice?.toFixed(2)) {
         incorrectOrders.push({
-            clientName: scheduleOrder.user.clientName,
-            clientId: scheduleOrder.user.id,
-            scheduleOrderId: scheduleOrder.id,
-            day: scheduleOrder.day,
-            totalPrice: scheduleOrder.totalPrice,
-            actualTotalPrice: totalPrice,
-        })
+          clientName: scheduleOrder.user.clientName,
+          clientId: scheduleOrder.user.id,
+          scheduleOrderId: scheduleOrder.id,
+          day: scheduleOrder.day,
+          totalPrice: scheduleOrder.totalPrice,
+          actualTotalPrice: totalPrice,
+        });
       }
-
     }
     console.log(incorrectOrders);
     expect(incorrectOrders.length).toBe(0);
-
-  })
+  });
 
   // Check if multiple of same items in one scheduled order
   test('Check if multiple of same items in one scheduled order', async () => {
     const prisma = new PrismaClient();
 
     const scheduledOrders = await prisma.scheduleOrders.findMany({
-        include: {
-          items: true,
-          user: true,
-        }
+      include: {
+        items: true,
+        user: true,
+      },
     });
 
     const incorrectOrders: any = [];
@@ -139,7 +143,10 @@ describe('Pre order check', () => {
 
       for (const item of items) {
         const sameItem = order.items.filter((orderedItem: any) => {
-          return item.inventoryItemId === orderedItem.inventoryItemId && item.name === orderedItem.name;
+          return (
+            item.inventoryItemId === orderedItem.inventoryItemId &&
+            item.name === orderedItem.name
+          );
         });
 
         if (sameItem.length > 2) {
@@ -149,37 +156,35 @@ describe('Pre order check', () => {
             day: order.day,
             name: item.name,
             inventoryItemId: item.inventoryItemId,
-          })
+          });
         }
       }
     }
-    
+
     console.log(incorrectOrders);
     expect(incorrectOrders.length).toBe(0);
-
-  })
+  });
 });
 
-
 const getScheduleOrderItems = async () => {
-    const prisma = new PrismaClient();
-    return await prisma.orderedItems.findMany({
-      where: {
-        scheduledOrderId: {
-          not: null,
+  const prisma = new PrismaClient();
+  return await prisma.orderedItems.findMany({
+    where: {
+      scheduledOrderId: {
+        not: null,
+      },
+    },
+    include: {
+      ScheduleOrders: {
+        include: {
+          user: true,
         },
       },
-      include: {
-        ScheduleOrders: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
+    },
+  });
 };
 
 const getCategoryItems = async () => {
-    const prisma = new PrismaClient();
-    return await prisma.item.findMany({});
+  const prisma = new PrismaClient();
+  return await prisma.item.findMany({});
 };

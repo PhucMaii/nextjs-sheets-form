@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import OrderStockTable from '../Tables/OrderStockTable';
 import { generateMonthRange } from '@/app/utils/time';
-import SelectDateRange from '../SelectDateRange';
+import SelectDateRange from '../Select/SelectDateRange';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';

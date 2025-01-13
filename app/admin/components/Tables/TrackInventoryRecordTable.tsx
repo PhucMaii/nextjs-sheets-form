@@ -1,10 +1,4 @@
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@mui/material';
+import { Paper, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import { Action } from '@prisma/client';
 import React, { Fragment } from 'react';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
@@ -14,57 +8,55 @@ interface IProps {
 }
 
 export default function TrackInventoryRecordTable({ actionData }: IProps) {
-    const fixedHeaderContent = () => {
-        return (
-            <TableRow>
-                <TableCell sx={{ width: 50 }}>Id</TableCell>
-                <TableCell sx={{ width: 100 }}>Date</TableCell>
-                <TableCell sx={{ width: 200 }}>Description</TableCell>
-                <TableCell sx={{ width: 100 }}>Created at</TableCell>
-                <TableCell sx={{ width: 100 }}>Type</TableCell>
-            </TableRow>
-        )
-    }
+  const fixedHeaderContent = () => {
+    return (
+      <TableRow>
+        <TableCell sx={{ width: 50 }}>Id</TableCell>
+        <TableCell sx={{ width: 100 }}>Date</TableCell>
+        <TableCell sx={{ width: 200 }}>Description</TableCell>
+        <TableCell sx={{ width: 100 }}>Created at</TableCell>
+        <TableCell sx={{ width: 100 }}>Type</TableCell>
+      </TableRow>
+    );
+  };
 
-    const rowContent = (index: number, action: Action) => {
-        return (
-            <Fragment key={index}>
-                <TableCell sx={{ width: 50 }}>{action.id}</TableCell>
-                <TableCell>{action.date}</TableCell>
-                <TableCell>{action.description}</TableCell>
-                <TableCell>{action.createdAt}</TableCell>
-                <TableCell>{action.name}</TableCell>
-            </Fragment>
-        )
-    }
+  const rowContent = (index: number, action: Action) => {
+    return (
+      <Fragment key={index}>
+        <TableCell sx={{ width: 50 }}>{action.id}</TableCell>
+        <TableCell>{action.date}</TableCell>
+        <TableCell>{action.description}</TableCell>
+        <TableCell>{action.createdAt}</TableCell>
+        <TableCell>{action.name}</TableCell>
+      </Fragment>
+    );
+  };
 
-    const VirtuosoTableComponents: TableComponents<any> = {
-        Table: (props) => (
-            <Table 
-                {...props}
-                sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
-            />
-        ),
+  const VirtuosoTableComponents: TableComponents<any> = {
+    Table: (props) => (
+      <Table
+        {...props}
+        sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
+      />
+    ),
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        TableRow: ({ item, ...props }) => {
-            return (
-                <TableRow {...props}/>
-            )
-        },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    TableRow: ({ item, ...props }) => {
+      return <TableRow {...props} />;
+    },
 
-        TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
-            <TableBody ref={ref} {...props} />
-        ))
-    }
+    TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
+      <TableBody ref={ref} {...props} />
+    )),
+  };
 
   return (
-    <Paper        
-        style={{
-            height: 500,
-            width: 790,
-            overflow: 'scroll',
-        }}
+    <Paper
+      style={{
+        height: 500,
+        width: 790,
+        overflow: 'scroll',
+      }}
     >
       {/* <Table>
         <TableHead>
@@ -88,7 +80,7 @@ export default function TrackInventoryRecordTable({ actionData }: IProps) {
           })}
         </TableBody>
       </Table> */}
-      <TableVirtuoso 
+      <TableVirtuoso
         data={actionData}
         components={VirtuosoTableComponents}
         fixedHeaderContent={fixedHeaderContent}

@@ -29,7 +29,7 @@ import { IBoard } from '@/app/utils/type';
 import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
-import SelectDateRange from '../components/SelectDateRange';
+import SelectDateRange from '../components/Select/SelectDateRange';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useSelectDate from '@/hooks/useSelectDate';
 import CodOverview from '../components/Overview/CodOverview';

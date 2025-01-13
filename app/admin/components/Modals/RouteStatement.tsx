@@ -17,7 +17,7 @@ import React, {
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
-import SelectDateRange from '../SelectDateRange';
+import SelectDateRange from '../Select/SelectDateRange';
 import { days } from '@/app/lib/constant';
 import { grey } from '@mui/material/colors';
 import { SWRFetchData } from '@/app/utils/db';
@@ -51,7 +51,7 @@ const RouteStatement = ({ open, onClose, currentDateRange }: IProps) => {
     [],
   );
 
-  console.log('ROUTE STATEMENT RE RENDER', currentDateRange);
+  console.log('ROUTE STATEMENT RE RENDER', dateRange);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [routes, _mutate, isValidating] = SWRFetchData(

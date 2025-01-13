@@ -40,7 +40,9 @@ export const sortByDeliveryDate = (
     const deliveryDateA: any = convertDeliveryDateStringToDate(orderA[field]);
     const deliveryDateB: any = convertDeliveryDateStringToDate(orderB[field]);
 
-    return direction === 'asc' ? deliveryDateA - deliveryDateB : deliveryDateB - deliveryDateA;
+    return direction === 'asc'
+      ? deliveryDateA - deliveryDateB
+      : deliveryDateB - deliveryDateA;
   });
 
   return sortedOrders;

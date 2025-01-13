@@ -28,6 +28,7 @@ import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import {
   errorColor,
   infoColor,
@@ -99,7 +100,7 @@ export const inventoryOrder = [
   'No. 2 MUSHROOM WHITE 10 LB',
   'NO. 1 OYSTER MUSHROOM 5 LB',
   'NO. 2 OYSTER MUSHROOM 5 LB',
-]
+];
 
 const lighterGreen = '#99FF99'; // Lighter Green
 const lighterLimeGreen = '#CCFF99'; // Lighter Lime Green
@@ -221,14 +222,19 @@ export const adminTabs = {
       path: '/admin/codBoard',
     },
     {
-      name: 'Blocking',
-      icon: AppBlockingIcon,
-      path: '/admin/blocking',
-    },
-    {
       name: 'Pre Orders',
       icon: PendingActionsIcon,
       path: '/admin/pre-orders',
+    },
+    {
+      name: 'Statements',
+      icon: DocumentScannerIcon,
+      path: '/admin/statements',
+    },
+    {
+      name: 'Blocking',
+      icon: AppBlockingIcon,
+      path: '/admin/blocking',
     },
   ],
 };

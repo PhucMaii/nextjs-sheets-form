@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,15 +20,9 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
-    "types": [
-      "react-dnd",
-      "react-dnd-html5-backend",
-      "jest"
-    ]
+    "types": ["react-dnd", "react-dnd-html5-backend", "jest"]
   },
   "include": [
     "next-env.d.ts",
@@ -43,7 +33,5 @@
     "__test__/*.ts",
     "__test__/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
