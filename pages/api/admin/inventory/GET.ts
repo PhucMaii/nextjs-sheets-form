@@ -100,8 +100,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         new Map(sellingUnits.map((unit: any) => [unit.ratio, unit])).values(),
       );
 
-      console.log(sellingUnits, 'selling Units');
-
       return res.status(200).json({
         data: { ...formattedInventory, units: sellingUnits },
         message: 'Fetch Inventory Successfully',
@@ -145,8 +143,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         sortedInventoryItem.push(inventoryItem);
       }
     }
-
-    console.log(sortedInventoryItem, 'sortedInventoryItem');
 
     return res.status(200).json({
       data: sortedInventoryItem,

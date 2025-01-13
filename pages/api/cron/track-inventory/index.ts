@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../utils/date';
+import { getTodayDate } from '../../utils/date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
-import { subtractInventoryItem } from '../admin/orderedItems/single';
+import { subtractInventoryItem } from '../../admin/orderedItems/single';
 
 // let isJobScheduled = false;
 
@@ -120,7 +120,7 @@ export default async function handler(
         createdAt: `${date.time} ${date.date}`,
       },
     });
-    return res.status(200).json({ message: 'Success CRON JOBS' });
+    return res.status(200).json({ message: 'Track Inventory Successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res
