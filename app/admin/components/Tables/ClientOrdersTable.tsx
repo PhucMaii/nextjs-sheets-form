@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, TYPE } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
 import EditReportOrder from '../Modals/edit/EditReportOrder';
 import axios from 'axios';
@@ -218,6 +218,7 @@ const ClientOrdersTable = ({
               Delete
             </Button>
             <Button
+              disabled={order?.type === TYPE.FIXED}
               onClick={() => {
                 setOpenEdit(() => ({ order, open: true }));
               }}

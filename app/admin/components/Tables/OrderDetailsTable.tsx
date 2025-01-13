@@ -18,7 +18,7 @@ import EditItemModal from '../Modals/edit/EditOrderItem';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { API_URL, TYPE, USER_ROLE } from '@/app/utils/enum';
 
 interface IProps {
   order: Order;
@@ -174,6 +174,7 @@ export default function OrderDetailsTable({
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                       <IconButton
+                        disabled={order?.type === TYPE.FIXED}
                         onClick={() => {
                           setSelectedItem(item);
                           setUpdatedItem(item);
@@ -185,6 +186,7 @@ export default function OrderDetailsTable({
                         <IconButton
                           color="error"
                           disabled={
+                            order?.type === TYPE.FIXED ||
                             role === USER_ROLE.CLIENT ||
                             role === USER_ROLE.DRIVER
                           }

@@ -20,7 +20,7 @@ import { useReactToPrint } from 'react-to-print';
 import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, TYPE } from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
@@ -255,7 +255,7 @@ const OrderAccordion = ({
           />
         </MenuItem>
         <Divider />
-        <MenuItem onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
+        <MenuItem disabled={order?.type === TYPE.FIXED} onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();

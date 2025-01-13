@@ -18,7 +18,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '../../utils/enum';
+import { API_URL, ORDER_STATUS, PAYMENT_TYPE, TYPE } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { IItem, IRoutes, OrderedItems, UserType } from '@/app/utils/type';
@@ -114,6 +114,7 @@ export interface Order {
   multipleOrders?: boolean;
   isAffectInventory?: boolean;
   orderRoute?: string;
+  type?: TYPE;
 }
 
 const orderPerPage = 10;

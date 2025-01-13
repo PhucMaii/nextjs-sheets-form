@@ -22,7 +22,7 @@ import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
 import AddCustomAmount from './add/AddCustomAmount';
 import axios from 'axios';
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { API_URL, TYPE, USER_ROLE } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -148,9 +148,9 @@ export default function OrderDetails({
               </Typography>
             </Grid>
             <Grid item xs={4} textAlign="right">
-              <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+              {order?.type !== TYPE.FIXED && <Button onClick={() => setIsOpenAddCustomAmount(true)}>
                 + Custom Amount
-              </Button>
+              </Button>}
             </Grid>
             <Grid item textAlign="center" xs={12}>
               <OrderDetailsTable
