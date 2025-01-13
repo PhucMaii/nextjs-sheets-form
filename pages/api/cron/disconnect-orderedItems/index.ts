@@ -5,6 +5,11 @@ import { PrismaClient } from "@prisma/client";
 import { ACTION, TYPE, USER_ROLE } from "@/app/utils/enum";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
     try {
         const prisma = new PrismaClient();
         const { date, time } = getTodayDate();

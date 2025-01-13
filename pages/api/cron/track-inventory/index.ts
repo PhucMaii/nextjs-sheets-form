@@ -19,6 +19,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  const authHeader = req.headers.authorization;
+  console.log(authHeader, 'AUTH HEADER');
+
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
     // if (!isJobScheduled) {
     //     const schedule = '*/5 * * * *'; // Every minute

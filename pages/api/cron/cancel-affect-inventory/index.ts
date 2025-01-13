@@ -5,6 +5,13 @@ import { ACTION, USER_ROLE } from "@/app/utils/enum";
 import { YYYYMMDDFormat } from "@/app/utils/time";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+    const authHeader = req.headers.authorization;
+    console.log(authHeader, 'AUTH HEADER');
+
+
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
     try {
         const prisma = new PrismaClient();
 
