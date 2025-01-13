@@ -55,7 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 deliveryDate: threeMonthsAgoString
             },
             data: {
-                type: TYPE.FIXED,
+                type: TYPE.LOCKED,
             }
         });
 

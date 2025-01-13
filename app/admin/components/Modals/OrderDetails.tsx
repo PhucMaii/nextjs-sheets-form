@@ -148,7 +148,7 @@ export default function OrderDetails({
               </Typography>
             </Grid>
             <Grid item xs={4} textAlign="right">
-              {order?.type !== TYPE.FIXED && <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+              {order?.type !== TYPE.LOCKED && <Button onClick={() => setIsOpenAddCustomAmount(true)}>
                 + Custom Amount
               </Button>}
             </Grid>

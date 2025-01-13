@@ -106,5 +106,5 @@ export enum ACTION {
 }
 
 export enum TYPE {
-  FIXED = 'FIXED',
+  LOCKED = 'LOCKED',
 }

@@ -39,6 +39,7 @@ import ConfirmModal from './Modals/ConfirmModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import LoadingModal from './Modals/LoadingModal';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LockIcon from '@mui/icons-material/Lock';
 
 interface PropTypes {
   order: Order;
@@ -255,7 +256,7 @@ const OrderAccordion = ({
           />
         </MenuItem>
         <Divider />
-        <MenuItem disabled={order?.type === TYPE.FIXED} onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
+        <MenuItem disabled={order?.type === TYPE.LOCKED} onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
@@ -381,6 +382,13 @@ const OrderAccordion = ({
           </Grid>
           <Grid item xs={10} md={7}>
             <Box display="flex" alignItems="center" gap={1}>
+              {order?.type === TYPE.LOCKED && (
+                <StatusText
+                  text={`Locked`}
+                  type={'info'}
+                  icon={<LockIcon color="info" fontSize="small" />}
+                />
+              )}
               {order?.previousUnpaidOrders && (
                 <StatusText
                   text={`${order.previousUnpaidOrders.numberOfOrders} unpaid orders`}
