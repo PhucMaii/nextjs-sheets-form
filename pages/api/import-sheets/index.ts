@@ -71,26 +71,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     if (createdBy === USER_ROLE.CLIENT) {
-      // const selectedDate = normalizeDate(deliveryDate);
-      // const today = getTodayDate();
-      // const currentDate = new Date(today.date);
-      // console.log(currentDate.getHours())
-
-      // console.log({selectedDate, currentDate, compare: selectedDate.getTime() === currentDate.getTime()});
-
-      // if (selectedDate.getTime() < currentDate.getTime()) {
-      //   return res.status(400).json({
-      //     error: 'Cannot create order for past date',
-      //   });
-      // }
-
-      // if (selectedDate.getTime() === currentDate.getTime()) {
-      //   if (Number(today.time.split(':')[0]) >= limitOrderHour) {
-      //     return res.status(400).json({
-      //       error: 'Cannot create order for past date',
-      //     });
-      //   }
-      // }
       const isValidDate =  checkOrderDeliveryDateValid(deliveryDate);
       if (!isValidDate.ok) {
         return res.status(400).json({
@@ -189,25 +169,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
         });
       }
-
-      // TODO: OVERRIDE ORDER
-
-      // const newItems = Object.keys(body).filter((item: string) => {
-      //   return item !== 'DELIVERY DATE' && item !== 'NOTE';
-      // });
-
-      // const items = userOrder.items.map((item: any) => {
-      //   const targetNewItem = newItems.find(
-      //     (newItemName: any) => item.name === newItemName,
-      //   );
-
-      //   if (targetNewItem) {
-      //     return { ...item, quantity: body[targetNewItem] };
-      //   }
-
-      //   return item;
-      // });
-
+      
       await overrideOrder(
         existingUser,
         userOrder.id,
