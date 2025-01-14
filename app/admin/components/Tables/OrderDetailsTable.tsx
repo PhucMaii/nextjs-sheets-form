@@ -174,7 +174,7 @@ export default function OrderDetailsTable({
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                       <IconButton
-                        disabled={order?.type === TYPE.FIXED}
+                        disabled={order?.type === TYPE.LOCKED}
                         onClick={() => {
                           setSelectedItem(item);
                           setUpdatedItem(item);
@@ -186,7 +186,7 @@ export default function OrderDetailsTable({
                         <IconButton
                           color="error"
                           disabled={
-                            order?.type === TYPE.FIXED ||
+                            order?.type === TYPE.LOCKED ||
                             role === USER_ROLE.CLIENT ||
                             role === USER_ROLE.DRIVER
                           }

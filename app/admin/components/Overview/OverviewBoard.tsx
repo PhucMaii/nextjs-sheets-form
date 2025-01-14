@@ -14,7 +14,12 @@ import useFilterOrders from '@/hooks/useFilterOrders';
 import PaidIcon from '@mui/icons-material/Paid';
 
 export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
-  const totalAmount = boardData.orders.reduce((acc: number, order: Order) => {
+  const orderWithoutVOID = useFilterOrders(boardData.orders, [
+    ORDER_STATUS.INCOMPLETED,
+    ORDER_STATUS.DELIVERED,
+    ORDER_STATUS.COMPLETED,
+  ]);
+  const totalAmount = orderWithoutVOID.reduce((acc: number, order: Order) => {
     return acc + order.totalPrice;
   }, 0);
 

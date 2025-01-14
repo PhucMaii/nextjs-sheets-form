@@ -13,6 +13,7 @@ import {
   MenuItem,
   Switch,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Order } from '../orders/page';
@@ -39,6 +40,7 @@ import ConfirmModal from './Modals/ConfirmModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import LoadingModal from './Modals/LoadingModal';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LockIcon from '@mui/icons-material/Lock';
 
 interface PropTypes {
   order: Order;
@@ -92,6 +94,8 @@ const OrderAccordion = ({
   };
 
   const { discountPrice, DiscountText } = useDiscount(order.items, order);
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
@@ -255,12 +259,7 @@ const OrderAccordion = ({
           />
         </MenuItem>
         <Divider />
-        <MenuItem
-          disabled={order?.type === TYPE.FIXED}
-          onClick={() => setIsOpenEditPrice(true)}
-        >
-          Edit price
-        </MenuItem>
+        <MenuItem disabled={order?.type === TYPE.LOCKED} onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
@@ -378,14 +377,21 @@ const OrderAccordion = ({
               onClick={(e: any) => handleSelectOrder(e, order)}
             />
           </Grid>
-          <Grid item xs={2}>
+          {/* <Grid item xs={2}>
             <Box display="flex" alignItems="center" gap={0.5}>
               <RememberMeIcon fontSize="small" color="primary" />
               <Typography variant="body2">{latestUpdatePerson}</Typography>
             </Box>
-          </Grid>
-          <Grid item xs={10} md={7}>
+          </Grid> */}
+          <Grid item xs={10} md={9}>
             <Box display="flex" alignItems="center" gap={1}>
+              {order?.type === TYPE.LOCKED && (
+                <StatusText
+                  text={`Locked`}
+                  type={'info'}
+                  icon={<LockIcon color="info" fontSize="small" />}
+                />
+              )}
               {order?.previousUnpaidOrders && (
                 <StatusText
                   text={`${order.previousUnpaidOrders.numberOfOrders} unpaid orders`}
@@ -485,6 +491,20 @@ const OrderAccordion = ({
               </IconButton>
             </Box>
           </Grid>
+          {mdDown && <Grid item xs={12}>
+          <Box display="flex" gap={2} alignItems="center" justifyContent="center">
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <RememberMeIcon fontSize="small" color="primary" />
+                  <Typography variant="body2">{latestUpdatePerson}</Typography>
+                </Box>
+                <Box display="flex" gap={1} alignItems="center">
+                  <LocalShippingIcon color="primary" />
+                  <Typography variant="subtitle2">
+                    {order?.orderRoute || ''}
+                  </Typography>
+                </Box>
+              </Box>
+          </Grid>}
           <Grid item xs={12}>
             <Box
               display="flex"
@@ -497,12 +517,18 @@ const OrderAccordion = ({
                   {totalQuantity}
                 </Typography>
               </Box>
-              <Box display="flex" gap={1} alignItems="center">
-                <LocalShippingIcon color="primary" />
-                <Typography variant="subtitle2">
-                  {order?.orderRoute || ''}
-                </Typography>
-              </Box>
+              {!mdDown && <Box display="flex" gap={2} alignItems="center" justifyContent="center">
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <RememberMeIcon fontSize="small" color="primary" />
+                  <Typography variant="body2">{latestUpdatePerson}</Typography>
+                </Box>
+                <Box display="flex" gap={1} alignItems="center">
+                  <LocalShippingIcon color="primary" />
+                  <Typography variant="subtitle2">
+                    {order?.orderRoute || ''}
+                  </Typography>
+                </Box>
+              </Box>}
               <Box display="flex" alignItems="center" gap={1}>
                 {discountPrice > 0 &&
                   discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&

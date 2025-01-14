@@ -218,7 +218,7 @@ const ClientOrdersTable = ({
               Delete
             </Button>
             <Button
-              disabled={order?.type === TYPE.FIXED}
+              disabled={order?.type === TYPE.LOCKED}
               onClick={() => {
                 setOpenEdit(() => ({ order, open: true }));
               }}

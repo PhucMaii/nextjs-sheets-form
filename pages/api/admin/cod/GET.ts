@@ -348,6 +348,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 const formatBoards = (boards: any) => {
   const allBoardsWithDetails = boards.map((codBoard: any) => {
     const totalAmount = codBoard.orders.reduce((acc: number, order: Orders) => {
+      if (order.status === ORDER_STATUS.VOID) {
+        return acc;
+      }
       return acc + order.totalPrice;
     }, 0);
 

@@ -70,6 +70,8 @@ export default function CODBoardDetails({
   isAutoAddBoard,
   // showNotification,
 }: IProps) {
+  console.log('boardData', boardData);
+
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
