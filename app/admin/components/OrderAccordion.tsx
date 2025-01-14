@@ -13,7 +13,6 @@ import {
   MenuItem,
   Switch,
   Typography,
-  useMediaQuery,
 } from '@mui/material';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Order } from '../orders/page';
@@ -95,7 +94,7 @@ const OrderAccordion = ({
 
   const { discountPrice, DiscountText } = useDiscount(order.items, order);
 
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
@@ -370,7 +369,7 @@ const OrderAccordion = ({
         />
       )}
       <ShadowSection>
-        <Grid container alignItems="center" columnSpacing={1}>
+        <Grid container alignItems="center" columnSpacing={1} rowGap={1}>
           <Grid item sm={0.5} xs={2}>
             <Checkbox
               checked={isOrderSelected}
@@ -455,13 +454,13 @@ const OrderAccordion = ({
               </IconButton>
             </Box>
           </Grid>
-          <Grid item xs={12} md={2} sx={{ mr: 2 }}>
+          <Grid item xs={12} md={4}>
             <Typography fontWeight="bold" variant="subtitle1">
               #{order.id}
             </Typography>
             <Typography variant="body2">Order at: {order.orderTime}</Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4} textAlign="center">
             <Button
               color="info"
               variant="contained"
@@ -470,14 +469,14 @@ const OrderAccordion = ({
               {order?.clientName || order?.user?.clientName}
             </Button>
           </Grid>
-          <Grid item xs={12} md={3} textAlign="left" alignItems="center">
+          <Grid item xs={12} md={4} textAlign="right">
             <Box
               display="flex"
               gap={1}
               alignItems="center"
-              justifyContent="center"
+              justifyContent="flex-end"
             >
-              <Typography fontWeight="bold" variant="subtitle1">
+              <Typography fontWeight="bold" variant="subtitle1" textAlign="right">
                 Delivery Date: {order.deliveryDate}
               </Typography>
               <IconButton
@@ -491,7 +490,7 @@ const OrderAccordion = ({
               </IconButton>
             </Box>
           </Grid>
-          {mdDown && <Grid item xs={12}>
+          {/* {mdDown && <Grid item xs={12}>
           <Box display="flex" gap={2} alignItems="center" justifyContent="center">
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <RememberMeIcon fontSize="small" color="primary" />
@@ -504,19 +503,50 @@ const OrderAccordion = ({
                   </Typography>
                 </Box>
               </Box>
-          </Grid>}
-          <Grid item xs={12}>
-            <Box
+          </Grid>} */}
+          <Grid item xs={4}>
+            <Box display="flex" gap={1} alignItems="center">
+              <SellIcon color="primary" />
+              <Typography color="primary" variant="subtitle1">
+                {totalQuantity}
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={4}>
+            <Box display="flex" flexDirection="column" gap={1} alignItems="center" justifyContent="center">
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <RememberMeIcon fontSize="small" color="primary" />
+                <Typography textAlign="center" variant="subtitle2">{latestUpdatePerson}</Typography>
+              </Box>
+              <Box display="flex" gap={1} alignItems="center">
+                <LocalShippingIcon color="primary" />
+                <Typography textAlign="center" variant="subtitle2">
+                  {order?.orderRoute || ''}
+                </Typography>
+              </Box>
+              <Box display="flex" gap={1} alignItems="center">
+                <Typography textAlign="center" variant="subtitle2">
+                  Delivered: {order?.orderRoute?.split(' - ')[1]}
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={4}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+              {discountPrice > 0 &&
+                discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
+                DiscountText}
+              <Button variant="outlined">
+                ${order.totalPrice.toFixed(2)}
+              </Button>
+            </Box>
+          </Grid>
+            {/* <Box
               display="flex"
               justifyContent="space-between"
               alignItems="center"
             >
-              <Box display="flex" gap={1} alignItems="center">
-                <SellIcon color="primary" />
-                <Typography color="primary" variant="subtitle1">
-                  {totalQuantity}
-                </Typography>
-              </Box>
+
               {!mdDown && <Box display="flex" gap={2} alignItems="center" justifyContent="center">
                 <Box display="flex" alignItems="center" gap={0.5}>
                   <RememberMeIcon fontSize="small" color="primary" />
@@ -537,8 +567,7 @@ const OrderAccordion = ({
                   ${order.totalPrice.toFixed(2)}
                 </Button>
               </Box>
-            </Box>
-          </Grid>
+            </Box> */}
         </Grid>
       </ShadowSection>
     </>
