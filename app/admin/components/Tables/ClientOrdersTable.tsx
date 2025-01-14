@@ -25,8 +25,8 @@ import useWindowDimensions from '@/hooks/useWindowDimensions';
 
 interface PropTypes {
   clientOrders: Order[];
-  handleUpdateOrderUI: (updatedOrder: Order) => void;
-  handleDeleteOrderUI: (deletedOrder: Order) => void;
+  // handleUpdateOrderUI: (updatedOrder: Order) => void;
+  // handleDeleteOrderUI: (deletedOrder: Order) => void;
   showNotification: (type: AlertColor, message: string) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, order: Order) => void;
@@ -36,8 +36,8 @@ interface PropTypes {
 
 const ClientOrdersTable = ({
   clientOrders,
-  handleUpdateOrderUI,
-  handleDeleteOrderUI,
+  // handleUpdateOrderUI,
+  // handleDeleteOrderUI,
   showNotification,
   selectedOrders,
   handleSelectOrder,
@@ -75,7 +75,7 @@ const ClientOrdersTable = ({
       }
 
       // Optimistic UI Update
-      handleUpdateOrderUI({ ...order, status: updatedStatus });
+      // handleUpdateOrderUI({ ...order, status: updatedStatus });
 
       // Update Real Data
       mutateOrders();
@@ -101,7 +101,7 @@ const ClientOrdersTable = ({
       }
 
       // Optimistic UI Update
-      handleDeleteOrderUI(order);
+      // handleDeleteOrderUI(order);
 
       // Update Real Data
       mutateOrders();
@@ -112,17 +112,6 @@ const ClientOrdersTable = ({
       showNotification('error', 'Fail to delete order: ' + error);
     }
   };
-
-  // const handleChangePage = (e: any, newPage: number) => {
-  //   setPage(newPage);
-  // }
-
-  // const handleChangeRowsPerPage = (
-  //   event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  // ) => {
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
 
   function fixedHeaderContent() {
     return (
@@ -272,13 +261,13 @@ const ClientOrdersTable = ({
         }
         targetObj={openDelete.order}
         handleDelete={handleDeleteOrder}
-        showTargetObj={openDelete.order.user.clientName}
+        showTargetObj={openDelete?.order?.user?.clientName}
       />
       <EditReportOrder
         order={openEdit.order}
         open={openEdit.open}
         showNotification={showNotification}
-        handleUpdateOrderUI={handleUpdateOrderUI}
+        // handleUpdateOrderUI={handleUpdateOrderUI}
         onClose={() =>
           setOpenEdit((prevState: any) => ({ ...prevState, open: false }))
         }

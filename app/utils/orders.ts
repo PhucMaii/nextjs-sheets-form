@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Order } from '../admin/orders/page';
 import { API_URL } from './enum';
 import { OrderedItems } from './type';
+import { Dispatch, SetStateAction } from 'react';
 
 export const updateStatus = async (
   status: string,
@@ -57,3 +58,26 @@ export const updateOrderedItems = async (
     );
   }
 };
+
+export const onSelectOrders = (targetOrder: Order, selectedOrders: Order[], setSelectedOrders: Dispatch<SetStateAction<Order[]>>) => {
+  const selectedOrder = selectedOrders.find((order: Order) => {
+    return order.id === targetOrder.id;
+  });
+
+  if (selectedOrder) {
+    const newSelectedOrders = selectedOrders.filter((order: Order) => {
+      return order.id !== targetOrder.id;
+    });
+    setSelectedOrders(newSelectedOrders);
+  } else {
+    setSelectedOrders([...selectedOrders, targetOrder]);
+  }
+}
+
+export const onSelectAllOrders = (selectedOrders: Order[], baseOrders: Order[], setSelectedOrders: Dispatch<SetStateAction<Order[]>>) => {
+  if (selectedOrders.length === baseOrders.length) {
+    setSelectedOrders([]);
+  } else {
+    setSelectedOrders(baseOrders);
+  }
+}

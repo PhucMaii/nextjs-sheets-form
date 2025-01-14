@@ -32,6 +32,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         normalizedEndDate,
       );
 
+      console.log(listOfDateString, 'list of DATE STRING')
+
       userOrders = await prisma.orders.findMany({
         where: {
           userId: Number(userId),

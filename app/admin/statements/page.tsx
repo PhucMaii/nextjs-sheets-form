@@ -9,6 +9,7 @@ import { days } from '@/app/lib/constant';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import ClientStatementsTable from '../components/Tables/ClientStatementTable';
+import useNotification from '@/hooks/useNotification';
 
 export default function StatementsPage() {
   const [selectedDay, setSelectedDay] = useState<string>(
@@ -16,6 +17,8 @@ export default function StatementsPage() {
   );
   const [selectedMonth, setSelectedMonth] = useState<any>(() => new Date());
   const [selectedRouteId, setSelectedRouteId] = useState<number>(-1);
+
+  const { showNotification, NotificationComp } = useNotification(); 
 
   const dateRange = useMemo(() => {
     const firstDayOfMonth = new Date(
@@ -42,6 +45,7 @@ export default function StatementsPage() {
 
   return (
     <Sidebar>
+      {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography variant="h5">Statements</Typography>
         <SelectMonth
@@ -97,6 +101,8 @@ export default function StatementsPage() {
 
         <ClientStatementsTable
           routeClients={routes?.formattedClientOrders[selectedRouteId] || []}
+          dateRange={dateRange}
+          showNotification={showNotification}
         />
       </ShadowSection>
     </Sidebar>

@@ -39,13 +39,13 @@ import DeleteModal from '../delete/DeleteModal';
 
 interface PropTypes extends ModalProps {
   order: Order;
-  handleUpdateOrderUI: (updatedOrder: Order) => void;
+  // handleUpdateOrderUI: (updatedOrder: Order) => void;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 const EditReportOrder = ({
   order,
-  handleUpdateOrderUI,
+  // handleUpdateOrderUI,
   showNotification,
   open,
   onClose,
@@ -257,11 +257,11 @@ const EditReportOrder = ({
         showNotification('warning', 'None of fields has updated yet');
       }
 
-      handleUpdateOrderUI({
-        ...order,
-        deliveryDate: orderData.deliveryDate,
-        status: orderData.status,
-      });
+      // handleUpdateOrderUI({
+      //   ...order,
+      //   deliveryDate: orderData.deliveryDate,
+      //   status: orderData.status,
+      // });
       showNotification('success', 'Update Order Successfully');
       setIsSubmitting(false);
     } catch (error: any) {
