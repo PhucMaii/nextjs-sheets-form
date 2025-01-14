@@ -88,7 +88,7 @@ export const sendEmail = async (
     );
   }
 
-  if (user?.email) {
+  if (user?.email && !user.email.includes('INACTIVE')) {
     await emailHandler(
       user.email,
       'Order Supreme Sprouts',
