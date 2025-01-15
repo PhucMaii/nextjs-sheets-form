@@ -15,6 +15,11 @@ interface QueryType {
 export interface ClientStatementType {
   client: UserType;
   orders: Order[];
+  balance: number;
+  incompletedOrders: Order[];
+  voidOrders: Order[];
+  completedOrders: Order[];
+  deliveredOrders: Order[];
   route: Route;
 }
 
@@ -55,9 +60,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   routes: true,
                   Orders: {
                     where: {
-                      status: {
-                        notIn: [ORDER_STATUS.VOID, ORDER_STATUS.COMPLETED],
-                      },
                       deliveryDate: {
                         in: listOfDayStrings,
                       },
@@ -73,9 +75,36 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const formattedClientOrders: any = {};
       routes.forEach((route: any) => {
         formattedClientOrders[route.id] = route.clients.map((client: any) => {
+          const userOrders = client.user.Orders;
+
+          const incompletedOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.INCOMPLETED,
+          );
+      
+          const deliveredOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.DELIVERED,
+          )
+      
+          const completedOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.COMPLETED
+          )
+          const voidOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.VOID
+          )
+
+          const balance = [...incompletedOrders, ...deliveredOrders].reduce((
+            acc: number,
+            order: any) => {
+            return acc + order.totalPrice;
+            }, 0)
           return {
             client: client.user,
+            balance,
             orders: client.user.Orders,
+            incompletedOrders,
+            deliveredOrders,
+            completedOrders,
+            voidOrders,
             route: route,
           };
         });

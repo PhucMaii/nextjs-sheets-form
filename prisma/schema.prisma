@@ -33,13 +33,14 @@ model User {
   role               String  @db.VarChar(255)
   createdAt          String?
 
-  category            Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory         SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  preference          UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
+  category            Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory         SubCategory?      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  preference          UserPreference?   @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders              Orders[]
   scheduleOrders      ScheduleOrders[]
   routes              UserRoute[]
   unavailableDayRange DayRange[]
+  printStatements     ClientStatement[]
 }
 
 model Category {
@@ -192,7 +193,7 @@ model CodBoard {
   driverId  Int?
   orders    Orders[]
 
-  driver  Driver?    @relation(fields: [driverId], references: [id])
+  driver  Driver?   @relation(fields: [driverId], references: [id])
   expense Expense[]
 }
 
@@ -286,8 +287,8 @@ model ItemPreference {
 }
 
 model ItemType {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
   icon      String?
   createdAt String?
   createdBy String?
@@ -343,4 +344,16 @@ model Action {
   date        String
   createdAt   String
   createdBy   String?
+}
+
+model ClientStatement {
+  id        Int     @id @default(autoincrement())
+  month     String
+  isPrinted Boolean
+  userId    Int
+  printedBy String
+  updatedBy String?
+  createdAt String
+
+  user User @relation(fields: [userId], references: [id])
 }
