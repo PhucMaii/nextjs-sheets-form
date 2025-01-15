@@ -17,10 +17,13 @@ import ErrorComponent from '../components/ErrorComponent';
 import { MultipleInvoicePrint } from '../components/Printing/MultipleInvoicePrint';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
+import axios from 'axios';
+import ConfirmModal from '../components/Modals/ConfirmModal';
 
 export default function StatementsPage() {
   const [displayClients, setDisplayClients] = useState<ClientStatementType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isOpenConfirmModal, setIsOpenConfimModal] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedDay, setSelectedDay] = useState<string>(
     () => days[new Date().getDay()],
@@ -54,8 +57,9 @@ export default function StatementsPage() {
   const [routes, _mutate, isValidating] = SWRFetchData(
     `${API_URL.ADMIN}/routes?day=${selectedDay}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
-
-  console.log(selectedClients, 'selectedClients');
+  const [clientStatements] = SWRFetchData(
+    `${API_URL.ADMIN}/clientStatements?month=${months[selectedMonth.getMonth()]}`
+  );
 
   useEffect(() => {
     if (routes && !isValidating) {
@@ -96,13 +100,68 @@ export default function StatementsPage() {
     content: () => multipleInvoicePrintRef.current,
   })
 
+  const clearClientStatement = async () => {
+    try {
+      const clients = selectedClients.length > 0 ? selectedClients : displayClients;
+      const response = await axios.put(
+        `${API_URL.ADMIN}/clientStatements`,
+        {
+          month: months[selectedMonth.getMonth()],
+          clientIds: clients.map((client: ClientStatementType) => client.client.id),
+          isPrinted: false,
+        });
+        
+        if (response.data.error) {
+          showNotification('error', response.data.error);
+          return;
+        }
+
+        showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error?.response?.data?.error || error);
+    }
+  }
+
   const switchRoute = (newValue: number) => {
     setSelectedRouteId(newValue);
   };
 
+  const handlePrintInvoice = async () => {
+    try {
+      const response = await axios.put(
+        `${API_URL.ADMIN}/clientStatements`,
+        {
+          month: months[selectedMonth.getMonth()],
+          clientIds: selectedClients.map((client: ClientStatementType) => client.client.id),
+          isPrinted: true,
+        });
+
+        if (response.data.error) {
+          showNotification('error', response.data.error);
+          return;
+        }
+
+        showNotification('success', response.data.message);
+        printInvoice();
+        setSelectedClients([]);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error?.response?.data?.error || error);
+    }
+  }
+
   return (
     <Sidebar>
       {NotificationComp}
+      <ConfirmModal 
+        open={isOpenConfirmModal}
+        onClose={() => setIsOpenConfimModal(false)}
+        title="Are you sure to clear memory of current route?"
+        buttonLabel="Clear"
+        handleSubmit={clearClientStatement}
+        showNotification={showNotification}
+      />
       <div style={{ display: 'none' }}>
         <MultipleInvoicePrint
           clientOrders={selectedClients}
@@ -144,24 +203,6 @@ export default function StatementsPage() {
             );
           })}
         </Box>
-
-        {/* <Select
-          fullWidth
-          value={selectedRouteId}
-          onChange={(e: any) => setSelectedRouteId(e.target.value)}
-        >
-          <MenuItem value={-1} disabled>
-            -- Choose a route --
-          </MenuItem>
-          {routes?.data &&
-            routes?.data?.map((route: any) => {
-              return (
-                <MenuItem key={route.id} value={route.id}>
-                  {route.name} - {route.driver.name}
-                </MenuItem>
-              );
-            })}
-        </Select> */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
             aria-label="basic tabs"
@@ -193,8 +234,9 @@ export default function StatementsPage() {
           onChange={(e: any) => setSearchKeywords(e.target.value)}
         />
 
-        <Box display="flex" justifyContent="flex-end">
-          <Button variant="outlined" onClick={printInvoice}>
+        <Box display="flex" justifyContent="flex-end" gap={1}>
+          <Button onClick={() => setIsOpenConfimModal(true)}>Clear</Button>
+          <Button variant="outlined" onClick={handlePrintInvoice}>
             <Box display="flex" gap={1}>
               <PrintIcon />
               <Typography>
@@ -210,6 +252,7 @@ export default function StatementsPage() {
           showNotification={showNotification}
           selectedClients={selectedClients}
           setSelectedClients={setSelectedClients}
+          clientStatements={clientStatements?.data || []}
         /> : <ErrorComponent errorText="Please select a route" />}
       </ShadowSection>
     </Sidebar>
