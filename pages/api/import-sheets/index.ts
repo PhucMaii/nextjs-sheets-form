@@ -71,7 +71,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     if (createdBy === USER_ROLE.CLIENT) {
-      const isValidDate =  checkOrderDeliveryDateValid(deliveryDate);
+      const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
       if (!isValidDate.ok) {
         return res.status(400).json({
           error: isValidDate.message,
@@ -169,7 +169,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
         });
       }
-      
+
       await overrideOrder(
         existingUser,
         userOrder.id,

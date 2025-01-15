@@ -80,23 +80,24 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           const incompletedOrders = userOrders.filter(
             (order: any) => order.status === ORDER_STATUS.INCOMPLETED,
           );
-      
+
           const deliveredOrders = userOrders.filter(
             (order: any) => order.status === ORDER_STATUS.DELIVERED,
-          )
-      
-          const completedOrders = userOrders.filter(
-            (order: any) => order.status === ORDER_STATUS.COMPLETED
-          )
-          const voidOrders = userOrders.filter(
-            (order: any) => order.status === ORDER_STATUS.VOID
-          )
+          );
 
-          const balance = [...incompletedOrders, ...deliveredOrders].reduce((
-            acc: number,
-            order: any) => {
-            return acc + order.totalPrice;
-            }, 0)
+          const completedOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.COMPLETED,
+          );
+          const voidOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.VOID,
+          );
+
+          const balance = [...incompletedOrders, ...deliveredOrders].reduce(
+            (acc: number, order: any) => {
+              return acc + order.totalPrice;
+            },
+            0,
+          );
           return {
             client: client.user,
             balance,

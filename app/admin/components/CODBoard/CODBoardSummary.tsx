@@ -142,7 +142,9 @@ export default function CODBoardSummary({
         <Grid container alignItems="stretch">
           <Grid item xs={12} md={8.9}>
             <Box>
-              <Typography variant="h6">{boardData?.driver?.name || 'No Route Board'}</Typography>
+              <Typography variant="h6">
+                {boardData?.driver?.name || 'No Route Board'}
+              </Typography>
               <Typography variant="body2" color={grey[500]}>
                 Delivered on: {boardData.date}
               </Typography>

@@ -258,7 +258,12 @@ const OrderAccordion = ({
           />
         </MenuItem>
         <Divider />
-        <MenuItem disabled={order?.type === TYPE.LOCKED} onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
+        <MenuItem
+          disabled={order?.type === TYPE.LOCKED}
+          onClick={() => setIsOpenEditPrice(true)}
+        >
+          Edit price
+        </MenuItem>
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
@@ -476,7 +481,11 @@ const OrderAccordion = ({
               alignItems="center"
               justifyContent="flex-end"
             >
-              <Typography fontWeight="bold" variant="subtitle1" textAlign="right">
+              <Typography
+                fontWeight="bold"
+                variant="subtitle1"
+                textAlign="right"
+              >
                 Delivery Date: {order.deliveryDate}
               </Typography>
               <IconButton
@@ -513,10 +522,18 @@ const OrderAccordion = ({
             </Box>
           </Grid>
           <Grid item xs={4} md={4}>
-            <Box display="flex" flexDirection="column" gap={1} alignItems="flex-start" justifyContent="flex-start">
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              alignItems="flex-start"
+              justifyContent="flex-start"
+            >
               <Box display="flex" alignItems="center" gap={0.5}>
                 <RememberMeIcon fontSize="small" color="primary" />
-                <Typography variant="subtitle2">{latestUpdatePerson}</Typography>
+                <Typography variant="subtitle2">
+                  {latestUpdatePerson}
+                </Typography>
               </Box>
               <Box display="flex" gap={1} alignItems="center">
                 <LocalShippingIcon color="primary" />
@@ -527,19 +544,26 @@ const OrderAccordion = ({
               <Box display="flex" gap={1} alignItems="center">
                 <Typography variant="subtitle2">
                   {/* Driver: {order?.orderRoute?.split(' - ')[1]} */}
-                  {order?.deliveredBy ? `Delivered: ${order?.deliveredBy}` : order?.orderRoute ? `Driver: ${order?.orderRoute?.split(' - ')[1]}` : 'Driver: N/A'}
+                  {order?.deliveredBy
+                    ? `Delivered: ${order?.deliveredBy}`
+                    : order?.orderRoute
+                      ? `Driver: ${order?.orderRoute?.split(' - ')[1]}`
+                      : 'Driver: N/A'}
                 </Typography>
               </Box>
             </Box>
           </Grid>
           <Grid item xs={4} md={4} textAlign="right">
-            <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-end"
+              gap={1}
+            >
               {discountPrice > 0 &&
                 discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
                 DiscountText}
-              <Button variant="outlined">
-                ${order.totalPrice.toFixed(2)}
-              </Button>
+              <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
             </Box>
           </Grid>
         </Grid>

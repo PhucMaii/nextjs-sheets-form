@@ -59,7 +59,11 @@ export const updateOrderedItems = async (
   }
 };
 
-export const onSelectOrders = (targetOrder: Order, selectedOrders: Order[], setSelectedOrders: Dispatch<SetStateAction<Order[]>>) => {
+export const onSelectOrders = (
+  targetOrder: Order,
+  selectedOrders: Order[],
+  setSelectedOrders: Dispatch<SetStateAction<Order[]>>,
+) => {
   const selectedOrder = selectedOrders.find((order: Order) => {
     return order.id === targetOrder.id;
   });
@@ -72,12 +76,16 @@ export const onSelectOrders = (targetOrder: Order, selectedOrders: Order[], setS
   } else {
     setSelectedOrders([...selectedOrders, targetOrder]);
   }
-}
+};
 
-export const onSelectAllOrders = (selectedOrders: Order[], baseOrders: Order[], setSelectedOrders: Dispatch<SetStateAction<Order[]>>) => {
+export const onSelectAllOrders = (
+  selectedOrders: Order[],
+  baseOrders: Order[],
+  setSelectedOrders: Dispatch<SetStateAction<Order[]>>,
+) => {
   if (selectedOrders.length === baseOrders.length) {
     setSelectedOrders([]);
   } else {
     setSelectedOrders(baseOrders);
   }
-}
+};

@@ -33,7 +33,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Get driver update info
     const driverUpdate: any = await getDriverInfo(req, res);
-    const {date, time} = getTodayDate();
+    const { date, time } = getTodayDate();
 
     const updatedBy = `Driver - ${driverUpdate.name}`;
 
@@ -45,7 +45,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         status: updatedStatus,
         updatedBy,
         updateTime: new Date(`${date} ${time}`),
-        deliveredBy: updatedStatus !== ORDER_STATUS.VOID ? driverUpdate.name : null, 
+        deliveredBy:
+          updatedStatus !== ORDER_STATUS.VOID ? driverUpdate.name : null,
         isVoid: updatedStatus === ORDER_STATUS.VOID && true,
       },
       include: {

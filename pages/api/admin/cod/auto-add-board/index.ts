@@ -5,7 +5,11 @@ import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
 import { IBoard, IRoutes } from '@/app/utils/type';
 import { getUserInfo } from '@/pages/api/utils/auth';
-import { generate7DaysBefore, getTodayDate, normalizeDate } from '@/pages/api/utils/date';
+import {
+  generate7DaysBefore,
+  getTodayDate,
+  normalizeDate,
+} from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { CodBoard, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -110,7 +114,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    
     const newBoardOrders = [...newWCODBoardOrders, ...newCODBoardOrders];
     console.log(newCODBoardOrders, 'newCODBoardOrders');
     console.log(newBoardOrders, 'newBoardOrders');
@@ -142,7 +145,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         boards,
         routeOnDate,
         todayString,
-        user
+        user,
       );
       return res.status(200).json({
         message: 'New orders are added already',
@@ -196,7 +199,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             routes: {
               include: {
                 route: true,
-              }
+              },
             },
           },
         },
@@ -207,16 +210,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     //   return order.user.routes.find((route: any) => route.day === day);
     // });
 
-    
     // Add Orders Into Boards
     await insertOrdersToSelectedBoards(
       dateOrders,
       newBoards,
       routeOnDate,
       todayString,
-      user
+      user,
     );
-    
+
     // Get no route orders
     // const noRouteOrderIds = dateOrders.filter((order: any) => {
     //   return order.user.routes.find((route: any) => route.day !== day);
@@ -246,7 +248,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     //   },
     // });
 
-
     return res.status(200).json({
       message: 'Boards Added Successfully',
     });
@@ -265,7 +266,7 @@ const insertOrdersToSelectedBoards = async (
   selectedBoards: IBoard[],
   routeOnDate: IRoutes[],
   date: string,
-  user: User
+  user: User,
 ) => {
   const prisma = new PrismaClient();
 
@@ -276,15 +277,22 @@ const insertOrdersToSelectedBoards = async (
 
   // Get has route orders
   const hasRouteOrders = orders.filter((order: any) => {
-    const selectedDayRoute = order.user.routes.find((route: any) => route.route.day === day);
-    console.log('selectedDayRoute', {selectedDayRoute, day});
-    return !!selectedDayRoute
+    const selectedDayRoute = order.user.routes.find(
+      (route: any) => route.route.day === day,
+    );
+    console.log('selectedDayRoute', { selectedDayRoute, day });
+    return !!selectedDayRoute;
   });
 
   // Get no route orders to insert to no route board
-  const noRouteOrderIds = orders.filter((order: any) => {
-    return order.user.routes.length === 0 || order.user.routes.find((route: any) => route.route.day !== day);
-  }).map((order: any) => order.id);
+  const noRouteOrderIds = orders
+    .filter((order: any) => {
+      return (
+        order.user.routes.length === 0 ||
+        order.user.routes.find((route: any) => route.route.day !== day)
+      );
+    })
+    .map((order: any) => order.id);
 
   if (noRouteOrderIds.length > 0) {
     let noRouteBoard: CodBoard | undefined = selectedBoards.find(
@@ -300,12 +308,12 @@ const insertOrdersToSelectedBoards = async (
           driverId: -1,
           note: '',
           status: COD_STATUS.IN_PROCESS,
-          createdAt: `${date} ${time}` ,
+          createdAt: `${date} ${time}`,
           createdBy: `Admin - ${user.clientName}`,
         },
       });
     }
-    
+
     await prisma.orders.updateMany({
       where: {
         id: {
@@ -317,7 +325,6 @@ const insertOrdersToSelectedBoards = async (
       },
     });
   }
-
 
   for (const board of selectedBoards) {
     const selectedRoute = routeOnDate.find(

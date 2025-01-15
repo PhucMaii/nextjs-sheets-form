@@ -86,8 +86,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             ...order,
             items: formattedItems,
             orderRoute: orderRoute
-            ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
-            : 'No route - N/A',
+              ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
+              : 'No route - N/A',
           };
         },
       );
@@ -198,7 +198,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 include: {
                   preference: true,
                   category: true,
-                  routes: true
+                  routes: true,
                 },
               },
             },
@@ -254,7 +254,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 include: {
                   preference: true,
                   category: true,
-                  routes: true
+                  routes: true,
                 },
               },
             },

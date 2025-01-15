@@ -1,10 +1,18 @@
 'use client';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { Box, Button, Tab, Tabs, TextField, Typography, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Button,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import SelectMonth from '../components/Select/SelectMonth';
 import { ShadowSection } from '../reports/styled';
-import { grey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import { days, months } from '@/app/lib/constant';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
@@ -21,7 +29,9 @@ import axios from 'axios';
 import ConfirmModal from '../components/Modals/ConfirmModal';
 
 export default function StatementsPage() {
-  const [displayClients, setDisplayClients] = useState<ClientStatementType[]>([]);
+  const [displayClients, setDisplayClients] = useState<ClientStatementType[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenConfirmModal, setIsOpenConfimModal] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
@@ -30,7 +40,9 @@ export default function StatementsPage() {
   );
   const [selectedMonth, setSelectedMonth] = useState<any>(() => new Date());
   const [selectedRouteId, setSelectedRouteId] = useState<number>(-1);
-  const [selectedClients, setSelectedClients] = useState<ClientStatementType[]>([]);
+  const [selectedClients, setSelectedClients] = useState<ClientStatementType[]>(
+    [],
+  );
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -58,13 +70,12 @@ export default function StatementsPage() {
     `${API_URL.ADMIN}/routes?day=${selectedDay}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
   const [clientStatements] = SWRFetchData(
-    `${API_URL.ADMIN}/clientStatements?month=${months[selectedMonth.getMonth()]}`
+    `${API_URL.ADMIN}/clientStatements?month=${months[selectedMonth.getMonth()]}`,
   );
 
   useEffect(() => {
     if (routes && !isValidating) {
       setIsLoading(false);
-      setSelectedRouteId(Number(Object.keys(routes?.formattedClientOrders)[0]));
     } else {
       setIsLoading(true);
     }
@@ -80,10 +91,16 @@ export default function StatementsPage() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newDisplayClients = routes?.formattedClientOrders[selectedRouteId].filter((client: ClientStatementType) => {
+      const newDisplayClients = routes?.formattedClientOrders[
+        selectedRouteId
+      ].filter((client: ClientStatementType) => {
         return (
-          client.client.clientName.toLowerCase().includes(debouncedKeywords.toLowerCase()) ||
-          client.client.clientId.toLowerCase().includes(debouncedKeywords.toLowerCase())
+          client.client.clientName
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
+          client.client.clientId
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
         );
       });
       setDisplayClients(newDisplayClients || []);
@@ -93,35 +110,47 @@ export default function StatementsPage() {
   }, [debouncedKeywords, routes]);
 
   useEffect(() => {
+    if (routes) {
+      setSelectedRouteId(Number(Object.keys(routes?.formattedClientOrders)[0]));
+    } 
+  }, [selectedDay, selectedMonth]);
+
+  useEffect(() => {
     setSelectedClients([]);
   }, [selectedDay, selectedMonth, selectedRouteId]);
 
   const printInvoice = useReactToPrint({
     content: () => multipleInvoicePrintRef.current,
-  })
+  });
 
   const clearClientStatement = async () => {
     try {
-      const clients = selectedClients.length > 0 ? selectedClients : displayClients;
-      const response = await axios.put(
-        `${API_URL.ADMIN}/clientStatements`,
-        {
-          month: months[selectedMonth.getMonth()],
-          clientIds: clients.map((client: ClientStatementType) => client.client.id),
-          isPrinted: false,
-        });
-        
-        if (response.data.error) {
-          showNotification('error', response.data.error);
-          return;
-        }
+      const clients =
+        selectedClients.length > 0 ? selectedClients : displayClients;
+      
+      if (clients.length === 0) {
+        showNotification('success', 'No clients need to be cleared');
+        return;
+      }
+      const response = await axios.put(`${API_URL.ADMIN}/clientStatements`, {
+        month: months[selectedMonth.getMonth()],
+        clientIds: clients.map(
+          (client: ClientStatementType) => client.client.id,
+        ),
+        isPrinted: false,
+      });
 
-        showNotification('success', response.data.message);
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', error?.response?.data?.error || error);
     }
-  }
+  };
 
   const switchRoute = (newValue: number) => {
     setSelectedRouteId(newValue);
@@ -129,32 +158,32 @@ export default function StatementsPage() {
 
   const handlePrintInvoice = async () => {
     try {
-      const response = await axios.put(
-        `${API_URL.ADMIN}/clientStatements`,
-        {
-          month: months[selectedMonth.getMonth()],
-          clientIds: selectedClients.map((client: ClientStatementType) => client.client.id),
-          isPrinted: true,
-        });
+      const response = await axios.put(`${API_URL.ADMIN}/clientStatements`, {
+        month: months[selectedMonth.getMonth()],
+        clientIds: selectedClients.map(
+          (client: ClientStatementType) => client.client.id,
+        ),
+        isPrinted: true,
+      });
 
-        if (response.data.error) {
-          showNotification('error', response.data.error);
-          return;
-        }
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
 
-        showNotification('success', response.data.message);
-        printInvoice();
-        setSelectedClients([]);
+      showNotification('success', response.data.message);
+      printInvoice();
+      setSelectedClients([]);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', error?.response?.data?.error || error);
     }
-  }
+  };
 
   return (
     <Sidebar>
       {NotificationComp}
-      <ConfirmModal 
+      <ConfirmModal
         open={isOpenConfirmModal}
         onClose={() => setIsOpenConfimModal(false)}
         title="Are you sure to clear memory of current route?"
@@ -209,10 +238,13 @@ export default function StatementsPage() {
             value={selectedRouteId}
             onChange={(e: any, newValue: number) => switchRoute(newValue)}
             variant={mdDown ? 'scrollable' : 'fullWidth'}
-            scrollButtons="auto"  
+            scrollButtons="auto"
           >
             {/* <Tab label="All" onClick={() => setSelectedRouteId(-1)} /> */}
-            {isLoading ? <Typography>Loading...</Typography> : routes?.data &&
+            {isLoading ? (
+              <Typography>Loading...</Typography>
+            ) : (
+              routes?.data &&
               routes?.data?.map((route: any, index: number) => {
                 return (
                   <Tab
@@ -221,11 +253,12 @@ export default function StatementsPage() {
                     value={route.id}
                   />
                 );
-            })}
+              })
+            )}
           </Tabs>
         </Box>
 
-        <TextField 
+        <TextField
           fullWidth
           label="Search clients"
           variant="filled"
@@ -234,26 +267,50 @@ export default function StatementsPage() {
           onChange={(e: any) => setSearchKeywords(e.target.value)}
         />
 
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          <Button onClick={() => setIsOpenConfimModal(true)}>Clear</Button>
-          <Button variant="outlined" onClick={handlePrintInvoice}>
-            <Box display="flex" gap={1}>
-              <PrintIcon />
-              <Typography>
-                {months[selectedMonth.getMonth()].slice(0, 3)} Statements
-              </Typography>
-            </Box>
-          </Button>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                backgroundColor: blueGrey[800],
+                color: 'white',
+                width: 'fit-content',
+                padding: 1,
+                borderRadius: 2,
+              }}
+            >
+              Total: {displayClients.length}
+            </Typography>
+          </Box>
+          <Box display="flex" justifyContent="flex-end" gap={1}>
+            <Button onClick={() => setIsOpenConfimModal(true)} disabled={isLoading || selectedRouteId === -1}>
+              Clear
+            </Button>
+            <Button variant="outlined" onClick={handlePrintInvoice} disabled={isLoading || selectedClients.length === 0 || selectedRouteId === -1}>
+              <Box display="flex" gap={1}>
+                <PrintIcon />
+                <Typography>
+                  {months[selectedMonth.getMonth()].slice(0, 3)} Statements
+                </Typography>
+              </Box>
+            </Button>
+          </Box>
         </Box>
 
-        {isLoading ? <LoadingComponent /> : selectedRouteId !== -1 ? <ClientStatementsTable
-          routeClients={displayClients}
-          dateRange={dateRange}
-          showNotification={showNotification}
-          selectedClients={selectedClients}
-          setSelectedClients={setSelectedClients}
-          clientStatements={clientStatements?.data || []}
-        /> : <ErrorComponent errorText="Please select a route" />}
+        {isLoading ? (
+          <LoadingComponent />
+        ) : selectedRouteId !== -1 ? (
+          <ClientStatementsTable
+            routeClients={displayClients}
+            dateRange={dateRange}
+            showNotification={showNotification}
+            selectedClients={selectedClients}
+            setSelectedClients={setSelectedClients}
+            clientStatements={clientStatements?.data || []}
+          />
+        ) : (
+          <ErrorComponent errorText="Please select a route" />
+        )}
       </ShadowSection>
     </Sidebar>
   );

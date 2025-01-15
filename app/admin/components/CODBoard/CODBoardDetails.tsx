@@ -493,7 +493,9 @@ export default function CODBoardDetails({
 
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="h5" color={blueGrey[800]}>
-              {boardResponse?.data?.driver?.name ? `${boardResponse?.data?.driver?.name}'s Board` : 'No Route Board'}
+              {boardResponse?.data?.driver?.name
+                ? `${boardResponse?.data?.driver?.name}'s Board`
+                : 'No Route Board'}
             </Typography>
             <AssignmentIndIcon
               fontSize="medium"

@@ -641,7 +641,7 @@ export default function Orders() {
               aria-label="basic tabs"
               value={tabIndex}
               onChange={(e, newValue) => setTabIndex(newValue)}
-              variant={mdDown ? "scrollable" : "fullWidth"}
+              variant={mdDown ? 'scrollable' : 'fullWidth'}
               sx={{ width: '100%' }}
             >
               {statusTabs &&
