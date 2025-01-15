@@ -116,6 +116,7 @@ export interface Order {
   isAffectInventory?: boolean;
   orderRoute?: string;
   type?: TYPE;
+  deliveredBy?: string;
 }
 
 const orderPerPage = 10;

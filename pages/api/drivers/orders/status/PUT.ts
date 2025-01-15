@@ -4,6 +4,7 @@ import {
   subtractInventoryItem,
 } from '@/pages/api/admin/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -32,7 +33,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Get driver update info
     const driverUpdate: any = await getDriverInfo(req, res);
-    const updateTime = new Date();
+    const {date, time} = getTodayDate();
+
+    const updatedBy = `Driver - ${driverUpdate.name}`;
 
     const updatedOrder = await prisma.orders.update({
       where: {
@@ -40,8 +43,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         status: updatedStatus,
-        updatedBy: `Driver - ${driverUpdate.name}`,
-        updateTime,
+        updatedBy,
+        updateTime: new Date(`${date} ${time}`),
+        deliveredBy: updatedStatus !== ORDER_STATUS.VOID ? driverUpdate.name : null, 
         isVoid: updatedStatus === ORDER_STATUS.VOID && true,
       },
       include: {

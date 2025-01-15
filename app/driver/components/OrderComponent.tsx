@@ -146,7 +146,7 @@ export default function OrderComponent({
                   onClick={() =>
                     setConfirmModalProps({
                       on: true,
-                      heading: `Have you deliver order for ${order.clientName}`,
+                      heading: `Have you delivered order for ${order.clientName}`,
                       color: 'primary',
                       updatedStatus: ORDER_STATUS.DELIVERED,
                     })
@@ -163,7 +163,7 @@ export default function OrderComponent({
                   onClick={() =>
                     setConfirmModalProps({
                       on: true,
-                      heading: `Have you deliver and collect money from order for ${order.clientName}`,
+                      heading: `Have you delivered and collected money from order for ${order.clientName}`,
                       color: 'success',
                       updatedStatus: ORDER_STATUS.COMPLETED,
                     })
