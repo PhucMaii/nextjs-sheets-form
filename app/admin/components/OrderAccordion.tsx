@@ -460,7 +460,7 @@ const OrderAccordion = ({
             </Typography>
             <Typography variant="body2">Order at: {order.orderTime}</Typography>
           </Grid>
-          <Grid item xs={12} md={4} textAlign="center">
+          <Grid item xs={12} md={4}>
             <Button
               color="info"
               variant="contained"
@@ -504,7 +504,7 @@ const OrderAccordion = ({
                 </Box>
               </Box>
           </Grid>} */}
-          <Grid item xs={4}>
+          <Grid item xs={4} md={4}>
             <Box display="flex" gap={1} alignItems="center">
               <SellIcon color="primary" />
               <Typography color="primary" variant="subtitle1">
@@ -512,26 +512,26 @@ const OrderAccordion = ({
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" flexDirection="column" gap={1} alignItems="center" justifyContent="center">
+          <Grid item xs={4} md={4}>
+            <Box display="flex" flexDirection="column" gap={1} alignItems="flex-start" justifyContent="flex-start">
               <Box display="flex" alignItems="center" gap={0.5}>
                 <RememberMeIcon fontSize="small" color="primary" />
-                <Typography textAlign="center" variant="subtitle2">{latestUpdatePerson}</Typography>
+                <Typography variant="subtitle2">{latestUpdatePerson}</Typography>
               </Box>
               <Box display="flex" gap={1} alignItems="center">
                 <LocalShippingIcon color="primary" />
-                <Typography textAlign="center" variant="subtitle2">
+                <Typography variant="subtitle2">
                   {order?.orderRoute || ''}
                 </Typography>
               </Box>
               <Box display="flex" gap={1} alignItems="center">
-                <Typography textAlign="center" variant="subtitle2">
-                  Delivered: {order?.orderRoute?.split(' - ')[1]}
+                <Typography variant="subtitle2">
+                  Driver: {order?.orderRoute?.split(' - ')[1]}
                 </Typography>
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={4} md={4} textAlign="right">
             <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
               {discountPrice > 0 &&
                 discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
@@ -541,33 +541,6 @@ const OrderAccordion = ({
               </Button>
             </Box>
           </Grid>
-            {/* <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-
-              {!mdDown && <Box display="flex" gap={2} alignItems="center" justifyContent="center">
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <RememberMeIcon fontSize="small" color="primary" />
-                  <Typography variant="body2">{latestUpdatePerson}</Typography>
-                </Box>
-                <Box display="flex" gap={1} alignItems="center">
-                  <LocalShippingIcon color="primary" />
-                  <Typography variant="subtitle2">
-                    {order?.orderRoute || ''}
-                  </Typography>
-                </Box>
-              </Box>}
-              <Box display="flex" alignItems="center" gap={1}>
-                {discountPrice > 0 &&
-                  discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
-                  DiscountText}
-                <Button variant="outlined">
-                  ${order.totalPrice.toFixed(2)}
-                </Button>
-              </Box>
-            </Box> */}
         </Grid>
       </ShadowSection>
     </>
