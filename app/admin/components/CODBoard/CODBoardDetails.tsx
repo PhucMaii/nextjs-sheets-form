@@ -70,8 +70,6 @@ export default function CODBoardDetails({
   isAutoAddBoard,
   // showNotification,
 }: IProps) {
-  console.log('boardData', boardData);
-
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
@@ -452,7 +450,7 @@ export default function CODBoardDetails({
         onClose={() => setOpen('isOpenAddExpense', false)}
         defaultValue={{
           date: boardData?.date,
-          spentBy: `Driver - ${boardData?.driver.name}`,
+          spentBy: `Driver - ${boardData?.driver?.name || 'N/A'}`,
         }}
         // handleAddExpenseId={handleAddExpenseId}
         codBoardId={boardData?.id}
@@ -495,7 +493,7 @@ export default function CODBoardDetails({
 
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="h5" color={blueGrey[800]}>
-              {boardResponse?.data?.driver?.name}'s Board
+              {boardResponse?.data?.driver?.name ? `${boardResponse?.data?.driver?.name}'s Board` : 'No Route Board'}
             </Typography>
             <AssignmentIndIcon
               fontSize="medium"
@@ -546,7 +544,7 @@ export default function CODBoardDetails({
         {isAutoAddBoard && (
           <Box mt={2}>
             <StatusText
-              text="We are checking for new boards..."
+              text="We are checking for new orders..."
               type="info"
               icon={<InfoIcon style={{ color: infoColor }} />}
             />

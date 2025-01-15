@@ -15,7 +15,6 @@ const withAuthGuard =
       const prisma = new PrismaClient();
 
       const session: any = await getServerSession(req, res, authOptions);
-      console.log({ session, res }, 'SESSION');
 
       if (!session) {
         return res.status(401).json({ error: 'You are not authenticated' });

@@ -47,8 +47,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    console.log(existingUser, 'EXISTING USER');
-
     if (!existingUser) {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }

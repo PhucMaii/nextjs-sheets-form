@@ -32,16 +32,13 @@ const SingleFieldEdit = ({
   menuList,
   defaultValue,
 }: IProps) => {
-  console.log('SINGLE FIELD EDIT RE RENDERED');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [value, setValue] = useState<any>(defaultValue ? defaultValue : null);
 
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
-      console.log('access here', value);
       await handleUpdate(value);
-      console.log('DONE');
 
       setIsLoading(false);
     } catch (error: any) {

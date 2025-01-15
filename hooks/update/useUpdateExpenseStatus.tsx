@@ -39,8 +39,6 @@ export const useUpdateExpenseStatus = (
 
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
 
-  console.log('hook re rendered');
-
   const handleUpdateStatus = async (
     transaction: any,
     newStatus: TRANSACTION_STATUS,

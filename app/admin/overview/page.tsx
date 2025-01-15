@@ -35,8 +35,6 @@ export default function Overview() {
   const printDetbCustomersRef: any = useRef();
 
   // Data Fetching
-
-  console.log(dateRange, 'dateRange');
   const [overview, _mutateOverview, isValidating] = SWRFetchData(
     `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );

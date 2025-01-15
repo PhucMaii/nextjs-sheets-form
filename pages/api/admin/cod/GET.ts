@@ -5,6 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
 import { IBoard } from '@/app/utils/type';
+import { days } from '@/app/lib/constant';
 // import { IBoard } from '@/app/utils/type';
 
 interface IQuery {
@@ -41,7 +42,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 include: {
                   preference: true,
                   category: true,
-                  routes: true,
+                  routes: {
+                    include: {
+                      route: {
+                        include: {
+                          driver: true,
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -65,9 +74,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             };
           });
 
+          // Get order route
+          const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
+          const orderDayIndex = orderDeliveryDate.getDay();
+          const orderDay = days[orderDayIndex];
+          const orderRoute = order.user.routes.find((route: any) => {
+            return route.route.day === orderDay;
+          });
+
           return {
             ...order,
             items: formattedItems,
+            orderRoute: orderRoute
+            ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
+            : 'No route - N/A',
           };
         },
       );
@@ -178,7 +198,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 include: {
                   preference: true,
                   category: true,
-                  routes: true,
+                  routes: true
                 },
               },
             },
@@ -234,7 +254,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 include: {
                   preference: true,
                   category: true,
-                  routes: true,
+                  routes: true
                 },
               },
             },

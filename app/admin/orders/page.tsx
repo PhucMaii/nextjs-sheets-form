@@ -17,6 +17,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE, TYPE } from '../../utils/enum';
 import axios from 'axios';
@@ -115,6 +116,7 @@ export interface Order {
   isAffectInventory?: boolean;
   orderRoute?: string;
   type?: TYPE;
+  deliveredBy?: string;
 }
 
 const orderPerPage = 10;
@@ -146,6 +148,8 @@ export default function Orders() {
   const [selectedOrderDetails, setSelectedOrderDetails] =
     useState<Order | null>(null);
   const [tabIndex, setTabIndex] = useState<number>(0);
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
@@ -220,7 +224,6 @@ export default function Orders() {
     pusherClient?.subscribe('void-order');
 
     pusherClient?.bind('incoming-order', (order: Order) => {
-      console.log(order, 'Incoming order');
       setIncomingOrder(order);
       mutate();
     });
@@ -638,7 +641,7 @@ export default function Orders() {
               aria-label="basic tabs"
               value={tabIndex}
               onChange={(e, newValue) => setTabIndex(newValue)}
-              variant="fullWidth"
+              variant={mdDown ? "scrollable" : "fullWidth"}
               sx={{ width: '100%' }}
             >
               {statusTabs &&
