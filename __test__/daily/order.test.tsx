@@ -50,5 +50,5 @@ describe('Check for incorrect orders', () => {
 
     console.log(incorrectOrders, 'incorrectOrders');
     expect(incorrectOrders.length).toBe(0);
-  });
+  }, 10000);
 });

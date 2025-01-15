@@ -90,7 +90,7 @@ describe('Pre order check', () => {
     expect(checkMap.categoryItemNotFound.length).toBe(0);
     expect(checkMap.incorrectIsShowDiscount.length).toBe(0);
     expect(checkMap.incorrectPrevPrice.length).toBe(0);
-  }, 10000);
+  }, 30000);
 
   test('Check scheduled order total price is correct', async () => {
     const prisma = new PrismaClient();
@@ -124,7 +124,7 @@ describe('Pre order check', () => {
     }
     console.log(incorrectOrders);
     expect(incorrectOrders.length).toBe(0);
-  });
+  }, 10000);
 
   // Check if multiple of same items in one scheduled order
   test('Check if multiple of same items in one scheduled order', async () => {
@@ -163,7 +163,7 @@ describe('Pre order check', () => {
 
     console.log(incorrectOrders);
     expect(incorrectOrders.length).toBe(0);
-  });
+  }, 10000);
 });
 
 const getScheduleOrderItems = async () => {

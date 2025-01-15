@@ -10,10 +10,10 @@ import BlockIcon from '@mui/icons-material/Block';
 import { Order } from '../admin/orders/page';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import axios from 'axios';
-import LoadingModal from '../admin/components/Modals/LoadingModal';
+// import LoadingModal from '../admin/components/Modals/LoadingModal';
 
 interface ActionProps {
-    onClick: () => void;
+    onClick: any;
     icon: any;
     label: string;
     color: string;
@@ -23,16 +23,17 @@ interface ActionProps {
 interface IProps {
     selectedOrders: Order[];
     showNotification: (type: AlertColor, message: string) => void;
+    setIsLoading: any;
     actions?: ActionProps[];
     fullWidth?: boolean;
     variant?: 'text' | 'outlined' | 'contained';
 }
 
-export default function StatusActionDropdown({selectedOrders, showNotification, actions, fullWidth, variant}: IProps) {
+export default function StatusActionDropdown({selectedOrders, showNotification, setIsLoading, actions, fullWidth, variant}: IProps) {
     const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
     const openActionsDropdown = Boolean(actionButtonAnchor);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    // const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const onCloseActionAnchor = () => {
         setActionButtonAnchor(null);
@@ -61,7 +62,7 @@ export default function StatusActionDropdown({selectedOrders, showNotification, 
 
   return (
     <>
-        <LoadingModal open={isLoading} />
+        {/* <LoadingModal open={isLoading} /> */}
         <Box
         display="flex"
         justifyContent="flex-end"
