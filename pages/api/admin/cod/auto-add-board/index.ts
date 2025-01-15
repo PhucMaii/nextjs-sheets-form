@@ -69,7 +69,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           include: {
             preference: true,
             category: true,
-            routes: true,
+            routes: {
+              include: {
+                route: true,
+              },
+            },
           },
         },
       },
@@ -96,7 +100,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           include: {
             preference: true,
             category: true,
-            routes: true,
+            routes: {
+              include: {
+                route: true,
+              },
+            },
           },
         },
       },
@@ -185,7 +193,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           include: {
             preference: true,
             category: true,
-            routes: true,
+            routes: {
+              include: {
+                route: true,
+              }
+            },
           },
         },
       },
@@ -264,15 +276,15 @@ const insertOrdersToSelectedBoards = async (
 
   // Get has route orders
   const hasRouteOrders = orders.filter((order: any) => {
-    return order.user.routes.find((route: any) => route.day === day);
+    const selectedDayRoute = order.user.routes.find((route: any) => route.route.day === day);
+    console.log('selectedDayRoute', {selectedDayRoute, day});
+    return !!selectedDayRoute
   });
 
   // Get no route orders to insert to no route board
   const noRouteOrderIds = orders.filter((order: any) => {
-    return order.user.routes.length === 0 || order.user.routes.find((route: any) => route.day !== day);
+    return order.user.routes.length === 0 || order.user.routes.find((route: any) => route.route.day !== day);
   }).map((order: any) => order.id);
-
-  console.log('noRouteOrderIds', orders);
 
   if (noRouteOrderIds.length > 0) {
     let noRouteBoard: CodBoard | undefined = selectedBoards.find(
@@ -285,7 +297,7 @@ const insertOrdersToSelectedBoards = async (
         data: {
           date,
           cash: 0,
-          driverId: -10,
+          driverId: -1,
           note: '',
           status: COD_STATUS.IN_PROCESS,
           createdAt: `${date} ${time}` ,
