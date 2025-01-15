@@ -97,6 +97,7 @@ export default function EditClientStatement({
             <Grid item xs={12} md={4} textAlign="right">
               <StatusActionDropdown 
                 selectedOrders={selectedOrders}
+                setIsLoading={setIsLoading}
                 showNotification={showNotification}
                 actions={[
                   {
