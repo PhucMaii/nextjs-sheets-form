@@ -160,7 +160,6 @@ const TransactionsTable = ({
           <TableBody>
             {transactions.length > 0 &&
               transactions.map((transaction: any, index: number) => {
-                console.log(transaction, 'transaction');
                 const isExpenseSelected = selectedExpense?.some(
                   (expense: IExpense) => expense.id === transaction.id,
                 );

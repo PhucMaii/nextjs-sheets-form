@@ -155,7 +155,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         multipleOrders: sameClientOrder.length > 1 ? true : false,
         orderRoute: orderRoute
           ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
-          : 'No route',
+          : 'No route - N/A',
       };
     });
 

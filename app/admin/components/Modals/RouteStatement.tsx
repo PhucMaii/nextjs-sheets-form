@@ -51,8 +51,6 @@ const RouteStatement = ({ open, onClose, currentDateRange }: IProps) => {
     [],
   );
 
-  console.log('ROUTE STATEMENT RE RENDER', currentDateRange);
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [routes, _mutate, isValidating] = SWRFetchData(
     `${API_URL.ADMIN}/routes?day=${selectedDay}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,

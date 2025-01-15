@@ -10,8 +10,6 @@ const useLocalStorage = (key: string, defaultValue: any) => {
   const [value, setValue] = useState<any>(defaultValue);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  console.log(key, 'key');
-
   // Use this to avoid hydrating in next.js
   useEffect(() => {
     if (typeof window !== 'undefined') {

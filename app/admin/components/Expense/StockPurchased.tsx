@@ -274,7 +274,6 @@ export default function StockPurchased({
     // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
     //   return acc + item.unit.unitPrice * item.quantity;
     // }, 0);
-    console.log(purchasedItems, 'purchasedItems');
     const total = purchasedItems.reduce((acc: any, item: any) => {
       if (!acc?.subTotal) {
         acc.subTotal = 0;

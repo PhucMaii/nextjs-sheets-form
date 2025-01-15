@@ -527,7 +527,7 @@ const OrderAccordion = ({
               <Box display="flex" gap={1} alignItems="center">
                 <Typography variant="subtitle2">
                   {/* Driver: {order?.orderRoute?.split(' - ')[1]} */}
-                  {order?.deliveredBy ? `Delivered: ${order?.deliveredBy}` : `Driver: ${order?.orderRoute?.split(' - ')[1]}`}
+                  {order?.deliveredBy ? `Delivered: ${order?.deliveredBy}` : order?.orderRoute ? `Driver: ${order?.orderRoute?.split(' - ')[1]}` : 'Driver: N/A'}
                 </Typography>
               </Box>
             </Box>

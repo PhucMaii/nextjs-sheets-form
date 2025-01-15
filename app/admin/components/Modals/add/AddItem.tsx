@@ -173,7 +173,6 @@ export default function AddItem({
                   ) || null
                 }
                 onChange={(e, newValue: any) => {
-                  console.log('new value', newValue);
                   let newUnits = newValue.vendorItem.flatMap(
                     (item: any) => item.unit,
                   );

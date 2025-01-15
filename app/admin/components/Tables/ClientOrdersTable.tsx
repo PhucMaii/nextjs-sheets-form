@@ -58,8 +58,6 @@ const ClientOrdersTable = ({
   // const [page, setPage] = useState<number>(0);
   const windowDimensions = useWindowDimensions();
 
-  console.log('TABLE RE RENDER');
-
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
     try {
       setIsLoading(true);

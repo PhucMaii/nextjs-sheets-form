@@ -189,10 +189,10 @@ model CodBoard {
   note      String
   cash      Float
   status    String
-  driverId  Int
+  driverId  Int?
   orders    Orders[]
 
-  driver  Driver    @relation(fields: [driverId], references: [id])
+  driver  Driver?    @relation(fields: [driverId], references: [id])
   expense Expense[]
 }
 
