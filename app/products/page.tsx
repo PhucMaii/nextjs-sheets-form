@@ -13,7 +13,7 @@ import ProductListing from '../components/ProductListingPage/ProductListing';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../admin/components/ErrorComponent';
 import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
-import NavbarWrapper from '../lib/NavbarWrapper';
+// import NavbarWrapper from '../lib/NavbarWrapper';
 
 export default function ProductPage() {
   const [bestSellerItems, setBestSellerItems] = useState<IItemPreference[]>([]);
@@ -83,21 +83,21 @@ export default function ProductPage() {
     
     }, [debouncedKeywords]);
 
-  return (
-    <>
-      <RequestToJoinModal open={isOpenSignUp} onClose={() => setIsOpenSignUp(false)} />
-      <NavbarWrapper setIsOpenSignUp={setIsOpenSignUp}>
-          <ErrorComponent errorText="This page is under construction" />
-      </NavbarWrapper>
-    </> 
-  )
+  // return (
+  //   <>
+  //     <RequestToJoinModal open={isOpenSignUp} onClose={() => setIsOpenSignUp(false)} />
+  //     <NavbarWrapper setIsOpenSignUp={setIsOpenSignUp}>
+  //         <ErrorComponent errorText="This page is under construction" />
+  //     </NavbarWrapper>
+  //   </> 
+  // )
 
   return (
     <>
     <RequestToJoinModal open={isOpenSignUp} onClose={() => setIsOpenSignUp(false)} />
     <Box sx={{pb: 2}}>
       <Navbar setIsOpenSignUp={setIsOpenSignUp} />
-      <Box display="flex" flexDirection="column" gap={2} py={3} px={6}>
+      <Box display="flex" flexDirection="column" gap={2} mt='80px' py={3} px={6}>
         <ProductHeader searchKeywords={searchKeywords} setSearchKeywords={setSearchKeywords} />
       </Box>
 
