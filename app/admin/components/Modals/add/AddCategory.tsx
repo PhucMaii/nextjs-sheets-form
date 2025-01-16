@@ -8,7 +8,7 @@ import { API_URL } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
-  handleOnChangeClient: any;
+  handleOnChangeClient?: any;
   mutateCategories: any;
 }
 
@@ -35,7 +35,9 @@ export default function AddCategory({
         return;
       }
 
-      handleOnChangeClient('category', response.data.data);
+      if (handleOnChangeClient) {
+        handleOnChangeClient('category', response.data.data);
+      }
       mutateCategories();
 
       showNotification('success', response.data.message);
