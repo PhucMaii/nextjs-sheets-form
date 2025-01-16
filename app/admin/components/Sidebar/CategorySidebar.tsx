@@ -13,6 +13,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import React from 'react';
 import { ListItemButtonStyled } from './styled';
 import { blueGrey } from '@mui/material/colors';
+import AddIcon from '@mui/icons-material/Add';
 
 interface IProps {
   categories: Category[];
@@ -20,6 +21,7 @@ interface IProps {
   handleChangeTab: (newTab: any) => void;
   isNavOpen: boolean;
   setIsNavOpen: any;
+  onOpenAddCategory: () => void;
   children: any;
 }
 
@@ -30,6 +32,7 @@ export default function CategorySidebar({
   handleChangeTab,
   isNavOpen,
   setIsNavOpen,
+  onOpenAddCategory,
   children,
 }: IProps) {
   return (
@@ -65,6 +68,9 @@ export default function CategorySidebar({
               <Typography variant="h5" color={blueGrey[800]}>
                 Category
               </Typography>
+              <IconButton onClick={onOpenAddCategory}>
+                <AddIcon />
+              </IconButton>
             </Box>
             <List
               sx={{

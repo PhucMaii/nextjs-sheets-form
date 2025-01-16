@@ -36,6 +36,7 @@ import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateCurrentTime } from '@/app/utils/time';
+import AddCategory from '../components/Modals/add/AddCategory';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -43,6 +44,7 @@ export default function ItemPage() {
   const [items, setItems] = useState<IItem[]>([]);
   const [isSavingArrangement, setIsSavingArrangement] =
     useState<boolean>(false);
+  const [isOpenAddCategory, setIsOpenAddCategory] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   const [open, setOpen] = useMultipleBoolean({
@@ -308,6 +310,12 @@ export default function ItemPage() {
 
   return (
     <Sidebar noMargin>
+      <AddCategory 
+        showNotification={showNotification}
+        mutateCategories={mutateCategories}
+        open={isOpenAddCategory}
+        onClose={() => setIsOpenAddCategory(false)}
+      />
       <CategoryClients
         open={open.isShowingClients}
         onClose={() => setOpen('isShowingClients', false)}
@@ -346,6 +354,7 @@ export default function ItemPage() {
         handleChangeTab={switchCurrentCategory}
         isNavOpen={open.isSidebarOpen}
         setIsNavOpen={setOpen}
+        onOpenAddCategory={() => setIsOpenAddCategory(true)}
       >
         <Grid container alignItems="center">
           <Grid item xs={12} md={10}>
