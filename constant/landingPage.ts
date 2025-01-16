@@ -21,7 +21,7 @@ export const howItWorksList: HowItWorksType[] = [
     title: 'Online Order',
     description:
       'Order what you need from our website at your convenience, and within seconds, all your food supplies will be prepared and ready to fuel your day.',
-    image: '/images/landing/how_it_works/online_order.png',
+    image: '/images/landing/how_it_works/online_order.jpg',
   },
   {
     title: 'Freshly Delivery',

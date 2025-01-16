@@ -8,7 +8,9 @@ export default function NavbarWrapper({ children, setIsOpenSignUp }: { children:
     <AuthenGuard>
       <Box>
         <Navbar setIsOpenSignUp={setIsOpenSignUp} />
-        {children}
+        <Box mt='80px'>
+          {children}
+        </Box>
       </Box>
     </AuthenGuard>
   );

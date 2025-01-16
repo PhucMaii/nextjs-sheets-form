@@ -174,8 +174,16 @@ export default function Navbar({setIsOpenSignUp}: IProps) {
       display="flex"
       alignItems="center"
       px={4}
-      py={4}
       justifyContent="space-between"
+      position="fixed"
+      width="100%"
+      height="80px"
+      top={0}
+      sx={{
+        backgroundColor: 'white',
+        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
+        zIndex: 100
+      }}
     >
       <Logo />
       {/* The logo of the website */}

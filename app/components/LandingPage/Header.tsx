@@ -2,49 +2,68 @@ import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import { Box, Button, Grid, Typography, useMediaQuery } from '@mui/material';
+import { Box, Button, Grid, InputAdornment, TextField, Typography, useMediaQuery } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import Image from 'next/image';
 import React from 'react';
 
 interface IProps {
   setIsOpenSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+  sx?: any;
 }
 
-export default function Header({setIsOpenSignUp}: IProps) {
+export default function Header({setIsOpenSignUp, sx}: IProps) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   return (
     <Grid
       container
       alignItems="center"
-      columnSpacing={2}
-      rowGap={4}
+      // columnSpacing={2}
       px={4}
-      my={2}
+      sx={{
+        position: 'relative', // Ensure the container is a positioned element
+        overflow: 'hidden',   // Prevent the pseudo-element from overflowing
+        height: '90vh',
+        ...sx,
+        ':before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: 'url("/images/landing/header/beansprout_background.png")',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          filter: 'brightness(50%)',
+          zIndex: -1,   // Ensure the pseudo-element is behind the content
+        },
+      }}
     >
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12}>
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography
             variant="h2"
             fontWeight="bold"
-            textAlign={mdDown ? 'center' : 'left'}
+            textAlign='center'
+            sx={{color: 'white'}}
           >
-            Freshness You Can Trust, Prices You'll Love
+            Freshness You Can Trust <br /> Prices You'll Love
           </Typography>
           <Typography
             variant="h5"
             fontWeight="normal"
-            textAlign={mdDown ? 'center' : 'left'}
-            sx={{ color: grey[600], lineHeight: 1.5 }}
+            textAlign='center'
+            sx={{ color: grey[100], lineHeight: 1.5 }}
           >
             Delivering farm-fresh produce with unmatched quality at competitive
-            prices, tailored for your business needs.
+            prices, <br /> tailored for your business needs.
           </Typography>
           <Box
             display="flex"
             alignItems="center"
-            justifyContent={mdDown ? 'center' : 'left'}
+            justifyContent='center'
             gap={2}
           >
             <Button
@@ -69,6 +88,7 @@ export default function Header({setIsOpenSignUp}: IProps) {
                 color: landingPagePrimaryColor,
                 px: 3,
                 py: 2,
+                backgroundColor: 'rgba(0, 0, 0, 0.3)' /* Semi-transparent black (50% opacity) */,
                 ':hover': {
                   backgroundColor: landingPageSecondaryColor,
                   color: 'white',
@@ -78,18 +98,41 @@ export default function Header({setIsOpenSignUp}: IProps) {
               Learn More
             </Button>
           </Box>
+
+          <Box display="flex" justifyContent="center">
+          <TextField
+            variant="outlined"
+            placeholder="What are you looking for today?"
+            size="small"
+            sx={{
+              borderRadius: 2,
+              backgroundColor: grey[300],
+              width: mdDown ? '100%' : '50%',
+              maxWidth: 600,
+              ".mui-apo49d-MuiInputBase-root-MuiOutlinedInput-root": {
+                padding: 1,
+              },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Button
+                    sx={{
+                      backgroundColor: landingPagePrimaryColor,
+                      color: 'white',
+                      padding: '10px 16px',
+                      borderRadius: 2,
+                      ':hover': { backgroundColor: landingPageSecondaryColor },
+                    }}
+                  >
+                    Search
+                  </Button>
+                </InputAdornment>
+              ),
+            }}
+          />
         </Box>
-      </Grid>
-      <Grid item xs={12} md={6} textAlign="center">
-        <Image
-          src="/images/landing/person_delivery.jpeg"
-          alt="header"
-          width={300}
-          height={400}
-          style={{ borderRadius: 50 }}
-          priority={true}
-          sizes="100vw"
-        />
+        </Box>
       </Grid>
     </Grid>
   );
