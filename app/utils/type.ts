@@ -125,6 +125,8 @@ export interface OrderedItems {
   isShowDiscount?: boolean;
   prevPrice?: number;
   orderId?: number;
+  fifoId?: number;
+  fifo?: Fifo;
   inventoryItemId?: number;
   inventoryItem?: any;
   inventoryUnitId?: number;

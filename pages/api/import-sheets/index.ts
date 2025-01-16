@@ -5,7 +5,7 @@ import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
-import { normalizeDate } from '../utils/date';
+import { checkOrderDeliveryDateValid, normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 import {
   checkHasClientOrder,
@@ -51,9 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       createdAt,
     }: IBody = req.body;
 
-    console.log({
-      body: req.body,
-    });
+    console.log('body', req.body);
 
     if (!deliveryDate || !items || !createdAt) {
       return res.status(400).json({
@@ -70,6 +68,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(401).json({ error: 'You are not authenticated' });
       }
       id = session.user.id;
+    }
+
+    if (createdBy === USER_ROLE.CLIENT) {
+      const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
+      if (!isValidDate.ok) {
+        return res.status(400).json({
+          error: isValidDate.message,
+        });
+      }
     }
 
     // Check does user exist
@@ -162,24 +169,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
         });
       }
-
-      // TODO: OVERRIDE ORDER
-
-      // const newItems = Object.keys(body).filter((item: string) => {
-      //   return item !== 'DELIVERY DATE' && item !== 'NOTE';
-      // });
-
-      // const items = userOrder.items.map((item: any) => {
-      //   const targetNewItem = newItems.find(
-      //     (newItemName: any) => item.name === newItemName,
-      //   );
-
-      //   if (targetNewItem) {
-      //     return { ...item, quantity: body[targetNewItem] };
-      //   }
-
-      //   return item;
-      // });
 
       await overrideOrder(
         existingUser,

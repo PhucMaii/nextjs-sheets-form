@@ -38,9 +38,11 @@ export const WeeklyStatement = forwardRef(
 
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
+    const endYear = endDate.getFullYear();
     const { debtData, sortDebtKeys } = useApiDebtData(
       client.id,
       endMonth,
+      endYear,
       orders,
     );
 

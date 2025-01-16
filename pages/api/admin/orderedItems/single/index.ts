@@ -3,7 +3,10 @@ import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
 import { generateOrderTotalPrice } from '../PUT';
 import { getUserInfo } from '@/pages/api/utils/auth';
-import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import {
+  checkOrderValidToAffectInventory,
+  formatItemsWithTotalPrice,
+} from '@/pages/api/utils/order';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -117,7 +120,7 @@ export default withAdminAuthGuard(handler);
 export const updateSingleInventoryItem = async (
   orderId: number,
   fifo: Fifo,
-  unit: InventoryUnit,
+  unit: InventoryUnit | any,
   newQuantity: number,
   previousQuantity: number,
 ) => {
@@ -126,9 +129,8 @@ export const updateSingleInventoryItem = async (
 
     // Handle if expense quantity change or admin just force update the inventory => orderId = -1
     // Only check if orderId is a valid id
-    console.log(orderId, 'order id');
     if (orderId > 0) {
-      const order = await prisma.orders.findUnique({
+      const order: any = await prisma.orders.findUnique({
         where: {
           id: orderId,
         },
@@ -139,7 +141,11 @@ export const updateSingleInventoryItem = async (
         return;
       }
 
-      if (!order?.isAffectInventory) {
+      const isValidToCheckInventory = await checkOrderValidToAffectInventory(
+        order.deliveryDate,
+      );
+
+      if (!order?.isAffectInventory || !isValidToCheckInventory) {
         console.log('Inventory Avoided');
         return;
       }
@@ -157,17 +163,9 @@ export const updateSingleInventoryItem = async (
       return;
     }
 
+    const ratio = unit?.ratio || 1;
     const updatedQuantity =
-      lastUpdatedFifo.quantity -
-      newQuantity * unit.ratio +
-      previousQuantity * unit.ratio;
-    console.log({
-      updatedQuantity,
-      fifo,
-      newQuantity,
-      previousQuantity,
-      ratio: unit.ratio,
-    });
+      lastUpdatedFifo.quantity - newQuantity * ratio + previousQuantity * ratio;
     await prisma.fifo.update({
       where: {
         id: fifo.id,
@@ -217,7 +215,7 @@ export const restockInventoryItem = async (
 export const subtractInventoryItem = async (
   orderId: number,
   fifo: Fifo,
-  unit: InventoryUnit,
+  unit: InventoryUnit | any,
   subtractedQuantity: number,
 ) => {
   try {

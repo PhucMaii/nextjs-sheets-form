@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-import SelectDateRange from '../components/SelectDateRange';
+import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import PaidIcon from '@mui/icons-material/Paid';

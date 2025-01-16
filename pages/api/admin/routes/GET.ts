@@ -1,12 +1,26 @@
-import { PAYMENT_TYPE } from '@/app/utils/enum';
+import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { normalizeDate } from '../../utils/date';
+import { UserType } from '@/app/utils/type';
+import { Order } from '@/app/admin/orders/page';
 
 interface QueryType {
   day?: string;
   startDate?: string;
   endDate?: string;
+}
+
+export interface ClientStatementType {
+  client: UserType;
+  orders: Order[];
+  balance: number;
+  incompletedOrders: Order[];
+  voidOrders: Order[];
+  completedOrders: Order[];
+  deliveredOrders: Order[];
+  route: Route;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
@@ -15,9 +29,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { day, startDate, endDate }: QueryType = req.query;
 
     if (startDate && endDate) {
+      const normalizedStartDate = normalizeDate(new Date(startDate));
+      const normalizedEndDate = normalizeDate(new Date(endDate));
+
       const listOfDayStrings = generateListOfDateString(
-        new Date(startDate),
-        new Date(endDate),
+        normalizedStartDate,
+        normalizedEndDate,
       );
 
       const routes = await prisma.route.findMany({
@@ -55,8 +72,48 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      const formattedClientOrders: any = {};
+      routes.forEach((route: any) => {
+        formattedClientOrders[route.id] = route.clients.map((client: any) => {
+          const userOrders = client.user.Orders;
+
+          const incompletedOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.INCOMPLETED,
+          );
+
+          const deliveredOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.DELIVERED,
+          );
+
+          const completedOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.COMPLETED,
+          );
+          const voidOrders = userOrders.filter(
+            (order: any) => order.status === ORDER_STATUS.VOID,
+          );
+
+          const balance = [...incompletedOrders, ...deliveredOrders].reduce(
+            (acc: number, order: any) => {
+              return acc + order.totalPrice;
+            },
+            0,
+          );
+          return {
+            client: client.user,
+            balance,
+            orders: client.user.Orders,
+            incompletedOrders,
+            deliveredOrders,
+            completedOrders,
+            voidOrders,
+            route: route,
+          };
+        });
+      });
+
       return res.status(200).json({
         data: routes,
+        formattedClientOrders,
         message: 'Fetch Routes Successfully',
       });
     }
@@ -82,8 +139,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // const formattedClientOrders: any = {};
+    // routes.forEach((route: any) => {
+    //   formattedClientOrders[route.id] = route.clients.map((client: any) => {
+    //     return {
+    //       client: client.user,
+    //       orders: client.user.Orders,
+    //       route: route,
+    //     };
+    //   })
+    // })
+
     return res.status(200).json({
       data: routes,
+      // formattedClientOrders,
       message: 'Fetch Routes Successfully',
     });
   } catch (error: any) {

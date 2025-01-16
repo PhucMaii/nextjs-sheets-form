@@ -1,4 +1,5 @@
 import { mainPaymentMethodId } from '@/app/lib/constant';
+import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { getUserInfo } from '@/pages/api/utils/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -12,6 +13,7 @@ interface IBody {
   description: string;
   paymentMethodId: number;
   spentBy: string;
+  status: TRANSACTION_STATUS;
   codBoardId: number;
   createdAt: string;
   createdBy?: string;
@@ -30,6 +32,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       GST,
       PST,
       description,
+      status,
       paymentMethodId,
       spentBy,
       codBoardId,
@@ -114,6 +117,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         GST,
         PST,
         spentBy,
+        status,
         createdAt,
         createdBy: createdBy ? createdBy : `Admin - ${user?.clientName}`,
         codBoardId,

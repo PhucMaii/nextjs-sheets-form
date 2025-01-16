@@ -1,5 +1,5 @@
 'use client';
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -20,7 +20,7 @@ import { useReactToPrint } from 'react-to-print';
 import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, TYPE } from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
@@ -38,6 +38,8 @@ import { useDiscount } from '@/hooks/useDiscount';
 import ConfirmModal from './Modals/ConfirmModal';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import LoadingModal from './Modals/LoadingModal';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LockIcon from '@mui/icons-material/Lock';
 
 interface PropTypes {
   order: Order;
@@ -91,6 +93,8 @@ const OrderAccordion = ({
   };
 
   const { discountPrice, DiscountText } = useDiscount(order.items, order);
+
+  // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
@@ -254,7 +258,12 @@ const OrderAccordion = ({
           />
         </MenuItem>
         <Divider />
-        <MenuItem onClick={() => setIsOpenEditPrice(true)}>Edit price</MenuItem>
+        <MenuItem
+          disabled={order?.type === TYPE.LOCKED}
+          onClick={() => setIsOpenEditPrice(true)}
+        >
+          Edit price
+        </MenuItem>
         <MenuItem
           onClick={(e) => {
             e.stopPropagation();
@@ -361,24 +370,32 @@ const OrderAccordion = ({
           onClose={() => setIsOpenDetails(false)}
           order={order}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       <ShadowSection>
-        <Grid container alignItems="center" columnSpacing={1}>
+        <Grid container alignItems="center" columnSpacing={1} rowGap={1}>
           <Grid item sm={0.5} xs={2}>
             <Checkbox
               checked={isOrderSelected}
               onClick={(e: any) => handleSelectOrder(e, order)}
             />
           </Grid>
-          <Grid item xs={2}>
+          {/* <Grid item xs={2}>
             <Box display="flex" alignItems="center" gap={0.5}>
               <RememberMeIcon fontSize="small" color="primary" />
               <Typography variant="body2">{latestUpdatePerson}</Typography>
             </Box>
-          </Grid>
-          <Grid item xs={10} md={7}>
+          </Grid> */}
+          <Grid item xs={10} md={9}>
             <Box display="flex" alignItems="center" gap={1}>
+              {order?.type === TYPE.LOCKED && (
+                <StatusText
+                  text={`Locked`}
+                  type={'info'}
+                  icon={<LockIcon color="info" fontSize="small" />}
+                />
+              )}
               {order?.previousUnpaidOrders && (
                 <StatusText
                   text={`${order.previousUnpaidOrders.numberOfOrders} unpaid orders`}
@@ -442,13 +459,13 @@ const OrderAccordion = ({
               </IconButton>
             </Box>
           </Grid>
-          <Grid item xs={12} md={2} sx={{ mr: 2 }}>
+          <Grid item xs={12} md={4}>
             <Typography fontWeight="bold" variant="subtitle1">
               #{order.id}
             </Typography>
             <Typography variant="body2">Order at: {order.orderTime}</Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Button
               color="info"
               variant="contained"
@@ -457,14 +474,18 @@ const OrderAccordion = ({
               {order?.clientName || order?.user?.clientName}
             </Button>
           </Grid>
-          <Grid item xs={12} md={3} textAlign="left" alignItems="center">
+          <Grid item xs={12} md={4} textAlign="right">
             <Box
               display="flex"
               gap={1}
               alignItems="center"
-              justifyContent="center"
+              justifyContent="flex-end"
             >
-              <Typography fontWeight="bold" variant="subtitle1">
+              <Typography
+                fontWeight="bold"
+                variant="subtitle1"
+                textAlign="right"
+              >
                 Delivery Date: {order.deliveryDate}
               </Typography>
               <IconButton
@@ -478,26 +499,71 @@ const OrderAccordion = ({
               </IconButton>
             </Box>
           </Grid>
-          <Grid item xs={12}>
+          {/* {mdDown && <Grid item xs={12}>
+          <Box display="flex" gap={2} alignItems="center" justifyContent="center">
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <RememberMeIcon fontSize="small" color="primary" />
+                  <Typography variant="body2">{latestUpdatePerson}</Typography>
+                </Box>
+                <Box display="flex" gap={1} alignItems="center">
+                  <LocalShippingIcon color="primary" />
+                  <Typography variant="subtitle2">
+                    {order?.orderRoute || ''}
+                  </Typography>
+                </Box>
+              </Box>
+          </Grid>} */}
+          <Grid item xs={4} md={4}>
+            <Box display="flex" gap={1} alignItems="center">
+              <SellIcon color="primary" />
+              <Typography color="primary" variant="subtitle1">
+                {totalQuantity}
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={4} md={4}>
             <Box
               display="flex"
-              justifyContent="space-between"
-              alignItems="center"
+              flexDirection="column"
+              gap={1}
+              alignItems="flex-start"
+              justifyContent="flex-start"
             >
-              <Box display="flex" gap={1} alignItems="center">
-                <SellIcon color="primary" />
-                <Typography color="primary" variant="subtitle1">
-                  {totalQuantity}
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <RememberMeIcon fontSize="small" color="primary" />
+                <Typography variant="subtitle2">
+                  {latestUpdatePerson}
                 </Typography>
               </Box>
-              <Box display="flex" alignItems="center" gap={1}>
-                {discountPrice > 0 &&
-                  discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
-                  DiscountText}
-                <Button variant="outlined">
-                  ${order.totalPrice.toFixed(2)}
-                </Button>
+              <Box display="flex" gap={1} alignItems="center">
+                <LocalShippingIcon color="primary" />
+                <Typography variant="subtitle2">
+                  {order?.orderRoute || ''}
+                </Typography>
               </Box>
+              <Box display="flex" gap={1} alignItems="center">
+                <Typography variant="subtitle2">
+                  {/* Driver: {order?.orderRoute?.split(' - ')[1]} */}
+                  {order?.deliveredBy
+                    ? `Delivered: ${order?.deliveredBy}`
+                    : order?.orderRoute
+                      ? `Driver: ${order?.orderRoute?.split(' - ')[1]}`
+                      : 'Driver: N/A'}
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={4} md={4} textAlign="right">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-end"
+              gap={1}
+            >
+              {discountPrice > 0 &&
+                discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
+                DiscountText}
+              <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
             </Box>
           </Grid>
         </Grid>
@@ -507,4 +573,4 @@ const OrderAccordion = ({
 };
 
 // only re renders if th order data change
-export default memo(OrderAccordion);
+export default OrderAccordion;

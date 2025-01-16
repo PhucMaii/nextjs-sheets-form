@@ -30,7 +30,6 @@ export default function UnitRadio({
   isShowPrice,
   role,
 }: IProps) {
-  console.log(units, 'UNITS');
   return (
     <RadioGroup row name="unit" value={value} onChange={onChange}>
       {units.map((unit: any, index: number) => {

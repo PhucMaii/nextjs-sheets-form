@@ -34,6 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const { day, orderList, userRoute } = req.body as IBody;
+    console.log({ day, orderList, userRoute });
     // const buffers = [];
     //   for await (const chunk of req) {
     //     buffers.push(chunk);
@@ -137,7 +138,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     while (trackOrderByRoutesIndex <= orderByRoutes.length) {
       // console.log(currentRouteOrders.length, 'currentRouteOrders');
       if (!orderByRoutes[trackOrderByRoutesIndex]?.routeId) {
-        console.log(orderByRoutes[trackOrderByRoutesIndex], 'orderByRoutes');
         // Reach the end of the orderByRoutes - Finalize the currentRouteOrders
         const sortedUserIds = userRoute[currentRouteId];
         currentRouteOrders.sort((orderA: Order, orderB: Order) => {
@@ -203,8 +203,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Generate Item Manifest
     const itemManifest: any = {};
+    const allManifestSummary: any = {};
+    const allManifestItemNames: string[] = [];
     for (const itemRoute in groupItemRoutes) {
-      console.log(itemRoute, 'itemRoute');
       let targetRoute: any = dayRoutes.find(
         (route: any) => route.id == itemRoute,
       );
@@ -234,6 +235,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             acc[itemKey] = 0;
           }
 
+          if (!allManifestSummary[itemKey]) {
+            allManifestSummary[itemKey] = 0;
+          }
+
+          allManifestSummary[itemKey] =
+            allManifestSummary[itemKey] + item.quantity;
           acc[itemKey] = acc[itemKey] + item.quantity;
           return acc;
         },
@@ -316,6 +323,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             continue;
           }
 
+          if (!allManifestItemNames.includes(itemName)) {
+            allManifestItemNames.push(itemName);
+          }
           itemNameList.push(itemName);
         }
       }
@@ -329,8 +339,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       };
     }
 
+    const sortedAllItemNames = sortedItemKeys(allManifestItemNames, mainItems);
+    itemManifest['-2'] = {
+      details: [],
+      summary: allManifestSummary,
+      route: {
+        id: '-2',
+        name: 'Day Manifest (Summary only)',
+      },
+      itemNames: sortedAllItemNames,
+    };
+
     // console.log('Manifest: ', {orderPrint: sortedOrderByRoutes, itemManifest});
 
+    console.log({ orderPrint: sortedOrderByRoutes, itemManifest });
     return res.status(200).json({
       data: { orderPrint: sortedOrderByRoutes, itemManifest },
     });

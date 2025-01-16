@@ -44,7 +44,6 @@ export default function BatchQuantity({
   }, [fifo]);
 
   const handleDeleteFifo = async (fifo: IFifo) => {
-    console.log('fifo: ', fifo);
     let nextFifoId = -1;
     if (fifo?.orderedItems?.length > 0) {
       if (fifoIndex + 1 >= fifoList.length) {

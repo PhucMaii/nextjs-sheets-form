@@ -30,7 +30,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const session: any = await getServerSession(req, res, authOptions);
-    console.log(session, 'session');
 
     const existingDriver = await prisma.driver.findUnique({
       where: {

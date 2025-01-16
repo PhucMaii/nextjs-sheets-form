@@ -20,7 +20,7 @@ export enum COLOR_TYPE {
 }
 
 interface PropTypes {
-  text: string;
+  text?: string;
   type: string;
   icon?: React.ReactNode;
 }
@@ -92,7 +92,7 @@ export default function StatusText({ text, type, icon }: PropTypes) {
       //   width: 'fit-content',
       // }}
       >
-        {text}
+        {text ? text : null}
       </Typography>
     </Box>
   );

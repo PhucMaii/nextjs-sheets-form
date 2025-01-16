@@ -75,6 +75,7 @@ export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',
   DRIVER = 'driver',
+  SYSTEM = 'system',
 }
 
 export enum FLAG_ORDER_TYPE {
@@ -97,4 +98,14 @@ export enum STOCK_STATUS {
 export enum TRANSACTION_STATUS {
   PAID = 'Paid',
   UNPAID = 'Unpaid',
+}
+
+export enum ACTION {
+  TRACK_INVENTORY = 'Track Inventory',
+  DISCONNECT_ORDERED_ITEMS = 'Disconnect Ordered Items',
+  CANCEL_AFFECT_INVENTORY = 'Cancel Affect Inventory',
+}
+
+export enum TYPE {
+  LOCKED = 'LOCKED',
 }

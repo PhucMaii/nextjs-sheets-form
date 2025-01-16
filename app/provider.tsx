@@ -1,5 +1,5 @@
 'use client';
-
+import React from 'react';
 import axios from 'axios';
 import { SessionProvider } from 'next-auth/react';
 import { SWRConfig } from 'swr';

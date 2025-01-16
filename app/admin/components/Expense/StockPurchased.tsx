@@ -274,7 +274,6 @@ export default function StockPurchased({
     // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
     //   return acc + item.unit.unitPrice * item.quantity;
     // }, 0);
-    console.log(purchasedItems, 'purchasedItems');
     const total = purchasedItems.reduce((acc: any, item: any) => {
       if (!acc?.subTotal) {
         acc.subTotal = 0;
@@ -618,6 +617,7 @@ export default function StockPurchased({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Subtotal</Typography>
               <TextField
+                disabled
                 placeholder="Enter epxense subtotal..."
                 fullWidth
                 type="number"
@@ -635,6 +635,7 @@ export default function StockPurchased({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">PST (7%)</Typography>
               <TextField
+                disabled
                 placeholder="Enter epxense PST..."
                 fullWidth
                 type="number"
@@ -652,6 +653,7 @@ export default function StockPurchased({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">GST (5%)</Typography>
               <TextField
+                disabled
                 placeholder="Enter epxense GST..."
                 fullWidth
                 type="number"
@@ -669,6 +671,7 @@ export default function StockPurchased({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Amount</Typography>
               <TextField
+                disabled
                 placeholder="Enter epxense amount..."
                 fullWidth
                 type="number"

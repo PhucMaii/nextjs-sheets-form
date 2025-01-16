@@ -159,7 +159,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Calculate customers in debt
     const debtRange = generateListOfDateString(
-      officiallyStartDate,
+      normalizeDate(officiallyStartDate),
       formattedEndDate,
     );
 

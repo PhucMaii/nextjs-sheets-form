@@ -17,7 +17,7 @@ import React, {
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
-import SelectDateRange from '../SelectDateRange';
+import SelectDateRange from '../Select/SelectDateRange';
 import { days } from '@/app/lib/constant';
 import { grey } from '@mui/material/colors';
 import { SWRFetchData } from '@/app/utils/db';

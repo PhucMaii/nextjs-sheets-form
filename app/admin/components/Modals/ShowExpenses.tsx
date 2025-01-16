@@ -51,7 +51,7 @@ export default function ShowExpenses({
         // handleAddExpenseId={handleAddExpenseId}
         defaultValue={{
           date: boardData.date,
-          spentBy: `Driver - ${boardData.driver.name}`,
+          spentBy: `Driver - ${boardData?.driver?.name || 'N/A'} `,
         }}
         codBoardId={boardData.id}
       />

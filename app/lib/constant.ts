@@ -28,6 +28,7 @@ import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import {
   errorColor,
   infoColor,
@@ -55,6 +56,50 @@ export const mainItems = [
   'LIQUID EGG',
   'EGGPLANTS 30 LB',
   'LIME NO. 1',
+];
+
+export const inventoryOrder = [
+  'BEAN 10 LB',
+  'BEAN 5 LB',
+  'BASIL',
+  'BEAN 1 LB',
+  'SOYA 10 LB',
+  'SOYA 5 LB',
+  'SOYA 1 LB',
+  'LIME NO. 1',
+  'LIME NO. 2',
+  'TRADITIONAL TOFU',
+  'OG CHINESE PUFF',
+  'FRIED TOFU',
+  'FIRM TOFU',
+  'MEDIUM FIRM TOFU',
+  'JUMBO EGG',
+  'LARGE EGG',
+  'XL EGG',
+  'LIQUID EGG 33 LB',
+  'EGGPLANTS 30 LB',
+  'DAILON 40 LB',
+  'BROCCOLI 20 LB',
+  'WHITE ONION 50 LB',
+  'USA GREEN CABBAGE',
+  'LEUCOCASIA / BAC HA 20 LB',
+  'LEUCOCASIA / BAC HA 30 LB',
+  'TARO',
+  'KING OYSTER',
+  'SHIITAKE',
+  'FRESH RICE NOODLE 1 LB',
+  'BANH PHO SINCERE 30 LB',
+  'WONTON NOODLE 1 LB',
+  'CHOW MEIN 10 LB',
+  'ORGANIC GINGER 30 LB',
+  'NO. 2 BELL PEPPER 25 LB',
+  'PEELED GARLIC 5 LB',
+  'JUMBO CARROT',
+  'NO. 1 GINGER 30 LB',
+  'No. 1 MUSHROOM WHITE 10 LB',
+  'No. 2 MUSHROOM WHITE 10 LB',
+  'NO. 1 OYSTER MUSHROOM 5 LB',
+  'NO. 2 OYSTER MUSHROOM 5 LB',
 ];
 
 const lighterGreen = '#99FF99'; // Lighter Green
@@ -87,6 +132,7 @@ export const productColors = [
   lightPaleGreen, // LIME NO. 1
 ];
 export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (0 = January)
+export const testAccountId = 223;
 
 export const sendChequeMsg = `
 * Please send your payment by cheque to:
@@ -105,6 +151,21 @@ export const days = [
   'Thursday',
   'Friday',
   'Saturday',
+];
+
+export const months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 export const limitOrderHour = 7;
@@ -176,14 +237,19 @@ export const adminTabs = {
       path: '/admin/codBoard',
     },
     {
-      name: 'Blocking',
-      icon: AppBlockingIcon,
-      path: '/admin/blocking',
-    },
-    {
       name: 'Pre Orders',
       icon: PendingActionsIcon,
       path: '/admin/pre-orders',
+    },
+    {
+      name: 'Statements',
+      icon: DocumentScannerIcon,
+      path: '/admin/statements',
+    },
+    {
+      name: 'Blocking',
+      icon: AppBlockingIcon,
+      path: '/admin/blocking',
     },
   ],
 };

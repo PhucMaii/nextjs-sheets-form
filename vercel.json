@@ -1,4 +1,18 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/track-inventory",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/disconnect-orderedItems",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/cancel-affect-inventory",
+      "schedule": "5 9 * * *"
+    }
+  ],
   "functions": {
     "pages/api/**/*": {
       "maxDuration": 300

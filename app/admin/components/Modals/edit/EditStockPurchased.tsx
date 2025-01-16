@@ -33,10 +33,10 @@ import AddIcon from '@mui/icons-material/Add';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import EditUnit from './EditUnit';
 import UnitRadio from '../../Radio/UnitRadio';
-import { grey } from '@mui/material/colors';
 // import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
-import { gstRate, pstRate } from '@/app/lib/constant';
+// import { gstRate, pstRate } from '@/app/lib/constant';
 import { ModalProps } from '../type';
+import { gstRate, pstRate } from '@/app/lib/constant';
 
 interface IProps extends ModalProps {
   stockPurchased: IExpense;
@@ -108,6 +108,8 @@ const EditStockPurchased = ({
       setAdminsAndDrivers(adminsAndDriversRes?.data);
     }
   }, [adminsAndDriversRes]);
+
+  console.log('stockPurchased', stockPurchased);
 
   // const fetchAdminsAndDrivers = async () => {
   //   const user: any = getAdminsAndDrivers(showNotification);
@@ -689,7 +691,7 @@ const EditStockPurchased = ({
 
             {purchasedItems.length > 0 &&
               purchasedItems.map((item: any, index) => {
-                const disabledItem = item?.fifo?._count?.orderedItems > 1;
+                // const disabledItem = item?.fifo?._count?.orderedItems > 1;
                 return (
                   <Grid container spacing={1} key={index}>
                     <Grid item xs={12} fontWeight="bold">
@@ -699,11 +701,12 @@ const EditStockPurchased = ({
                         </Typography>
                         <IconButton
                           onClick={() => removeItem(item.id)}
-                          disabled={disabledItem}
+                          // disabled={disabledItem}
                         >
                           <RemoveCircleIcon
                             sx={{
-                              color: disabledItem ? grey[500] : errorColor,
+                              color: errorColor,
+                              // color: disabledItem ? grey[500] : errorColor,
                             }}
                           />
                         </IconButton>
@@ -720,7 +723,7 @@ const EditStockPurchased = ({
                           }
                           type="number"
                           inputProps={{ min: 0 }}
-                          disabled={disabledItem}
+                          // disabled={disabledItem}
                         />
                       </Grid>
                       <Grid item xs={6}>
@@ -733,7 +736,7 @@ const EditStockPurchased = ({
                           }
                           type="number"
                           inputProps={{ min: 0 }}
-                          disabled={disabledItem}
+                          // disabled={disabledItem}
                         />
                       </Grid>
                     </Grid>
@@ -747,6 +750,7 @@ const EditStockPurchased = ({
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">Subtotal</Typography>
                   <TextField
+                    disabled
                     placeholder="Enter epxense subtotal..."
                     fullWidth
                     type="number"
@@ -764,6 +768,7 @@ const EditStockPurchased = ({
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">PST (7%)</Typography>
                   <TextField
+                    disabled
                     placeholder="Enter epxense PST..."
                     fullWidth
                     type="number"
@@ -781,6 +786,7 @@ const EditStockPurchased = ({
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">GST (5%)</Typography>
                   <TextField
+                    disabled
                     placeholder="Enter epxense GST..."
                     fullWidth
                     type="number"
@@ -798,6 +804,7 @@ const EditStockPurchased = ({
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">Amount</Typography>
                   <TextField
+                    disabled
                     placeholder="Enter epxense amount..."
                     fullWidth
                     type="number"

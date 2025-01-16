@@ -17,8 +17,9 @@ import {
   Tabs,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
-import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '../../utils/enum';
+import { API_URL, ORDER_STATUS, PAYMENT_TYPE, TYPE } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { IItem, IRoutes, OrderedItems, UserType } from '@/app/utils/type';
@@ -113,6 +114,9 @@ export interface Order {
   previousUnpaidOrders?: { numberOfOrders: number; totalPrice: number };
   multipleOrders?: boolean;
   isAffectInventory?: boolean;
+  orderRoute?: string;
+  type?: TYPE;
+  deliveredBy?: string;
 }
 
 const orderPerPage = 10;
@@ -144,6 +148,8 @@ export default function Orders() {
   const [selectedOrderDetails, setSelectedOrderDetails] =
     useState<Order | null>(null);
   const [tabIndex, setTabIndex] = useState<number>(0);
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const componentRef: any = useRef();
   const totalPosition: any = useRef();
@@ -218,7 +224,6 @@ export default function Orders() {
     pusherClient?.subscribe('void-order');
 
     pusherClient?.bind('incoming-order', (order: Order) => {
-      console.log(order, 'Incoming order');
       setIncomingOrder(order);
       mutate();
     });
@@ -243,6 +248,9 @@ export default function Orders() {
           debouncedKeywords == order.id.toString() ||
           order.user.clientName
             .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
+          order?.orderRoute
+            ?.toLowerCase()
             .includes(debouncedKeywords.toLowerCase())
         ) {
           return true;
@@ -633,7 +641,7 @@ export default function Orders() {
               aria-label="basic tabs"
               value={tabIndex}
               onChange={(e, newValue) => setTabIndex(newValue)}
-              variant="fullWidth"
+              variant={mdDown ? 'scrollable' : 'fullWidth'}
               sx={{ width: '100%' }}
             >
               {statusTabs &&
@@ -806,6 +814,7 @@ export default function Orders() {
           onClose={() => setSelectedOrderDetails(null)}
           order={selectedOrderDetails}
           handleUpdateItem={handleUpdateItem}
+          showNotification={showNotification}
         />
       )}
       {isLoading ? (

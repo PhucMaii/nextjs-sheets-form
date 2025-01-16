@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import React, { useEffect, useState } from 'react';
 
 export interface ILocalNoti {
   title: string;
@@ -13,7 +14,7 @@ const useLocalStorage = (key: string, defaultValue: any) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedValue = localStorage.getItem(key);
-      if (storedValue) {
+      if (storedValue && storedValue !== 'undefined') {
         setValue(JSON.parse(storedValue));
       }
       setIsInitialized(true);

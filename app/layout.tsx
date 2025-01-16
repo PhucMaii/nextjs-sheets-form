@@ -1,5 +1,6 @@
+import React from 'react';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+// import { Inter } from '@next/font/google';
 import './globals.css';
 import { Providers } from './provider';
 import { CssBaseline, ThemeProvider } from '@mui/material';
@@ -12,7 +13,7 @@ import { theme } from '@/theme';
 // Create cache for SSR
 // const clientSideEmotionCache = createEmotionCache();
 
-const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Supreme Sprouts Ltd.',
@@ -53,7 +54,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body id="root" className={inter.className}>
+      <body id="root">
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
             <CssBaseline />

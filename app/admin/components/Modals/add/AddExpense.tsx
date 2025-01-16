@@ -133,15 +133,16 @@ export default function AddExpense({
   };
 
   const onChangeNewExpense = (field: string, value: any) => {
-    setNewExpense({
-      ...newExpense,
-      [field]: value,
-    });
-
     if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
       setNewExpense({
         ...newExpense,
+        [field]: value,
         status: TRANSACTION_STATUS.PAID,
+      });
+    } else {
+      setNewExpense({
+        ...newExpense,
+        [field]: value,
       });
     }
   };

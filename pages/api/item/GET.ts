@@ -15,7 +15,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        id: userId ? Number(userId) : Number(session.user.id),
+        id: userId ? Number(userId) : Number(session?.user?.id),
       },
     });
 

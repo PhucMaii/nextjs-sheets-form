@@ -1,4 +1,4 @@
-import { transporter } from './transporter';
+import { emailTransporter, yahooTransporter } from './transporter';
 import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
 import { UserType } from '@/app/utils/type';
@@ -16,7 +16,22 @@ const emailHandler = async (
   template: string,
 ) => {
   try {
-    await transporter.sendMail({
+    console.log(
+      { email, includesYahoo: email.includes('@yahoo.com') },
+      'EMAIL',
+    );
+    if (email.includes('@yahoo.ca') || email.includes('@yahoo.com')) {
+      await yahooTransporter.sendMail({
+        from: process.env.NODEMAILER_EMAIL,
+        to: email,
+        subject: subject,
+        text: title,
+        html: template,
+      });
+      return;
+    }
+
+    await emailTransporter.sendMail({
       from: process.env.NODEMAILER_EMAIL,
       to: email,
       subject: subject,
@@ -73,7 +88,7 @@ export const sendEmail = async (
     );
   }
 
-  if (user?.email) {
+  if (user?.email && !user.email.includes('INACTIVE')) {
     await emailHandler(
       user.email,
       'Order Supreme Sprouts',

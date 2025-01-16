@@ -115,6 +115,18 @@ export default function EditInventory({
   const handleUpdate = async () => {
     setIsLoading(true);
 
+    if (updatedVendorItems.length === 0) {
+      showNotification('error', 'Please add at least one vendor');
+      setIsLoading(false);
+      return;
+    }
+
+    if (updatedVendorItems.some((item: any) => item.units.length === 0)) {
+      showNotification('error', 'Please add at least one unit for each vendor');
+      setIsLoading(false);
+      return;
+    }
+
     const updatedAt = generateCurrentTime();
     try {
       const response = await axios.put(`${API_URL.ADMIN}/inventory`, {
@@ -321,7 +333,7 @@ export default function EditInventory({
       />
       <Button onClick={() => setOpen(true)}>Edit</Button>
       <Modal open={open} onClose={() => setOpen(false)}>
-        <BoxModal>
+        <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Inventory"
             buttonLabel="EDIT"

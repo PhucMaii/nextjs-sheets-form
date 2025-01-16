@@ -20,7 +20,7 @@ import axios from 'axios';
 import { Order } from '../orders/page';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import SelectDateRange from '../components/SelectDateRange';
+import SelectDateRange from '../components/Select/SelectDateRange';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -60,6 +60,7 @@ import useNotification from '@/hooks/useNotification';
 import RouteStatement from '../components/Modals/RouteStatement';
 import LoadingModal from '../components/Modals/LoadingModal';
 import EditEmail from '../components/Modals/edit/EditEmail';
+import { onSelectAllOrders, onSelectOrders } from '@/app/utils/orders';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
@@ -256,34 +257,34 @@ export default function ReportPage() {
     setStatementAnchor(null);
   };
 
-  const handleDeleteOrderUI = (deletedOrder: Order) => {
-    // update base order list
-    const newBaseOrderList = baseClientOrders.filter((order: Order) => {
-      return order.id !== deletedOrder.id;
-    });
+  // const handleDeleteOrderUI = (deletedOrder: Order) => {
+  //   // update base order list
+  //   const newBaseOrderList = baseClientOrders.filter((order: Order) => {
+  //     return order.id !== deletedOrder.id;
+  //   });
 
-    // update current displaying list
-    const newOrderList = clientOrders.filter((order: Order) => {
-      return order.id !== deletedOrder.id;
-    });
+  //   // update current displaying list
+  //   const newOrderList = clientOrders.filter((order: Order) => {
+  //     return order.id !== deletedOrder.id;
+  //   });
 
-    // update unpaid order list
-    if (
-      deletedOrder.status === ORDER_STATUS.INCOMPLETED ||
-      deletedOrder.status === ORDER_STATUS.DELIVERED
-    ) {
-      const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-        return (
-          order.status === ORDER_STATUS.INCOMPLETED ||
-          order.status === ORDER_STATUS.DELIVERED
-        );
-      });
-      setUnpaidOrders(newUnpaidOrders);
-    }
+  //   // update unpaid order list
+  //   if (
+  //     deletedOrder.status === ORDER_STATUS.INCOMPLETED ||
+  //     deletedOrder.status === ORDER_STATUS.DELIVERED
+  //   ) {
+  //     const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
+  //       return (
+  //         order.status === ORDER_STATUS.INCOMPLETED ||
+  //         order.status === ORDER_STATUS.DELIVERED
+  //       );
+  //     });
+  //     setUnpaidOrders(newUnpaidOrders);
+  //   }
 
-    setBaseClientOrders(newBaseOrderList);
-    setClientOrders(newOrderList);
-  };
+  //   setBaseClientOrders(newBaseOrderList);
+  //   setClientOrders(newOrderList);
+  // };
 
   const handleInvoicePrint = useReactToPrint({
     content: () => invoicePrint.current,
@@ -299,54 +300,39 @@ export default function ReportPage() {
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
     e.preventDefault();
-    const selectedOrder = selectedOrders.find((order: Order) => {
-      return order.id === targetOrder.id;
-    });
-
-    if (selectedOrder) {
-      const newSelectedOrders = selectedOrders.filter((order: Order) => {
-        return order.id !== targetOrder.id;
-      });
-      setSelectedOrders(newSelectedOrders);
-    } else {
-      setSelectedOrders([...selectedOrders, targetOrder]);
-    }
+    onSelectOrders(targetOrder, selectedOrders, setSelectedOrders);
   };
 
   const handleSelectAll = () => {
-    if (selectedOrders.length === clientOrders.length) {
-      setSelectedOrders([]);
-    } else {
-      setSelectedOrders(clientOrders);
-    }
+    onSelectAllOrders(selectedOrders, clientOrders, setSelectedOrders);
   };
 
-  const handleUpdateOrderUI = (updatedOrder: Order) => {
-    // update base order list
-    const newBaseOrderList = baseClientOrders.map((order: Order) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  // const handleUpdateOrderUI = (updatedOrder: Order) => {
+  //   // update base order list
+  //   const newBaseOrderList = baseClientOrders.map((order: Order) => {
+  //     if (order.id === updatedOrder.id) {
+  //       return updatedOrder;
+  //     }
+  //     return order;
+  //   });
 
-    // update current displaying order list
-    const newOrderList = clientOrders.map((order: Order) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  //   // update current displaying order list
+  //   const newOrderList = clientOrders.map((order: Order) => {
+  //     if (order.id === updatedOrder.id) {
+  //       return updatedOrder;
+  //     }
+  //     return order;
+  //   });
 
-    // update completed order list
-    const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-      return order.status === ORDER_STATUS.COMPLETED;
-    });
+  //   // update completed order list
+  //   const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
+  //     return order.status === ORDER_STATUS.COMPLETED;
+  //   });
 
-    setBaseClientOrders(newBaseOrderList);
-    setClientOrders(newOrderList);
-    setUnpaidOrders(newUnpaidOrders);
-  };
+  //   setBaseClientOrders(newBaseOrderList);
+  //   setClientOrders(newOrderList);
+  //   setUnpaidOrders(newUnpaidOrders);
+  // };
 
   const handleDeleteSelectedOrders = async () => {
     try {
@@ -381,7 +367,8 @@ export default function ReportPage() {
       console.log('Fail to mark all as completed: ', error);
       showNotification(
         'error',
-        'Something went wrong: ' + error.response.data.error,
+        'Something went wrong. Please try again later - ERROR: ' +
+          (error?.response?.data?.error || error),
       );
       setIsLoading(false);
     }
@@ -612,14 +599,14 @@ export default function ReportPage() {
           />
         </div>
       )}
-      {clientValue?.clientName === 'All Clients' && (
-        <div style={{ display: 'none' }}>
-          <MemoizedAllPrint
-            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-            ref={billPrint}
-          />
-        </div>
-      )}
+      {/* {clientValue?.clientName === 'All Clients' && ( */}
+      <div style={{ display: 'none' }}>
+        <MemoizedAllPrint
+          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+          ref={billPrint}
+        />
+      </div>
+      {/* )} */}
       {clientValue?.clientName === 'All Clients' && (
         <>
           <BillPrintModal
@@ -756,8 +743,8 @@ export default function ReportPage() {
             </Box>
           ) : clientOrders.length > 0 ? (
             <ClientOrdersTable
-              handleDeleteOrderUI={handleDeleteOrderUI}
-              handleUpdateOrderUI={handleUpdateOrderUI}
+              // handleDeleteOrderUI={handleDeleteOrderUI}
+              // handleUpdateOrderUI={handleUpdateOrderUI}
               clientOrders={clientOrders}
               showNotification={showNotification}
               selectedOrders={selectedOrders}

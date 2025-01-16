@@ -16,7 +16,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PendingIcon from '@mui/icons-material/Pending';
-import SelectDateRange from '../../admin/components/SelectDateRange';
 import { generateMonthRange } from '../../utils/time';
 import { Order } from '../../admin/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -36,6 +35,7 @@ import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import useSWR from 'swr';
 import ErrorComponent from '../../admin/components/ErrorComponent';
+import SelectDateRange from '@/app/admin/components/Select/SelectDateRange';
 
 const totalYPosition = 250;
 export default function HistoryPage() {

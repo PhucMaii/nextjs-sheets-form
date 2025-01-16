@@ -1,7 +1,7 @@
 import { Order } from '@/app/admin/orders/page';
 import { IItem } from '@/app/utils/type';
 import { Typography } from '@mui/material';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 export const useDiscount = (items: IItem[], order: Order) => {
   const discountPrice = useMemo(() => {

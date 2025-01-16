@@ -33,13 +33,14 @@ model User {
   role               String  @db.VarChar(255)
   createdAt          String?
 
-  category            Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory         SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  preference          UserPreference?  @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
+  category            Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory         SubCategory?      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  preference          UserPreference?   @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders              Orders[]
   scheduleOrders      ScheduleOrders[]
   routes              UserRoute[]
   unavailableDayRange DayRange[]
+  printStatements     ClientStatement[]
 }
 
 model Category {
@@ -110,12 +111,14 @@ model Orders {
   PST               Float?
   GST               Float?
   totalPrice        Float
+  type              String?
   updateTime        DateTime?
   isReplacement     Boolean?
   isVoid            Boolean?
   isAffectInventory Boolean?
   createdBy         String?
   updatedBy         String?
+  deliveredBy       String?
 
   user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderedItems[]
@@ -187,10 +190,10 @@ model CodBoard {
   note      String
   cash      Float
   status    String
-  driverId  Int
+  driverId  Int?
   orders    Orders[]
 
-  driver  Driver    @relation(fields: [driverId], references: [id])
+  driver  Driver?   @relation(fields: [driverId], references: [id])
   expense Expense[]
 }
 
@@ -332,4 +335,25 @@ model InventoryUnit {
 
   vendorItem   VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems OrderedItems[]
+}
+
+model Action {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String? @db.Text
+  date        String
+  createdAt   String
+  createdBy   String?
+}
+
+model ClientStatement {
+  id        Int     @id @default(autoincrement())
+  month     String
+  isPrinted Boolean
+  userId    Int
+  printedBy String
+  updatedBy String?
+  createdAt String
+
+  user User @relation(fields: [userId], references: [id])
 }

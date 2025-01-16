@@ -86,16 +86,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const formatUserOrders = userOrders.map((order: any) => {
-      // const formatItems = order.items.map((item: OrderedItems) => {
-      //   let totalPrevPrice = 0;
-
-      //   if (item?.isShowDiscount && item?.prevPrice) {
-      //     totalPrevPrice = item.prevPrice * item.quantity;
-      //   }
-
-      //   const totalPrice = item.price * item.quantity;
-      //   return { ...item, totalPrice, totalPrevPrice };
-      // });
       const formatItems = formatItemsWithTotalPrice(order.items);
 
       // ...user for printing, regular user for displaying in table

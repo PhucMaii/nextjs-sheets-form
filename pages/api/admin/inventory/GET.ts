@@ -1,3 +1,5 @@
+import { inventoryOrder } from '@/app/lib/constant';
+import { sortedItemKeys } from '@/app/utils/array';
 import { STOCK_STATUS } from '@/app/utils/enum';
 import { IInventoryItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
@@ -98,8 +100,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         new Map(sellingUnits.map((unit: any) => [unit.ratio, unit])).values(),
       );
 
-      console.log(sellingUnits, 'selling Units');
-
       return res.status(200).json({
         data: { ...formattedInventory, units: sellingUnits },
         message: 'Fetch Inventory Successfully',
@@ -130,8 +130,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const formattedInventory =
       formatInventoryWithTotalValueAndStatus(inventory);
 
+    const itemNames = formattedInventory.map((item: any) => item.name);
+
+    const sortedItems = sortedItemKeys(itemNames, inventoryOrder);
+
+    const sortedInventoryItem = [];
+    for (const item of sortedItems) {
+      const inventoryItem = formattedInventory.find(
+        (i: any) => i.name === item,
+      );
+      if (inventoryItem) {
+        sortedInventoryItem.push(inventoryItem);
+      }
+    }
+
     return res.status(200).json({
-      data: formattedInventory,
+      data: sortedInventoryItem,
       message: 'Fetch Inventory Successfully',
     });
   } catch (error: any) {

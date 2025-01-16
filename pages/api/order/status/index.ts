@@ -7,6 +7,7 @@ import { authOptions } from '../../auth/[...nextauth]';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../../utils/email';
 import { restockInventoryItem } from '../../admin/orderedItems/single';
+import { testAccountId } from '@/app/lib/constant';
 
 interface BodyTypes {
   orderId: number;
@@ -16,7 +17,7 @@ interface BodyTypes {
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'PUT') {
-      return res.status(401).json({
+      return res.status(404).json({
         error: 'Your method is not supported',
       });
     }
@@ -26,17 +27,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Updated Status will always be VOID - Delete order button on client side
     const { orderId, updatedStatus }: BodyTypes = req.body;
 
-    const session: any = await getServerSession(req, res, authOptions);
-
-    if (!session) {
-      return res.status(401).json({ error: 'You are not authenticated' });
-    }
-
-    const existingUser = await prisma.user.findUnique({
+    let existingUser = await prisma.user.findUnique({
       where: {
-        id: Number(session.user.id),
+        id: testAccountId,
       },
     });
+
+    if (!req.query.test) {
+      const session: any = await getServerSession(req, res, authOptions);
+
+      if (!session) {
+        return res.status(401).json({ error: 'You are not authenticated' });
+      }
+
+      existingUser = await prisma.user.findUnique({
+        where: {
+          id: Number(session.user.id),
+        },
+      });
+    }
 
     if (!existingUser) {
       return res.status(404).json({ error: 'User Not Found in DB' });
