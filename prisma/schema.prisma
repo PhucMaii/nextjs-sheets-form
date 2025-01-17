@@ -276,6 +276,9 @@ model ItemPreference {
   image        String
   description  String
   isBestSeller Boolean
+  price        Float?
+  quantity     Int?
+
   createdAt    String?
   createdBy    String?
 

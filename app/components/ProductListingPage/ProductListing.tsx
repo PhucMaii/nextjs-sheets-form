@@ -1,7 +1,8 @@
 import { generateImgUrl } from '@/app/lib/s3';
 import { IItemPreference } from '@/app/utils/type';
-import { Box, Typography } from '@mui/material'
-import { grey, orange } from '@mui/material/colors';
+import { landingPagePrimaryColor, landingPageSecondaryColor } from '@/constant/landingPage';
+import { Box, Button, Typography } from '@mui/material'
+import { green, orange } from '@mui/material/colors';
 import React from 'react';
 
 interface IProps {
@@ -13,9 +14,11 @@ export default function ProductListing({product}: IProps) {
     <Box
         display="flex"
         flexDirection="column"
-        justifyContent="center"
+        justifyContent="space-between"
+        // alignItems="center"
+        flexGrow={1}
         gap={1}
-        sx={{ width: 300, px: 6 }}
+        sx={{ height: '100%' }}
         position="relative"
     >
         <img
@@ -30,12 +33,37 @@ export default function ProductListing({product}: IProps) {
         {product?.isBestSeller && <Box position="absolute" sx={{backgroundColor: orange[800], color: 'white', p: 1, borderRadius: 2, top: -10, right: 45}}>
             <Typography>Best Seller 🔥</Typography>
         </Box>}
-        <Typography variant="h6" fontWeight="bold">
+        <Typography variant="h6" fontWeight="regular" sx={{color: green[800]}}>
           {product.inventoryItem.name}
         </Typography>
-        <Typography variant="body1" sx={{color: grey[600]}} fontWeight="normal">
+        {/* <TextField 
+            type="number"
+            variant="outlined"
+            size="small"
+            sx={{ 
+              maxWidth: '12ch' 
+            }}
+            /> */}
+            <div style={{flexGrow: 1}} />
+        <Typography variant="h5" fontWeight="bold" sx={{color: green[900]}}>$20</Typography>
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{
+            backgroundColor: landingPagePrimaryColor,
+            alignSelf: 'flex-end',
+            color: 'white',
+            borderRadius: 2,
+            ":hover": {
+              backgroundColor: landingPageSecondaryColor
+            }
+          }}
+        >
+          Add to cart
+        </Button>
+        {/* <Typography variant="body1" sx={{color: grey[600]}} fontWeight="normal">
           {product.description} 
-        </Typography>
+        </Typography> */}
     </Box>  
   )
 }
