@@ -8,8 +8,9 @@ import {
   CardActions,
   Button,
   AlertColor,
+  Box,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { grey, red } from '@mui/material/colors';
 import React from 'react';
 import EditItemPreference from '../../Modals/edit/EditItemPreference';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
@@ -74,12 +75,21 @@ export default function Product({ itemPreference, showNotification }: IProps) {
           title={itemPreference?.inventoryItem?.name}
         />
         <CardContent>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" fontWeight="regular" gutterBottom>
             {itemPreference.inventoryItem?.name}
           </Typography>
-          <Typography variant="body1" sx={{ color: grey[600] }}>
-            {itemPreference.description}
-          </Typography>
+          <Box display="flex" alignItems="flex-end" gap={1}>
+            <Typography variant="h5" sx={{mt: 2, color: itemPreference?.isShowDiscount && itemPreference?.prevPrice ? red[500] : 'black'}}>
+              ${itemPreference?.price?.toFixed(2) || 0}
+            </Typography>
+            {
+              itemPreference?.isShowDiscount && itemPreference?.prevPrice && (
+                <Typography variant="body1" sx={{textDecoration: 'line-through', color: grey[500]}}>
+                  ${itemPreference?.prevPrice?.toFixed(2) || 0}
+                </Typography>
+              )
+            }
+          </Box>
         </CardContent>
         <CardActions>
           <Button

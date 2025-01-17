@@ -2,7 +2,7 @@ import { generateImgUrl } from '@/app/lib/s3';
 import { IItemPreference } from '@/app/utils/type';
 import { landingPagePrimaryColor, landingPageSecondaryColor } from '@/constant/landingPage';
 import { Box, Button, Typography } from '@mui/material'
-import { green, orange } from '@mui/material/colors';
+import { green, orange, red } from '@mui/material/colors';
 import React from 'react';
 
 interface IProps {
@@ -45,7 +45,16 @@ export default function ProductListing({product}: IProps) {
             }}
             /> */}
             <div style={{flexGrow: 1}} />
-        <Typography variant="h5" fontWeight="bold" sx={{color: green[900]}}>$20</Typography>
+        <Box display="flex" alignItems="flex-end" gap={1}>
+          <Typography variant="h5" fontWeight="bold" sx={{color: product?.isShowDiscount && product?.prevPrice ? red[600] : green[900]}}>
+            ${product?.price?.toFixed(2) || 'N/A'}
+          </Typography>
+          {
+            product?.isShowDiscount && product?.prevPrice && (
+              <Typography variant="body1" sx={{color: green[900], textDecoration: 'line-through'}}>${product.prevPrice.toFixed(2)}</Typography>
+            )
+          }
+        </Box>
         <Button
           variant="contained"
           fullWidth

@@ -6,6 +6,9 @@ interface IBody {
   inventoryItemId: number;
   image: string;
   description: string;
+  price: number;
+  isShowDiscount?: boolean;
+  prevPrice?: number;
   isBestSeller: boolean;
   typeId: number;
 }
@@ -19,6 +22,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       inventoryItemId,
       image,
       description,
+      price,
+      isShowDiscount,
+      prevPrice,
       isBestSeller,
       typeId,
     }: IBody = req.body;
@@ -36,6 +42,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     // Check if inventoryItemid  exists in typeId already
     const existingInventoryItemAndType = await prisma.itemPreference.findFirst({
       where: {
+        id: {
+          not: id,
+        },
         typeId: typeId,
         inventoryItemId: inventoryItemId,
       },
@@ -55,6 +64,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         inventoryItemId: inventoryItemId,
         image: image,
         description: description,
+        price,
+        isShowDiscount: isShowDiscount,
+        prevPrice: prevPrice,
         isBestSeller: isBestSeller,
         typeId: typeId,
       },

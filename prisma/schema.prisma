@@ -272,15 +272,16 @@ model InventoryItem {
 }
 
 model ItemPreference {
-  id           Int     @id @default(autoincrement())
-  image        String
-  description  String
-  isBestSeller Boolean
-  price        Float?
-  quantity     Int?
+  id             Int      @id @default(autoincrement())
+  image          String
+  description    String
+  isBestSeller   Boolean
+  price          Float?
+  isShowDiscount Boolean?
+  prevPrice      Float?
 
-  createdAt    String?
-  createdBy    String?
+  createdAt String?
+  createdBy String?
 
   inventoryItemId Int @unique
   typeId          Int

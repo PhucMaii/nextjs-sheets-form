@@ -4,6 +4,7 @@ import {
   Box,
   Divider,
   FormControlLabel,
+  InputLabel,
   MenuItem,
   Modal,
   Select,
@@ -55,6 +56,24 @@ export default function EditItemPreference({
     }
   }, [itemPreference]);
 
+  useEffect(() => {
+    if (promptedItem.id !== updatedItem?.inventoryItemId) {
+      const itemPrice = promptedItem.vendorItem[0].unit.find(
+        (unit: any) => unit.ratio === 1
+      );
+
+      setUpdatedItem((prevState: any) => ({
+        ...prevState,
+        price: itemPrice.unitPrice * 2,
+      }));
+    } else {
+      setUpdatedItem((prevState: any) => ({
+        ...prevState,
+        price: itemPreference?.price,
+      }));
+    }
+  }, [promptedItem.id]);
+
   const handleUpdateItemPreference = async () => {
     setIsUpdating(true);
     try {
@@ -87,7 +106,7 @@ export default function EditItemPreference({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="scroll">
         <ModalHead
           heading="Edit Item Preference"
           buttonLabel="Save"
@@ -178,7 +197,54 @@ export default function EditItemPreference({
             renderInput={(params) => <TextField {...params} label="Item" />}
           />
 
-          <Typography>Description</Typography>
+          <InputLabel htmlFor="price">Price</InputLabel>
+            <TextField
+              id="price"
+              label="Price"
+              placeholder="Enter item price..."
+              type="number"
+              value={updatedItem?.price || 0}
+              onChange={(e) => {
+                setUpdatedItem((prevState: any) => ({
+                  ...prevState,
+                  price: +e.target.value,
+                }));
+              }}
+            />
+
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <InputLabel htmlFor="discount">Discount</InputLabel>
+            <FormControlLabel 
+              label="Show Discount"
+              control={
+                <Switch
+                  checked={updatedItem?.isShowDiscount || false}
+                  onChange={(e: any) =>
+                    setUpdatedItem((prevState: any) => ({
+                      ...prevState,
+                      isShowDiscount: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              labelPlacement='end'
+            />
+          </Box>
+          <TextField 
+            id="discount"
+            label="Previous price"
+            placeholder="Enter previous price..."
+            type="number"
+            value={updatedItem?.prevPrice || 0}
+            onChange={(e) => {
+              setUpdatedItem((prevState: any) => ({
+                ...prevState,
+                prevPrice: +e.target.value,
+              }));
+            }}
+          />
+
+          {/* <Typography>Description</Typography>
           <TextField
             label="Description"
             placeholder="Enter item description..."
@@ -191,7 +257,7 @@ export default function EditItemPreference({
                 description: e.target.value,
               }));
             }}
-          />
+          /> */}
 
           <Typography>Upload Image</Typography>
           {promptedItem?.image && (

@@ -89,8 +89,9 @@ export default function page() {
           gap={2}
           flexWrap={'wrap'}
         >
-          {type?.data.itemPreferences.map((item: any) => (
+          {type?.data.itemPreferences.map((item: any, index: number) => (
               <Product
+                key={index}
                 itemPreference={item}
                 showNotification={showNotification}
               />

@@ -7,6 +7,9 @@ interface IBody {
   inventoryItemId: number;
   image?: string;
   description: string;
+  price: number;
+  isShowDiscount?: boolean;
+  prevPrice?: number;
   isBestSeller: boolean;
   typeId: number;
 }
@@ -15,8 +18,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { inventoryItemId, image, description, isBestSeller, typeId }: IBody =
-      req.body;
+    const { 
+      inventoryItemId,
+      image,
+      description,
+      price,
+      isShowDiscount,
+      prevPrice,
+      isBestSeller, 
+      typeId 
+    }: IBody = req.body;
 
     const existingPreference = await prisma.itemPreference.findFirst({
       where: {
@@ -39,6 +50,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         image: image || '',
         description,
         isBestSeller,
+        price,
+        isShowDiscount,
+        prevPrice,
         typeId,
         createdAt,
         createdBy: `Admin - ${createdBy.clientName}`,

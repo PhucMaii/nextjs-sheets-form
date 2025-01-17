@@ -4,12 +4,13 @@ import {
   Box,
   Divider,
   FormControlLabel,
+  InputLabel,
   Modal,
   Switch,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -37,12 +38,26 @@ export default function AddItemIntoType({
     id: -1,
     name: '',
     image: '',
+    price: 0,
     description: '',
     isBestSeller: false,
     typeId,
   });
 
-  const handleAddItemIntoType = async () => {
+  useEffect(() => {
+    if (promptedItem.id > 0) {
+      const itemPrice = promptedItem.vendorItem[0].unit.find(
+        (unit: any) => unit.ratio === 1
+      );
+      
+      setPromptedItem((prevState: any) => ({
+        ...prevState,
+        price: itemPrice.unitPrice * 2 
+      }));
+    }
+  }, [promptedItem.id]);
+
+  const onAddItemIntoType = async () => {
     if (promptedItem.id === -1) {
       showNotification('error', 'Please select item');
       return;
@@ -50,7 +65,6 @@ export default function AddItemIntoType({
 
     setIsLoading(true);
     try {
-      console.log(promptedItem, 'promptedItem');
       const response = await axios.post(
         `${API_URL.ADMIN}/productTypes/item-preference`,
         {
@@ -83,7 +97,7 @@ export default function AddItemIntoType({
         <ModalHead
           heading="Add Item Into Type"
           buttonLabel="ADD"
-          onClick={handleAddItemIntoType}
+          onClick={onAddItemIntoType}
           buttonProps={{ loading: isLoading }}
           onClose={onClose}
         />
@@ -96,8 +110,8 @@ export default function AddItemIntoType({
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography>Select Item</Typography>
-            <FormControlLabel
+            <InputLabel>Select Item</InputLabel>
+            {/* <FormControlLabel
               label="Best Seller"
               control={
                 <Switch
@@ -110,7 +124,7 @@ export default function AddItemIntoType({
                   }
                 />
               }
-            />
+            /> */}
           </Box>
           <Autocomplete
             value={promptedItem}
@@ -152,8 +166,55 @@ export default function AddItemIntoType({
             renderInput={(params) => <TextField {...params} label="Item" />}
           />
 
-          <Typography>Description</Typography>
+          <InputLabel htmlFor="price">Price</InputLabel>
           <TextField
+            id="price"
+            label="Price"
+            placeholder="Enter item price..."
+            type="number"
+            value={promptedItem.price}
+            onChange={(e) => {
+              setPromptedItem((prevState: any) => ({
+                ...prevState,
+                price: +e.target.value,
+              }));
+            }}
+          />
+
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <InputLabel htmlFor="discount">Discount</InputLabel>
+            <FormControlLabel 
+              label="Show Discount"
+              control={
+                <Switch
+                  checked={promptedItem.isShowDiscount}
+                  onChange={(e: any) =>
+                    setPromptedItem((prevState: any) => ({
+                      ...prevState,
+                      isShowDiscount: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              labelPlacement='end'
+            />
+          </Box>
+          <TextField 
+            id="discount"
+            label="Previous price"
+            placeholder="Enter previous price..."
+            type="number"
+            value={promptedItem.prevPrice}
+            onChange={(e) => {
+              setPromptedItem((prevState: any) => ({
+                ...prevState,
+                prevPrice: +e.target.value,
+              }));
+            }}
+          />
+
+          {/* <Typography>Description</Typography> */}
+          {/* <TextField
             label="Description"
             placeholder="Enter item description..."
             multiline
@@ -165,7 +226,7 @@ export default function AddItemIntoType({
                 description: e.target.value,
               }));
             }}
-          />
+          /> */}
 
           <Typography>Upload Image</Typography>
           {promptedItem?.image && (
