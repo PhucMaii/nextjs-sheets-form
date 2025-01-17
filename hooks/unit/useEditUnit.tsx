@@ -13,6 +13,7 @@ import EditUnit from '@/app/admin/components/Modals/edit/EditUnit';
 import UnitRadio from '@/app/admin/components/Radio/UnitRadio';
 import AddIcon from '@mui/icons-material/Add';
 import { USER_ROLE } from '@/app/utils/enum';
+import ErrorComponent from '@/app/admin/components/ErrorComponent';
 
 const useEditUnit = (
   initialUnits: IInventoryUnit[] = [],
@@ -182,20 +183,25 @@ const useEditUnit = (
         <FormLabel id="unit">Units</FormLabel>
         <IconButton
           onClick={() => onChangeAddUnitBoolean('open', true)}
-          disabled={role === USER_ROLE.DRIVER}
+          disabled={units.length === 0 || role === USER_ROLE.DRIVER}
         >
           <AddIcon />
         </IconButton>
       </Box>
-      <UnitRadio
-        units={units}
-        onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
-        value={JSON.stringify(selectedUnit)}
-        removeUnit={removeUnit}
-        setEditUnit={setEditUnit}
-        isShowPrice={isShowPrice}
-        role={role}
-      />
+
+      {
+        units.length === 0 ? <ErrorComponent errorText='Please select an inventory item' /> : (
+          <UnitRadio
+            units={units}
+            onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
+            value={JSON.stringify(selectedUnit)}
+            removeUnit={removeUnit}
+            setEditUnit={setEditUnit}
+            isShowPrice={isShowPrice}
+            role={role}
+          />
+        )
+      }
     </FormControl>
   );
 

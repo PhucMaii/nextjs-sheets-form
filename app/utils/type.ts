@@ -30,6 +30,19 @@ export interface BSData {
   percentage: number;
 }
 
+export interface ICustomAmount {
+  price: number;
+  name: string;
+  quantity: number;
+  inventoryItemId?: number;
+  inventoryItem?: any;
+  inventoryUnit?: any;
+  inventoryUnitId?: number;
+  fifoId?: number;
+  units?: any[];
+  isCustomAmount: boolean;
+}
+
 export interface Notification {
   on: boolean;
   type: AlertColor;
@@ -131,6 +144,7 @@ export interface OrderedItems {
   inventoryItem?: any;
   inventoryUnitId?: number;
   inventoryUnit?: any;
+  isCustomAmount?: boolean;
 }
 
 export interface ScheduledOrder {

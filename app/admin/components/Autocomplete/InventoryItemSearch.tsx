@@ -1,79 +1,54 @@
-import { USER_ROLE } from '@/app/utils/enum';
-import { Autocomplete, createFilterOptions, TextField } from '@mui/material';
-import React from 'react';
-
-export const filter = createFilterOptions<any>();
+import { Autocomplete, TextField } from '@mui/material';
+import React, { Dispatch, SetStateAction } from 'react'
+import { filter } from './VendorItemSearch';
+import { IInventoryItem } from '@/app/utils/type';
 
 interface IProps {
-  promptedItem: any;
-  handleSelectPromptedItem: any;
-  role?: USER_ROLE;
-  displayItems: any[];
-  disabled?: boolean;
-  disabledItems?: any[];
-}
+    promptedItem: any;
+    setPromptedItem: Dispatch<SetStateAction<any>>;
+    displayItems: IInventoryItem[];
+}   
 
-export default function InventoryItemSearch({
-  promptedItem,
-  handleSelectPromptedItem,
-  role,
-  displayItems,
-  disabled,
-  disabledItems,
-}: IProps) {
+export default function InventoryItemSearch({promptedItem, setPromptedItem, displayItems}: IProps) {
   return (
     <Autocomplete
-      disabled={disabled}
-      value={promptedItem.name}
-      onChange={(event, newValue) => {
-        handleSelectPromptedItem(newValue);
-      }}
-      filterOptions={(options, params) => {
-        const filtered = filter(options, params);
+    value={promptedItem}
+    onChange={(event, newValue) => {
+      setPromptedItem((prevState: any) => ({
+        ...prevState,
+        ...newValue,
+      }));
+    }}
+    filterOptions={(options, params) => {
+      const filtered = filter(options, params);
+      return filtered;
+    }}
+    selectOnFocus
+    clearOnBlur
+    handleHomeEndKeys
+    id="free-solo-with-text-demo"
+    options={
+      [
+        { id: -1, name: '-- Choose an item --' },
+        ...(displayItems || []),
+      ] || []
+    }
+    getOptionLabel={(option) => {
+      // Regular option
+      return option?.name || '';
+    }}
+    renderOption={(props, option) => {
+      const { key, ...optionProps } = props;
 
-        const { inputValue } = params;
-        // Suggest the creation of a new value
-        const isExisting = options.some(
-          (option) => inputValue === option?.inventoryItem?.name,
-        );
-        if (role === USER_ROLE.ADMIN && inputValue !== '' && !isExisting) {
-          filtered.push({
-            inputValue,
-            title: `Add "${inputValue}"`,
-          });
-        }
-
-        return filtered;
-      }}
-      selectOnFocus
-      clearOnBlur
-      handleHomeEndKeys
-      id="free-solo-with-text-demo"
-      options={
-        [{ id: -1, name: '-- Choose an item --' }, ...(displayItems || [])] ||
-        []
-      }
-      getOptionLabel={(option) => {
-        // Check if the option has a custom title (for new item suggestion)
-        if (option.title) {
-          return option.title;
-        }
-        // Regular option
-        return option?.inventoryItem?.name || '';
-      }}
-      renderOption={(props, option) => {
-        const { key, ...optionProps } = props;
-
-        const isDisabled = disabledItems?.includes(option?.id);
-        return (
-          <li key={key} {...optionProps} aria-disabled={isDisabled}>
-            {option.title || option?.inventoryItem?.name}
-          </li>
-        );
-      }}
-      sx={{ width: '100%' }}
-      freeSolo={role === USER_ROLE.ADMIN}
-      renderInput={(params) => <TextField {...params} label="Item" />}
-    />
-  );
+      // const isDisabled = disabledItems?.includes(option?.id);
+      return (
+        <li key={key} {...optionProps} aria-disabled={option.id === -1}>
+          {option.name}
+        </li>
+      );
+    }}
+    sx={{ width: '100%' }}
+    renderInput={(params) => <TextField {...params} label="Item" />}
+  />
+  )
 }

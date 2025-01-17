@@ -90,6 +90,7 @@ model OrderedItems {
   prevPrice        Float?
   inventoryUnitId  Int?
   inventoryItemId  Int?
+  isCustomAmount   Boolean?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)

@@ -80,6 +80,7 @@ export interface Item extends IItem {
   unit?: any;
   totalPrice: number;
   totalPrevPrice?: number;
+  isCustomAmount?: boolean;
 }
 
 export interface Order {

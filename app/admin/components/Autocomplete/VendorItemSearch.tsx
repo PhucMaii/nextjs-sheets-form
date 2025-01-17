@@ -1,38 +1,30 @@
 import { USER_ROLE } from '@/app/utils/enum';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, createFilterOptions, TextField } from '@mui/material';
 import React from 'react';
-import { filter } from './VendorItemSearch';
+
+export const filter = createFilterOptions<any>();
 
 interface IProps {
-  value: any;
+  promptedItem: any;
   handleSelectPromptedItem: any;
   role?: USER_ROLE;
-  displayItems: string[];
+  displayItems: any[];
   disabled?: boolean;
+  disabledItems?: any[];
 }
 
-// const getNestedValue = (obj: any, path: string) => {
-//   console.log(obj, 'OBJ')
-//   const value = path.split('.').reduce((acc, key) => {
-//     console.log(acc, key);
-//     return acc[key];
-//   }, obj);
-
-//   return value
-// }
-
-export default function UnitSearch({
-  value,
+export default function VendorItemSearch({
+  promptedItem,
   handleSelectPromptedItem,
   role,
   displayItems,
-  // displayKey,
   disabled,
+  disabledItems,
 }: IProps) {
   return (
     <Autocomplete
       disabled={disabled}
-      value={value}
+      value={promptedItem.name}
       onChange={(event, newValue) => {
         handleSelectPromptedItem(newValue);
       }}
@@ -41,7 +33,9 @@ export default function UnitSearch({
 
         const { inputValue } = params;
         // Suggest the creation of a new value
-        const isExisting = options.some((option) => inputValue === option);
+        const isExisting = options.some(
+          (option) => inputValue === option?.inventoryItem?.name,
+        );
         if (role === USER_ROLE.ADMIN && inputValue !== '' && !isExisting) {
           filtered.push({
             inputValue,
@@ -55,25 +49,30 @@ export default function UnitSearch({
       clearOnBlur
       handleHomeEndKeys
       id="free-solo-with-text-demo"
-      options={displayItems}
+      options={
+        [{ id: -1, name: '-- Choose an item --' }, ...(displayItems || [])] ||
+        []
+      }
       getOptionLabel={(option) => {
         // Check if the option has a custom title (for new item suggestion)
         if (option.title) {
           return option.title;
         }
         // Regular option
-        return option || '';
+        return option?.inventoryItem?.name || '';
       }}
       renderOption={(props, option) => {
         const { key, ...optionProps } = props;
+
+        const isDisabled = disabledItems?.includes(option?.id);
         return (
-          <li key={key} {...optionProps}>
-            {option.title || option}
+          <li key={key} {...optionProps} aria-disabled={isDisabled}>
+            {option.title || option?.inventoryItem?.name}
           </li>
         );
       }}
       sx={{ width: '100%' }}
-      freeSolo
+      freeSolo={role === USER_ROLE.ADMIN}
       renderInput={(params) => <TextField {...params} label="Item" />}
     />
   );
