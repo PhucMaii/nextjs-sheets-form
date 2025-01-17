@@ -1,5 +1,5 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { PrismaClient, User } from '@prisma/client';
+import { Orders, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
@@ -237,18 +237,14 @@ export const createOrder = async (
   }
 };
 
-const createOrderedItems = async (order: any, items: any) => {
+export const createOrderedItems = async (order: Orders, items: any) => {
   const prisma = new PrismaClient();
 
   // STEP 1: Loop through each item
   const inventoryItems = await prisma.inventoryItem.findMany({
     include: {
       vendorItem: true,
-      fifo: {
-        // include: {
-        //   vendorItem: true,
-        // },
-      },
+      fifo: true,
     },
   });
 
@@ -266,13 +262,24 @@ const createOrderedItems = async (order: any, items: any) => {
 
     // console.log(item, 'item');
 
+    if (!targetedItem && item.isCustomAmount) {
+      newOrderedItems.push({
+        orderId: order.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        isCustomAmount: item.isCustomAmount,
+      });
+      continue;
+    }
+
     if (!targetedItem) {
       console.error('Conflict Inventory Item Not Found');
       continue;
     }
 
     // console.log({ targetedItem, item }, 'targetedItem');
-    // Check if vendor item has no batch
+    // CASE 1:Check if vendor item has no batch
     if (targetedItem.fifo.length === 0) {
       const newFifo = await prisma.fifo.create({
         data: {
@@ -280,7 +287,7 @@ const createOrderedItems = async (order: any, items: any) => {
           vendorItemId: targetedItem.vendorItem[0].id,
           quantity: isValidToCheckInventory ? -item.quantity : 0,
           createdAt: order.orderTime,
-          createdBy: order.createdBy,
+          createdBy: order?.createdBy || '',
         },
         include: {
           vendorItem: true,
@@ -307,8 +314,10 @@ const createOrderedItems = async (order: any, items: any) => {
         quantity: item.quantity,
         inventoryUnitId: item.inventoryUnitId,
         inventoryItemId: item.inventoryItemId,
+        isCustomAmount: item?.isCustomAmount || false,
       });
     } else {
+      // CASE 2: Check if vendor item has batch
       // STEP 2: Get and Sorted from latest date all FIFO from inventory item
       const itemFifo = targetedItem.fifo.map((fifo) => {
         const createdAt = fifo.createdAt.split(' ')[1];
@@ -396,6 +405,7 @@ const createOrderedItems = async (order: any, items: any) => {
           prevPrice: item?.prevPrice,
           inventoryUnitId: item.inventoryUnitId,
           inventoryItemId: item.inventoryItemId,
+          isCustomAmount: item?.isCustomAmount || false,
         });
       } else {
         newOrderedItems.push({
@@ -408,6 +418,7 @@ const createOrderedItems = async (order: any, items: any) => {
           prevPrice: item?.prevPrice,
           inventoryUnitId: item.inventoryUnitId,
           inventoryItemId: item.inventoryItemId,
+          isCustomAmount: item?.isCustomAmount || false,
         });
       }
     }
@@ -426,4 +437,6 @@ const createOrderedItems = async (order: any, items: any) => {
   await prisma.orderedItems.createMany({
     data: newOrderedItems,
   });
+
+  return newOrderedItems;
 };

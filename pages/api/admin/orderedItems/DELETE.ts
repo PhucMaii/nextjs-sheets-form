@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { restockInventoryItem } from './single';
 
 interface IQuery {
   id?: string;
@@ -27,6 +28,10 @@ export default async function DELETE(
           not: null,
         },
       },
+      include: {
+        fifo: true,
+        inventoryUnit: true,
+      }
     });
 
     if (!existingItem) {
@@ -63,6 +68,15 @@ export default async function DELETE(
       return res.status(400).json({
         error: 'Order Cannot Be Empty',
       });
+    }
+
+    if (existingItem.fifo && existingItem.inventoryUnit) {
+      await restockInventoryItem(
+        existingItem.orderId,
+        existingItem.fifo,
+        existingItem.inventoryUnit,
+        existingItem.quantity,
+      )
     }
 
     await prisma.orderedItems.delete({

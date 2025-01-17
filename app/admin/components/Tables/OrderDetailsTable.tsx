@@ -143,11 +143,11 @@ export default function OrderDetailsTable({
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
-                        <Typography>{item.name}</Typography>
+                        <Typography>{item?.isCustomAmount ? '(C)' : null} {item.name}</Typography>
                       </Box>
                     </>
                   ) : (
-                    <>{item.name}</>
+                    <>{item?.isCustomAmount ? '(C)' : null} {item.name}</>
                   )}
                 </TableCell>
                 <TableCell>{item.quantity}</TableCell>
@@ -182,7 +182,7 @@ export default function OrderDetailsTable({
                       >
                         <EditIcon />
                       </IconButton>
-                      {!item?.inventoryItemId && showNotification && (
+                      {(item?.isCustomAmount || !item?.inventoryItemId) && showNotification && (
                         <IconButton
                           color="error"
                           disabled={

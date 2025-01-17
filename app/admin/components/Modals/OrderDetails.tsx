@@ -21,8 +21,7 @@ import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
 import AddCustomAmount from './add/AddCustomAmount';
-import axios from 'axios';
-import { API_URL, TYPE, USER_ROLE } from '@/app/utils/enum';
+import { TYPE, USER_ROLE } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -62,34 +61,36 @@ export default function OrderDetails({
     return quantity;
   }, [order]);
 
-  const handleAddCustomAmount = async (customAmount: any) => {
-    try {
-      const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
-        orderId: order.id,
-        customAmount,
-      });
+  // const handleAddCustomAmount = async (customAmount: any) => {
+  //   try {
+  //     const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
+  //       orderId: order.id,
+  //       customAmount,
+  //     });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
 
-      setItems((prevState: any) => {
-        return [...prevState, response.data.data];
-      });
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification('error', error?.response?.data?.error);
-    }
-  };
+  //     setItems((prevState: any) => {
+  //       return [...prevState, response.data.data];
+  //     });
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('Internal Server Error: ', error);
+  //     showNotification('error', error?.response?.data?.error);
+  //   }
+  // };
 
   return (
     <>
       <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
-        addCustomAmount={handleAddCustomAmount}
+        // addCustomAmount={handleAddCustomAmount}
+        onUpdateUI={(data: any) => setItems((prevState: any) => [...prevState, data])}
+        orderId={order.id}
         showNotification={showNotification}
       />
       <div style={{ display: 'none' }}>

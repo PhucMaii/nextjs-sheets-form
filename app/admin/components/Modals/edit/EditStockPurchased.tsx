@@ -28,7 +28,7 @@ import useSelectDate from '@/hooks/useSelectDate';
 import { generateCurrentTime } from '@/app/utils/time';
 import axios from 'axios';
 import { compareTwoArrays } from '@/app/utils/array';
-import InventoryItemSearch from '../../Autocomplete/InventoryItemSearch';
+import VendorItemSearch from '../../Autocomplete/VendorItemSearch';
 import AddIcon from '@mui/icons-material/Add';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import EditUnit from './EditUnit';
@@ -621,7 +621,7 @@ const EditStockPurchased = ({
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <InventoryItemSearch
+                <VendorItemSearch
                   promptedItem={promptedItem}
                   handleSelectPromptedItem={selectPromptedItem}
                   role={USER_ROLE.ADMIN}

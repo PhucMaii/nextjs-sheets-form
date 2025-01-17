@@ -154,30 +154,30 @@ const EditReportOrder = ({
     }
   };
 
-  const handleAddCustomAmount = async (customAmount: any) => {
-    try {
-      const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
-        orderId: order.id,
-        customAmount,
-      });
+  // const handleAddCustomAmount = async (customAmount: any) => {
+  //   try {
+  //     const response = await axios.post(`${API_URL.ADMIN}/custom-amount`, {
+  //       orderId: order.id,
+  //       customAmount,
+  //     });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
 
-      setItemList((prevState: any) => {
-        return [...prevState, response.data.data];
-      });
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      showNotification(
-        'error',
-        'Fail to update item: ' + error?.response?.data?.error,
-      );
-    }
-  };
+  //     setItemList((prevState: any) => {
+  //       return [...prevState, response.data.data];
+  //     });
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //     showNotification(
+  //       'error',
+  //       'Fail to update item: ' + error?.response?.data?.error,
+  //     );
+  //   }
+  // };
 
   const handleDeleteCustomAmount = async (item: any) => {
     try {
@@ -288,7 +288,9 @@ const EditReportOrder = ({
       <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
-        addCustomAmount={handleAddCustomAmount}
+        // addCustomAmount={handleAddCustomAmount}
+        onUpdateUI={(customAmount: any) => setItemList((prevState: any) => [...prevState, customAmount])}
+        orderId={order.id}
         showNotification={showNotification}
       />
       <AddVendor
@@ -415,7 +417,7 @@ const EditReportOrder = ({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          {!item?.inventoryItemId ? (
+                          {(item?.isCustomAmount || !item?.inventoryItemId) ? (
                             <IconButton
                               onClick={() =>
                                 setDeleteItemProps({

@@ -48,6 +48,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         name: customAmount.name,
         price: customAmount.price,
         quantity: customAmount.quantity,
+        isCustomAmount: true,
       },
     });
 

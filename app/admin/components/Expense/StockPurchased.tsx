@@ -23,7 +23,7 @@ import AddVendor from '../Modals/add/AddVendor';
 import { gstRate, mainPaymentMethodId, pstRate } from '@/app/lib/constant';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
-import InventoryItemSearch from '../Autocomplete/InventoryItemSearch';
+import VendorItemSearch from '../Autocomplete/VendorItemSearch';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useEditUnit from '@/hooks/unit/useEditUnit';
@@ -522,7 +522,7 @@ export default function StockPurchased({
             </FormControl>
           </Grid>
           <Grid item xs={12}>
-            <InventoryItemSearch
+            <VendorItemSearch
               promptedItem={promptedItem}
               handleSelectPromptedItem={selectPromptedItem}
               role={role}

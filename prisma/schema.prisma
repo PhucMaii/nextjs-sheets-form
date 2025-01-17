@@ -90,6 +90,7 @@ model OrderedItems {
   prevPrice        Float?
   inventoryUnitId  Int?
   inventoryItemId  Int?
+  isCustomAmount   Boolean?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -272,12 +273,16 @@ model InventoryItem {
 }
 
 model ItemPreference {
-  id           Int     @id @default(autoincrement())
-  image        String
-  description  String
-  isBestSeller Boolean
-  createdAt    String?
-  createdBy    String?
+  id             Int      @id @default(autoincrement())
+  image          String
+  description    String
+  isBestSeller   Boolean
+  price          Float?
+  isShowDiscount Boolean?
+  prevPrice      Float?
+
+  createdAt String?
+  createdBy String?
 
   inventoryItemId Int @unique
   typeId          Int
