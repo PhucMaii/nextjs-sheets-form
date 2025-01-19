@@ -20,7 +20,12 @@ export default async function handler(
     const { name, email, contactNumber, deliveryAddress }: IBody = req.body;
 
     // Send Email to Admin
-    const template = signUpRequest({ name, email, contactNumber, deliveryAddress });
+    const template = signUpRequest({
+      name,
+      email,
+      contactNumber,
+      deliveryAddress,
+    });
     await emailHandler(
       'maithienphuc0102@gmail.com',
       'New Client Sign Up Request',
@@ -28,7 +33,9 @@ export default async function handler(
       template,
     );
 
-    return res.status(200).json({ message: 'Your Request has been sent successfully' });
+    return res
+      .status(200)
+      .json({ message: 'Your Request has been sent successfully' });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: 'Internal Server Error' });

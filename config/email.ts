@@ -109,7 +109,12 @@ export const generateOrderTemplate = (
     `;
 };
 
-export const signUpRequest = (newClient: {name: string, email: string, contactNumber: string, deliveryAddress: string}) => {
+export const signUpRequest = (newClient: {
+  name: string;
+  email: string;
+  contactNumber: string;
+  deliveryAddress: string;
+}) => {
   return `
     <div>
       <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
@@ -129,5 +134,5 @@ export const signUpRequest = (newClient: {name: string, email: string, contactNu
         <h4 style="font-weight: 300;">${newClient.deliveryAddress}</h4>
       </div>
     </div>
-  `
-}
+  `;
+};

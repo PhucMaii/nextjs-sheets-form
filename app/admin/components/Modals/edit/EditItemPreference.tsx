@@ -59,7 +59,7 @@ export default function EditItemPreference({
   useEffect(() => {
     if (promptedItem.id !== updatedItem?.inventoryItemId) {
       const itemPrice = promptedItem.vendorItem[0].unit.find(
-        (unit: any) => unit.ratio === 1
+        (unit: any) => unit.ratio === 1,
       );
 
       setUpdatedItem((prevState: any) => ({
@@ -198,23 +198,27 @@ export default function EditItemPreference({
           />
 
           <InputLabel htmlFor="price">Price</InputLabel>
-            <TextField
-              id="price"
-              label="Price"
-              placeholder="Enter item price..."
-              type="number"
-              value={updatedItem?.price || 0}
-              onChange={(e) => {
-                setUpdatedItem((prevState: any) => ({
-                  ...prevState,
-                  price: +e.target.value,
-                }));
-              }}
-            />
+          <TextField
+            id="price"
+            label="Price"
+            placeholder="Enter item price..."
+            type="number"
+            value={updatedItem?.price || 0}
+            onChange={(e) => {
+              setUpdatedItem((prevState: any) => ({
+                ...prevState,
+                price: +e.target.value,
+              }));
+            }}
+          />
 
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <InputLabel htmlFor="discount">Discount</InputLabel>
-            <FormControlLabel 
+            <FormControlLabel
               label="Show Discount"
               control={
                 <Switch
@@ -227,10 +231,10 @@ export default function EditItemPreference({
                   }
                 />
               }
-              labelPlacement='end'
+              labelPlacement="end"
             />
           </Box>
-          <TextField 
+          <TextField
             id="discount"
             label="Previous price"
             placeholder="Enter previous price..."

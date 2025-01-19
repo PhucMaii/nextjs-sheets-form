@@ -310,7 +310,7 @@ export default function ItemPage() {
 
   return (
     <Sidebar noMargin>
-      <AddCategory 
+      <AddCategory
         showNotification={showNotification}
         mutateCategories={mutateCategories}
         open={isOpenAddCategory}

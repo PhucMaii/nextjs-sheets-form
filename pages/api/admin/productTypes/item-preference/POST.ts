@@ -18,15 +18,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { 
+    const {
       inventoryItemId,
       image,
       description,
       price,
       isShowDiscount,
       prevPrice,
-      isBestSeller, 
-      typeId 
+      isBestSeller,
+      typeId,
     }: IBody = req.body;
 
     const existingPreference = await prisma.itemPreference.findFirst({

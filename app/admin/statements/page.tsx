@@ -112,7 +112,7 @@ export default function StatementsPage() {
   useEffect(() => {
     if (routes) {
       setSelectedRouteId(Number(Object.keys(routes?.formattedClientOrders)[0]));
-    } 
+    }
   }, [selectedDay, selectedMonth]);
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function StatementsPage() {
     try {
       const clients =
         selectedClients.length > 0 ? selectedClients : displayClients;
-      
+
       if (clients.length === 0) {
         showNotification('success', 'No clients need to be cleared');
         return;
@@ -283,10 +283,21 @@ export default function StatementsPage() {
             </Typography>
           </Box>
           <Box display="flex" justifyContent="flex-end" gap={1}>
-            <Button onClick={() => setIsOpenConfimModal(true)} disabled={isLoading || selectedRouteId === -1}>
+            <Button
+              onClick={() => setIsOpenConfimModal(true)}
+              disabled={isLoading || selectedRouteId === -1}
+            >
               Clear
             </Button>
-            <Button variant="outlined" onClick={handlePrintInvoice} disabled={isLoading || selectedClients.length === 0 || selectedRouteId === -1}>
+            <Button
+              variant="outlined"
+              onClick={handlePrintInvoice}
+              disabled={
+                isLoading ||
+                selectedClients.length === 0 ||
+                selectedRouteId === -1
+              }
+            >
               <Box display="flex" gap={1}>
                 <PrintIcon />
                 <Typography>

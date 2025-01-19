@@ -95,7 +95,7 @@ export default function EditClientStatement({
               </Typography>
             </Grid>
             <Grid item xs={12} md={4} textAlign="right">
-              <StatusActionDropdown 
+              <StatusActionDropdown
                 selectedOrders={selectedOrders}
                 setIsLoading={setIsLoading}
                 showNotification={showNotification}
@@ -106,7 +106,7 @@ export default function EditClientStatement({
                     disabled: selectedOrders.length === 0,
                     icon: PrintIcon,
                     color: infoColor,
-                  }
+                  },
                 ]}
               />
             </Grid>

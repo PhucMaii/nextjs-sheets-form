@@ -12,12 +12,15 @@ import { green, orange } from '@mui/material/colors';
 import SearchIcon from '@mui/icons-material/Search';
 import { landingPageSecondaryColor } from '@/constant/landingPage';
 
-interface IProps{
+interface IProps {
   searchKeywords: string;
-  setSearchKeywords: Dispatch<SetStateAction<string>>
+  setSearchKeywords: Dispatch<SetStateAction<string>>;
 }
 
-export default function ProductHeader({searchKeywords, setSearchKeywords}: IProps) {
+export default function ProductHeader({
+  searchKeywords,
+  setSearchKeywords,
+}: IProps) {
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   return (
@@ -39,7 +42,13 @@ export default function ProductHeader({searchKeywords, setSearchKeywords}: IProp
         Selection Today!
       </Typography>
 
-      <Box display="flex" flexDirection={smDown ? 'column' : 'row'} alignItems="center" gap={2} px={smDown ? 1 : 6}>
+      <Box
+        display="flex"
+        flexDirection={smDown ? 'column' : 'row'}
+        alignItems="center"
+        gap={2}
+        px={smDown ? 1 : 6}
+      >
         <FormControl fullWidth>
           <OutlinedInput
             placeholder="Search items you like..."

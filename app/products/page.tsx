@@ -1,6 +1,19 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Divider, FormControl, Grid, InputAdornment, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import Navbar from '../components/LandingPage/Navbar';
 import { SWRFetchData } from '../utils/db';
 import { API_URL } from '../utils/enum';
@@ -12,36 +25,37 @@ import ProductListing from '../components/ProductListingPage/ProductListing';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../admin/components/ErrorComponent';
 import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
-// import NavbarWrapper from '../lib/NavbarWrapper';
+import { useSearchParams } from 'next/navigation';
 
 export default function ProductPage() {
-  // const [bestSellerItems, setBestSellerItems] = useState<IItemPreference[]>([]);
+  const searchParams = useSearchParams();
+  const queryParams = searchParams?.get('q');
+
   const [displayItems, setDisplayItems] = useState<IItemPreference[]>([]);
   const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
-  const [selectedType, setSelectedType] = useState<
-    IProductType | any
-  >({ id: 0, name: 'All' });
-  const [sortedBy, setSortedBy] = useState<string>('name');
+  const [selectedType, setSelectedType] = useState<IProductType | any>({
+    id: 0,
+    name: 'All',
+  });
+  const [sortedBy, setSortedBy] = useState<string>('featured');
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-  const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`)
+  const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`);
   const [types] = SWRFetchData(`${API_URL.PUBLIC}/types`);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    if (selectedType?.id === 0) {
-      // const bestSeller = allItemPreferences?.data?.filter(
-      //   (item: IItemPreference) => item.isBestSeller
-      // );
-      const nonBestSeller = allItemPreferences?.data?.filter(
-        (item: IItemPreference) => !item.isBestSeller
-      );
+    if (queryParams) {
+      setSearchKeywords(queryParams);
+    }
+  }, [queryParams]);
 
-      // setBestSellerItems(bestSeller);
-      setDisplayItems(nonBestSeller);
+  useEffect(() => {
+    if (selectedType?.id === 0) {
+      setDisplayItems(allItemPreferences?.data);
     } else {
       // setBestSellerItems([]);
       setDisplayItems(selectedType.itemPreferences);
@@ -50,47 +64,111 @@ export default function ProductPage() {
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newDisplayItems = (selectedType?.id === 0 ? allItemPreferences?.data : selectedType?.itemPreferences)?.filter(
-        (item: IItemPreference) => {
-          return (
-            item.inventoryItem.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) || 
-            item.description.toLowerCase().includes(debouncedKeywords.toLowerCase())
-          )}
-          );
-      // const bestSeller = newDisplayItems?.filter(
-      //   (item: IItemPreference) => item.isBestSeller
-      // )
-      const nonBestSeller = newDisplayItems?.filter(
-        (item: IItemPreference) => !item.isBestSeller
-      )
-      // setBestSellerItems(bestSeller);
-      setDisplayItems(nonBestSeller);
+      const newDisplayItems = (
+        selectedType?.id === 0
+          ? allItemPreferences?.data
+          : selectedType?.itemPreferences
+      )?.filter((item: IItemPreference) => {
+        return (
+          item.inventoryItem.name
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase()) ||
+          item.description
+            .toLowerCase()
+            .includes(debouncedKeywords.toLowerCase())
+        );
+      });
+      setDisplayItems(newDisplayItems);
     } else {
       if (selectedType?.id === 0) {
-        // const bestSeller = allItemPreferences?.data?.filter(
-        //   (item: IItemPreference) => item.isBestSeller
-        // )
-        const nonBestSeller = allItemPreferences?.data?.filter(
-          (item: IItemPreference) => !item.isBestSeller
-        )
-        // setBestSellerItems(bestSeller);
-        setDisplayItems(nonBestSeller);
+        setDisplayItems(allItemPreferences?.data);
       } else {
-        // setBestSellerItems([]);
         setDisplayItems(selectedType?.itemPreferences);
       }
     }
-    
-    }, [debouncedKeywords]);
+  }, [debouncedKeywords]);
 
+  useEffect(() => {
+    if (allItemPreferences) {
+      const items = selectedType.name === 'All' ? [...allItemPreferences.data] : [...selectedType.itemPreferences];
+      if (sortedBy === 'best-sellers') {
+        filterBestSellerItems(items);
+      } else if (sortedBy === 'a-z' || sortedBy === 'z-a') {
+        sortItemsAlphabetically(items);
+      } else if (sortedBy === 'price-asc' || sortedBy === 'price-desc') {
+        sortByPrice(items);
+      } else {
+        setDisplayItems(items);
+      }
+    }
+  }, [sortedBy, allItemPreferences, selectedType]);
   
+  const filterBestSellerItems = (items: IItemPreference[]) => {
+    if (!allItemPreferences) {
+      setDisplayItems([]);
+      return;
+    };
+
+    const bestSeller = items.filter(
+      (item: IItemPreference) => item.isBestSeller,
+    );
+
+    const nonBestSeller = items.filter(
+      (item: IItemPreference) => !item.isBestSeller,
+    );
+
+    setDisplayItems([...bestSeller, ...nonBestSeller]); 
+  }
+
+  const sortItemsAlphabetically = (items: IItemPreference[]) => {
+    if (!allItemPreferences) {
+      setDisplayItems([]);
+      return;
+    }
+
+    if (sortedBy === 'a-z') {
+      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
+        itemA.inventoryItem.name.localeCompare(itemB.inventoryItem.name),
+      );
+      setDisplayItems(sortedItems);
+    } else if (sortedBy === 'z-a') {
+      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
+        itemB.inventoryItem.name.localeCompare(itemA.inventoryItem.name),
+      );
+      setDisplayItems(sortedItems);
+    } else {
+      setDisplayItems([])
+    }
+  };
+
+  const sortByPrice = (items: IItemPreference[]) => {
+    if (!allItemPreferences) {
+      setDisplayItems([]);
+      return;
+    }
+
+    if (sortedBy === 'price-asc') {
+      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
+        itemA.price - itemB.price,
+      );
+      setDisplayItems(sortedItems);  
+    } else if (sortedBy === 'price-desc') {
+      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
+        itemB.price - itemA.price,
+      );
+      setDisplayItems(sortedItems);
+    } else {
+      setDisplayItems([])
+    }
+  }
+
   const renderProductTypes = () => {
     return (
       <Box
         display="flex"
         alignItems="center"
         gap={2}
-        mt="80px"
+        mt="150px"
         sx={{ overflowX: 'auto', whiteSpace: 'nowrap', px: 6, py: 2 }}
       >
         <Button
@@ -111,13 +189,20 @@ export default function ProductPage() {
             },
           }}
         >
-          <Box display="flex" flexDirection={smDown ? 'column' : 'row'} alignItems="center" gap={1} >
+          <Box
+            display="flex"
+            flexDirection={smDown ? 'column' : 'row'}
+            alignItems="center"
+            gap={1}
+          >
             <LucideIcons.ShoppingBasketIcon />
             <Typography>All</Typography>
           </Box>
         </Button>
         {types?.data?.map((type: any, index: number) => {
-          const IconComponent: any = type?.icon ? LucideIcons[type.icon as keyof typeof LucideIcons] : () => <></>;
+          const IconComponent: any = type?.icon
+            ? LucideIcons[type.icon as keyof typeof LucideIcons]
+            : () => <></>;
           return (
             <Button
               key={index}
@@ -143,7 +228,12 @@ export default function ProductPage() {
                 },
               }}
             >
-              <Box display="flex" flexDirection={smDown ? 'column' : 'row'} alignItems="center" gap={1}>
+              <Box
+                display="flex"
+                flexDirection={smDown ? 'column' : 'row'}
+                alignItems="center"
+                gap={1}
+              >
                 <IconComponent />
                 <Typography>{type.name}</Typography>
               </Box>
@@ -151,31 +241,36 @@ export default function ProductPage() {
           );
         })}
       </Box>
-    )
-  }
+    );
+  };
 
   const renderSortAndSearch = () => {
     return (
-      <Box 
-        display="flex" 
-        flexWrap="wrap" 
-        alignItems="center" 
-        justifyContent="space-between" 
+      <Box
+        display="flex"
+        flexWrap="wrap"
+        alignItems="center"
+        justifyContent="space-between"
         px={6}
         mt={2}
       >
-        <Typography variant="h3" fontWeight="bold" sx={{color: green[800]}}>
-          ALL
+        <Typography variant="h3" fontWeight="bold" sx={{ color: green[800] }}>
+          {selectedType?.name}
         </Typography>
-        <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
-          <TextField 
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="flex-end"
+          gap={1}
+        >
+          <TextField
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}
             placeholder="Search"
             size="small"
             sx={{
-              maxWidth: '500px', 
-              backgroundColor: grey[200], 
+              maxWidth: '500px',
+              backgroundColor: grey[200],
               borderRadius: 2,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2, // Applies border radius to the input's outline
@@ -190,7 +285,7 @@ export default function ProductPage() {
             }}
           />
 
-          <FormControl sx={{width: 'fit-content'}}>
+          <FormControl sx={{ width: 'fit-content' }}>
             <InputLabel id="sort-by">Sort by</InputLabel>
             <Select
               labelId="sort-by"
@@ -198,44 +293,64 @@ export default function ProductPage() {
               label="Sort by"
               onChange={(e) => setSortedBy(e.target.value)}
               size="small"
-              sx={{width: 'fit-content'}}
+              sx={{ width: 'fit-content' }}
             >
-              <MenuItem value="price">Price</MenuItem>
-              <MenuItem value="name">Name</MenuItem>
+              <MenuItem value="featured">Featured</MenuItem>
+              <MenuItem value="best-sellers">Best sellers</MenuItem>
+              <MenuItem value="a-z">Alphabetically: A-Z</MenuItem>
+              <MenuItem value="z-a">Alphabetically: Z-A</MenuItem>
+              <MenuItem value="price-asc">Price: Low to High</MenuItem>
+              <MenuItem value="price-desc">Price: High to Low</MenuItem>
             </Select>
           </FormControl>
         </Box>
       </Box>
-    )
-  }
+    );
+  };
 
   return (
     <>
-    <RequestToJoinModal open={isOpenSignUp} onClose={() => setIsOpenSignUp(false)} />
-    <Box sx={{pb: 2, backgroundColor: 'white', height: '100%'}}>
-      <Navbar setIsOpenSignUp={setIsOpenSignUp} />
-      {renderProductTypes()}
+      <RequestToJoinModal
+        open={isOpenSignUp}
+        onClose={() => setIsOpenSignUp(false)}
+      />
+      <Box sx={{ pb: 2, backgroundColor: 'white', maxHeight: '100vh', overflowY: 'auto' }}>
+        <Navbar setIsOpenSignUp={setIsOpenSignUp} />
+        {renderProductTypes()}
 
-      <Divider sx={{my: 1}} />
+        <Divider sx={{ my: 1 }} />
 
-      {renderSortAndSearch()}
-      {/* Product Display */}
-      <Grid container columnSpacing={2} rowGap={4} width="100%" sx={{my: 2, px: 4}}>
-        {
-          displayItems?.length > 0 ? displayItems?.map((product: IItemPreference, index: number) => {
-            return (
-              <Grid item xs={6} sm={4} md={2} key={index} sx={{height: '370px'}}>
-                <ProductListing product={product} />
-              </Grid>
-            );
-          }) : (
+        {renderSortAndSearch()}
+        {/* Product Display */}
+        <Grid
+          container
+          columnSpacing={2}
+          rowGap={4}
+          width="100%"
+          sx={{ my: 2, px: 4 }}
+        >
+          {displayItems?.length > 0 ? (
+            displayItems?.map((product: IItemPreference, index: number) => {
+              return (
+                <Grid
+                  item
+                  xs={6}
+                  sm={4}
+                  md={2}
+                  key={index}
+                  sx={{ height: '370px' }}
+                >
+                  <ProductListing product={product} />
+                </Grid>
+              );
+            })
+          ) : (
             <Grid item xs={12}>
-              <ErrorComponent errorText='No Product Available' />
+              <ErrorComponent errorText="No Product Available" />
             </Grid>
-          )
-        }
-      </Grid>
-    </Box>
+          )}
+        </Grid>
+      </Box>
     </>
   );
 }

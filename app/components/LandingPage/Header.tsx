@@ -2,7 +2,15 @@ import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import { Box, Button, Grid, InputAdornment, TextField, Typography, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Button,
+  Grid,
+  InputAdornment,
+  TextField,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React from 'react';
 
@@ -11,7 +19,7 @@ interface IProps {
   sx?: any;
 }
 
-export default function Header({setIsOpenSignUp, sx}: IProps) {
+export default function Header({ setIsOpenSignUp, sx }: IProps) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   return (
@@ -22,7 +30,7 @@ export default function Header({setIsOpenSignUp, sx}: IProps) {
       px={4}
       sx={{
         position: 'relative', // Ensure the container is a positioned element
-        overflow: 'hidden',   // Prevent the pseudo-element from overflowing
+        overflow: 'hidden', // Prevent the pseudo-element from overflowing
         height: '90vh',
         ...sx,
         ':before': {
@@ -32,12 +40,13 @@ export default function Header({setIsOpenSignUp, sx}: IProps) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: 'url("/images/landing/header/beansprout_background.png")',
+          backgroundImage:
+            'url("/images/landing/header/beansprout_background.png")',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
           filter: 'brightness(50%)',
-          zIndex: -1,   // Ensure the pseudo-element is behind the content
+          zIndex: -1, // Ensure the pseudo-element is behind the content
         },
       }}
     >
@@ -46,15 +55,15 @@ export default function Header({setIsOpenSignUp, sx}: IProps) {
           <Typography
             variant="h2"
             fontWeight="bold"
-            textAlign='center'
-            sx={{color: 'white'}}
+            textAlign="center"
+            sx={{ color: 'white' }}
           >
             Freshness You Can Trust <br /> Prices You'll Love
           </Typography>
           <Typography
             variant="h5"
             fontWeight="normal"
-            textAlign='center'
+            textAlign="center"
             sx={{ color: grey[100], lineHeight: 1.5 }}
           >
             Delivering farm-fresh produce with unmatched quality at competitive
@@ -63,7 +72,7 @@ export default function Header({setIsOpenSignUp, sx}: IProps) {
           <Box
             display="flex"
             alignItems="center"
-            justifyContent='center'
+            justifyContent="center"
             gap={2}
           >
             <Button
@@ -88,7 +97,8 @@ export default function Header({setIsOpenSignUp, sx}: IProps) {
                 color: landingPagePrimaryColor,
                 px: 3,
                 py: 2,
-                backgroundColor: 'rgba(0, 0, 0, 0.3)' /* Semi-transparent black (50% opacity) */,
+                backgroundColor:
+                  'rgba(0, 0, 0, 0.3)' /* Semi-transparent black (50% opacity) */,
                 ':hover': {
                   backgroundColor: landingPageSecondaryColor,
                   color: 'white',
@@ -100,38 +110,40 @@ export default function Header({setIsOpenSignUp, sx}: IProps) {
           </Box>
 
           <Box display="flex" justifyContent="center">
-          <TextField
-            variant="outlined"
-            placeholder="What are you looking for today?"
-            size="small"
-            sx={{
-              borderRadius: 2,
-              backgroundColor: grey[300],
-              width: mdDown ? '100%' : '50%',
-              maxWidth: 600,
-              ".mui-apo49d-MuiInputBase-root-MuiOutlinedInput-root": {
-                padding: 1,
-              },
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Button
-                    sx={{
-                      backgroundColor: landingPagePrimaryColor,
-                      color: 'white',
-                      padding: '10px 16px',
-                      borderRadius: 2,
-                      ':hover': { backgroundColor: landingPageSecondaryColor },
-                    }}
-                  >
-                    Search
-                  </Button>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
+            <TextField
+              variant="outlined"
+              placeholder="What are you looking for today?"
+              size="small"
+              sx={{
+                borderRadius: 2,
+                backgroundColor: grey[300],
+                width: mdDown ? '100%' : '50%',
+                maxWidth: 600,
+                '.mui-apo49d-MuiInputBase-root-MuiOutlinedInput-root': {
+                  padding: 1,
+                },
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button
+                      sx={{
+                        backgroundColor: landingPagePrimaryColor,
+                        color: 'white',
+                        padding: '10px 16px',
+                        borderRadius: 2,
+                        ':hover': {
+                          backgroundColor: landingPageSecondaryColor,
+                        },
+                      }}
+                    >
+                      Search
+                    </Button>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
         </Box>
       </Grid>
     </Grid>

@@ -277,7 +277,7 @@ model ItemPreference {
   image          String
   description    String
   isBestSeller   Boolean
-  price          Float?
+  price          Float
   isShowDiscount Boolean?
   prevPrice      Float?
 

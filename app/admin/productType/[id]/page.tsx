@@ -90,11 +90,11 @@ export default function page() {
           flexWrap={'wrap'}
         >
           {type?.data.itemPreferences.map((item: any, index: number) => (
-              <Product
-                key={index}
-                itemPreference={item}
-                showNotification={showNotification}
-              />
+            <Product
+              key={index}
+              itemPreference={item}
+              showNotification={showNotification}
+            />
           ))}
         </Box>
       ) : (

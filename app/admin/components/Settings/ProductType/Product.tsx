@@ -70,7 +70,9 @@ export default function Product({ itemPreference, showNotification }: IProps) {
         <CardMedia
           sx={{ height: 200 }}
           image={
-            itemPreference?.image ? generateImgUrl(itemPreference?.image) : '/images/landing/image_not_found.jpeg'
+            itemPreference?.image
+              ? generateImgUrl(itemPreference?.image)
+              : '/images/landing/image_not_found.jpeg'
           }
           title={itemPreference?.inventoryItem?.name}
         />
@@ -79,16 +81,26 @@ export default function Product({ itemPreference, showNotification }: IProps) {
             {itemPreference.inventoryItem?.name}
           </Typography>
           <Box display="flex" alignItems="flex-end" gap={1}>
-            <Typography variant="h5" sx={{mt: 2, color: itemPreference?.isShowDiscount && itemPreference?.prevPrice ? red[500] : 'black'}}>
+            <Typography
+              variant="h5"
+              sx={{
+                mt: 2,
+                color:
+                  itemPreference?.isShowDiscount && itemPreference?.prevPrice
+                    ? red[500]
+                    : 'black',
+              }}
+            >
               ${itemPreference?.price?.toFixed(2) || 0}
             </Typography>
-            {
-              itemPreference?.isShowDiscount && itemPreference?.prevPrice && (
-                <Typography variant="body1" sx={{textDecoration: 'line-through', color: grey[500]}}>
-                  ${itemPreference?.prevPrice?.toFixed(2) || 0}
-                </Typography>
-              )
-            }
+            {itemPreference?.isShowDiscount && itemPreference?.prevPrice && (
+              <Typography
+                variant="body1"
+                sx={{ textDecoration: 'line-through', color: grey[500] }}
+              >
+                ${itemPreference?.prevPrice?.toFixed(2) || 0}
+              </Typography>
+            )}
           </Box>
         </CardContent>
         <CardActions>

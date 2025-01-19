@@ -48,8 +48,7 @@ const prisma = new PrismaClient();
 //   return koreanRange.test(text);
 // };
 
-async function main() {
-}
+async function main() {}
 
 main()
   .then(() => prisma.$disconnect())

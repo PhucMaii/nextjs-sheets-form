@@ -189,19 +189,19 @@ const useEditUnit = (
         </IconButton>
       </Box>
 
-      {
-        units.length === 0 ? <ErrorComponent errorText='Please select an inventory item' /> : (
-          <UnitRadio
-            units={units}
-            onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
-            value={JSON.stringify(selectedUnit)}
-            removeUnit={removeUnit}
-            setEditUnit={setEditUnit}
-            isShowPrice={isShowPrice}
-            role={role}
-          />
-        )
-      }
+      {units.length === 0 ? (
+        <ErrorComponent errorText="Please select an inventory item" />
+      ) : (
+        <UnitRadio
+          units={units}
+          onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
+          value={JSON.stringify(selectedUnit)}
+          removeUnit={removeUnit}
+          setEditUnit={setEditUnit}
+          isShowPrice={isShowPrice}
+          role={role}
+        />
+      )}
     </FormControl>
   );
 

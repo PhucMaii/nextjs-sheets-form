@@ -89,7 +89,9 @@ export default function OrderDetails({
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         // addCustomAmount={handleAddCustomAmount}
-        onUpdateUI={(data: any) => setItems((prevState: any) => [...prevState, data])}
+        onUpdateUI={(data: any) =>
+          setItems((prevState: any) => [...prevState, data])
+        }
         orderId={order.id}
         showNotification={showNotification}
       />

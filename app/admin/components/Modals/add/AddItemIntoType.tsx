@@ -47,12 +47,12 @@ export default function AddItemIntoType({
   useEffect(() => {
     if (promptedItem.id > 0) {
       const itemPrice = promptedItem.vendorItem[0].unit.find(
-        (unit: any) => unit.ratio === 1
+        (unit: any) => unit.ratio === 1,
       );
-      
+
       setPromptedItem((prevState: any) => ({
         ...prevState,
-        price: itemPrice.unitPrice * 2 
+        price: itemPrice.unitPrice * 2,
       }));
     }
   }, [promptedItem.id]);
@@ -181,9 +181,13 @@ export default function AddItemIntoType({
             }}
           />
 
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <InputLabel htmlFor="discount">Discount</InputLabel>
-            <FormControlLabel 
+            <FormControlLabel
               label="Show Discount"
               control={
                 <Switch
@@ -196,10 +200,10 @@ export default function AddItemIntoType({
                   }
                 />
               }
-              labelPlacement='end'
+              labelPlacement="end"
             />
           </Box>
-          <TextField 
+          <TextField
             id="discount"
             label="Previous price"
             placeholder="Enter previous price..."

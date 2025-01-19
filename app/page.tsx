@@ -15,7 +15,10 @@ export default function page() {
 
   return (
     <NavbarWrapper setIsOpenSignUp={setIsOpenSignUp}>
-      <RequestToJoinModal open={isOpenSignUp} onClose={() => setIsOpenSignUp(false)} />
+      <RequestToJoinModal
+        open={isOpenSignUp}
+        onClose={() => setIsOpenSignUp(false)}
+      />
       {/* <Navbar setIsOpenSignUp={setIsOpenSignUp} /> */}
       <Header setIsOpenSignUp={setIsOpenSignUp} />
       <HowItWorks />

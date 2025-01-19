@@ -14,6 +14,9 @@ export default async function handler(req: any, res: any) {
       include: {
         inventoryItem: true,
       },
+      orderBy: {
+        typeId: 'asc',
+      },
     });
 
     return res.status(200).json({

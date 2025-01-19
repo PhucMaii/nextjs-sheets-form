@@ -10,7 +10,7 @@ interface IProps {
   setIsOpenSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function InvitationSection({setIsOpenSignUp}: IProps) {
+export default function InvitationSection({ setIsOpenSignUp }: IProps) {
   return (
     <Box
       display="flex"
