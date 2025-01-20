@@ -25,10 +25,11 @@ import ProductListing from '../components/ProductListingPage/ProductListing';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../admin/components/ErrorComponent';
 import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { onSearchItems } from '../utils/array';
 
 export default function ProductPage() {
-  const searchParams = useSearchParams();
+  const searchParams: any = useSearchParams();
   const queryParams = searchParams?.get('q');
 
   const [displayItems, setDisplayItems] = useState<IItemPreference[]>([]);
@@ -40,6 +41,8 @@ export default function ProductPage() {
   const [sortedBy, setSortedBy] = useState<string>('featured');
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
+  const router = useRouter();
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`);
@@ -47,37 +50,14 @@ export default function ProductPage() {
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
+  // On search items when query params change
   useEffect(() => {
+    if (queryParams !== searchKeywords) {
+      setSearchKeywords(queryParams || '');
+    }
+
     if (queryParams) {
-      setSearchKeywords(queryParams);
-    }
-  }, [queryParams]);
-
-  useEffect(() => {
-    if (selectedType?.id === 0) {
-      setDisplayItems(allItemPreferences?.data);
-    } else {
-      // setBestSellerItems([]);
-      setDisplayItems(selectedType.itemPreferences);
-    }
-  }, [allItemPreferences, selectedType]);
-
-  useEffect(() => {
-    if (debouncedKeywords) {
-      const newDisplayItems = (
-        selectedType?.id === 0
-          ? allItemPreferences?.data
-          : selectedType?.itemPreferences
-      )?.filter((item: IItemPreference) => {
-        return (
-          item.inventoryItem.name
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase()) ||
-          item.description
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
-        );
-      });
+      const newDisplayItems = onSearchItems(displayItems || [], queryParams, ['inventoryItem.name']);
       setDisplayItems(newDisplayItems);
     } else {
       if (selectedType?.id === 0) {
@@ -86,8 +66,25 @@ export default function ProductPage() {
         setDisplayItems(selectedType?.itemPreferences);
       }
     }
+  }, [queryParams]);
+
+  // On select type and render items from that type
+  useEffect(() => {
+    if (selectedType?.id === 0) {
+      setDisplayItems(allItemPreferences?.data);
+    } else {
+      setDisplayItems(selectedType.itemPreferences);
+    }
+  }, [allItemPreferences, selectedType]);
+
+  // Update query params when search keywords change
+  useEffect(() => {
+    if (debouncedKeywords !== queryParams) {
+      onUpdateQueryParams();
+    }
   }, [debouncedKeywords]);
 
+  // On sort items
   useEffect(() => {
     if (allItemPreferences) {
       const items = selectedType.name === 'All' ? [...allItemPreferences.data] : [...selectedType.itemPreferences];
@@ -117,8 +114,26 @@ export default function ProductPage() {
       (item: IItemPreference) => !item.isBestSeller,
     );
 
+    // Place the best seller on the top
     setDisplayItems([...bestSeller, ...nonBestSeller]); 
   }
+
+  const onUpdateQueryParams = () => {
+    const current = new URLSearchParams(searchParams?.entries());
+
+    const value = debouncedKeywords?.trim();
+
+    if (!value) {
+      current.delete('q');
+    } else {
+      current.set('q', value);
+    }
+
+    const search = current.toString();
+    const query = search ? `?${search}` : '';
+
+    router.push(`/products${query}`);
+  };
 
   const sortItemsAlphabetically = (items: IItemPreference[]) => {
     if (!allItemPreferences) {

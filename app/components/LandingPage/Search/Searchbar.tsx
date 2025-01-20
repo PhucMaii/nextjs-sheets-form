@@ -6,6 +6,7 @@ import useDebounce from '@/hooks/useDebounce';
 import SearchPopover from './SearchPopover';
 import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
+import { onSearchItems } from '@/app/utils/array';
 
 export default function Searchbar({width}: any) {
     const [anchor, setAnchor] = useState<null | HTMLElement>(null);
@@ -21,29 +22,12 @@ export default function Searchbar({width}: any) {
     useEffect(() => {
       if (debouncedKeywords) {
         setIsOpenSearch(true);
-        filterItems();
+        const searchItems = onSearchItems(allItemPreferences?.data || [], debouncedKeywords, ['inventoryItem.name']);
+        setFilteredItems(searchItems);
       } else {
         setIsOpenSearch(false);
       }
     }, [debouncedKeywords]);
-
-  const filterItems = () => {
-    const items = allItemPreferences?.data || [];
-
-    const preprocessedItems = items.map((item: any) => ({
-      original: item,
-      normalized: {...item, name: item.inventoryItem.name.toLowerCase()}, // Precompute the lowercase version
-    }));
-
-    const keywords: any = debouncedKeywords?.toLowerCase().split(/\s+/);
-    const searchItems = preprocessedItems
-    .filter(({ normalized }: any) =>
-        keywords.some((keyword: string[]) => normalized.name.includes(keyword))
-    )
-    .map(({ original }: any) => original);
-
-    setFilteredItems(searchItems.slice(0, 5));
-  }
 
   return (
     <>
