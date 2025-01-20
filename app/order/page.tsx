@@ -27,7 +27,6 @@ import OverrideOrder from '../components/Modals/OverrideOrder';
 import { Order } from '../admin/orders/page';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
-import useSWR from 'swr';
 import NotificationPopup from '../admin/components/Notification';
 import { LoadingButton } from '@mui/lab';
 import OrderOnVacationModal from '../admin/components/Modals/OrderOnVacationModal';
@@ -35,6 +34,7 @@ import useNotification from '@/hooks/useNotification';
 import SearchItem from '../components/Modals/SearchItem';
 import SearchIcon from '@mui/icons-material/Search';
 import SellingItemName from '../components/SellingItemName';
+import { SWRFetchData } from '../utils/db';
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -45,6 +45,7 @@ export default function OrderForm() {
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [note, setNote] = useState<string>('');
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenSecurityModal, setIsOpenSecurityModal] =
     useState<boolean>(false);
   const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false);
@@ -64,7 +65,8 @@ export default function OrderForm() {
   }
 
   const minDate = today.startOf('day');
-  const { data: items, isValidating } = useSWR(API_URL.CLIENT_ITEM);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [items, _mutate, isValidating] = SWRFetchData(API_URL.CLIENT_ITEM);
 
   useEffect(() => {
     if (unavailableRange) {
@@ -73,8 +75,11 @@ export default function OrderForm() {
   }, [unavailableRange]);
 
   useEffect(() => {
-    if (items) {
+    if (!items && isValidating) {
+      setIsLoading(true);
+    } else {
       initializeItems();
+      setIsLoading(false);
     }
   }, [items]);
 
@@ -180,7 +185,7 @@ export default function OrderForm() {
     setDeliveryDate(formattedDate);
   };
 
-  if (isValidating) {
+  if (isLoading) {
     return (
       <Sidebar>
         <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
