@@ -2,6 +2,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import PUT from './PUT';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '8mb', // Set desired value here
+    },
+  },
+};
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'PUT') {

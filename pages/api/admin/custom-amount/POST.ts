@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { generateOrderTotalPrice } from '../orderedItems/PUT';
 
 interface IBody {
   orderId: number;
@@ -52,17 +53,37 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const newOrderTotalPrice = existingOrder.items.reduce((total, item) => {
-      return total + item.price * item.quantity;
-    }, 0);
+    const newlyAddedCustomAmountOrder = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+          }
+        },
+      },
+    })
+
+    // const newOrderTotalPrice = existingOrder.items.reduce((total, item) => {
+    //   return total + item.price * item.quantity;
+    // }, 0);
+    if (!newlyAddedCustomAmountOrder) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    const orderTotal = generateOrderTotalPrice(newlyAddedCustomAmountOrder.items);
 
     await prisma.orders.update({
       where: {
         id: orderId,
       },
       data: {
-        totalPrice:
-          newOrderTotalPrice + customAmount.price * customAmount.quantity,
+        totalPrice: orderTotal,
+        subTotal: orderTotal.subTotal,
+        PST: orderTotal.PST,
+        GST: orderTotal.GST,
       },
     });
     return res.status(200).json({

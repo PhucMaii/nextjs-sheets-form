@@ -2,6 +2,7 @@ import { ICustomAmount } from "@/app/utils/type";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { createOrderedItems } from "../../orders/POST";
+import { generateOrderTotalPrice } from "../../orderedItems/PUT";
 
 interface IBody {
     orderId: number;
@@ -25,6 +26,38 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
 
         const orderedItems = await createOrderedItems(existingOrder, [customAmount]);
+
+        // Generate total price order newly added custom amount order
+        const newlyAddedCustomAmountOrder = await prisma.orders.findUnique({
+            where: {
+                id: orderId,
+            },
+            include: {
+                items: {
+                    include: {
+                        inventoryItem: true,
+                    }
+                },
+            }
+        });
+
+        if (!newlyAddedCustomAmountOrder) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        const orderTotal = generateOrderTotalPrice(newlyAddedCustomAmountOrder.items);
+
+        await prisma.orders.update({
+            where: {
+                id: orderId,
+            },
+            data: {
+                totalPrice: orderTotal,
+                subTotal: orderTotal.subTotal,
+                PST: orderTotal.PST,
+                GST: orderTotal.GST,
+            }
+        });
 
         const targetItem = orderedItems[0];
 
