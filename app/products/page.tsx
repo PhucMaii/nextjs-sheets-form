@@ -331,40 +331,43 @@ export default function ProductPage() {
       />
       <Box sx={{ pb: 2, backgroundColor: 'white', maxHeight: '100vh', overflowY: 'auto' }}>
         <Navbar setIsOpenSignUp={setIsOpenSignUp} />
-        {renderProductTypes()}
+        <Box sx={{ maxWidth: '1500px', mx: 'auto' }}>
+          {renderProductTypes()}
 
-        <Divider sx={{ my: 1 }} />
+          <Divider sx={{ my: 1 }} />
 
-        {renderSortAndSearch()}
-        {/* Product Display */}
-        <Grid
-          container
-          columnSpacing={2}
-          rowGap={4}
-          width="100%"
-          sx={{ my: 2, px: 4 }}
-        >
-          {displayItems?.length > 0 ? (
-            displayItems?.map((product: IItemPreference, index: number) => {
-              return (
-                <Grid
-                  item
-                  xs={6}
-                  sm={4}
-                  md={2}
-                  key={index}
-                  sx={{ height: '370px' }}
-                >
-                  <ProductListing product={product} />
-                </Grid>
-              );
-            })
-          ) : (
-            <Grid item xs={12}>
-              <ErrorComponent errorText="No Product Available" />
-            </Grid>
-          )}
-        </Grid>
+          {renderSortAndSearch()}
+          {/* Product Display */}
+          <Grid
+            container
+            columnSpacing={2}
+            rowGap={4}
+            width="100%"
+            sx={{ my: 2, px: 4 }}
+          >
+            {displayItems?.length > 0 ? (
+              displayItems?.map((product: IItemPreference, index: number) => {
+                return (
+                  <Grid
+                    item
+                    xs={6}
+                    sm={4}
+                    md={2}
+                    key={index}
+                    sx={{ height: '370px' }}
+                  >
+                    <ProductListing product={product} />
+                  </Grid>
+                );
+              })
+            ) : (
+              <Grid item xs={12}>
+                <ErrorComponent errorText="No Product Available" />
+              </Grid>
+            )}
+          </Grid>
+
+        </Box>
       </Box>
     </>
   );
