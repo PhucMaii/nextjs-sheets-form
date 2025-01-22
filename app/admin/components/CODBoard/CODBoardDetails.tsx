@@ -607,6 +607,7 @@ export default function CODBoardDetails({
               mutateOrders={mutateBoard}
               isMarkDateDifference={order.deliveryDate !== boardData.date}
               handleRemoveOrder={handleRemoveOrders}
+              showAddedBy
             />
           ))
         )}
