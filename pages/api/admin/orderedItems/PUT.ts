@@ -9,6 +9,7 @@ import { IItem } from '@/app/utils/type';
 import { generateCurrentTime } from '@/app/utils/time';
 import { getDifferentItems } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { getTodayDate } from '../../utils/date';
 
 interface UpdatedItem {
   id: number;
@@ -142,7 +143,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
-    const updatedAt = new Date();
+    const updatedAt = getTodayDate();
 
     await prisma.orders.update({
       where: {
@@ -154,7 +155,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         updatedBy: `Admin - ${adminUpdate.clientName}`,
-        updateTime: updatedAt,
+        updateTime: `${updatedAt.date} ${updatedAt.time}`,
       },
     });
 

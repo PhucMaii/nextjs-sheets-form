@@ -118,6 +118,8 @@ export interface Order {
   orderRoute?: string;
   type?: TYPE;
   deliveredBy?: string;
+  notInRoute?: boolean;
+  addedToCODBy?: string;
 }
 
 const orderPerPage = 10;
@@ -832,7 +834,7 @@ export default function Orders() {
             <>
               <Virtuoso
                 totalCount={orderData.length}
-                style={{ height: virtuosoHeight }}
+                style={{ height: virtuosoHeight}}
                 data={orderData}
                 itemContent={(index, order) => {
                   return (

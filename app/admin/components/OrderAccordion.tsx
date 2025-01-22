@@ -55,6 +55,7 @@ interface PropTypes {
   handleOpenDetails?: any;
   isMarkDateDifference?: boolean;
   handleRemoveOrder?: (order: Order[]) => Promise<void>;
+  showAddedBy?: boolean;
 }
 
 const OrderAccordion = ({
@@ -67,6 +68,7 @@ const OrderAccordion = ({
   handleOpenDetails,
   isMarkDateDifference,
   handleRemoveOrder,
+  showAddedBy,
 }: PropTypes) => {
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
@@ -427,6 +429,13 @@ const OrderAccordion = ({
               {order?.multipleOrders && (
                 <StatusText
                   text={`Multiple orders`}
+                  type={'info'}
+                  icon={<InfoIcon color="info" fontSize="small" />}
+                />
+              )}
+              {showAddedBy && order?.addedToCODBy && (
+                <StatusText
+                  text={`Added by: ${order.addedToCODBy}`}
                   type={'info'}
                   icon={<InfoIcon color="info" fontSize="small" />}
                 />

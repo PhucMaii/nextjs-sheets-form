@@ -74,6 +74,12 @@ export default function StatementsPage() {
   );
 
   useEffect(() => {
+    const date = new Date();
+    const dayIndex = date.getDay();
+    setSelectedDay(days[dayIndex]);
+  }, []);
+
+  useEffect(() => {
     if (routes && !isValidating) {
       setIsLoading(false);
     } else {
