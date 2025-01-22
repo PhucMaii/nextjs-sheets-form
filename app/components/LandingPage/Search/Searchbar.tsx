@@ -1,5 +1,5 @@
-import { InputAdornment, TextField } from '@mui/material'
-import { grey } from '@mui/material/colors'
+import { InputAdornment, TextField } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import React, { useEffect, useState } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import useDebounce from '@/hooks/useDebounce';
@@ -8,65 +8,69 @@ import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import { onSearchItems } from '@/app/utils/array';
 
-export default function Searchbar({width}: any) {
-    const [anchor, setAnchor] = useState<null | HTMLElement>(null);
-    const openDropdown = Boolean(anchor);
-    const [filteredItems, setFilteredItems] = useState<any>([]);
-    const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false);    
-    const [searchKeywords, setSearchKeywords] = useState<string>('');
+export default function Searchbar({ width }: any) {
+  const [anchor, setAnchor] = useState<null | HTMLElement>(null);
+  const openDropdown = Boolean(anchor);
+  const [filteredItems, setFilteredItems] = useState<any>([]);
+  const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
 
-    const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`);
+  const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`);
 
-    const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
-    useEffect(() => {
-      if (debouncedKeywords) {
-        setIsOpenSearch(true);
-        const searchItems = onSearchItems(allItemPreferences?.data || [], debouncedKeywords, ['inventoryItem.name']);
-        setFilteredItems(searchItems);
-      } else {
-        setIsOpenSearch(false);
-      }
-    }, [debouncedKeywords]);
+  useEffect(() => {
+    if (debouncedKeywords) {
+      setIsOpenSearch(true);
+      const searchItems = onSearchItems(
+        allItemPreferences?.data || [],
+        debouncedKeywords,
+        ['inventoryItem.name'],
+      );
+      setFilteredItems(searchItems);
+    } else {
+      setIsOpenSearch(false);
+    }
+  }, [debouncedKeywords]);
 
   return (
     <>
-      <SearchPopover 
+      <SearchPopover
         open={isOpenSearch}
         onClose={() => setIsOpenSearch(false)}
         anchorEl={anchor}
         debouncedKeywords={debouncedKeywords || ''}
         searchItems={filteredItems}
       />
-        <TextField
-            size="small"
-            placeholder="What are you looking for today?"
-            onClick={(e: any) => setAnchor(e.currentTarget)}
-            aria-controls={openDropdown ? 'basic-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={openDropdown ? 'true' : undefined}
-            value={searchKeywords}
-            onChange={(e) => {
-              e.stopPropagation();
-              setSearchKeywords(e.target.value)
-            }}
-            sx={{
-              backgroundColor: grey[200], 
-              borderRadius: 5, 
-              width,
-              '.MuiInputBase-root': {
-                borderRadius: '15px',
-                backgroundColor: grey[200],  
-              }
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              )
-            }}
-          />
+      <TextField
+        size="small"
+        placeholder="What are you looking for today?"
+        onClick={(e: any) => setAnchor(e.currentTarget)}
+        aria-controls={openDropdown ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={openDropdown ? 'true' : undefined}
+        value={searchKeywords}
+        onChange={(e) => {
+          e.stopPropagation();
+          setSearchKeywords(e.target.value);
+        }}
+        sx={{
+          backgroundColor: grey[200],
+          borderRadius: 5,
+          width,
+          '.MuiInputBase-root': {
+            borderRadius: '15px',
+            backgroundColor: grey[200],
+          },
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+      />
     </>
-  )
+  );
 }

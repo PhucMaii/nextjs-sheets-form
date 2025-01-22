@@ -207,14 +207,18 @@ export const getDifferentItems = (
   });
 };
 
-export const onSearchItems = (baseItems: any[], searchKeywords: string, searchFields: string[]) => {
+export const onSearchItems = (
+  baseItems: any[],
+  searchKeywords: string,
+  searchFields: string[],
+) => {
   const fuse = new Fuse(baseItems, {
     keys: searchFields,
-  }); 
+  });
 
   const result = fuse.search(searchKeywords);
   console.log(result, 'result');
 
   const data = result.map((item: any) => item.item);
   return data;
-}
+};

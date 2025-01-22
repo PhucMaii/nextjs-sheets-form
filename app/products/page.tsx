@@ -57,7 +57,9 @@ export default function ProductPage() {
     }
 
     if (queryParams) {
-      const newDisplayItems = onSearchItems(displayItems || [], queryParams, ['inventoryItem.name']);
+      const newDisplayItems = onSearchItems(displayItems || [], queryParams, [
+        'inventoryItem.name',
+      ]);
       setDisplayItems(newDisplayItems);
     } else {
       if (selectedType?.id === 0) {
@@ -87,7 +89,10 @@ export default function ProductPage() {
   // On sort items
   useEffect(() => {
     if (allItemPreferences) {
-      const items = selectedType.name === 'All' ? [...allItemPreferences.data] : [...selectedType.itemPreferences];
+      const items =
+        selectedType.name === 'All'
+          ? [...allItemPreferences.data]
+          : [...selectedType.itemPreferences];
       if (sortedBy === 'best-sellers') {
         filterBestSellerItems(items);
       } else if (sortedBy === 'a-z' || sortedBy === 'z-a') {
@@ -99,12 +104,12 @@ export default function ProductPage() {
       }
     }
   }, [sortedBy, allItemPreferences, selectedType]);
-  
+
   const filterBestSellerItems = (items: IItemPreference[]) => {
     if (!allItemPreferences) {
       setDisplayItems([]);
       return;
-    };
+    }
 
     const bestSeller = items.filter(
       (item: IItemPreference) => item.isBestSeller,
@@ -115,8 +120,8 @@ export default function ProductPage() {
     );
 
     // Place the best seller on the top
-    setDisplayItems([...bestSeller, ...nonBestSeller]); 
-  }
+    setDisplayItems([...bestSeller, ...nonBestSeller]);
+  };
 
   const onUpdateQueryParams = () => {
     const current = new URLSearchParams(searchParams?.entries());
@@ -142,17 +147,19 @@ export default function ProductPage() {
     }
 
     if (sortedBy === 'a-z') {
-      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
-        itemA.inventoryItem.name.localeCompare(itemB.inventoryItem.name),
+      const sortedItems = items.sort(
+        (itemA: IItemPreference, itemB: IItemPreference) =>
+          itemA.inventoryItem.name.localeCompare(itemB.inventoryItem.name),
       );
       setDisplayItems(sortedItems);
     } else if (sortedBy === 'z-a') {
-      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
-        itemB.inventoryItem.name.localeCompare(itemA.inventoryItem.name),
+      const sortedItems = items.sort(
+        (itemA: IItemPreference, itemB: IItemPreference) =>
+          itemB.inventoryItem.name.localeCompare(itemA.inventoryItem.name),
       );
       setDisplayItems(sortedItems);
     } else {
-      setDisplayItems([])
+      setDisplayItems([]);
     }
   };
 
@@ -163,19 +170,21 @@ export default function ProductPage() {
     }
 
     if (sortedBy === 'price-asc') {
-      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
-        itemA.price - itemB.price,
+      const sortedItems = items.sort(
+        (itemA: IItemPreference, itemB: IItemPreference) =>
+          itemA.price - itemB.price,
       );
-      setDisplayItems(sortedItems);  
+      setDisplayItems(sortedItems);
     } else if (sortedBy === 'price-desc') {
-      const sortedItems = items.sort((itemA: IItemPreference, itemB: IItemPreference) =>
-        itemB.price - itemA.price,
+      const sortedItems = items.sort(
+        (itemA: IItemPreference, itemB: IItemPreference) =>
+          itemB.price - itemA.price,
       );
       setDisplayItems(sortedItems);
     } else {
-      setDisplayItems([])
+      setDisplayItems([]);
     }
-  }
+  };
 
   const renderProductTypes = () => {
     return (
@@ -329,7 +338,14 @@ export default function ProductPage() {
         open={isOpenSignUp}
         onClose={() => setIsOpenSignUp(false)}
       />
-      <Box sx={{ pb: 2, backgroundColor: 'white', maxHeight: '100vh', overflowY: 'auto' }}>
+      <Box
+        sx={{
+          pb: 2,
+          backgroundColor: 'white',
+          maxHeight: '100vh',
+          overflowY: 'auto',
+        }}
+      >
         <Navbar setIsOpenSignUp={setIsOpenSignUp} />
         <Box sx={{ maxWidth: '1500px', mx: 'auto' }}>
           {renderProductTypes()}
@@ -356,7 +372,10 @@ export default function ProductPage() {
                     key={index}
                     sx={{ height: '370px' }}
                   >
-                    <ProductListing product={product} />
+                    <ProductListing
+                      product={product}
+                      onClick={() => router.push(`/products/${product.id}`)}
+                    />
                   </Grid>
                 );
               })
@@ -366,7 +385,6 @@ export default function ProductPage() {
               </Grid>
             )}
           </Grid>
-
         </Box>
       </Box>
     </>

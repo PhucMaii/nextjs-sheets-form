@@ -14,7 +14,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS, PAYMENT_TYPE, USER_ROLE } from '@/app/utils/enum';
+import {
+  API_URL,
+  ORDER_STATUS,
+  PAYMENT_TYPE,
+  USER_ROLE,
+} from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
@@ -27,7 +32,7 @@ import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import InsertOrderToCodBoard from '@/app/admin/components/Modals/add/InsertOrderToCodBoard';
- 
+
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
   return (
@@ -173,7 +178,7 @@ export default function OrdersPage() {
   const initializeOrders = () => {
     if (currentTab === 'C.O.D') {
       setOrders(board?.data?.orders);
-      setDisplayOrders(board?.data?.orders)
+      setDisplayOrders(board?.data?.orders);
     } else if (currentTab === 'Delivered') {
       setOrders(ordersResponse?.data.deliveryOrders);
       const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter(
@@ -293,15 +298,17 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
-      {currentTab === 'C.O.D' && <InsertOrderToCodBoard 
-        open={isOpenInsertToCOD}
-        onClose={() => setIsOpenInsertToCOD(false)}
-        showNotification={showNotification}
-        currentDate={today}
-        boardId={board?.data?.id || -1}
-        mutateBoards={mutateBoard}
-        role={USER_ROLE.DRIVER}
-      />}
+      {currentTab === 'C.O.D' && (
+        <InsertOrderToCodBoard
+          open={isOpenInsertToCOD}
+          onClose={() => setIsOpenInsertToCOD(false)}
+          showNotification={showNotification}
+          currentDate={today}
+          boardId={board?.data?.id || -1}
+          mutateBoards={mutateBoard}
+          role={USER_ROLE.DRIVER}
+        />
+      )}
       {NotificationComp}
       <LoadingModal open={isFetching} />
       <SearchModal
@@ -351,11 +358,11 @@ export default function OrdersPage() {
           })}
       </Box>
       <Box display="flex" justifyContent="flex-end" my={2}>
-        {currentTab === 'C.O.D' && 
-            <Button variant="outlined" onClick={() => setIsOpenInsertToCOD(true)}>
-              + Insert Paid Order
-            </Button>
-        }
+        {currentTab === 'C.O.D' && (
+          <Button variant="outlined" onClick={() => setIsOpenInsertToCOD(true)}>
+            + Insert Paid Order
+          </Button>
+        )}
       </Box>
       <Grid container my={2} spacing={2}>
         <Grid item xs={6}>
@@ -399,11 +406,11 @@ export default function OrdersPage() {
           </ShadowSection>
         </Grid>
       </Grid>
-    
+
       {displayOrders?.length > 0 ? (
         <Virtuoso
           totalCount={displayOrders?.length || 0}
-          style={{ height: virtuosoHeight, marginTop: 2}}
+          style={{ height: virtuosoHeight, marginTop: 2 }}
           data={displayOrders}
           itemContent={(index, order) => {
             return (

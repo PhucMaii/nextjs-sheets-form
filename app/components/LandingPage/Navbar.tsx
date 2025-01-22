@@ -66,17 +66,22 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
   if (mdDown) {
     return (
       <>
-      <Grid container alignItems="center" columnSpacing={1} sx={{backgroundColor: 'white', my: 1, px: 2}}>
-        <Grid item xs={12}>
-          <Logo />
-        </Grid>
-        <Grid item xs={1}>
-          <IconButton onClick={() => setIsNavOpen(true)}>
-            <MenuIcon />
-          </IconButton>
-        </Grid>
-        <Grid item xs={11}>
-          {/* <TextField 
+        <Grid
+          container
+          alignItems="center"
+          columnSpacing={1}
+          sx={{ backgroundColor: 'white', my: 1, px: 2 }}
+        >
+          <Grid item xs={12}>
+            <Logo />
+          </Grid>
+          <Grid item xs={1}>
+            <IconButton onClick={() => setIsNavOpen(true)}>
+              <MenuIcon />
+            </IconButton>
+          </Grid>
+          <Grid item xs={11}>
+            {/* <TextField 
             size="small"
             fullWidth
             placeholder="What are you looking for today?"
@@ -97,10 +102,9 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
               )
             }}
           /> */}
-          <Searchbar width="100%" />
+            <Searchbar width="100%" />
+          </Grid>
         </Grid>
-
-      </Grid>
         <Box display="flex">
           <Drawer
             sx={{
@@ -232,7 +236,7 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
       >
         <Logo />
         {/* The logo of the website */}
-      
+
         {/* <TextField 
           size="small"
           placeholder="What are you looking for today?"
@@ -277,38 +281,42 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
         </Box>
       </Box>
 
-      <Box display="flex" alignItems="center" justifyContent="center" gap={4} width="100%">
-          {/* The links to the other pages */}
-          {tabs.map((tab: any) => {
-            return (
-              <Typography
-                variant="h6"
-                key={tab.label}
-                onClick={() => {
-                  window.location.href = tab.href;
-                  // setSelectedTab(tab.href);
-                }}
-                sx={{
-                  backgroundColor:
-                    selectedTab === tab.href ? green[50] : 'transparent',
-                  color:
-                    selectedTab === tab.href
-                      ? green[700]
-                      : landingPageGreyColor,
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  ':hover': {
-                    cursor: 'pointer',
-                    backgroundColor: blueGrey[50],
-                  },
-                }}
-              >
-                {tab.label}
-              </Typography>
-            );
-          })}
-        </Box>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        gap={4}
+        width="100%"
+      >
+        {/* The links to the other pages */}
+        {tabs.map((tab: any) => {
+          return (
+            <Typography
+              variant="h6"
+              key={tab.label}
+              onClick={() => {
+                window.location.href = tab.href;
+                // setSelectedTab(tab.href);
+              }}
+              sx={{
+                backgroundColor:
+                  selectedTab === tab.href ? green[50] : 'transparent',
+                color:
+                  selectedTab === tab.href ? green[700] : landingPageGreyColor,
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                ':hover': {
+                  cursor: 'pointer',
+                  backgroundColor: blueGrey[50],
+                },
+              }}
+            >
+              {tab.label}
+            </Typography>
+          );
+        })}
+      </Box>
     </Box>
   );
 }

@@ -60,7 +60,7 @@ export const getDriverInfo = async (
       },
       include: {
         routes: true,
-      }
+      },
     });
 
     if (!driverInfo) {

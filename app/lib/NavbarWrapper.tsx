@@ -16,7 +16,7 @@ export default function NavbarWrapper({
     <AuthenGuard>
       <Box>
         <Navbar setIsOpenSignUp={setIsOpenSignUp} />
-        <Box mt={!mdDown ? "140px" : 0}>{children}</Box>
+        <Box mt={!mdDown ? '140px' : 0}>{children}</Box>
       </Box>
     </AuthenGuard>
   );
