@@ -58,26 +58,30 @@ export default function StatusActionDropdown({
     setActionButtonAnchor(null);
   };
 
-  const onUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
-    setIsLoading(true);
-    try {
-      const response = await axios.put(API_URL.ORDER_STATUS, {
-        status,
-        updatedOrders: selectedOrders,
-      });
+    const onUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+        setIsLoading(true);
 
-      showNotification('success', response.data.message);
-      setIsLoading(false);
-    } catch (error: any) {
-      console.log('Fail to mark all as completed: ', error);
-      showNotification(
-        'error',
-        'Something went wrong. Please try again later - ERROR: ' +
-          (error?.response?.data?.error || error),
-      );
-      setIsLoading(false);
-    }
-  };
+        const updatedOrderIds = selectedOrders.map((order: Order) => {
+          return order.id;
+        })
+        try {
+          const response = await axios.put(API_URL.ORDER_STATUS, {
+            status,
+            updatedOrderIds,
+          });
+    
+          showNotification('success', response.data.message);
+          setIsLoading(false);
+        } catch (error: any) {
+          console.log('Fail to mark all as completed: ', error);
+          showNotification(
+            'error',
+            'Something went wrong. Please try again later - ERROR: ' +
+              (error?.response?.data?.error || error),
+          );
+          setIsLoading(false);
+        }
+      };
 
   return (
     <>

@@ -10,7 +10,7 @@ import {
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   const prisma = new PrismaClient();
   try {
-    const { id, status, updatedOrders } = req.body as any;
+    const { id, status, updatedOrderIds } = req.body as any;
 
     const adminCreate: any = await getUserInfo(req, res);
 
@@ -104,16 +104,23 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // for (const order of updatedOrders) {
-    //   await prisma.orders.updateMany({
-    //     where: {
-    //       id: order.id,
-    //     },
-    //     data: {
-    //       status,
-    //     },
-    //   });
-    // }
+    const updatedOrders = await prisma.orders.findMany({
+      where: {
+        id: {
+          in: updatedOrderIds,
+        },
+      },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            fifo: true,
+            inventoryUnit: true,
+          },
+        },
+      }
+    });
+
     const idsToUpdate = updatedOrders.map((order: any) => order.id);
 
     await prisma.orders.updateMany({

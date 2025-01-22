@@ -1,6 +1,6 @@
 import StatusText, { COLOR_TYPE } from '@/app/admin/components/StatusText';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { Box, Button, Fab, Grid, IconButton, Typography } from '@mui/material';
+import { AlertColor, Box, Button, Fab, Grid, IconButton, Typography } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
@@ -10,10 +10,12 @@ import { Item, Order } from '@/app/admin/orders/page';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
 import { OrderedItems } from '@/app/utils/type';
 import DeleteIcon from '@mui/icons-material/Delete';
+import axios from 'axios';
+import { LoadingButton } from '@mui/lab';
 
 interface IProps {
   order: Order;
@@ -26,12 +28,14 @@ interface IProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function OrderComponent({
   order,
   handleUpdateStatus,
   handleUpdateItem,
+  showNotification
 }: IProps) {
   const [confirmModalProps, setConfirmModalProps] = useState<any>({
     on: false,
@@ -39,6 +43,7 @@ export default function OrderComponent({
     color: 'primary',
     updatedStatus: ORDER_STATUS.DELIVERED,
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
@@ -77,6 +82,28 @@ export default function OrderComponent({
 
     return quantity;
   }, [order]);
+
+  const onRemoveOrderFromBoard = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.delete(
+        `${API_URL.DRIVER}/cod/remove-order?orderId=${order.id}`,
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsLoading(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsLoading(false);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error.response.data.error);
+      setIsLoading(false);
+    }
+  }
 
   return (
     <ShadowSection mt={1}>
@@ -181,16 +208,23 @@ export default function OrderComponent({
           <Typography variant="subtitle1">#{order.id}</Typography>
         </Grid>
         <Grid item xs={6} textAlign="right">
-          <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
-            target="_blank"
-            aria-disabled={
-              !order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng
+          <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
+            { order?.notInRoute &&
+              <LoadingButton loading={isLoading} color="error" onClick={onRemoveOrderFromBoard}>
+                Remove
+              </LoadingButton>
             }
-            onClick={() => setIsOpenDetails(true)}
-          >
-            <AssistantDirectionIcon />
-          </a>
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
+              target="_blank"
+              aria-disabled={
+                !order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng
+              }
+              onClick={() => setIsOpenDetails(true)}
+            >
+              <AssistantDirectionIcon />
+            </a>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="subtitle1">

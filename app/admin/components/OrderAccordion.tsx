@@ -431,6 +431,13 @@ const OrderAccordion = ({
                   icon={<InfoIcon color="info" fontSize="small" />}
                 />
               )}
+              {order?.addedToCODBy && (
+                <StatusText
+                  text={`Added by: ${order.addedToCODBy}`}
+                  type={'info'}
+                  icon={<InfoIcon color="info" fontSize="small" />}
+                />
+              )}
             </Box>
           </Grid>
           <Grid item xs={12} md={2.5} textAlign="right">

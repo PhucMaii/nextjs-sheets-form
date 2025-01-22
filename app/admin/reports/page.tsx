@@ -353,10 +353,14 @@ export default function ReportPage() {
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     setIsLoading(true);
+
+    const updatedOrderIds = selectedOrders.map((order: Order) => {
+      return order.id;
+    })
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status,
-        updatedOrders: selectedOrders,
+        updatedOrderIds,
       });
 
       mutateOrders();

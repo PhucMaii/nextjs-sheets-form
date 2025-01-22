@@ -120,6 +120,7 @@ model Orders {
   createdBy         String?
   updatedBy         String?
   deliveredBy       String?
+  addedToCODBy      String?
 
   user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderedItems[]

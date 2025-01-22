@@ -1,7 +1,7 @@
 import { BoxModal } from '@/app/admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
-import { Box, IconButton, Modal, TextField, Typography } from '@mui/material';
+import { AlertColor, Box, IconButton, Modal, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import useDebounce from '@/hooks/useDebounce';
@@ -22,6 +22,7 @@ interface IProps extends ModalProps {
     order: Order,
     updatedItem: OrderedItems,
   ) => Promise<void>;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function SearchModal({
@@ -30,6 +31,7 @@ export default function SearchModal({
   orders,
   handleUpdateStatus,
   handleUpdateItem,
+  showNotification,
 }: IProps) {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -109,6 +111,7 @@ export default function SearchModal({
                   order={order}
                   handleUpdateStatus={handleUpdateStatus}
                   handleUpdateItem={handleUpdateItem}
+                  showNotification={showNotification}
                 />
               );
             })
