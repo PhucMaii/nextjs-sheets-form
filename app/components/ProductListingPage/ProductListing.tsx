@@ -10,9 +10,10 @@ import React from 'react';
 
 interface IProps {
   product: IItemPreference;
+  onClick?: () => void;
 }
 
-export default function ProductListing({ product }: IProps) {
+export default function ProductListing({ product, onClick }: IProps) {
   return (
     <Box
       display="flex"
@@ -21,8 +22,9 @@ export default function ProductListing({ product }: IProps) {
       // alignItems="center"
       flexGrow={1}
       gap={1}
-      sx={{ height: '100%' }}
+      sx={{ height: '100%', maxWidth: '400px', minWidth: '120px' }}
       position="relative"
+      onClick={onClick}
     >
       <img
         src={
@@ -53,14 +55,6 @@ export default function ProductListing({ product }: IProps) {
       <Typography variant="h6" fontWeight="regular" sx={{ color: green[800] }}>
         {product.inventoryItem.name}
       </Typography>
-      {/* <TextField 
-            type="number"
-            variant="outlined"
-            size="small"
-            sx={{ 
-              maxWidth: '12ch' 
-            }}
-            /> */}
       <div style={{ flexGrow: 1 }} />
       <Box display="flex" alignItems="flex-end" gap={1}>
         <Typography
@@ -99,9 +93,6 @@ export default function ProductListing({ product }: IProps) {
       >
         Add to cart
       </Button>
-      {/* <Typography variant="body1" sx={{color: grey[600]}} fontWeight="normal">
-          {product.description} 
-        </Typography> */}
     </Box>
   );
 }

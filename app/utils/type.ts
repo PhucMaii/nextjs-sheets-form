@@ -237,4 +237,5 @@ export interface IProductType extends ItemType {
 
 export interface IItemPreference extends ItemPreference {
   inventoryItem: IInventoryItem;
+  price: number;
 }

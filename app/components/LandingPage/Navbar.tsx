@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   Drawer,
   Grid,
   IconButton,
@@ -21,7 +22,7 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
-import { HomeIcon, ShoppingBagIcon } from 'lucide-react';
+import { HomeIcon, ShoppingBagIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';
 
@@ -66,17 +67,22 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
   if (mdDown) {
     return (
       <>
-      <Grid container alignItems="center" columnSpacing={1} sx={{backgroundColor: 'white', my: 1, px: 2}}>
-        <Grid item xs={12}>
-          <Logo />
-        </Grid>
-        <Grid item xs={1}>
-          <IconButton onClick={() => setIsNavOpen(true)}>
-            <MenuIcon />
-          </IconButton>
-        </Grid>
-        <Grid item xs={11}>
-          {/* <TextField 
+        <Grid
+          container
+          alignItems="center"
+          columnSpacing={1}
+          sx={{ backgroundColor: 'white', my: 1, px: 2 }}
+        >
+          <Grid item xs={12}>
+            <Logo />
+          </Grid>
+          <Grid item xs={1}>
+            <IconButton onClick={() => setIsNavOpen(true)}>
+              <MenuIcon />
+            </IconButton>
+          </Grid>
+          <Grid item xs={11}>
+            {/* <TextField 
             size="small"
             fullWidth
             placeholder="What are you looking for today?"
@@ -97,10 +103,9 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
               )
             }}
           /> */}
-          <Searchbar width="100%" />
+            <Searchbar width="100%" />
+          </Grid>
         </Grid>
-
-      </Grid>
         <Box display="flex">
           <Drawer
             sx={{
@@ -231,31 +236,16 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
         justifyContent="space-between"
       >
         <Logo />
-        {/* The logo of the website */}
-      
-        {/* <TextField 
-          size="small"
-          placeholder="What are you looking for today?"
-          sx={{
-            backgroundColor: grey[200], 
-            borderRadius: 5, 
-            width: '50%',
-            '.MuiInputBase-root': {
-              borderRadius: '15px',
-              backgroundColor: grey[200],  
-            }
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            )
-          }}
-        /> */}
         <Searchbar width="50%" />
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton size="large" sx={{ color: landingPagePrimaryColor }}>
+            <UserIcon style={{width: 30, height: 30}} />
+          </IconButton>
+          <Divider orientation='vertical' flexItem />
+          <IconButton sx={{ color: landingPagePrimaryColor }} onClick={() => router.push('/cart')}>
+            <ShoppingCartIcon style={{width: 30, height: 30}} />
+          </IconButton>
+          {/* <Button
             onClick={() => router.push('/auth/login')}
             sx={{ color: landingPageSecondaryColor }}
           >
@@ -273,42 +263,46 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
             onClick={() => setIsOpenSignUp(true)}
           >
             Sign Up
-          </Button>
+          </Button> */}
         </Box>
       </Box>
 
-      <Box display="flex" alignItems="center" justifyContent="center" gap={4} width="100%">
-          {/* The links to the other pages */}
-          {tabs.map((tab: any) => {
-            return (
-              <Typography
-                variant="h6"
-                key={tab.label}
-                onClick={() => {
-                  window.location.href = tab.href;
-                  // setSelectedTab(tab.href);
-                }}
-                sx={{
-                  backgroundColor:
-                    selectedTab === tab.href ? green[50] : 'transparent',
-                  color:
-                    selectedTab === tab.href
-                      ? green[700]
-                      : landingPageGreyColor,
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  ':hover': {
-                    cursor: 'pointer',
-                    backgroundColor: blueGrey[50],
-                  },
-                }}
-              >
-                {tab.label}
-              </Typography>
-            );
-          })}
-        </Box>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        gap={4}
+        width="100%"
+      >
+        {/* The links to the other pages */}
+        {tabs.map((tab: any) => {
+          return (
+            <Typography
+              variant="h6"
+              key={tab.label}
+              onClick={() => {
+                window.location.href = tab.href;
+                // setSelectedTab(tab.href);
+              }}
+              sx={{
+                backgroundColor:
+                  selectedTab === tab.href ? green[50] : 'transparent',
+                color:
+                  selectedTab === tab.href ? green[700] : landingPageGreyColor,
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                ':hover': {
+                  cursor: 'pointer',
+                  backgroundColor: blueGrey[50],
+                },
+              }}
+            >
+              {tab.label}
+            </Typography>
+          );
+        })}
+      </Box>
     </Box>
   );
 }

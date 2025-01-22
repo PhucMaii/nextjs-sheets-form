@@ -356,7 +356,7 @@ export default function ReportPage() {
 
     const updatedOrderIds = selectedOrders.map((order: Order) => {
       return order.id;
-    })
+    });
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status,

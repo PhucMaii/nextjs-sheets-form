@@ -1,7 +1,7 @@
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { generateImgUrl } from '@/app/lib/s3';
 import { IItemPreference } from '@/app/utils/type';
-import { Box, Popover, Typography } from '@mui/material'
+import { Box, Popover, Typography } from '@mui/material';
 import { green, grey } from '@mui/material/colors';
 import React from 'react';
 
@@ -11,7 +11,13 @@ interface IProps extends ModalProps {
   searchItems: any;
 }
 
-export default function SearchPopover({open, onClose, anchorEl, debouncedKeywords, searchItems}: IProps) {
+export default function SearchPopover({
+  open,
+  onClose,
+  anchorEl,
+  debouncedKeywords,
+  searchItems,
+}: IProps) {
   const popoverWidth = anchorEl?.getBoundingClientRect().width || 0;
 
   return (
@@ -36,44 +42,53 @@ export default function SearchPopover({open, onClose, anchorEl, debouncedKeyword
         },
       }}
     >
-      <Box display="flex" flexDirection="column" gap={2} sx={{width: '100%', py: 2, px: 2}}>
-        <Typography>
-          You are looking for "{debouncedKeywords}"
-        </Typography>
+      <Box
+        display="flex"
+        flexDirection="column"
+        gap={2}
+        sx={{ width: '100%', py: 2, px: 2 }}
+      >
+        <Typography>You are looking for "{debouncedKeywords}"</Typography>
 
         <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="subtitle1" sx={{color: green[800]}} fontWeight="regular">
+          <Typography
+            variant="subtitle1"
+            sx={{ color: green[800] }}
+            fontWeight="regular"
+          >
             Products
           </Typography>
           {searchItems?.map((item: IItemPreference, index: number) => {
-            console.log(item, 'ITEM')
+            console.log(item, 'ITEM');
             return (
-              <Box 
-                display="flex" 
-                alignItems="center" 
-                gap={1} 
-                key={index} 
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                key={index}
                 p={1}
-                sx={{pointer: 'cursor', '&:hover': {backgroundColor: grey[200]}}}
+                sx={{
+                  pointer: 'cursor',
+                  '&:hover': { backgroundColor: grey[200] },
+                }}
               >
-                <img 
+                <img
                   src={
                     item?.image
                       ? generateImgUrl(item?.image)
                       : '/images/landing/image_not_found.jpeg'
-                  } 
-                  alt={item.inventoryItem.name} 
-                  width={100} 
+                  }
+                  alt={item.inventoryItem.name}
+                  width={100}
                   height={'100%'}
-                  style={{borderRadius: '20px'}}
+                  style={{ borderRadius: '20px' }}
                 />
                 <Typography variant="h6">{item.inventoryItem.name}</Typography>
               </Box>
-            )
+            );
           })}
         </Box>
       </Box>
-
     </Popover>
-  )
+  );
 }
