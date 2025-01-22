@@ -74,9 +74,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const deliveryOrders = await prisma.orders.findMany({
       where: {
-        userId: {
-          in: userIds,
-        },
         deliveryDate,
         status: {
           in: [
@@ -91,6 +88,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             preference: true,
             category: true,
+            routes: true,
           },
         },
         items: {
@@ -122,6 +120,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Format the return orders
     const sortedDeliveryOrders = [];
     for (const order of arrangedOrders) {
       const deliveryOrder = deliveryOrders.find(

@@ -22,7 +22,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import OrderAccordion from '../OrderAccordion';
 import { Order } from '../../orders/page';
 import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -464,6 +464,7 @@ export default function CODBoardDetails({
         showNotification={showNotification}
         boardId={boardData?.id}
         mutateBoards={mutateBoard}
+        role={USER_ROLE.ADMIN}
       />
       <EditCodBoard
         mutateBoard={mutateBoard}
@@ -606,6 +607,7 @@ export default function CODBoardDetails({
               mutateOrders={mutateBoard}
               isMarkDateDifference={order.deliveryDate !== boardData.date}
               handleRemoveOrder={handleRemoveOrders}
+              showAddedBy
             />
           ))
         )}
