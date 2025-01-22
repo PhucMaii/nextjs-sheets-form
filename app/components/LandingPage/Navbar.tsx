@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   Drawer,
   Grid,
   IconButton,
@@ -21,7 +22,7 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
-import { HomeIcon, ShoppingBagIcon } from 'lucide-react';
+import { HomeIcon, ShoppingBagIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';
 
@@ -235,31 +236,16 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
         justifyContent="space-between"
       >
         <Logo />
-        {/* The logo of the website */}
-
-        {/* <TextField 
-          size="small"
-          placeholder="What are you looking for today?"
-          sx={{
-            backgroundColor: grey[200], 
-            borderRadius: 5, 
-            width: '50%',
-            '.MuiInputBase-root': {
-              borderRadius: '15px',
-              backgroundColor: grey[200],  
-            }
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            )
-          }}
-        /> */}
         <Searchbar width="50%" />
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton size="large" sx={{ color: landingPagePrimaryColor }}>
+            <UserIcon style={{width: 30, height: 30}} />
+          </IconButton>
+          <Divider orientation='vertical' flexItem />
+          <IconButton sx={{ color: landingPagePrimaryColor }} onClick={() => router.push('/cart')}>
+            <ShoppingCartIcon style={{width: 30, height: 30}} />
+          </IconButton>
+          {/* <Button
             onClick={() => router.push('/auth/login')}
             sx={{ color: landingPageSecondaryColor }}
           >
@@ -277,7 +263,7 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
             onClick={() => setIsOpenSignUp(true)}
           >
             Sign Up
-          </Button>
+          </Button> */}
         </Box>
       </Box>
 

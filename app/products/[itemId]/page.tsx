@@ -17,12 +17,14 @@ import React, { useEffect, useState } from 'react';
 import { orange } from '@mui/material/colors';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ProductListing from '@/app/components/ProductListingPage/ProductListing';
+import Footer from '@/app/components/LandingPage/Footer';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [itemData, setItemData] = useState<IItemPreference | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
+  const [relatedProducts, setRelatedProducts] = useState<IItemPreference[]>([]);
 
   const { showNotification, NotificationComp } = useNotification();
 
@@ -42,6 +44,7 @@ export default function ItemPage() {
       }
 
       setItemData(response.data.data);
+      setRelatedProducts(response.data.relatedProducts);
       setIsLoading(false);
     } catch (err: any) {
       showNotification(
@@ -151,33 +154,13 @@ export default function ItemPage() {
         </Typography>
 
         <Box display="flex" flexDirection="row" gap={4} sx={{overflowX: 'scroll', whiteSpace: 'nowrap'}}>
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-            <Box sx={{minWidth: 200}}>
-            <ProductListing product={itemData as IItemPreference} onClick={() => {}} />
-            </Box>
-
-
+            {
+                relatedProducts.map((item) => (
+                    <Box key={item.id} sx={{minWidth: 200}}>
+                        <ProductListing product={item} onClick={() => {}} />
+                    </Box>
+                ))
+            }
         </Box>
       </>
     );
@@ -218,6 +201,7 @@ export default function ItemPage() {
         </Grid>
         {renderRelatedItems()}
       </Box>
+      <Footer />
     </NavbarWrapper>
   );
 }

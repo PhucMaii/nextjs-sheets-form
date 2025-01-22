@@ -41,6 +41,7 @@ model User {
   routes              UserRoute[]
   unavailableDayRange DayRange[]
   printStatements     ClientStatement[]
+  cart                Cart[]
 }
 
 model Category {
@@ -290,6 +291,7 @@ model ItemPreference {
 
   inventoryItem InventoryItem @relation("InventoryItemToPreference", fields: [inventoryItemId], references: [id], onDelete: Cascade)
   type          ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  cartItems     CartItem[]
 }
 
 model ItemType {
@@ -362,4 +364,28 @@ model ClientStatement {
   createdAt String
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id               Int @id @default(autoincrement())
+  quantity         Int
+  cartId           Int
+  itemPreferenceId Int
+
+  itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id])
+  cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id          Int     @id @default(autoincrement())
+  subtotal    Float
+  GST         Float
+  PST         Float
+  shippingFee Float
+  totalPrice  Float
+  note        String?
+  userId      Int
+
+  items CartItem[]
+  user  User       @relation(fields: [userId], references: [id])
 }
