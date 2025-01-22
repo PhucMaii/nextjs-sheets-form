@@ -58,6 +58,9 @@ export const getDriverInfo = async (
       where: {
         id: Number(session.user.id),
       },
+      include: {
+        routes: true,
+      }
     });
 
     if (!driverInfo) {

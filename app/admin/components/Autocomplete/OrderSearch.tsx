@@ -24,10 +24,13 @@ export default function OrderSearch({
   selectedOrders,
   onChangeSelectOrders,
 }: IProps) {
+  console.log(orders, 'orders in search');
   return (
     <Autocomplete
       multiple
-      options={orders}
+      disabled={orders.length === 0}
+      aria-disabled={orders.length === 0}
+      options={orders || []}
       getOptionLabel={(option: Order) =>
         `${option.clientName} - ${option.clientId}`
       }
@@ -35,7 +38,7 @@ export default function OrderSearch({
       renderOption={(props, option, { selected }) => (
         <li {...props}>
           <Grid container alignItems="center">
-            <Grid item xs={1}>
+            <Grid item xs={2} md={1}>
               <Checkbox
                 icon={<CheckBoxOutlineBlankIcon />}
                 checkedIcon={<CheckBoxIcon />}
@@ -43,7 +46,7 @@ export default function OrderSearch({
                 checked={selected}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={10} md={2}>
               <StatusText
                 text={option.status}
                 type={
@@ -59,16 +62,16 @@ export default function OrderSearch({
                 }
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6} md={4}>
               <Box>
                 <Typography>{option.clientName}</Typography>
                 <Typography>{option.clientId}</Typography>
               </Box>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={4} md={3}>
               <Typography>{option.deliveryDate}</Typography>
             </Grid>
-            <Grid item xs={2} textAlign={'right'}>
+            <Grid item xs={2} md={2} textAlign={'right'}>
               <Typography>Total: ${option.totalPrice.toFixed(2)}</Typography>
             </Grid>
           </Grid>
@@ -80,6 +83,8 @@ export default function OrderSearch({
           {...params}
           label="Orders"
           placeholder="-- Choose orders --"
+          disabled={orders.length === 0}
+          aria-disabled={orders.length === 0}
         />
       )}
       value={selectedOrders}

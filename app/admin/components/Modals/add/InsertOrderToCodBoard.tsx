@@ -15,7 +15,7 @@ import ModalHead from '@/app/lib/ModalHead';
 import useSelectDate from '@/hooks/useSelectDate';
 import OrderSearch from '../../Autocomplete/OrderSearch';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { Order } from '@/app/admin/orders/page';
 import axios from 'axios';
 
@@ -24,6 +24,7 @@ interface IProps extends ModalProps {
   showNotification: any;
   boardId: number;
   mutateBoards: any;
+  role: USER_ROLE
 }
 
 export default function InsertOrderToCodBoard({
@@ -33,6 +34,7 @@ export default function InsertOrderToCodBoard({
   showNotification,
   boardId,
   mutateBoards,
+  role,
 }: IProps) {
   const [isInserting, setIsInserting] = useState<boolean>(false);
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
@@ -47,13 +49,22 @@ export default function InsertOrderToCodBoard({
   const startDate = new Date(date);
   startDate.setDate(startDate.getDate() - 30);
 
-  const [orders] = SWRFetchData(
-    selectedClient && selectedClient?.id !== -1
+  const fetchUrl = () => {
+    if (role === USER_ROLE.ADMIN) {
+      return selectedClient && selectedClient?.id !== -1
       ? `${API_URL.ADMIN}/clients/orders?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
-      : `${API_URL.ORDER}?date=${date}&status=${ORDER_STATUS.NONE}`,
-  );
+      : `${API_URL.ORDER}?date=${date}&status=${ORDER_STATUS.NONE}`
+    } else {
+      return selectedClient && selectedClient?.id !== -1
+      ? `${API_URL.DRIVER}/orders/clients?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
+      : `${API_URL.DRIVER}/orders?deliveryDate=${date}`
+    }
+  }
 
-  const [clients] = SWRFetchData(`${API_URL.ADMIN}/clients`);
+  const [orders] = SWRFetchData(fetchUrl());
+  console.log(orders, 'orders');
+
+  const [clients] = SWRFetchData(`${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/clients`);
 
   useEffect(() => {
     if (tabIndex === 0) {
@@ -78,7 +89,8 @@ export default function InsertOrderToCodBoard({
         return;
       }
 
-      const response = await axios.post(`${API_URL.ADMIN}/cod/insert-orders`, {
+      const url = role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER
+      const response = await axios.post(`${url}/cod/insert-orders`, {
         orders: selectedOrders,
         boardId,
       });
@@ -138,7 +150,7 @@ export default function InsertOrderToCodBoard({
             <Box display="flex" flexDirection={'column'} gap={1}>
               <Typography variant="h6">Orders</Typography>
               <OrderSearch
-                orders={orders?.data || []}
+                orders={(role === USER_ROLE.ADMIN ? orders?.data : orders?.data?.deliveryOrders) || []}
                 onChangeSelectOrders={onChangeSelectOrders}
                 selectedOrders={selectedOrders}
               />
@@ -171,7 +183,7 @@ export default function InsertOrderToCodBoard({
             <Box display="flex" flexDirection={'column'} gap={1}>
               <Typography variant="h6">Orders</Typography>
               <OrderSearch
-                orders={orders?.data || []}
+                orders={orders?.data ? orders?.data : []}
                 onChangeSelectOrders={onChangeSelectOrders}
                 selectedOrders={selectedOrders}
               />

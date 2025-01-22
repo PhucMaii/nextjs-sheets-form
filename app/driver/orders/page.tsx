@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import {
   Box,
+  Button,
   Chip,
   CircularProgress,
   Grid,
@@ -13,7 +14,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, PAYMENT_TYPE, USER_ROLE } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
@@ -24,9 +25,9 @@ import { primary, success } from '@/theme/color';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
-import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
-
+import InsertOrderToCodBoard from '@/app/admin/components/Modals/add/InsertOrderToCodBoard';
+ 
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
   return (
@@ -70,13 +71,14 @@ function CircularProgressWithLabel(props: any) {
   );
 }
 
-const tabs = ['Today', 'Delivered', 'Paid'];
+const tabs = ['Today', 'Delivered', 'C.O.D'];
 
 const totalYPosition = 250;
 export default function OrdersPage() {
   const [currentTab, setCurrentTab] = useState<string>('Today');
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
+  const [isOpenInsertToCOD, setIsOpenInsertToCOD] = useState<boolean>(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
@@ -85,10 +87,13 @@ export default function OrdersPage() {
   const today = YYYYMMDDFormat(date);
 
   const { showNotification, NotificationComp } = useNotification();
-  const { date: datePicker, SelectDate } = useSelectDate(today);
+  // const { date: datePicker, SelectDate } = useSelectDate(today);
 
   const [ordersResponse, mutateOrders] = SWRFetchData(
-    `${API_URL.DRIVER_ORDERS}?deliveryDate=${datePicker}`,
+    `${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`,
+  );
+  const [board, mutateBoard] = SWRFetchData(
+    `${API_URL.DRIVER}/cod?date=${today}`,
   );
 
   useEffect(() => {
@@ -104,7 +109,7 @@ export default function OrdersPage() {
       setDisplayOrders([]);
     }
     setIsFetching(false);
-  }, [currentTab, ordersResponse]);
+  }, [currentTab, ordersResponse, board]);
 
   const deliveredOrders = useMemo(() => {
     if (orders.length === 0) {
@@ -134,7 +139,7 @@ export default function OrdersPage() {
       return acc;
     }, 0);
 
-    return codCollected;
+    return codCollected.toFixed(2);
   }, [orders]);
 
   const codAmount = useMemo(() => {
@@ -142,7 +147,11 @@ export default function OrdersPage() {
       return 0;
     }
 
-    const amount = orders.reduce((acc: number, order: Order) => {
+    const nonVoidOrders = orders.filter((order: Order) => {
+      return order.status !== ORDER_STATUS.VOID;
+    });
+
+    const amount = nonVoidOrders.reduce((acc: number, order: Order) => {
       if (order.user.preference.paymentType === PAYMENT_TYPE.COD) {
         return acc + order.totalPrice;
       }
@@ -162,8 +171,11 @@ export default function OrdersPage() {
   };
 
   const initializeOrders = () => {
-    setOrders(ordersResponse?.data.deliveryOrders);
-    if (currentTab === 'Delivered') {
+    if (currentTab === 'C.O.D') {
+      setOrders(board?.data?.orders);
+      setDisplayOrders(board?.data?.orders)
+    } else if (currentTab === 'Delivered') {
+      setOrders(ordersResponse?.data.deliveryOrders);
       const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter(
         (order: Order) => {
           return (
@@ -174,6 +186,7 @@ export default function OrdersPage() {
       );
       setDisplayOrders(newDeliveredOrders);
     } else {
+      setOrders(ordersResponse?.data.deliveryOrders);
       const newOrders = filterOrderByStatus(
         ordersResponse?.data.deliveryOrders,
         currentTab === 'Today'
@@ -280,6 +293,15 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
+      {currentTab === 'C.O.D' && <InsertOrderToCodBoard 
+        open={isOpenInsertToCOD}
+        onClose={() => setIsOpenInsertToCOD(false)}
+        showNotification={showNotification}
+        currentDate={today}
+        boardId={board?.data?.id || -1}
+        mutateBoards={mutateBoard}
+        role={USER_ROLE.DRIVER}
+      />}
       {NotificationComp}
       <LoadingModal open={isFetching} />
       <SearchModal
@@ -328,7 +350,11 @@ export default function OrdersPage() {
           })}
       </Box>
       <Box display="flex" justifyContent="flex-end" my={2}>
-        {SelectDate}
+        {currentTab === 'C.O.D' && 
+            <Button variant="outlined" onClick={() => setIsOpenInsertToCOD(true)}>
+              + Insert Paid Order
+            </Button>
+        }
       </Box>
       <Grid container my={2} spacing={2}>
         <Grid item xs={6}>
@@ -372,10 +398,11 @@ export default function OrdersPage() {
           </ShadowSection>
         </Grid>
       </Grid>
-      {displayOrders.length > 0 ? (
+    
+      {displayOrders?.length > 0 ? (
         <Virtuoso
           totalCount={displayOrders?.length || 0}
-          style={{ height: virtuosoHeight, marginTop: 2 }}
+          style={{ height: virtuosoHeight, marginTop: 2}}
           data={displayOrders}
           itemContent={(index, order) => {
             return (
@@ -384,6 +411,7 @@ export default function OrdersPage() {
                 order={order}
                 handleUpdateStatus={handleUpdateStatus}
                 handleUpdateItem={handleUpdateItem}
+                showNotification={showNotification}
               />
             );
           }}
