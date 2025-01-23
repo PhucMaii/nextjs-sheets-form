@@ -384,8 +384,8 @@ model Cart {
   shippingFee Float
   totalPrice  Float
   note        String?
-  userId      Int
+  userId      Int?
 
   items CartItem[]
-  user  User       @relation(fields: [userId], references: [id])
+  user  User?       @relation(fields: [userId], references: [id])
 }
