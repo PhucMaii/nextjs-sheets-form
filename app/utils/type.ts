@@ -1,5 +1,6 @@
 import { AlertColor } from '@mui/material';
 import {
+  Cart,
   Category,
   CodBoard,
   DayRange,
@@ -238,4 +239,25 @@ export interface IProductType extends ItemType {
 export interface IItemPreference extends ItemPreference {
   inventoryItem: IInventoryItem;
   price: number;
+}
+
+export interface ICart extends Cart {
+  items: ICartItem[];
+}
+
+export interface ICartItem {
+  quantity: number;
+  cartId: number;
+  itemPreferenceId: number;
+
+  itemPreference: IItemPreference;
+}
+
+export type OrderSummary = {
+  subtotal: number;
+  discount: number;
+  totalPrice: number;
+  PST: number;
+  GST: number;
+  shippingFee: number;
 }

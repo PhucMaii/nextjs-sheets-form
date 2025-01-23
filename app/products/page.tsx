@@ -27,6 +27,7 @@ import ErrorComponent from '../admin/components/ErrorComponent';
 import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { onSearchItems } from '../utils/array';
+import useNotification from '@/hooks/useNotification';
 
 export default function ProductPage() {
   const searchParams: any = useSearchParams();
@@ -44,6 +45,7 @@ export default function ProductPage() {
   const router = useRouter();
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const { showNotification, NotificationComp } = useNotification();
 
   const [allItemPreferences] = SWRFetchData(`${API_URL.PUBLIC}/products`);
   const [types] = SWRFetchData(`${API_URL.PUBLIC}/types`);
@@ -338,6 +340,7 @@ export default function ProductPage() {
         open={isOpenSignUp}
         onClose={() => setIsOpenSignUp(false)}
       />
+      {NotificationComp}
       <Box
         sx={{
           pb: 2,
@@ -375,6 +378,7 @@ export default function ProductPage() {
                     <ProductListing
                       product={product}
                       onClick={() => router.push(`/products/${product.id}`)}
+                      showNotification={showNotification}
                     />
                   </Grid>
                 );

@@ -157,7 +157,7 @@ export default function ItemPage() {
             {
                 relatedProducts.map((item) => (
                     <Box key={item.id} sx={{minWidth: 200}}>
-                        <ProductListing product={item} onClick={() => {}} />
+                        <ProductListing product={item} onClick={() => {}} showNotification={showNotification} />
                     </Box>
                 ))
             }

@@ -1,12 +1,47 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import NavbarWrapper from '../lib/NavbarWrapper';
 import { Box, Button, Grid, Typography } from '@mui/material';
-import { landingPagePrimaryColor } from '@/constant/landingPage';
+import { landingPagePrimaryColor, landingPageSecondaryColor } from '@/constant/landingPage';
 import { ShadowSection } from '../admin/reports/styled';
-import { green } from '@mui/material/colors';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import useNotification from '@/hooks/useNotification';
+import axios from 'axios';
+import { API_URL } from '../utils/enum';
+import { ICart, ICartItem } from '../utils/type';
+import { ShoppingBagIcon } from 'lucide-react';
+import CheckoutItem from '../components/CartPage/CheckoutItem';
 
 export default function CartPage() {
+  const [cart, setCart] = useState<ICart | null>(null);
+  const [cartId, setCartId] = useLocalStorage('cartId', '');
+
+  const { showNotification, NotificationComp } = useNotification();
+
+  useEffect(() => {
+    if (cartId) {
+      fetchCart();
+    }
+  }, [cartId]);
+
+  const fetchCart = async () => {
+    try {
+      const ipAddress: any = await axios.get('https://api.ipify.org?format=json');
+      const response = await axios.get(`${API_URL.PUBLIC}/cart?cartId=${cartId}&ipAddress=${ipAddress.ip}`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      setCart(response.data.data);
+      setCartId(response.data.data.id)
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', error?.response?.data?.error || 'Something went wrong. Please try again later');
+    }
+  }
+
   const renderDisplayCartItems = () => {
     return (
       // Header of the table
@@ -25,79 +60,57 @@ export default function CartPage() {
         </Grid>
 
         {/* Body of the table */}
-        <Grid item xs={6}>
-          <Box display="flex" gap={2} alignItems="center">
-            <img
-              style={{ width: '150px', height: '100%', objectFit: 'contain' }}
-              src="https://media.istockphoto.com/id/953466314/photo/mung-bean-sprouts-isolated-on-white-background.webp?a=1&b=1&s=612x612&w=0&k=20&c=MUOVjJpE6C7wNJhEog0R9RQ1YKi9VoItCbzI_Hzyj70="
-              alt=""
-            />
-            <Typography variant="h6">BEAN 5 LB</Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={2}>
-          <Typography variant="h6" fontWeight="bold">
-            $5.50
-          </Typography>
-        </Grid>
-        <Grid item xs={2} textAlign="center">
-          <Box display="flex" gap={1} alignItems="center">
-            <Button
-              variant="outlined"
-              sx={{
-                borderRadius: 1,
-                width: '30px',
-                height: '30px',
-                p: 0,
-                minWidth: 0,
-                border: `1px solid ${green[800]}`,
-                color: green[800],
-                '&:hover': {
-                    backgroundColor: green[50],
-                    border: `1px solid ${green[800]}`
-                }
-              }}
-            >
-              -
-            </Button>
-            <Typography variant="h6" fontWeight="normal">
-              2
-            </Typography>
-            <Button
-              variant="outlined"
-              sx={{
-                borderRadius: 1,
-                width: '30px',
-                height: '30px',
-                p: 0,
-                minWidth: 0,
-                border: `1px solid ${green[800]}`,
-                color: green[800],
-                '&:hover': {
-                    backgroundColor: green[50],
-                    border: `1px solid ${green[800]}`
-                }
-              }}
-            >
-              +
-            </Button>
-          </Box>
-        </Grid>
-        <Grid item xs={2}>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            sx={{ color: landingPagePrimaryColor }}
-          >
-            $11.00
-          </Typography>
-        </Grid>
+        {
+          cart?.items && cart.items.length > 0 && cart.items.map((item: ICartItem, index: number) => {
+            return (
+              <CheckoutItem item={item} key={index} />
+            )
+          })
+        }
       </Grid>
     );
   };
+  
+  const renderEmptyCart = () => {
+    return (
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        flexDirection="column" 
+        gap={2}
+        sx={{
+         paddingTop: '150px'
+        }}
+      >
+        <ShoppingBagIcon style={{color: landingPagePrimaryColor, width: '50px', height: '50px'}}/>
+        <Typography variant="h5" textAlign="center" fontWeight="bold" sx={{color: landingPagePrimaryColor}}>
+          Your cart is empty
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{
+            width: 'fit-content',
+            backgroundColor: landingPagePrimaryColor, 
+            '&:hover': {backgroundColor: landingPageSecondaryColor}}}
+        >
+          Back Home
+        </Button>
+      </Box>
+    )
+  }
+
+  if (!cart) {
+    return (
+     <NavbarWrapper setIsOpenSignUp={() => {}}>
+      {renderEmptyCart()}
+     </NavbarWrapper> 
+    )
+  }
 
   return (
     <NavbarWrapper setIsOpenSignUp={() => {}}>
+      {NotificationComp}
       <Box sx={{maxWidth: '1500px', mx: 'auto', p: 4}}>
         <Typography
           variant="h5"

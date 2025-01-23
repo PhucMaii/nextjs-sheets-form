@@ -367,10 +367,12 @@ model ClientStatement {
 }
 
 model CartItem {
-  id               Int @id @default(autoincrement())
+  id               Int    @id @default(autoincrement())
   quantity         Int
   cartId           Int
   itemPreferenceId Int
+  createdAt        String
+  createdBy        String
 
   itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id])
   cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
@@ -379,13 +381,16 @@ model CartItem {
 model Cart {
   id          Int     @id @default(autoincrement())
   subtotal    Float
+  discount    Float
   GST         Float
   PST         Float
   shippingFee Float
   totalPrice  Float
   note        String?
   userId      Int?
+  createdAt   String
+  createdBy   String
 
   items CartItem[]
-  user  User?       @relation(fields: [userId], references: [id])
+  user  User?      @relation(fields: [userId], references: [id])
 }

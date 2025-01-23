@@ -25,6 +25,9 @@ import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import { HomeIcon, ShoppingBagIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import { SWRFetchData } from '@/app/utils/db';
+import { API_URL } from '@/app/utils/enum';
 
 const tabs = [
   {
@@ -47,11 +50,15 @@ const drawerWidth = 250;
 
 interface IProps {
   setIsOpenSignUp: any;
+  cartId?: number;
 }
-export default function Navbar({ setIsOpenSignUp }: IProps) {
+export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
+  const [cartId] = useLocalStorage('cartId', '');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
   const router = useRouter();
+
+  const [cart] = SWRFetchData(`${API_URL.PUBLIC}/cart?cartId=${cartId}`);
 
   useEffect(() => {
     setSelectedTab(window.location.pathname);

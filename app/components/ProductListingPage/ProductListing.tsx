@@ -1,19 +1,56 @@
 import { generateImgUrl } from '@/app/lib/s3';
+import { API_URL } from '@/app/utils/enum';
 import { IItemPreference } from '@/app/utils/type';
 import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import { Box, Button, Typography } from '@mui/material';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import { LoadingButton } from '@mui/lab';
+import { AlertColor, Box, Typography } from '@mui/material';
 import { green, red } from '@mui/material/colors';
-import React from 'react';
+import axios from 'axios';
+import React, { useState } from 'react';
 
 interface IProps {
   product: IItemPreference;
+  showNotification: (type: AlertColor, message: string) => void;
   onClick?: () => void;
 }
 
-export default function ProductListing({ product, onClick }: IProps) {
+export default function ProductListing({ product, onClick, showNotification }: IProps) {
+  const [cartId, setCartId] = useLocalStorage('cartId', '');
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+
+  const onAddToCart = async (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      setIsAdding(true);
+      const ipResponse = await axios.get('https://api.ipify.org?format=json');
+      const response = await axios.post(`${API_URL.PUBLIC}/cart/add-to-cart`, {
+        item: {quantity: 1, itemPreference: product, itemPreferenceId: product.id},
+        cartId: Number(cartId),
+        ipAddress: ipResponse.data.ip
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsAdding(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setCartId(response.data.data.cartId)
+      setIsAdding(false);
+
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong. Please try again later');
+      setIsAdding(false);
+    }
+  }
+
   return (
     <Box
       display="flex"
@@ -78,9 +115,11 @@ export default function ProductListing({ product, onClick }: IProps) {
           </Typography>
         )}
       </Box>
-      <Button
+      <LoadingButton
         variant="contained"
         fullWidth
+        loading={isAdding}
+        onClick={onAddToCart}
         sx={{
           backgroundColor: landingPagePrimaryColor,
           alignSelf: 'flex-end',
@@ -92,7 +131,7 @@ export default function ProductListing({ product, onClick }: IProps) {
         }}
       >
         Add to cart
-      </Button>
+      </LoadingButton>
     </Box>
   );
 }
