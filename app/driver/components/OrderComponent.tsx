@@ -216,27 +216,17 @@ export default function OrderComponent({
           <Typography variant="subtitle1">#{order.id}</Typography>
         </Grid>
         <Grid item xs={6} textAlign="right">
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            alignItems="center"
-            gap={1}
-          >
-            {order?.notInRoute && (
-              <LoadingButton
-                loading={isLoading}
-                color="error"
-                onClick={onRemoveOrderFromBoard}
-              >
+          <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
+            { order?.notInRoute &&
+              <LoadingButton loading={isLoading} color="error" onClick={onRemoveOrderFromBoard}>
                 Remove
               </LoadingButton>
-            )}
+            }
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
               target="_blank"
               aria-disabled={
-                !order.user?.deliveryAddressLat ||
-                !order.user?.deliveryAddressLng
+                !order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng
               }
               onClick={() => setIsOpenDetails(true)}
             >

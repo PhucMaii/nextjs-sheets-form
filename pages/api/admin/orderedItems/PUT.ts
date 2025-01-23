@@ -3,12 +3,10 @@ import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
 import { updateSingleInventoryItem } from './single';
-import { createOrderedItems } from '../inventory/expenses/POST';
 import { gstRate, pstRate } from '@/app/lib/constant';
-import { IItem } from '@/app/utils/type';
-import { generateCurrentTime } from '@/app/utils/time';
 import { getDifferentItems } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { getTodayDate } from '../../utils/date';
 
 interface UpdatedItem {
   id: number;
@@ -142,7 +140,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
-    const updatedAt = new Date();
+    const updatedAt = getTodayDate(); 
+    const updateTime = new Date(`${updatedAt.date} ${updatedAt.time}`);
+    console.log(updateTime, 'update time');
 
     await prisma.orders.update({
       where: {
@@ -154,7 +154,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         updatedBy: `Admin - ${adminUpdate.clientName}`,
-        updateTime: updatedAt,
+        updateTime,
       },
     });
 
@@ -415,42 +415,6 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
       ...total,
       totalPrice: total.subTotal + total.PST + total.GST,
     };
-    // const prisma = new PrismaClient();
-    //   where: {
-    //   },
-    //   include: {
-    //     items: true,
-    //   },
-    // });
-
-    // const subTotal =
-
-    // // const updatedOrder: any = await prisma.orders.update({
-    // //   where: {
-    // //     id: orderId,
-    // //   },
-    // //   data: {
-    // //     totalPrice: newTotalPrice,
-    // //     updatedBy,
-    // //     updateTime,
-    // //   },
-    // //   include: {
-    // //     items: true,
-    // //     user: true,
-    // //   },
-    // // });
-
-    // const newItems = updatedOrder.items.map((item: OrderedItems) => {
-    //   const totalPrice = item.quantity * item.price;
-    //   return { ...item, totalPrice };
-    // });
-
-    // return {
-    //   ...updatedOrder,
-    //   items: newItems,
-    //   clientName: updatedOrder.user.clientName,
-    //   clientId: updatedOrder.user.clientId,
-    // };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

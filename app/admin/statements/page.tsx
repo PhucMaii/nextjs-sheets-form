@@ -27,6 +27,7 @@ import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import axios from 'axios';
 import ConfirmModal from '../components/Modals/ConfirmModal';
+import { getTodayDate } from '@/pages/api/utils/date';
 
 export default function StatementsPage() {
   const [displayClients, setDisplayClients] = useState<ClientStatementType[]>(
@@ -35,9 +36,7 @@ export default function StatementsPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenConfirmModal, setIsOpenConfimModal] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  const [selectedDay, setSelectedDay] = useState<string>(
-    () => days[new Date().getDay()],
-  );
+  const [selectedDay, setSelectedDay] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState<any>(() => new Date());
   const [selectedRouteId, setSelectedRouteId] = useState<number>(-1);
   const [selectedClients, setSelectedClients] = useState<ClientStatementType[]>(
@@ -72,6 +71,13 @@ export default function StatementsPage() {
   const [clientStatements] = SWRFetchData(
     `${API_URL.ADMIN}/clientStatements?month=${months[selectedMonth.getMonth()]}`,
   );
+
+  useEffect(() => {
+    const today = getTodayDate();
+    const date = new Date(today.date);
+    const dayIndex = date.getDay();
+    setSelectedDay(days[dayIndex]);
+  }, []);
 
   useEffect(() => {
     if (routes && !isValidating) {

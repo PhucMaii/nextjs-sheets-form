@@ -834,7 +834,7 @@ export default function Orders() {
             <>
               <Virtuoso
                 totalCount={orderData.length}
-                style={{ height: virtuosoHeight }}
+                style={{ height: virtuosoHeight}}
                 data={orderData}
                 itemContent={(index, order) => {
                   return (
