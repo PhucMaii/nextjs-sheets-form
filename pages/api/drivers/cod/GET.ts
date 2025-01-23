@@ -1,4 +1,4 @@
-import { PrismaClient, UserRoute } from "@prisma/client";
+import { OrderedItems, PrismaClient, UserRoute } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getDriverInfo } from "../../utils/auth";
 import { convertDeliveryDateStringToDate } from "../../utils/date";
@@ -27,7 +27,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         const formattedDate: Date = convertDeliveryDateStringToDate(date);
         const day = days[formattedDate.getDay()];
 
-        const cod = await prisma.codBoard.findFirst({
+        const cod: any = await prisma.codBoard.findFirst({
             where: {
                 date,
                 driverId: currentDriver.id,
@@ -48,6 +48,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             }
         });
 
+        if (!cod) {
+            return res.status(404).json({
+                error: 'COD not found'
+            })
+        }
+
 
         const targetRoute = currentDriver.routes.find((route: any) => {
             return route.day === day;
@@ -56,19 +62,66 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             return res.status(404).json({ error: 'Route Not Found' });
         }
 
-        const formattedOrders = cod?.orders.map((order: any) => {
-            const isOrderIncludedInRoute = order.user.routes.some((route: UserRoute) => route.routeId === targetRoute.id);
+        const userIds = targetRoute?.clients.map((userRoute: UserRoute) => {
+            return userRoute.userId;
+          });
 
-            return {
-                ...order,
+        const arrangedOrders = await prisma.scheduleOrders.findMany({
+              where: {
+                userId: {
+                  in: userIds,
+                },
+                day,
+              },
+              include: {
+                user: true,
+                items: {
+                  include: {
+                    inventoryItem: true,
+                    inventoryUnit: true,
+                    fifo: true,
+                  },
+                },
+              },
+            });
+        
+            // Format the return orders
+            const sortedDeliveryOrders = [];
+            for (const order of arrangedOrders) {
+              const deliveryOrder = cod.orders.find(
+                (browsingOrder: any) => browsingOrder.userId === order.userId,
+              );
+        
+              if (!deliveryOrder) {
+                continue;
+              }
+        
+              const newItems = deliveryOrder.items.map((item: OrderedItems) => {
+                const totalPrice = item.quantity * item.price;
+                return { ...item, totalPrice };
+              });
+
+              const isOrderIncludedInRoute = deliveryOrder.user.routes.some((route: UserRoute) => route.routeId === targetRoute.id);
+              sortedDeliveryOrders.push({
+                ...deliveryOrder,
+                items: newItems,
                 notInRoute: !isOrderIncludedInRoute
+              });
             }
-        });
 
-        console.log(formattedOrders, 'formattedOrders');
+        // const formattedOrders = cod?.orders.map((order: any) => {
+        //     const isOrderIncludedInRoute = order.user.routes.some((route: UserRoute) => route.routeId === targetRoute.id);
+
+        //     return {
+        //         ...order,
+        //         notInRoute: !isOrderIncludedInRoute
+        //     }
+        // });
+
+        console.log(sortedDeliveryOrders, 'formattedOrders');
 
         return res.status(200).json({
-            data: {...cod, orders: formattedOrders},
+            data: {...cod, orders: sortedDeliveryOrders},
             message: 'Fetch All Cod Successfully',
         });
     } catch (error: any) {

@@ -172,8 +172,8 @@ export default function OrdersPage() {
 
   const initializeOrders = () => {
     if (currentTab === 'C.O.D') {
-      setOrders(board?.data?.orders);
-      setDisplayOrders(board?.data?.orders)
+      setOrders(board?.data?.orders || []);
+      setDisplayOrders(board?.data?.orders || [])
     } else if (currentTab === 'Delivered') {
       setOrders(ordersResponse?.data.deliveryOrders);
       const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter(
@@ -293,7 +293,7 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
-      {currentTab === 'C.O.D' && <InsertOrderToCodBoard 
+      {currentTab === 'C.O.D'  && board?.data?.id && <InsertOrderToCodBoard 
         open={isOpenInsertToCOD}
         onClose={() => setIsOpenInsertToCOD(false)}
         showNotification={showNotification}
@@ -417,6 +417,10 @@ export default function OrdersPage() {
             );
           }}
         />
+      ) : currentTab === 'C.O.D' && !board?.data ? (
+        <>
+          <ErrorComponent errorText="Please wait for admin to create your board." />
+        </>
       ) : (
         <ErrorComponent errorText="No Order Found" />
       )}
