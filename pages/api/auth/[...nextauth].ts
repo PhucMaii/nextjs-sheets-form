@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Credentials missing');
         } catch (error: any) {
           console.error('Authorize error: ', error);
-          return null;
+          throw new Error(error);
         }
       },
     }),
@@ -100,7 +100,7 @@ const loginUser = async (credentials: any) => {
     user.password,
   );
   if (!isPasswordValid) {
-    throw new Error('Incorrect Credentials');
+    throw new Error('Your password is incorrect');
   }
   return {
     id: user.id + '',

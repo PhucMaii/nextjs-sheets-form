@@ -40,11 +40,17 @@ export default function LoginPage() {
       setIsLoading(true);
 
       try {
-        const user = await signIn('credentials', {
+        const user: any = await signIn('credentials', {
           redirect: false,
           clientId: values.clientId,
           password: values.password,
         });
+
+        if (user.error) {
+          setIsLoading(false);
+          showNotification('error', user.error);
+          return;
+        }
 
         const session: any = await getSession();
         const response = await axios.get(
@@ -68,10 +74,10 @@ export default function LoginPage() {
           }
         }, 1000);
       } catch (error: any) {
-        console.log('Fail to sign in: ', error);
+        console.log('Fail to sign in: ', error?.response?.data?.error);
         showNotification(
           'error',
-          'Your client id and/or password are not correct',
+          error?.response?.data?.error,
         );
         setIsLoading(false);
       }
