@@ -13,6 +13,7 @@ import { getUserInfo } from '../../utils/auth';
 import { checkHasClientOrder } from '../../import-sheets/utils';
 import { generateOrderTotalPrice } from '../orderedItems/PUT';
 import { checkOrderValidToAffectInventory } from '../../utils/order';
+import { categorizeUser } from '../../utils/user';
 
 export const config = {
   api: {
@@ -229,6 +230,17 @@ export const createOrder = async (
         user: true,
       },
     });
+
+    // Update user type
+    const userType = await categorizeUser(user.id);
+    await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        type: userType
+      }
+    })
 
     return updatedOrder;
   } catch (error: any) {

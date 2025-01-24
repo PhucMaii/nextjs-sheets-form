@@ -20,7 +20,7 @@ import { useReactToPrint } from 'react-to-print';
 import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS, TYPE } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, TYPE, USER_CATEGORIZED } from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
@@ -40,6 +40,7 @@ import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import LoadingModal from './Modals/LoadingModal';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LockIcon from '@mui/icons-material/Lock';
+import { renderType } from '@/app/lib/render';
 
 interface PropTypes {
   order: Order;
@@ -383,12 +384,6 @@ const OrderAccordion = ({
               onClick={(e: any) => handleSelectOrder(e, order)}
             />
           </Grid>
-          {/* <Grid item xs={2}>
-            <Box display="flex" alignItems="center" gap={0.5}>
-              <RememberMeIcon fontSize="small" color="primary" />
-              <Typography variant="body2">{latestUpdatePerson}</Typography>
-            </Box>
-          </Grid> */}
           <Grid item xs={10} md={9}>
             <Box display="flex" alignItems="center" gap={1}>
               {order?.type === TYPE.LOCKED && (
@@ -478,9 +473,18 @@ const OrderAccordion = ({
             <Button
               color="info"
               variant="contained"
+              sx={{textTransform: 'none'}}
               onClick={handleOpenClientModal}
+
             >
-              {order?.clientName || order?.user?.clientName}
+              <Box display="flex" alignItems="center" gap={2}>
+                <Typography variant="body2" fontWeight="medium">
+                  {order?.clientName?.toUpperCase() || order?.user?.clientName?.toUpperCase()}
+                </Typography>
+                {order?.user?.type && order?.user?.type !== USER_CATEGORIZED.NONE && 
+                  renderType(order.user.type)
+                }
+              </Box>
             </Button>
           </Grid>
           <Grid item xs={12} md={4} textAlign="right">
@@ -508,20 +512,6 @@ const OrderAccordion = ({
               </IconButton>
             </Box>
           </Grid>
-          {/* {mdDown && <Grid item xs={12}>
-          <Box display="flex" gap={2} alignItems="center" justifyContent="center">
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <RememberMeIcon fontSize="small" color="primary" />
-                  <Typography variant="body2">{latestUpdatePerson}</Typography>
-                </Box>
-                <Box display="flex" gap={1} alignItems="center">
-                  <LocalShippingIcon color="primary" />
-                  <Typography variant="subtitle2">
-                    {order?.orderRoute || ''}
-                  </Typography>
-                </Box>
-              </Box>
-          </Grid>} */}
           <Grid item xs={4} md={4}>
             <Box display="flex" gap={1} alignItems="center">
               <SellIcon color="primary" />
@@ -552,7 +542,6 @@ const OrderAccordion = ({
               </Box>
               <Box display="flex" gap={1} alignItems="center">
                 <Typography variant="subtitle2">
-                  {/* Driver: {order?.orderRoute?.split(' - ')[1]} */}
                   {order?.deliveredBy
                     ? `Delivered: ${order?.deliveredBy}`
                     : order?.orderRoute

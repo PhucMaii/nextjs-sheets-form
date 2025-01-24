@@ -10,12 +10,13 @@ import { Item, Order } from '@/app/admin/orders/page';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
 import { OrderedItems } from '@/app/utils/type';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
+import { renderType } from '@/app/lib/render';
 
 interface IProps {
   order: Order;
@@ -240,8 +241,16 @@ export default function OrderComponent({
           <Button
             onClick={() => setIsOpenClientDetails(true)}
             variant="contained"
+            sx={{textTransform: 'none'}}
           >
-            {order.user.clientName}
+              <Box display="flex" alignItems="center" gap={2}>
+                <Typography variant="body2" fontWeight="medium">
+                  {order?.user?.clientName?.toUpperCase()}
+                </Typography>
+                {order?.user?.type && order?.user?.type !== USER_CATEGORIZED.NONE && 
+                  renderType(order.user.type)
+                }
+              </Box>
           </Button>
         </Grid>
         <Grid item xs={12}>

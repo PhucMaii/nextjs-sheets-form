@@ -18,7 +18,7 @@ import {
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/orders/page';
-import { STOCK_STATUS } from './enum';
+import { STOCK_STATUS, USER_CATEGORIZED } from './enum';
 
 export interface IDayRange extends DayRange {}
 
@@ -98,6 +98,7 @@ export interface UserType {
   // subCategory?: any;
   category?: any;
   preference?: any;
+  type?: USER_CATEGORIZED
 }
 
 export interface ICategory extends Category {
