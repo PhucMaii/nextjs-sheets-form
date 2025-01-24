@@ -118,7 +118,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
-      }
+      },
     });
 
     const idsToUpdate = updatedOrders.map((order: any) => order.id);

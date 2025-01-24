@@ -98,7 +98,7 @@ export interface UserType {
   // subCategory?: any;
   category?: any;
   preference?: any;
-  type?: USER_CATEGORIZED
+  type?: USER_CATEGORIZED;
 }
 
 export interface ICategory extends Category {

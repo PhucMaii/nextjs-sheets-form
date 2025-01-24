@@ -207,7 +207,7 @@ export const createOrder = async (
 
     // Check if user is inactive
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
-      throw new Error('Client Account Is INACTIVE')
+      throw new Error('Client Account Is INACTIVE');
     }
 
     // Check if user order within invalid date
@@ -254,12 +254,12 @@ export const createOrder = async (
     const userType = await categorizeUser(user.id);
     await prisma.user.update({
       where: {
-        id: user.id
+        id: user.id,
       },
       data: {
-        type: userType
-      }
-    })
+        type: userType,
+      },
+    });
 
     return updatedOrder;
   } catch (error: any) {

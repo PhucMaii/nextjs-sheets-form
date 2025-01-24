@@ -289,7 +289,9 @@ const EditReportOrder = ({
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         // addCustomAmount={handleAddCustomAmount}
-        onUpdateUI={(customAmount: any) => setItemList((prevState: any) => [...prevState, customAmount])}
+        onUpdateUI={(customAmount: any) =>
+          setItemList((prevState: any) => [...prevState, customAmount])
+        }
         orderId={order.id}
         showNotification={showNotification}
       />
@@ -417,7 +419,7 @@ const EditReportOrder = ({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          {(item?.isCustomAmount || !item?.inventoryItemId) ? (
+                          {item?.isCustomAmount || !item?.inventoryItemId ? (
                             <IconButton
                               onClick={() =>
                                 setDeleteItemProps({

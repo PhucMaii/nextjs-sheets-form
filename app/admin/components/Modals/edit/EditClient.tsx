@@ -44,7 +44,7 @@ const EditClient = ({
   const [updatedClient, setUpdatedClient] = useState<UserType>({
     ...client,
     password: '',
-    type: client?.type || USER_CATEGORIZED.NONE
+    type: client?.type || USER_CATEGORIZED.NONE,
   });
 
   const onChangeClient = (key: string, value: any) => {
@@ -57,10 +57,17 @@ const EditClient = ({
     } else if (key === 'type') {
       setUpdatedClient((prevClient: UserType) => ({
         ...prevClient,
-        type: value ? USER_CATEGORIZED.INACTIVE : client?.type
-      }))
+        type: value
+          ? USER_CATEGORIZED.INACTIVE
+          : client?.type === USER_CATEGORIZED.INACTIVE
+            ? USER_CATEGORIZED.NONE
+            : client?.type,
+      }));
     } else {
-      setUpdatedClient((prevClient: UserType) => ({ ...prevClient, [key]: value }));
+      setUpdatedClient((prevClient: UserType) => ({
+        ...prevClient,
+        [key]: value,
+      }));
     }
   };
 
@@ -109,13 +116,15 @@ const EditClient = ({
           <Divider />
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} textAlign="right">
-              <FormControlLabel 
+              <FormControlLabel
                 control={
-                  <Switch 
+                  <Switch
                     checked={updatedClient.type === USER_CATEGORIZED.INACTIVE}
-                    onChange={(e: any) => onChangeClient('type', e.target.checked)}
+                    onChange={(e: any) =>
+                      onChangeClient('type', e.target.checked)
+                    }
                   />
-              }
+                }
                 label="Inactive"
               />
               {/* <Button
@@ -137,9 +146,7 @@ const EditClient = ({
               <TextField
                 label="Client Id"
                 value={updatedClient.clientId}
-                onChange={(e) =>
-                  onChangeClient('clientId', e.target.value)
-                }
+                onChange={(e) => onChangeClient('clientId', e.target.value)}
                 fullWidth
               />
             </Grid>
@@ -151,9 +158,7 @@ const EditClient = ({
                 label="Client Name"
                 fullWidth
                 value={updatedClient.clientName}
-                onChange={(e) =>
-                  onChangeClient('clientName', e.target.value)
-                }
+                onChange={(e) => onChangeClient('clientName', e.target.value)}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -176,9 +181,7 @@ const EditClient = ({
                 label="Password"
                 fullWidth
                 value={updatedClient?.password}
-                onChange={(e) =>
-                  onChangeClient('password', e.target.value)
-                }
+                onChange={(e) => onChangeClient('password', e.target.value)}
               />
             </Grid>
             <Grid item xs={12} md={6}>

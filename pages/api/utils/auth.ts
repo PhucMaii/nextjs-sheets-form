@@ -61,10 +61,10 @@ export const getDriverInfo = async (
       include: {
         routes: {
           include: {
-            clients: true
-          }
+            clients: true,
+          },
         },
-      }
+      },
     });
 
     if (!driverInfo) {

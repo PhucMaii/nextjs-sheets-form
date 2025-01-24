@@ -58,7 +58,7 @@ export const overrideOrder = async (
 
     // Check if user account is inactive
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
-      throw new Error('Client Account Is INACTIVE')
+      throw new Error('Client Account Is INACTIVE');
     }
 
     const order = await prisma.orders.findUnique({

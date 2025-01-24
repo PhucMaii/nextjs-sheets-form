@@ -152,9 +152,9 @@ const ClientsTable = ({
           </Select>
         </TableCell>
         <TableCell>
-          {client?.type && client.type !== USER_CATEGORIZED.NONE &&
-            renderType(client.type)
-          }
+          {client?.type &&
+            client.type !== USER_CATEGORIZED.NONE &&
+            renderType(client.type)}
         </TableCell>
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
@@ -197,10 +197,12 @@ const ClientsTable = ({
         <TableRow
           aria-checked={isClientSelected}
           selected={isClientSelected}
-          sx={{ 
-            cursor: 'pointer', 
-            backgroundColor: 
-              client?.type && client?.type === USER_CATEGORIZED.INACTIVE ? grey[200] : 'white' 
+          sx={{
+            cursor: 'pointer',
+            backgroundColor:
+              client?.type && client?.type === USER_CATEGORIZED.INACTIVE
+                ? grey[200]
+                : 'white',
           }}
           {...props}
         />

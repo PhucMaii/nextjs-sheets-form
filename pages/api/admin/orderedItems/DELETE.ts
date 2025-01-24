@@ -32,7 +32,7 @@ export default async function DELETE(
       include: {
         fifo: true,
         inventoryUnit: true,
-      }
+      },
     });
 
     if (!existingItem) {
@@ -77,7 +77,7 @@ export default async function DELETE(
         existingItem.fifo,
         existingItem.inventoryUnit,
         existingItem.quantity,
-      )
+      );
     }
 
     await prisma.orderedItems.delete({
