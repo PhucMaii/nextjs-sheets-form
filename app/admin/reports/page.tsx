@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { ShadowSection } from './styled';
 import { UserType } from '@/app/utils/type';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import axios from 'axios';
 import { Order } from '../orders/page';
 import ErrorComponent from '../components/ErrorComponent';
@@ -61,6 +61,7 @@ import RouteStatement from '../components/Modals/RouteStatement';
 import LoadingModal from '../components/Modals/LoadingModal';
 import EditEmail from '../components/Modals/edit/EditEmail';
 import { onSelectAllOrders, onSelectOrders } from '@/app/utils/orders';
+import { renderType } from '@/app/lib/render';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
@@ -663,6 +664,18 @@ export default function ReportPage() {
             return `${option.clientName} - ${option.clientId}`;
           }}
           renderInput={(params) => <TextField {...params} label="Client" />}
+          renderOption={(props: any, option: any) => {
+            return (
+              <li {...props}>
+                <Box display="flex" gap={2} alignItems="center">
+                  <Typography>
+                    {option.clientName} - {option.clientId}
+                  </Typography>
+                  {option?.type && option.type !== USER_CATEGORIZED.NONE && renderType(option.type)}
+                </Box>
+              </li>
+            )
+          }}
           value={clientValue}
           onChange={(e, newValue) => setClientValue(newValue)}
           sx={{ width: 'auto' }}

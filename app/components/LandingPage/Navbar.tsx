@@ -1,4 +1,6 @@
 import {
+  Badge,
+  badgeClasses,
   Box,
   Button,
   Divider,
@@ -8,6 +10,7 @@ import {
   List,
   ListItemIcon,
   ListItemText,
+  styled,
   Toolbar,
   Typography,
   useMediaQuery,
@@ -28,6 +31,13 @@ import Searchbar from './Search/Searchbar';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
+
+const CartBadge = styled(Badge)`
+  & .${badgeClasses.badge} {
+    top: -12px;
+    right: -6px;
+  }
+`;
 
 const tabs = [
   {
@@ -53,12 +63,12 @@ interface IProps {
   cartId?: number;
 }
 export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
-  const [cartId] = useLocalStorage('cartId', '');
+  const [cId] = useLocalStorage('cartId', cartId || '');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
   const router = useRouter();
 
-  const [cart] = SWRFetchData(`${API_URL.PUBLIC}/cart?cartId=${cartId}`);
+  const [cart] = SWRFetchData(`${API_URL.PUBLIC}/cart?cartId=${cId}`);
 
   useEffect(() => {
     setSelectedTab(window.location.pathname);
@@ -89,27 +99,6 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
             </IconButton>
           </Grid>
           <Grid item xs={11}>
-            {/* <TextField 
-            size="small"
-            fullWidth
-            placeholder="What are you looking for today?"
-            sx={{
-              backgroundColor: grey[200], 
-              borderRadius: 5, 
-              // width: '50%',
-              '.MuiInputBase-root': {
-                borderRadius: '15px',
-                backgroundColor: grey[200],  
-              }
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              )
-            }}
-          /> */}
             <Searchbar width="100%" />
           </Grid>
         </Grid>
@@ -249,8 +238,13 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
             <UserIcon style={{width: 30, height: 30}} />
           </IconButton>
           <Divider orientation='vertical' flexItem />
-          <IconButton sx={{ color: landingPagePrimaryColor }} onClick={() => router.push('/cart')}>
+          <IconButton sx={{ color: landingPagePrimaryColor, position: 'relative' }} onClick={() => router.push('/cart')}>
             <ShoppingCartIcon style={{width: 30, height: 30}} />
+            <CartBadge 
+              badgeContent={cart?.data?.items?.length}
+              color='error'
+              overlap="circular" 
+            />
           </IconButton>
           {/* <Button
             onClick={() => router.push('/auth/login')}

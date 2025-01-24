@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { checkIsKorean } from './korean';
-import { generateListOfDateString } from '@/prisma/seed';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { Order } from '@/app/admin/orders/page';
 import { normalizeDate } from './date';
+import { generateListOfDateString } from '@/app/utils/time';
 
 export const generateManifest = (orders: any, revenue: number = 0) => {
   const itemList = orders.flatMap((order: any) => {

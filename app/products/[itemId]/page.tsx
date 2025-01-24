@@ -9,7 +9,7 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import useNotification from '@/hooks/useNotification';
-import { Box, Button, Grid, MenuItem, Select, Typography } from '@mui/material';
+import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
@@ -18,9 +18,13 @@ import { orange } from '@mui/material/colors';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ProductListing from '@/app/components/ProductListingPage/ProductListing';
 import Footer from '@/app/components/LandingPage/Footer';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import { LoadingButton } from '@mui/lab';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
+  const [cartId, setCartId] = useLocalStorage('cartId', '');
+  const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [itemData, setItemData] = useState<IItemPreference | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -55,6 +59,32 @@ export default function ItemPage() {
       setIsLoading(false);
     }
   };
+
+  const onAddToCart = async () => {
+    try {
+      setIsAdding(true);
+      const ipResponse = await axios.get('https://api.ipify.org?format=json');
+      const response = await axios.post(`${API_URL.PUBLIC}/cart/add-to-cart`, {
+        item: {quantity: 1, itemPreference: itemData, itemPreferenceId: itemData?.id},
+        cartId: Number(cartId),
+        ipAddress: ipResponse.data.ip
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsAdding(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setCartId(response.data.data.cartId)
+      setIsAdding(false);
+
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Some thing went wrong. Please try again later' + error?.response?.data?.error);
+    }
+  }
 
   const renderProductInfo = () => {
     return (
@@ -120,9 +150,11 @@ export default function ItemPage() {
             </Box>
           </Grid>
           <Grid item xs={12} md={10}>
-            <Button
+            <LoadingButton
               fullWidth
+              loading={isAdding}
               variant="contained"
+              onClick={onAddToCart}
               sx={{
                 color: 'white',
                 backgroundColor: landingPagePrimaryColor,
@@ -134,7 +166,7 @@ export default function ItemPage() {
               startIcon={<AddShoppingCartIcon />}
             >
               Add to Cart
-            </Button>
+            </LoadingButton>
           </Grid>
         </Grid>
       </Box>
