@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
+import { ORDER_TYPE, PAYMENT_TYPE, USER_CATEGORIZED } from '@/app/utils/enum';
 import { IItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -17,6 +17,7 @@ interface BodyTypes {
   categoryId?: number;
   email?: string;
   password?: string;
+  type?: USER_CATEGORIZED;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -33,6 +34,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       paymentType,
       email,
       password,
+      type
     }: BodyTypes = req.body;
 
     const existingUser = await prisma.user.findUnique({
@@ -72,6 +74,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     if (categoryId) {
       updateFields.categoryId = categoryId;
+    }
+
+    console.log(type, 'type');
+    if (type && type !== existingUser?.type) {
+      updateFields.type = type;
     }
 
     // If user don't input any updated data

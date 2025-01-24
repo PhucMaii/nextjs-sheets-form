@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Divider,
-  FormControl,
   FormControlLabel,
   Grid,
   MenuItem,
@@ -20,19 +19,20 @@ import { Category } from '@prisma/client';
 import AutoCompleteAddress from '../../AutoCompleteAddress';
 import { LoadingButton } from '@mui/lab';
 import UnavailableRange from '../UnavailableRange';
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 // import ScheduleIcon from '@mui/icons-material/Schedule';
 
 interface PropTypes {
   client: UserType;
   categories: Category[];
-  handleUpdateClient: (userId: number, updatedData: any) => void;
+  onUpdateClient: (userId: number, updatedData: any) => void;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 const EditClient = ({
   client,
   categories,
-  handleUpdateClient,
+  onUpdateClient,
   showNotification,
 }: PropTypes) => {
   const [deliveryAddress, setDeliveryAddress] = useState<any>({
@@ -44,17 +44,23 @@ const EditClient = ({
   const [updatedClient, setUpdatedClient] = useState<UserType>({
     ...client,
     password: '',
+    type: client?.type || USER_CATEGORIZED.NONE
   });
 
-  const handleOnChangeClient = (key: string, value: any) => {
+  const onChangeClient = (key: string, value: any) => {
     if (key === 'category') {
-      setUpdatedClient({
-        ...updatedClient,
+      setUpdatedClient((prevClient: UserType) => ({
+        ...prevClient,
         category: value,
         categoryId: value.id,
-      });
+      }));
+    } else if (key === 'type') {
+      setUpdatedClient((prevClient: UserType) => ({
+        ...prevClient,
+        type: value ? USER_CATEGORIZED.INACTIVE : client?.type
+      }))
     } else {
-      setUpdatedClient({ ...updatedClient, [key]: value });
+      setUpdatedClient((prevClient: UserType) => ({ ...prevClient, [key]: value }));
     }
   };
 
@@ -85,7 +91,7 @@ const EditClient = ({
             <LoadingButton
               variant="contained"
               onClick={() =>
-                handleUpdateClient(client.id, {
+                onUpdateClient(client.id, {
                   clientId: updatedClient.clientId,
                   clientName: updatedClient.clientName,
                   deliveryAddress: deliveryAddress.description,
@@ -93,6 +99,7 @@ const EditClient = ({
                   categoryId: updatedClient.categoryId,
                   email: updatedClient.email,
                   password: updatedClient.password,
+                  type: updatedClient.type,
                 })
               }
             >
@@ -103,7 +110,12 @@ const EditClient = ({
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} textAlign="right">
               <FormControlLabel 
-                control={<Switch />}
+                control={
+                  <Switch 
+                    checked={updatedClient.type === USER_CATEGORIZED.INACTIVE}
+                    onChange={(e: any) => onChangeClient('type', e.target.checked)}
+                  />
+              }
                 label="Inactive"
               />
               {/* <Button
@@ -126,7 +138,7 @@ const EditClient = ({
                 label="Client Id"
                 value={updatedClient.clientId}
                 onChange={(e) =>
-                  handleOnChangeClient('clientId', e.target.value)
+                  onChangeClient('clientId', e.target.value)
                 }
                 fullWidth
               />
@@ -140,7 +152,7 @@ const EditClient = ({
                 fullWidth
                 value={updatedClient.clientName}
                 onChange={(e) =>
-                  handleOnChangeClient('clientName', e.target.value)
+                  onChangeClient('clientName', e.target.value)
                 }
               />
             </Grid>
@@ -153,7 +165,7 @@ const EditClient = ({
                 label="Email"
                 fullWidth
                 value={updatedClient?.email}
-                onChange={(e) => handleOnChangeClient('email', e.target.value)}
+                onChange={(e) => onChangeClient('email', e.target.value)}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -165,7 +177,7 @@ const EditClient = ({
                 fullWidth
                 value={updatedClient?.password}
                 onChange={(e) =>
-                  handleOnChangeClient('password', e.target.value)
+                  onChangeClient('password', e.target.value)
                 }
               />
             </Grid>
@@ -176,7 +188,7 @@ const EditClient = ({
               <Select
                 value={JSON.stringify(updatedClient.category)} // Serialize the object
                 onChange={(e) =>
-                  handleOnChangeClient('category', JSON.parse(e.target.value))
+                  onChangeClient('category', JSON.parse(e.target.value))
                 }
                 fullWidth
               >
@@ -200,7 +212,7 @@ const EditClient = ({
                 fullWidth
                 value={updatedClient.contactNumber}
                 onChange={(e) =>
-                  handleOnChangeClient('contactNumber', e.target.value)
+                  onChangeClient('contactNumber', e.target.value)
                 }
               />
             </Grid>

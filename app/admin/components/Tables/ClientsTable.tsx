@@ -25,11 +25,12 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import EditClient from '../Modals/edit/EditClient';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { renderType } from '@/app/lib/render';
+import { grey } from '@mui/material/colors';
 
 interface PropTypes {
   categories: Category[];
   clients: UserType[];
-  handleUpdateClient: (userId: number, updatedData: any) => void;
+  onUpdateClient: (userId: number, updatedData: any) => void;
   handleDeleteClientUI: (clientId: number) => void;
   showNotification: (type: AlertColor, message: string) => void;
   selectedClients: UserType[];
@@ -42,7 +43,7 @@ interface PropTypes {
 const ClientsTable = ({
   categories,
   clients,
-  handleUpdateClient,
+  onUpdateClient,
   handleDeleteClientUI,
   showNotification,
   selectedClients,
@@ -137,7 +138,7 @@ const ClientsTable = ({
           <Select
             value={client.preference?.paymentType || 'N/A'}
             onChange={(e) =>
-              handleUpdateClient(client.id, { paymentType: e.target.value })
+              onUpdateClient(client.id, { paymentType: e.target.value })
             }
           >
             <MenuItem value={'N/A'}>N/A</MenuItem>
@@ -171,7 +172,7 @@ const ClientsTable = ({
               client={client}
               showNotification={showNotification}
               categories={categories}
-              handleUpdateClient={handleUpdateClient}
+              onUpdateClient={onUpdateClient}
             />
           </Box>
         </TableCell>
@@ -187,15 +188,20 @@ const ClientsTable = ({
       />
     ),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    TableRow: ({ item: item, ...props }) => {
+    TableRow: ({ item: client, ...props }) => {
       const isClientSelected = selectedClients.some(
-        (targetClient: UserType) => item.id === targetClient.id,
+        (targetClient: UserType) => client.id === targetClient.id,
       );
+
       return (
         <TableRow
           aria-checked={isClientSelected}
           selected={isClientSelected}
-          sx={{ cursor: 'pointer' }}
+          sx={{ 
+            cursor: 'pointer', 
+            backgroundColor: 
+              client?.type && client?.type === USER_CATEGORIZED.INACTIVE ? grey[200] : 'white' 
+          }}
           {...props}
         />
       );

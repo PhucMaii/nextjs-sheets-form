@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { Orders, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
@@ -73,6 +73,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt: createdAt,
       };
       try {
+        // Check if the order has no items existed
         if (scheduleOrder.totalPrice === 0) {
           await pusherServer?.trigger(
             'admin-schedule-order',
@@ -82,6 +83,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           // console.log({ zeroTotalPrice: scheduleOrder });
           continue;
         }
+
         // Check has user order for today, if yes then skip that client
         const existingOrder: any = await checkHasClientOrder(
           scheduleOrder.user.id,
@@ -98,7 +100,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           continue;
         }
 
-        // Check is user has time off
+        // Check if user is inactive
+        if (scheduleOrder?.user?.type === USER_CATEGORIZED.INACTIVE) {
+          await pusherServer?.trigger(
+            'admin-schedule-order',
+            'pre-order',
+            returnOrder,
+          );
+          // console.log({ inactiveAccount: scheduleOrder });
+          continue;
+        }
+
+        // Check is user has blocked off for selected date
         const unavailableRanges = await prisma.dayRange.findMany({
           where: {
             userId: scheduleOrder.userId,
@@ -192,6 +205,12 @@ export const createOrder = async (
   try {
     const prisma = new PrismaClient();
 
+    // Check if user is inactive
+    if (user?.type === USER_CATEGORIZED.INACTIVE) {
+      throw new Error('Client Account Is INACTIVE')
+    }
+
+    // Check if user order within invalid date
     if (createdBy.split(' - ')[0] === 'Client') {
       const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
       if (!isValidDate.ok) {

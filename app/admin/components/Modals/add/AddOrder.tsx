@@ -23,7 +23,7 @@ import {
 import { BoxModal } from '../styled';
 import { IItem, UserType } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
+import { API_URL, FLAG_ORDER_TYPE, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ErrorComponent from '../../ErrorComponent';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -340,6 +340,9 @@ export default function AddOrder({
                   getOptionLabel={(option) =>
                     `${option.clientName} - ${option.clientId}`
                   }
+                  getOptionDisabled={(client: UserType) => {
+                    return client?.type === USER_CATEGORIZED.INACTIVE
+                  }}
                   renderInput={(params) => (
                     <TextField {...params} label="Client" />
                   )}
@@ -356,18 +359,6 @@ export default function AddOrder({
               <Grid item xs={12}>
                 <Divider textAlign="center">Items</Divider>
               </Grid>
-              {/* <Grid item xs={12} textAlign="right">
-                <LoadingButton
-                  onClick={copyLastOrder}
-                  loading={isButtonLoading}
-                  disabled={itemList.length === 0}
-                >
-                  <Box display="flex" gap={1}>
-                    <ContentCopyIcon />
-                    <Typography variant="subtitle1">Copy last order</Typography>
-                  </Box>
-                </LoadingButton>
-              </Grid> */}
               {!createScheduledOrder && (
                 <>
                   <Grid item xs={12} textAlign="right">
