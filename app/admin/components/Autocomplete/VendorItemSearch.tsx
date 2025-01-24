@@ -49,9 +49,10 @@ export default function VendorItemSearch({
       clearOnBlur
       handleHomeEndKeys
       id="free-solo-with-text-demo"
-      options={
-        [{ id: -1, name: '-- Choose an item --' }, ...(displayItems || [])]
-      }
+      options={[
+        { id: -1, name: '-- Choose an item --' },
+        ...(displayItems || []),
+      ]}
       getOptionLabel={(option) => {
         // Check if the option has a custom title (for new item suggestion)
         if (option.title) {

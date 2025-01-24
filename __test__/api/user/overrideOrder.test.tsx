@@ -52,17 +52,14 @@ describe('Client Manipulating Order', () => {
 
   test('Do not allow to override order for inactive acount', async () => {
     const response = await overrideOrder(
-      {...testClient, type: USER_CATEGORIZED.INACTIVE},
+      { ...testClient, type: USER_CATEGORIZED.INACTIVE },
       30843,
       testOrderData.body.items,
       testOrderData.body.note,
-      'Client - 00030'
+      'Client - 00030',
     );
 
-    expect(response).toHaveProperty(
-      'error',
-      'Client Account Is INACTIVE'
-    )
+    expect(response).toHaveProperty('error', 'Client Account Is INACTIVE');
   });
 
   test('Client could create, override, then void order', async () => {

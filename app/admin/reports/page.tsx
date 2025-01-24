@@ -357,7 +357,7 @@ export default function ReportPage() {
 
     const updatedOrderIds = selectedOrders.map((order: Order) => {
       return order.id;
-    })
+    });
     try {
       const response = await axios.put(API_URL.ORDER_STATUS, {
         status,
@@ -671,10 +671,12 @@ export default function ReportPage() {
                   <Typography>
                     {option.clientName} - {option.clientId}
                   </Typography>
-                  {option?.type && option.type !== USER_CATEGORIZED.NONE && renderType(option.type)}
+                  {option?.type &&
+                    option.type !== USER_CATEGORIZED.NONE &&
+                    renderType(option.type)}
                 </Box>
               </li>
-            )
+            );
           }}
           value={clientValue}
           onChange={(e, newValue) => setClientValue(newValue)}

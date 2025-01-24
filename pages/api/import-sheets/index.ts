@@ -5,11 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import { checkOrderDeliveryDateValid, normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
-import {
-  checkHasClientOrder,
-  getCreatedBy,
-  overrideOrder,
-} from './utils';
+import { checkHasClientOrder, getCreatedBy, overrideOrder } from './utils';
 import { createOrder } from '../admin/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
@@ -94,8 +90,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Check if user account is inactive
     if (existingUser?.type === USER_CATEGORIZED.INACTIVE) {
       return res.status(400).json({
-        error: 'Client Account Is INACTIVE'
-      })
+        error: 'Client Account Is INACTIVE',
+      });
     }
 
     const formattedCreatedBy = await getCreatedBy(req, res, createdBy);

@@ -125,7 +125,7 @@ describe('Create Order', () => {
 
   test('Do not allow to create for inactive account', async () => {
     const newOrder = await createOrder(
-      {...testClient, type: USER_CATEGORIZED.INACTIVE}, // mod user to inactive
+      { ...testClient, type: USER_CATEGORIZED.INACTIVE }, // mod user to inactive
       testOrderData.body.items,
       '01/01/3000',
       testOrderData.body.createdAt,
@@ -133,11 +133,8 @@ describe('Create Order', () => {
       testOrderData.body.note,
     );
 
-    expect(newOrder).toHaveProperty(
-      'message',
-      'Client Account Is INACTIVE'
-    )
-  }, 10000)
+    expect(newOrder).toHaveProperty('message', 'Client Account Is INACTIVE');
+  }, 10000);
 
   test('Client Create Order', async () => {
     const newOrder = await createOrder(

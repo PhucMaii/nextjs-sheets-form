@@ -46,13 +46,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       scheduleOrders = scheduleOrders.map((scheduledOrder: any) => {
         const userId = scheduledOrder.userId;
 
-        const isInactive = scheduledOrder?.user?.type === USER_CATEGORIZED.INACTIVE;
+        const isInactive =
+          scheduledOrder?.user?.type === USER_CATEGORIZED.INACTIVE;
         if (clientPreOrdersInfo[userId]) {
           // Place the blocked: isInactive before preOrderInfo because it could change by the blocking range
-          return { ...scheduledOrder, blocked: isInactive, ...clientPreOrdersInfo[userId]  };
+          return {
+            ...scheduledOrder,
+            blocked: isInactive,
+            ...clientPreOrdersInfo[userId],
+          };
         }
 
-        return {...scheduledOrder, blocked: isInactive};
+        return { ...scheduledOrder, blocked: isInactive };
       });
     }
 
@@ -92,7 +97,7 @@ const getClientsPreOrderInfo = async (
       },
     });
 
-    // Use client orders array to get client who has ordered already 
+    // Use client orders array to get client who has ordered already
     const formattedClients = clientOrdersOnThatDay.reduce(
       (acc: any, order: Orders) => {
         const key = order.userId;
@@ -114,7 +119,7 @@ const getClientsPreOrderInfo = async (
       },
       include: {
         user: true,
-      }
+      },
     });
 
     // Filter range that includes delivery date only

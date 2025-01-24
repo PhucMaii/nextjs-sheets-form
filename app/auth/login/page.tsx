@@ -75,10 +75,7 @@ export default function LoginPage() {
         }, 1000);
       } catch (error: any) {
         console.log('Fail to sign in: ', error?.response?.data?.error);
-        showNotification(
-          'error',
-          error?.response?.data?.error,
-        );
+        showNotification('error', error?.response?.data?.error);
         setIsLoading(false);
       }
     },

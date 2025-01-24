@@ -75,7 +75,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const deliveryOrders = await prisma.orders.findMany({
       where: {
         userId: {
-          in: userIds
+          in: userIds,
         },
         deliveryDate,
         status: {

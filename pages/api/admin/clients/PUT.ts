@@ -34,7 +34,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       paymentType,
       email,
       password,
-      type
+      type,
     }: BodyTypes = req.body;
 
     const existingUser = await prisma.user.findUnique({

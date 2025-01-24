@@ -15,20 +15,27 @@ import CheckIcon from '@mui/icons-material/Check';
 import { ClientStatementType } from '@/pages/api/admin/routes/GET';
 
 interface IProps {
-    client: ClientStatementType;
-    isPrintedAlready: boolean;
-    isSelected: boolean;
-    onSelectClient: (client: ClientStatementType) => void;
-    dateRange: Date[];
-    onOpenEditModal: Dispatch<SetStateAction<any>>
+  client: ClientStatementType;
+  isPrintedAlready: boolean;
+  isSelected: boolean;
+  onSelectClient: (client: ClientStatementType) => void;
+  dateRange: Date[];
+  onOpenEditModal: Dispatch<SetStateAction<any>>;
 }
 
-export default function ClientStatementRow({ client, isPrintedAlready, isSelected, onSelectClient, dateRange, onOpenEditModal }: IProps) {
-    const invoicePrint: any = useRef(null);
+export default function ClientStatementRow({
+  client,
+  isPrintedAlready,
+  isSelected,
+  onSelectClient,
+  dateRange,
+  onOpenEditModal,
+}: IProps) {
+  const invoicePrint: any = useRef(null);
 
-    const printInvoice = useReactToPrint({
-      content: () => invoicePrint.current,
-    })
+  const printInvoice = useReactToPrint({
+    content: () => invoicePrint.current,
+  });
 
   return (
     <>
@@ -51,14 +58,12 @@ export default function ClientStatementRow({ client, isPrintedAlready, isSelecte
         }}
       >
         <TableCell>
-            {
-                client.incompletedOrders.length === 0 && client.deliveredOrders.length === 0 && client.completedOrders.length > 0 && client.orders.length > 0  &&
-                <StatusText 
-                    text="Paid"
-                    type="success"
-                    icon={<CheckIcon />}
-                />
-            }
+          {client.incompletedOrders.length === 0 &&
+            client.deliveredOrders.length === 0 &&
+            client.completedOrders.length > 0 &&
+            client.orders.length > 0 && (
+              <StatusText text="Paid" type="success" icon={<CheckIcon />} />
+            )}
         </TableCell>
         <TableCell padding="checkbox" variant="body">
           <Checkbox
@@ -68,7 +73,7 @@ export default function ClientStatementRow({ client, isPrintedAlready, isSelecte
           />
         </TableCell>
         <TableCell>
-            <Typography>{client.client.clientName}</Typography>
+          <Typography>{client.client.clientName}</Typography>
         </TableCell>
         <TableCell>
           <Typography>{client.client.clientId}</Typography>

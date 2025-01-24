@@ -23,7 +23,12 @@ import {
 import { BoxModal } from '../styled';
 import { IItem, UserType } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, FLAG_ORDER_TYPE, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
+import {
+  API_URL,
+  FLAG_ORDER_TYPE,
+  USER_CATEGORIZED,
+  USER_ROLE,
+} from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ErrorComponent from '../../ErrorComponent';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -341,7 +346,7 @@ export default function AddOrder({
                     `${option.clientName} - ${option.clientId}`
                   }
                   getOptionDisabled={(client: UserType) => {
-                    return client?.type === USER_CATEGORIZED.INACTIVE
+                    return client?.type === USER_CATEGORIZED.INACTIVE;
                   }}
                   renderInput={(params) => (
                     <TextField {...params} label="Client" />

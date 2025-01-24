@@ -140,7 +140,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
-    const updatedAt = getTodayDate(); 
+    const updatedAt = getTodayDate();
     const updateTime = new Date(`${updatedAt.date} ${updatedAt.time}`);
     console.log(updateTime, 'update time');
 

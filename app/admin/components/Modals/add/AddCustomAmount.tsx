@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { BoxModal } from '../styled';
-import {
-  AlertColor,
-  Box,
-  Divider,
-  Modal,
-  Tab,
-  Tabs,
-
-} from '@mui/material';
+import { AlertColor, Box, Divider, Modal, Tab, Tabs } from '@mui/material';
 import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
 import CustomAmount from '../../CustomAmount/CustomAmount';
@@ -82,39 +74,41 @@ export default function AddCustomAmount({
           buttonLabel="ADD"
           onClick={() => {}}
           onlyHeading
-          buttonProps={{ }}
+          buttonProps={{}}
           onClose={onClose}
         />
 
         <Divider sx={{ my: 2 }} />
 
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-          <Tabs variant="fullWidth" value={tabIdx} onChange={(e, value) => setTabIdx(value)}>
+          <Tabs
+            variant="fullWidth"
+            value={tabIdx}
+            onChange={(e, value) => setTabIdx(value)}
+          >
             <Tab label="Link Inventory" value={0} />
             <Tab label="Custom Amount" value={1} />
           </Tabs>
         </Box>
 
-        {
-          tabIdx === 0 ? (
-            <CustomLinkInventory
-              showNotification={showNotification}
-              onClose={onClose}
-              orderId={orderId}
-              setItemList={setItemList}
-              onUpdateUI={onUpdateUI}
-            />
-          ) : (
-            <CustomAmount 
-              showNotification={showNotification}
-              onClose={onClose}
-              // onAddCustomAmount={addCustomAmount}
-              setItemList={setItemList}
-              orderId={orderId}
-              onUpdateUI={onUpdateUI}
-            />
-          )
-        }
+        {tabIdx === 0 ? (
+          <CustomLinkInventory
+            showNotification={showNotification}
+            onClose={onClose}
+            orderId={orderId}
+            setItemList={setItemList}
+            onUpdateUI={onUpdateUI}
+          />
+        ) : (
+          <CustomAmount
+            showNotification={showNotification}
+            onClose={onClose}
+            // onAddCustomAmount={addCustomAmount}
+            setItemList={setItemList}
+            orderId={orderId}
+            onUpdateUI={onUpdateUI}
+          />
+        )}
 
         {/* <Box display="flex" flexDirection="column" gap={2}>
           <Typography>Price</Typography>
