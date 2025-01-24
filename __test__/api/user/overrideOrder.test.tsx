@@ -11,7 +11,7 @@ loginTestAccountBeforeAll();
 import { overrideOrder } from '@/pages/api/import-sheets/utils';
 import { testClient, testOrderData } from './createOrder.test';
 import { createOrder } from '@/pages/api/admin/orders/POST';
-import { ORDER_STATUS } from '../../../app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '../../../app/utils/enum';
 import { generateRecommendDate } from '@/app/utils/time';
 import UpdateOrderStatus from '../../../pages/api/order/status/index';
 import { NextApiResponse } from 'next';
@@ -35,11 +35,10 @@ describe('Client Manipulating Order', () => {
     status: jest.fn().mockReturnValue({ json: jest.fn() }),
   } as unknown as jest.Mocked<NextApiResponse>;
   // loginTestAccountBeforeAll();
-  console.log(mockedRes, 'MOCKED RES');
   test('Client Could Not Override Order From The Past', async () => {
     const response = await overrideOrder(
       testClient,
-      30843, // Test Account 3 Order on 01/01/2023,
+      30843, // Test Account 2 Order on 01/01/2023,
       testOrderData.body.items,
       testOrderData.body.note,
       'Client - 00030',
@@ -50,6 +49,21 @@ describe('Client Manipulating Order', () => {
       'Cannot override order for past date',
     );
   }, 10000);
+
+  test('Do not allow to override order for inactive acount', async () => {
+    const response = await overrideOrder(
+      {...testClient, type: USER_CATEGORIZED.INACTIVE},
+      30843,
+      testOrderData.body.items,
+      testOrderData.body.note,
+      'Client - 00030'
+    );
+
+    expect(response).toHaveProperty(
+      'error',
+      'Client Account Is INACTIVE'
+    )
+  });
 
   test('Client could create, override, then void order', async () => {
     // CREATE

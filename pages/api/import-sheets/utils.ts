@@ -1,4 +1,4 @@
-import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { updateSingleInventoryItem } from '../admin/orderedItems/single';
 import { sendEmail } from '../utils/email';
@@ -56,6 +56,11 @@ export const overrideOrder = async (
   try {
     const prisma = new PrismaClient();
 
+    // Check if user account is inactive
+    if (user?.type === USER_CATEGORIZED.INACTIVE) {
+      throw new Error('Client Account Is INACTIVE')
+    }
+
     const order = await prisma.orders.findUnique({
       where: {
         id: orderId,
@@ -65,6 +70,7 @@ export const overrideOrder = async (
       },
     });
 
+    // Check if user override order within correct date
     if (order && updatedBy.split(' - ')[0] === 'Client') {
       const isValidDate = checkOrderDeliveryDateValid(order.deliveryDate);
       if (!isValidDate.ok) {

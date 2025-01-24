@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { createOrder } from '@/pages/api/admin/orders/POST';
 import { loginTestAccountBeforeAll } from '../../setUpAuth';
 
@@ -122,6 +122,22 @@ describe('Create Order', () => {
       'Cannot create order for past date',
     );
   }, 10000);
+
+  test('Do not allow to create for inactive account', async () => {
+    const newOrder = await createOrder(
+      {...testClient, type: USER_CATEGORIZED.INACTIVE}, // mod user to inactive
+      testOrderData.body.items,
+      '01/01/3000',
+      testOrderData.body.createdAt,
+      'Client - 00030',
+      testOrderData.body.note,
+    );
+
+    expect(newOrder).toHaveProperty(
+      'message',
+      'Client Account Is INACTIVE'
+    )
+  }, 10000)
 
   test('Client Create Order', async () => {
     const newOrder = await createOrder(
