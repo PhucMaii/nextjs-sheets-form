@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem } from './single';
+import { generateOrderTotalPrice } from './PUT';
 
 interface IQuery {
   id?: string;
@@ -85,19 +86,24 @@ export default async function DELETE(
       },
     });
 
-    const totalAmount = existingOrder.items.reduce((acc: number, item: any) => {
-      if (item.id === existingItem.id) {
-        return acc; // Skip the deleted item
-      }
-      return acc + item.price * item.quantity;
-    }, 0);
+    // const totalAmount = existingOrder.items.reduce((acc: number, item: any) => {
+    //   if (item.id === existingItem.id) {
+    //     return acc; // Skip the deleted item
+    //   }
+    //   return acc + item.price * item.quantity;
+    // }, 0);
+    const total = generateOrderTotalPrice(existingOrder.items);
 
     await prisma.orders.update({
       where: {
         id: existingOrder.id,
       },
       data: {
-        totalPrice: totalAmount,
+        totalPrice: total.totalPrice,
+        subTotal: total.subTotal,
+        discount: total.discount,
+        PST: total.PST,
+        GST: total.GST,
       },
     });
 

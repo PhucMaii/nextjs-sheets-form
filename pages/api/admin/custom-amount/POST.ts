@@ -80,10 +80,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         id: orderId,
       },
       data: {
-        totalPrice: orderTotal,
+        totalPrice: orderTotal.totalPrice,
         subTotal: orderTotal.subTotal,
         PST: orderTotal.PST,
         GST: orderTotal.GST,
+        discount: orderTotal.discount,
       },
     });
     return res.status(200).json({

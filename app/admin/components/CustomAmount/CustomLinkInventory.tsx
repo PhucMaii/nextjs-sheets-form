@@ -174,7 +174,7 @@ const CustomLinkInventory = ({showNotification, onClose, orderId, setItemList, o
 
             <Typography>Price</Typography>
             <TextField
-                label="Name"
+                label="Price"
                 type="number"
                 value={customAmount.price}
                 onChange={(e) => setCustomAmount({...customAmount, price: +e.target.value})}
