@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
 export const authOptions: NextAuthOptions = {
@@ -83,9 +84,17 @@ const loginUser = async (credentials: any) => {
       clientId: credentials.clientId,
     },
   });
+
+  // Handle user input incorrect data
   if (!user) {
     throw new Error('User does not Exist');
   }
+
+  // Handle user account is inactive
+  if (user?.type === USER_CATEGORIZED.INACTIVE) {
+    throw new Error('User Account Is Inactive');
+  }
+
   const isPasswordValid = await bcrypt.compare(
     credentials.password,
     user.password,
