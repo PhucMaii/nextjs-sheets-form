@@ -4,10 +4,13 @@ import {
   Box,
   Button,
   Divider,
+  FormControl,
+  FormControlLabel,
   Grid,
   MenuItem,
   Modal,
   Select,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -17,7 +20,7 @@ import { Category } from '@prisma/client';
 import AutoCompleteAddress from '../../AutoCompleteAddress';
 import { LoadingButton } from '@mui/lab';
 import UnavailableRange from '../UnavailableRange';
-import ScheduleIcon from '@mui/icons-material/Schedule';
+// import ScheduleIcon from '@mui/icons-material/Schedule';
 
 interface PropTypes {
   client: UserType;
@@ -99,7 +102,11 @@ const EditClient = ({
           <Divider />
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} textAlign="right">
-              <Button
+              <FormControlLabel 
+                control={<Switch />}
+                label="Inactive"
+              />
+              {/* <Button
                 variant="outlined"
                 onClick={() => setIsUnavailableRangeOpen(true)}
               >
@@ -109,7 +116,7 @@ const EditClient = ({
                     Set Unavailable Days
                   </Typography>
                 </Box>
-              </Button>
+              </Button> */}
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="h6">Client Id:</Typography>

@@ -113,5 +113,6 @@ export enum USER_CATEGORIZED {
   GOLD = 'Gold',
   SILVER = 'Silver',
   BRONZE = 'Bronze',
+  INACTIVE = 'Inactive',
   NONE = 'None'
 }
