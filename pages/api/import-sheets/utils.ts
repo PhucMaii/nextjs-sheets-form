@@ -77,7 +77,6 @@ export const overrideOrder = async (
         throw new Error('Cannot override order for past date');
       }
     }
-    let discount = 0;
     const itemList: any = [];
     for (const item of newItems) {
       const existingItem = await prisma.orderedItems.findFirst({
@@ -107,11 +106,6 @@ export const overrideOrder = async (
         },
       });
 
-      // Update new total price
-      if (newItem.isShowDiscount && newItem.prevPrice) {
-        discount += newItem.quantity * (newItem.prevPrice - newItem.price);
-      }
-
       itemList.push({
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
@@ -134,7 +128,11 @@ export const overrideOrder = async (
         id: orderId,
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            inventoryItem: true
+          }
+        },
       },
     });
 
@@ -154,7 +152,7 @@ export const overrideOrder = async (
         PST: total.PST,
         GST: total.GST,
         totalPrice: total.totalPrice,
-        discount,
+        discount: total.discount,
         note: newNote,
         isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
         updateTime: new Date(),

@@ -103,6 +103,7 @@ export enum ACTION {
   TRACK_INVENTORY = 'Track Inventory',
   DISCONNECT_ORDERED_ITEMS = 'Disconnect Ordered Items',
   CANCEL_AFFECT_INVENTORY = 'Cancel Affect Inventory',
+  RECORD_INVENTORY = 'Record Inventory',
 }
 
 export enum TYPE {
