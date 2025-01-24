@@ -7,6 +7,7 @@ describe('Check for incorrect orders', () => {
   const startDate = new Date('2024-12-02');
   const endDate = getTodayDate();
   const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`)
+  endDateFormatted.setDate(endDateFormatted.getDate() + 1);
   const decemberDayList = generateListOfDateString(startDate, endDateFormatted);
   console.log(decemberDayList, 'december day list');
   test('Test Order Total Price', async () => {
