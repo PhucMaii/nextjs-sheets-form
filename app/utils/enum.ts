@@ -108,3 +108,10 @@ export enum ACTION {
 export enum TYPE {
   LOCKED = 'LOCKED',
 }
+
+export enum USER_CATEGORIZED {
+  GOLD = 'Gold',
+  SILVER = 'Silver',
+  BRONZE = 'Bronze',
+  NONE = 'None'
+}

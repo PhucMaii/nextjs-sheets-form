@@ -64,7 +64,7 @@ export const ComponentToPrint = forwardRef(
                   <Typography
                     sx={{
                       textDecoration: 'line-through',
-                      textDecorationThickness: 4,
+                      textDecorationThickness: 2,
                     }}
                   >
                     ${item.prevPrice}

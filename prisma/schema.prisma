@@ -32,6 +32,7 @@ model User {
   sheetName          String  @db.VarChar(255)
   role               String  @db.VarChar(255)
   createdAt          String?
+  type               String?
 
   category            Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory         SubCategory?      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
@@ -41,6 +42,7 @@ model User {
   routes              UserRoute[]
   unavailableDayRange DayRange[]
   printStatements     ClientStatement[]
+  cart                Cart[]
 }
 
 model Category {
@@ -278,7 +280,7 @@ model ItemPreference {
   image          String
   description    String
   isBestSeller   Boolean
-  price          Float?
+  price          Float
   isShowDiscount Boolean?
   prevPrice      Float?
 
@@ -290,6 +292,7 @@ model ItemPreference {
 
   inventoryItem InventoryItem @relation("InventoryItemToPreference", fields: [inventoryItemId], references: [id], onDelete: Cascade)
   type          ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  cartItems     CartItem[]
 }
 
 model ItemType {
@@ -362,4 +365,33 @@ model ClientStatement {
   createdAt String
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id               Int    @id @default(autoincrement())
+  quantity         Int
+  cartId           Int
+  itemPreferenceId Int
+  createdAt        String
+  createdBy        String
+
+  itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id])
+  cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id          Int     @id @default(autoincrement())
+  subtotal    Float
+  discount    Float
+  GST         Float
+  PST         Float
+  shippingFee Float
+  totalPrice  Float
+  note        String?
+  userId      Int?
+  createdAt   String
+  createdBy   String
+
+  items CartItem[]
+  user  User?      @relation(fields: [userId], references: [id])
 }
