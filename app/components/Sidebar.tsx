@@ -13,7 +13,6 @@ import {
   Paper,
   Snackbar,
   Toolbar,
-  Typography,
   useMediaQuery,
 } from '@mui/material';
 import React, { ReactNode, useContext, useEffect, useState } from 'react';
@@ -32,6 +31,7 @@ import { primary } from '@/theme/color';
 import useNotification from '@/hooks/useNotification';
 import { MaintenanceContext } from '../context/MaintenanceProvider';
 import Maintenance from './Maintenance';
+import { USER_CATEGORIZED } from '../utils/enum';
 
 interface PropTypes {
   children: ReactNode;
@@ -54,9 +54,15 @@ export default function Sidebar({ children }: PropTypes) {
   }
 
   const { user, isValidating } = useContext(UserContext);
-  const orderDate = generateRecommendDate();
+  console.log(user, 'user');
 
-  const url = process.env.NEXT_PUBLIC_WEB_URL;
+  useEffect(() => {
+    if (user?.type === USER_CATEGORIZED.INACTIVE) {
+      signOut({
+        callbackUrl: `https://www.supremesprouts.com/auth/login`,
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     setCurrentTab(pathname);
