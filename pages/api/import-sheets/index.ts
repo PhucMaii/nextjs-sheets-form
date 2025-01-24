@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
-import { FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
+import { FLAG_ORDER_TYPE, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 // import { sheetStructure } from '@/config/sheetStructure';
 import { checkOrderDeliveryDateValid, normalizeDate } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
@@ -92,6 +92,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (!existingUser) {
       return res.status(404).json({ error: 'User Not Found in DB' });
+    }
+
+    // Check if user account is inactive
+    if (existingUser?.type === USER_CATEGORIZED.INACTIVE) {
+      return res.status(400).json({
+        error: 'Client Account Is INACTIVE'
+      })
     }
 
     const formattedCreatedBy = await getCreatedBy(req, res, createdBy);
