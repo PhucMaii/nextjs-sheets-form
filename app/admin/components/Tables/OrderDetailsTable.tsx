@@ -143,11 +143,15 @@ export default function OrderDetailsTable({
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
-                        <Typography>{item?.isCustomAmount ? '(C)' : null} {item.name}</Typography>
+                        <Typography>
+                          {item?.isCustomAmount ? '(C)' : null} {item.name}
+                        </Typography>
                       </Box>
                     </>
                   ) : (
-                    <>{item?.isCustomAmount ? '(C)' : null} {item.name}</>
+                    <>
+                      {item?.isCustomAmount ? '(C)' : null} {item.name}
+                    </>
                   )}
                 </TableCell>
                 <TableCell>{item.quantity}</TableCell>
@@ -182,21 +186,25 @@ export default function OrderDetailsTable({
                       >
                         <EditIcon />
                       </IconButton>
-                      {(item?.isCustomAmount || !item?.inventoryItemId) && showNotification && (
-                        <IconButton
-                          color="error"
-                          disabled={
-                            order?.type === TYPE.LOCKED ||
-                            role === USER_ROLE.CLIENT ||
-                            role === USER_ROLE.DRIVER
-                          }
-                          onClick={() =>
-                            setDeleteModalProps({ open: true, targetObj: item })
-                          }
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      )}
+                      {(item?.isCustomAmount || !item?.inventoryItemId) &&
+                        showNotification && (
+                          <IconButton
+                            color="error"
+                            disabled={
+                              order?.type === TYPE.LOCKED ||
+                              role === USER_ROLE.CLIENT ||
+                              role === USER_ROLE.DRIVER
+                            }
+                            onClick={() =>
+                              setDeleteModalProps({
+                                open: true,
+                                targetObj: item,
+                              })
+                            }
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
                     </Box>
                   </TableCell>
                 )}

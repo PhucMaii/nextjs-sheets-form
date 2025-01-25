@@ -46,13 +46,11 @@ export default function ClientStatementsTable({
   );
 
   const availableClients = useMemo(() => {
-    return routeClients.filter(
-      (client: ClientStatementType) => {
-        return !clientStatements.find(
-          (statement: ClientStatement) => statement.userId === client.client.id,
-        )?.isPrinted;
-      },
-    );
+    return routeClients.filter((client: ClientStatementType) => {
+      return !clientStatements.find(
+        (statement: ClientStatement) => statement.userId === client.client.id,
+      )?.isPrinted;
+    });
   }, [routeClients]);
 
   // useEffect(() => {
@@ -62,7 +60,6 @@ export default function ClientStatementsTable({
   //     }, 0); // Ensure state update is processed before invoking print
   //   }
   // }, [printClient]);
-
 
   const onSelectAll = () => {
     if (selectedClients.length === availableClients.length) {
@@ -122,13 +119,14 @@ export default function ClientStatementsTable({
             {routeClients.length > 0 ? (
               routeClients.map((client: ClientStatementType, index: number) => {
                 const isSelected = selectedClients.includes(client);
-                const isPrintedAlready = clientStatements.find(
-                  (statement: ClientStatement) =>
-                    statement.userId === client.client.id,
-                )?.isPrinted || false;
+                const isPrintedAlready =
+                  clientStatements.find(
+                    (statement: ClientStatement) =>
+                      statement.userId === client.client.id,
+                  )?.isPrinted || false;
                 return (
                   <Fragment key={index}>
-                    <ClientStatementRow 
+                    <ClientStatementRow
                       client={client}
                       isPrintedAlready={isPrintedAlready}
                       isSelected={isSelected}

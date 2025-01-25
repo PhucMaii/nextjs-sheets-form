@@ -1,3 +1,4 @@
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 import {
   errorBackground,
   errorText,
@@ -22,6 +23,7 @@ export enum COLOR_TYPE {
 interface PropTypes {
   text?: string;
   type: string;
+  backgroundColor?: string;
   icon?: React.ReactNode;
 }
 
@@ -30,7 +32,24 @@ interface TextColorType {
   color: string;
 }
 
-export default function StatusText({ text, type, icon }: PropTypes) {
+export const formatClientType = (type: string) => {
+  if (type === USER_CATEGORIZED.GOLD) {
+    return type + '🥇';
+  } else if (type === USER_CATEGORIZED.SILVER) {
+    return type + '🥈';
+  } else if (type === USER_CATEGORIZED.BRONZE) {
+    return type + '🥉';
+  } else {
+    return type;
+  }
+};
+
+export default function StatusText({
+  text,
+  type,
+  icon,
+  backgroundColor,
+}: PropTypes) {
   const [textColor, setTextColor] = useState<TextColorType>({
     backgroundColor: '',
     color: '',
@@ -46,23 +65,25 @@ export default function StatusText({ text, type, icon }: PropTypes) {
         backgroundColor: successBackground,
         color: successText,
       });
-    }
-    if (type === 'info') {
+    } else if (type === 'info') {
       setTextColor({
         backgroundColor: infoBackground,
         color: infoColor,
       });
-    }
-    if (type === 'warning') {
+    } else if (type === 'warning') {
       setTextColor({
         backgroundColor: warningBackground,
         color: warningText,
       });
-    }
-    if (type === 'error') {
+    } else if (type === 'error') {
       setTextColor({
         backgroundColor: errorBackground,
         color: errorText,
+      });
+    } else {
+      setTextColor({
+        backgroundColor: backgroundColor || '',
+        color: type,
       });
     }
   };

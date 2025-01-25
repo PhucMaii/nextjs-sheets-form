@@ -84,7 +84,7 @@ const EditReportOrder = ({
     }
   }, [order]);
 
-  const handleDateChange = (e: any) => {
+  const onUpdateChange = (e: any) => {
     const formattedDate: string = formatDateChanged(e);
     setOrderData((prevState: any) => ({
       ...prevState,
@@ -121,7 +121,7 @@ const EditReportOrder = ({
     return totalPrice;
   };
 
-  const handleAvoidInventory = async (e: any) => {
+  const onAvoidInventory = async (e: any) => {
     setIsUpdatingAvoidInventory(true);
     try {
       setOrderData((prevState: any) => ({
@@ -179,7 +179,7 @@ const EditReportOrder = ({
   //   }
   // };
 
-  const handleDeleteCustomAmount = async (item: any) => {
+  const onDeleteCustomAmount = async (item: any) => {
     try {
       const response = await axios.delete(
         `${API_URL.ADMIN}/orderedItems?id=${item.id}`,
@@ -203,7 +203,7 @@ const EditReportOrder = ({
     }
   };
 
-  const handleUpdateItems = async () => {
+  const onUpdateItem = async () => {
     try {
       setIsSubmitting(true);
       const totalPrice = calculateNewTotalPrice();
@@ -282,14 +282,16 @@ const EditReportOrder = ({
           }))
         }
         targetObj={deleteItemProps.targetObj}
-        handleDelete={handleDeleteCustomAmount}
+        handleDelete={onDeleteCustomAmount}
         showTargetObj={deleteItemProps.targetObj.name}
       />
       <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         // addCustomAmount={handleAddCustomAmount}
-        onUpdateUI={(customAmount: any) => setItemList((prevState: any) => [...prevState, customAmount])}
+        onUpdateUI={(customAmount: any) =>
+          setItemList((prevState: any) => [...prevState, customAmount])
+        }
         orderId={order.id}
         showNotification={showNotification}
       />
@@ -310,7 +312,7 @@ const EditReportOrder = ({
               control={
                 <Switch
                   checked={orderData?.isAffectInventory}
-                  onChange={handleAvoidInventory}
+                  onChange={onAvoidInventory}
                 />
               }
               label={
@@ -329,7 +331,7 @@ const EditReportOrder = ({
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       value={dayjs(orderData.deliveryDate)}
-                      onChange={(e: any) => handleDateChange(e)}
+                      onChange={(e: any) => onUpdateChange(e)}
                       sx={{
                         width: '100%',
                         height: '0.1%',
@@ -417,7 +419,7 @@ const EditReportOrder = ({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          {(item?.isCustomAmount || !item?.inventoryItemId) ? (
+                          {item?.isCustomAmount || !item?.inventoryItemId ? (
                             <IconButton
                               onClick={() =>
                                 setDeleteItemProps({
@@ -461,7 +463,7 @@ const EditReportOrder = ({
               <Grid item xs={12} textAlign="right">
                 <LoadingButton
                   variant="contained"
-                  onClick={handleUpdateItems}
+                  onClick={onUpdateItem}
                   loading={isSubmitting}
                 >
                   Save

@@ -61,10 +61,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         items: {
           include: {
             inventoryItem: true,
-          }
+          },
         },
       },
-    })
+    });
 
     // const newOrderTotalPrice = existingOrder.items.reduce((total, item) => {
     //   return total + item.price * item.quantity;
@@ -72,18 +72,21 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     if (!newlyAddedCustomAmountOrder) {
       return res.status(404).json({ error: 'Order not found' });
     }
-    
-    const orderTotal = generateOrderTotalPrice(newlyAddedCustomAmountOrder.items);
+
+    const orderTotal = generateOrderTotalPrice(
+      newlyAddedCustomAmountOrder.items,
+    );
 
     await prisma.orders.update({
       where: {
         id: orderId,
       },
       data: {
-        totalPrice: orderTotal,
+        totalPrice: orderTotal.totalPrice,
         subTotal: orderTotal.subTotal,
         PST: orderTotal.PST,
         GST: orderTotal.GST,
+        discount: orderTotal.discount,
       },
     });
     return res.status(200).json({

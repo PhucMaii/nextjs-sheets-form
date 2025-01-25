@@ -35,6 +35,7 @@ import {
   successColor,
   warningColor,
 } from '../../theme/color';
+import { amber, brown, grey, orange } from '@mui/material/colors';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -417,3 +418,26 @@ export const transactionStatusList = [
 ];
 
 export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];
+
+export const userCategorizedColor: any = {
+  Gold: {
+    color: amber[600],
+    backgroundColor: amber[100],
+  },
+  Silver: {
+    color: grey[600],
+    backgroundColor: grey[200],
+  },
+  Bronze: {
+    color: brown[500],
+    backgroundColor: orange[100],
+  },
+  None: {
+    color: 'black',
+    backgroundColor: 'white',
+  },
+  Inactive: {
+    color: 'black',
+    backgroundColor: grey[200],
+  },
+};

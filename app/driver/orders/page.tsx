@@ -14,7 +14,16 @@ import SearchIcon from '@mui/icons-material/Search';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
+<<<<<<< HEAD
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE, USER_ROLE } from '@/app/utils/enum';
+=======
+import {
+  API_URL,
+  ORDER_STATUS,
+  PAYMENT_TYPE,
+  USER_ROLE,
+} from '@/app/utils/enum';
+>>>>>>> e16e29ea5802012e7629a94d3eb14f3cf0903665
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
@@ -27,7 +36,11 @@ import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import InsertOrderToCodBoard from '@/app/admin/components/Modals/add/InsertOrderToCodBoard';
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> e16e29ea5802012e7629a94d3eb14f3cf0903665
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
   return (
@@ -172,8 +185,13 @@ export default function OrdersPage() {
 
   const initializeOrders = () => {
     if (currentTab === 'C.O.D') {
+<<<<<<< HEAD
       setOrders(board?.data?.orders);
       setDisplayOrders(board?.data?.orders)
+=======
+      setOrders(board?.data?.orders || []);
+      setDisplayOrders(board?.data?.orders || []);
+>>>>>>> e16e29ea5802012e7629a94d3eb14f3cf0903665
     } else if (currentTab === 'Delivered') {
       setOrders(ordersResponse?.data.deliveryOrders);
       const newDeliveredOrders = ordersResponse?.data.deliveryOrders.filter(
@@ -293,6 +311,7 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
+<<<<<<< HEAD
       {currentTab === 'C.O.D' && <InsertOrderToCodBoard 
         open={isOpenInsertToCOD}
         onClose={() => setIsOpenInsertToCOD(false)}
@@ -302,6 +321,19 @@ export default function OrdersPage() {
         mutateBoards={mutateBoard}
         role={USER_ROLE.DRIVER}
       />}
+=======
+      {currentTab === 'C.O.D' && board?.data?.id && (
+        <InsertOrderToCodBoard
+          open={isOpenInsertToCOD}
+          onClose={() => setIsOpenInsertToCOD(false)}
+          showNotification={showNotification}
+          currentDate={today}
+          boardId={board?.data?.id || -1}
+          mutateBoards={mutateBoard}
+          role={USER_ROLE.DRIVER}
+        />
+      )}
+>>>>>>> e16e29ea5802012e7629a94d3eb14f3cf0903665
       {NotificationComp}
       <LoadingModal open={isFetching} />
       <SearchModal
@@ -351,11 +383,19 @@ export default function OrdersPage() {
           })}
       </Box>
       <Box display="flex" justifyContent="flex-end" my={2}>
+<<<<<<< HEAD
         {currentTab === 'C.O.D' && 
             <Button variant="outlined" onClick={() => setIsOpenInsertToCOD(true)}>
               + Insert Paid Order
             </Button>
         }
+=======
+        {currentTab === 'C.O.D' && (
+          <Button variant="outlined" onClick={() => setIsOpenInsertToCOD(true)}>
+            + Insert Paid Order
+          </Button>
+        )}
+>>>>>>> e16e29ea5802012e7629a94d3eb14f3cf0903665
       </Box>
       <Grid container my={2} spacing={2}>
         <Grid item xs={6}>
@@ -399,7 +439,11 @@ export default function OrdersPage() {
           </ShadowSection>
         </Grid>
       </Grid>
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> e16e29ea5802012e7629a94d3eb14f3cf0903665
       {displayOrders?.length > 0 ? (
         <Virtuoso
           totalCount={displayOrders?.length || 0}
@@ -417,6 +461,10 @@ export default function OrdersPage() {
             );
           }}
         />
+      ) : currentTab === 'C.O.D' && !board?.data ? (
+        <>
+          <ErrorComponent errorText="Please wait for admin to create your board." />
+        </>
       ) : (
         <ErrorComponent errorText="No Order Found" />
       )}

@@ -1,4 +1,4 @@
-import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { updateSingleInventoryItem } from '../admin/orderedItems/single';
 import { sendEmail } from '../utils/email';
@@ -56,6 +56,11 @@ export const overrideOrder = async (
   try {
     const prisma = new PrismaClient();
 
+    // Check if user account is inactive
+    if (user?.type === USER_CATEGORIZED.INACTIVE) {
+      throw new Error('Client Account Is INACTIVE');
+    }
+
     const order = await prisma.orders.findUnique({
       where: {
         id: orderId,
@@ -65,13 +70,13 @@ export const overrideOrder = async (
       },
     });
 
+    // Check if user override order within correct date
     if (order && updatedBy.split(' - ')[0] === 'Client') {
       const isValidDate = checkOrderDeliveryDateValid(order.deliveryDate);
       if (!isValidDate.ok) {
         throw new Error('Cannot override order for past date');
       }
     }
-    let discount = 0;
     const itemList: any = [];
     for (const item of newItems) {
       const existingItem = await prisma.orderedItems.findFirst({
@@ -101,11 +106,6 @@ export const overrideOrder = async (
         },
       });
 
-      // Update new total price
-      if (newItem.isShowDiscount && newItem.prevPrice) {
-        discount += newItem.quantity * (newItem.prevPrice - newItem.price);
-      }
-
       itemList.push({
         ...newItem,
         totalPrice: newItem.quantity * newItem.price,
@@ -128,7 +128,11 @@ export const overrideOrder = async (
         id: orderId,
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            inventoryItem: true
+          }
+        },
       },
     });
 
@@ -148,7 +152,7 @@ export const overrideOrder = async (
         PST: total.PST,
         GST: total.GST,
         totalPrice: total.totalPrice,
-        discount,
+        discount: total.discount,
         note: newNote,
         isReplacement: updatedBy.split(' - ')[0] === 'Client' ? true : false,
         updateTime: new Date(),

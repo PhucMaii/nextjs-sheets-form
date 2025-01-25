@@ -7,6 +7,7 @@ import {
   checkOrderValidToAffectInventory,
   formatItemsWithTotalPrice,
 } from '@/pages/api/utils/order';
+import { getTodayDate } from '@/pages/api/utils/date';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -70,7 +71,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     //   `Admin - ${adminUpdate.clientName}`,
     // );
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
-    const updatedAt = new Date();
+    const updatedAt = getTodayDate();
+    const updatedTime = new Date(`${updatedAt.date} ${updatedAt.time}`);
 
     const updatedOrder = await prisma.orders.update({
       where: {
@@ -83,7 +85,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
         updatedBy: `Admin - ${adminUpdate.clientName}`,
-        updateTime: updatedAt,
+        updateTime: updatedTime,
       },
       include: {
         items: true,

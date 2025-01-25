@@ -1,6 +1,14 @@
 import StatusText, { COLOR_TYPE } from '@/app/admin/components/StatusText';
 import { ShadowSection } from '@/app/admin/reports/styled';
-import { AlertColor, Box, Button, Fab, Grid, IconButton, Typography } from '@mui/material';
+import {
+  AlertColor,
+  Box,
+  Button,
+  Fab,
+  Grid,
+  IconButton,
+  Typography,
+} from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
@@ -10,12 +18,13 @@ import { Item, Order } from '@/app/admin/orders/page';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
 import { OrderedItems } from '@/app/utils/type';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
-import { LoadingButton } from '@mui/lab';
+import { LoadingButton }  from '@mui/lab';
+import { renderType } from '@/app/lib/render';
 
 interface IProps {
   order: Order;
@@ -35,7 +44,7 @@ export default function OrderComponent({
   order,
   handleUpdateStatus,
   handleUpdateItem,
-  showNotification
+  showNotification,
 }: IProps) {
   const [confirmModalProps, setConfirmModalProps] = useState<any>({
     on: false,
@@ -103,7 +112,7 @@ export default function OrderComponent({
       showNotification('error', error.response.data.error);
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <ShadowSection mt={1}>
@@ -208,17 +217,27 @@ export default function OrderComponent({
           <Typography variant="subtitle1">#{order.id}</Typography>
         </Grid>
         <Grid item xs={6} textAlign="right">
-          <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
-            { order?.notInRoute &&
-              <LoadingButton loading={isLoading} color="error" onClick={onRemoveOrderFromBoard}>
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            gap={1}
+          >
+            {order?.notInRoute && (
+              <LoadingButton
+                loading={isLoading}
+                color="error"
+                onClick={onRemoveOrderFromBoard}
+              >
                 Remove
               </LoadingButton>
-            }
+            )}
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
               target="_blank"
               aria-disabled={
-                !order.user?.deliveryAddressLat || !order.user?.deliveryAddressLng
+                !order.user?.deliveryAddressLat ||
+                !order.user?.deliveryAddressLng
               }
               onClick={() => setIsOpenDetails(true)}
             >
@@ -240,8 +259,16 @@ export default function OrderComponent({
           <Button
             onClick={() => setIsOpenClientDetails(true)}
             variant="contained"
+            sx={{ textTransform: 'none' }}
           >
-            {order.user.clientName}
+            <Box display="flex" alignItems="center" gap={2}>
+              <Typography variant="body2" fontWeight="medium">
+                {order?.user?.clientName?.toUpperCase()}
+              </Typography>
+              {order?.user?.type &&
+                order?.user?.type !== USER_CATEGORIZED.NONE &&
+                renderType(order.user.type)}
+            </Box>
           </Button>
         </Grid>
         <Grid item xs={12}>

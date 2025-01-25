@@ -14,7 +14,12 @@ import {
 } from '@mui/material';
 import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
-import { API_URL, ORDER_STATUS, TYPE } from '@/app/utils/enum';
+import {
+  API_URL,
+  ORDER_STATUS,
+  TYPE,
+  USER_CATEGORIZED,
+} from '@/app/utils/enum';
 import { Order } from '../../orders/page';
 import EditReportOrder from '../Modals/edit/EditReportOrder';
 import axios from 'axios';
@@ -22,6 +27,7 @@ import LoadingModal from '../Modals/LoadingModal';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
+import { renderType } from '@/app/lib/render';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -124,6 +130,7 @@ const ClientOrdersTable = ({
         <TableCell variant="head" style={{ width: 100 }}>
           Invoice Id
         </TableCell>
+        <TableCell style={{ width: 100 }}>Type</TableCell>
         <TableCell variant="head" style={{ width: 100 }}>
           Client Id
         </TableCell>
@@ -166,6 +173,11 @@ const ClientOrdersTable = ({
           />
         </TableCell>
         <TableCell>{order.id}</TableCell>
+        <TableCell>
+          {order?.user?.type && order?.user?.type !== USER_CATEGORIZED.NONE
+            ? renderType(order.user.type)
+            : ''}
+        </TableCell>
         <TableCell>{order.user.clientId}</TableCell>
         <TableCell>{order.user.clientName}</TableCell>
         <TableCell>{order.deliveryDate}</TableCell>

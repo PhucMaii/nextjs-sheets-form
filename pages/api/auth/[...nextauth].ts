@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
 export const authOptions: NextAuthOptions = {
@@ -44,7 +45,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Credentials missing');
         } catch (error: any) {
           console.error('Authorize error: ', error);
-          return null;
+          throw new Error(error);
         }
       },
     }),
@@ -83,15 +84,23 @@ const loginUser = async (credentials: any) => {
       clientId: credentials.clientId,
     },
   });
+
+  // Handle user input incorrect data
   if (!user) {
     throw new Error('User does not Exist');
   }
+
+  // Handle user account is inactive
+  if (user?.type === USER_CATEGORIZED.INACTIVE) {
+    throw new Error('User Account Is Inactive');
+  }
+
   const isPasswordValid = await bcrypt.compare(
     credentials.password,
     user.password,
   );
   if (!isPasswordValid) {
-    throw new Error('Incorrect Credentials');
+    throw new Error('Your password is incorrect');
   }
   return {
     id: user.id + '',
