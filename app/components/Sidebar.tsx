@@ -41,7 +41,7 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(false);
+  // const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(false);
 
   const router = useRouter();
   const pathname: any = usePathname();
@@ -68,13 +68,13 @@ export default function Sidebar({ children }: PropTypes) {
     setCurrentTab(pathname);
   }, [pathname]);
 
-  useEffect(() => {
-    if (!isValidating && !user?.email) {
-      setIsOpenSnackbar(true);
-    } else {
-      setIsOpenSnackbar(false);
-    }
-  }, [isValidating, user]);
+  // useEffect(() => {
+  //   if (!isValidating && !user?.email) {
+  //     setIsOpenSnackbar(true);
+  //   } else {
+  //     setIsOpenSnackbar(false);
+  //   }
+  // }, [isValidating, user]);
 
   const handleChangeTab = (path: string) => {
     router.push(path);
@@ -147,7 +147,7 @@ export default function Sidebar({ children }: PropTypes) {
           {/* <HolidayText /> */}
           {children}
         </Box>
-        {isOpenSnackbar && (
+        {/* {isOpenSnackbar && (
           <Snackbar
             open={isOpenSnackbar}
             onClose={() => setIsOpenSnackbar(false)}
@@ -169,7 +169,7 @@ export default function Sidebar({ children }: PropTypes) {
               />
             </div>
           </Snackbar>
-        )}
+        )} */}
         <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
           <BottomNavigation
             sx={{ width: '100vw !important' }}
@@ -237,12 +237,12 @@ export default function Sidebar({ children }: PropTypes) {
             {content}
           </Drawer>
           <Box width="100%">
-            {isOpenSnackbar && (
+            {/* {isOpenSnackbar && (
               <EmailAlert
                 setIsOpenSnackbar={setIsOpenSnackbar}
                 showNotification={showNotification}
               />
-            )}
+            )} */}
             <Box
               display="flex"
               width="100%"
@@ -279,12 +279,12 @@ export default function Sidebar({ children }: PropTypes) {
           {content}
         </Drawer>
         <Box width="100%">
-          {isOpenSnackbar && (
+          {/* {isOpenSnackbar && (
             <EmailAlert
               setIsOpenSnackbar={setIsOpenSnackbar}
               showNotification={showNotification}
             />
-          )}
+          )} */}
           <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
             {/* <HolidayText /> */}
             {children}
