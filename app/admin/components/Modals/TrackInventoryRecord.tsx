@@ -1,4 +1,4 @@
-import { Modal, Typography } from '@mui/material';
+import { Box, Modal, Tab, Tabs, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
@@ -6,15 +6,17 @@ import TrackInventoryRecordTable from '../Tables/TrackInventoryRecordTable';
 import { SWRFetchData } from '@/app/utils/db';
 import { ACTION, API_URL } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import ErrorComponent from '../ErrorComponent';
 
 interface IProps extends ModalProps {}
 
 export default function TrackInventoryRecord({ open, onClose }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [tabIdx, setTabIdx] = useState<number>(0);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [actionRecords, _mutate, isValidating] = SWRFetchData(
-    `${API_URL.ADMIN}/actions?name=${ACTION.TRACK_INVENTORY}`,
+    `${API_URL.ADMIN}/actions?name=${tabIdx === 0 ? ACTION.TRACK_INVENTORY : ACTION.RECORD_INVENTORY}`,
   );
 
   useEffect(() => {
@@ -28,12 +30,20 @@ export default function TrackInventoryRecord({ open, onClose }: IProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal maxHeight="80vh" overflow="scroll" width="800px">
+        <Box sx={{borderBottom: 1, color: 'divider', mb: 2 }}>
+          <Tabs variant="fullWidth" value={tabIdx} onChange={(_e: any, value: number) => setTabIdx(value)}>
+            <Tab label="Track Inventory Record" value={0} />
+            <Tab label="Left Inventory Record" value={1} />
+          </Tabs>
+        </Box>
         <Typography variant="h6" textAlign="center" sx={{ mb: 2 }}>
-          Track Inventory Record
+          {tabIdx === 0 ? 'Track Inventory Record' : 'Left Inventory Record'}
         </Typography>
 
         {isLoading ? (
           <LoadingComponent />
+        ) : actionRecords?.data?.length === 0 ? (
+          <ErrorComponent errorText='Actions Not Available Yet' />
         ) : (
           <TrackInventoryRecordTable actionData={actionRecords?.data || []} />
         )}
