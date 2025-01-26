@@ -55,6 +55,7 @@ export default async function handler(
 
       let actionDescription: string = '';
 
+      // Loop thru each item and added in fifo to retrieve correct left quantity
       for (const item of inventoryItems) {
         const qty = item.fifo.reduce((acc: number, fifo: Fifo) => {
           return acc + fifo.quantity;
