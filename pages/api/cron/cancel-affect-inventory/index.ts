@@ -51,6 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         name: ACTION.CANCEL_AFFECT_INVENTORY,
         date: date,
+        description: 'Cancel Affect Inventory For Date: ' + threeDaysAgoString,
         createdAt: time,
         createdBy: USER_ROLE.SYSTEM,
       },

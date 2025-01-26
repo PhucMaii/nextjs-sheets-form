@@ -37,6 +37,7 @@ export default async function handler(
       todayDate.getDate() - 1,
     );
     const yesterdayString = YYYYMMDDFormat(yesterday);
+    console.log(yesterdayString, 'yesterdayString');
 
     // Check if action is taken already
     const recordInventoryAction = prisma.action.findFirst({
@@ -45,6 +46,7 @@ export default async function handler(
         date: yesterdayString,
       },
     });
+    console.log(recordInventoryAction, 'recordInventoryAction');
 
     if (!recordInventoryAction) {
       const inventoryItems = await prisma.inventoryItem.findMany({
@@ -63,7 +65,7 @@ export default async function handler(
         actionDescription += `${item.name}: ${qty} ||`;
       }
 
-      await prisma.action.create({
+      const newAction = await prisma.action.create({
         data: {
           name: ACTION.RECORD_INVENTORY,
           date: yesterdayString,
@@ -71,6 +73,8 @@ export default async function handler(
           createdAt: `${date.time} ${date.date}`,
         },
       });
+
+      console.log({newAction, actionDescription});
     }
 
     // 2. Track Inventory

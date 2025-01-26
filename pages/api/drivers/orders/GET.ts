@@ -1,6 +1,5 @@
 import {
   OrderedItems,
-  Orders,
   PrismaClient,
   Route,
   UserRoute,
@@ -10,7 +9,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
 import { days } from '@/app/lib/constant';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateManifest } from '../../utils/overview';
 
 interface IQuery {
@@ -82,6 +81,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             ORDER_STATUS.COMPLETED,
           ],
         },
+        userId: {
+          in: userIds,
+        }
       },
       include: {
         user: {
@@ -143,8 +145,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const manifest = generateManifest(deliveryOrders);
-    const codAmount = deliveryOrders.reduce((acc: number, order: Orders) => {
-      return acc + order.totalPrice;
+    const codAmount = deliveryOrders.reduce((acc: number, order: any) => {
+      if (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD) {
+        return acc + order.totalPrice;
+      } else {
+        return acc;
+      }
     }, 0);
 
     return res.status(200).json({
