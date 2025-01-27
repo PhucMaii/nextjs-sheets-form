@@ -31,7 +31,7 @@ import { renderType } from '@/app/lib/render';
 
 interface PropTypes {
   clientOrders: Order[];
-  // handleUpdateOrderUI: (updatedOrder: Order) => void;
+  onUpdateOrderUI?: (updatedOrder: Order) => void;
   // handleDeleteOrderUI: (deletedOrder: Order) => void;
   showNotification: (type: AlertColor, message: string) => void;
   selectedOrders: Order[];
@@ -48,6 +48,7 @@ const ClientOrdersTable = ({
   selectedOrders,
   handleSelectOrder,
   handleSelectAll,
+  onUpdateOrderUI,
   // subCategories,
   mutateOrders,
 }: PropTypes) => {
@@ -281,6 +282,8 @@ const ClientOrdersTable = ({
         onClose={() =>
           setOpenEdit((prevState: any) => ({ ...prevState, open: false }))
         }
+        mutateOrders={mutateOrders}
+        onUpdateOrderUI={onUpdateOrderUI}
       />
       <LoadingModal open={isLoading} />
       <Paper

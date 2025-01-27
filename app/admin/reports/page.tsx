@@ -308,32 +308,33 @@ export default function ReportPage() {
     onSelectAllOrders(selectedOrders, clientOrders, setSelectedOrders);
   };
 
-  // const handleUpdateOrderUI = (updatedOrder: Order) => {
-  //   // update base order list
-  //   const newBaseOrderList = baseClientOrders.map((order: Order) => {
-  //     if (order.id === updatedOrder.id) {
-  //       return updatedOrder;
-  //     }
-  //     return order;
-  //   });
+  const onUpdateOrderUI = (updatedOrder: Order) => {
+    console.log(updatedOrder, 'updated order');
+    // update base order list
+    const newBaseOrderList = baseClientOrders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
 
-  //   // update current displaying order list
-  //   const newOrderList = clientOrders.map((order: Order) => {
-  //     if (order.id === updatedOrder.id) {
-  //       return updatedOrder;
-  //     }
-  //     return order;
-  //   });
+    // update current displaying order list
+    const newOrderList = clientOrders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
 
-  //   // update completed order list
-  //   const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-  //     return order.status === ORDER_STATUS.COMPLETED;
-  //   });
+    // update completed order list
+    const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
+      return order.status === ORDER_STATUS.COMPLETED;
+    });
 
-  //   setBaseClientOrders(newBaseOrderList);
-  //   setClientOrders(newOrderList);
-  //   setUnpaidOrders(newUnpaidOrders);
-  // };
+    setBaseClientOrders(newBaseOrderList);
+    setClientOrders(newOrderList);
+    setUnpaidOrders(newUnpaidOrders);
+  };
 
   const handleDeleteSelectedOrders = async () => {
     try {
@@ -771,6 +772,7 @@ export default function ReportPage() {
               handleSelectAll={handleSelectAll}
               // subCategories={subCategories?.data || []}
               mutateOrders={mutateOrders}
+              onUpdateOrderUI={onUpdateOrderUI}
             />
           ) : (
             <ErrorComponent errorText="No Order Available" />

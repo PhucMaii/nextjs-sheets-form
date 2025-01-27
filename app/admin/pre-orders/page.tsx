@@ -17,7 +17,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { days, limitOrderHour } from '@/app/lib/constant';
+import { days, limitOrderHour, limitOrderMinutes } from '@/app/lib/constant';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import ReceiptIcon from '@mui/icons-material/Receipt';
@@ -65,8 +65,14 @@ export default function ScheduledOrderPage() {
   const [dayIndex, setDayIndex] = useState<number>(() => {
     const dateObj = new Date();
     // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
+    if (dateObj.getHours() > limitOrderHour) {
       dateObj.setDate(dateObj.getDate() + 1);
+    }
+
+    if (dateObj.getHours() === limitOrderHour) {
+      if (dateObj.getMinutes() > limitOrderMinutes) {
+        dateObj.setDate(dateObj.getDate() + 1);
+      }
     }
 
     return dateObj.getDay();
@@ -83,8 +89,14 @@ export default function ScheduledOrderPage() {
     // format initial date
     const dateObj = new Date();
     // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() >= limitOrderHour) {
+    if (dateObj.getHours() > limitOrderHour) {
       dateObj.setDate(dateObj.getDate() + 1);
+    }
+
+    if (dateObj.getHours() === limitOrderHour) {
+      if (dateObj.getMinutes() > limitOrderMinutes) {
+        dateObj.setDate(dateObj.getDate() + 1);
+      }
     }
 
     const formattedDate = YYYYMMDDFormat(dateObj);

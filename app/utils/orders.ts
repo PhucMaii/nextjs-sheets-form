@@ -10,9 +10,12 @@ export const updateStatus = async (
   showNotification: any,
 ) => {
   try {
+    const orderIds = selectedOrders.map((order: Order) => {
+      return order.id;
+    })
     const response = await axios.put(`${API_URL.ADMIN}/orders/status`, {
       status,
-      updatedOrders: selectedOrders,
+      updatedOrderIds: orderIds,
     });
 
     if (response.data.error) {
