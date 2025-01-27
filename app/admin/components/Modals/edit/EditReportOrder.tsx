@@ -52,7 +52,7 @@ const EditReportOrder = ({
   open,
   onClose,
   mutateOrders,
-  onUpdateOrderUI
+  onUpdateOrderUI,
 }: PropTypes) => {
   // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deleteItemProps, setDeleteItemProps] = useState<any>({

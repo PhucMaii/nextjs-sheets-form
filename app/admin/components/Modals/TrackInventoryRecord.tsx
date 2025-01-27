@@ -30,8 +30,12 @@ export default function TrackInventoryRecord({ open, onClose }: IProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal maxHeight="80vh" overflow="scroll" width="800px">
-        <Box sx={{borderBottom: 1, color: 'divider', mb: 2 }}>
-          <Tabs variant="fullWidth" value={tabIdx} onChange={(_e: any, value: number) => setTabIdx(value)}>
+        <Box sx={{ borderBottom: 1, color: 'divider', mb: 2 }}>
+          <Tabs
+            variant="fullWidth"
+            value={tabIdx}
+            onChange={(_e: any, value: number) => setTabIdx(value)}
+          >
             <Tab label="Track Inventory Record" value={0} />
             <Tab label="Left Inventory Record" value={1} />
           </Tabs>
@@ -43,7 +47,7 @@ export default function TrackInventoryRecord({ open, onClose }: IProps) {
         {isLoading ? (
           <LoadingComponent />
         ) : actionRecords?.data?.length === 0 ? (
-          <ErrorComponent errorText='Actions Not Available Yet' />
+          <ErrorComponent errorText="Actions Not Available Yet" />
         ) : (
           <TrackInventoryRecordTable actionData={actionRecords?.data || []} />
         )}

@@ -1,9 +1,4 @@
-import {
-  OrderedItems,
-  PrismaClient,
-  Route,
-  UserRoute,
-} from '@prisma/client';
+import { OrderedItems, PrismaClient, Route, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
@@ -83,7 +78,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         userId: {
           in: userIds,
-        }
+        },
       },
       include: {
         user: {

@@ -75,7 +75,7 @@ export default async function handler(
         },
       });
 
-      console.log({newAction, actionDescription});
+      console.log({ newAction, actionDescription });
     }
 
     // 2. Track Inventory

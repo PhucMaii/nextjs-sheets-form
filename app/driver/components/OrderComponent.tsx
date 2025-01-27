@@ -23,7 +23,7 @@ import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal
 import { OrderedItems } from '@/app/utils/type';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
-import { LoadingButton }  from '@mui/lab';
+import { LoadingButton } from '@mui/lab';
 import { renderType } from '@/app/lib/render';
 
 interface IProps {

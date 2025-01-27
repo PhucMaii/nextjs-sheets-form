@@ -130,8 +130,8 @@ export const overrideOrder = async (
       include: {
         items: {
           include: {
-            inventoryItem: true
-          }
+            inventoryItem: true,
+          },
         },
       },
     });

@@ -408,7 +408,7 @@ export default function OrdersPage() {
       {displayOrders?.length > 0 ? (
         <Virtuoso
           totalCount={displayOrders?.length || 0}
-          style={{ height: virtuosoHeight, marginTop: 2}}
+          style={{ height: virtuosoHeight, marginTop: 2 }}
           data={displayOrders}
           itemContent={(index, order) => {
             return (

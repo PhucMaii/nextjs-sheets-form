@@ -80,7 +80,11 @@ export default function AddOrder({
   const [note, setNote] = useState<string>('');
   const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
 
-  const [clientItems, _mutate, isValidating] = SWRFetchData(clientValue ? `${API_URL.CLIENTS}/items?categoryId=${clientValue?.categoryId}` : '');
+  const [clientItems, _mutate, isValidating] = SWRFetchData(
+    clientValue
+      ? `${API_URL.CLIENTS}/items?categoryId=${clientValue?.categoryId}`
+      : '',
+  );
 
   useEffect(() => {
     if (!clientItems && isValidating) {
@@ -185,7 +189,7 @@ export default function AddOrder({
 
       setItemList(quantitySetUp);
     }
-  }
+  };
 
   // const copyLastOrder = async () => {
   //   try {
