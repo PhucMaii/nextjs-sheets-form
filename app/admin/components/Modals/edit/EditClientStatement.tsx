@@ -128,6 +128,7 @@ export default function EditClientStatement({
                 )
               }
               mutateOrders={mutateOrders}
+              onUpdateOrderUI={mutateOrders}
             />
           )}
         </BoxModal>
