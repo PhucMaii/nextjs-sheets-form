@@ -101,57 +101,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           });
         }
 
-        // for (const item of items) {
-        //   // first, find if there is any of that item
-        //   const existedItem = await prisma.orderedItems.findFirst({
-        //     where: {
-        //       scheduledOrderId: sameDayOrder.id,
-        //       name: item.name,
-        //     },
-        //   });
-
-        //   // if yes, then update it, otherwise create new items
-        //   if (existedItem) {
-        //     await prisma.orderedItems.updateMany({
-        //       where: {
-        //         scheduledOrderId: sameDayOrder.id,
-        //         inventoryItemId: item.inventoryItemId,
-        //         inventoryUnitId: item.inventoryUnitId,
-        //         name: item.name,
-        //       },
-        //       data: {
-        //         price: item.price,
-        //         quantity: item.quantity,
-        //       },
-        //     });
-        //   } else {
-        //     await prisma.orderedItems.create({
-        //       data: {
-        //         name: item.name,
-        //         price: item.price,
-        //         quantity: item.quantity,
-        //         scheduledOrderId: sameDayOrder.id,
-        //         inventoryItemId: item.inventoryItemId,
-        //         inventoryUnitId: item.inventoryUnitId,
-        //       },
-        //     });
-        //   }
-        // }
-
-        // update schedule order
-        // const updatedScheduleOrder = await prisma.scheduleOrders.update({
-        //   where: {
-        //     id: sameDayOrder.id,
-        //   },
-        //   data: {
-        //     totalPrice: newTotalPrice,
-        //   },
-        //   include: {
-        //     items: true,
-        //     user: true,
-        //   },
-        // });
-
         // check then add target client into selected route
         const clientInUserRoute = await prisma.userRoute.findUnique({
           where: {
@@ -187,34 +136,51 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // Create items for the schedule order
-    for (const item of items) {
-      const existedItem = await prisma.orderedItems.findMany({
-        where: {
-          name: item.name,
-          scheduledOrderId: newScheduleOrder.id,
-        },
-      });
-
-      if (existedItem.length > 0) {
-        return res.status(500).json({
-          error: `Item ${item.name} already existed in schedule order ${newScheduleOrder.id}`,
-        });
+    const newItems = items.map((item: any) => {
+      return {
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        isShowDiscount: item?.isShowDiscount,
+        prevPrice: item?.prevPrice,
+        scheduledOrderId: newScheduleOrder.id,
+        inventoryItemId: item.inventoryItemId,
+        inventoryUnitId: item.inventoryUnitId,
       }
+    });
 
-      await prisma.orderedItems.create({
-        data: {
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          isShowDiscount: item?.isShowDiscount,
-          prevPrice: item?.prevPrice,
-          scheduledOrderId: newScheduleOrder.id,
-          inventoryItemId: item.inventoryItemId,
-          inventoryUnitId: item.inventoryUnitId,
-        },
-      });
-    }
+    await prisma.orderedItems.createMany({
+      data: newItems,
+    });
+
+    // Create items for the schedule order
+    // for (const item of items) {
+    //   const existedItem = await prisma.orderedItems.findMany({
+    //     where: {
+    //       name: item.name,
+    //       scheduledOrderId: newScheduleOrder.id,
+    //     },
+    //   });
+
+    //   if (existedItem.length > 0) {
+    //     return res.status(500).json({
+    //       error: `Item ${item.name} already existed in schedule order ${newScheduleOrder.id}`,
+    //     });
+    //   }
+
+    //   await prisma.orderedItems.create({
+    //     data: {
+    //       name: item.name,
+    //       price: item.price,
+    //       quantity: item.quantity,
+    //       isShowDiscount: item?.isShowDiscount,
+    //       prevPrice: item?.prevPrice,
+    //       scheduledOrderId: newScheduleOrder.id,
+    //       inventoryItemId: item.inventoryItemId,
+    //       inventoryUnitId: item.inventoryUnitId,
+    //     },
+    //   });
+    // }
 
     // check then add target client into selected route
     const clientInUserRoute = await prisma.userRoute.findUnique({
