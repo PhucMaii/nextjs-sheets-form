@@ -169,7 +169,8 @@ export const months = [
   'December',
 ];
 
-export const limitOrderHour = 5;
+export const limitOrderHour = 6;
+export const limitOrderMinutes = 30;
 
 export const adminTabs = {
   Admin: [

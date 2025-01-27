@@ -154,6 +154,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         subTotal: orderTotalPrice.subTotal,
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
+        discount: orderTotalPrice.discount,
         updatedBy: `Admin - ${adminUpdate.clientName}`,
         updateTime,
       },
