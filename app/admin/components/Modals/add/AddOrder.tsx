@@ -43,11 +43,11 @@ import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
 import moment from 'moment';
 import ConfirmModal from '../ConfirmModal';
-import { grey } from '@mui/material/colors';
 import SellingItemName from '@/app/components/SellingItemName';
 import AddCustomAmount from './AddCustomAmount';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import order from '@/pages/api/order';
+import { SWRFetchData } from '@/app/utils/db';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -80,6 +80,18 @@ export default function AddOrder({
   const [note, setNote] = useState<string>('');
   const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
 
+  const [clientItems, _mutate, isValidating] = SWRFetchData(clientValue ? `${API_URL.CLIENTS}/items?categoryId=${clientValue?.categoryId}` : '');
+
+  useEffect(() => {
+    if (!clientItems && isValidating) {
+      setIsFetching(true);
+      setItemList([]);
+    } else {
+      setIsFetching(false);
+      initializeItems();
+    }
+  }, [clientItems]);
+
   useEffect(() => {
     if (unavailableRange) {
       setIsOrderOnVacationOpen(true);
@@ -92,13 +104,13 @@ export default function AddOrder({
     }
   }, [currentDate]);
 
-  useEffect(() => {
-    if (clientValue) {
-      fetchClientItems();
-    } else {
-      setItemList([]);
-    }
-  }, [clientValue]);
+  // useEffect(() => {
+  //   if (clientValue) {
+  //     fetchClientItems();
+  //   } else {
+  //     setItemList([]);
+  //   }
+  // }, [clientValue]);
 
   const addOrder = async (
     clientValue: UserType | null,
@@ -160,6 +172,20 @@ export default function AddOrder({
       return;
     }
   };
+
+  const initializeItems = () => {
+    if (clientItems) {
+      const quantitySetUp = clientItems.data.map((item: IItem) => {
+        return {
+          ...item,
+          quantity: 0,
+          totalPrice: 0,
+        };
+      });
+
+      setItemList(quantitySetUp);
+    }
+  }
 
   // const copyLastOrder = async () => {
   //   try {

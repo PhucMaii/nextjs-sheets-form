@@ -73,8 +73,8 @@ model Item {
 
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
 
   @@index([categoryId])
 }
@@ -309,7 +309,7 @@ model VendorItem {
   id              Int    @id @default(autoincrement())
   inventoryItemId Int
   vendorId        Int
-  quantity        Int // hidden
+  quantity        Float // hidden
   createdAt       String
   createdBy       String
 
@@ -323,7 +323,7 @@ model Fifo {
   id              Int    @id @default(autoincrement())
   inventoryItemId Int
   vendorItemId    Int
-  quantity        Int
+  quantity        Float
   createdAt       String
   createdBy       String
 
@@ -337,7 +337,7 @@ model InventoryUnit {
   vendorItemId Int
   unit         String
   unitPrice    Float  @db.Double
-  ratio        Int
+  ratio        Float
   createdAt    String
   createdBy    String
   sellingItem  Item[]
