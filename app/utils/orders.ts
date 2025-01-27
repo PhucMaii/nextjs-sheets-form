@@ -12,7 +12,7 @@ export const updateStatus = async (
   try {
     const orderIds = selectedOrders.map((order: Order) => {
       return order.id;
-    })
+    });
     const response = await axios.put(`${API_URL.ADMIN}/orders/status`, {
       status,
       updatedOrderIds: orderIds,

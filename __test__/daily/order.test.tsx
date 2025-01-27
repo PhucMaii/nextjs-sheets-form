@@ -6,7 +6,7 @@ describe('Check for incorrect orders', () => {
   const prisma = new PrismaClient();
   const startDate = new Date('2024-12-02');
   const endDate = getTodayDate();
-  const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`)
+  const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`);
   endDateFormatted.setDate(endDateFormatted.getDate() + 1);
   const decemberDayList = generateListOfDateString(startDate, endDateFormatted);
   console.log(decemberDayList, 'december day list');
@@ -75,7 +75,10 @@ describe('Check for incorrect orders', () => {
 
     const incorrectOrders = [];
     for (const order of ordersInDecember) {
-      const subTotalWithTax = (order?.subTotal || order?.totalPrice) + (order?.PST || 0) + (order?.GST || 0);
+      const subTotalWithTax =
+        (order?.subTotal || order?.totalPrice) +
+        (order?.PST || 0) +
+        (order?.GST || 0);
 
       if (subTotalWithTax?.toFixed(2) !== order.totalPrice?.toFixed(2)) {
         incorrectOrders.push(order);
@@ -84,7 +87,5 @@ describe('Check for incorrect orders', () => {
 
     console.log(incorrectOrders, 'incorrectOrders');
     expect(incorrectOrders.length).toBe(0);
-
-
-  }, 10000)
+  }, 10000);
 });

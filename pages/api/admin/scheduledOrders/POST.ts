@@ -146,7 +146,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         scheduledOrderId: newScheduleOrder.id,
         inventoryItemId: item.inventoryItemId,
         inventoryUnitId: item.inventoryUnitId,
-      }
+      };
     });
 
     await prisma.orderedItems.createMany({

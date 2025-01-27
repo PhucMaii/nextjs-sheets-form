@@ -5,7 +5,11 @@ const prisma = new PrismaClient();
 //   const koreanRange = /[\uAC00-\uD7AF]/;
 //   return koreanRange.test(text);
 // };
-async function main() {}
+async function main() {
+  const units = await prisma.inventoryUnit.findMany();
+
+  console.log(units);
+}
 
 main()
   .then(() => prisma.$disconnect())
