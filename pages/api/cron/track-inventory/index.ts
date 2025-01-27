@@ -40,7 +40,7 @@ export default async function handler(
     console.log(yesterdayString, 'yesterdayString');
 
     // Check if action is taken already
-    const recordInventoryAction = prisma.action.findFirst({
+    const recordInventoryAction = await prisma.action.findFirst({
       where: {
         name: ACTION.RECORD_INVENTORY,
         date: yesterdayString,

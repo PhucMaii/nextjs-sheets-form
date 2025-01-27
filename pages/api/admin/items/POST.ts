@@ -48,6 +48,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const user = await getUserInfo(req, res);
     const createdBy = `Admin - ${user?.clientName}`;
 
+    console.log(newItem.units);
+
     for (const vItem of selectedInvetoryItem.vendorItem) {
       const clientVendorItemUnits = newItem.units.filter(
         (unit: any) => unit.vendorItemId === vItem.id,

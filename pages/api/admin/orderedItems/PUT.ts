@@ -7,6 +7,7 @@ import { gstRate, pstRate } from '@/app/lib/constant';
 import { getDifferentItems } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
+import { formatItemsWithTotalPrice } from '../../utils/order';
 
 interface UpdatedItem {
   id: number;
@@ -144,7 +145,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const updateTime = new Date(`${updatedAt.date} ${updatedAt.time}`);
     console.log(updateTime, 'update time');
 
-    await prisma.orders.update({
+    const orderUpdated = await prisma.orders.update({
       where: {
         id: orderId,
       },
@@ -157,11 +158,34 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         updatedBy: `Admin - ${adminUpdate.clientName}`,
         updateTime,
       },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          },
+        },
+        user: {
+          include: {
+            category: true,
+            routes: true,
+            preference: true,
+          },
+        },
+      },
     });
+
+    const formattedItems = formatItemsWithTotalPrice(orderUpdated?.items);
 
     // First case: No update neither create new category
     if (updateOption === UpdateOption.NONE || !updateOption) {
       return res.status(200).json({
+        data: {
+          ...orderUpdated?.user,
+          ...orderUpdated,
+          items: formattedItems,
+        },
         message: 'Update Data Successfully',
       });
     }
@@ -356,7 +380,38 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         message: 'Category Price Updated Succesfully',
       });
     }
+
+    const updatedOrder = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          },
+        },
+        user: {
+          include: {
+            category: true,
+            routes: true,
+            preference: true,
+          },
+        },
+      },
+    });
+
+    const itemFormatted = formatItemsWithTotalPrice([updatedOrder?.items]);
+
     return res.status(200).json({
+      data: {
+        ...updatedOrder?.user,
+        ...updatedOrder,
+        id: updatedOrder?.id,
+        items: itemFormatted,
+      },
       message: 'Updating Progress Has Done',
     });
   } catch (error: any) {
