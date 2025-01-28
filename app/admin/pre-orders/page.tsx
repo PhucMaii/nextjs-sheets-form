@@ -47,6 +47,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { SWRFetchData } from '@/app/utils/db';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import useNotification from '@/hooks/useNotification';
+import ReArrangementModal from '../components/Modals/ReArrangementModal';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -60,6 +61,7 @@ export default function ScheduledOrderPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSavingArrangement, setIsSavingArrangement] =
     useState<boolean>(false);
+  const [isOpenReArrangement, setIsOpenReArrangement] = useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [dayIndex, setDayIndex] = useState<number>(() => {
@@ -544,6 +546,11 @@ export default function ScheduledOrderPage() {
         progress={preOrderProgress}
         scheduleOrderList={selectedOrders}
       />
+      <ReArrangementModal 
+        open={isOpenReArrangement}
+        onClose={() => setIsOpenReArrangement(false)}
+        scheduledOrders={orderList || []}
+      />
       {routes.length > 0 && (
         <EditRoute
           open={isEditRouteOpen}
@@ -764,9 +771,9 @@ export default function ScheduledOrderPage() {
                   baseOrderList.length === 0 ||
                   orderList.length !== baseOrderList.length
                 }
-                onClick={saveOrderArrangement}
+                onClick={() => setIsOpenReArrangement(true)}
               >
-                Save order
+                Re Arrange
               </Button>
             </Grid>
             <Grid item xs={12}>
