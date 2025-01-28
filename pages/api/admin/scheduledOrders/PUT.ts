@@ -27,6 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     console.log(items, 'items');
 
+    // CASE: Move to new route
     if (oldRouteId && newRouteId) {
       // remove from user route
       const existingUserRoute = await prisma.userRoute.findUnique({
@@ -44,6 +45,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
+      // Delete old route connection
       await prisma.userRoute.delete({
         where: {
           userId_routeId: {
@@ -53,6 +55,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      // Create new route connection
       await prisma.userRoute.create({
         data: {
           userId: user.id,
