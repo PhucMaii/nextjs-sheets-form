@@ -25,8 +25,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       newRouteId,
     } = req.body as BodyTypes;
 
-    console.log(items, 'items');
-
     // CASE: Move to new route
     if (oldRouteId && newRouteId) {
       // remove from user route

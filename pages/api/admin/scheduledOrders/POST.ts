@@ -1,4 +1,5 @@
-import { PrismaClient, ScheduleOrders } from '@prisma/client';
+import { ScheduledOrder } from '@/app/utils/type';
+import { PrismaClient, ScheduleOrders, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -19,6 +20,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           },
           include: {
             items: true,
+            positionIndex: true,
           },
         },
         routes: true,
@@ -49,7 +51,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
       );
 
-      // Override same day schedule order if it existed
+      // Override same route schedule order if it existed
       if (sameDayOrder) {
         // Create schedule order for that day
         const newScheduleOrder = await prisma.scheduleOrders.create({
@@ -60,6 +62,25 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
+        // Create position index for added pre order
+        // If owner/client of new order existed in selected route -> use prev index
+        // If owner/client of new order does not exist in selected route -> get the last index of that route
+        // Should have a test to check if any scheduledOrder has position index of -1 -> bugs
+        const routeScheduledOrders = await getRouteScheduledOrders(routeId);
+        const sameRouteOrder = routeScheduledOrders.find(
+          (scheduledOrder: ScheduledOrder) => scheduledOrder.userId === userId,
+        );
+
+        await prisma.positionIndex.create({
+          data: {
+            index: sameRouteOrder
+              ? sameRouteOrder.positionIndex.index || -1
+              : routeScheduledOrders.length,
+            scheduledOrderId: newScheduleOrder.id,
+          },
+        });
+
+        // Create items for added pre order
         await prisma.orderedItems.createMany({
           data: items.map((item: any) => ({
             name: item.name,
@@ -136,6 +157,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // TEMPORARY: Get numbers of orders in that route and place newly added order at the last item
+    const routeScheduledOrders = await getRouteScheduledOrders(Number(routeId));
+
+    // Create position index for added pre order
+    await prisma.positionIndex.create({
+      data: {
+        scheduledOrderId: newScheduleOrder.id,
+        index: routeScheduledOrders.length, // Last index
+      },
+    });
+
     const newItems = items.map((item: any) => {
       return {
         name: item.name,
@@ -152,36 +184,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     await prisma.orderedItems.createMany({
       data: newItems,
     });
-
-    // Create items for the schedule order
-    // for (const item of items) {
-    //   const existedItem = await prisma.orderedItems.findMany({
-    //     where: {
-    //       name: item.name,
-    //       scheduledOrderId: newScheduleOrder.id,
-    //     },
-    //   });
-
-    //   if (existedItem.length > 0) {
-    //     return res.status(500).json({
-    //       error: `Item ${item.name} already existed in schedule order ${newScheduleOrder.id}`,
-    //     });
-    //   }
-
-    //   await prisma.orderedItems.create({
-    //     data: {
-    //       name: item.name,
-    //       price: item.price,
-    //       quantity: item.quantity,
-    //       isShowDiscount: item?.isShowDiscount,
-    //       prevPrice: item?.prevPrice,
-    //       scheduledOrderId: newScheduleOrder.id,
-    //       inventoryItemId: item.inventoryItemId,
-    //       inventoryUnitId: item.inventoryUnitId,
-    //     },
-    //   });
-    // }
-
     // check then add target client into selected route
     const clientInUserRoute = await prisma.userRoute.findUnique({
       where: {
@@ -222,3 +224,52 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+export const getRouteScheduledOrders = async (routeId: number) => {
+  try {
+    const prisma = new PrismaClient();
+
+    const route = await prisma.route.findUnique({
+      where: {
+        id: routeId,
+      },
+      include: {
+        clients: {
+          include: {
+            user: {
+              include: {
+                scheduleOrders: {
+                  include: {
+                    positionIndex: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!route) {
+      console.log('Route Not Found');
+      throw new Error('Route Not Found');
+    }
+
+    const scheduledOrders = route.clients.map((client: UserRoute | any) => {
+      if (client.user.scheduleOrders.length === 0) {
+        return null;
+      }
+      const routePreOrder = client.user.scheduleOrders.find(
+        (scheduledOrder: ScheduledOrder) => {
+          return scheduledOrder.day === route.day;
+        },
+      );
+
+      return routePreOrder;
+    });
+
+    return scheduledOrders;
+  } catch (error: any) {
+    throw new Error('Error getting route scheduled orders', error);
+  }
+};

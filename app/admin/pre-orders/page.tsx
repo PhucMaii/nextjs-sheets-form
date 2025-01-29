@@ -36,12 +36,10 @@ import EditDeliveryDate from '../components/Modals/edit/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';
 import AddRoute from '../components/Modals/add/AddRoute';
-import { mutate } from 'swr';
 import { UserRoute } from '@prisma/client';
 import EditRoute from '../components/Modals/edit/EditRoute';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import ScheduleOrder from '../components/Reorder/ScheduleOrder';
-import LoadingModal from '../components/Modals/LoadingModal';
 import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import { SWRFetchData } from '@/app/utils/db';
@@ -59,8 +57,8 @@ export default function ScheduledOrderPage() {
   const [isEditRouteOpen, setIsEditRouteOpen] = useState<boolean>(false);
   const [isFetchingRoute, setIsFetchingRoute] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSavingArrangement, setIsSavingArrangement] =
-    useState<boolean>(false);
+  // const [isSavingArrangement, setIsSavingArrangement] =
+  //   useState<boolean>(false);
   const [isOpenReArrangement, setIsOpenReArrangement] = useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
@@ -454,55 +452,55 @@ export default function ScheduledOrderPage() {
     setRoutes(newRoutes);
   };
 
-  const saveOrderArrangement = async () => {
-    try {
-      setIsSavingArrangement(true);
-      const newListWithId = orderList.map(
-        (order: ScheduledOrder, index: number) => {
-          const newOrderId = baseOrderList[index].id;
-          return { id: order.id, newId: newOrderId };
-        },
-      );
+  // const saveOrderArrangement = async () => {
+  //   try {
+  //     setIsSavingArrangement(true);
+  //     const newListWithId = orderList.map(
+  //       (order: ScheduledOrder, index: number) => {
+  //         const newOrderId = baseOrderList[index].id;
+  //         return { id: order.id, newId: newOrderId };
+  //       },
+  //     );
 
-      const updatedIdList = newListWithId.map((order: any) => order.id);
+  //     const updatedIdList = newListWithId.map((order: any) => order.id);
 
-      const response = await axios.put(API_URL.SCHEDULED_ORDER, {
-        removedOrderIdList: updatedIdList,
-        updatedOrderList: newListWithId,
-        reArrangement: true,
-      });
+  //     const response = await axios.put(API_URL.SCHEDULED_ORDER, {
+  //       removedOrderIdList: updatedIdList,
+  //       updatedOrderList: newListWithId,
+  //       reArrangement: true,
+  //     });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        setIsSavingArrangement(false);
-        return;
-      }
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       setIsSavingArrangement(false);
+  //       return;
+  //     }
 
-      // const newRoutes = await fetchRoutes();
+  //     // const newRoutes = await fetchRoutes();
 
-      // await fetchOrders(newRoutes);
-      // mutateOrders();
-      const clientIds = routes[routeIndex].clients?.map(
-        (userRoute: UserRoute) => {
-          return userRoute.userId;
-        },
-      );
+  //     // await fetchOrders(newRoutes);
+  //     // mutateOrders();
+  //     const clientIds = routes[routeIndex].clients?.map(
+  //       (userRoute: UserRoute) => {
+  //         return userRoute.userId;
+  //       },
+  //     );
 
-      mutate(
-        `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
-      );
+  //     mutate(
+  //       `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
+  //     );
 
-      setIsSavingArrangement(false);
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('There was an error in rearrangement: ', error);
-      showNotification(
-        'error',
-        'There was an error in rearrangement: ' + error,
-      );
-      setIsSavingArrangement(false);
-    }
-  };
+  //     setIsSavingArrangement(false);
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('There was an error in rearrangement: ', error);
+  //     showNotification(
+  //       'error',
+  //       'There was an error in rearrangement: ' + error,
+  //     );
+  //     setIsSavingArrangement(false);
+  //   }
+  // };
 
   const switchDay = (newValue: number) => {
     setRouteIndex(0);
@@ -513,7 +511,7 @@ export default function ScheduledOrderPage() {
   return (
     <Sidebar>
       {NotificationComp}
-      <LoadingModal open={isSavingArrangement} />
+      {/* <LoadingModal open={isSavingArrangement} /> */}
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
@@ -550,6 +548,7 @@ export default function ScheduledOrderPage() {
         open={isOpenReArrangement}
         onClose={() => setIsOpenReArrangement(false)}
         scheduledOrders={orderList || []}
+        showNotification={showNotification}
       />
       {routes.length > 0 && (
         <EditRoute

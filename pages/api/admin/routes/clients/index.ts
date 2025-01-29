@@ -45,7 +45,13 @@ export default async function handler(
             routes: true,
           },
         },
+        positionIndex: true,
       },
+      orderBy: {
+        positionIndex: {
+          index: 'asc'
+        }
+      }
     });
 
     const routeListWithUserId = routeList.reduce((acc: any, route: any) => {

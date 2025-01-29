@@ -9,6 +9,7 @@ import {
   InventoryItem,
   InventoryUnit,
   PaymentMethod,
+  PositionIndex,
   Route,
   User,
   UserRoute,
@@ -155,6 +156,7 @@ export interface ScheduledOrder {
   day: string;
   alreadyOrder?: boolean;
   blocked?: boolean;
+  positionIndex: PositionIndex;
 }
 
 export interface IRoutes extends Route {
