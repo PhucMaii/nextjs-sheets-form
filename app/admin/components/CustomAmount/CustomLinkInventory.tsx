@@ -187,7 +187,7 @@ const CustomLinkInventory = ({
 
         <Typography>Price</Typography>
         <TextField
-          label="Name"
+          label="Price"
           type="number"
           value={customAmount.price}
           onChange={(e) =>

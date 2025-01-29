@@ -12,6 +12,7 @@ import {
   ItemPreference,
   ItemType,
   PaymentMethod,
+  PositionIndex,
   Route,
   User,
   UserRoute,
@@ -101,7 +102,7 @@ export interface UserType {
   // subCategory?: any;
   category?: any;
   preference?: any;
-  type?: USER_CATEGORIZED
+  type?: USER_CATEGORIZED;
 }
 
 export interface ICategory extends Category {
@@ -158,6 +159,7 @@ export interface ScheduledOrder {
   day: string;
   alreadyOrder?: boolean;
   blocked?: boolean;
+  positionIndex: PositionIndex;
 }
 
 export interface IRoutes extends Route {

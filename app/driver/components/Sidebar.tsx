@@ -177,7 +177,7 @@ export default function Sidebar({ children }: IProps) {
               display="flex"
               width="100%"
               flexDirection="column"
-              m={2}
+              p={2}
               gap={2}
             >
               {children}

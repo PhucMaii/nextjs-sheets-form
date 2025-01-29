@@ -156,6 +156,7 @@ export default function EditScheduleOrder({
       setIsSubmitting(true);
       const response = await axios.put(API_URL.SCHEDULED_ORDER, {
         user: order.user,
+        scheduledOrderId: order.id,
         oldRouteId: routeId,
         newRouteId,
       });

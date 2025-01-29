@@ -1,5 +1,4 @@
 import {
-  Autocomplete,
   Box,
   Divider,
   Grid,
@@ -8,7 +7,6 @@ import {
   Select,
   TextField,
   Typography,
-  Checkbox,
   AlertColor,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -16,58 +14,56 @@ import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { Driver } from '@prisma/client';
-import { IUserRoutes, IRoutes, UserType } from '@/app/utils/type';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { IRoutes } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
 interface IEditRouteModal extends ModalProps {
   route: IRoutes;
   driverList: Driver[];
-  clientList: UserType[];
+  // clientList: UserType[];
   day: string;
   showNotification: (type: AlertColor, message: string) => void;
   handleUpdateRouteUI: (targetRoute: IRoutes) => void;
 }
 
-const convertFromUserRouteToUser = (clientList: IUserRoutes[]) => {
-  const formattedClients = clientList.map((userRoute: IUserRoutes) => {
-    return userRoute.user;
-  });
+// const convertFromUserRouteToUser = (clientList: IUserRoutes[]) => {
+//   const formattedClients = clientList.map((userRoute: IUserRoutes) => {
+//     return userRoute.user;
+//   });
 
-  return formattedClients;
-};
+//   return formattedClients;
+// };
 
 export default function EditRoute({
   open,
   onClose,
   route,
   driverList,
-  clientList,
+  // clientList,
   day,
   showNotification,
   handleUpdateRouteUI,
 }: IEditRouteModal) {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedRoute, setUpdatedRoute] = useState<IRoutes>(route);
-  const [selectedClients, setSelectedClients] = useState<UserType[]>(() => {
-    if (route?.clients) {
-      const formattedClients = convertFromUserRouteToUser(route.clients);
-      return formattedClients;
-    }
-    return [];
-  });
+  // const [selectedClients, setSelectedClients] = useState<UserType[]>(() => {
+  //   if (route?.clients) {
+  //     const formattedClients = convertFromUserRouteToUser(route.clients);
+  //     return formattedClients;
+  //   }
+  //   return [];
+  // });
 
   useEffect(() => {
     setUpdatedRoute(route);
 
-    if (route?.clients) {
-      const formattedClients = convertFromUserRouteToUser(route.clients);
-      setSelectedClients(formattedClients);
-    } else {
-      setSelectedClients([]);
-    }
+    // if (route?.clients) {
+    //   const formattedClients = convertFromUserRouteToUser(route.clients);
+    //   setSelectedClients(formattedClients);
+    // } else {
+    //   setSelectedClients([]);
+    // }
   }, [route]);
 
   const updateRoute = async () => {
@@ -88,7 +84,7 @@ export default function EditRoute({
       const response = await axios.put(API_URL.ROUTES, {
         routeId: route.id,
         ...updatedValue,
-        updatedClients: selectedClients,
+        // updatedClients: selectedClients,
         day,
       });
 
@@ -168,7 +164,7 @@ export default function EditRoute({
               </Select>
             </Box>
           </Grid>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Clients:</Typography>
               <Autocomplete
@@ -204,7 +200,7 @@ export default function EditRoute({
                 }
               />
             </Box>
-          </Grid>
+          </Grid> */}
         </Grid>
       </BoxModal>
     </Modal>

@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { DayRange, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
@@ -33,7 +33,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
+        positionIndex: true,
         user: true,
+      },
+      orderBy: {
+        positionIndex: {
+          index: 'asc',
+        },
       },
     });
 
@@ -46,11 +52,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       scheduleOrders = scheduleOrders.map((scheduledOrder: any) => {
         const userId = scheduledOrder.userId;
 
+        const isInactive =
+          scheduledOrder?.user?.type === USER_CATEGORIZED.INACTIVE;
         if (clientPreOrdersInfo[userId]) {
-          return { ...scheduledOrder, ...clientPreOrdersInfo[userId] };
+          // Place the blocked: isInactive before preOrderInfo because it could change by the blocking range
+          return {
+            ...scheduledOrder,
+            blocked: isInactive,
+            ...clientPreOrdersInfo[userId],
+          };
         }
 
-        return scheduledOrder;
+        return { ...scheduledOrder, blocked: isInactive };
       });
     }
 
@@ -109,6 +122,9 @@ const getClientsPreOrderInfo = async (
         userId: {
           in: clientIdsList,
         },
+      },
+      include: {
+        user: true,
       },
     });
 

@@ -72,7 +72,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // );
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
     const updatedAt = getTodayDate();
-    const updatedTime = new Date(`${updatedAt.date} ${updatedAt.time}`)
+    const updatedTime = new Date(`${updatedAt.date} ${updatedAt.time}`);
 
     const updatedOrder = await prisma.orders.update({
       where: {

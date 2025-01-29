@@ -169,7 +169,8 @@ export const months = [
   'December',
 ];
 
-export const limitOrderHour = 7;
+export const limitOrderHour = 6;
+export const limitOrderMinutes = 30;
 
 export const adminTabs = {
   Admin: [
@@ -420,21 +421,24 @@ export const transactionStatusList = [
 export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];
 
 export const userCategorizedColor: any = {
-  'Gold': {
+  Gold: {
     color: amber[600],
-    backgroundColor: amber[100]
+    backgroundColor: amber[100],
   },
-  'Silver': {
+  Silver: {
     color: grey[600],
-    backgroundColor: grey[200]
+    backgroundColor: grey[200],
   },
-  'Bronze': {
+  Bronze: {
     color: brown[500],
-    backgroundColor: orange[100]
+    backgroundColor: orange[100],
   },
-  'None': {
+  None: {
     color: 'black',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
-
-}
+  Inactive: {
+    color: 'black',
+    backgroundColor: grey[200],
+  },
+};

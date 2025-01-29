@@ -20,7 +20,12 @@ import { useReactToPrint } from 'react-to-print';
 import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS, TYPE, USER_CATEGORIZED } from '@/app/utils/enum';
+import {
+  API_URL,
+  ORDER_STATUS,
+  TYPE,
+  USER_CATEGORIZED,
+} from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
@@ -473,17 +478,17 @@ const OrderAccordion = ({
             <Button
               color="info"
               variant="contained"
-              sx={{textTransform: 'none'}}
+              sx={{ textTransform: 'none' }}
               onClick={handleOpenClientModal}
-
             >
               <Box display="flex" alignItems="center" gap={2}>
                 <Typography variant="body2" fontWeight="medium">
-                  {order?.clientName?.toUpperCase() || order?.user?.clientName?.toUpperCase()}
+                  {order?.clientName?.toUpperCase() ||
+                    order?.user?.clientName?.toUpperCase()}
                 </Typography>
-                {order?.user?.type && order?.user?.type !== USER_CATEGORIZED.NONE && 
-                  renderType(order.user.type)
-                }
+                {order?.user?.type &&
+                  order?.user?.type !== USER_CATEGORIZED.NONE &&
+                  renderType(order.user.type)}
               </Box>
             </Button>
           </Grid>

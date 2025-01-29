@@ -56,10 +56,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         id: orderId,
       },
       data: {
-        totalPrice: orderTotal,
+        totalPrice: orderTotal.totalPrice,
         subTotal: orderTotal.subTotal,
         PST: orderTotal.PST,
         GST: orderTotal.GST,
+        discount: orderTotal.discount,
       },
     });
 
@@ -84,15 +85,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Conflict add item not found' });
     }
 
-    return res
-      .status(200)
-      .json({
-        data: {
-          ...addedItem,
-          totalPrice: addedItem.price * addedItem.quantity,
-        },
-        message: 'Add Custom Amount Successfully',
-      });
+    return res.status(200).json({
+      data: {
+        ...addedItem,
+        totalPrice: addedItem.price * addedItem.quantity,
+      },
+      message: 'Add Custom Amount Successfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

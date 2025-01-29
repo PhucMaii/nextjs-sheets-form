@@ -19,7 +19,7 @@ const UserContextAPI = ({ children }: { children: ReactNode }) => {
     session?.user ? `${API_URL.USER}?id=${session.user.id}` : null,
     fetcher,
     {
-      revalidateOnFocus: false,
+      refreshInterval: 1000,
     },
   );
 

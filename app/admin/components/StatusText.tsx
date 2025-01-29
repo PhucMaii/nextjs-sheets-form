@@ -38,13 +38,18 @@ export const formatClientType = (type: string) => {
   } else if (type === USER_CATEGORIZED.SILVER) {
     return type + '🥈';
   } else if (type === USER_CATEGORIZED.BRONZE) {
-    return type + '🥉'
+    return type + '🥉';
   } else {
-    return type
+    return type;
   }
-}
+};
 
-export default function StatusText({ text, type, icon, backgroundColor, }: PropTypes) {
+export default function StatusText({
+  text,
+  type,
+  icon,
+  backgroundColor,
+}: PropTypes) {
   const [textColor, setTextColor] = useState<TextColorType>({
     backgroundColor: '',
     color: '',
@@ -60,32 +65,27 @@ export default function StatusText({ text, type, icon, backgroundColor, }: PropT
         backgroundColor: successBackground,
         color: successText,
       });
-    }
-    else if (type === 'info') {
+    } else if (type === 'info') {
       setTextColor({
         backgroundColor: infoBackground,
         color: infoColor,
       });
-    }
-    else if (type === 'warning') {
+    } else if (type === 'warning') {
       setTextColor({
         backgroundColor: warningBackground,
         color: warningText,
       });
-    }
-    else if (type === 'error') {
+    } else if (type === 'error') {
       setTextColor({
         backgroundColor: errorBackground,
         color: errorText,
       });
-    }
-    else {
+    } else {
       setTextColor({
         backgroundColor: backgroundColor || '',
         color: type,
       });
     }
-    
   };
 
   return (

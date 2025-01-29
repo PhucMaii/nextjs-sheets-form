@@ -14,7 +14,12 @@ import {
 } from '@mui/material';
 import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
-import { API_URL, ORDER_STATUS, TYPE, USER_CATEGORIZED } from '@/app/utils/enum';
+import {
+  API_URL,
+  ORDER_STATUS,
+  TYPE,
+  USER_CATEGORIZED,
+} from '@/app/utils/enum';
 import { Order } from '../../orders/page';
 import EditReportOrder from '../Modals/edit/EditReportOrder';
 import axios from 'axios';
@@ -26,7 +31,7 @@ import { renderType } from '@/app/lib/render';
 
 interface PropTypes {
   clientOrders: Order[];
-  // handleUpdateOrderUI: (updatedOrder: Order) => void;
+  onUpdateOrderUI?: (updatedOrder: Order) => void;
   // handleDeleteOrderUI: (deletedOrder: Order) => void;
   showNotification: (type: AlertColor, message: string) => void;
   selectedOrders: Order[];
@@ -43,6 +48,7 @@ const ClientOrdersTable = ({
   selectedOrders,
   handleSelectOrder,
   handleSelectAll,
+  onUpdateOrderUI,
   // subCategories,
   mutateOrders,
 }: PropTypes) => {
@@ -123,9 +129,7 @@ const ClientOrdersTable = ({
         <TableCell variant="head" style={{ width: 100 }}>
           Invoice Id
         </TableCell>
-        <TableCell style={{width: 100}}>
-          Type
-        </TableCell>
+        <TableCell style={{ width: 100 }}>Type</TableCell>
         <TableCell variant="head" style={{ width: 100 }}>
           Client Id
         </TableCell>
@@ -169,10 +173,9 @@ const ClientOrdersTable = ({
         </TableCell>
         <TableCell>{order.id}</TableCell>
         <TableCell>
-          {(order?.user?.type && order?.user?.type !== USER_CATEGORIZED.NONE) ? 
-            renderType(order.user.type) 
-            : ''
-          }
+          {order?.user?.type && order?.user?.type !== USER_CATEGORIZED.NONE
+            ? renderType(order.user.type)
+            : ''}
         </TableCell>
         <TableCell>{order.user.clientId}</TableCell>
         <TableCell>{order.user.clientName}</TableCell>
@@ -277,6 +280,8 @@ const ClientOrdersTable = ({
         onClose={() =>
           setOpenEdit((prevState: any) => ({ ...prevState, open: false }))
         }
+        mutateOrders={mutateOrders}
+        onUpdateOrderUI={onUpdateOrderUI}
       />
       <LoadingModal open={isLoading} />
       <Paper

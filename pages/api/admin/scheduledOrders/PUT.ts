@@ -2,11 +2,12 @@ import { UserType } from '@/app/utils/type';
 import { Item, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { UpdateOption } from '../orderedItems/PUT';
+import { getRouteScheduledOrders, refactorRouteArrangement } from './POST';
 
 interface BodyTypes {
   user: UserType;
   items?: any[];
-  scheduledOrderId?: number;
+  scheduledOrderId: number;
   updateOption?: UpdateOption;
   oldRouteId?: number;
   newRouteId?: number;
@@ -25,8 +26,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       newRouteId,
     } = req.body as BodyTypes;
 
-    console.log(items, 'items');
-
+    // CASE: Move to new route
     if (oldRouteId && newRouteId) {
       // remove from user route
       const existingUserRoute = await prisma.userRoute.findUnique({
@@ -44,6 +44,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
+      // Delete old route connection
       await prisma.userRoute.delete({
         where: {
           userId_routeId: {
@@ -53,12 +54,26 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      // Create new position index for order in new route
+      const routeScheduledOrders = await getRouteScheduledOrders(newRouteId);
+      await prisma.positionIndex.update({
+        where: {
+          scheduledOrderId,
+        },
+        data: {
+          index: routeScheduledOrders.length,
+        },
+      });
+
+      // Create new route connection
       await prisma.userRoute.create({
         data: {
           userId: user.id,
           routeId: newRouteId,
         },
       });
+
+      await refactorRouteArrangement(oldRouteId);
 
       return res.status(200).json({
         message: 'User Switch Route Successfully',

@@ -40,7 +40,9 @@ import DeleteModal from '../delete/DeleteModal';
 interface PropTypes extends ModalProps {
   order: Order;
   // handleUpdateOrderUI: (updatedOrder: Order) => void;
+  onUpdateOrderUI?: (updatedOrder: Order) => void;
   showNotification: (type: AlertColor, message: string) => void;
+  mutateOrders: any;
 }
 
 const EditReportOrder = ({
@@ -49,6 +51,8 @@ const EditReportOrder = ({
   showNotification,
   open,
   onClose,
+  mutateOrders,
+  onUpdateOrderUI,
 }: PropTypes) => {
   // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deleteItemProps, setDeleteItemProps] = useState<any>({
@@ -223,6 +227,10 @@ const EditReportOrder = ({
         return;
       }
 
+      if (onUpdateOrderUI) {
+        onUpdateOrderUI(response.data.data);
+      }
+      mutateOrders();
       showNotification('success', response.data.message);
       setIsSubmitting(false);
     } catch (error: any) {

@@ -13,7 +13,6 @@ import {
   Paper,
   Snackbar,
   Toolbar,
-  Typography,
   useMediaQuery,
 } from '@mui/material';
 import React, { ReactNode, useContext, useEffect, useState } from 'react';
@@ -27,11 +26,11 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailAlert from './EmailAlert';
-import { generateRecommendDate } from '@/app/utils/time';
 import { primary } from '@/theme/color';
 import useNotification from '@/hooks/useNotification';
 import { MaintenanceContext } from '../context/MaintenanceProvider';
 import Maintenance from './Maintenance';
+import { USER_CATEGORIZED } from '../utils/enum';
 
 interface PropTypes {
   children: ReactNode;
@@ -41,7 +40,8 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(false);
+  const { user, isValidating } = useContext(UserContext);
+  const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(!user?.email);
 
   const router = useRouter();
   const pathname: any = usePathname();
@@ -53,22 +53,27 @@ export default function Sidebar({ children }: PropTypes) {
     return <Maintenance />;
   }
 
-  const { user, isValidating } = useContext(UserContext);
-  const orderDate = generateRecommendDate();
+  console.log(user, 'user');
 
-  const url = process.env.NEXT_PUBLIC_WEB_URL;
+  useEffect(() => {
+    if (user?.type === USER_CATEGORIZED.INACTIVE) {
+      signOut({
+        callbackUrl: `https://www.supremesprouts.com/auth/login`,
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
 
-  useEffect(() => {
-    if (!isValidating && !user?.email) {
-      setIsOpenSnackbar(true);
-    } else {
-      setIsOpenSnackbar(false);
-    }
-  }, [isValidating, user]);
+  // useEffect(() => {
+  //   if (!isValidating && !user?.email) {
+  //     setIsOpenSnackbar(true);
+  //   } else {
+  //     setIsOpenSnackbar(false);
+  //   }
+  // }, [isValidating, user]);
 
   const handleChangeTab = (path: string) => {
     router.push(path);
@@ -137,7 +142,7 @@ export default function Sidebar({ children }: PropTypes) {
   if (smDown) {
     return (
       <>
-        <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 8, m: 1 }}>
+        <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 8, p: 1 }}>
           {/* <HolidayText /> */}
           {children}
         </Box>

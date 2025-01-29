@@ -184,7 +184,7 @@ export default function ClientsPage() {
     }
   };
 
-  const handleUpdateClient = async (userId: number, updatedData: object) => {
+  const onUpdateClient = async (userId: number, updatedData: object) => {
     if (Object.keys(updatedData).length === 0) {
       showNotification('error', 'Please provide at least 1 updated data');
       return;
@@ -414,7 +414,7 @@ export default function ClientsPage() {
           <ClientsTable
             categories={categories?.data || []}
             clients={clientList}
-            handleUpdateClient={handleUpdateClient}
+            onUpdateClient={onUpdateClient}
             handleDeleteClientUI={handleDeleteClientUI}
             showNotification={showNotification}
             selectedClients={selectedClients}

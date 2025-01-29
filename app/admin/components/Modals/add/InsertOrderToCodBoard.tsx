@@ -25,7 +25,7 @@ interface IProps extends ModalProps {
   showNotification: any;
   boardId: number;
   mutateBoards: any;
-  role: USER_ROLE
+  role: USER_ROLE;
 }
 
 export default function InsertOrderToCodBoard({
@@ -55,18 +55,20 @@ export default function InsertOrderToCodBoard({
   const fetchUrl = () => {
     if (role === USER_ROLE.ADMIN) {
       return selectedClient && selectedClient?.id !== -1
-      ? `${API_URL.ADMIN}/clients/orders?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
-      : `${API_URL.ORDER}?date=${date}&status=${ORDER_STATUS.NONE}`
+        ? `${API_URL.ADMIN}/clients/orders?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
+        : `${API_URL.ORDER}?date=${date}&status=${ORDER_STATUS.NONE}`;
     } else {
       return selectedClient && selectedClient?.id !== -1
-      ? `${API_URL.DRIVER}/orders/clients?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
-      : `${API_URL.DRIVER}/orders?deliveryDate=${date}`
+        ? `${API_URL.DRIVER}/orders/clients?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
+        : `${API_URL.DRIVER}/orders?deliveryDate=${date}`;
     }
-  }
+  };
 
   const [orders] = SWRFetchData(fetchUrl());
 
-  const [clients] = SWRFetchData(`${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/clients`);
+  const [clients] = SWRFetchData(
+    `${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/clients`,
+  );
 
   useEffect(() => {
     if (tabIndex === 0) {
@@ -91,7 +93,7 @@ export default function InsertOrderToCodBoard({
         return;
       }
 
-      const url = role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER
+      const url = role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER;
       const response = await axios.post(`${url}/cod/insert-orders`, {
         orders: selectedOrders,
         boardId,
@@ -152,7 +154,11 @@ export default function InsertOrderToCodBoard({
             <Box display="flex" flexDirection={'column'} gap={1}>
               <Typography variant="h6">Orders</Typography>
               <OrderSearch
-                orders={(role === USER_ROLE.ADMIN ? orders?.data : orders?.data?.deliveryOrders) || []}
+                orders={
+                  (role === USER_ROLE.ADMIN
+                    ? orders?.data
+                    : orders?.data?.deliveryOrders) || []
+                }
                 onChangeSelectOrders={onChangeSelectOrders}
                 selectedOrders={selectedOrders}
               />
@@ -168,7 +174,7 @@ export default function InsertOrderToCodBoard({
                   ...(clients?.data || []),
                 ]}
                 // PopperComponent={(props: any) => (
-                //   <Popper 
+                //   <Popper
                 //     {...props}
                 //     placement={mdDown ? 'top-start' : 'auto'}
                 //   />

@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { Fifo, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../../utils/date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
 import { subtractInventoryItem } from '../../admin/orderedItems/single';
-
-// let isJobScheduled = false;
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 interface ItemMap {
   [key: string]: {
@@ -26,20 +25,60 @@ export default async function handler(
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    // if (!isJobScheduled) {
-    //     const schedule = '*/5 * * * *'; // Every minute
-    //     const job = () => {
-    //         console.log(`Cron Job executed at: ${new Date().toISOString()}`);
-    //     };
-
-    //     cron.schedule(schedule, job);
-    //     isJobScheduled = true;
-    // }
-
     const prisma = new PrismaClient();
 
     const date: { date: string; time: string } = getTodayDate();
 
+    // 1. Record the left inventory
+    const todayDate = new Date(`${date.date} ${date.time}`);
+    const yesterday = new Date(
+      todayDate.getFullYear(),
+      todayDate.getMonth(),
+      todayDate.getDate() - 1,
+    );
+    const yesterdayString = YYYYMMDDFormat(yesterday);
+    console.log(yesterdayString, 'yesterdayString');
+
+    // Check if action is taken already
+    const recordInventoryAction = await prisma.action.findFirst({
+      where: {
+        name: ACTION.RECORD_INVENTORY,
+        date: yesterdayString,
+      },
+    });
+    console.log(recordInventoryAction, 'recordInventoryAction');
+
+    if (!recordInventoryAction) {
+      const inventoryItems = await prisma.inventoryItem.findMany({
+        include: {
+          fifo: true,
+        },
+      });
+
+      let actionDescription: string = '';
+
+      // Loop thru each item and added in fifo to retrieve correct left quantity
+      for (const item of inventoryItems) {
+        const qty = item.fifo.reduce((acc: number, fifo: Fifo) => {
+          return acc + fifo.quantity;
+        }, 0);
+
+        actionDescription += `${item.name}: ${qty} ||`;
+      }
+
+      const newAction = await prisma.action.create({
+        data: {
+          name: ACTION.RECORD_INVENTORY,
+          date: yesterdayString,
+          description: actionDescription,
+          createdAt: `${date.time} ${date.date}`,
+        },
+      });
+
+      console.log({ newAction, actionDescription });
+    }
+
+    // 2. Track Inventory
     // Check in DB if the action is taken already
     const action = await prisma.action.findFirst({
       where: {

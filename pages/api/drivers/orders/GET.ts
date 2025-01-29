@@ -1,16 +1,10 @@
-import {
-  OrderedItems,
-  Orders,
-  PrismaClient,
-  Route,
-  UserRoute,
-} from '@prisma/client';
+import { OrderedItems, PrismaClient, Route, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
 import { days } from '@/app/lib/constant';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateManifest } from '../../utils/overview';
 
 interface IQuery {
@@ -74,9 +68,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const deliveryOrders = await prisma.orders.findMany({
       where: {
-        userId: {
-          in: userIds
-        },
         deliveryDate,
         status: {
           in: [
@@ -84,6 +75,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             ORDER_STATUS.DELIVERED,
             ORDER_STATUS.COMPLETED,
           ],
+        },
+        userId: {
+          in: userIds,
         },
       },
       include: {
@@ -120,6 +114,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             fifo: true,
           },
         },
+        positionIndex: true,
+      },
+      orderBy: {
+        positionIndex: {
+          index: 'asc',
+        },
       },
     });
 
@@ -146,8 +146,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const manifest = generateManifest(deliveryOrders);
-    const codAmount = deliveryOrders.reduce((acc: number, order: Orders) => {
-      return acc + order.totalPrice;
+    const codAmount = deliveryOrders.reduce((acc: number, order: any) => {
+      if (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD) {
+        return acc + order.totalPrice;
+      } else {
+        return acc;
+      }
     }, 0);
 
     return res.status(200).json({
