@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { ScheduledOrder } from '@/app/utils/type';
+import { PrismaClient, Route, UserRoute } from '@prisma/client';
 
 describe('Pre order check', () => {
   test('Check scheduled order items are same as category items', async () => {
@@ -163,6 +164,64 @@ describe('Pre order check', () => {
 
     console.log(incorrectOrders);
     expect(incorrectOrders.length).toBe(0);
+  }, 10000);
+});
+
+describe('Scheduled Orders With Position Index', () => {
+  test('Check if scheduled orders has correct position index', async () => {
+    const prisma = new PrismaClient();
+
+    const routes = await prisma.route.findMany({
+      include: {
+        clients: {
+          include: {
+            user: {
+              include: {
+                scheduleOrders: {
+                  include: {
+                    positionIndex: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    const incorrectRoute: Route[] = [];
+
+    for (const route of routes) {
+      // Get all scheduled orders of current route
+      const scheduledOrders = route.clients
+        .map((client: UserRoute | any) => {
+          if (client.user.scheduleOrders.length === 0) {
+            return null;
+          }
+          const routePreOrder = client.user.scheduleOrders.find(
+            (scheduledOrder: ScheduledOrder) => {
+              return scheduledOrder.day === route.day;
+            },
+          );
+
+          return routePreOrder;
+        })
+        .sort(
+          (orderA: ScheduledOrder, orderB: ScheduledOrder) =>
+            orderA.positionIndex.index - orderB.positionIndex.index,
+        );
+      
+      // Check if position index consistently increment by 1
+      for (let i = 1; i < scheduledOrders.length; i++) {
+        if (scheduledOrders[i].positionIndex.index !== scheduledOrders[i - 1].positionIndex.index + 1) {
+          incorrectRoute.push(route);
+        }
+      }
+    }
+
+    if (incorrectRoute.length > 0) {
+      console.log(incorrectRoute, 'incorrect route');
+    }
+    expect(incorrectRoute.length).toBe(0);
   }, 10000);
 });
 
