@@ -263,4 +263,4 @@ export type OrderSummary = {
   PST: number;
   GST: number;
   shippingFee: number;
-}
+};

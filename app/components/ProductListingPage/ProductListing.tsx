@@ -18,7 +18,11 @@ interface IProps {
   onClick?: () => void;
 }
 
-export default function ProductListing({ product, onClick, showNotification }: IProps) {
+export default function ProductListing({
+  product,
+  onClick,
+  showNotification,
+}: IProps) {
   const [cartId, setCartId] = useLocalStorage('cartId', '');
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
@@ -29,9 +33,13 @@ export default function ProductListing({ product, onClick, showNotification }: I
       setIsAdding(true);
       const ipResponse = await axios.get('https://api.ipify.org?format=json');
       const response = await axios.post(`${API_URL.PUBLIC}/cart/add-to-cart`, {
-        item: {quantity: 1, itemPreference: product, itemPreferenceId: product.id},
+        item: {
+          quantity: 1,
+          itemPreference: product,
+          itemPreferenceId: product.id,
+        },
         cartId: Number(cartId),
-        ipAddress: ipResponse.data.ip
+        ipAddress: ipResponse.data.ip,
       });
 
       if (response.data.error) {
@@ -41,15 +49,14 @@ export default function ProductListing({ product, onClick, showNotification }: I
       }
 
       showNotification('success', response.data.message);
-      setCartId(response.data.data.cartId)
+      setCartId(response.data.data.cartId);
       setIsAdding(false);
-
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Something went wrong. Please try again later');
       setIsAdding(false);
     }
-  }
+  };
 
   return (
     <Box
@@ -59,16 +66,16 @@ export default function ProductListing({ product, onClick, showNotification }: I
       // alignItems="center"
       flexGrow={1}
       gap={1}
-      sx={{ 
-        height: '100%', 
-        maxWidth: '400px', 
+      sx={{
+        height: '100%',
+        maxWidth: '400px',
         minWidth: '120px',
         cursor: 'pointer',
         p: 2,
         borderRadius: 1,
         '&:hover': {
-          border: `1px solid ${grey[300]}`
-        }
+          border: `1px solid ${grey[300]}`,
+        },
       }}
       position="relative"
       onClick={onClick}

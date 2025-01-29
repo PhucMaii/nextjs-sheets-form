@@ -34,7 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Product Not Found',
       });
     }
-    
+
     const relatedProducts = await getRelatedProducts(product);
     console.log(relatedProducts, 'relatedProducts');
 
@@ -53,7 +53,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default handler;
 
-
 const getRelatedProducts = async (product: IItemPreference) => {
   try {
     const prisma = new PrismaClient();
@@ -70,8 +69,8 @@ const getRelatedProducts = async (product: IItemPreference) => {
             },
           },
           include: {
-            inventoryItem: true
-          }
+            inventoryItem: true,
+          },
         },
       },
     });
@@ -81,19 +80,25 @@ const getRelatedProducts = async (product: IItemPreference) => {
         inventoryItem: {
           name: {
             contains: product.inventoryItem.name,
-          }
+          },
         },
         id: {
-          not: product.id
-        }
+          not: product.id,
+        },
       },
-    })
+    });
 
-    const relatedProducts = almostSameNameProducts.filter((item: IItemPreference) => item.id !== product.id && productType?.itemPreferences.every((itemPreference: any) => itemPreference.id !== item.id));
+    const relatedProducts = almostSameNameProducts.filter(
+      (item: IItemPreference) =>
+        item.id !== product.id &&
+        productType?.itemPreferences.every(
+          (itemPreference: any) => itemPreference.id !== item.id,
+        ),
+    );
 
-    return [...relatedProducts, ...productType?.itemPreferences || []];
+    return [...relatedProducts, ...(productType?.itemPreferences || [])];
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
-    throw new Error('Internal Server Error: ' + error); 
+    throw new Error('Internal Server Error: ' + error);
   }
-}
+};

@@ -209,10 +209,13 @@ describe('Scheduled Orders With Position Index', () => {
           (orderA: ScheduledOrder, orderB: ScheduledOrder) =>
             orderA.positionIndex.index - orderB.positionIndex.index,
         );
-      
+
       // Check if position index consistently increment by 1
       for (let i = 1; i < scheduledOrders.length; i++) {
-        if (scheduledOrders[i].positionIndex.index !== scheduledOrders[i - 1].positionIndex.index + 1) {
+        if (
+          scheduledOrders[i].positionIndex.index !==
+          scheduledOrders[i - 1].positionIndex.index + 1
+        ) {
           incorrectRoute.push(route);
         }
       }

@@ -1,193 +1,196 @@
-import { ICartItem } from "@/app/utils/type";
-import { generateOrderTotalPrice } from "@/pages/api/admin/orderedItems/PUT";
-import { getTodayDate } from "@/pages/api/utils/date";
-import { PrismaClient } from "@prisma/client";
-import { NextApiRequest, NextApiResponse } from "next";
+import { ICartItem } from '@/app/utils/type';
+import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { PrismaClient } from '@prisma/client';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
-    item: ICartItem;
-    cartId: number; // might be incorrect since user can edit localStorage
-    userId?: number;
-    ipAddress: string;
+  item: ICartItem;
+  cartId: number; // might be incorrect since user can edit localStorage
+  userId?: number;
+  ipAddress: string;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    try {
-        if (req.method !== 'POST') {
-            return res.status(404).json({
-                error: 'Your method is not supported'
-            });
-        }
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  try {
+    if (req.method !== 'POST') {
+      return res.status(404).json({
+        error: 'Your method is not supported',
+      });
+    }
 
-        const prisma = new PrismaClient();
+    const prisma = new PrismaClient();
 
-        const { item, cartId, userId, ipAddress }: IBody = req.body;
-        console.log({ item, cartId, userId, ipAddress })
+    const { item, cartId, userId, ipAddress }: IBody = req.body;
+    console.log({ item, cartId, userId, ipAddress });
 
-        const today = getTodayDate();
-        // Check if item is existed in cart, then increase the quantity
-        if (cartId) {
-            const selectedCart = await prisma.cart.findUnique({
-                where: {
-                    id: cartId
-                }
-            });
+    const today = getTodayDate();
+    // Check if item is existed in cart, then increase the quantity
+    if (cartId) {
+      const selectedCart = await prisma.cart.findUnique({
+        where: {
+          id: cartId,
+        },
+      });
 
-            console.log(selectedCart, 'selected cart');
-            // If cart found -> find if item exists then add to existed cart
-            // Else go to create cart
-            if (selectedCart) {
-                const existingItem = await prisma.cartItem.findFirst({
-                    where: {
-                        cartId,
-                        itemPreferenceId: item.itemPreferenceId
-                    }
-                });
-
-                let returnAddedItem;
-                if (existingItem) {
-                    returnAddedItem = await prisma.cartItem.update({
-                        where: {
-                            id: existingItem.id
-                        },
-                        data: {
-                            quantity: existingItem.quantity + 1
-                        }
-                    })
-                } else {
-                    // Create new item
-                    returnAddedItem = await prisma.cartItem.create({
-                        data: {
-                            quantity: item.quantity,
-                            itemPreferenceId: item.itemPreferenceId,
-                            cartId: selectedCart.id,
-                            createdAt: `${today.date} ${today.time}`,
-                            createdBy: `Guest - ${ipAddress}`
-                        }
-                    });
-                }
-
-                await updateCartTotalPrice(selectedCart.id);
-
-                return res.status(201).json({
-                    data: returnAddedItem,
-                    message: 'Add Item Into Cart Successfully'
-                })
-            }
-        }
-
-        // CASE: No cart id available
-        let cart = null;
-        // Prioritize if user id is available because it couldn't be changed by user
-        if (userId) {
-            cart = await prisma.cart.findFirst({
-                where: {
-                    userId
-                }
-            });
-
-            if (!cart) {
-                cart = await prisma.cart.create({
-                    data: {
-                        subtotal: 0,
-                        totalPrice: 0,
-                        discount: 0,
-                        shippingFee: 0,
-                        PST: 0,
-                        GST: 0,
-                        note: '',
-                        userId,
-                        createdAt: `${today.date} ${today.time}`,
-                        createdBy: `Guest - ${ipAddress}`
-                    }
-                });
-            }
-        } else {
-            // If no user id available - init cart without user id
-            cart = await prisma.cart.create({
-                data: {
-                    subtotal: 0,
-                    totalPrice: 0,
-                    discount: 0,
-                    shippingFee: 0,
-                    PST: 0,
-                    GST: 0,
-                    note: '',
-                    createdAt: `${today.date} ${today.time}`,
-                    createdBy: `Guest - ${ipAddress}`
-                }
-            });
-        }
-
-        // Create new item
-        const addedItem = await prisma.cartItem.create({
-            data: {
-                quantity: item.quantity,
-                itemPreferenceId: item.itemPreferenceId,
-                cartId: cart.id,
-                createdAt: `${today.date} ${today.time}`,
-                createdBy: `Guest - ${ipAddress}`
-            }
+      console.log(selectedCart, 'selected cart');
+      // If cart found -> find if item exists then add to existed cart
+      // Else go to create cart
+      if (selectedCart) {
+        const existingItem = await prisma.cartItem.findFirst({
+          where: {
+            cartId,
+            itemPreferenceId: item.itemPreferenceId,
+          },
         });
 
-        await updateCartTotalPrice(cart.id);
+        let returnAddedItem;
+        if (existingItem) {
+          returnAddedItem = await prisma.cartItem.update({
+            where: {
+              id: existingItem.id,
+            },
+            data: {
+              quantity: existingItem.quantity + 1,
+            },
+          });
+        } else {
+          // Create new item
+          returnAddedItem = await prisma.cartItem.create({
+            data: {
+              quantity: item.quantity,
+              itemPreferenceId: item.itemPreferenceId,
+              cartId: selectedCart.id,
+              createdAt: `${today.date} ${today.time}`,
+              createdBy: `Guest - ${ipAddress}`,
+            },
+          });
+        }
+
+        await updateCartTotalPrice(selectedCart.id);
 
         return res.status(201).json({
-            message: 'Add Item Into Cart Successfully',
-            data: addedItem
-        })
-    } catch (error: any) {
-        console.log('Internal Server Error: ', error);
-        return res.status(500).json({
-            error: 'Internal Server Error: ' + error
-        })
+          data: returnAddedItem,
+          message: 'Add Item Into Cart Successfully',
+        });
+      }
     }
+
+    // CASE: No cart id available
+    let cart = null;
+    // Prioritize if user id is available because it couldn't be changed by user
+    if (userId) {
+      cart = await prisma.cart.findFirst({
+        where: {
+          userId,
+        },
+      });
+
+      if (!cart) {
+        cart = await prisma.cart.create({
+          data: {
+            subtotal: 0,
+            totalPrice: 0,
+            discount: 0,
+            shippingFee: 0,
+            PST: 0,
+            GST: 0,
+            note: '',
+            userId,
+            createdAt: `${today.date} ${today.time}`,
+            createdBy: `Guest - ${ipAddress}`,
+          },
+        });
+      }
+    } else {
+      // If no user id available - init cart without user id
+      cart = await prisma.cart.create({
+        data: {
+          subtotal: 0,
+          totalPrice: 0,
+          discount: 0,
+          shippingFee: 0,
+          PST: 0,
+          GST: 0,
+          note: '',
+          createdAt: `${today.date} ${today.time}`,
+          createdBy: `Guest - ${ipAddress}`,
+        },
+      });
+    }
+
+    // Create new item
+    const addedItem = await prisma.cartItem.create({
+      data: {
+        quantity: item.quantity,
+        itemPreferenceId: item.itemPreferenceId,
+        cartId: cart.id,
+        createdAt: `${today.date} ${today.time}`,
+        createdBy: `Guest - ${ipAddress}`,
+      },
+    });
+
+    await updateCartTotalPrice(cart.id);
+
+    return res.status(201).json({
+      message: 'Add Item Into Cart Successfully',
+      data: addedItem,
+    });
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+    return res.status(500).json({
+      error: 'Internal Server Error: ' + error,
+    });
+  }
 }
 
 const updateCartTotalPrice = async (cartId: number) => {
-    try {
-        const prisma = new PrismaClient();
+  try {
+    const prisma = new PrismaClient();
 
-        const allCartItems = await prisma.cartItem.findMany({
-            where: {
-                cartId
-            },
-            include: {
-                itemPreference: {
-                    include: {
-                        inventoryItem: true,
-                    }
-                },
-            }
-        });
+    const allCartItems = await prisma.cartItem.findMany({
+      where: {
+        cartId,
+      },
+      include: {
+        itemPreference: {
+          include: {
+            inventoryItem: true,
+          },
+        },
+      },
+    });
 
-        // Format the item to generate total
-        const formattedItems = allCartItems.map((item: any) => {
-            return {
-                ...item.itemPreference,
-                quantity: item.quantity,
-            }
-        })
+    // Format the item to generate total
+    const formattedItems = allCartItems.map((item: any) => {
+      return {
+        ...item.itemPreference,
+        quantity: item.quantity,
+      };
+    });
 
-        // Generate and update cart total
-        const total = generateOrderTotalPrice(formattedItems);
-        await prisma.cart.update({
-            where: {
-                id: cartId
-            },
-            data: {
-                subtotal: total.subTotal,
-                totalPrice: total.totalPrice,
-                PST: total.PST,
-                GST: total.GST,
-                discount: total.discount,
-                shippingFee: 0, 
-            }
-        });
+    // Generate and update cart total
+    const total = generateOrderTotalPrice(formattedItems);
+    await prisma.cart.update({
+      where: {
+        id: cartId,
+      },
+      data: {
+        subtotal: total.subTotal,
+        totalPrice: total.totalPrice,
+        PST: total.PST,
+        GST: total.GST,
+        discount: total.discount,
+        shippingFee: 0,
+      },
+    });
 
-        return null;
-    } catch (error: any) {
-        console.log('Internal Server Error: ', error);
-        throw new Error('Something went wrong. Please try again later', error);
-    }
-}
+    return null;
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+    throw new Error('Something went wrong. Please try again later', error);
+  }
+};

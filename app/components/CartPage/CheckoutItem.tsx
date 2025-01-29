@@ -11,7 +11,7 @@ interface IProps {
 
 export default function CheckoutItem({ item }: IProps) {
   const [quantity, setQuantity] = useState<number>(item.quantity);
-  
+
   const totalPrice = useMemo(() => {
     return quantity * item.itemPreference.price;
   }, [quantity]);
@@ -24,13 +24,13 @@ export default function CheckoutItem({ item }: IProps) {
 
   const onIncrement = () => {
     setQuantity((prevQty: number) => prevQty + 1);
-  }
+  };
 
   const onDecrement = () => {
     if (quantity > 1) {
       setQuantity((prevQty: number) => prevQty - 1);
     }
-  }
+  };
 
   return (
     <>
@@ -38,7 +38,11 @@ export default function CheckoutItem({ item }: IProps) {
         <Box display="flex" gap={2} alignItems="center">
           <img
             style={{ width: '150px', height: '100%', objectFit: 'contain' }}
-            src={item.itemPreference?.image ? generateImgUrl(item.itemPreference.image) : ''}
+            src={
+              item.itemPreference?.image
+                ? generateImgUrl(item.itemPreference.image)
+                : ''
+            }
             alt=""
           />
           <Typography variant="h6">

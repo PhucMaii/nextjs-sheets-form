@@ -65,9 +65,13 @@ export default function ItemPage() {
       setIsAdding(true);
       const ipResponse = await axios.get('https://api.ipify.org?format=json');
       const response = await axios.post(`${API_URL.PUBLIC}/cart/add-to-cart`, {
-        item: {quantity: 1, itemPreference: itemData, itemPreferenceId: itemData?.id},
+        item: {
+          quantity,
+          itemPreference: itemData,
+          itemPreferenceId: itemData?.id,
+        },
         cartId: Number(cartId),
-        ipAddress: ipResponse.data.ip
+        ipAddress: ipResponse.data.ip,
       });
 
       if (response.data.error) {
@@ -77,14 +81,17 @@ export default function ItemPage() {
       }
 
       showNotification('success', response.data.message);
-      setCartId(response.data.data.cartId)
+      setCartId(response.data.data.cartId);
       setIsAdding(false);
-
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', 'Some thing went wrong. Please try again later' + error?.response?.data?.error);
+      showNotification(
+        'error',
+        'Some thing went wrong. Please try again later' +
+          error?.response?.data?.error,
+      );
     }
-  }
+  };
 
   const renderProductInfo = () => {
     return (
@@ -176,27 +183,34 @@ export default function ItemPage() {
   const renderRelatedItems = () => {
     return (
       <>
-        <Typography 
-            variant="h5" 
-            fontWeight="bold"
-            textAlign="center"
-            sx={{ color: landingPagePrimaryColor }}
+        <Typography
+          variant="h5"
+          fontWeight="bold"
+          textAlign="center"
+          sx={{ color: landingPagePrimaryColor }}
         >
           Don't miss these favorites
         </Typography>
 
-        <Box display="flex" flexDirection="row" gap={4} sx={{overflowX: 'scroll', whiteSpace: 'nowrap'}}>
-            {
-                relatedProducts.map((item) => (
-                    <Box key={item.id} sx={{minWidth: 200}}>
-                        <ProductListing product={item} onClick={() => {}} showNotification={showNotification} />
-                    </Box>
-                ))
-            }
+        <Box
+          display="flex"
+          flexDirection="row"
+          gap={4}
+          sx={{ overflowX: 'scroll', whiteSpace: 'nowrap' }}
+        >
+          {relatedProducts.map((item) => (
+            <Box key={item.id} sx={{ minWidth: 200 }}>
+              <ProductListing
+                product={item}
+                onClick={() => {}}
+                showNotification={showNotification}
+              />
+            </Box>
+          ))}
         </Box>
       </>
     );
-  }
+  };
 
   if (isLoading) {
     return (
@@ -209,7 +223,12 @@ export default function ItemPage() {
   return (
     <NavbarWrapper setIsOpenSignUp={() => {}}>
       {NotificationComp}
-      <Box display="flex" flexDirection="column" gap={4} sx={{ maxWidth: '1500px', mx: 'auto', p: 4 }}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        gap={4}
+        sx={{ maxWidth: '1500px', mx: 'auto', p: 4 }}
+      >
         <Grid container rowGap={2}>
           <Grid
             item
@@ -224,7 +243,11 @@ export default function ItemPage() {
             <img
               src={itemData?.image && generateImgUrl(itemData?.image)}
               alt={itemData?.inventoryItem.name}
-              style={{maxWidth: '100%', maxHeight: '100%', objectFit: 'contain'}}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6}>

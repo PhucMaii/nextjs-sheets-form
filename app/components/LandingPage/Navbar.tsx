@@ -25,7 +25,12 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
-import { HomeIcon, ShoppingBagIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
+import {
+  HomeIcon,
+  ShoppingBagIcon,
+  ShoppingCartIcon,
+  UserIcon,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';
 import useLocalStorage from '@/hooks/useLocalStorage';
@@ -84,7 +89,10 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
       return 0;
     }
 
-    const qty = cart.data.items.reduce((acc: number, item: CartItem) => acc + item.quantity, 0);
+    const qty = cart.data.items.reduce(
+      (acc: number, item: CartItem) => acc + item.quantity,
+      0,
+    );
 
     return qty;
   }, [cart]);
@@ -254,15 +262,18 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
         <Searchbar width="50%" />
         <Box display="flex" alignItems="center" gap={1}>
           <IconButton size="large" sx={{ color: landingPagePrimaryColor }}>
-            <UserIcon style={{width: 30, height: 30}} />
+            <UserIcon style={{ width: 30, height: 30 }} />
           </IconButton>
-          <Divider orientation='vertical' flexItem />
-          <IconButton sx={{ color: landingPagePrimaryColor, position: 'relative' }} onClick={() => router.push('/cart')}>
-            <ShoppingCartIcon style={{width: 30, height: 30}} />
-            <CartBadge 
+          <Divider orientation="vertical" flexItem />
+          <IconButton
+            sx={{ color: landingPagePrimaryColor, position: 'relative' }}
+            onClick={() => router.push('/cart')}
+          >
+            <ShoppingCartIcon style={{ width: 30, height: 30 }} />
+            <CartBadge
               badgeContent={cartItemsQty}
-              color='error'
-              overlap="circular" 
+              color="error"
+              overlap="circular"
             />
           </IconButton>
           {/* <Button
