@@ -15,7 +15,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Logo from './Logo';
 import { blueGrey, green } from '@mui/material/colors';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -31,6 +31,7 @@ import Searchbar from './Search/Searchbar';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
+import { CartItem } from '@prisma/client';
 
 const CartBadge = styled(Badge)`
   & .${badgeClasses.badge} {
@@ -69,6 +70,24 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
   const router = useRouter();
 
   const [cart] = SWRFetchData(`${API_URL.PUBLIC}/cart?cartId=${cId}`);
+
+  const cartItemsQty = useMemo(() => {
+    if (!cart) {
+      return 0;
+    }
+
+    if (!cart?.data?.items) {
+      return 0;
+    }
+
+    if (cart?.data?.items.length === 0) {
+      return 0;
+    }
+
+    const qty = cart.data.items.reduce((acc: number, item: CartItem) => acc + item.quantity, 0);
+
+    return qty;
+  }, [cart]);
 
   useEffect(() => {
     setSelectedTab(window.location.pathname);
@@ -241,7 +260,7 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
           <IconButton sx={{ color: landingPagePrimaryColor, position: 'relative' }} onClick={() => router.push('/cart')}>
             <ShoppingCartIcon style={{width: 30, height: 30}} />
             <CartBadge 
-              badgeContent={cart?.data?.items?.length}
+              badgeContent={cartItemsQty}
               color='error'
               overlap="circular" 
             />

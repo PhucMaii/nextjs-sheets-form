@@ -43,6 +43,7 @@ export default function CartPage() {
   }
 
   const renderDisplayCartItems = () => {
+    console.log('render display cart item re render')
     return (
       // Header of the table
       <Grid container rowGap={4} columnSpacing={2} alignItems="center">

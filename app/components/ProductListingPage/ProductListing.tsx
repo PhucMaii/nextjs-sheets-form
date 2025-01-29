@@ -8,7 +8,7 @@ import {
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { LoadingButton } from '@mui/lab';
 import { AlertColor, Box, Typography } from '@mui/material';
-import { green, red } from '@mui/material/colors';
+import { green, grey, red } from '@mui/material/colors';
 import axios from 'axios';
 import React, { useState } from 'react';
 
@@ -59,7 +59,17 @@ export default function ProductListing({ product, onClick, showNotification }: I
       // alignItems="center"
       flexGrow={1}
       gap={1}
-      sx={{ height: '100%', maxWidth: '400px', minWidth: '120px' }}
+      sx={{ 
+        height: '100%', 
+        maxWidth: '400px', 
+        minWidth: '120px',
+        cursor: 'pointer',
+        p: 2,
+        borderRadius: 1,
+        '&:hover': {
+          border: `1px solid ${grey[300]}`
+        }
+      }}
       position="relative"
       onClick={onClick}
     >

@@ -22,28 +22,61 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const prisma = new PrismaClient();
 
         const { item, cartId, userId, ipAddress }: IBody = req.body;
+        console.log({ item, cartId, userId, ipAddress })
 
+        const today = getTodayDate();
         // Check if item is existed in cart, then increase the quantity
         if (cartId) {
-            const existingItem = await prisma.cartItem.findFirst({
+            const selectedCart = await prisma.cart.findUnique({
                 where: {
-                    cartId,
-                    itemPreferenceId: item.itemPreferenceId
+                    id: cartId
                 }
             });
 
-            if (existingItem) {
-                await prisma.cartItem.update({
+            console.log(selectedCart, 'selected cart');
+            // If cart found -> find if item exists then add to existed cart
+            // Else go to create cart
+            if (selectedCart) {
+                const existingItem = await prisma.cartItem.findFirst({
                     where: {
-                        id: existingItem.id
-                    },
-                    data: {
-                        quantity: existingItem + 1
+                        cartId,
+                        itemPreferenceId: item.itemPreferenceId
                     }
+                });
+
+                let returnAddedItem;
+                if (existingItem) {
+                    returnAddedItem = await prisma.cartItem.update({
+                        where: {
+                            id: existingItem.id
+                        },
+                        data: {
+                            quantity: existingItem.quantity + 1
+                        }
+                    })
+                } else {
+                    // Create new item
+                    returnAddedItem = await prisma.cartItem.create({
+                        data: {
+                            quantity: item.quantity,
+                            itemPreferenceId: item.itemPreferenceId,
+                            cartId: selectedCart.id,
+                            createdAt: `${today.date} ${today.time}`,
+                            createdBy: `Guest - ${ipAddress}`
+                        }
+                    });
+                }
+
+                await updateCartTotalPrice(selectedCart.id);
+
+                return res.status(201).json({
+                    data: returnAddedItem,
+                    message: 'Add Item Into Cart Successfully'
                 })
             }
         }
 
+        // CASE: No cart id available
         let cart = null;
         // Prioritize if user id is available because it couldn't be changed by user
         if (userId) {
@@ -52,30 +85,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     userId
                 }
             });
-        }
 
-        // If user id does not have, then check if id is correct
-        // if yes -> update user id
-        // else -> create new cart
-        const today = getTodayDate();
-        if (!cart) {
-            cart = await prisma.cart.findUnique({
-                where: {
-                    id: cartId
-                }
-            });
-
-            if (cart) {
-                await prisma.cart.update({
-                    where: {
-                        id: cart.id,
-                    },
-                    data: {
-                        userId
-                    }
-                });
-            } else {
-                // init cart
+            if (!cart) {
                 cart = await prisma.cart.create({
                     data: {
                         subtotal: 0,
@@ -85,12 +96,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         PST: 0,
                         GST: 0,
                         note: '',
+                        userId,
                         createdAt: `${today.date} ${today.time}`,
                         createdBy: `Guest - ${ipAddress}`
-
                     }
                 });
             }
+        } else {
+            // If no user id available - init cart without user id
+            cart = await prisma.cart.create({
+                data: {
+                    subtotal: 0,
+                    totalPrice: 0,
+                    discount: 0,
+                    shippingFee: 0,
+                    PST: 0,
+                    GST: 0,
+                    note: '',
+                    createdAt: `${today.date} ${today.time}`,
+                    createdBy: `Guest - ${ipAddress}`
+                }
+            });
         }
 
         // Create new item
@@ -104,10 +130,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         });
 
-        // Get all items in selected cart, including added item
+        await updateCartTotalPrice(cart.id);
+
+        return res.status(201).json({
+            message: 'Add Item Into Cart Successfully',
+            data: addedItem
+        })
+    } catch (error: any) {
+        console.log('Internal Server Error: ', error);
+        return res.status(500).json({
+            error: 'Internal Server Error: ' + error
+        })
+    }
+}
+
+const updateCartTotalPrice = async (cartId: number) => {
+    try {
+        const prisma = new PrismaClient();
+
         const allCartItems = await prisma.cartItem.findMany({
             where: {
-                cartId: cart.id
+                cartId
             },
             include: {
                 itemPreference: {
@@ -130,7 +173,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const total = generateOrderTotalPrice(formattedItems);
         await prisma.cart.update({
             where: {
-                id: cart.id
+                id: cartId
             },
             data: {
                 subtotal: total.subTotal,
@@ -142,14 +185,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         });
 
-        return res.status(201).json({
-            message: 'Add Item To Cart Successfully',
-            data: addedItem
-        })
+        return null;
     } catch (error: any) {
         console.log('Internal Server Error: ', error);
-        return res.status(500).json({
-            error: 'Internal Server Error: ' + error
-        })
+        throw new Error('Something went wrong. Please try again later', error);
     }
 }
