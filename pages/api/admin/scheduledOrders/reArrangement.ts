@@ -14,19 +14,20 @@ export default async function reArrangement(
   try {
     const prisma = new PrismaClient();
 
-    const { removedPositionIndexIdList, newPositionIndexList }: BodyTypes = req.body;
+    const { removedPositionIndexIdList, newPositionIndexList }: BodyTypes =
+      req.body;
 
     // const updatedOrders = await prisma.positionIndex.findMany({
-      //   where: {
-        //     id: {
-          //       in: removedPositionIndexIdList,
-          //     },
-          //   },
-          //   include: {
-            //     items: true,
-            //   },
-            // });
-            
+    //   where: {
+    //     id: {
+    //       in: removedPositionIndexIdList,
+    //     },
+    //   },
+    //   include: {
+    //     items: true,
+    //   },
+    // });
+
     // Remove all the positionIndex provided from client - it should all in selected route by client
     await prisma.positionIndex.deleteMany({
       where: {
@@ -38,15 +39,15 @@ export default async function reArrangement(
 
     // Create new position index list provided from client
     await prisma.positionIndex.createMany({
-      data: newPositionIndexList
+      data: newPositionIndexList,
     });
 
     const updatedScheduledOrders = await prisma.scheduleOrders.findMany({
       where: {
         id: {
-          in: newPositionIndexList.map((posIndex) => posIndex.scheduledOrderId)
-        }
-      }
+          in: newPositionIndexList.map((posIndex) => posIndex.scheduledOrderId),
+        },
+      },
     });
 
     // for (const id of removedOrderIdList) {

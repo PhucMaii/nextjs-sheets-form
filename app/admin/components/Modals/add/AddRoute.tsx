@@ -47,10 +47,7 @@ export default function AddRoute({
   // const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
 
   const addRoute = async () => {
-    if (
-      newRoute.driverId === -1 ||
-      newRoute.name.trim() === ''
-    ) {
+    if (newRoute.driverId === -1 || newRoute.name.trim() === '') {
       showNotification('error', 'Please fill out all blanks');
       return;
     }
@@ -93,9 +90,7 @@ export default function AddRoute({
           onClick={addRoute}
           buttonProps={{
             loading: isAdding,
-            disabled:
-              newRoute.driverId === -1 ||
-              newRoute.name.trim() === ''
+            disabled: newRoute.driverId === -1 || newRoute.name.trim() === '',
           }}
           buttonLabel="ADD"
           onClose={onClose}

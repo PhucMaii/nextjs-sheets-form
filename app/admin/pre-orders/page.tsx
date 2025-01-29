@@ -1,5 +1,11 @@
 'use client';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { SplashScreen } from '@/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
@@ -58,7 +64,8 @@ export default function ScheduledOrderPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   // const [isSavingArrangement, setIsSavingArrangement] =
   //   useState<boolean>(false);
-  const [isOpenReArrangement, setIsOpenReArrangement] = useState<boolean>(false);
+  const [isOpenReArrangement, setIsOpenReArrangement] =
+    useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [dayIndex, setDayIndex] = useState<number>(() => {
@@ -544,7 +551,7 @@ export default function ScheduledOrderPage() {
         progress={preOrderProgress}
         scheduleOrderList={selectedOrders}
       />
-      <ReArrangementModal 
+      <ReArrangementModal
         open={isOpenReArrangement}
         onClose={() => setIsOpenReArrangement(false)}
         scheduledOrders={orderList || []}
@@ -609,7 +616,7 @@ export default function ScheduledOrderPage() {
           </Tabs>
         </Box>
         <Grid container mt={3} alignItems="flex-start" spacing={2}>
-          <Grid item md={2} xs={12} >
+          <Grid item md={2} xs={12}>
             <Box
               display="flex"
               flexDirection="column"
@@ -647,43 +654,49 @@ export default function ScheduledOrderPage() {
                   <Typography>Loading Route...</Typography>
                 </Box>
               ) : routes.length > 0 ? (
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', width: '100%' }}>
-                <Tabs
-                  orientation={mdDown ? 'horizontal' : 'vertical'}
-                  aria-label="basic tabs"
-                  value={routeIndex}
-                  onChange={(e, newValue) => setRouteIndex(newValue)}
-                  variant={mdDown ? 'scrollable' : 'fullWidth'}
+                <Box
                   sx={{
-                    '& button': { borderRadius: 2 },
-                    '& button:hover': {
-                      boxShadow:
-                        'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
-                    },
-                    '& button:active': {
-                      boxShadow:
-                        'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
-                    },
-                    '& button.Mui-selected': {
-                      backgroundColor: infoBackground,
-                      color: infoColor,
-                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
-                    },
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    width: '100%',
                   }}
                 >
-                  {routes.length > 0 &&
-                    routes.map((route: IRoutes, index: number) => {
-                      return (
-                        <Tab
-                          key={index}
-                          id={`simple-tab-${route.name}`}
-                          label={`${route.name} - ${route?.driver?.name}`}
-                          aria-controls={`tabpanel-${route.name}`}
-                          value={index}
-                        />
-                      );
-                    })}
-                </Tabs>
+                  <Tabs
+                    orientation={mdDown ? 'horizontal' : 'vertical'}
+                    aria-label="basic tabs"
+                    value={routeIndex}
+                    onChange={(e, newValue) => setRouteIndex(newValue)}
+                    variant={mdDown ? 'scrollable' : 'fullWidth'}
+                    sx={{
+                      '& button': { borderRadius: 2 },
+                      '& button:hover': {
+                        boxShadow:
+                          'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
+                      },
+                      '& button:active': {
+                        boxShadow:
+                          'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
+                      },
+                      '& button.Mui-selected': {
+                        backgroundColor: infoBackground,
+                        color: infoColor,
+                        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
+                      },
+                    }}
+                  >
+                    {routes.length > 0 &&
+                      routes.map((route: IRoutes, index: number) => {
+                        return (
+                          <Tab
+                            key={index}
+                            id={`simple-tab-${route.name}`}
+                            label={`${route.name} - ${route?.driver?.name}`}
+                            aria-controls={`tabpanel-${route.name}`}
+                            value={index}
+                          />
+                        );
+                      })}
+                  </Tabs>
                 </Box>
               ) : (
                 <Box
@@ -780,13 +793,14 @@ export default function ScheduledOrderPage() {
             <Grid item xs={12}>
               {isLoading ? (
                 <SplashScreen />
-              ) : orderList.length > 0 ? 
+              ) : orderList.length > 0 ? (
                 // <Reorder.Group
                 //   style={{ padding: 0 }}
                 //   values={orderList}
                 //   onReorder={setOrderList}
                 // >
-                  orderList.map((order: ScheduledOrder) => {
+                orderList.map(
+                  (order: ScheduledOrder) => {
                     return (
                       // <Reorder.Item
                       //   key={order.id}
@@ -816,8 +830,9 @@ export default function ScheduledOrderPage() {
                       </Fragment>
                       // </Reorder.Item>
                     );
-                  }
-                // </Reorder.Group>
+                  },
+                  // </Reorder.Group>
+                )
               ) : (
                 <Box
                   display="flex"

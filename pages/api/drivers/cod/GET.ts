@@ -1,4 +1,4 @@
- import { OrderedItems, PrismaClient, UserRoute } from '@prisma/client';
+import { OrderedItems, PrismaClient, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
@@ -85,9 +85,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       orderBy: {
         positionIndex: {
-          index: 'asc'
-        }
-      }
+          index: 'asc',
+        },
+      },
     });
 
     // Format the return orders

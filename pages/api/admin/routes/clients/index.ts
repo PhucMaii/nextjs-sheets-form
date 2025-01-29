@@ -49,24 +49,27 @@ export default async function handler(
       },
       orderBy: {
         positionIndex: {
-          index: 'asc'
-        }
-      }
+          index: 'asc',
+        },
+      },
     });
 
-    const unsortedRouteListWithUserId = routeList.reduce((acc: any, route: any) => {
-      const routeKey = route.id;
+    const unsortedRouteListWithUserId = routeList.reduce(
+      (acc: any, route: any) => {
+        const routeKey = route.id;
 
-      const clientIds = route.clients?.map((client: UserRoute) => {
-        return client.userId;
-      });
-      acc[routeKey] = clientIds;
+        const clientIds = route.clients?.map((client: UserRoute) => {
+          return client.userId;
+        });
+        acc[routeKey] = clientIds;
 
-      if (!acc[routeKey]) {
-        acc[routeKey] = [];
-      }
-      return acc;
-    }, {});
+        if (!acc[routeKey]) {
+          acc[routeKey] = [];
+        }
+        return acc;
+      },
+      {},
+    );
 
     const sortedUserIds: any = {};
     const routeListInTargetDay = Object.keys(unsortedRouteListWithUserId);

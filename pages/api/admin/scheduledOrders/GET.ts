@@ -38,9 +38,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       orderBy: {
         positionIndex: {
-          index: 'asc'
-        }
-      }
+          index: 'asc',
+        },
+      },
     });
 
     if (deliveryDate) {

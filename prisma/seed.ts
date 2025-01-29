@@ -14,39 +14,45 @@ async function main() {
           user: {
             include: {
               scheduleOrders: true,
-            }
+            },
           },
-        }
+        },
       },
-    }
+    },
   });
 
   const indexPos = [];
 
   for (const route of routes) {
-    const scheduledOrders = route.clients.map((client: UserRoute | any) => {
-      if (client.user.scheduleOrders.length === 0) {
-        return null;
-      }
-      const routePreOrder = client.user.scheduleOrders.find((scheduledOrder: ScheduledOrder) => {
-        return scheduledOrder.day === route.day;
-      });
+    const scheduledOrders = route.clients
+      .map((client: UserRoute | any) => {
+        if (client.user.scheduleOrders.length === 0) {
+          return null;
+        }
+        const routePreOrder = client.user.scheduleOrders.find(
+          (scheduledOrder: ScheduledOrder) => {
+            return scheduledOrder.day === route.day;
+          },
+        );
 
-      return routePreOrder;
-    }).sort((orderA: ScheduledOrder, orderB: ScheduledOrder) => orderA.id - orderB.id);
+        return routePreOrder;
+      })
+      .sort(
+        (orderA: ScheduledOrder, orderB: ScheduledOrder) =>
+          orderA.id - orderB.id,
+      );
 
     for (let i = 0; i < scheduledOrders.length; i++) {
       indexPos.push({
         index: i,
-        scheduledOrderId: scheduledOrders[i].id
-      })
+        scheduledOrderId: scheduledOrders[i].id,
+      });
     }
   }
 
   await prisma.positionIndex.createMany({
-    data: indexPos
-  })
-
+    data: indexPos,
+  });
 }
 
 main()

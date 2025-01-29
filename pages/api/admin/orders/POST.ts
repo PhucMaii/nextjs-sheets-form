@@ -59,9 +59,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
       orderBy: {
         positionIndex: {
-          index: 'asc'
-        }
-      }
+          index: 'asc',
+        },
+      },
     });
 
     for (const scheduleOrder of scheduleOrderList) {

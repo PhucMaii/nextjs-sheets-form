@@ -1,5 +1,10 @@
 import { ScheduledOrder } from '@/app/utils/type';
-import { PositionIndex, PrismaClient, ScheduleOrders, UserRoute } from '@prisma/client';
+import {
+  PositionIndex,
+  PrismaClient,
+  ScheduleOrders,
+  UserRoute,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -26,7 +31,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         routes: {
           include: {
             route: true,
-          }
+          },
         },
       },
     });
@@ -75,15 +80,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           (scheduledOrder: ScheduledOrder) => scheduledOrder.userId === userId,
         );
 
-        // If owner/client of new order does not exist in selected route -> refactor arrangement of other route 
+        // If owner/client of new order does not exist in selected route -> refactor arrangement of other route
         if (!sameRouteOrder) {
           // Get prev route
-          const prevRoute = existingUser.routes.find((route: any) => route.route.day === day);
+          const prevRoute = existingUser.routes.find(
+            (route: any) => route.route.day === day,
+          );
 
           if (prevRoute) {
             await refactorRouteArrangement(prevRoute.route.id);
           }
-
         }
 
         await prisma.positionIndex.create({
@@ -307,30 +313,37 @@ export const refactorRouteArrangement = async (routeId: number) => {
     }
 
     // Get all position index of fetched scheduled orders and sort it
-    const sortedPosIndexList = routeScheduledOrders.map((scheduledOrder: ScheduledOrder) => {
-      return scheduledOrder.positionIndex
-    }).sort((posIndexA: PositionIndex, posIndexB: PositionIndex) => posIndexA.index - posIndexB.index);
+    const sortedPosIndexList = routeScheduledOrders
+      .map((scheduledOrder: ScheduledOrder) => {
+        return scheduledOrder.positionIndex;
+      })
+      .sort(
+        (posIndexA: PositionIndex, posIndexB: PositionIndex) =>
+          posIndexA.index - posIndexB.index,
+      );
 
     // Get the correct position index
-    const newPosIndexList = sortedPosIndexList.map((posIndex: PositionIndex, index: number) => {
-      return {index, scheduledOrderId: posIndex.scheduledOrderId}
-    });
+    const newPosIndexList = sortedPosIndexList.map(
+      (posIndex: PositionIndex, index: number) => {
+        return { index, scheduledOrderId: posIndex.scheduledOrderId };
+      },
+    );
 
     // Delete all the old position index
     await prisma.positionIndex.deleteMany({
       where: {
         id: {
-          in: sortedPosIndexList.map((posIndex: PositionIndex) => posIndex.id)
-        }
-      }
+          in: sortedPosIndexList.map((posIndex: PositionIndex) => posIndex.id),
+        },
+      },
     });
 
     // Create new position index
     await prisma.positionIndex.createMany({
-      data: newPosIndexList
-    })
+      data: newPosIndexList,
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     throw new Error('Error in refactoring route arrangement: ', error);
   }
-}
+};

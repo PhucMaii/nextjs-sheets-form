@@ -13,8 +13,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { routeId, day, name, driverId }: BodyTypes =
-      req.body;
+    const { routeId, day, name, driverId }: BodyTypes = req.body;
 
     const updateOptions: any = {};
 

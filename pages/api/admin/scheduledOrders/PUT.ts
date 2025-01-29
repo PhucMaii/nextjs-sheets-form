@@ -58,12 +58,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const routeScheduledOrders = await getRouteScheduledOrders(newRouteId);
       await prisma.positionIndex.update({
         where: {
-          scheduledOrderId
+          scheduledOrderId,
         },
         data: {
-          index: routeScheduledOrders.length
-        }
-      })
+          index: routeScheduledOrders.length,
+        },
+      });
 
       // Create new route connection
       await prisma.userRoute.create({
