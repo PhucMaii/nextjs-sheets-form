@@ -121,6 +121,68 @@ export default function CartPage() {
     );
   };
 
+  const renderOrderSummary = () => {
+    return (
+      <>
+        <Typography
+          textAlign="center"
+          variant="h5"
+          fontWeight="bold"
+          sx={{ color: landingPagePrimaryColor }}
+        >
+          Order Summary
+        </Typography>
+
+        <Box display="flex" flexDirection="column" gap={2} mt={4}>
+          {cart && cart?.discount > 0 && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography>Discount: </Typography>
+              <Typography>${cart.discount.toFixed(2)} </Typography>
+            </Box>
+          )}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography>Subtotal: </Typography>
+            <Typography>${cart?.subtotal?.toFixed(2)} </Typography>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography>PST (7%): </Typography>
+            <Typography>${cart?.PST?.toFixed(2)} </Typography>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography>GST (5%): </Typography>
+            <Typography>${cart?.GST?.toFixed(2)} </Typography>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography variant="h5">Total: </Typography>
+            <Typography variant="h5">
+              ${cart?.totalPrice?.toFixed(2)}{' '}
+            </Typography>
+          </Box>
+        </Box>
+      </>
+    );
+  };
+
   if (!cart) {
     return (
       <NavbarWrapper setIsOpenSignUp={() => {}}>
@@ -146,60 +208,7 @@ export default function CartPage() {
           </Grid>
           <Grid item xs={12} md={4}>
             <ShadowSection>
-              <Typography
-                textAlign="center"
-                variant="h5"
-                fontWeight="bold"
-                sx={{ color: landingPagePrimaryColor }}
-              >
-                Order Summary
-              </Typography>
-
-              <Box display="flex" flexDirection="column" gap={2} mt={4}>
-                {
-                  cart?.discount > 0 && 
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="space-between"
-                    >
-                      <Typography>Discount: </Typography>
-                      <Typography>${cart.discount.toFixed(2)} </Typography>
-                    </Box>
-                }
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography>Subtotal: </Typography>
-                  <Typography>${cart?.subtotal?.toFixed(2)} </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography>PST (7%): </Typography>
-                  <Typography>${cart?.PST?.toFixed(2)} </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography>GST (5%): </Typography>
-                  <Typography>${cart?.GST?.toFixed(2)} </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography variant="h5">Total: </Typography>
-                  <Typography variant="h5">${cart?.totalPrice?.toFixed(2)} </Typography>
-                </Box>
-              </Box>
+              {renderOrderSummary()}
             </ShadowSection>
           </Grid>
         </Grid>
