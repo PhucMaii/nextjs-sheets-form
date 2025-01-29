@@ -222,8 +222,8 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
               width="100%"
               flexDirection="column"
               gap={2}
-              m={2}
-              sx={{ overflowX: 'hidden' }}
+              p={2}
+              sx={{ overflowX: 'hidden', maxWidth: '100vw' }}
             >
               {printComponents}
               {children}

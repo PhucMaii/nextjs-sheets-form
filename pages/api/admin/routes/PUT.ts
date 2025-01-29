@@ -1,4 +1,3 @@
-import { UserType } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -7,14 +6,14 @@ interface BodyTypes {
   name?: string;
   day?: string;
   driverId?: number;
-  updatedClients?: UserType[];
+  // updatedClients?: UserType[];
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { routeId, day, name, driverId, updatedClients }: BodyTypes =
+    const { routeId, day, name, driverId }: BodyTypes =
       req.body;
 
     const updateOptions: any = {};
@@ -50,7 +49,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // check if any updated with day or driverId, then check before update
+    // Check if driver id already existed in selected day in other route
     if (driverId) {
       const checkIsRouteNotValid = await prisma.route.findFirst({
         where: {
@@ -66,48 +65,48 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    let baseClientList = existingRoute.clients.map((userRoute: any) => {
-      return userRoute.user;
-    });
+    // let baseClientList = existingRoute.clients.map((userRoute: any) => {
+    //   return userRoute.user;
+    // });
 
-    if (updatedClients) {
-      for (const client of updatedClients) {
-        // check if client id exist in user route
-        const existingUserRoute = baseClientList.find(
-          (targetClient: UserType) => client.id === targetClient.id,
-        );
+    // if (updatedClients) {
+    //   for (const client of updatedClients) {
+    //     // check if client id exist in user route
+    //     const existingUserRoute = baseClientList.find(
+    //       (targetClient: UserType) => client.id === targetClient.id,
+    //     );
 
-        if (existingUserRoute) {
-          // pop item off to track
-          baseClientList = baseClientList.filter((targetClient: UserType) => {
-            return targetClient.id !== client.id;
-          });
-          continue;
-        }
+    //     if (existingUserRoute) {
+    //       // pop item off to track
+    //       baseClientList = baseClientList.filter((targetClient: UserType) => {
+    //         return targetClient.id !== client.id;
+    //       });
+    //       continue;
+    //     }
 
-        await prisma.userRoute.create({
-          data: {
-            userId: client.id,
-            routeId,
-          },
-        });
-      }
-    }
+    //     await prisma.userRoute.create({
+    //       data: {
+    //         userId: client.id,
+    //         routeId,
+    //       },
+    //     });
+    //   }
+    // }
 
     // Remove client schedule orders as admin wants
-    if (baseClientList.length > 0) {
-      const removedIds = baseClientList.map((client: UserType) => {
-        return client.id;
-      });
+    // if (baseClientList.length > 0) {
+    //   const removedIds = baseClientList.map((client: UserType) => {
+    //     return client.id;
+    //   });
 
-      await prisma.userRoute.deleteMany({
-        where: {
-          userId: {
-            in: removedIds,
-          },
-        },
-      });
-    }
+    //   await prisma.userRoute.deleteMany({
+    //     where: {
+    //       userId: {
+    //         in: removedIds,
+    //       },
+    //     },
+    //   });
+    // }
 
     const updatedRoute = await prisma.route.update({
       where: {

@@ -54,7 +54,7 @@ export default async function handler(
       }
     });
 
-    const routeListWithUserId = routeList.reduce((acc: any, route: any) => {
+    const unsortedRouteListWithUserId = routeList.reduce((acc: any, route: any) => {
       const routeKey = route.id;
 
       const clientIds = route.clients?.map((client: UserRoute) => {
@@ -69,7 +69,7 @@ export default async function handler(
     }, {});
 
     const sortedUserIds: any = {};
-    const routeListInTargetDay = Object.keys(routeListWithUserId);
+    const routeListInTargetDay = Object.keys(unsortedRouteListWithUserId);
 
     // Loop run O(n ^ 3) - Need to optimize
     for (const scheduleOrder of scheduleOrders) {

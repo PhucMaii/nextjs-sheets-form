@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { SplashScreen } from '@/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
@@ -40,7 +40,6 @@ import { UserRoute } from '@prisma/client';
 import EditRoute from '../components/Modals/edit/EditRoute';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import ScheduleOrder from '../components/Reorder/ScheduleOrder';
-import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import { SWRFetchData } from '@/app/utils/db';
 import { YYYYMMDDFormat } from '@/app/utils/time';
@@ -345,6 +344,7 @@ export default function ScheduledOrderPage() {
       });
       mutateOrders();
 
+      setSelectedOrders([]);
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to delete selected orders: ', error);
@@ -524,8 +524,8 @@ export default function ScheduledOrderPage() {
         onClose={() => setIsAddRouteOpen(false)}
         day={days[dayIndex]}
         driverList={drivers?.data || []}
-        clientList={clients?.data?.clientList || []}
-        disabledClientList={clients?.data?.existedUserRoute || []}
+        // clientList={clients?.data?.clientList || []}
+        // disabledClientList={clients?.data?.existedUserRoute || []}
         showNotification={showNotification}
         handleAddRouteUI={handleAddRouteUI}
       />
@@ -555,7 +555,7 @@ export default function ScheduledOrderPage() {
           open={isEditRouteOpen}
           onClose={() => setIsEditRouteOpen(false)}
           driverList={drivers?.data || []}
-          clientList={clients?.data?.clientList || []}
+          // clientList={clients?.data?.clientList || []}
           day={days[dayIndex]}
           handleUpdateRouteUI={handleUpdateRouteUI}
           showNotification={showNotification}
@@ -609,7 +609,7 @@ export default function ScheduledOrderPage() {
           </Tabs>
         </Box>
         <Grid container mt={3} alignItems="flex-start" spacing={2}>
-          <Grid item md={2} xs={12} alignSelf="flex-start">
+          <Grid item md={2} xs={12} >
             <Box
               display="flex"
               flexDirection="column"
@@ -647,12 +647,13 @@ export default function ScheduledOrderPage() {
                   <Typography>Loading Route...</Typography>
                 </Box>
               ) : routes.length > 0 ? (
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', width: '100%' }}>
                 <Tabs
                   orientation={mdDown ? 'horizontal' : 'vertical'}
                   aria-label="basic tabs"
                   value={routeIndex}
                   onChange={(e, newValue) => setRouteIndex(newValue)}
-                  variant="fullWidth"
+                  variant={mdDown ? 'scrollable' : 'fullWidth'}
                   sx={{
                     '& button': { borderRadius: 2 },
                     '& button:hover': {
@@ -675,14 +676,15 @@ export default function ScheduledOrderPage() {
                       return (
                         <Tab
                           key={index}
-                          id={`simple-tab-${index}`}
+                          id={`simple-tab-${route.name}`}
                           label={`${route.name} - ${route?.driver?.name}`}
-                          aria-controls={`tabpanel-${index}`}
+                          aria-controls={`tabpanel-${route.name}`}
                           value={index}
                         />
                       );
                     })}
                 </Tabs>
+                </Box>
               ) : (
                 <Box
                   display="flex"
@@ -778,25 +780,26 @@ export default function ScheduledOrderPage() {
             <Grid item xs={12}>
               {isLoading ? (
                 <SplashScreen />
-              ) : orderList.length > 0 ? (
-                <Reorder.Group
-                  style={{ padding: 0 }}
-                  values={orderList}
-                  onReorder={setOrderList}
-                >
-                  {orderList.map((order: ScheduledOrder) => {
+              ) : orderList.length > 0 ? 
+                // <Reorder.Group
+                //   style={{ padding: 0 }}
+                //   values={orderList}
+                //   onReorder={setOrderList}
+                // >
+                  orderList.map((order: ScheduledOrder) => {
                     return (
-                      <Reorder.Item
-                        key={order.id}
-                        value={order}
-                        style={{ listStyle: 'none' }}
-                        transition={{
-                          type: 'spring',
-                          damping: 10,
-                          stiffness: 300,
-                          mass: 0.5,
-                        }}
-                      >
+                      // <Reorder.Item
+                      //   key={order.id}
+                      //   value={order}
+                      //   style={{ listStyle: 'none' }}
+                      //   transition={{
+                      //     type: 'spring',
+                      //     damping: 10,
+                      //     stiffness: 300,
+                      //     mass: 0.5,
+                      //   }}
+                      // >
+                      <Fragment key={order.id}>
                         <ScheduleOrder
                           key={order.id}
                           scheduleOrder={order}
@@ -810,10 +813,11 @@ export default function ScheduledOrderPage() {
                           showNotification={showNotification}
                         />
                         <Divider />
-                      </Reorder.Item>
+                      </Fragment>
+                      // </Reorder.Item>
                     );
-                  })}
-                </Reorder.Group>
+                  }
+                // </Reorder.Group>
               ) : (
                 <Box
                   display="flex"

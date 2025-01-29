@@ -123,6 +123,7 @@ export default function ReArrangementModal({
           variant="contained"
           onClick={onSaveArrangement}
           loading={isLoading}
+          fullWidth
         >
           Save Arrangement
         </LoadingButton>
