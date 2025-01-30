@@ -56,8 +56,8 @@ export default function CartPage() {
   const renderDisplayCartItems = () => {
     return (
       // Header of the table
-      <Grid container rowGap={4} columnSpacing={2} alignItems="center">
-        <Grid item xs={6}>
+      <Grid container rowGap={4} alignItems="center" sx={{p: 0}}>
+        <Grid item xs={5.5}>
           <Typography fontWeight="bold">Product</Typography>
         </Grid>
         <Grid item xs={2}>
@@ -69,12 +69,21 @@ export default function CartPage() {
         <Grid item xs={2}>
           <Typography fontWeight="bold">Total Price</Typography>
         </Grid>
+        <Grid item xs={0.5}></Grid>
 
         {/* Body of the table */}
         {cart?.items &&
           cart.items.length > 0 &&
           cart.items.map((item: ICartItem, index: number) => {
-            return <CheckoutItem item={item} key={index} />;
+            return (
+              <CheckoutItem 
+                key={index} 
+                item={item}
+                showNotification={showNotification}
+                cart={cart}
+                setCart={setCart}
+              />
+            );
           })}
       </Grid>
     );

@@ -1,6 +1,7 @@
 import { AlertColor } from '@mui/material';
 import {
   Cart,
+  CartItem,
   Category,
   CodBoard,
   DayRange,
@@ -248,7 +249,7 @@ export interface ICart extends Cart {
   items: ICartItem[];
 }
 
-export interface ICartItem {
+export interface ICartItem extends CartItem {
   quantity: number;
   cartId: number;
   itemPreferenceId: number;

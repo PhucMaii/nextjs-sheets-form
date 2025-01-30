@@ -1,16 +1,24 @@
 import { generateImgUrl } from '@/app/lib/s3';
-import { ICartItem } from '@/app/utils/type';
+import { API_URL } from '@/app/utils/enum';
+import { ICart, ICartItem } from '@/app/utils/type';
 import { landingPagePrimaryColor } from '@/constant/landingPage';
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { AlertColor, Box, Button, Grid, IconButton, Typography } from '@mui/material';
 import { green } from '@mui/material/colors';
-import React, { useEffect, useMemo, useState } from 'react';
+import { CartItem } from '@prisma/client';
+import axios from 'axios';
+import { Loader2Icon, Trash2Icon } from 'lucide-react';
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 
 interface IProps {
   item: ICartItem;
+  setCart: Dispatch<SetStateAction<ICart | null>>;
+  cart: ICart;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function CheckoutItem({ item }: IProps) {
+export default function CheckoutItem({ item, setCart, cart, showNotification }: IProps) {
   const [quantity, setQuantity] = useState<number>(item.quantity);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const totalPrice = useMemo(() => {
     return quantity * item.itemPreference.price;
@@ -32,9 +40,37 @@ export default function CheckoutItem({ item }: IProps) {
     }
   };
 
+  const onRemoveItem = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await axios.delete(`${API_URL.PUBLIC}/cart/remove-item?itemId=${item.id}`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsDeleting(false);
+        return;
+      }
+
+      setIsDeleting(false);
+      onRemoveItemUI(item.id);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong. Please try again later');
+    }
+  }
+
+  const onRemoveItemUI = (itemId: number) => {
+    const newCartItemList = cart.items.filter((item: CartItem) => item.id !== itemId);
+
+    setCart((prevState: any) => ({
+      ...prevState,
+      items: newCartItemList
+    }))
+  }
+
   return (
     <>
-      <Grid item xs={6}>
+      <Grid item xs={5.5}>
         <Box display="flex" gap={2} alignItems="center">
           <img
             style={{ width: '150px', height: '100%', objectFit: 'contain' }}
@@ -109,6 +145,17 @@ export default function CheckoutItem({ item }: IProps) {
         >
           ${totalPrice?.toFixed(2)}
         </Typography>
+      </Grid>
+      <Grid item xs={0.5} textAlign="center" sx={{p: 0}}>
+          <IconButton onClick={onRemoveItem}>
+            {isDeleting ? 
+            <Loader2Icon
+              style={{
+                animation: 'spin 1s linear infinite'
+              }}
+            /> : 
+            <Trash2Icon style={{width: '25px', height: '25px'}} />}
+          </IconButton>
       </Grid>
     </>
   );
