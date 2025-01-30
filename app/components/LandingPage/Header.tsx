@@ -12,7 +12,8 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 
 interface IProps {
   setIsOpenSignUp: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,7 +21,15 @@ interface IProps {
 }
 
 export default function Header({ setIsOpenSignUp, sx }: IProps) {
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const router = useRouter();
+
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  const onGoToSearchPage = () => {
+    router.push(`/products?q=${searchKeywords}`);
+  }
 
   return (
     <Grid
@@ -114,6 +123,8 @@ export default function Header({ setIsOpenSignUp, sx }: IProps) {
               variant="outlined"
               placeholder="What are you looking for today?"
               size="small"
+              value={searchKeywords}
+              onChange={(e: any) => setSearchKeywords(e.target.value)}
               sx={{
                 borderRadius: 2,
                 backgroundColor: grey[300],
@@ -136,6 +147,8 @@ export default function Header({ setIsOpenSignUp, sx }: IProps) {
                           backgroundColor: landingPageSecondaryColor,
                         },
                       }}
+                      onClick={onGoToSearchPage}
+                      disabled={!searchKeywords}
                     >
                       Search
                     </Button>

@@ -33,6 +33,12 @@ export default function Searchbar({ width }: any) {
     }
   }, [debouncedKeywords]);
 
+  useEffect(() => {
+    if (openDropdown) {
+      setIsOpenSearch(true);
+    }
+  }, [openDropdown]);
+
   return (
     <>
       <SearchPopover
@@ -41,11 +47,17 @@ export default function Searchbar({ width }: any) {
         anchorEl={anchor}
         debouncedKeywords={debouncedKeywords || ''}
         searchItems={filteredItems}
+        setOpen={setIsOpenSearch}
       />
       <TextField
         size="small"
         placeholder="What are you looking for today?"
-        onClick={(e: any) => setAnchor(e.currentTarget)}
+        onClick={(e: any) => {
+          setAnchor(e.currentTarget);
+          if (searchKeywords) {
+            setIsOpenSearch(true);
+          } 
+        }}
         aria-controls={openDropdown ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={openDropdown ? 'true' : undefined}

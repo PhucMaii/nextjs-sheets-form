@@ -20,6 +20,9 @@ import ProductListing from '@/app/components/ProductListingPage/ProductListing';
 import Footer from '@/app/components/LandingPage/Footer';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { LoadingButton } from '@mui/lab';
+import { addItemToCartAsync } from '@/state/cart/cartSlice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/state/store';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
@@ -31,6 +34,7 @@ export default function ItemPage() {
   const [relatedProducts, setRelatedProducts] = useState<IItemPreference[]>([]);
 
   const { showNotification, NotificationComp } = useNotification();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     fetchItemData();
@@ -60,36 +64,34 @@ export default function ItemPage() {
     }
   };
 
-  const onAddToCart = async () => {
+  const onAddToCart = async (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
       setIsAdding(true);
-      const ipResponse = await axios.get('https://api.ipify.org?format=json');
-      const response = await axios.post(`${API_URL.PUBLIC}/cart/add-to-cart`, {
-        item: {
-          quantity,
-          itemPreference: itemData,
-          itemPreferenceId: itemData?.id,
-        },
-        cartId: Number(cartId),
-        ipAddress: ipResponse.data.ip,
-      });
+      const resultAction = await dispatch(
+        addItemToCartAsync({
+          cartId: Number(cartId),
+          item: {
+            quantity,
+            itemPreference: itemData,
+            itemPreferenceId: itemData?.id,
+          }
+      }));
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        setIsAdding(false);
-        return;
+      if (addItemToCartAsync.fulfilled.match(resultAction)) {
+        const { data, message } = resultAction.payload;
+        showNotification('success', message);
+        setCartId(data.id);
+      } else if (addItemToCartAsync.rejected.match(resultAction)) {
+        const error: any = resultAction.payload || resultAction.error;
+        showNotification('error', error?.message || 'Failed to add item to cart');
       }
-
-      showNotification('success', response.data.message);
-      setCartId(response.data.data.cartId);
       setIsAdding(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification(
-        'error',
-        'Some thing went wrong. Please try again later' +
-          error?.response?.data?.error,
-      );
+      showNotification('error', 'Something went wrong. Please try again later');
+      setIsAdding(false);
     }
   };
 

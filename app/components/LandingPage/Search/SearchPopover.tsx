@@ -1,14 +1,17 @@
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { generateImgUrl } from '@/app/lib/s3';
 import { IItemPreference } from '@/app/utils/type';
+import { landingPagePrimaryColor } from '@/constant/landingPage';
 import { Box, Popover, Typography } from '@mui/material';
 import { green, grey } from '@mui/material/colors';
-import React from 'react';
+import { useRouter } from 'next/navigation';
+import React, { Dispatch, SetStateAction } from 'react';
 
 interface IProps extends ModalProps {
   anchorEl: any;
   debouncedKeywords: string;
   searchItems: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function SearchPopover({
@@ -17,15 +20,18 @@ export default function SearchPopover({
   anchorEl,
   debouncedKeywords,
   searchItems,
+  setOpen
 }: IProps) {
   const popoverWidth = anchorEl?.getBoundingClientRect().width || 0;
+  const router = useRouter();
 
   return (
     <Popover
       anchorEl={anchorEl}
       open={open}
-      disableAutoFocus
       onClose={onClose}
+      onFocus={() => setOpen((prevState: boolean) => !prevState)}
+      disableAutoFocus
       anchorOrigin={{
         vertical: 'bottom',
         horizontal: 'left',
@@ -48,7 +54,7 @@ export default function SearchPopover({
         gap={2}
         sx={{ width: '100%', py: 2, px: 2 }}
       >
-        <Typography>You are looking for "{debouncedKeywords}"</Typography>
+        <Typography>You are looking for "<a>{debouncedKeywords}</a>"</Typography>
 
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography
@@ -59,13 +65,13 @@ export default function SearchPopover({
             Products
           </Typography>
           {searchItems?.map((item: IItemPreference, index: number) => {
-            console.log(item, 'ITEM');
             return (
               <Box
+                key={index}
+                onClick={() => router.push(`/products/${item.id}`)}
                 display="flex"
                 alignItems="center"
                 gap={1}
-                key={index}
                 p={1}
                 sx={{
                   pointer: 'cursor',
@@ -87,6 +93,21 @@ export default function SearchPopover({
               </Box>
             );
           })}
+        </Box>
+
+        <Box
+          component="a"
+          href={`/products?q=${debouncedKeywords}`}
+          sx={{
+            textDecoration: 'underline', 
+            color: landingPagePrimaryColor,
+            cursor: 'pointer',
+            '&:hover': {
+              color: green[800],
+            }
+          }}
+        >
+          <Typography>View All</Typography>
         </Box>
       </Box>
     </Popover>

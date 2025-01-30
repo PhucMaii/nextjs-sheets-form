@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import NavbarWrapper from '../lib/NavbarWrapper';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import {
@@ -7,87 +7,25 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { ShadowSection } from '../admin/reports/styled';
-import useLocalStorage from '@/hooks/useLocalStorage';
 import useNotification from '@/hooks/useNotification';
-import axios from 'axios';
-import { API_URL } from '../utils/enum';
-import { ICart, ICartItem } from '../utils/type';
 import { ShoppingBagIcon } from 'lucide-react';
-import CheckoutItem from '../components/CartPage/CheckoutItem';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
+import CartItemTable from '../components/CartPage/CartItemTable';
+import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
-  const [cart, setCart] = useState<ICart | null>(null);
-  const [cartId, setCartId] = useLocalStorage('cartId', '');
+  // const [cart, setCart] = useState<ICart | null>(null);
+  // const [cartId, setCartId] = useLocalStorage('cartId', '');
+
+  const router = useRouter();
+  const cart = useSelector((state: RootState) => state.cart);
 
   const { showNotification, NotificationComp } = useNotification();
 
-  useEffect(() => {
-    if (cartId) {
-      fetchCart();
-    }
-  }, [cartId]);
-
-  const fetchCart = async () => {
-    try {
-      const ipAddress: any = await axios.get(
-        'https://api.ipify.org?format=json',
-      );
-      const response = await axios.get(
-        `${API_URL.PUBLIC}/cart?cartId=${cartId}&ipAddress=${ipAddress.ip}`,
-      );
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      setCart(response.data.data);
-      setCartId(response.data.data.id);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification(
-        'error',
-        error?.response?.data?.error ||
-          'Something went wrong. Please try again later',
-      );
-    }
-  };
-
-  const renderDisplayCartItems = () => {
-    return (
-      // Header of the table
-      <Grid container rowGap={4} alignItems="center" sx={{p: 0}}>
-        <Grid item xs={5.5}>
-          <Typography fontWeight="bold">Product</Typography>
-        </Grid>
-        <Grid item xs={2}>
-          <Typography fontWeight="bold">Price</Typography>
-        </Grid>
-        <Grid item xs={2}>
-          <Typography fontWeight="bold">Quantity</Typography>
-        </Grid>
-        <Grid item xs={2}>
-          <Typography fontWeight="bold">Total Price</Typography>
-        </Grid>
-        <Grid item xs={0.5}></Grid>
-
-        {/* Body of the table */}
-        {cart?.items &&
-          cart.items.length > 0 &&
-          cart.items.map((item: ICartItem, index: number) => {
-            return (
-              <CheckoutItem 
-                key={index} 
-                item={item}
-                showNotification={showNotification}
-                cart={cart}
-                setCart={setCart}
-              />
-            );
-          })}
-      </Grid>
-    );
-  };
+  const goToProductsPage = () => {
+    router.push('/products');
+  }
 
   const renderEmptyCart = () => {
     return (
@@ -118,13 +56,14 @@ export default function CartPage() {
         </Typography>
         <Button
           variant="contained"
+          onClick={goToProductsPage}
           sx={{
             width: 'fit-content',
             backgroundColor: landingPagePrimaryColor,
             '&:hover': { backgroundColor: landingPageSecondaryColor },
           }}
         >
-          Back Home
+          Back To Shopping
         </Button>
       </Box>
     );
@@ -192,7 +131,7 @@ export default function CartPage() {
     );
   };
 
-  if (!cart) {
+  if (!cart || cart.items.length === 0) {
     return (
       <NavbarWrapper setIsOpenSignUp={() => {}}>
         {renderEmptyCart()}
@@ -213,7 +152,11 @@ export default function CartPage() {
         </Typography>
         <Grid container columnSpacing={2} rowGap={2} mt={2}>
           <Grid item xs={12} md={8}>
-            <ShadowSection>{renderDisplayCartItems()}</ShadowSection>
+            <ShadowSection>
+              <CartItemTable 
+                showNotification={showNotification}
+              />
+            </ShadowSection>
           </Grid>
           <Grid item xs={12} md={4}>
             <ShadowSection>

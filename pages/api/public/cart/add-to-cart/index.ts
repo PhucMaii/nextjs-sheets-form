@@ -36,7 +36,6 @@ export default async function handler(
         },
       });
 
-      console.log(selectedCart, 'selected cart');
       // If cart found -> find if item exists then add to existed cart
       // Else go to create cart
       if (selectedCart) {
@@ -47,19 +46,18 @@ export default async function handler(
           },
         });
 
-        let returnAddedItem;
         if (existingItem) {
-          returnAddedItem = await prisma.cartItem.update({
+         await prisma.cartItem.update({
             where: {
               id: existingItem.id,
             },
             data: {
-              quantity: existingItem.quantity + 1,
+              quantity: existingItem.quantity + item.quantity,
             },
           });
         } else {
           // Create new item
-          returnAddedItem = await prisma.cartItem.create({
+          await prisma.cartItem.create({
             data: {
               quantity: item.quantity,
               itemPreferenceId: item.itemPreferenceId,
@@ -70,10 +68,10 @@ export default async function handler(
           });
         }
 
-        await updateCartTotalPrice(selectedCart.id);
+        const updatedCart = await updateCartTotalPrice(selectedCart.id);
 
         return res.status(201).json({
-          data: returnAddedItem,
+          data: updatedCart,
           message: 'Add Item Into Cart Successfully',
         });
       }
@@ -123,7 +121,7 @@ export default async function handler(
     }
 
     // Create new item
-    const addedItem = await prisma.cartItem.create({
+    await prisma.cartItem.create({
       data: {
         quantity: item.quantity,
         itemPreferenceId: item.itemPreferenceId,
@@ -133,11 +131,11 @@ export default async function handler(
       },
     });
 
-    await updateCartTotalPrice(cart.id);
+    const updatedCart = await updateCartTotalPrice(cart.id);
 
     return res.status(201).json({
       message: 'Add Item Into Cart Successfully',
-      data: addedItem,
+      data: updatedCart,
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
@@ -147,7 +145,7 @@ export default async function handler(
   }
 }
 
-const updateCartTotalPrice = async (cartId: number) => {
+export const updateCartTotalPrice = async (cartId: number) => {
   try {
     const prisma = new PrismaClient();
 
@@ -164,6 +162,24 @@ const updateCartTotalPrice = async (cartId: number) => {
       },
     });
 
+    if (allCartItems.length === 0) {
+      await prisma.cart.update({
+        where: {
+          id: cartId,
+        },
+        data: {
+          subtotal: 0,
+          totalPrice: 0,
+          PST: 0,
+          GST: 0,
+          discount: 0,
+          shippingFee: 0,
+        },
+      });
+
+      return null;
+    }
+
     // Format the item to generate total
     const formattedItems = allCartItems.map((item: any) => {
       return {
@@ -174,7 +190,7 @@ const updateCartTotalPrice = async (cartId: number) => {
 
     // Generate and update cart total
     const total = generateOrderTotalPrice(formattedItems);
-    await prisma.cart.update({
+    const returnCart = await prisma.cart.update({
       where: {
         id: cartId,
       },
@@ -186,9 +202,20 @@ const updateCartTotalPrice = async (cartId: number) => {
         discount: total.discount,
         shippingFee: 0,
       },
+      include: {
+        items: {
+          include: {
+            itemPreference: {
+              include: {
+                inventoryItem: true,
+              }
+            },
+          }
+        }
+      }
     });
 
-    return null;
+    return returnCart;
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     throw new Error('Something went wrong. Please try again later', error);

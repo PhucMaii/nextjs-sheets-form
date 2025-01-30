@@ -52,13 +52,19 @@ export default function ProductPage() {
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
+  // Update query params when search keywords change
+  useEffect(() => {
+    if (debouncedKeywords !== queryParams) {
+      onUpdateQueryParams();
+    }
+  }, [debouncedKeywords]);
+
   // On search items when query params change
   useEffect(() => {
-    if (queryParams !== searchKeywords) {
-      setSearchKeywords(queryParams || '');
-    }
-
     if (queryParams) {
+      if (queryParams !== searchKeywords) {
+        setSearchKeywords(queryParams || '');
+      }
       const newDisplayItems = onSearchItems(displayItems || [], queryParams, [
         'inventoryItem.name',
       ]);
@@ -80,13 +86,6 @@ export default function ProductPage() {
       setDisplayItems(selectedType.itemPreferences);
     }
   }, [allItemPreferences, selectedType]);
-
-  // Update query params when search keywords change
-  useEffect(() => {
-    if (debouncedKeywords !== queryParams) {
-      onUpdateQueryParams();
-    }
-  }, [debouncedKeywords]);
 
   // On sort items
   useEffect(() => {

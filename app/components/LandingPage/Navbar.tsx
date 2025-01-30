@@ -37,6 +37,9 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { CartItem } from '@prisma/client';
+import { useDispatch } from 'react-redux';
+import { updateCart } from '@/state/cart/cartSlice';
+import { getIpAddress } from '@/app/utils/ipAddress';
 
 const CartBadge = styled(Badge)`
   & .${badgeClasses.badge} {
@@ -69,12 +72,19 @@ interface IProps {
   cartId?: number;
 }
 export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
-  const [cId] = useLocalStorage('cartId', cartId || '');
+  const [cId, setCId] = useLocalStorage('cartId', cartId || '');
+  const [ipAddress, setIpAddress] = useState<any>();
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
+  
   const router = useRouter();
 
-  const [cart] = SWRFetchData(`${API_URL.PUBLIC}/cart?cartId=${cId}`);
+  // Dispatch to update cart whenever the cart changes
+  const dispatch = useDispatch();
+  
+  const [cart] = SWRFetchData(`${API_URL.PUBLIC}/cart?cartId=${cId}&ipAddress=${ipAddress?.ip}`);
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const cartItemsQty = useMemo(() => {
     if (!cart) {
@@ -98,10 +108,28 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
   }, [cart]);
 
   useEffect(() => {
+    if (cart?.data) {
+      dispatch(updateCart(cart.data));
+      setCId(cart?.data?.id);
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    const retrieveIpAddress = async () => {
+      try {
+        const newIpAddress: any = await getIpAddress();
+        setIpAddress(newIpAddress);
+      } catch (error: any) {
+        console.log('Internal Server Error: ', error);
+      }
+    };
+
+    retrieveIpAddress();
+  }, []);
+
+  useEffect(() => {
     setSelectedTab(window.location.pathname);
   }, [window.location.pathname]);
-
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const handleChangeTab = (path: string) => {
     setSelectedTab(path);
