@@ -391,17 +391,18 @@ model CartItem {
 }
 
 model Cart {
-  id          Int     @id @default(autoincrement())
-  subtotal    Float
-  discount    Float
-  GST         Float
-  PST         Float
-  shippingFee Float
-  totalPrice  Float
-  note        String?
-  userId      Int?
-  createdAt   String
-  createdBy   String
+  id             Int     @id @default(autoincrement())
+  subtotal       Float
+  discount       Float
+  GST            Float
+  PST            Float
+  shippingFee    Float
+  totalPrice     Float
+  note           String?
+  userId         Int?
+  guestSessionId String?
+  createdAt      String
+  createdBy      String
 
   items CartItem[]
   user  User?      @relation(fields: [userId], references: [id])

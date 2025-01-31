@@ -22,7 +22,7 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "types": ["react-dnd", "react-dnd-html5-backend", "jest"]
+    "types": ["react-dnd", "react-dnd-html5-backend", "jest", "iron-session"]
   },
   "include": [
     "next-env.d.ts",

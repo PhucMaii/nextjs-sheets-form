@@ -37,9 +37,10 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { CartItem } from '@prisma/client';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateCart } from '@/state/cart/cartSlice';
-import { getIpAddress } from '@/app/utils/ipAddress';
+import axios from 'axios';
+import { RootState } from '@/state/store';
 
 const CartBadge = styled(Badge)`
   & .${badgeClasses.badge} {
@@ -69,20 +70,25 @@ const drawerWidth = 250;
 
 interface IProps {
   setIsOpenSignUp: any;
-  cartId?: number;
+  // cartId?: number;
 }
-export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
-  const [cId, setCId] = useLocalStorage('cartId', cartId || '');
-  const [ipAddress, setIpAddress] = useState<any>();
+export default function Navbar({ setIsOpenSignUp }: IProps) {
+  // const [cId, setCId] = useLocalStorage('cartId', cartId || '');
+  const [guestSession, setGuestSession] = useLocalStorage('guest-session', {});
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
-  
+
   const router = useRouter();
 
   // Dispatch to update cart whenever the cart changes
   const dispatch = useDispatch();
-  
-  const [cart] = SWRFetchData(`${API_URL.PUBLIC}/cart?cartId=${cId}&ipAddress=${ipAddress?.ip}`);
+  const cartState = useSelector((state: RootState) => state.cart);
+
+  const [cart] = SWRFetchData(
+    cartState.id !== -1
+      ? `${API_URL.PUBLIC}/cart?cartId=${cartState.id}`
+      : `${API_URL.PUBLIC}/cart?guestSessionId=${guestSession.sessionId}&guestSessionSignature=${guestSession.signature}`,
+  );
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -108,24 +114,34 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
   }, [cart]);
 
   useEffect(() => {
+    fetchGuestSessionId();
+  }, []);
+
+  useEffect(() => {
     if (cart?.data) {
+      if (cart.guestSessionId && cart.guestSessionSignature) {
+        setGuestSession({
+          sessionId: cart.guestSessionId,
+          signature: cart.guestSessionSignature,
+        });
+      }
+
       dispatch(updateCart(cart.data));
-      setCId(cart?.data?.id);
     }
   }, [cart]);
 
-  useEffect(() => {
-    const retrieveIpAddress = async () => {
-      try {
-        const newIpAddress: any = await getIpAddress();
-        setIpAddress(newIpAddress);
-      } catch (error: any) {
-        console.log('Internal Server Error: ', error);
-      }
-    };
+  // useEffect(() => {
+  //   const retrieveIpAddress = async () => {
+  //     try {
+  //       const newIpAddress: any = await getIpAddress();
+  //       setIpAddress(newIpAddress);
+  //     } catch (error: any) {
+  //       console.log('Internal Server Error: ', error);
+  //     }
+  //   };
 
-    retrieveIpAddress();
-  }, []);
+  //   retrieveIpAddress();
+  // }, []);
 
   useEffect(() => {
     setSelectedTab(window.location.pathname);
@@ -134,6 +150,32 @@ export default function Navbar({ setIsOpenSignUp, cartId }: IProps) {
   const handleChangeTab = (path: string) => {
     setSelectedTab(path);
     window.location.href = path;
+  };
+
+  const fetchGuestSessionId = async () => {
+    try {
+      // Check if a guest session ID already exists in local storage
+      if (Object.keys(guestSession).length > 0) {
+        console.log('Existing guest session ID:', guestSession.sessionId);
+        return; // Exit if a session ID already exists
+      }
+
+      const response = await axios.post(`${API_URL.PUBLIC}/guest-session`);
+
+      if (response.data.error) {
+        throw new Error('Something went wrong. ', response.data.error);
+      }
+
+      setGuestSession({
+        sessionId: response.data.guestSessionId,
+        signature: response.data.guestSessionSignature,
+      });
+    } catch (error: any) {
+      console.error(
+        'Something went wrong. Fail to fetch guest session id: ',
+        error,
+      );
+    }
   };
 
   if (mdDown) {

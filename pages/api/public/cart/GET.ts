@@ -1,23 +1,62 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getTodayDate } from '../../utils/date';
+import { generateGuestSessionId, generateSessionSignature, verifySessionId } from '@/app/utils/security';
 
 interface IQuery {
-  userId?: string;
+  guestSessionId?: string;
+  guestSessionSignature?: string;
   cartId?: string;
-  ipAddress?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId, cartId }: IQuery = req.query;
+    const { cartId, guestSessionId, guestSessionSignature }: IQuery = req.query;
 
-    if (userId) {
-      const userCart = await prisma.cart.findFirst({
+    if (cartId) {
+      const existingCart = await prisma.cart.findUnique({
         where: {
-          userId: Number(userId),
+          id: Number(cartId),
         },
+        include: {
+          items: {
+            include: {
+              itemPreference: {
+                include: {
+                  inventoryItem: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (existingCart) {
+        return res.status(200).json({
+          data: existingCart,
+          message: 'Fetch Cart By Cart Id Successfully',
+        });
+      }
+    }
+
+    if (guestSessionId) {
+      // const whereClause: any = {};
+      // if (userId) {
+      //   whereClause['userId'] = Number(userId);
+      // } else if (guestSessionId && guestSessionSignature) {
+      //   // Case for guest session
+      //   // Verify guest session id
+      //   const isSessionValid = verifySessionId(guestSessionId, guestSessionSignature);
+
+      //   if (isSessionValid) {
+      //     whereClause['guestSessionId'] = guestSessionId;
+      //   }
+      // }
+
+      const userCart = await prisma.cart.findFirst({
+        where: {guestSessionId},
         include: {
           items: {
             include: {
@@ -37,55 +76,51 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           message: 'Fetch Cart By User Id Successfully',
         });
       }
-    }
 
-    if (cartId) {
-      const cart = await prisma.cart.findUnique({
-        where: {
-          id: Number(cartId),
-        },
-        include: {
-          items: {
-            include: {
-              itemPreference: {
-                include: {
-                  inventoryItem: true,
-                },
-              },
-            },
-          },
+      // CASE: guest session id is not valid or not have cart
+      // Verify guest session id
+      let sessionId = guestSessionId;
+      let sessionSignature = guestSessionSignature;
+      
+      // If session id is not available, create new one
+      if (!sessionId || !sessionSignature) {
+        sessionId = generateGuestSessionId();
+        sessionSignature = generateSessionSignature(sessionId);
+      } else {
+        // If session id is available, verify
+        const isSessionValid = verifySessionId(sessionId, sessionSignature);
+
+        // If invalid, create new one and return it to client
+        if (!isSessionValid) {
+          sessionId = generateGuestSessionId();
+          sessionSignature = generateSessionSignature(sessionId);
+        }
+      }
+
+      const today = getTodayDate();
+      const newCart = await prisma.cart.create({
+        data: {
+          guestSessionId: sessionId,
+          shippingFee: 0,
+          discount: 0,
+          PST: 0,
+          GST: 0,
+          totalPrice: 0,
+          subtotal: 0,
+          createdAt: `${today.date} ${today.time}`,
+          createdBy: 'Guest',
         },
       });
-
-      if (cart) {
-        return res.status(200).json({
-          data: cart,
-          message: 'Fetch Cart By Id Successfullt',
-        });
-      }
+      return res.status(200).json({
+        data: newCart,
+        guestSessionId: sessionId,
+        guestSessionSignature: sessionSignature,
+        message: 'Create New Cart Successfully',
+      });
     }
 
-    // If there is no params provided or user hasn't had cart yet
-    // -> Create cart
-
-    // const today = getTodayDate();
-    // const newCart = await prisma.cart.create({
-    //     data: {
-    //         userId: userId ? Number(userId) : null,
-    //         note: '',
-    //         subtotal: 0,
-    //         PST: 0,
-    //         GST: 0,
-    //         discount: 0,
-    //         shippingFee: 0,
-    //         totalPrice: 0,
-    //         createdAt: `${today.date} ${today.time}`,
-    //         createdBy: `Guest - ${ipAddress}`
-    //     }
-    // });
-
-    return res.status(200).json({
-      message: 'Create New Cart Successfully',
+    return res.status(404).json({
+      error: 'You are missing query key',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

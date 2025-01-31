@@ -7,7 +7,7 @@ export interface ILocalNoti {
 }
 
 const useLocalStorage = (key: string, defaultValue: any) => {
-  const [value, setValue] = useState<any>(defaultValue);
+  const [value, setValue] = useState<any>(localStorage.getItem(key) || defaultValue);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Use this to avoid hydrating in next.js
@@ -15,7 +15,11 @@ const useLocalStorage = (key: string, defaultValue: any) => {
     if (typeof window !== 'undefined') {
       const storedValue = localStorage.getItem(key);
       if (storedValue && storedValue !== 'undefined') {
-        setValue(JSON.parse(storedValue));
+        try {
+          setValue(JSON.parse(storedValue));
+        } catch(e) {
+          setValue(storedValue);
+        }
       }
       setIsInitialized(true);
     }

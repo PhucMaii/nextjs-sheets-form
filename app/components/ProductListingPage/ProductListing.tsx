@@ -4,14 +4,13 @@ import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import useLocalStorage from '@/hooks/useLocalStorage';
 import { addItemToCartAsync } from '@/state/cart/cartSlice';
-import { AppDispatch } from '@/state/store';
+import { AppDispatch, RootState } from '@/state/store';
 import { LoadingButton } from '@mui/lab';
 import { AlertColor, Box, Typography } from '@mui/material';
 import { green, grey, red } from '@mui/material/colors';
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface IProps {
   product: IItemPreference;
@@ -24,7 +23,9 @@ export default function ProductListing({
   onClick,
   showNotification,
 }: IProps) {
-  const [cartId, setCartId] = useLocalStorage('cartId', '');
+  // const [cartId, setCartId] = useLocalStorage('cartId', '');
+
+  const cart = useSelector((state: RootState) => state.cart);
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -36,7 +37,7 @@ export default function ProductListing({
       setIsAdding(true);
       const resultAction = await dispatch(
         addItemToCartAsync({
-          cartId: Number(cartId),
+          cartId: cart.id,
           item: {
             quantity: 1,
             itemPreference: product,
@@ -45,9 +46,9 @@ export default function ProductListing({
       }));
 
       if (addItemToCartAsync.fulfilled.match(resultAction)) {
-        const { data, message } = resultAction.payload;
+        const { message } = resultAction.payload;
         showNotification('success', message);
-        setCartId(data.id);
+        // setCartId(data.id);
       } else if (addItemToCartAsync.rejected.match(resultAction)) {
         const error: any = resultAction.payload || resultAction.error;
         showNotification('error', error?.message || 'Failed to add item to cart');

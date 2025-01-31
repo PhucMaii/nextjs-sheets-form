@@ -18,20 +18,22 @@ import { orange } from '@mui/material/colors';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ProductListing from '@/app/components/ProductListingPage/ProductListing';
 import Footer from '@/app/components/LandingPage/Footer';
-import useLocalStorage from '@/hooks/useLocalStorage';
+// import useLocalStorage from '@/hooks/useLocalStorage';
 import { LoadingButton } from '@mui/lab';
 import { addItemToCartAsync } from '@/state/cart/cartSlice';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/state/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/state/store';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
-  const [cartId, setCartId] = useLocalStorage('cartId', '');
+  // const [cartId, setCartId] = useLocalStorage('cartId', '');
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [itemData, setItemData] = useState<IItemPreference | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [relatedProducts, setRelatedProducts] = useState<IItemPreference[]>([]);
+
+  const cart = useSelector((state: RootState) => state.cart);
 
   const { showNotification, NotificationComp } = useNotification();
   const dispatch = useDispatch<AppDispatch>();
@@ -71,7 +73,7 @@ export default function ItemPage() {
       setIsAdding(true);
       const resultAction = await dispatch(
         addItemToCartAsync({
-          cartId: Number(cartId),
+          cartId: cart.id,
           item: {
             quantity,
             itemPreference: itemData,
@@ -80,9 +82,9 @@ export default function ItemPage() {
       }));
 
       if (addItemToCartAsync.fulfilled.match(resultAction)) {
-        const { data, message } = resultAction.payload;
+        const { message } = resultAction.payload;
         showNotification('success', message);
-        setCartId(data.id);
+        // setCartId(data.id);
       } else if (addItemToCartAsync.rejected.match(resultAction)) {
         const error: any = resultAction.payload || resultAction.error;
         showNotification('error', error?.message || 'Failed to add item to cart');

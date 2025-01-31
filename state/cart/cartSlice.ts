@@ -23,6 +23,7 @@ const initialState: CartState = {
   items: [],
   note: null,
   userId: null,
+  guestSessionId: null,
 };
 
 const cartSlice = createSlice({

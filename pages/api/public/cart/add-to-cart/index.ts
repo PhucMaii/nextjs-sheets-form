@@ -6,9 +6,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   item: ICartItem;
-  cartId: number; // might be incorrect since user can edit localStorage
   userId?: number;
-  ipAddress: string;
+  cartId: number;
 }
 
 export default async function handler(
@@ -24,8 +23,7 @@ export default async function handler(
 
     const prisma = new PrismaClient();
 
-    const { item, cartId, userId, ipAddress }: IBody = req.body;
-    console.log({ item, cartId, userId, ipAddress });
+    const { item, userId, cartId }: IBody = req.body;
 
     const today = getTodayDate();
     // Check if item is existed in cart, then increase the quantity
@@ -63,7 +61,7 @@ export default async function handler(
               itemPreferenceId: item.itemPreferenceId,
               cartId: selectedCart.id,
               createdAt: `${today.date} ${today.time}`,
-              createdBy: `Guest - ${ipAddress}`,
+              createdBy: 'Guest',
             },
           });
         }
@@ -99,7 +97,7 @@ export default async function handler(
             note: '',
             userId,
             createdAt: `${today.date} ${today.time}`,
-            createdBy: `Guest - ${ipAddress}`,
+            createdBy: 'Guest',
           },
         });
       }
@@ -115,7 +113,7 @@ export default async function handler(
           GST: 0,
           note: '',
           createdAt: `${today.date} ${today.time}`,
-          createdBy: `Guest - ${ipAddress}`,
+          createdBy: 'Guest',
         },
       });
     }
@@ -127,7 +125,7 @@ export default async function handler(
         itemPreferenceId: item.itemPreferenceId,
         cartId: cart.id,
         createdAt: `${today.date} ${today.time}`,
-        createdBy: `Guest - ${ipAddress}`,
+        createdBy: 'Guest',
       },
     });
 
