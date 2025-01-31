@@ -19,7 +19,6 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   const authHeader = req.headers.authorization;
-  console.log(authHeader, 'AUTH HEADER');
 
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -37,7 +36,6 @@ export default async function handler(
       todayDate.getDate() - 1,
     );
     const yesterdayString = YYYYMMDDFormat(yesterday);
-    console.log(yesterdayString, 'yesterdayString');
 
     // Check if action is taken already
     const recordInventoryAction = await prisma.action.findFirst({
@@ -46,7 +44,6 @@ export default async function handler(
         date: yesterdayString,
       },
     });
-    console.log(recordInventoryAction, 'recordInventoryAction');
 
     if (!recordInventoryAction) {
       const inventoryItems = await prisma.inventoryItem.findMany({
