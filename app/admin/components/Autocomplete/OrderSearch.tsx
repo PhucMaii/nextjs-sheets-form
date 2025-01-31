@@ -26,7 +26,19 @@ export default function OrderSearch({
 }: IProps) {
   // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
-  console.log(orders.length, 'orders');
+  const filterOptions = (
+    options: Order[],
+    { inputValue }: { inputValue: string },
+  ) => {
+    const keywords = inputValue.toLowerCase();
+    return options.filter((option: Order) => {
+      return (
+        option.clientName.toLowerCase().includes(keywords) ||
+        option.clientId.toLowerCase().includes(keywords) ||
+        option.deliveryDate.toLowerCase().includes(keywords)
+      );
+    });
+  };
   return (
     <Autocomplete
       multiple
@@ -36,6 +48,7 @@ export default function OrderSearch({
       getOptionLabel={(option: Order) =>
         `${option.clientName} - ${option.clientId}`
       }
+      filterOptions={filterOptions}
       // PopperComponent={(props: any) => (
       //   <Popper
       //     {...props}
