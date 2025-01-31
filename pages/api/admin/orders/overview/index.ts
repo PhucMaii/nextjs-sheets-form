@@ -52,6 +52,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedStartDate,
       formattedEndDate,
     );
+
+    console.log({
+      startDate,
+      endDate,
+      formattedStartDate,
+      formattedEndDate,
+      datesInRange,
+    });
+
     const orders: any = await prisma.orders.findMany({
       where: {
         status: {

@@ -155,12 +155,12 @@ const ClientStatementsTable = ({
       </Paper>
     </>
   );
-}
+};
 
 export default memo(ClientStatementsTable, (prev, next) => {
   return (
     Object.is(prev.routeClients, next.routeClients) &&
     Object.is(prev.selectedClients, next.selectedClients) &&
     Object.is(prev.clientStatements, next.clientStatements)
-  )
+  );
 });
