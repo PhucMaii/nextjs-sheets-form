@@ -142,7 +142,7 @@ export default function Sidebar({ children }: PropTypes) {
   if (smDown) {
     return (
       <>
-        <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 8, m: 1 }}>
+        <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 8, p: 1 }}>
           {/* <HolidayText /> */}
           {children}
         </Box>

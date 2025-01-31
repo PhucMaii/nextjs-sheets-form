@@ -359,7 +359,7 @@ export default function OrdersPage() {
       <Box display="flex" justifyContent="flex-end" my={2}>
         {currentTab === 'C.O.D' && (
           <Button variant="outlined" onClick={() => setIsOpenInsertToCOD(true)}>
-            + Insert Paid Order
+            + Insert Orders
           </Button>
         )}
       </Box>

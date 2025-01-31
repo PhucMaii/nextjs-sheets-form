@@ -1,5 +1,6 @@
 import { PrismaClient, ScheduleOrders, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { refactorRouteArrangement } from './POST';
 
 export enum DELETE_OPTION {
   TEMPORARY = 'temporary',
@@ -10,7 +11,7 @@ interface BodyTypes {
   scheduleOrderId?: string;
   scheduleOrderList?: ScheduleOrders[];
   deleteOption?: DELETE_OPTION;
-  routeId?: number;
+  routeId: number;
   userId?: number;
 }
 
@@ -50,6 +51,8 @@ export default async function DELETE(
           routeId,
         },
       });
+
+      await refactorRouteArrangement(routeId);
       // for (const order of scheduleOrderList) {
       //   const existingOrder = await prisma.scheduleOrders.findUnique({
       //     where: {
@@ -138,6 +141,7 @@ export default async function DELETE(
       });
     }
 
+    await refactorRouteArrangement(routeId);
     return res.status(200).json({
       message: 'Schedule Order Deleted Successfully',
     });

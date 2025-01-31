@@ -1,5 +1,11 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { SplashScreen } from '@/HOC/AuthenGuard';
 import { ShadowSection } from '../reports/styled';
@@ -36,17 +42,15 @@ import EditDeliveryDate from '../components/Modals/edit/EditDeliveryDate';
 import { pusherClient } from '@/app/pusher';
 import { Order } from '../orders/page';
 import AddRoute from '../components/Modals/add/AddRoute';
-import { mutate } from 'swr';
 import { UserRoute } from '@prisma/client';
 import EditRoute from '../components/Modals/edit/EditRoute';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import ScheduleOrder from '../components/Reorder/ScheduleOrder';
-import LoadingModal from '../components/Modals/LoadingModal';
-import { Reorder } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import { SWRFetchData } from '@/app/utils/db';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import useNotification from '@/hooks/useNotification';
+import ReArrangementModal from '../components/Modals/ReArrangementModal';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
@@ -58,7 +62,9 @@ export default function ScheduledOrderPage() {
   const [isEditRouteOpen, setIsEditRouteOpen] = useState<boolean>(false);
   const [isFetchingRoute, setIsFetchingRoute] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSavingArrangement, setIsSavingArrangement] =
+  // const [isSavingArrangement, setIsSavingArrangement] =
+  //   useState<boolean>(false);
+  const [isOpenReArrangement, setIsOpenReArrangement] =
     useState<boolean>(false);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState<boolean>(false);
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
@@ -345,6 +351,7 @@ export default function ScheduledOrderPage() {
       });
       mutateOrders();
 
+      setSelectedOrders([]);
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to delete selected orders: ', error);
@@ -452,55 +459,55 @@ export default function ScheduledOrderPage() {
     setRoutes(newRoutes);
   };
 
-  const saveOrderArrangement = async () => {
-    try {
-      setIsSavingArrangement(true);
-      const newListWithId = orderList.map(
-        (order: ScheduledOrder, index: number) => {
-          const newOrderId = baseOrderList[index].id;
-          return { id: order.id, newId: newOrderId };
-        },
-      );
+  // const saveOrderArrangement = async () => {
+  //   try {
+  //     setIsSavingArrangement(true);
+  //     const newListWithId = orderList.map(
+  //       (order: ScheduledOrder, index: number) => {
+  //         const newOrderId = baseOrderList[index].id;
+  //         return { id: order.id, newId: newOrderId };
+  //       },
+  //     );
 
-      const updatedIdList = newListWithId.map((order: any) => order.id);
+  //     const updatedIdList = newListWithId.map((order: any) => order.id);
 
-      const response = await axios.put(API_URL.SCHEDULED_ORDER, {
-        removedOrderIdList: updatedIdList,
-        updatedOrderList: newListWithId,
-        reArrangement: true,
-      });
+  //     const response = await axios.put(API_URL.SCHEDULED_ORDER, {
+  //       removedOrderIdList: updatedIdList,
+  //       updatedOrderList: newListWithId,
+  //       reArrangement: true,
+  //     });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        setIsSavingArrangement(false);
-        return;
-      }
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       setIsSavingArrangement(false);
+  //       return;
+  //     }
 
-      // const newRoutes = await fetchRoutes();
+  //     // const newRoutes = await fetchRoutes();
 
-      // await fetchOrders(newRoutes);
-      // mutateOrders();
-      const clientIds = routes[routeIndex].clients?.map(
-        (userRoute: UserRoute) => {
-          return userRoute.userId;
-        },
-      );
+  //     // await fetchOrders(newRoutes);
+  //     // mutateOrders();
+  //     const clientIds = routes[routeIndex].clients?.map(
+  //       (userRoute: UserRoute) => {
+  //         return userRoute.userId;
+  //       },
+  //     );
 
-      mutate(
-        `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
-      );
+  //     mutate(
+  //       `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}`,
+  //     );
 
-      setIsSavingArrangement(false);
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('There was an error in rearrangement: ', error);
-      showNotification(
-        'error',
-        'There was an error in rearrangement: ' + error,
-      );
-      setIsSavingArrangement(false);
-    }
-  };
+  //     setIsSavingArrangement(false);
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('There was an error in rearrangement: ', error);
+  //     showNotification(
+  //       'error',
+  //       'There was an error in rearrangement: ' + error,
+  //     );
+  //     setIsSavingArrangement(false);
+  //   }
+  // };
 
   const switchDay = (newValue: number) => {
     setRouteIndex(0);
@@ -511,7 +518,7 @@ export default function ScheduledOrderPage() {
   return (
     <Sidebar>
       {NotificationComp}
-      <LoadingModal open={isSavingArrangement} />
+      {/* <LoadingModal open={isSavingArrangement} /> */}
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
@@ -524,8 +531,8 @@ export default function ScheduledOrderPage() {
         onClose={() => setIsAddRouteOpen(false)}
         day={days[dayIndex]}
         driverList={drivers?.data || []}
-        clientList={clients?.data?.clientList || []}
-        disabledClientList={clients?.data?.existedUserRoute || []}
+        // clientList={clients?.data?.clientList || []}
+        // disabledClientList={clients?.data?.existedUserRoute || []}
         showNotification={showNotification}
         handleAddRouteUI={handleAddRouteUI}
       />
@@ -544,12 +551,18 @@ export default function ScheduledOrderPage() {
         progress={preOrderProgress}
         scheduleOrderList={selectedOrders}
       />
+      <ReArrangementModal
+        open={isOpenReArrangement}
+        onClose={() => setIsOpenReArrangement(false)}
+        scheduledOrders={orderList || []}
+        showNotification={showNotification}
+      />
       {routes.length > 0 && (
         <EditRoute
           open={isEditRouteOpen}
           onClose={() => setIsEditRouteOpen(false)}
           driverList={drivers?.data || []}
-          clientList={clients?.data?.clientList || []}
+          // clientList={clients?.data?.clientList || []}
           day={days[dayIndex]}
           handleUpdateRouteUI={handleUpdateRouteUI}
           showNotification={showNotification}
@@ -603,7 +616,7 @@ export default function ScheduledOrderPage() {
           </Tabs>
         </Box>
         <Grid container mt={3} alignItems="flex-start" spacing={2}>
-          <Grid item md={2} xs={12} alignSelf="flex-start">
+          <Grid item md={2} xs={12}>
             <Box
               display="flex"
               flexDirection="column"
@@ -641,42 +654,50 @@ export default function ScheduledOrderPage() {
                   <Typography>Loading Route...</Typography>
                 </Box>
               ) : routes.length > 0 ? (
-                <Tabs
-                  orientation={mdDown ? 'horizontal' : 'vertical'}
-                  aria-label="basic tabs"
-                  value={routeIndex}
-                  onChange={(e, newValue) => setRouteIndex(newValue)}
-                  variant="fullWidth"
+                <Box
                   sx={{
-                    '& button': { borderRadius: 2 },
-                    '& button:hover': {
-                      boxShadow:
-                        'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
-                    },
-                    '& button:active': {
-                      boxShadow:
-                        'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
-                    },
-                    '& button.Mui-selected': {
-                      backgroundColor: infoBackground,
-                      color: infoColor,
-                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
-                    },
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    width: '100%',
                   }}
                 >
-                  {routes.length > 0 &&
-                    routes.map((route: IRoutes, index: number) => {
-                      return (
-                        <Tab
-                          key={index}
-                          id={`simple-tab-${index}`}
-                          label={`${route.name} - ${route?.driver?.name}`}
-                          aria-controls={`tabpanel-${index}`}
-                          value={index}
-                        />
-                      );
-                    })}
-                </Tabs>
+                  <Tabs
+                    orientation={mdDown ? 'horizontal' : 'vertical'}
+                    aria-label="basic tabs"
+                    value={routeIndex}
+                    onChange={(e, newValue) => setRouteIndex(newValue)}
+                    variant={mdDown ? 'scrollable' : 'fullWidth'}
+                    sx={{
+                      '& button': { borderRadius: 2 },
+                      '& button:hover': {
+                        boxShadow:
+                          'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
+                      },
+                      '& button:active': {
+                        boxShadow:
+                          'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset',
+                      },
+                      '& button.Mui-selected': {
+                        backgroundColor: infoBackground,
+                        color: infoColor,
+                        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px;',
+                      },
+                    }}
+                  >
+                    {routes.length > 0 &&
+                      routes.map((route: IRoutes, index: number) => {
+                        return (
+                          <Tab
+                            key={index}
+                            id={`simple-tab-${route.name}`}
+                            label={`${route.name} - ${route?.driver?.name}`}
+                            aria-controls={`tabpanel-${route.name}`}
+                            value={index}
+                          />
+                        );
+                      })}
+                  </Tabs>
+                </Box>
               ) : (
                 <Box
                   display="flex"
@@ -764,33 +785,35 @@ export default function ScheduledOrderPage() {
                   baseOrderList.length === 0 ||
                   orderList.length !== baseOrderList.length
                 }
-                onClick={saveOrderArrangement}
+                onClick={() => setIsOpenReArrangement(true)}
               >
-                Save order
+                Re Arrange
               </Button>
             </Grid>
             <Grid item xs={12}>
               {isLoading ? (
                 <SplashScreen />
               ) : orderList.length > 0 ? (
-                <Reorder.Group
-                  style={{ padding: 0 }}
-                  values={orderList}
-                  onReorder={setOrderList}
-                >
-                  {orderList.map((order: ScheduledOrder) => {
+                // <Reorder.Group
+                //   style={{ padding: 0 }}
+                //   values={orderList}
+                //   onReorder={setOrderList}
+                // >
+                orderList.map(
+                  (order: ScheduledOrder) => {
                     return (
-                      <Reorder.Item
-                        key={order.id}
-                        value={order}
-                        style={{ listStyle: 'none' }}
-                        transition={{
-                          type: 'spring',
-                          damping: 10,
-                          stiffness: 300,
-                          mass: 0.5,
-                        }}
-                      >
+                      // <Reorder.Item
+                      //   key={order.id}
+                      //   value={order}
+                      //   style={{ listStyle: 'none' }}
+                      //   transition={{
+                      //     type: 'spring',
+                      //     damping: 10,
+                      //     stiffness: 300,
+                      //     mass: 0.5,
+                      //   }}
+                      // >
+                      <Fragment key={order.id}>
                         <ScheduleOrder
                           key={order.id}
                           scheduleOrder={order}
@@ -804,10 +827,12 @@ export default function ScheduledOrderPage() {
                           showNotification={showNotification}
                         />
                         <Divider />
-                      </Reorder.Item>
+                      </Fragment>
+                      // </Reorder.Item>
                     );
-                  })}
-                </Reorder.Group>
+                  },
+                  // </Reorder.Group>
+                )
               ) : (
                 <Box
                   display="flex"

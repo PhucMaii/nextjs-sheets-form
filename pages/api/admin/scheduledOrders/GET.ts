@@ -33,7 +33,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
+        positionIndex: true,
         user: true,
+      },
+      orderBy: {
+        positionIndex: {
+          index: 'asc',
+        },
       },
     });
 

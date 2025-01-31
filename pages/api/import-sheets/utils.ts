@@ -160,6 +160,7 @@ export const overrideOrder = async (
       },
       include: {
         items: true,
+        user: true,
       },
     });
 

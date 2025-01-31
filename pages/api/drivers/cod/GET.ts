@@ -81,6 +81,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             fifo: true,
           },
         },
+        positionIndex: true,
+      },
+      orderBy: {
+        positionIndex: {
+          index: 'asc',
+        },
       },
     });
 

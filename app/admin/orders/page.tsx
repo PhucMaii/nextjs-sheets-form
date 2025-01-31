@@ -249,7 +249,7 @@ export default function Orders() {
         if (
           order?.user?.clientId.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
-          order.user.clientName
+          order?.user?.clientName
             .toLowerCase()
             .includes(debouncedKeywords.toLowerCase()) ||
           order?.orderRoute

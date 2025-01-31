@@ -1,4 +1,3 @@
-import { UserType } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -6,14 +5,13 @@ interface BodyType {
   day: string;
   driverId: number;
   name: string;
-  clientList: UserType[];
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { day, driverId, name, clientList }: BodyType = req.body;
+    const { day, driverId, name }: BodyType = req.body;
 
     const existedRoute = await prisma.route.findFirst({
       where: {
@@ -36,26 +34,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const formattedUser = clientList.map((client: UserType) => {
-      return { user: { connect: { id: client.id } } };
-    });
+    // const formattedUser = clientList.map((client: UserType) => {
+    //   return { user: { connect: { id: client.id } } };
+    // });
 
-    const updatedRoute = await prisma.route.update({
+    const updatedRoute = await prisma.route.findUnique({
       where: {
         id: newRoute.id,
       },
-      data: {
-        clients: {
-          create: formattedUser,
-        },
-      },
       include: {
         driver: true,
-        clients: {
-          include: {
-            user: true,
-          },
-        },
       },
     });
 

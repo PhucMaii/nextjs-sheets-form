@@ -55,6 +55,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         user: true,
+        positionIndex: true,
+      },
+      orderBy: {
+        positionIndex: {
+          index: 'asc',
+        },
       },
     });
 

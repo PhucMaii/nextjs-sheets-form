@@ -144,7 +144,18 @@ model ScheduleOrders {
   totalPrice Float
   day        String
   items      OrderedItems[]
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  positionIndex PositionIndex? @relation("ScheduledOrderIndex")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PositionIndex {
+  id               Int @id @default(autoincrement())
+  scheduledOrderId Int @unique
+  index            Int
+
+  scheduledOrder ScheduleOrders @relation("ScheduledOrderIndex", fields: [scheduledOrderId], references: [id], onDelete: Cascade)
 }
 
 model Route {

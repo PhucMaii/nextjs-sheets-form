@@ -45,25 +45,34 @@ export default async function handler(
             routes: true,
           },
         },
+        positionIndex: true,
+      },
+      orderBy: {
+        positionIndex: {
+          index: 'asc',
+        },
       },
     });
 
-    const routeListWithUserId = routeList.reduce((acc: any, route: any) => {
-      const routeKey = route.id;
+    const unsortedRouteListWithUserId = routeList.reduce(
+      (acc: any, route: any) => {
+        const routeKey = route.id;
 
-      const clientIds = route.clients?.map((client: UserRoute) => {
-        return client.userId;
-      });
-      acc[routeKey] = clientIds;
+        const clientIds = route.clients?.map((client: UserRoute) => {
+          return client.userId;
+        });
+        acc[routeKey] = clientIds;
 
-      if (!acc[routeKey]) {
-        acc[routeKey] = [];
-      }
-      return acc;
-    }, {});
+        if (!acc[routeKey]) {
+          acc[routeKey] = [];
+        }
+        return acc;
+      },
+      {},
+    );
 
     const sortedUserIds: any = {};
-    const routeListInTargetDay = Object.keys(routeListWithUserId);
+    const routeListInTargetDay = Object.keys(unsortedRouteListWithUserId);
 
     // Loop run O(n ^ 3) - Need to optimize
     for (const scheduleOrder of scheduleOrders) {

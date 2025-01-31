@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ModalProps } from '../type';
 import { Driver } from '@prisma/client';
 import {
-  Autocomplete,
   Box,
   Divider,
   Grid,
@@ -11,22 +10,19 @@ import {
   Select,
   TextField,
   Typography,
-  Checkbox,
   AlertColor,
 } from '@mui/material';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { IRoutes, UserType } from '@/app/utils/type';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { IRoutes } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 
 interface PropTypes extends ModalProps {
   day: string;
   driverList: Driver[];
-  clientList: UserType[];
-  disabledClientList: UserType[];
+  // clientList: UserType[];
+  // disabledClientList: UserType[];
   showNotification: (type: AlertColor, message: string) => void;
   handleAddRouteUI: (targetRoute: IRoutes) => void;
 }
@@ -36,8 +32,8 @@ export default function AddRoute({
   onClose,
   day,
   driverList,
-  clientList,
-  disabledClientList,
+  // clientList,
+  // disabledClientList,
   showNotification,
   handleAddRouteUI,
 }: PropTypes) {
@@ -48,14 +44,10 @@ export default function AddRoute({
     driverId: -1,
     day,
   });
-  const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
+  // const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
 
   const addRoute = async () => {
-    if (
-      newRoute.driverId === -1 ||
-      newRoute.name.trim() === '' ||
-      selectedClients.length === 0
-    ) {
+    if (newRoute.driverId === -1 || newRoute.name.trim() === '') {
       showNotification('error', 'Please fill out all blanks');
       return;
     }
@@ -65,7 +57,6 @@ export default function AddRoute({
         day,
         driverId: newRoute.driverId,
         name: newRoute.name,
-        clientList: selectedClients,
       });
 
       if (response.data.error) {
@@ -99,10 +90,7 @@ export default function AddRoute({
           onClick={addRoute}
           buttonProps={{
             loading: isAdding,
-            disabled:
-              newRoute.driverId === -1 ||
-              newRoute.name.trim() === '' ||
-              selectedClients.length === 0,
+            disabled: newRoute.driverId === -1 || newRoute.name.trim() === '',
           }}
           buttonLabel="ADD"
           onClose={onClose}
@@ -142,7 +130,7 @@ export default function AddRoute({
               </Select>
             </Box>
           </Grid>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Clients:</Typography>
               <Autocomplete
@@ -183,7 +171,7 @@ export default function AddRoute({
                 }
               />
             </Box>
-          </Grid>
+          </Grid> */}
         </Grid>
       </BoxModal>
     </Modal>
