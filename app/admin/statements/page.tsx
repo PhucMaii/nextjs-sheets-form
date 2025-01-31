@@ -197,13 +197,15 @@ export default function StatementsPage() {
         handleSubmit={clearClientStatement}
         showNotification={showNotification}
       />
-      {selectedClients.length > 0 && <div style={{ display: 'none' }}>
-        <MultipleInvoicePrint
-          clientOrders={selectedClients}
-          endDate={dateRange[1]}
-          ref={multipleInvoicePrintRef}
-        />
-      </div>}
+      {selectedClients.length > 0 && (
+        <div style={{ display: 'none' }}>
+          <MultipleInvoicePrint
+            clientOrders={selectedClients}
+            endDate={dateRange[1]}
+            ref={multipleInvoicePrintRef}
+          />
+        </div>
+      )}
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography variant="h5">Statements</Typography>
         <SelectMonth
