@@ -1,12 +1,13 @@
-import { forwardRef, Fragment } from 'react';
+import { forwardRef, Fragment, memo } from 'react';
 import { InvoicePrint } from './InvoicePrint';
 import './print.css';
 
-export const MultipleInvoicePrint = forwardRef(
+export const MultipleInvoicePrint = memo(forwardRef(
   (
     { clientOrders, endDate }: { clientOrders: any; endDate: Date },
     ref: any,
   ) => {
+    console.log('clientOrders', clientOrders);
     return (
       <div ref={ref}>
         {clientOrders.map((order: any, index: number) => {
@@ -27,4 +28,4 @@ export const MultipleInvoicePrint = forwardRef(
       </div>
     );
   },
-);
+));

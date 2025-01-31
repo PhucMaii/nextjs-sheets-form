@@ -12,6 +12,7 @@ import {
 import React, {
   Dispatch,
   Fragment,
+  memo,
   SetStateAction,
   useMemo,
   useState,
@@ -30,14 +31,14 @@ interface IProps {
   clientStatements: ClientStatement[];
 }
 
-export default function ClientStatementsTable({
+const ClientStatementsTable = ({
   routeClients,
   showNotification,
   dateRange,
   selectedClients,
   setSelectedClients,
   clientStatements,
-}: IProps) {
+}: IProps) => {
   const [editClientStatementProps, setEditClientStatementProps] = useState<any>(
     {
       open: false,
@@ -117,7 +118,7 @@ export default function ClientStatementsTable({
           </TableHead>
           <TableBody>
             {routeClients.length > 0 ? (
-              routeClients.map((client: ClientStatementType, index: number) => {
+              routeClients.map((client: ClientStatementType) => {
                 const isSelected = selectedClients.includes(client);
                 const isPrintedAlready =
                   clientStatements.find(
@@ -125,7 +126,7 @@ export default function ClientStatementsTable({
                       statement.userId === client.client.id,
                   )?.isPrinted || false;
                 return (
-                  <Fragment key={index}>
+                  <Fragment key={client.client.id}>
                     <ClientStatementRow
                       client={client}
                       isPrintedAlready={isPrintedAlready}
@@ -155,3 +156,11 @@ export default function ClientStatementsTable({
     </>
   );
 }
+
+export default memo(ClientStatementsTable, (prev, next) => {
+  return (
+    Object.is(prev.routeClients, next.routeClients) &&
+    Object.is(prev.selectedClients, next.selectedClients) &&
+    Object.is(prev.clientStatements, next.clientStatements)
+  )
+});
