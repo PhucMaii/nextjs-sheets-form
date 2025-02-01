@@ -1,7 +1,8 @@
 // import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date';
+import { sortByDeliveryDate } from '@/pages/api/utils/date';
+import moment from 'moment-timezone';
 import {
   generateManifest,
   getCustomersInDebt,
@@ -237,3 +238,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAdminAuthGuard(handler);
+
+const normalizeDate = (date: Date | string) => {
+  return moment.tz(date, 'America/Los_Angeles').startOf('day').toDate();
+};
