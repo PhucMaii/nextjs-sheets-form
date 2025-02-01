@@ -13,11 +13,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import CartItemTable from '../components/CartPage/CartItemTable';
 import { useRouter } from 'next/navigation';
+import OrderSummary from '../components/CartPage/OrderSummary';
 
 export default function CartPage() {
-  // const [cart, setCart] = useState<ICart | null>(null);
-  // const [cartId, setCartId] = useLocalStorage('cartId', '');
-
   const router = useRouter();
   const cart = useSelector((state: RootState) => state.cart);
 
@@ -69,68 +67,6 @@ export default function CartPage() {
     );
   };
 
-  const renderOrderSummary = () => {
-    return (
-      <>
-        <Typography
-          textAlign="center"
-          variant="h5"
-          fontWeight="bold"
-          sx={{ color: landingPagePrimaryColor }}
-        >
-          Order Summary
-        </Typography>
-
-        <Box display="flex" flexDirection="column" gap={2} mt={4}>
-          {cart && cart?.discount > 0 && (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Typography>Discount: </Typography>
-              <Typography>${cart.discount.toFixed(2)} </Typography>
-            </Box>
-          )}
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography>Subtotal: </Typography>
-            <Typography>${cart?.subtotal?.toFixed(2)} </Typography>
-          </Box>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography>PST (7%): </Typography>
-            <Typography>${cart?.PST?.toFixed(2)} </Typography>
-          </Box>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography>GST (5%): </Typography>
-            <Typography>${cart?.GST?.toFixed(2)} </Typography>
-          </Box>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography variant="h5">Total: </Typography>
-            <Typography variant="h5">
-              ${cart?.totalPrice?.toFixed(2)}{' '}
-            </Typography>
-          </Box>
-        </Box>
-      </>
-    );
-  };
-
   if (!cart || cart.items.length === 0) {
     return (
       <NavbarWrapper setIsOpenSignUp={() => {}}>
@@ -160,7 +96,7 @@ export default function CartPage() {
           </Grid>
           <Grid item xs={12} md={4}>
             <ShadowSection>
-              {renderOrderSummary()}
+              <OrderSummary />
             </ShadowSection>
           </Grid>
         </Grid>

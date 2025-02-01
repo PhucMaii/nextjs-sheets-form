@@ -442,3 +442,16 @@ export const userCategorizedColor: any = {
     backgroundColor: grey[200],
   },
 };
+
+export const deliveryCities = [
+  'Burnaby',
+  'Coquitlam',
+  'Delta',
+  'New Westminster',
+  'Richmond',
+  'Surrey',
+  'Vancouver',
+]
+
+export const homeLat = 49.216583;
+export const homeLng = -122.970200;
