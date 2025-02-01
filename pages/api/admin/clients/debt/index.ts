@@ -49,7 +49,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       endMonth,
       endYear,
     );
+    console.log(debtOrdersByMonth, 'debtOrdersByMonth');
 
+    console.log(debtOrdersByMonth, 'debtOrdersByMonth');
     return res.status(200).json({
       data: debtOrdersByMonth,
       message: 'Fetch Debt Data Successfully',
@@ -69,13 +71,33 @@ export const groupOrderByMMYYYY = (
   endMonth: string,
   endYear: string,
 ) => {
-  const debtOrdersByMonth = orders.reduce((acc: any, order: Orders) => {
+  const validOrders = orders.filter((order: Orders) => {
+    const splitDeliveryDate = order.deliveryDate.split('/');
+
+    if (Number(splitDeliveryDate[2]) > Number(endYear)) {
+      return false;
+    }
+
+    if (
+      Number(splitDeliveryDate[0]) > Number(endMonth) &&
+      Number(splitDeliveryDate[2]) === Number(endYear)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const debtOrdersByMonth = validOrders.reduce((acc: any, order: Orders) => {
     const splitDeliveryDate = order.deliveryDate.split('/');
     if (Number(splitDeliveryDate[2]) > Number(endYear)) {
       return acc;
     }
 
-    if (Number(splitDeliveryDate[0]) > Number(endMonth)) {
+    if (
+      Number(splitDeliveryDate[0]) > Number(endMonth) &&
+      Number(splitDeliveryDate[2]) === Number(endYear)
+    ) {
       return acc;
     }
 
