@@ -103,10 +103,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const normalizedStartDate = normalizeDate(dayRange.startDate);
         const normalizedEndDate = normalizeDate(dayRange.endDate);
 
+        console.log({
+          normalizedStartDate,
+          normalizedEndDate,
+          normalizedDeliveryDate,
+        });
+
         normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
         if (
-          normalizedDeliveryDate >= normalizedStartDate &&
-          normalizedDeliveryDate <= normalizedEndDate
+          normalizedDeliveryDate.getTime() >= normalizedStartDate.getTime() &&
+          normalizedDeliveryDate.getTime() <= normalizedEndDate.getTime()
         ) {
           return res.status(200).json({
             warning: `Client ${

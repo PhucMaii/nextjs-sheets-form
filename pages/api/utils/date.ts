@@ -2,6 +2,7 @@ import { Order } from '@/app/admin/orders/page';
 import { limitOrderHour } from '@/app/lib/constant';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Expense } from '@prisma/client';
+import moment from 'moment-timezone';
 
 export const convertDeliveryDateStringToDate = (deliveryDate: string) => {
   const parts = deliveryDate.split('/');
@@ -68,9 +69,10 @@ export const getSameDateLastWeek = (currentDate: string | Date) => {
 };
 
 export const normalizeDate = (date: Date | string) => {
-  const normalized = new Date(date);
-  normalized.setHours(0, 0, 0, 0);
-  return normalized;
+  // const normalized = new Date(date);
+  // normalized.setHours(0, 0, 0, 0);
+  // return normalized;
+  return moment.tz(date, 'America/Los_Angeles').startOf('day').toDate();
 };
 
 export const generate7DaysBefore = (deliveryDate: string) => {

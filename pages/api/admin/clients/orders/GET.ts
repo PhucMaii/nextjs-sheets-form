@@ -25,6 +25,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           error: 'Start Date and End Date are required',
         });
       }
+
+      console.log({
+        startDate,
+        endDate,
+      });
       const normalizedStartDate = normalizeDate(new Date(startDate));
       const normalizedEndDate = normalizeDate(new Date(endDate));
       const listOfDateString = generateListOfDateString(
