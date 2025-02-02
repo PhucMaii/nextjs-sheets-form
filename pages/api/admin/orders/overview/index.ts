@@ -1,8 +1,7 @@
 // import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { sortByDeliveryDate } from '@/pages/api/utils/date';
-import moment from 'moment-timezone';
+import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date';
 import {
   generateManifest,
   getCustomersInDebt,
@@ -37,8 +36,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const formattedStartDate = normalizeDate(new Date(startDate));
-    const formattedEndDate = normalizeDate(new Date(endDate));
+    const formattedStartDate = normalizeDate(startDate);
+    const formattedEndDate = normalizeDate(endDate);
 
     // formattedEndDate.setDate(formattedEndDate.getDate() - 1);
 
@@ -134,12 +133,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const lastMonthProfit = lastMonthRevenueReport.revenue - lastMonthExpenses;
     const profitChange = ((profit - lastMonthProfit) / lastMonthProfit) * 100;
 
-    console.log('profitChange', {
-      profitChange,
-      lastMonthProfit,
-      lastMonthREvenue: lastMonthRevenueReport.revenue,
-      lastMonthExpenses,
-    });
+    // console.log('profitChange', {
+    //   profitChange,
+    //   lastMonthProfit,
+    //   lastMonthREvenue: lastMonthRevenueReport.revenue,
+    //   lastMonthExpenses,
+    // });
 
     const manifest = generateManifest(sortedThisMonthOrders, revenue);
 
@@ -235,6 +234,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-const normalizeDate = (date: Date | string) => {
-  return moment.tz(date, 'America/Los_Angeles').startOf('day').toDate();
-};
+// const normalizeDate = (date: Date | string) => {
+//   return moment.tz(date, 'America/Los_Angeles').startOf('day').toDate();
+// };

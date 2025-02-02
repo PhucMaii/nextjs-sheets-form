@@ -98,7 +98,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Check is delivery date in client's vacation range
     if (isCheckUnavailableRange) {
-      const normalizedDeliveryDate = normalizeDate(new Date(deliveryDate));
+      const normalizedDeliveryDate = normalizeDate(deliveryDate);
       for (const dayRange of existingUser.unavailableDayRange) {
         const normalizedStartDate = normalizeDate(dayRange.startDate);
         const normalizedEndDate = normalizeDate(dayRange.endDate);

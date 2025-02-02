@@ -23,8 +23,8 @@ export const checkOrderValidToAffectInventory = async (
     const prisma = new PrismaClient();
     const { date, time: currentTime } = getTodayDate();
 
-    const normalizedToday = normalizeDate(new Date(date));
-    const normalizedOrderDate = normalizeDate(new Date(deliveryDate));
+    const normalizedToday = normalizeDate(date);
+    const normalizedOrderDate = normalizeDate(deliveryDate);
 
     if (normalizedOrderDate.getTime() > normalizedToday.getTime()) {
       return false;

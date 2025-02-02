@@ -85,7 +85,7 @@ const getClientsPreOrderInfo = async (
 ) => {
   try {
     const prisma = new PrismaClient();
-    const formattedDate = normalizeDate(new Date(deliveryDate));
+    const formattedDate = normalizeDate(deliveryDate);
 
     const clientOrdersOnThatDay = await prisma.orders.findMany({
       where: {
@@ -133,7 +133,7 @@ const getClientsPreOrderInfo = async (
       const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
       const normalizedEndDate = normalizeDate(range.endDate);
 
-      normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+      // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
       return (
         normalizedStartDate <= formattedDate &&
         normalizedEndDate >= formattedDate

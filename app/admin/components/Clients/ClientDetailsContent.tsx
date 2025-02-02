@@ -16,8 +16,8 @@ interface IProps {
 
 export default function ClientDetailsContent({ orders, dateRange }: IProps) {
   const listOfDateString = useMemo(() => {
-    const normalizedStartDate = normalizeDate(new Date(dateRange[0]));
-    const normalizedEndDate = normalizeDate(new Date(dateRange[1]));
+    const normalizedStartDate = normalizeDate(dateRange[0]);
+    const normalizedEndDate = normalizeDate(dateRange[1]);
     const dateStringList = generateListOfDateString(
       normalizedStartDate,
       normalizedEndDate,

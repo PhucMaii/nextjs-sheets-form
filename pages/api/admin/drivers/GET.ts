@@ -13,7 +13,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { date } = req.query as IQuery;
 
     if (date) {
-      const selectedDate = normalizeDate(new Date(date));
+      const selectedDate = normalizeDate(date);
       const dayIndex = selectedDate.getDay();
       const day = days[dayIndex];
 

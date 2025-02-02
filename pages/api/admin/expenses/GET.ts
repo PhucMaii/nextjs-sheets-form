@@ -23,15 +23,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const { startDate, endDate, id, type }: IQuery = req.query;
 
+    console.log({ startDate, endDate, id, type });
+
     if (!startDate || !endDate) {
       return res.status(404).json({ error: 'Missing required parameters' });
     }
 
     const formattedStartDate = normalizeDate(
-      `${startDate.split(' ')[1]} ${startDate.split(' ')[2]} ${startDate.split(' ')[3]}`,
+      new Date(
+        `${startDate.split(' ')[1]} ${startDate.split(' ')[2]} ${startDate.split(' ')[3]}`,
+      ),
     );
     const formattedEndDate = normalizeDate(
-      `${endDate.split(' ')[1]} ${endDate.split(' ')[2]} ${endDate.split(' ')[3]}`,
+      new Date(
+        `${endDate.split(' ')[1]} ${endDate.split(' ')[2]} ${endDate.split(' ')[3]}`,
+      ),
     );
 
     const listOfDateString = generateListOfDateString(

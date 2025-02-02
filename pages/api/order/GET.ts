@@ -44,8 +44,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ error: 'User Not Found' });
     }
 
-    const formattedStartDate = normalizeDate(new Date(startDate));
-    const formattedEndDate = normalizeDate(new Date(endDate));
+    const formattedStartDate = normalizeDate(startDate);
+    const formattedEndDate = normalizeDate(endDate);
 
     // formattedEndDate.setDate(formattedEndDate.getDate() + 1);
 

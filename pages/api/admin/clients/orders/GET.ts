@@ -30,8 +30,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         startDate,
         endDate,
       });
-      const normalizedStartDate = normalizeDate(new Date(startDate));
-      const normalizedEndDate = normalizeDate(new Date(endDate));
+      const normalizedStartDate = normalizeDate(startDate);
+      const normalizedEndDate = normalizeDate(endDate);
       const listOfDateString = generateListOfDateString(
         normalizedStartDate,
         normalizedEndDate,

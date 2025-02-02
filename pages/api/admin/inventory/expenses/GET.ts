@@ -20,8 +20,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const normalizedStartDate = normalizeDate(new Date(startDate));
-    const normalizedEndDate = normalizeDate(new Date(endDate));
+    const normalizedStartDate = normalizeDate(startDate);
+    const normalizedEndDate = normalizeDate(endDate);
 
     const listOfDateString = generateListOfDateString(
       normalizedStartDate,
@@ -47,8 +47,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             inventoryUnit: true,
             fifo: {
-              include: {
-                orderedItems: true,
+              select: {
+                _count: {
+                  select: {
+                    orderedItems: true,
+                  },
+                },
               },
             },
           },

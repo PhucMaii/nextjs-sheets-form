@@ -124,7 +124,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const normalizedDate = normalizeDate(new Date(todayString));
+    const normalizedDate = normalizeDate(todayString);
     const dayIndex = normalizedDate.getDay();
     const day = days[dayIndex];
 
@@ -270,7 +270,7 @@ const insertOrdersToSelectedBoards = async (
 ) => {
   const prisma = new PrismaClient();
 
-  const today = normalizeDate(new Date(date));
+  const today = normalizeDate(date);
 
   const dayIndex = today.getDay();
   const day = days[dayIndex];

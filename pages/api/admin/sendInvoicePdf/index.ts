@@ -33,8 +33,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const normalizedStartDate = normalizeDate(new Date('01/01/2024'));
-    const normalizedEndDate = normalizeDate(new Date(endDate));
+    const normalizedStartDate = normalizeDate('01/01/2024');
+    const normalizedEndDate = normalizeDate(endDate);
 
     const listOfDateString = generateListOfDateString(
       normalizedStartDate,

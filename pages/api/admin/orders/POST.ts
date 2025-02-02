@@ -125,12 +125,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         });
 
         let trackIndex = 0;
-        const deliveryDateTypeDate = normalizeDate(new Date(deliveryDate));
+        const deliveryDateTypeDate = normalizeDate(deliveryDate);
         for (const unavailableRange of unavailableRanges) {
           const normalizedStartDate = normalizeDate(unavailableRange.startDate);
           const normalizedEndDate = normalizeDate(unavailableRange.endDate);
 
-          normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+          // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
           if (
             deliveryDateTypeDate >= normalizedStartDate &&
             deliveryDateTypeDate <= normalizedEndDate

@@ -72,7 +72,20 @@ export const normalizeDate = (date: Date | string) => {
   // const normalized = new Date(date);
   // normalized.setHours(0, 0, 0, 0);
   // return normalized;
-  return moment.tz(date, 'America/Los_Angeles').startOf('day').toDate();
+  // const pstDate = new Intl.DateTimeFormat('en-US', {
+  //   timeZone: 'America/Los_Angeles',
+  //   dateStyle: 'full',
+  //   timeStyle: 'long',
+  // }).format(new Date(date));
+  console.log(date, 'date');
+  const parsedDate = new Date(date);
+
+  console.log(parsedDate, 'parsed date');
+  return moment
+    .utc(parsedDate)
+    .tz('America/Los_Angeles')
+    .startOf('day')
+    .toDate();
 };
 
 export const generate7DaysBefore = (deliveryDate: string) => {
