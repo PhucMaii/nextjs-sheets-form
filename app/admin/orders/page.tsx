@@ -119,6 +119,7 @@ export interface Order {
   type?: TYPE;
   deliveredBy?: string;
   notInRoute?: boolean;
+  notInBoard?: boolean;
   addedToCODBy?: string;
 }
 
