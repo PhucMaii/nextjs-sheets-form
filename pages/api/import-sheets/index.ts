@@ -109,7 +109,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           normalizedDeliveryDate,
         });
 
-        normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+        // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
         if (
           normalizedDeliveryDate.getTime() >= normalizedStartDate.getTime() &&
           normalizedDeliveryDate.getTime() <= normalizedEndDate.getTime()

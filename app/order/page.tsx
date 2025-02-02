@@ -209,7 +209,7 @@ export default function OrderForm() {
           onClose={() => {
             setTimeout(() => {
               closeNotification();
-            }, 3000)
+            }, 3000);
           }}
           anchorOrigin={{
             vertical: 'top',
