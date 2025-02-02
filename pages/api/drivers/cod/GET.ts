@@ -72,13 +72,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Get cod orders on that day from that route
     const orderExistedInBoard = cod.orders.map((order: any) => {
       return order.id;
-    })
+    });
 
     const wcodDay: any = getWCODDay(date);
     const codOrders = await prisma.orders.findMany({
       where: {
         id: {
-          notIn: orderExistedInBoard
+          notIn: orderExistedInBoard,
         },
         deliveryDate: date,
         status: {
@@ -96,8 +96,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             paymentType: {
               in: [wcodDay, PAYMENT_TYPE.COD],
             },
-          }
-        }
+          },
+        },
       },
       include: {
         user: {
