@@ -69,23 +69,60 @@ export const getSameDateLastWeek = (currentDate: string | Date) => {
 };
 
 export const normalizeDate = (date: Date | string) => {
-  // const normalized = new Date(date);
-  // normalized.setHours(0, 0, 0, 0);
-  // return normalized;
-  // const pstDate = new Intl.DateTimeFormat('en-US', {
-  //   timeZone: 'America/Los_Angeles',
-  //   dateStyle: 'full',
-  //   timeStyle: 'long',
-  // }).format(new Date(date));
-  console.log(date, 'date');
-  const parsedDate = new Date(date);
+  // console.log(date, 'date');
+  // const parsedDate = new Date(date);
 
-  console.log(parsedDate, 'parsed date');
-  return moment
-    .utc(parsedDate)
-    .tz('America/Los_Angeles')
+  // console.log(parsedDate, 'parsed date');
+  // return moment
+  //   .utc(parsedDate)
+  //   .tz('America/Los_Angeles')
+  //   .startOf('day')
+  //   .toDate();
+  console.log('Input Date:', date);
+  let parsedDate;
+
+  if (date instanceof Date) {
+    parsedDate = moment(date);
+  } else if (typeof date === 'string') {
+    const possibleFormats = [
+      'MM/DD/YYYY', // e.g., 01/26/2025
+      'YYYY-MM-DD', // e.g., 2025-01-26
+      'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ', // e.g., Sat Feb 01 2025 00:00:00 GMT-0800
+      'MM/DD/YYYY HH:mm:ss', // e.g., 01/26/2025 12:34:56
+      'YYYY-MM-DDTHH:mm:ssZ', // ISO 8601 format
+      moment.ISO_8601, // Fallback for any valid ISO 8601 string
+    ];
+
+    // Try parsing with each format
+    for (const format of possibleFormats) {
+      parsedDate = moment(date, format, true); // true = strict parsing
+      if (parsedDate.isValid()) {
+        break; // Stop if a valid date is found
+      }
+    }
+
+    // Fallback to default parsing if no format matches
+    if (!parsedDate || !parsedDate.isValid()) {
+      parsedDate = moment(date);
+    }
+  } else {
+    throw new Error('Invalid date format');
+  }
+
+  if (!parsedDate.isValid()) {
+    throw new Error('Invalid date');
+  }
+  console.log('Parsed Date (Local):', parsedDate);
+  console.log('Parsed Date (UTC):', parsedDate.toISOString());
+
+  const normalizedDate = parsedDate
+    .tz('America/Los_Angeles', true)
     .startOf('day')
     .toDate();
+
+  console.log('Normalized Date:', normalizedDate);
+  console.log('Normalized Date (UTC):', normalizedDate.toISOString());
+  return normalizedDate;
 };
 
 export const generate7DaysBefore = (deliveryDate: string) => {
