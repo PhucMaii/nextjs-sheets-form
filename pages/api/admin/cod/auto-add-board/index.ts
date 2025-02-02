@@ -11,7 +11,7 @@ import {
   normalizeDate,
 } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { CodBoard, PrismaClient, User } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -295,9 +295,15 @@ const insertOrdersToSelectedBoards = async (
     .map((order: any) => order.id);
 
   if (noRouteOrderIds.length > 0) {
-    let noRouteBoard: CodBoard | undefined = selectedBoards.find(
-      (board: any) => board.driverId === -1,
-    );
+    // let noRouteBoard: CodBoard | undefined = selectedBoards.find(
+    //   (board: any) => board.driverId === -1,
+    // );
+    let noRouteBoard = await prisma.codBoard.findFirst({
+      where: {
+        date,
+        driverId: -1,
+      },
+    })
 
     if (!noRouteBoard) {
       const { date, time } = getTodayDate();
