@@ -44,7 +44,6 @@ export const ComponentToPrint = forwardRef(
           <TableRow key={item.name}>
             <TableCell>
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography>{generateTaxNote(item)}</Typography>
                 <Typography sx={{ fontSize: 18, fontWeight: 'bold' }}>
                   {item.name}
                 </Typography>
@@ -52,7 +51,7 @@ export const ComponentToPrint = forwardRef(
             </TableCell>
             <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
               {item.quantity}
-            </TableCell>
+            </TableCell >
             <TableCell sx={{ fontSize: 18 }}>
               <Box
                 display="flex"
@@ -77,6 +76,7 @@ export const ComponentToPrint = forwardRef(
               <Box
                 display="flex"
                 alignItems="center"
+                justifyContent="flex-start"
                 gap={1}
                 flexDirection="column"
               >
@@ -91,6 +91,8 @@ export const ComponentToPrint = forwardRef(
                 <Typography fontWeight="bold">
                   ${item.totalPrice?.toFixed(2)}
                 </Typography>
+                {/* <Typography>{generateTaxNote(item)}</Typography> */}
+                <Typography>{generateTaxNote(item)}</Typography>
               </Box>
             </TableCell>
           </TableRow>,
@@ -107,7 +109,7 @@ export const ComponentToPrint = forwardRef(
     };
     return (
       <div ref={ref}>
-        <Box display="flex" flexDirection="column" m={4}>
+        <Box display="flex" flexDirection="column" p={2} className="print-container">
           <Box
             display="flex"
             flexDirection="column"
@@ -151,7 +153,7 @@ export const ComponentToPrint = forwardRef(
             <Typography sx={{ fontSize: printFontSize }} fontWeight="bold">
               Order Details:{' '}
             </Typography>
-            <Table sx={{ marginLeft: '-10px' }}>
+            <Table>
               <TableHead>
                 <TableRow>
                   <TableCell
@@ -162,7 +164,7 @@ export const ComponentToPrint = forwardRef(
                   <TableCell
                     sx={{ fontWeight: 'bold', fontSize: printFontSize - 5 }}
                   >
-                    No. Items
+                    Qty
                   </TableCell>
                   <TableCell
                     sx={{ fontWeight: 'bold', fontSize: printFontSize - 5 }}
