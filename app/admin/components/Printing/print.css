@@ -1,6 +1,7 @@
-@media print {
+/* @media print {
   .page-break {
     page-break-before: always;
+    page-break-after: always;
   }
 
   .print-container {
@@ -8,5 +9,32 @@
     margin: 0;
     padding: 0;
     padding-right: 20;
+  }
+} */
+
+@media print {
+  /* Global reset for print */
+  /* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  } */
+
+  /* Ensure page breaks after each element with this class */
+  .page-break {
+    page-break-after: always;
+  }
+
+  /* Prevent content from being split across pages
+  .no-break {
+    page-break-inside: avoid;
+  } */
+
+  /* Print container styling */
+  .print-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    padding-right: 20px; /* Add unit (e.g., px) */
   }
 }
