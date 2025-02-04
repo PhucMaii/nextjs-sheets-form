@@ -51,7 +51,7 @@ export const ComponentToPrint = forwardRef(
             </TableCell>
             <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
               {item.quantity}
-            </TableCell >
+            </TableCell>
             <TableCell sx={{ fontSize: 18 }}>
               <Box
                 display="flex"
@@ -109,7 +109,12 @@ export const ComponentToPrint = forwardRef(
     };
     return (
       <div ref={ref}>
-        <Box display="flex" flexDirection="column" p={2} className="print-container">
+        <Box
+          display="flex"
+          flexDirection="column"
+          p={2}
+          className="print-container"
+        >
           <Box
             display="flex"
             flexDirection="column"

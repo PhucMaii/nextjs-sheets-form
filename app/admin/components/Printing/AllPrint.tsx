@@ -2,7 +2,6 @@ import React, { forwardRef, memo } from 'react';
 import './print.css';
 import { ComponentToPrint } from './ComponentToPrint';
 
-
 const AllPrint = forwardRef(({ orders }: { orders: any }, ref: any) => {
   return (
     <div ref={ref}>
