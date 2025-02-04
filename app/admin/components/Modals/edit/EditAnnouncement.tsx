@@ -1,5 +1,5 @@
 import { Box, Divider, Modal, TextField, Typography } from '@mui/material';
-import React, { memo, useState } from 'react';
+import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import { LoadingButton } from '@mui/lab';
 import { ModalProps } from '../type';
@@ -56,4 +56,4 @@ const EditAnnouncement = ({ open, onClose, handleUpdate }: IProps) => {
   );
 };
 
-export default memo(EditAnnouncement);
+export default EditAnnouncement;

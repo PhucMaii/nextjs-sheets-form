@@ -16,10 +16,10 @@ import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import { filter } from '../../Autocomplete/InventoryItemSearch';
 import FileUpload from '../../FileUpload';
 import { generateImgUrl } from '@/app/lib/s3';
 import axios from 'axios';
+import { filter } from '../../Autocomplete/VendorItemSearch';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -146,7 +146,7 @@ export default function AddItemIntoType({
               [
                 { id: -1, name: '-- Choose an item --' },
                 ...(inventoryItems?.data || []),
-              ] || []
+              ]
             }
             getOptionLabel={(option) => {
               // Regular option
