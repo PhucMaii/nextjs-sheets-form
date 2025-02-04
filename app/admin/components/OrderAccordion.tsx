@@ -210,6 +210,11 @@ const OrderAccordion = ({
     }
   };
 
+  const onSubmitConfirmModal = async () => {
+    await handleDeleteOrder(order);
+    setOpen('isOpenConfirmModal', false);
+  }
+
   const actions = (
     <>
       <IconButton
@@ -368,7 +373,7 @@ const OrderAccordion = ({
         onClose={() => setOpen('isOpenConfirmModal', false)}
         title="Are you sure to delete this order ?"
         buttonLabel="Delete"
-        handleSubmit={() => handleDeleteOrder(order)}
+        handleSubmit={onSubmitConfirmModal}
         showNotification={showNotification}
         color="error"
       />

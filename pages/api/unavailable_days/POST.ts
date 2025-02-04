@@ -2,6 +2,7 @@ import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../utils/auth';
+import { convertToPSTDate } from '../utils/date';
 
 interface IBody {
   startDate: Date;
@@ -53,10 +54,20 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const pstStartDate = convertToPSTDate(startDate);
+    const pstEndDate = convertToPSTDate(endDate);
+
+    console.log({
+      startDate,
+      endDate,
+      pstStartDate,
+      pstEndDate,
+    });
+
     const newUnavailableRange = await prisma.dayRange.create({
       data: {
-        startDate,
-        endDate,
+        startDate: pstStartDate,
+        endDate: pstEndDate,
         userId,
         createdAt,
         createdBy,
