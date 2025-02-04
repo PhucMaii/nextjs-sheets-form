@@ -11,13 +11,13 @@ import {
   normalizeDate,
 } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { CodBoard, PrismaClient, User } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-interface IBody {
-  todayString: string;
-  createdAt: string;
-}
+// interface IBody {
+//   todayString: string;
+//   createdAt: string;
+// }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -27,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    const { todayString, createdAt }: IBody = req.body;
+    // const { createdAt }: IBody = req.body;
 
     const user = await getUserInfo(req, res);
 
@@ -36,6 +36,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'You are not authenticated',
       });
     }
+
+    const { date: todayString, time } = getTodayDate();
 
     const boards: any = await prisma.codBoard.findMany({
       where: {
@@ -161,7 +163,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         driverId: route.driverId,
         note: '',
         status: COD_STATUS.IN_PROCESS,
-        createdAt,
+        createdAt: `${todayString} ${time}`,
         createdBy: `Admin - ${user.clientName}`,
       };
     });
@@ -261,12 +263,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-const insertOrdersToSelectedBoards = async (
+export const insertOrdersToSelectedBoards = async (
   orders: Order[],
   selectedBoards: IBoard[],
   routeOnDate: IRoutes[],
   date: string,
-  user: User,
+  user: User | any,
 ) => {
   const prisma = new PrismaClient();
 
@@ -295,9 +297,15 @@ const insertOrdersToSelectedBoards = async (
     .map((order: any) => order.id);
 
   if (noRouteOrderIds.length > 0) {
-    let noRouteBoard: CodBoard | undefined = selectedBoards.find(
-      (board: any) => board.driverId === -1,
-    );
+    // let noRouteBoard: CodBoard | undefined = selectedBoards.find(
+    //   (board: any) => board.driverId === -1,
+    // );
+    let noRouteBoard = await prisma.codBoard.findFirst({
+      where: {
+        date,
+        driverId: -1,
+      },
+    });
 
     if (!noRouteBoard) {
       const { date, time } = getTodayDate();

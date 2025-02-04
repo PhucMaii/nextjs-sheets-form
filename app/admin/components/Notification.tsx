@@ -4,7 +4,7 @@ import { Notification } from '@/app/utils/type';
 
 interface PropTypes {
   notification: Notification;
-  onClose: () => void;
+  onClose?: () => void;
   anchorOrigin?: any;
 }
 

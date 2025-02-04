@@ -3,6 +3,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
 import { days } from '@/app/lib/constant';
+import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
+import { getWCODDay } from '@/app/utils/time';
 
 interface IQuery {
   date?: string;
@@ -48,6 +50,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Get cod orders on that day
+
     if (!cod) {
       return res.status(404).json({
         error: 'COD not found',
@@ -65,6 +69,58 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return userRoute.userId;
     });
 
+    // Get cod orders on that day from that route
+    const orderExistedInBoard = cod.orders.map((order: any) => {
+      return order.id;
+    });
+
+    const wcodDay: any = getWCODDay(date);
+    const codOrders = await prisma.orders.findMany({
+      where: {
+        id: {
+          notIn: orderExistedInBoard,
+        },
+        deliveryDate: date,
+        status: {
+          in: [
+            ORDER_STATUS.INCOMPLETED,
+            ORDER_STATUS.DELIVERED,
+            ORDER_STATUS.COMPLETED,
+          ],
+        },
+        userId: {
+          in: userIds,
+        },
+        user: {
+          preference: {
+            paymentType: {
+              in: [wcodDay, PAYMENT_TYPE.COD],
+            },
+          },
+        },
+      },
+      include: {
+        user: {
+          include: {
+            preference: true,
+            category: true,
+            routes: true,
+          },
+        },
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          },
+        },
+      },
+    });
+
+    // Merge both cod orders and board orders
+    const mergedOrders = [...codOrders, ...cod.orders];
+
+    // Arrange orders
     const arrangedOrders = await prisma.scheduleOrders.findMany({
       where: {
         userId: {
@@ -93,7 +149,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Format the return orders
     const sortedDeliveryOrders = [];
     for (const order of arrangedOrders) {
-      const deliveryOrder = cod.orders.find(
+      const deliveryOrder = mergedOrders.find(
         (browsingOrder: any) => browsingOrder.userId === order.userId,
       );
 
@@ -112,6 +168,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       sortedDeliveryOrders.push({
         ...deliveryOrder,
         items: newItems,
+        notInBoard: !orderExistedInBoard.includes(deliveryOrder.id),
         notInRoute: !isOrderIncludedInRoute,
       });
     }

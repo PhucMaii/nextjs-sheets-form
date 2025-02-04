@@ -1,7 +1,8 @@
 // import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { normalizeDate, sortByDeliveryDate } from '@/pages/api/utils/date';
+import { sortByDeliveryDate } from '@/pages/api/utils/date';
+import moment from 'moment-timezone';
 import {
   generateManifest,
   getCustomersInDebt,
@@ -52,6 +53,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedStartDate,
       formattedEndDate,
     );
+
+    console.log({
+      startDate,
+      endDate,
+      formattedStartDate,
+      formattedEndDate,
+      datesInRange,
+    });
+
     const orders: any = await prisma.orders.findMany({
       where: {
         status: {
@@ -192,6 +202,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       debtFetchSkip += fetchedDebtOrders.length;
     }
 
+    // const henlongOrders = debtOrders.filter((order: any) => {
+    //   return order.user.clientId === "00130";
+    // }).map((order: any) => {
+    //   return {
+    //     date: order.deliveryDate,
+    //     amount: order.totalPrice,
+    //   }
+    // });
+
     const customersInDebt = getCustomersInDebt(debtOrders);
 
     return res.status(200).json({
@@ -203,19 +222,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           lastMonth: lastMonthRevenueReport.chartData,
           timeSeries: thisMonthRevenueReport.keys, // Time series for displaying time for the chart
         },
-        // beansprouts: {
-        //   BK: {
-        //     quantity: BKQuantity,
-        //     revenue: BKRevenue,
-        //     percentage: BKPercentage,
-        //   },
-        //   PP: {
-        //     quantity: PPQuantity,
-        //     revenue: PPRevenue,
-        //     percentage: PPPercentage,
-        //   },
-        //   totalItems,
-        // },
       },
       message: 'Fetch Overview Data Successfully',
     });
@@ -228,3 +234,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAdminAuthGuard(handler);
+
+const normalizeDate = (date: Date | string) => {
+  return moment.tz(date, 'America/Los_Angeles').startOf('day').toDate();
+};

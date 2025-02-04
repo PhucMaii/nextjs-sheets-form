@@ -25,6 +25,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import { renderType } from '@/app/lib/render';
+import { grey } from '@mui/material/colors';
 
 interface IProps {
   order: Order;
@@ -282,6 +283,13 @@ export default function OrderComponent({
             <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
           </Box>
         </Grid>
+        {order?.notInBoard && (
+          <Grid item xs={12}>
+            <Typography sx={{ color: grey[500] }} variant="subtitle2">
+              *Order not existed in admin COD board yet.
+            </Typography>
+          </Grid>
+        )}
       </Grid>
     </ShadowSection>
   );

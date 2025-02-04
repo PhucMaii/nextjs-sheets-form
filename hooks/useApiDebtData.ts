@@ -56,6 +56,13 @@ const useApiDebtData = (
 
   const sortKeys = (debtList: any) => {
     const sortedKeys = Object.keys(debtList).sort((key1, key2) => {
+      // Compare year first then month
+      const year1 = Number(key1.split('/')[1]);
+      const year2 = Number(key2.split('/')[1]);
+      if (year1 !== year2) {
+        return year1 - year2;
+      }
+
       const month1 = Number(key1.split('/')[0]);
       const month2 = Number(key2.split('/')[0]);
 

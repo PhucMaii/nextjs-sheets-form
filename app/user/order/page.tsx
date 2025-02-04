@@ -99,18 +99,18 @@ export default function OrderForm() {
     setClientName(items.data.clientName);
   };
 
-  const handleCheckUserHasInput = () => {
+  const checkUserInput = () => {
     return itemList.some((item: any) => {
       return item.quantity > 0;
     });
   };
 
-  const handleSubmit = async (
+  const onSubmit = async (
     e: MouseEvent,
     isCheckUnavailableRange: boolean = true,
   ) => {
     e.preventDefault();
-    const checkUserHasInput = handleCheckUserHasInput();
+    const checkUserHasInput = checkUserInput();
     if (!checkUserHasInput) {
       showNotification('error', 'Please enter your order');
       return;
@@ -169,7 +169,7 @@ export default function OrderForm() {
     }
   };
 
-  const handleChangeItem = (e: any, targetItem: any) => {
+  const onChangeItem = (e: any, targetItem: any) => {
     const newItems = itemList.map((item: any) => {
       if (item.id === targetItem.id) {
         return { ...targetItem, quantity: +e.target.value };
@@ -180,7 +180,7 @@ export default function OrderForm() {
     setItemList(newItems);
   };
 
-  const handleDateChange = (e: any) => {
+  const onDateChange = (e: any) => {
     const formattedDate = formatDateChanged(e);
     setDeliveryDate(formattedDate);
   };
@@ -206,7 +206,11 @@ export default function OrderForm() {
         />
         <NotificationPopup
           notification={notification}
-          onClose={closeNotification}
+          onClose={() => {
+            setTimeout(() => {
+              closeNotification();
+            }, 3000);
+          }}
           anchorOrigin={{
             vertical: 'top',
             horizontal: 'right',
@@ -234,7 +238,7 @@ export default function OrderForm() {
             onClose={() => setIsOrderOnVacationOpen(false)}
             startDate={new Date(unavailableRange[0])}
             endDate={new Date(unavailableRange[1])}
-            handleContinueOrder={(e: any) => handleSubmit(e, false)}
+            handleContinueOrder={(e: any) => onSubmit(e, false)}
           />
         )}
         <div className="w-full mx-auto pb-6">
@@ -271,7 +275,7 @@ export default function OrderForm() {
                   disablePast
                   minDate={minDate}
                   value={dayjs(deliveryDate)}
-                  onChange={handleDateChange}
+                  onChange={onDateChange}
                   sx={{ width: '100%' }}
                   shouldDisableDate={disableChristmasAndNewYear}
                 />
@@ -291,7 +295,7 @@ export default function OrderForm() {
                       <TextField
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => handleChangeItem(e, item)}
+                        onChange={(e) => onChangeItem(e, item)}
                         placeholder={`Enter ${item.name} here...`}
                         disabled={!item.availability}
                         inputProps={{ min: 0 }}
@@ -315,7 +319,7 @@ export default function OrderForm() {
             <Box display="flex" justifyContent={'center'}>
               <LoadingButton
                 variant="contained"
-                onClick={handleSubmit}
+                onClick={onSubmit}
                 type="submit"
                 loading={isButtonLoading}
                 fullWidth
