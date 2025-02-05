@@ -90,7 +90,7 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
       : `${API_URL.PUBLIC}/cart?guestSessionId=${guestSession.sessionId}&guestSessionSignature=${guestSession.signature}`,
   );
 
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md')); 
 
   const cartItemsQty = useMemo(() => {
     if (!cart) {

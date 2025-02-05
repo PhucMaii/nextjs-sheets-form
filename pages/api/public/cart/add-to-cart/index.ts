@@ -25,6 +25,39 @@ export default async function handler(
 
     const { item, userId, cartId }: IBody = req.body;
 
+    // Get the unit of ratio 1 for new item
+    const existingItemPreference = await prisma.itemPreference.findUnique({
+      where: {
+        id: item.itemPreferenceId,
+      },
+      include: {
+        inventoryItem: {
+          include: {
+            vendorItem: {
+              where: {
+                unit: {
+                  some: {}, // Ensure vendorItem has some inventory units
+                },
+              },
+              include: {
+                unit: {
+                  where: {
+                    ratio: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!existingItemPreference) {
+      return res.status(404).json({
+        error: 'Item Not Found',
+      });
+    }
+
     const today = getTodayDate();
     // Check if item is existed in cart, then increase the quantity
     if (cartId) {
@@ -45,7 +78,7 @@ export default async function handler(
         });
 
         if (existingItem) {
-         await prisma.cartItem.update({
+          await prisma.cartItem.update({
             where: {
               id: existingItem.id,
             },
@@ -62,6 +95,8 @@ export default async function handler(
               cartId: selectedCart.id,
               createdAt: `${today.date} ${today.time}`,
               createdBy: 'Guest',
+              inventoryUnitId:
+                existingItemPreference.inventoryItem.vendorItem[0].unit[0].id,
             },
           });
         }
@@ -126,6 +161,8 @@ export default async function handler(
         cartId: cart.id,
         createdAt: `${today.date} ${today.time}`,
         createdBy: 'Guest',
+        inventoryUnitId:
+          existingItemPreference.inventoryItem.vendorItem[0].unit[0].id,
       },
     });
 
@@ -206,11 +243,11 @@ export const updateCartTotalPrice = async (cartId: number) => {
             itemPreference: {
               include: {
                 inventoryItem: true,
-              }
+              },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     return returnCart;

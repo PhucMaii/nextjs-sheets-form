@@ -18,7 +18,6 @@ import { orange } from '@mui/material/colors';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ProductListing from '@/app/components/ProductListingPage/ProductListing';
 import Footer from '@/app/components/LandingPage/Footer';
-// import useLocalStorage from '@/hooks/useLocalStorage';
 import { LoadingButton } from '@mui/lab';
 import { addItemToCartAsync } from '@/state/cart/cartSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,7 +25,6 @@ import { AppDispatch, RootState } from '@/state/store';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
-  // const [cartId, setCartId] = useLocalStorage('cartId', '');
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [itemData, setItemData] = useState<IItemPreference | null>(null);

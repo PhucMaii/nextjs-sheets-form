@@ -18,7 +18,7 @@ model Driver {
 
 model User {
   id                 Int     @id @default(autoincrement())
-  categoryId         Int
+  categoryId         Int?
   subCategoryId      Int?
   userPreferenceId   Int? // will change back to force user to have it
   clientName         String  @db.VarChar(255)
@@ -31,10 +31,11 @@ model User {
   password           String  @db.VarChar(255)
   sheetName          String  @db.VarChar(255)
   role               String  @db.VarChar(255)
+  guestSessionId     String? // Only useful for first time placing order
   createdAt          String?
   type               String?
 
-  category            Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category            Category?          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory         SubCategory?      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   preference          UserPreference?   @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders              Orders[]
@@ -124,7 +125,7 @@ model Orders {
   deliveredBy       String?
   addedToCODBy      String?
 
-  user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User?          @relation(fields: [userId], references: [id])
   items      OrderedItems[]
   CodBoard   CodBoard?      @relation(fields: [codBoardId], references: [id])
   codBoardId Int?
@@ -355,6 +356,7 @@ model InventoryUnit {
 
   vendorItem   VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems OrderedItems[]
+  cartItems    CartItem[]
 }
 
 model Action {
@@ -383,9 +385,11 @@ model CartItem {
   quantity         Int
   cartId           Int
   itemPreferenceId Int
+  inventoryUnitId  Int
   createdAt        String
   createdBy        String
 
+  inventoryUnit  InventoryUnit  @relation(fields: [inventoryUnitId], references: [id])
   itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id])
   cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
 }

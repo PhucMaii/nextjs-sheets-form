@@ -56,7 +56,6 @@ export default function OrderSummary() {
     try {
       setIsLoading(true);
       const latLng: any = await generateLatLng(address.fullName);
-      // const getAddressInfo = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${providedAddress}&key=${process.env.NEXT_PUBLIC_MAPS_KEY}`);
 
       const distance = calculateDistance(
         latLng.latitude,
@@ -98,6 +97,10 @@ export default function OrderSummary() {
       };
     });
   }, []);
+  
+  const onPlaceOrder = () => {
+    
+  }
 
   const renderAddressInput = () => {
     return (
@@ -183,11 +186,12 @@ export default function OrderSummary() {
         </Grid>
         <Grid item xs={12}>
           <Typography variant="subtitle2" sx={{ color: grey[500] }}>
-            * We currently offer shipping only within British Columbia (BC), Canada.
+            * We currently offer shipping only within British Columbia (BC),
+            Canada.
           </Typography>
         </Grid>
 
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <LoadingButton
             loading={isLoading}
             onClick={onCalculateShippingFee}
@@ -196,7 +200,7 @@ export default function OrderSummary() {
           >
             Calculate Shipping Fee
           </LoadingButton>
-        </Grid>
+        </Grid> */}
       </Grid>
     );
   };
@@ -245,7 +249,7 @@ export default function OrderSummary() {
   };
 
   return (
-    <>
+    <Box display="flex" flexDirection="column" gap={2}>
       <Typography
         textAlign="center"
         variant="h5"
@@ -288,6 +292,19 @@ export default function OrderSummary() {
       {renderAddressInput()}
 
       {renderDisplayTotal()}
-    </>
+
+      <LoadingButton
+        loading={isLoading}
+        onClick={onCalculateShippingFee}
+        variant="contained"
+        fullWidth
+      >
+        {/* TODO: will be changed to checkout */}
+        Place order
+      </LoadingButton>
+      <Typography variant="subtitle2" sx={{ color: grey[500] }}>
+        * Shipping fee will be calculated at checkout
+      </Typography>
+    </Box>
   );
 }

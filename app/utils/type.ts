@@ -252,6 +252,7 @@ export interface ICart extends Cart {
 export interface ICartItem extends CartItem {
   quantity: number;
   cartId: number;
+  inventoryUnit: IInventoryUnit;
   itemPreferenceId: number;
 
   itemPreference: IItemPreference;

@@ -217,7 +217,7 @@ export const createOrder = async (
     }
 
     // Check if user order within invalid date
-    if (createdBy.split(' - ')[0] === 'Client') {
+    if (createdBy.split(' - ')[0] === 'Client' || createdBy.split(' - ')[0] === 'Guest') {
       const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
       if (!isValidDate.ok) {
         throw new Error(isValidDate.message);
