@@ -182,6 +182,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           routeId: order?.routeId,
           client: order.clientName,
           user: order.user,
+          order: order,
         };
       });
     });
@@ -250,7 +251,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const manifestDetail = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem, index: number) => {
-          const { user, quantity } = item;
+          const { user, order, quantity } = item;
           if (!user) {
             return acc;
           }
@@ -285,6 +286,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             }
             const newUserManifest = {
               user: { ...user, displayName },
+              order,
               [itemKey]: quantity,
             };
 
@@ -295,6 +297,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           const currentUserManifest = acc[acc.length - 1];
           const updatedUserManifest = {
             ...currentUserManifest,
+            order,
             [itemKey]: quantity,
           };
 
@@ -314,6 +317,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             continue;
           }
 
+          if (itemName === 'order') {
+            continue;
+          }
+
           if (itemNameList.includes(itemName)) {
             continue;
           }
@@ -330,11 +337,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       const sortedItemNames = sortedItemKeys(itemNameList, mainItems);
+
+      const routeNote = manifestDetail
+        .filter((userManifest: any) => {
+          return !!userManifest.order.note;
+        })
+        .map((userManifest: any) => {
+          return userManifest.order;
+        });
+
+      console.log({ manifestDetail });
+
       itemManifest[itemRoute] = {
         details: manifestDetail,
         summary: manifestItem,
         route: targetRoute,
         itemNames: sortedItemNames,
+        notes: routeNote || [],
       };
     }
 

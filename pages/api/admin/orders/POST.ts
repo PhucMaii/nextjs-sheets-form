@@ -7,6 +7,7 @@ import { pusherServer } from '@/app/pusher';
 import {
   checkOrderDeliveryDateValid,
   convertToPSTDate,
+  getTodayDate,
   normalizeDate,
   // normalizeDate,
   sortByDeliveryDate,
@@ -233,6 +234,7 @@ export const createOrder = async (
     }
 
     const total = generateOrderTotalPrice(items);
+    const { date, time } = getTodayDate();
 
     // initialize order
     const newOrder = await prisma.orders.create({
@@ -247,7 +249,7 @@ export const createOrder = async (
         discount: total.discount,
         totalPrice: total.totalPrice,
         isAffectInventory: true,
-        orderTime,
+        orderTime: `${date} ${time}`,
         createdBy,
       },
     });

@@ -127,6 +127,7 @@ export interface IItem {
   units?: any;
   prevPrice?: number;
   isShowDiscount?: boolean;
+  order?: any;
 }
 
 export interface OrderedItems {
