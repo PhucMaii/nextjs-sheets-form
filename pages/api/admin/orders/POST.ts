@@ -6,7 +6,10 @@ import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
 import {
   checkOrderDeliveryDateValid,
+  convertToPSTDate,
+  getTodayDate,
   normalizeDate,
+  // normalizeDate,
   sortByDeliveryDate,
 } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
@@ -126,11 +129,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         let trackIndex = 0;
         const deliveryDateTypeDate = normalizeDate(new Date(deliveryDate));
+        // const deliveryDateTypeDate = convertToPSTDate(deliveryDate);
         for (const unavailableRange of unavailableRanges) {
-          const normalizedStartDate = normalizeDate(unavailableRange.startDate);
-          const normalizedEndDate = normalizeDate(unavailableRange.endDate);
+          // const normalizedStartDate = normalizeDate(unavailableRange.startDate);
+          // const normalizedEndDate = normalizeDate(unavailableRange.endDate);
 
-          normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+          const normalizedStartDate = convertToPSTDate(
+            unavailableRange.startDate,
+          );
+          const normalizedEndDate = convertToPSTDate(unavailableRange.endDate);
+
+          // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
           if (
             deliveryDateTypeDate >= normalizedStartDate &&
             deliveryDateTypeDate <= normalizedEndDate
@@ -225,6 +234,7 @@ export const createOrder = async (
     }
 
     const total = generateOrderTotalPrice(items);
+    const { date, time } = getTodayDate();
 
     // initialize order
     const newOrder = await prisma.orders.create({
@@ -239,7 +249,7 @@ export const createOrder = async (
         discount: total.discount,
         totalPrice: total.totalPrice,
         isAffectInventory: true,
-        orderTime,
+        orderTime: `${date} ${time}`,
         createdBy,
       },
     });

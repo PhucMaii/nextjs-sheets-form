@@ -4,7 +4,7 @@ import { Box, Grid, TextField, useMediaQuery } from '@mui/material';
 import { IDayRange } from '@/app/utils/type';
 
 interface IProps {
-  range: IDayRange;
+  range: any;
   isDeleting: boolean;
   isEditing: boolean;
   isSaving: boolean;

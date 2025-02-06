@@ -150,3 +150,15 @@ export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
 
   return { ok: true };
 };
+
+export const convertToPSTDate = (date: string | Date) => {
+  let utcTimestamp;
+  if (date instanceof Date) {
+    utcTimestamp = new Date(date.getTime());
+  } else {
+    utcTimestamp = new Date(date);
+  }
+
+  const pstDate = new Date(utcTimestamp.getTime() - 8 * 3600 * 1000);
+  return pstDate;
+};

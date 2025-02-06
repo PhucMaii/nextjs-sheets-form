@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { handleCheckRangeValid } from './POST';
+// import { convertToPSTDate } from '../utils/date';
 
 interface IBody {
   updatedRangeId: number;
@@ -41,13 +42,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // const pstStartDate = convertToPSTDate(startDate);
+    // const pstEndDate = convertToPSTDate(endDate);
+    const utcStartDate = new Date(startDate);
+    const utcEndDate = new Date(endDate);
+
     const updatedUnavailableRange = await prisma.dayRange.update({
       where: {
         id: updatedRangeId,
       },
       data: {
-        startDate,
-        endDate,
+        startDate: utcStartDate,
+        endDate: utcEndDate,
       },
     });
 

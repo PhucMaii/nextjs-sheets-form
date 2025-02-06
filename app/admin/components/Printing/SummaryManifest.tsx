@@ -67,7 +67,7 @@ export const SummaryManifest = forwardRef(
                     <Typography>{currentDate}</Typography>
                   </Box>
 
-                  {/* Manifest Table */}
+                  {/* Summary Manifest Table */}
                   <Table>
                     <TableHead>
                       <TableRow>
@@ -92,6 +92,40 @@ export const SummaryManifest = forwardRef(
                         })}
                     </TableBody>
                   </Table>
+
+                  {/* Note Table */}
+                  {manifest[routeId]?.notes?.length > 0 && (
+                    <>
+                      <Typography variant="h4" m={2}>
+                        Note
+                      </Typography>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Client</TableCell>
+                            <TableCell>Note</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {manifest[routeId]?.notes?.length > 0 &&
+                            manifest[routeId]?.notes.map(
+                              (clientNote: any, index: number) => {
+                                return (
+                                  <TableRow key={index}>
+                                    <TableCell>
+                                      {clientNote.clientName} -{' '}
+                                      {clientNote.clientId}
+                                    </TableCell>
+                                    <TableCell>{clientNote.note}</TableCell>
+                                  </TableRow>
+                                );
+                              },
+                            )}
+                        </TableBody>
+                      </Table>
+                    </>
+                  )}
+
                   {index < Object.keys(manifest).length - 1 && (
                     <div className="page-break"></div>
                   )}

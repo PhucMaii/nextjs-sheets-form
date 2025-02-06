@@ -3,7 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
-import { checkOrderDeliveryDateValid, normalizeDate } from '../utils/date';
+import {
+  checkOrderDeliveryDateValid,
+  convertToPSTDate,
+  normalizeDate,
+} from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 import { checkHasClientOrder, getCreatedBy, overrideOrder } from './utils';
 import { createOrder } from '../admin/orders/POST';
@@ -98,12 +102,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Check is delivery date in client's vacation range
     if (isCheckUnavailableRange) {
+      // const normalizedDeliveryDate = convertToPSTDate(deliveryDate);
       const normalizedDeliveryDate = normalizeDate(new Date(deliveryDate));
       for (const dayRange of existingUser.unavailableDayRange) {
-        const normalizedStartDate = normalizeDate(dayRange.startDate);
-        const normalizedEndDate = normalizeDate(dayRange.endDate);
+        // const normalizedStartDate = normalizeDate(dayRange.startDate);
+        // const normalizedEndDate = normalizeDate(dayRange.endDate);
 
-        normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+        const normalizedStartDate = convertToPSTDate(dayRange.startDate);
+        const normalizedEndDate = convertToPSTDate(dayRange.endDate);
+
+        // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
         if (
           normalizedDeliveryDate >= normalizedStartDate &&
           normalizedDeliveryDate <= normalizedEndDate

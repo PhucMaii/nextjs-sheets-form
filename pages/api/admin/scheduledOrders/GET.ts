@@ -1,7 +1,7 @@
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { DayRange, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { normalizeDate } from '../../utils/date';
+import { convertToPSTDate, normalizeDate } from '../../utils/date';
 
 interface QueryTypes {
   day?: string;
@@ -85,6 +85,7 @@ const getClientsPreOrderInfo = async (
 ) => {
   try {
     const prisma = new PrismaClient();
+    // const formattedDate = convertToPSTDate(deliveryDate);
     const formattedDate = normalizeDate(new Date(deliveryDate));
 
     const clientOrdersOnThatDay = await prisma.orders.findMany({
@@ -130,10 +131,13 @@ const getClientsPreOrderInfo = async (
 
     // Filter range that includes delivery date only
     const filteredRange = blockingRange.filter((range: DayRange) => {
-      const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
-      const normalizedEndDate = normalizeDate(range.endDate);
+      // const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
+      // const normalizedEndDate = normalizeDate(range.endDate);
 
-      normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
+      const normalizedStartDate = convertToPSTDate(range.startDate);
+      const normalizedEndDate = convertToPSTDate(range.endDate);
+
+      // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
       return (
         normalizedStartDate <= formattedDate &&
         normalizedEndDate >= formattedDate
