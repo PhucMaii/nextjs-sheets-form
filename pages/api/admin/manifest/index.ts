@@ -343,7 +343,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           return !!userManifest.order.note;
         })
         .map((userManifest: any) => {
-          return userManifest.order;
+          return {
+            clientName: userManifest.user.clientName,
+            clientId: userManifest.user.clientId,
+            note: userManifest.order.note,
+
+          };
         });
 
       console.log({ manifestDetail });
