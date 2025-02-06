@@ -213,7 +213,7 @@ const OrderAccordion = ({
   const onSubmitConfirmModal = async () => {
     await handleDeleteOrder(order);
     setOpen('isOpenConfirmModal', false);
-  }
+  };
 
   const actions = (
     <>

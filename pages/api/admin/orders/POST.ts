@@ -136,9 +136,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           const normalizedStartDate = convertToPSTDate(
             unavailableRange.startDate,
           );
-          const normalizedEndDate = convertToPSTDate(
-            unavailableRange.endDate,
-          );
+          const normalizedEndDate = convertToPSTDate(unavailableRange.endDate);
 
           // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
           if (

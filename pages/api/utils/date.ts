@@ -158,7 +158,7 @@ export const convertToPSTDate = (date: string | Date) => {
   } else {
     utcTimestamp = new Date(date);
   }
-  
-  const pstDate = new Date(utcTimestamp.getTime() - (8 * 3600 * 1000));
+
+  const pstDate = new Date(utcTimestamp.getTime() - 8 * 3600 * 1000);
   return pstDate;
-}
+};

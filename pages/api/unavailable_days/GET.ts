@@ -76,7 +76,7 @@ const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
   const rangesInDate = rangeList.filter((range: DayRange) => {
     // const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
     // const normalizedEndDate = normalizeDate(range.endDate);
-    
+
     const pstStartDate = convertToPSTDate(range.startDate);
     const pstEndDate = convertToPSTDate(range.endDate);
 
@@ -84,9 +84,7 @@ const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
     // console.log('pstStartDate: ', pstStartDate);
 
     // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
-    return (
-      selectedDate >= pstStartDate && selectedDate <= pstEndDate
-    );
+    return selectedDate >= pstStartDate && selectedDate <= pstEndDate;
   });
 
   // Format return result by client
