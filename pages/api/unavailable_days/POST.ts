@@ -53,10 +53,23 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // const pstStartDate = convertToPSTDate(startDate);
+    // const pstEndDate = convertToPSTDate(endDate);
+
+    const utcStartDate = new Date(startDate);
+    const utcEndDate = new Date(endDate);
+
+    // console.log({
+    //   startDate,
+    //   endDate,
+    //   pstStartDate,
+    //   pstEndDate,
+    // });
+
     const newUnavailableRange = await prisma.dayRange.create({
       data: {
-        startDate,
-        endDate,
+        startDate: utcStartDate,
+        endDate: utcEndDate,
         userId,
         createdAt,
         createdBy,
