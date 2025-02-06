@@ -9,7 +9,8 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "test": "jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "analyze": "ANALYZE=true next build"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -87,6 +88,7 @@
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.26.0",
+    "@next/bundle-analyzer": "^15.1.6",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",

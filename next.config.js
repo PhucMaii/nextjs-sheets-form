@@ -9,6 +9,10 @@ const nextConfig = {
   },
 };
 
+const withBundlerAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   disable: process.env.NEXT_PUBLIC_CURRENT_STATE !== 'development',
@@ -16,4 +20,4 @@ const withPWA = require('next-pwa')({
   skipWaiting: true, // Skip wating for service worker activation
 });
 
-module.exports = withPWA(nextConfig);
+module.exports = withBundlerAnalyzer(withPWA(nextConfig));
