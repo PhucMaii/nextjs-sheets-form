@@ -456,3 +456,5 @@ export const deliveryCities = [
 export const homeLat = 49.216583;
 export const homeLng = -122.970200;
 export const maxDistance = 100; // in km
+
+export const maxWidth = '1500px'; // max width of the landing page

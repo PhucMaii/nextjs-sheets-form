@@ -3,9 +3,10 @@ import { deliveryCities, homeLat, homeLng } from '@/app/lib/constant';
 import { calculateDistance } from '@/app/utils/googleMaps';
 import { calculateShippingFee } from '@/app/utils/shipping';
 import { landingPagePrimaryColor } from '@/constant/landingPage';
+import useCart from '@/hooks/useCart';
 import { generateLatLng } from '@/pages/api/admin/clients/POST';
 import { updateCartAsync } from '@/state/cart/cartSlice';
-import { AppDispatch, RootState } from '@/state/store';
+import { AppDispatch } from '@/state/store';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
@@ -21,7 +22,7 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React, { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 export default function OrderSummary() {
   const [address, setAddress] = useState<any>({
@@ -36,8 +37,9 @@ export default function OrderSummary() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [receiveType, setReceiveType] = useState<string>('Ship');
 
-  const cart = useSelector((state: RootState) => state.cart);
+  // const cart = useSelector((state: RootState) => state.cart);
   const dispatch = useDispatch<AppDispatch>();
+  const { cart, renderDisplayTotal } = useCart();
 
   // useEffect(() => {
   //   if (!address.fullName) {
@@ -205,48 +207,48 @@ export default function OrderSummary() {
     );
   };
 
-  const renderDisplayTotal = () => {
-    return (
-      <Box display="flex" flexDirection="column" gap={2} mt={4}>
-        {cart && cart?.discount > 0 && (
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography>Discount: </Typography>
-            <Typography>${cart.discount.toFixed(2)} </Typography>
-          </Box>
-        )}
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography>Subtotal: </Typography>
-          <Typography>${cart?.subtotal?.toFixed(2)} </Typography>
-        </Box>
-        {cart?.shippingFee > 0 && (
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography>Shipping Fee: </Typography>
-            <Typography>${cart?.shippingFee?.toFixed(2)} </Typography>
-          </Box>
-        )}
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography>PST (7%): </Typography>
-          <Typography>${cart?.PST?.toFixed(2)} </Typography>
-        </Box>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography>GST (5%): </Typography>
-          <Typography>${cart?.GST?.toFixed(2)} </Typography>
-        </Box>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography variant="h5">Total: </Typography>
-          <Typography variant="h5">${cart?.totalPrice?.toFixed(2)} </Typography>
-        </Box>
-      </Box>
-    );
-  };
+  // const renderDisplayTotal = () => {
+  //   return (
+  //     <Box display="flex" flexDirection="column" gap={2} mt={4}>
+  //       {cart && cart?.discount > 0 && (
+  //         <Box
+  //           display="flex"
+  //           alignItems="center"
+  //           justifyContent="space-between"
+  //         >
+  //           <Typography>Discount: </Typography>
+  //           <Typography>${cart.discount.toFixed(2)} </Typography>
+  //         </Box>
+  //       )}
+  //       <Box display="flex" alignItems="center" justifyContent="space-between">
+  //         <Typography>Subtotal: </Typography>
+  //         <Typography>${cart?.subtotal?.toFixed(2)} </Typography>
+  //       </Box>
+  //       {cart?.shippingFee > 0 && (
+  //         <Box
+  //           display="flex"
+  //           alignItems="center"
+  //           justifyContent="space-between"
+  //         >
+  //           <Typography>Shipping Fee: </Typography>
+  //           <Typography>${cart?.shippingFee?.toFixed(2)} </Typography>
+  //         </Box>
+  //       )}
+  //       <Box display="flex" alignItems="center" justifyContent="space-between">
+  //         <Typography>PST (7%): </Typography>
+  //         <Typography>${cart?.PST?.toFixed(2)} </Typography>
+  //       </Box>
+  //       <Box display="flex" alignItems="center" justifyContent="space-between">
+  //         <Typography>GST (5%): </Typography>
+  //         <Typography>${cart?.GST?.toFixed(2)} </Typography>
+  //       </Box>
+  //       <Box display="flex" alignItems="center" justifyContent="space-between">
+  //         <Typography variant="h5">Total: </Typography>
+  //         <Typography variant="h5">${cart?.totalPrice?.toFixed(2)} </Typography>
+  //       </Box>
+  //     </Box>
+  //   );
+  // };
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>

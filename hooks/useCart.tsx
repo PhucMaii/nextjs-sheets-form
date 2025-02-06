@@ -1,0 +1,85 @@
+import { generateImgUrl } from '@/app/lib/s3';
+import { RootState } from '@/state/store';
+import { Box, Typography } from '@mui/material';
+import { useCallback } from 'react';
+import { useSelector } from 'react-redux';
+
+export default function useCart() {
+  const cart = useSelector((state: RootState) => state.cart);
+
+  const renderDisplayTotal = useCallback(() => {
+    return (
+      <Box display="flex" flexDirection="column" gap={2} mt={4}>
+        {cart && cart?.discount > 0 && (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography>Discount: </Typography>
+            <Typography>${cart.discount.toFixed(2)} </Typography>
+          </Box>
+        )}
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography>Subtotal: </Typography>
+          <Typography>${cart?.subtotal?.toFixed(2)} </Typography>
+        </Box>
+        {cart?.shippingFee > 0 && (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography>Shipping Fee: </Typography>
+            <Typography>${cart?.shippingFee?.toFixed(2)} </Typography>
+          </Box>
+        )}
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography>PST (7%): </Typography>
+          <Typography>${cart?.PST?.toFixed(2)} </Typography>
+        </Box>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography>GST (5%): </Typography>
+          <Typography>${cart?.GST?.toFixed(2)} </Typography>
+        </Box>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography variant="h5">Total: </Typography>
+          <Typography variant="h5">${cart?.totalPrice?.toFixed(2)} </Typography>
+        </Box>
+      </Box>
+    );
+  }, [cart]);
+
+  const renderItemsDisplay = useCallback(() => {
+    return (
+      <Box display="flex" flexDirection="column" gap={2} mt={4}>
+        {cart?.items?.map((item) => (
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            key={item.id}
+          >
+            <Box display="flex" gap={1}>
+              <img
+                src={generateImgUrl(item.itemPreference.image)}
+                style={{ width: '100px', height: '100%', objectFit: 'contain' }}
+              />
+              <Box>
+                <Typography fontWeight="bold">
+                  {item.itemPreference.inventoryItem.name}
+                </Typography>
+                <Typography>x{item.quantity}</Typography>
+              </Box>
+            </Box>
+            <Typography fontWeight="bold">
+              ${(item.itemPreference.price * item.quantity)?.toFixed(2)}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    );
+  }, [cart]);
+
+  return { cart, renderDisplayTotal, renderItemsDisplay };
+}
