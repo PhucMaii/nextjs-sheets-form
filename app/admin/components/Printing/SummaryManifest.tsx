@@ -109,14 +109,14 @@ export const SummaryManifest = forwardRef(
                         <TableBody>
                           {manifest[routeId]?.notes?.length > 0 &&
                             manifest[routeId]?.notes.map(
-                              (order: any, index: number) => {
+                              (clientNote: any, index: number) => {
                                 return (
                                   <TableRow key={index}>
                                     <TableCell>
-                                      {order.user.clientName} -{' '}
-                                      {order.user.clientId}
+                                      {clientNote.clientName} -{' '}
+                                      {clientNote.clientId}
                                     </TableCell>
-                                    <TableCell>{order.note}</TableCell>
+                                    <TableCell>{clientNote.note}</TableCell>
                                   </TableRow>
                                 );
                               },
