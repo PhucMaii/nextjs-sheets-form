@@ -93,7 +93,7 @@ export default function ProductListing({
             ? generateImgUrl(product?.image)
             : '/images/landing/image_not_found.jpeg'
         }
-        alt={product.name}
+        alt={product?.name || product.inventoryItem.name}
         width="100%"
         height={200}
         style={{ borderRadius: '20px' }}
@@ -114,7 +114,7 @@ export default function ProductListing({
         </Box>
       )} */}
       <Typography variant="h6" fontWeight="regular" sx={{ color: green[800] }}>
-        {product.inventoryItem.name}
+        {product?.name || product.inventoryItem.name}
       </Typography>
       <div style={{ flexGrow: 1 }} />
       <Box display="flex" alignItems="flex-end" gap={1}>

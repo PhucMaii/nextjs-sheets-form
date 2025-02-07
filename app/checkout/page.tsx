@@ -329,7 +329,7 @@ export default function CheckoutPage() {
   return (
     <NavbarWrapper setIsOpenSignUp={() => {}}>
       {NotificationComp}
-      <Box sx={{ maxWidth: maxWidth, mx: 'auto', pt: 2 }}>
+      <Box sx={{ maxWidth: maxWidth, mx: 'auto', p: 2 }}>
         <Grid container spacing={2}>
           {/* Checkout info */}
           <Grid item md={8} xs={12}>

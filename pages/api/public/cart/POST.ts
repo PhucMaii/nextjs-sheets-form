@@ -61,6 +61,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return {
         quantity: item.quantity,
         itemPreferenceId: item.itemPreferenceId,
+        inventoryUnitId: item.itemPreference.inventoryUnitId,
         cartId: newCart.id,
         createdAt: `${today.date} ${today.time}`,
         createdBy: 'Guestt',

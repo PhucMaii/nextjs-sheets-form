@@ -31,24 +31,7 @@ export default async function handler(
         id: item.itemPreferenceId,
       },
       include: {
-        inventoryItem: {
-          include: {
-            vendorItem: {
-              where: {
-                unit: {
-                  some: {}, // Ensure vendorItem has some inventory units
-                },
-              },
-              include: {
-                unit: {
-                  where: {
-                    ratio: 1,
-                  },
-                },
-              },
-            },
-          },
-        },
+        inventoryItem: true,
       },
     });
 
@@ -95,8 +78,7 @@ export default async function handler(
               cartId: selectedCart.id,
               createdAt: `${today.date} ${today.time}`,
               createdBy: 'Guest',
-              inventoryUnitId:
-                existingItemPreference.inventoryItem.vendorItem[0].unit[0].id,
+              inventoryUnitId: existingItemPreference.inventoryUnitId,
             },
           });
         }
@@ -161,8 +143,7 @@ export default async function handler(
         cartId: cart.id,
         createdAt: `${today.date} ${today.time}`,
         createdBy: 'Guest',
-        inventoryUnitId:
-          existingItemPreference.inventoryItem.vendorItem[0].unit[0].id,
+        inventoryUnitId: existingItemPreference.inventoryUnitId,
       },
     });
 
