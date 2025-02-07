@@ -21,6 +21,7 @@ import { generateImgUrl } from '@/app/lib/s3';
 import axios from 'axios';
 import { filter } from '../../Autocomplete/VendorItemSearch';
 import useEditUnit from '@/hooks/unit/useEditUnit';
+import useImageGallery from '@/hooks/useImageGallery';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -47,6 +48,8 @@ export default function AddItemIntoType({
     inventoryUnit: null,
     typeId,
   });
+
+  const { selectedImage, renderImageGallery } = useImageGallery('', '100%');
 
   const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
     useEditUnit(
@@ -101,6 +104,7 @@ export default function AddItemIntoType({
           ...promptedItem,
           name: promptedItem.customName,
           inventoryItemId: promptedItem.id,
+          image: selectedImage || promptedItem.image,
         },
       );
 
@@ -124,7 +128,11 @@ export default function AddItemIntoType({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal maxHeight="80vh" overflow="scroll">
+      <BoxModal
+        maxHeight="80vh"
+        sx={{ overflowY: 'scroll', overflowX: 'hidden' }}
+        maxWidth="900px"
+      >
         {AddUnitModal}
         {EditUnitModal}
         <ModalHead
@@ -278,6 +286,9 @@ export default function AddItemIntoType({
               }));
             }}
           /> */}
+          <Typography>Select Image</Typography>
+          {renderImageGallery()}
+          <Divider>Or</Divider>
 
           <Typography>Upload Image</Typography>
           {promptedItem?.image && (

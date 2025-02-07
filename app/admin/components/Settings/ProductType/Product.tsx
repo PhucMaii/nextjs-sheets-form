@@ -57,7 +57,7 @@ const Product = ({ itemPreference, showNotification }: IProps) => {
         handleCloseModal={() => setOpen('deleteItemPreference', false)}
         targetObj={itemPreference}
         handleDelete={onDeleteItemPref}
-        showTargetObj={itemPreference.inventoryItem.name}
+        showTargetObj={itemPreference.name}
       />
       {/* <EditItemPreference
         open={open.editItemPreference}

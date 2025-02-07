@@ -290,7 +290,7 @@ model InventoryItem {
 model ItemPreference {
   id             Int      @id @default(autoincrement())
   image          String
-  name           String?
+  name           String
   description    String
   isBestSeller   Boolean
   price          Float
@@ -301,13 +301,13 @@ model ItemPreference {
   createdBy String?
 
   inventoryItemId Int
-  inventoryUnitId Int?
+  inventoryUnitId Int
   typeId          Int
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   type          ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
   cartItems     CartItem[]
-  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
+  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
 }
 
 model ItemType {

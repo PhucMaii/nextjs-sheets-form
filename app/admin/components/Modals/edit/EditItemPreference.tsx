@@ -20,10 +20,10 @@ import { IInventoryItem, IItemPreference } from '@/app/utils/type';
 import { filter } from './EditStockPurchased';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import { generateImgUrl } from '@/app/lib/s3';
 import FileUpload from '../../FileUpload';
 import axios from 'axios';
 import useEditUnit from '@/hooks/unit/useEditUnit';
+import useImageGallery from '@/hooks/useImageGallery';
 // import useEditUnit from '@/hooks/unit/useEditUnit';
 
 interface IProps {
@@ -45,7 +45,10 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
     inventoryUnit: null,
   });
 
-  console.log('edit item preference re render');
+  const { selectedImage, renderImageGallery } = useImageGallery(
+    itemPreference?.image,
+    '100%',
+  );
 
   const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
     useEditUnit(
@@ -123,7 +126,12 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
         `${API_URL.ADMIN}/productTypes/item-preference`,
         {
           ...updatedItem,
-          image: promptedItem.image,
+          image:
+            selectedImage !== itemPreference?.image
+              ? selectedImage
+              : promptedItem.image !== itemPreference?.image
+                ? promptedItem.image
+                : itemPreference?.image,
           units: updatedItem.units,
           inventoryItemId: promptedItem.id,
         },
@@ -329,9 +337,12 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
               }));
             }}
           /> */}
+            <Typography>Select Image</Typography>
+            {renderImageGallery()}
+            <Divider>Or</Divider>
 
             <Typography>Upload Image</Typography>
-            {promptedItem?.image && (
+            {/* {promptedItem?.image && (
               <Box display="flex" gap={2} alignItems="center">
                 <img
                   src={
@@ -345,7 +356,7 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
                 />
                 <Typography>{promptedItem?.image}</Typography>
               </Box>
-            )}
+            )} */}
             <FileUpload
               item={promptedItem}
               showNotification={showNotification}

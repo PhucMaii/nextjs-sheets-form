@@ -1,4 +1,13 @@
 import AWS from 'aws-sdk';
+import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
+
+const s3 = new S3Client({
+  region: 'us-west-2',
+  credentials: {
+    accessKeyId: process.env.NEXT_PUBLIC_S3_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY || '',
+  },
+});
 
 export default async function uploadToS3(
   file: File,
@@ -66,4 +75,36 @@ export default async function uploadToS3(
 
 export const generateImgUrl = (fileKey: string) => {
   return `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com/${fileKey}`;
+};
+
+export const getAllS3Images = async () => {
+  const allImages: string[] = [];
+  let continuationToken = undefined;
+  try {
+    do {
+      // Command to retrive all images from bucket
+      const command: any = new ListObjectsV2Command({
+        Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
+        ContinuationToken: continuationToken,
+      });
+
+      console.log(command, 'command');
+
+      const response: any = await s3.send(command);
+      const objects = response.Contents || [];
+
+      // Filter files with common image extensions
+      const imageFiles = objects
+        .map((obj: any) => obj.Key)
+        .filter((key: string) => key.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i));
+
+      allImages.push(...imageFiles);
+      continuationToken = response.NextContinuationToken;
+    } while (continuationToken);
+
+    console.log(allImages);
+    return allImages;
+  } catch (error: any) {
+    console.log('Fail to get images from S3: ', error);
+  }
 };

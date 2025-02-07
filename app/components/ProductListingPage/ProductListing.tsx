@@ -93,7 +93,7 @@ export default function ProductListing({
             ? generateImgUrl(product?.image)
             : '/images/landing/image_not_found.jpeg'
         }
-        alt={product.inventoryItem.name}
+        alt={product.name}
         width="100%"
         height={200}
         style={{ borderRadius: '20px' }}

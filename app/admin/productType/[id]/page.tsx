@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import {
   Box,
@@ -21,13 +21,18 @@ import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useNotification from '@/hooks/useNotification';
 import Product from '../../components/Settings/ProductType/Product';
 import ErrorComponent from '../../components/ErrorComponent';
+import useDebounce from '@/hooks/useDebounce';
+import { IItemPreference } from '@/app/utils/type';
 
 export default function page() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
 
+  const [displayItemPref, setDisplayItemPref] = useState<IItemPreference[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [open, setOpen] = useMultipleBoolean({
     addItemIntoType: false,
@@ -38,7 +43,25 @@ export default function page() {
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
-  console.log('re render in product type page');
+  useEffect(() => {
+    if (type?.data) {
+      setDisplayItemPref(type.data.itemPreferences);
+    }
+  }, [type]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newDisplayItemPref = type?.data?.itemPreferences.filter(
+        (item: any) =>
+          item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()),
+      );
+
+      setDisplayItemPref(newDisplayItemPref || []);
+    } else {
+      setDisplayItemPref(type?.data?.itemPreferences || []);
+    }
+  }, [debouncedKeywords, type]);
+
   return (
     <Sidebar>
       {NotificationComp}
@@ -82,7 +105,7 @@ export default function page() {
         </Button>
       </Box>
 
-      {type?.data && type?.data?.itemPreferences?.length > 0 ? (
+      {displayItemPref.length > 0 ? (
         <Box
           display="flex"
           justifyContent={mdDown ? 'center' : 'flex-start'}
@@ -90,7 +113,7 @@ export default function page() {
           gap={2}
           flexWrap={'wrap'}
         >
-          {type?.data.itemPreferences.map((item: any, index: number) => (
+          {displayItemPref.map((item: any, index: number) => (
             // <>
             //   hee
             // </>
