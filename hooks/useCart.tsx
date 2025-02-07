@@ -1,10 +1,11 @@
 import { generateImgUrl } from '@/app/lib/s3';
 import { RootState } from '@/state/store';
-import { Box, Typography } from '@mui/material';
-import { useCallback } from 'react';
+import { Box, FormGroup, InputLabel, TextareaAutosize, TextField, Typography } from '@mui/material';
+import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 export default function useCart() {
+  const [note, setNote] = useState('');
   const cart = useSelector((state: RootState) => state.cart);
 
   const renderDisplayTotal = useCallback(() => {
@@ -81,5 +82,22 @@ export default function useCart() {
     );
   }, [cart]);
 
-  return { cart, renderDisplayTotal, renderItemsDisplay };
+  const renderNoteInput = useCallback(() => {
+    return (
+      <Box>
+        <FormGroup>
+          <InputLabel htmlFor="note">Note</InputLabel>
+          <TextField
+            id="note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            minRows={3}
+            placeholder="Leave note for us..."
+          />
+        </FormGroup>
+      </Box>
+    )
+  }, [note, cart]);
+
+  return { cart, renderDisplayTotal, renderItemsDisplay, renderNoteInput, note };
 }

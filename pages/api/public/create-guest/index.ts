@@ -31,6 +31,15 @@ export default async function handler(
       deliveryAddress,
     }: IBody = req.body;
 
+    console.log({
+      guestSessionId,
+      guestSessionSignature,
+      name,
+      email,
+      contactNumber,
+      deliveryAddress,
+    });
+
     if (!guestSessionId || !guestSessionSignature) {
       return res.status(400).json({
         error: 'Guest Session Id and Guest Session Signature are required',
@@ -70,7 +79,7 @@ export default async function handler(
         error: 'Delivery Address is not valid',
       });
     }
-    
+
     // Generate password
     const password = await bcrypt.hash(guestSessionId, 12);
 
@@ -82,6 +91,7 @@ export default async function handler(
         clientName: name,
         clientId,
         password,
+        categoryId: 334,
         sheetName: clientId,
         email,
         contactNumber,

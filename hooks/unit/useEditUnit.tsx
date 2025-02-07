@@ -6,7 +6,7 @@ import {
   FormLabel,
   IconButton,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMultipleBoolean } from '../useMultipleBoolean';
 import AddUnit from '@/app/admin/components/Modals/add/AddUnit';
 import EditUnit from '@/app/admin/components/Modals/edit/EditUnit';
@@ -36,12 +36,18 @@ const useEditUnit = (
   );
   const [units, setUnits] = useState<IInventoryUnit[]>(initialUnits);
 
+  console.log('units', units);
+
   useEffect(() => {
-    setUnits(initialUnits);
+    if (initialUnits.length !== units.length) {
+      setUnits(initialUnits);
+    }
   }, [initialUnits]);
 
   useEffect(() => {
-    setSelectedUnit(initialSelectedUnit);
+    if (initialSelectedUnit !== selectedUnit) {
+      setSelectedUnit(initialSelectedUnit);
+    }
   }, [initialSelectedUnit]);
 
   const addUnit = (newUnit: IInventoryUnit) => {
@@ -155,16 +161,16 @@ const useEditUnit = (
     // });
   };
 
-  const AddUnitModal = (
+  const AddUnitModal = useMemo(() => (
     <AddUnit
       open={addUnitBoolean.open}
       onClose={() => onChangeAddUnitBoolean('open', false)}
       addUnit={addUnit}
       noClose={addUnitBoolean.disabledClose}
     />
-  );
+  ), [addUnitBoolean]);
 
-  const EditUnitModal = (
+  const EditUnitModal = useMemo(() => (
     <EditUnit
       open={editUnit.open}
       onClose={() =>
@@ -175,9 +181,9 @@ const useEditUnit = (
         updateUnit(updatedUnit, editUnit.unitIndex)
       }
     />
-  );
+  ), [editUnit]);
 
-  const UnitDisplay = (
+  const UnitDisplay = useMemo(() => (
     <FormControl>
       <Box display="flex" alignItems="center" gap={1}>
         <FormLabel id="unit">Units</FormLabel>
@@ -203,7 +209,9 @@ const useEditUnit = (
         />
       )}
     </FormControl>
-  );
+  ), [
+    units,
+  ]);
 
   return {
     units,

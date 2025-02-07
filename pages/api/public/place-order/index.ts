@@ -1,15 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { verifyDeliveryAddress } from '../../utils/address';
-import { generateLatLng } from '../../admin/clients/POST';
 import { createOrder } from '../../admin/orders/POST';
 import { getTodayDate } from '../../utils/date';
 
 interface IBody {
-  cartItemIds: number[];
-  userId: number;
-  deliveryAddress: string;
+  cartId: number;
+  userId?: number;
   deliveryDate: string;
+  guestSessionId?: string; // temporary
   phoneNumber: string;
   email: string;
   note: string;
@@ -29,56 +27,24 @@ export default async function handler(
     const prisma = new PrismaClient();
 
     const {
-      cartItemIds,
+      cartId,
       userId,
-      deliveryAddress,
+      guestSessionId,
       deliveryDate,
       note,
     }: IBody = req.body;
 
     // If none of authentication is provided -> error
-    if (!userId) {
+    if (!userId && !guestSessionId) {
       return res.status(400).json({
         error: 'You are not authenticated - No authentication provided',
       });
     }
 
-    // If userId is provided -> check if user exists
-    // if (userId) {
-    //   const existingUser = await prisma.user.findUnique({
-    //     where: {
-    //       id: userId,
-    //     },
-    //   });
-
-    //   if (!existingUser) {
-    //     return res.status(400).json({
-    //       error: 'User Not Found',
-    //     });
-    //   }
-
-    //   authenticatedField.userId = userId;
-    // } else if (guestSessionId && guestSessionSignature) {
-    //   // Else if user not logged in -> check if guest session is valid
-    //   const isSessionValid = verifySessionId(
-    //     guestSessionId,
-    //     guestSessionSignature,
-    //   );
-
-    //   if (!isSessionValid) {
-    //     return res.status(400).json({
-    //       error: 'You are not authenticated',
-    //     });
-    //   }
-
-    //   authenticatedField.guestSessionId = guestSessionId;
-    // }
-
     // Verify User
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
+    const queryUser = userId ? { id: userId } : { guestSessionId: guestSessionId };
+    const existingUser = await prisma.user.findFirst({
+      where: queryUser
     });
 
     if (!existingUser) {
@@ -87,54 +53,51 @@ export default async function handler(
       });
     }
 
-    // Check if delivery address is valid
-    const address = await generateLatLng(deliveryAddress);
-    const isDeliveryAddressValid = verifyDeliveryAddress(
-      address.latitude,
-      address.longitude,
-    );
-
-    if (!isDeliveryAddressValid) {
-      return res.status(400).json({
-        error: 'Sorry, we are unable to deliver to your provided address',
-      });
-    }
-
     // Check items length
-    if (cartItemIds.length === 0) {
+    if (!cartId) {
       return res.status(400).json({
-        error: 'You have no items in your cart',
+        error: 'You have no items in your cart or you not provided cart id',
       });
     }
 
-    const cartItems = await prisma.cartItem.findMany({
+    const cart = await prisma.cart.findUnique({
       where: {
-        id: {
-          in: cartItemIds,
-        },
+        id: cartId,
       },
       include: {
-        inventoryUnit: true,
-        itemPreference: {
+        items: {
           include: {
-            inventoryItem: true,
+            inventoryUnit: true,
+            itemPreference: {
+              include: {
+                inventoryItem: true,
+              },
+            },
           },
         },
-      },
+      }
     });
 
     // Verify cart item ids passed correctly
-    if (cartItems.length !== cartItemIds.length) {
+    if (!cart) {
       return res.status(400).json({
-        error: 'You have items in your cart that do not exist',
+        error: 'Cart Not Found',
       });
     }
 
+    const cartItems = cart?.items;
+
+    if (cartItems.length === 0) {
+      return res.status(400).json({
+        error: 'You have no items in your cart or you not provided cart id',
+      });
+    }
     // Format items to passed to createOrder function
     const formattedItems = cartItems.map((item: any) => {
       return {
         ...item.itemPreference,
         quantity: item.quantity,
+        name: item.itemPreference.inventoryItem.name,
         inventoryUnitId: item.inventoryUnitId,
         inventoryUnit: item.inventoryUnit,
       };

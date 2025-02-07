@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { IInventoryItem, IItemPreference } from '@/app/utils/type';
@@ -23,27 +23,40 @@ import { generateImgUrl } from '@/app/lib/s3';
 import FileUpload from '../../FileUpload';
 import { ModalProps } from '../type';
 import axios from 'axios';
+// import useEditUnit from '@/hooks/unit/useEditUnit';
 
 interface IProps extends ModalProps {
   itemPreference?: IItemPreference;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function EditItemPreference({
+const EditItemPreference = ({
   open,
   onClose,
   itemPreference,
   showNotification,
-}: IProps) {
+}: IProps) => {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [promptedItem, setPromptedItem] = useState<IInventoryItem | any>(
     itemPreference?.inventoryItem || { id: -1, name: '-- Choose an item --' },
   );
-  const [updatedItem, setUpdatedItem] = useState<IItemPreference | null>(
-    itemPreference || null,
-  );
+  const [updatedItem, setUpdatedItem] = useState<any>({
+    ...(itemPreference || {}),
+    units: [],
+    inventoryUnit: null,
+  });
 
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  console.log('edit item preference re render');
+
+  // const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
+  //   useEditUnit(
+  //     updatedItem?.units || [],
+  //     updatedItem?.inventoryUnit || null,
+  //     showNotification,
+  //     false,
+  //   );
+
+  const [inventoryItems] = useMemo(() => SWRFetchData(`${API_URL.ADMIN}/inventory`), []); 
   const [types] = SWRFetchData(`${API_URL.ADMIN}/productTypes`);
 
   useEffect(() => {
@@ -105,8 +118,10 @@ export default function EditItemPreference({
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose}>      
       <BoxModal maxHeight="80vh" overflow="scroll">
+      {/* {AddUnitModal}
+      {EditUnitModal} */}
         <ModalHead
           heading="Edit Item Preference"
           buttonLabel="Save"
@@ -173,12 +188,10 @@ export default function EditItemPreference({
             clearOnBlur
             handleHomeEndKeys
             id="free-solo-with-text-demo"
-            options={
-              [
-                { id: -1, name: '-- Choose an item --' },
-                ...(inventoryItems?.data || []),
-              ] || []
-            }
+            options={[
+              { id: -1, name: '-- Choose an item --' },
+              ...(inventoryItems?.data || []),
+            ]}
             getOptionLabel={(option) => {
               // Regular option
               return option?.name || '';
@@ -196,6 +209,22 @@ export default function EditItemPreference({
             sx={{ width: '100%' }}
             renderInput={(params) => <TextField {...params} label="Item" />}
           />
+
+          <InputLabel htmlFor="name">Name</InputLabel>
+          <TextField
+            id="name"
+            label="Name"
+            placeholder="Enter item name..."
+            value={updatedItem?.name || ''}
+            onChange={(e: any) => {
+              setUpdatedItem((prevState: any) => ({
+                ...prevState,
+                name: e.target.value,
+              }));
+            }}
+          />
+
+          {/* {UnitDisplay} */}
 
           <InputLabel htmlFor="price">Price</InputLabel>
           <TextField
@@ -287,3 +316,10 @@ export default function EditItemPreference({
     </Modal>
   );
 }
+
+export default memo(EditItemPreference, (prev, next) => {
+  return (
+    prev.open === next.open &&
+    Object.is(prev.itemPreference, next.itemPreference)
+  )
+});

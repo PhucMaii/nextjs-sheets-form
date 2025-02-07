@@ -38,6 +38,7 @@ export default function page() {
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
+  console.log('re render in product type page');
   return (
     <Sidebar>
       {NotificationComp}

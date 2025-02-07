@@ -100,9 +100,9 @@ export default function OrderSummary() {
     });
   }, []);
   
-  const onPlaceOrder = () => {
+  // const onPlaceOrder = () => {
     
-  }
+  // }
 
   const renderAddressInput = () => {
     return (

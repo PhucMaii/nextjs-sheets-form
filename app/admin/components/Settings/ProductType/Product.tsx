@@ -11,7 +11,7 @@ import {
   Box,
 } from '@mui/material';
 import { grey, red } from '@mui/material/colors';
-import React from 'react';
+import React, { memo } from 'react';
 import EditItemPreference from '../../Modals/edit/EditItemPreference';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import DeleteModal from '../../Modals/delete/DeleteModal';
@@ -23,11 +23,13 @@ interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function Product({ itemPreference, showNotification }: IProps) {
+const Product = ({ itemPreference, showNotification }: IProps) => {
   const [open, setOpen] = useMultipleBoolean({
     editItemPreference: false,
     deleteItemPreference: false,
   });
+
+  console.log('re render in prodcut comp');
 
   const handleDeleteItemPreference = async () => {
     try {
@@ -121,3 +123,9 @@ export default function Product({ itemPreference, showNotification }: IProps) {
     </>
   );
 }
+
+export default memo(Product, (prev, next) => {
+  return (
+    Object.is(prev.itemPreference, next.itemPreference)
+  )
+});

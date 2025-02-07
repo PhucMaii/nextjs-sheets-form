@@ -31,7 +31,8 @@
     ".next/types/**/*.ts",
     "babel.config.js",
     "__test__/*.ts",
-    "__test__/**/*.tsx"
+    "__test__/**/*.tsx",
+    "app/**/*"
   ],
   "exclude": ["node_modules"]
 }
