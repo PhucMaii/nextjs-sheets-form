@@ -4,7 +4,14 @@ import { landingPagePrimaryColor } from '@/constant/landingPage';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { removeItemAsync, updateItemQuantity } from '@/state/cart/cartSlice';
 import { AppDispatch } from '@/state/store';
-import { Box, Button, IconButton, TableCell, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  IconButton,
+  TableCell,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { green } from '@mui/material/colors';
 import { Trash2Icon } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -13,7 +20,7 @@ import { useDispatch } from 'react-redux';
 interface IProps {
   item: ICartItem;
   cart: ICart;
-  showNotification: ShowNotificationType
+  showNotification: ShowNotificationType;
 }
 
 export default function CheckoutItemRow({ item, showNotification }: IProps) {
@@ -51,9 +58,11 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
   const onRemoveItem = async () => {
     try {
       setIsLoading(true);
-      const resultAction = await dispatch(removeItemAsync({
-        itemId: item.id
-      }));
+      const resultAction = await dispatch(
+        removeItemAsync({
+          itemId: item.id,
+        }),
+      );
 
       if (removeItemAsync.rejected.match(resultAction)) {
         const error: any = resultAction.payload || resultAction?.error;
@@ -66,15 +75,17 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Something went wrong. Please try again later');
     }
-  }
+  };
 
   const onUpdateItemQuantity = async () => {
     try {
       setIsLoading(true);
-      const resultAction = await dispatch(updateItemQuantity({
-        itemId: item.id,
-        quantity
-      }));
+      const resultAction = await dispatch(
+        updateItemQuantity({
+          itemId: item.id,
+          quantity,
+        }),
+      );
 
       if (updateItemQuantity.rejected.match(resultAction)) {
         const error: any = resultAction.payload || resultAction?.error;
@@ -94,14 +105,17 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
       setIsLoading(false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', 'Something went wrong. ' + error?.response?.data?.error);
+      showNotification(
+        'error',
+        'Something went wrong. ' + error?.response?.data?.error,
+      );
       setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <TableRow sx={{opacity: isLoading ? 0.5 : 1}}>
-    {/* Name */}
+    <TableRow sx={{ opacity: isLoading ? 0.5 : 1 }}>
+      {/* Name */}
       <TableCell>
         <Box display="flex" gap={2} alignItems="center">
           <img
@@ -124,28 +138,36 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
               color: 'inherit',
               '&:hover': {
                 textDecoration: 'underline',
-                color: landingPagePrimaryColor
-              }
+                color: landingPagePrimaryColor,
+              },
             }}
           >
             <Typography variant="h6">
-                {item.itemPreference.inventoryItem.name}
+              {item.itemPreference.inventoryItem.name}
             </Typography>
-          </Box>          
+          </Box>
         </Box>
       </TableCell>
 
       {/* Price */}
       <TableCell>
         <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
-          {
-            item.itemPreference.isShowDiscount && (
-              <Typography variant="h6" fontWeight="bold" style={{textDecoration: 'line-through'}}>
-                ${item.itemPreference.prevPrice?.toFixed(2)}
-              </Typography>
-            )
-          }
-          <Typography variant="h6" fontWeight="bold" style={{color: item.itemPreference.isShowDiscount ? 'red' : 'black'}}>
+          {item.itemPreference.isShowDiscount && (
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              style={{ textDecoration: 'line-through' }}
+            >
+              ${item.itemPreference.prevPrice?.toFixed(2)}
+            </Typography>
+          )}
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            style={{
+              color: item.itemPreference.isShowDiscount ? 'red' : 'black',
+            }}
+          >
             ${item.itemPreference.price?.toFixed(2)}
           </Typography>
         </Box>
@@ -213,9 +235,9 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
 
       {/* Remove button */}
       <TableCell>
-          <IconButton disabled={isLoading} onClick={onRemoveItem}>
-            <Trash2Icon style={{width: '25px', height: '25px'}} />
-          </IconButton>
+        <IconButton disabled={isLoading} onClick={onRemoveItem}>
+          <Trash2Icon style={{ width: '25px', height: '25px' }} />
+        </IconButton>
       </TableCell>
     </TableRow>
   );

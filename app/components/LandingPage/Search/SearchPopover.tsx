@@ -20,7 +20,7 @@ export default function SearchPopover({
   anchorEl,
   debouncedKeywords,
   searchItems,
-  setOpen
+  setOpen,
 }: IProps) {
   const popoverWidth = anchorEl?.getBoundingClientRect().width || 0;
   const router = useRouter();
@@ -54,7 +54,9 @@ export default function SearchPopover({
         gap={2}
         sx={{ width: '100%', py: 2, px: 2 }}
       >
-        <Typography>You are looking for "<a>{debouncedKeywords}</a>"</Typography>
+        <Typography>
+          You are looking for "<a>{debouncedKeywords}</a>"
+        </Typography>
 
         <Box display="flex" flexDirection="column" gap={2}>
           <Typography
@@ -99,12 +101,12 @@ export default function SearchPopover({
           component="a"
           href={`/products?q=${debouncedKeywords}`}
           sx={{
-            textDecoration: 'underline', 
+            textDecoration: 'underline',
             color: landingPagePrimaryColor,
             cursor: 'pointer',
             '&:hover': {
               color: green[800],
-            }
+            },
           }}
         >
           <Typography>View All</Typography>

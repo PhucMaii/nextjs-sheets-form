@@ -25,7 +25,6 @@ interface IProps {
 
 const Product = ({ itemPreference, showNotification }: IProps) => {
   const [open, setOpen] = useMultipleBoolean({
-    editItemPreference: false,
     deleteItemPreference: false,
   });
 
@@ -62,12 +61,12 @@ const Product = ({ itemPreference, showNotification }: IProps) => {
         handleDelete={handleDeleteItemPreference}
         showTargetObj={itemPreference.inventoryItem.name}
       />
-      <EditItemPreference
+      {/* <EditItemPreference
         open={open.editItemPreference}
         onClose={() => setOpen('editItemPreference', false)}
         showNotification={showNotification}
         itemPreference={itemPreference}
-      />
+      /> */}
       <Card sx={{ maxWidth: 300, maxHeight: 500, minWidth: 300 }}>
         <CardMedia
           sx={{ height: 200 }}
@@ -112,20 +111,22 @@ const Product = ({ itemPreference, showNotification }: IProps) => {
           >
             Remove
           </Button>
-          <Button
+          {/* <Button
             color="primary"
             onClick={() => setOpen('editItemPreference', true)}
           >
             Edit
-          </Button>
+          </Button> */}
+          <EditItemPreference
+            showNotification={showNotification}
+            itemPreference={itemPreference}
+          />
         </CardActions>
       </Card>
     </>
   );
-}
+};
 
 export default memo(Product, (prev, next) => {
-  return (
-    Object.is(prev.itemPreference, next.itemPreference)
-  )
+  return Object.is(prev.itemPreference, next.itemPreference);
 });

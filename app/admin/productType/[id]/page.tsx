@@ -91,6 +91,9 @@ export default function page() {
           flexWrap={'wrap'}
         >
           {type?.data.itemPreferences.map((item: any, index: number) => (
+            // <>
+            //   hee
+            // </>
             <Product
               key={index}
               itemPreference={item}

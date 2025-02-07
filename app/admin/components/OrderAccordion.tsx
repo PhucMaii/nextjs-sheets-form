@@ -482,7 +482,9 @@ const OrderAccordion = ({
           </Grid>
           <Grid item xs={12} md={4}>
             <Button
-              color={order?.user?.role === USER_ROLE.CLIENT ? 'info': 'success'}
+              color={
+                order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'success'
+              }
               variant="contained"
               sx={{ textTransform: 'none' }}
               onClick={handleOpenClientModal}

@@ -1,9 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { checkAndUpdateUnits } from '../../inventory/expenses/POST';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { getUserInfo } from '@/pages/api/utils/auth';
 
 interface IBody {
   id: number;
   inventoryItemId: number;
+  name: string;
+  units: any;
+  inventoryUnitId: number;
   image: string;
   description: string;
   price: number;
@@ -20,6 +26,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const {
       id,
       inventoryItemId,
+      name,
+      units,
+      inventoryUnitId,
       image,
       description,
       price,
@@ -40,20 +49,50 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Check if inventoryItemid  exists in typeId already
-    const existingInventoryItemAndType = await prisma.itemPreference.findFirst({
-      where: {
-        id: {
-          not: id,
-        },
-        typeId: typeId,
-        inventoryItemId: inventoryItemId,
-      },
-    });
+    // const existingInventoryItemAndType = await prisma.itemPreference.findFirst({
+    //   where: {
+    //     id: {
+    //       not: id,
+    //     },
+    //     typeId: typeId,
+    //     inventoryItemId: inventoryItemId,
+    //   },
+    // });
 
-    if (existingInventoryItemAndType) {
-      return res
-        .status(400)
-        .json({ error: 'Item already exists in this type' });
+    // if (existingInventoryItemAndType) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: 'Item already exists in this type' });
+    // }
+
+    // Update if any units are added or removed or modified
+    if (units) {
+      const selectedUnit = await prisma.inventoryUnit.findUnique({
+        where: {
+          id: inventoryUnitId,
+        },
+      });
+
+      if (!selectedUnit) {
+        return res.status(404).json({ error: 'Unit not found' });
+      }
+
+      const dbUnits = await prisma.inventoryUnit.findMany({
+        where: {
+          vendorItemId: selectedUnit?.vendorItemId,
+        },
+      });
+
+      const { date, time } = getTodayDate();
+      const admin: any = await getUserInfo(req, res);
+
+      await checkAndUpdateUnits(
+        dbUnits,
+        units,
+        selectedUnit.vendorItemId,
+        `${date} ${time}`,
+        `Admin - ${admin.clientName}`,
+      );
     }
 
     await prisma.itemPreference.update({
@@ -63,6 +102,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       data: {
         inventoryItemId: inventoryItemId,
         image: image,
+        name: name,
+        inventoryUnitId: inventoryUnitId,
         description: description,
         price,
         isShowDiscount: isShowDiscount,

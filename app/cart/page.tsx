@@ -23,7 +23,7 @@ export default function CartPage() {
 
   const goToProductsPage = () => {
     router.push('/products');
-  }
+  };
 
   const renderEmptyCart = () => {
     return (
@@ -89,9 +89,7 @@ export default function CartPage() {
         <Grid container columnSpacing={2} rowGap={2} mt={2}>
           <Grid item xs={12} md={8}>
             <ShadowSection>
-              <CartItemTable 
-                showNotification={showNotification}
-              />
+              <CartItemTable showNotification={showNotification} />
             </ShadowSection>
           </Grid>
           <Grid item xs={12} md={4}>

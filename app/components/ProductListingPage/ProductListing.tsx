@@ -42,8 +42,9 @@ export default function ProductListing({
             quantity: 1,
             itemPreference: product,
             itemPreferenceId: product.id,
-          }
-      }));
+          },
+        }),
+      );
 
       if (addItemToCartAsync.fulfilled.match(resultAction)) {
         const { message } = resultAction.payload;
@@ -51,7 +52,10 @@ export default function ProductListing({
         // setCartId(data.id);
       } else if (addItemToCartAsync.rejected.match(resultAction)) {
         const error: any = resultAction.payload || resultAction.error;
-        showNotification('error', error?.message || 'Failed to add item to cart');
+        showNotification(
+          'error',
+          error?.message || 'Failed to add item to cart',
+        );
       }
       setIsAdding(false);
     } catch (error: any) {

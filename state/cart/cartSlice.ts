@@ -65,12 +65,9 @@ const cartSlice = createSlice({
           Object.assign(state, data);
         },
       )
-      .addCase(
-        updateItemQuantity.rejected,
-        (state, action) => {
-            console.error('Fail to update item quantity: ', action.payload);
-        },
-      )
+      .addCase(updateItemQuantity.rejected, (state, action) => {
+        console.error('Fail to update item quantity: ', action.payload);
+      })
       .addCase(
         updateCartAsync.fulfilled,
         (state, action: PayloadAction<AsyncReducerResponseType>) => {
@@ -153,14 +150,14 @@ export const updateItemQuantity = createAsyncThunk(
 
 export const updateCartAsync = createAsyncThunk(
   'updateCartAsync',
-  async ({cartId, updatedData}: {cartId: number, updatedData: object}) => {
+  async ({ cartId, updatedData }: { cartId: number; updatedData: object }) => {
     try {
       const response = await axios.put(`${API_URL.PUBLIC}/cart`, {
         id: cartId,
         updatedData,
       });
 
-      if (response.data.error) {  
+      if (response.data.error) {
         throw new Error('Something went wrong. ', response.data.error);
       }
 
@@ -169,8 +166,8 @@ export const updateCartAsync = createAsyncThunk(
       console.error('Internal Server Error', error);
       throw new Error('Something went wrong. ', error);
     }
-  }
-)
+  },
+);
 
 export const { updateCart } = cartSlice.actions;
 

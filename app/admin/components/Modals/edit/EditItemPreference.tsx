@@ -2,6 +2,7 @@ import {
   AlertColor,
   Autocomplete,
   Box,
+  Button,
   Divider,
   FormControlLabel,
   InputLabel,
@@ -12,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { IInventoryItem, IItemPreference } from '@/app/utils/type';
@@ -21,25 +22,23 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { generateImgUrl } from '@/app/lib/s3';
 import FileUpload from '../../FileUpload';
-import { ModalProps } from '../type';
 import axios from 'axios';
+import useEditUnit from '@/hooks/unit/useEditUnit';
 // import useEditUnit from '@/hooks/unit/useEditUnit';
 
-interface IProps extends ModalProps {
+interface IProps {
   itemPreference?: IItemPreference;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-const EditItemPreference = ({
-  open,
-  onClose,
-  itemPreference,
-  showNotification,
-}: IProps) => {
+const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
+  const [open, setOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [promptedItem, setPromptedItem] = useState<IInventoryItem | any>(
-    itemPreference?.inventoryItem || { id: -1, name: '-- Choose an item --' },
-  );
+  const [promptedItem, setPromptedItem] = useState<IInventoryItem | any>({
+    id: -1,
+    name: '-- Choose an item --',
+  });
+
   const [updatedItem, setUpdatedItem] = useState<any>({
     ...(itemPreference || {}),
     units: [],
@@ -48,46 +47,85 @@ const EditItemPreference = ({
 
   console.log('edit item preference re render');
 
-  // const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
-  //   useEditUnit(
-  //     updatedItem?.units || [],
-  //     updatedItem?.inventoryUnit || null,
-  //     showNotification,
-  //     false,
-  //   );
+  const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
+    useEditUnit(
+      updatedItem?.units || [],
+      updatedItem?.inventoryUnit || null,
+      showNotification,
+      false,
+    );
 
-  const [inventoryItems] = useMemo(() => SWRFetchData(`${API_URL.ADMIN}/inventory`), []); 
-  const [types] = SWRFetchData(`${API_URL.ADMIN}/productTypes`);
-
-  useEffect(() => {
-    if (itemPreference) {
-      setPromptedItem({
-        ...itemPreference.inventoryItem,
-        image: itemPreference.image,
-      });
-      setUpdatedItem(itemPreference);
-    }
-  }, [itemPreference]);
+  const [inventoryItems] = SWRFetchData(
+    open ? `${API_URL.ADMIN}/inventory` : '',
+  );
+  const [types] = SWRFetchData(open ? `${API_URL.ADMIN}/productTypes` : '');
 
   useEffect(() => {
-    if (promptedItem.id !== updatedItem?.inventoryItemId) {
-      const itemPrice = promptedItem.vendorItem[0].unit.find(
-        (unit: any) => unit.ratio === 1,
+    if (itemPreference && inventoryItems) {
+      const targetItemPreference = inventoryItems.data.find(
+        (item: IInventoryItem) => item.id === itemPreference.inventoryItemId,
       );
 
+      if (targetItemPreference) {
+        let units =
+          targetItemPreference?.vendorItem?.flatMap((item: any) => item.unit) ||
+          [];
+
+        units = Array.from(
+          new Map(units?.map((unit: any) => [unit.ratio, unit])).values(),
+        );
+        setPromptedItem({
+          ...targetItemPreference,
+          image: itemPreference.image,
+        });
+        setUpdatedItem(() => ({
+          ...itemPreference,
+          name: itemPreference.inventoryItem.name,
+          units,
+        }));
+      }
+    }
+  }, [itemPreference, inventoryItems]);
+
+  useEffect(() => {
+    if (selectedUnit) {
       setUpdatedItem((prevState: any) => ({
         ...prevState,
-        price: itemPrice.unitPrice * 2,
+        inventoryUnit: selectedUnit,
+        inventoryUnitId: selectedUnit?.id,
       }));
-    } else {
+    }
+  }, [selectedUnit]);
+
+  useEffect(() => {
+    if (promptedItem.id !== -1) {
+      let units =
+        promptedItem?.vendorItem?.flatMap((item: any) => item.unit) || [];
+
+      units = Array.from(
+        new Map(units?.map((unit: any) => [unit.ratio, unit])).values(),
+      );
+
+      const itemPrice =
+        promptedItem?.vendorItem[0]?.unit?.find(
+          (unit: any) => unit.ratio === 1,
+        ) || 0;
+      let price = itemPrice.unitPrice;
+
+      if (promptedItem.id !== updatedItem?.inventoryItemId) {
+        price *= 2;
+      }
+
       setUpdatedItem((prevState: any) => ({
         ...prevState,
-        price: itemPreference?.price,
+        name: promptedItem.name,
+        price,
+        units: units,
       }));
     }
   }, [promptedItem.id]);
 
-  const handleUpdateItemPreference = async () => {
+  const onUpdateItemPreference = async () => {
     setIsUpdating(true);
     try {
       const response = await axios.put(
@@ -95,6 +133,7 @@ const EditItemPreference = ({
         {
           ...updatedItem,
           image: promptedItem.image,
+          units: updatedItem.units,
           inventoryItemId: promptedItem.id,
         },
       );
@@ -118,166 +157,174 @@ const EditItemPreference = ({
   };
 
   return (
-    <Modal open={open} onClose={onClose}>      
-      <BoxModal maxHeight="80vh" overflow="scroll">
-      {/* {AddUnitModal}
+    <>
+      {AddUnitModal}
+      {EditUnitModal}
+      <Button onClick={() => setOpen(true)}>Edit</Button>
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <BoxModal maxHeight="80vh" overflow="scroll">
+          {/* {AddUnitModal}
       {EditUnitModal} */}
-        <ModalHead
-          heading="Edit Item Preference"
-          buttonLabel="Save"
-          onClose={onClose}
-          buttonProps={{ loading: isUpdating }}
-          onClick={handleUpdateItemPreference}
-        />
-
-        <Divider sx={{ my: 2 }} />
-
-        <Box display="flex" gap={2} flexDirection="column">
-          <Typography>Move To</Typography>
-          <Select
-            value={updatedItem?.typeId}
-            onChange={(e: any) =>
-              setUpdatedItem((prevState: any) => ({
-                ...prevState,
-                typeId: e.target.value,
-              }))
-            }
-          >
-            {types?.data?.map((type: any) => (
-              <MenuItem key={type.id} value={type.id}>
-                {type.name}
-              </MenuItem>
-            ))}
-          </Select>
+          <ModalHead
+            heading="Edit Item Preference"
+            buttonLabel="Save"
+            onClose={() => setOpen(false)}
+            buttonProps={{ loading: isUpdating }}
+            onClick={onUpdateItemPreference}
+          />
 
           <Divider sx={{ my: 2 }} />
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography>Select Item</Typography>
-            <FormControlLabel
-              label="Best Seller"
-              control={
-                <Switch
-                  checked={updatedItem?.isBestSeller}
-                  onChange={(e: any) =>
-                    setUpdatedItem((prevState: any) => ({
-                      ...prevState,
-                      isBestSeller: e.target.checked,
-                    }))
-                  }
-                />
+
+          <Box display="flex" gap={2} flexDirection="column">
+            <Typography>Move To</Typography>
+            <Select
+              value={updatedItem?.typeId}
+              onChange={(e: any) =>
+                setUpdatedItem((prevState: any) => ({
+                  ...prevState,
+                  typeId: e.target.value,
+                }))
               }
+            >
+              {types?.data?.map((type: any) => (
+                <MenuItem key={type.id} value={type.id}>
+                  {type.name}
+                </MenuItem>
+              ))}
+            </Select>
+
+            <Divider sx={{ my: 2 }} />
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography>Select Item</Typography>
+              <FormControlLabel
+                label="Best Seller"
+                control={
+                  <Switch
+                    checked={updatedItem?.isBestSeller}
+                    onChange={(e: any) =>
+                      setUpdatedItem((prevState: any) => ({
+                        ...prevState,
+                        isBestSeller: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+              />
+            </Box>
+            <Autocomplete
+              value={promptedItem}
+              onChange={(event, newValue) => {
+                setPromptedItem((prevState: any) => ({
+                  ...prevState,
+                  ...newValue,
+                }));
+              }}
+              filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+                return filtered;
+              }}
+              selectOnFocus
+              clearOnBlur
+              handleHomeEndKeys
+              id="free-solo-with-text-demo"
+              options={[
+                { id: -1, name: '-- Choose an item --' },
+                ...(inventoryItems?.data || []),
+              ]}
+              getOptionLabel={(option) => {
+                // Regular option
+                return option?.name || '';
+              }}
+              renderOption={(props, option) => {
+                const { key, ...optionProps } = props;
+
+                // const isDisabled = disabledItems?.includes(option?.id);
+                return (
+                  <li
+                    key={key}
+                    {...optionProps}
+                    aria-disabled={option.id === -1}
+                  >
+                    {option.name}
+                  </li>
+                );
+              }}
+              sx={{ width: '100%' }}
+              renderInput={(params) => <TextField {...params} label="Item" />}
             />
-          </Box>
-          <Autocomplete
-            value={promptedItem}
-            onChange={(event, newValue) => {
-              setPromptedItem((prevState: any) => ({
-                ...prevState,
-                ...newValue,
-              }));
-            }}
-            filterOptions={(options, params) => {
-              const filtered = filter(options, params);
-              return filtered;
-            }}
-            selectOnFocus
-            clearOnBlur
-            handleHomeEndKeys
-            id="free-solo-with-text-demo"
-            options={[
-              { id: -1, name: '-- Choose an item --' },
-              ...(inventoryItems?.data || []),
-            ]}
-            getOptionLabel={(option) => {
-              // Regular option
-              return option?.name || '';
-            }}
-            renderOption={(props, option) => {
-              const { key, ...optionProps } = props;
 
-              // const isDisabled = disabledItems?.includes(option?.id);
-              return (
-                <li key={key} {...optionProps} aria-disabled={option.id === -1}>
-                  {option.name}
-                </li>
-              );
-            }}
-            sx={{ width: '100%' }}
-            renderInput={(params) => <TextField {...params} label="Item" />}
-          />
-
-          <InputLabel htmlFor="name">Name</InputLabel>
-          <TextField
-            id="name"
-            label="Name"
-            placeholder="Enter item name..."
-            value={updatedItem?.name || ''}
-            onChange={(e: any) => {
-              setUpdatedItem((prevState: any) => ({
-                ...prevState,
-                name: e.target.value,
-              }));
-            }}
-          />
-
-          {/* {UnitDisplay} */}
-
-          <InputLabel htmlFor="price">Price</InputLabel>
-          <TextField
-            id="price"
-            label="Price"
-            placeholder="Enter item price..."
-            type="number"
-            value={updatedItem?.price || 0}
-            onChange={(e) => {
-              setUpdatedItem((prevState: any) => ({
-                ...prevState,
-                price: +e.target.value,
-              }));
-            }}
-          />
-
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <InputLabel htmlFor="discount">Discount</InputLabel>
-            <FormControlLabel
-              label="Show Discount"
-              control={
-                <Switch
-                  checked={updatedItem?.isShowDiscount || false}
-                  onChange={(e: any) =>
-                    setUpdatedItem((prevState: any) => ({
-                      ...prevState,
-                      isShowDiscount: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              labelPlacement="end"
+            <InputLabel htmlFor="name">Name</InputLabel>
+            <TextField
+              id="name"
+              label="Name"
+              placeholder="Enter item name..."
+              value={updatedItem?.name || ''}
+              onChange={(e: any) => {
+                setUpdatedItem((prevState: any) => ({
+                  ...prevState,
+                  name: e.target.value,
+                }));
+              }}
             />
-          </Box>
-          <TextField
-            id="discount"
-            label="Previous price"
-            placeholder="Enter previous price..."
-            type="number"
-            value={updatedItem?.prevPrice || 0}
-            onChange={(e) => {
-              setUpdatedItem((prevState: any) => ({
-                ...prevState,
-                prevPrice: +e.target.value,
-              }));
-            }}
-          />
 
-          {/* <Typography>Description</Typography>
+            {UnitDisplay}
+
+            <InputLabel htmlFor="price">Price</InputLabel>
+            <TextField
+              id="price"
+              label="Price"
+              placeholder="Enter item price..."
+              type="number"
+              value={updatedItem?.price || 0}
+              onChange={(e) => {
+                setUpdatedItem((prevState: any) => ({
+                  ...prevState,
+                  price: +e.target.value,
+                }));
+              }}
+            />
+
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <InputLabel htmlFor="discount">Discount</InputLabel>
+              <FormControlLabel
+                label="Show Discount"
+                control={
+                  <Switch
+                    checked={updatedItem?.isShowDiscount || false}
+                    onChange={(e: any) =>
+                      setUpdatedItem((prevState: any) => ({
+                        ...prevState,
+                        isShowDiscount: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                labelPlacement="end"
+              />
+            </Box>
+            <TextField
+              id="discount"
+              label="Previous price"
+              placeholder="Enter previous price..."
+              type="number"
+              value={updatedItem?.prevPrice || 0}
+              onChange={(e) => {
+                setUpdatedItem((prevState: any) => ({
+                  ...prevState,
+                  prevPrice: +e.target.value,
+                }));
+              }}
+            />
+
+            {/* <Typography>Description</Typography>
           <TextField
             label="Description"
             placeholder="Enter item description..."
@@ -292,34 +339,34 @@ const EditItemPreference = ({
             }}
           /> */}
 
-          <Typography>Upload Image</Typography>
-          {promptedItem?.image && (
-            <Box display="flex" gap={2} alignItems="center">
-              <img
-                src={
-                  promptedItem?.image ? generateImgUrl(promptedItem?.image) : ''
-                }
-                alt={promptedItem.name}
-                width={100}
-                height={100}
-              />
-              <Typography>{promptedItem?.image}</Typography>
-            </Box>
-          )}
-          <FileUpload
-            item={promptedItem}
-            showNotification={showNotification}
-            setPromptedItem={setPromptedItem}
-          />
-        </Box>
-      </BoxModal>
-    </Modal>
+            <Typography>Upload Image</Typography>
+            {promptedItem?.image && (
+              <Box display="flex" gap={2} alignItems="center">
+                <img
+                  src={
+                    promptedItem?.image
+                      ? generateImgUrl(promptedItem?.image)
+                      : ''
+                  }
+                  alt={promptedItem.name}
+                  width={100}
+                  height={100}
+                />
+                <Typography>{promptedItem?.image}</Typography>
+              </Box>
+            )}
+            <FileUpload
+              item={promptedItem}
+              showNotification={showNotification}
+              setPromptedItem={setPromptedItem}
+            />
+          </Box>
+        </BoxModal>
+      </Modal>
+    </>
   );
-}
+};
 
 export default memo(EditItemPreference, (prev, next) => {
-  return (
-    prev.open === next.open &&
-    Object.is(prev.itemPreference, next.itemPreference)
-  )
+  return Object.is(prev.itemPreference, next.itemPreference);
 });

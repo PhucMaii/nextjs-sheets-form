@@ -4,7 +4,7 @@ import { Notification } from '@/app/utils/type';
 import { AlertColor } from '@mui/material';
 import { useState } from 'react';
 
-export type ShowNotificationType = (type: AlertColor, message: string) => void
+export type ShowNotificationType = (type: AlertColor, message: string) => void;
 
 const useNotification = () => {
   const [notification, setNotification] = useState<Notification>({

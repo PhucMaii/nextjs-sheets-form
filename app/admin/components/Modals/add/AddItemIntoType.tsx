@@ -20,6 +20,7 @@ import FileUpload from '../../FileUpload';
 import { generateImgUrl } from '@/app/lib/s3';
 import axios from 'axios';
 import { filter } from '../../Autocomplete/VendorItemSearch';
+import useEditUnit from '@/hooks/unit/useEditUnit';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -37,12 +38,23 @@ export default function AddItemIntoType({
   const [promptedItem, setPromptedItem] = useState<any>({
     id: -1,
     name: '',
+    customName: '',
     image: '',
     price: 0,
     description: '',
     isBestSeller: false,
+    units: [],
+    inventoryUnit: null,
     typeId,
   });
+
+  const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
+    useEditUnit(
+      promptedItem.units,
+      promptedItem.inventoryUnit,
+      showNotification,
+      false,
+    );
 
   useEffect(() => {
     if (promptedItem.id > 0) {
@@ -50,12 +62,30 @@ export default function AddItemIntoType({
         (unit: any) => unit.ratio === 1,
       );
 
+      let units =
+        promptedItem?.vendorItem?.flatMap((item: any) => item.unit) || [];
+
+      units = Array.from(
+        new Map(units?.map((unit: any) => [unit.ratio, unit])).values(),
+      );
+
       setPromptedItem((prevState: any) => ({
         ...prevState,
         price: itemPrice.unitPrice * 2,
+        units,
       }));
     }
   }, [promptedItem.id]);
+
+  useEffect(() => {
+    if (selectedUnit) {
+      setPromptedItem((prevState: any) => ({
+        ...prevState,
+        inventoryUnit: selectedUnit,
+        inventoryUnitId: selectedUnit?.id,
+      }));
+    }
+  }, [selectedUnit]);
 
   const onAddItemIntoType = async () => {
     if (promptedItem.id === -1) {
@@ -93,7 +123,9 @@ export default function AddItemIntoType({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="scroll">
+        {AddUnitModal}
+        {EditUnitModal}
         <ModalHead
           heading="Add Item Into Type"
           buttonLabel="ADD"
@@ -142,12 +174,10 @@ export default function AddItemIntoType({
             clearOnBlur
             handleHomeEndKeys
             id="free-solo-with-text-demo"
-            options={
-              [
-                { id: -1, name: '-- Choose an item --' },
-                ...(inventoryItems?.data || []),
-              ]
-            }
+            options={[
+              { id: -1, name: '-- Choose an item --' },
+              ...(inventoryItems?.data || []),
+            ]}
             getOptionLabel={(option) => {
               // Regular option
               return option?.name || '';
@@ -165,6 +195,22 @@ export default function AddItemIntoType({
             sx={{ width: '100%' }}
             renderInput={(params) => <TextField {...params} label="Item" />}
           />
+
+          <InputLabel>Name</InputLabel>
+          <TextField
+            id="name"
+            label="Name"
+            placeholder="Enter item name..."
+            value={promptedItem.customName}
+            onChange={(e) => {
+              setPromptedItem((prevState: any) => ({
+                ...prevState,
+                customName: e.target.value,
+              }));
+            }}
+          />
+
+          {UnitDisplay}
 
           <InputLabel htmlFor="price">Price</InputLabel>
           <TextField

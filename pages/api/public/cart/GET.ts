@@ -1,7 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../../utils/date';
-import { generateGuestSessionId, generateSessionSignature, verifySessionId } from '@/app/utils/security';
+import {
+  generateGuestSessionId,
+  generateSessionSignature,
+  verifySessionId,
+} from '@/app/utils/security';
 
 interface IQuery {
   guestSessionId?: string;
@@ -56,7 +60,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       // }
 
       const userCart = await prisma.cart.findFirst({
-        where: {guestSessionId},
+        where: { guestSessionId },
         include: {
           items: {
             include: {
@@ -81,7 +85,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       // Verify guest session id
       let sessionId = guestSessionId;
       let sessionSignature = guestSessionSignature;
-      
+
       // If session id is not available, create new one
       if (!sessionId || !sessionSignature) {
         sessionId = generateGuestSessionId();

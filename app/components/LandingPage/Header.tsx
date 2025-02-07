@@ -29,7 +29,7 @@ export default function Header({ setIsOpenSignUp, sx }: IProps) {
 
   const onGoToSearchPage = () => {
     router.push(`/products?q=${searchKeywords}`);
-  }
+  };
 
   return (
     <Grid

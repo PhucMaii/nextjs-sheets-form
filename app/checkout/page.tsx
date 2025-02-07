@@ -353,7 +353,7 @@ export default function CheckoutPage() {
                 onClick={onPlaceOrder}
                 fullWidth
                 loading={isLoading}
-                sx={{mt: 2}}
+                sx={{ mt: 2 }}
               >
                 Checkout / Place order
               </LoadingButton>

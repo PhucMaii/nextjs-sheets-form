@@ -1,6 +1,13 @@
 import { generateImgUrl } from '@/app/lib/s3';
 import { RootState } from '@/state/store';
-import { Box, FormGroup, InputLabel, TextareaAutosize, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  FormGroup,
+  InputLabel,
+  TextareaAutosize,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -96,8 +103,14 @@ export default function useCart() {
           />
         </FormGroup>
       </Box>
-    )
+    );
   }, [note, cart]);
 
-  return { cart, renderDisplayTotal, renderItemsDisplay, renderNoteInput, note };
+  return {
+    cart,
+    renderDisplayTotal,
+    renderItemsDisplay,
+    renderNoteInput,
+    note,
+  };
 }

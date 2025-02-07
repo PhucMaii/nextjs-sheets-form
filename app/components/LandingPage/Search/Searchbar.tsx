@@ -56,7 +56,7 @@ export default function Searchbar({ width }: any) {
           setAnchor(e.currentTarget);
           if (searchKeywords) {
             setIsOpenSearch(true);
-          } 
+          }
         }}
         aria-controls={openDropdown ? 'basic-menu' : undefined}
         aria-haspopup="true"

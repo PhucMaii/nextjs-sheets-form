@@ -1,10 +1,12 @@
-import { generateCurrentTime } from '@/app/utils/time';
 import { getUserInfo } from '@/pages/api/utils/auth';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   inventoryItemId: number;
+  name: string;
+  inventoryUnitId: number;
   image?: string;
   description: string;
   price: number;
@@ -21,6 +23,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const {
       inventoryItemId,
       image,
+      name,
+      inventoryUnitId,
       description,
       price,
       isShowDiscount,
@@ -29,19 +33,19 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       typeId,
     }: IBody = req.body;
 
-    const existingPreference = await prisma.itemPreference.findFirst({
-      where: {
-        inventoryItemId,
-      },
-    });
+    // const existingPreference = await prisma.itemPreference.findFirst({
+    //   where: {
+    //     inventoryItemId,
+    //   },
+    // });
 
-    if (existingPreference) {
-      return res.status(400).json({
-        error: 'Preference already exists either in this type or other type',
-      });
-    }
+    // if (existingPreference) {
+    //   return res.status(400).json({
+    //     error: 'Preference already exists either in this type or other type',
+    //   });
+    // }
 
-    const createdAt = generateCurrentTime();
+    const { date, time } = getTodayDate();
     const createdBy: any = await getUserInfo(req, res);
 
     const newPreference = await prisma.itemPreference.create({
@@ -49,12 +53,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         inventoryItemId,
         image: image || '',
         description,
+        name,
+        inventoryUnitId,
         isBestSeller,
         price,
         isShowDiscount,
         prevPrice,
         typeId,
-        createdAt,
+        createdAt: `${date} ${time}`,
         createdBy: `Admin - ${createdBy.clientName}`,
       },
     });

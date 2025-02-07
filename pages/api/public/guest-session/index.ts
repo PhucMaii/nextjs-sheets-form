@@ -1,5 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { generateGuestSessionId, generateSessionSignature } from '@/app/utils/security';
+import {
+  generateGuestSessionId,
+  generateSessionSignature,
+} from '@/app/utils/security';
 import {
   IronSessionWithSessionData,
   sessionOptions,
@@ -29,17 +32,16 @@ export default withIronSession(
       // Generate a guest session ID (or use an existing one)
       const guestSessionId =
         req.session.guestSessionId || generateGuestSessionId();
-      
-      
+
       const guestSessionSignature = generateSessionSignature(guestSessionId);
       // Save the guest session ID in the session
       req.session.guestSessionId = guestSessionId;
       await req.session.save();
 
-      return res.status(200).json({ 
+      return res.status(200).json({
         guestSessionId,
-        guestSessionSignature, 
-        message: 'Get Guest Session Id Successfully' 
+        guestSessionSignature,
+        message: 'Get Guest Session Id Successfully',
       });
     } catch (error: any) {
       console.log('Internal Server Error: ', error);

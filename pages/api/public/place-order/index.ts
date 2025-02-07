@@ -26,13 +26,8 @@ export default async function handler(
 
     const prisma = new PrismaClient();
 
-    const {
-      cartId,
-      userId,
-      guestSessionId,
-      deliveryDate,
-      note,
-    }: IBody = req.body;
+    const { cartId, userId, guestSessionId, deliveryDate, note }: IBody =
+      req.body;
 
     // If none of authentication is provided -> error
     if (!userId && !guestSessionId) {
@@ -42,9 +37,11 @@ export default async function handler(
     }
 
     // Verify User
-    const queryUser = userId ? { id: userId } : { guestSessionId: guestSessionId };
+    const queryUser = userId
+      ? { id: userId }
+      : { guestSessionId: guestSessionId };
     const existingUser = await prisma.user.findFirst({
-      where: queryUser
+      where: queryUser,
     });
 
     if (!existingUser) {
@@ -75,7 +72,7 @@ export default async function handler(
             },
           },
         },
-      }
+      },
     });
 
     // Verify cart item ids passed correctly

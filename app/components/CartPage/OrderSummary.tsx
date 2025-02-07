@@ -99,9 +99,9 @@ export default function OrderSummary() {
       };
     });
   }, []);
-  
+
   // const onPlaceOrder = () => {
-    
+
   // }
 
   const renderAddressInput = () => {

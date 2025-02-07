@@ -161,57 +161,64 @@ const useEditUnit = (
     // });
   };
 
-  const AddUnitModal = useMemo(() => (
-    <AddUnit
-      open={addUnitBoolean.open}
-      onClose={() => onChangeAddUnitBoolean('open', false)}
-      addUnit={addUnit}
-      noClose={addUnitBoolean.disabledClose}
-    />
-  ), [addUnitBoolean]);
+  const AddUnitModal = useMemo(
+    () => (
+      <AddUnit
+        open={addUnitBoolean.open}
+        onClose={() => onChangeAddUnitBoolean('open', false)}
+        addUnit={addUnit}
+        noClose={addUnitBoolean.disabledClose}
+      />
+    ),
+    [addUnitBoolean],
+  );
 
-  const EditUnitModal = useMemo(() => (
-    <EditUnit
-      open={editUnit.open}
-      onClose={() =>
-        setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
-      }
-      unit={editUnit.unit}
-      updateUnit={(updatedUnit: any) =>
-        updateUnit(updatedUnit, editUnit.unitIndex)
-      }
-    />
-  ), [editUnit]);
+  const EditUnitModal = useMemo(
+    () => (
+      <EditUnit
+        open={editUnit.open}
+        onClose={() =>
+          setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
+        }
+        unit={editUnit.unit}
+        updateUnit={(updatedUnit: any) =>
+          updateUnit(updatedUnit, editUnit.unitIndex)
+        }
+      />
+    ),
+    [editUnit],
+  );
 
-  const UnitDisplay = useMemo(() => (
-    <FormControl>
-      <Box display="flex" alignItems="center" gap={1}>
-        <FormLabel id="unit">Units</FormLabel>
-        <IconButton
-          onClick={() => onChangeAddUnitBoolean('open', true)}
-          disabled={units.length === 0 || role === USER_ROLE.DRIVER}
-        >
-          <AddIcon />
-        </IconButton>
-      </Box>
+  const UnitDisplay = useMemo(
+    () => (
+      <FormControl>
+        <Box display="flex" alignItems="center" gap={1}>
+          <FormLabel id="unit">Units</FormLabel>
+          <IconButton
+            onClick={() => onChangeAddUnitBoolean('open', true)}
+            disabled={units.length === 0 || role === USER_ROLE.DRIVER}
+          >
+            <AddIcon />
+          </IconButton>
+        </Box>
 
-      {units.length === 0 ? (
-        <ErrorComponent errorText="Please select an inventory item" />
-      ) : (
-        <UnitRadio
-          units={units}
-          onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
-          value={JSON.stringify(selectedUnit)}
-          removeUnit={removeUnit}
-          setEditUnit={setEditUnit}
-          isShowPrice={isShowPrice}
-          role={role}
-        />
-      )}
-    </FormControl>
-  ), [
-    units,
-  ]);
+        {units.length === 0 ? (
+          <ErrorComponent errorText="Please select an inventory item" />
+        ) : (
+          <UnitRadio
+            units={units}
+            onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
+            value={JSON.stringify(selectedUnit)}
+            removeUnit={removeUnit}
+            setEditUnit={setEditUnit}
+            isShowPrice={isShowPrice}
+            role={role}
+          />
+        )}
+      </FormControl>
+    ),
+    [units, selectedUnit],
+  );
 
   return {
     units,
