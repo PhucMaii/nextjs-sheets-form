@@ -99,6 +99,7 @@ export default function AddItemIntoType({
         `${API_URL.ADMIN}/productTypes/item-preference`,
         {
           ...promptedItem,
+          name: promptedItem.customName,
           inventoryItemId: promptedItem.id,
         },
       );

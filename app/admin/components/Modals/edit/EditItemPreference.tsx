@@ -80,7 +80,6 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
         });
         setUpdatedItem(() => ({
           ...itemPreference,
-          name: itemPreference.inventoryItem.name,
           units,
         }));
       }
@@ -91,6 +90,10 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
     if (selectedUnit) {
       setUpdatedItem((prevState: any) => ({
         ...prevState,
+        price:
+          selectedUnit.id !== itemPreference?.inventoryUnitId
+            ? selectedUnit.unitPrice * 2
+            : itemPreference.price,
         inventoryUnit: selectedUnit,
         inventoryUnitId: selectedUnit?.id,
       }));
@@ -106,20 +109,8 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
         new Map(units?.map((unit: any) => [unit.ratio, unit])).values(),
       );
 
-      const itemPrice =
-        promptedItem?.vendorItem[0]?.unit?.find(
-          (unit: any) => unit.ratio === 1,
-        ) || 0;
-      let price = itemPrice.unitPrice;
-
-      if (promptedItem.id !== updatedItem?.inventoryItemId) {
-        price *= 2;
-      }
-
       setUpdatedItem((prevState: any) => ({
         ...prevState,
-        name: promptedItem.name,
-        price,
         units: units,
       }));
     }

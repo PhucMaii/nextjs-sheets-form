@@ -20,6 +20,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           itemPreferences: {
             include: {
               inventoryItem: true,
+              inventoryUnit: true,
             },
           },
         },
@@ -33,7 +34,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const productTypes = await prisma.itemType.findMany({
       include: {
-        itemPreferences: true,
+        itemPreferences: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          },
+        },
       },
     });
 

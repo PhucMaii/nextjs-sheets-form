@@ -48,6 +48,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const { date, time } = getTodayDate();
     const createdBy: any = await getUserInfo(req, res);
 
+    console.log(inventoryUnitId, 'INVENTORY UNIT ID');
+
     const newPreference = await prisma.itemPreference.create({
       data: {
         inventoryItemId,

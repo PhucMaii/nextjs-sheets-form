@@ -28,9 +28,7 @@ const Product = ({ itemPreference, showNotification }: IProps) => {
     deleteItemPreference: false,
   });
 
-  console.log('re render in prodcut comp');
-
-  const handleDeleteItemPreference = async () => {
+  const onDeleteItemPref = async () => {
     try {
       const response = await axios.delete(
         `${API_URL.ADMIN}/productTypes/item-preference?id=${itemPreference.id}`,
@@ -58,7 +56,7 @@ const Product = ({ itemPreference, showNotification }: IProps) => {
         open={open.deleteItemPreference}
         handleCloseModal={() => setOpen('deleteItemPreference', false)}
         targetObj={itemPreference}
-        handleDelete={handleDeleteItemPreference}
+        handleDelete={onDeleteItemPref}
         showTargetObj={itemPreference.inventoryItem.name}
       />
       {/* <EditItemPreference
@@ -79,7 +77,7 @@ const Product = ({ itemPreference, showNotification }: IProps) => {
         />
         <CardContent>
           <Typography variant="h6" fontWeight="regular" gutterBottom>
-            {itemPreference.inventoryItem?.name}
+            {itemPreference?.name || itemPreference.inventoryItem.name}
           </Typography>
           <Box display="flex" alignItems="flex-end" gap={1}>
             <Typography

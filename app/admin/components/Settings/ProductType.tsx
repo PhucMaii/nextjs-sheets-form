@@ -40,7 +40,7 @@ export default function ProductType() {
 
   const [types] = SWRFetchData(`${API_URL.ADMIN}/productTypes`);
 
-  const handleDeleteType = async (type: IProductType) => {
+  const onDeleteType = async (type: IProductType) => {
     try {
       const response = await axios.delete(
         `${API_URL.ADMIN}/productTypes?id=${type.id}`,
@@ -59,14 +59,11 @@ export default function ProductType() {
     }
   };
 
-  const handleMenuOpen = (
-    e: React.MouseEvent<HTMLElement>,
-    type: IProductType,
-  ) => {
+  const onMenuOpen = (e: React.MouseEvent<HTMLElement>, type: IProductType) => {
     setMenuState({ anchorEl: e.currentTarget, type });
   };
 
-  const handleMenuClose = () => {
+  const onMenuClose = () => {
     setMenuState({ anchorEl: null, type: null });
   };
 
@@ -76,7 +73,7 @@ export default function ProductType() {
       <DeleteModal
         open={open.deleteProductType}
         handleCloseModal={() => setOpen('deleteProductType', false)}
-        handleDelete={handleDeleteType}
+        handleDelete={onDeleteType}
         targetObj={deletingType}
         showTargetObj={deletingType?.name}
       />
@@ -142,7 +139,7 @@ export default function ProductType() {
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleMenuOpen(e, type);
+                        onMenuOpen(e, type);
                       }}
                     >
                       <MoreHorizIcon />
@@ -150,7 +147,7 @@ export default function ProductType() {
                     <Menu
                       anchorEl={menuState.anchorEl}
                       open={!!menuState.anchorEl}
-                      onClose={() => handleMenuClose()}
+                      onClose={() => onMenuClose()}
                       PaperProps={{
                         elevation: 0,
                         sx: {
@@ -186,7 +183,7 @@ export default function ProductType() {
                           e.preventDefault();
                           setOpen('editProductType', true);
                           setEdittingType(menuState.type);
-                          handleMenuClose();
+                          onMenuClose();
                         }}
                       >
                         <Box display="flex" alignItems="center" gap={2}>
@@ -200,7 +197,7 @@ export default function ProductType() {
                           e.preventDefault();
                           setOpen('deleteProductType', true);
                           setDeletingType(menuState.type);
-                          handleMenuClose();
+                          onMenuClose();
                         }}
                       >
                         <Box display="flex" alignItems="center" gap={2}>
