@@ -25,6 +25,7 @@ import {
   ORDER_STATUS,
   TYPE,
   USER_CATEGORIZED,
+  USER_ROLE,
 } from '@/app/utils/enum';
 import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
@@ -481,7 +482,9 @@ const OrderAccordion = ({
           </Grid>
           <Grid item xs={12} md={4}>
             <Button
-              color="info"
+              color={
+                order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'success'
+              }
               variant="contained"
               sx={{ textTransform: 'none' }}
               onClick={handleOpenClientModal}

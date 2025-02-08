@@ -5,6 +5,7 @@ import './globals.css';
 import { Providers } from './provider';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import '../styles/reactCalendar.css';
+import '../styles/animation.css';
 import UserContextAPI from './context/UserContextAPI';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { theme } from '@/theme';

@@ -13,15 +13,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ error: 'You are not authenticated' });
     }
 
-    const existingUser = await prisma.user.findUnique({
+    const existingUser: any = await prisma.user.findUnique({
       where: {
         id: userId ? Number(userId) : Number(session?.user?.id),
       },
     });
 
+    if (!existingUser) {
+      return res.status(404).json({
+        error: 'User Not Found',
+      });
+    }
+
     const items = await prisma.item.findMany({
       where: {
-        categoryId: existingUser?.categoryId,
+        categoryId: existingUser.categoryId,
       },
       include: {
         inventoryItem: true,

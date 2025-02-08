@@ -18,6 +18,7 @@ export enum API_URL {
   SUBCATEGORIES = '/api/admin/subcategories',
   ROUTES = '/api/admin/routes',
   ADMIN_DRIVERS = '/api/admin/drivers',
+  PUBLIC = '/api/public',
   DRIVER_ORDERS = '/api/drivers/orders',
 }
 
@@ -74,6 +75,7 @@ export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',
   DRIVER = 'driver',
+  GUEST = 'guest',
   SYSTEM = 'system',
 }
 

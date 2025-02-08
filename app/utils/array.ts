@@ -3,6 +3,7 @@ import { Order } from '../admin/orders/page';
 import { fetchWcodOrders } from './db';
 import { ORDER_STATUS, PAYMENT_TYPE } from './enum';
 import { getWCODDay } from './time';
+import Fuse from 'fuse.js';
 
 // Utility function to group items by a key
 export const groupBy = (array: any[], key: (item: any) => any) => {
@@ -204,4 +205,20 @@ export const getDifferentItems = (
       );
     });
   });
+};
+
+export const onSearchItems = (
+  baseItems: any[],
+  searchKeywords: string,
+  searchFields: string[],
+) => {
+  const fuse = new Fuse(baseItems, {
+    keys: searchFields,
+  });
+
+  const result = fuse.search(searchKeywords);
+  console.log(result, 'result');
+
+  const data = result.map((item: any) => item.item);
+  return data;
 };

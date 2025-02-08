@@ -1,5 +1,4 @@
-import { ScheduledOrder } from '@/app/utils/type';
-import { PrismaClient, UserRoute } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -7,52 +6,44 @@ const prisma = new PrismaClient();
 //   return koreanRange.test(text);
 // };
 async function main() {
-  const routes = await prisma.route.findMany({
+  const allItemPref = await prisma.itemPreference.findMany({
     include: {
-      clients: {
+      inventoryItem: {
         include: {
-          user: {
+          vendorItem: {
             include: {
-              scheduleOrders: true,
+              unit: true,
             },
           },
         },
       },
+      inventoryUnit: true,
     },
   });
 
-  const indexPos = [];
-
-  for (const route of routes) {
-    const scheduledOrders = route.clients
-      .map((client: UserRoute | any) => {
-        if (client.user.scheduleOrders.length === 0) {
-          return null;
-        }
-        const routePreOrder = client.user.scheduleOrders.find(
-          (scheduledOrder: ScheduledOrder) => {
-            return scheduledOrder.day === route.day;
-          },
-        );
-
-        return routePreOrder;
-      })
-      .sort(
-        (orderA: ScheduledOrder, orderB: ScheduledOrder) =>
-          orderA.id - orderB.id,
+  for (const itemPref of allItemPref) {
+    const unitRatioOf1 = itemPref.inventoryItem.vendorItem[0].unit.find(
+      (unit: any) => unit.ratio === 1,
+    );
+    if (!unitRatioOf1) {
+      console.log(
+        'Could not find unit',
+        itemPref.id,
+        itemPref.inventoryItem.name,
       );
 
-    for (let i = 0; i < scheduledOrders.length; i++) {
-      indexPos.push({
-        index: i,
-        scheduledOrderId: scheduledOrders[i].id,
-      });
+      continue;
     }
+    console.log(itemPref.id, itemPref.inventoryItem.name);
+    await prisma.itemPreference.update({
+      where: {
+        id: itemPref.id,
+      },
+      data: {
+        inventoryUnitId: unitRatioOf1.id,
+      },
+    });
   }
-
-  await prisma.positionIndex.createMany({
-    data: indexPos,
-  });
 }
 
 main()

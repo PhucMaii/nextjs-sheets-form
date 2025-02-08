@@ -61,8 +61,6 @@ const ClientOrdersTable = ({
     open: false,
     order: clientOrders[0],
   });
-  // const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  // const [page, setPage] = useState<number>(0);
   const windowDimensions = useWindowDimensions();
 
   const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
