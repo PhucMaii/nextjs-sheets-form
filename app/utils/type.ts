@@ -1,5 +1,7 @@
 import { AlertColor } from '@mui/material';
 import {
+  Cart,
+  CartItem,
   Category,
   CodBoard,
   DayRange,
@@ -8,6 +10,8 @@ import {
   Fifo,
   InventoryItem,
   InventoryUnit,
+  ItemPreference,
+  ItemType,
   PaymentMethod,
   PositionIndex,
   Route,
@@ -210,6 +214,7 @@ export interface IInventoryItem extends InventoryItem {
   fifo: IFifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
+  preference?: ItemPreference;
 }
 
 export interface IVendorItem extends VendorItem {
@@ -231,3 +236,34 @@ export interface IFifo extends Fifo {
   vendorItem: IVendorItem;
   orderedItems: OrderedItems[];
 }
+
+export interface IProductType extends ItemType {
+  itemPreferences: IItemPreference[];
+}
+
+export interface IItemPreference extends ItemPreference {
+  inventoryItem: IInventoryItem;
+  price: number;
+}
+
+export interface ICart extends Cart {
+  items: ICartItem[];
+}
+
+export interface ICartItem extends CartItem {
+  quantity: number;
+  cartId: number;
+  inventoryUnit: IInventoryUnit;
+  itemPreferenceId: number;
+
+  itemPreference: IItemPreference;
+}
+
+export type OrderSummary = {
+  subtotal: number;
+  discount: number;
+  totalPrice: number;
+  PST: number;
+  GST: number;
+  shippingFee: number;
+};

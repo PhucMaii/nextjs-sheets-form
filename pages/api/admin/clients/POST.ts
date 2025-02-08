@@ -106,8 +106,11 @@ export const generateLatLng = async (deliveryAddress: string) => {
     },
   });
 
+  console.log(response.data, 'response.data');
+
   if (response.data.status === 'OK') {
     const location = response.data.results[0].geometry.location;
+    console.log(location, 'location');
     return { latitude: location.lat, longitude: location.lng };
   }
 

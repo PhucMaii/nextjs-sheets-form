@@ -298,22 +298,22 @@ export const clientTabs = [
   {
     name: 'Overview',
     icon: DashboardIcon,
-    path: '/',
+    path: '/user/overview',
   },
   {
     name: 'History',
     icon: HistoryIcon,
-    path: '/history',
+    path: '/user/history',
   },
   {
     name: 'Order',
     icon: AddBoxIcon,
-    path: '/order',
+    path: '/user/order',
   },
   {
     name: 'Account',
     icon: AccountCircleIcon,
-    path: '/account',
+    path: '/user/account',
   },
 ];
 
@@ -350,7 +350,7 @@ export const driverTabs = [
   // },
 ];
 
-export const settingsTabs = ['General', 'Announcement'];
+export const settingsTabs = ['General', 'Products', 'Announcement'];
 
 export const statusTabs = [
   {
@@ -442,3 +442,21 @@ export const userCategorizedColor: any = {
     backgroundColor: grey[200],
   },
 };
+
+export const deliveryCities = [
+  'Burnaby',
+  'Coquitlam',
+  'Delta',
+  'New Westminster',
+  'Richmond',
+  'Surrey',
+  'Vancouver',
+];
+
+export const homeLat = 49.216583;
+export const homeLng = -122.9702;
+export const maxDistance = 100; // in km
+
+export const maxWidth = '1500px'; // max width of the landing page
+
+export const guestCategoryId = 334;

@@ -18,7 +18,7 @@ model Driver {
 
 model User {
   id                 Int     @id @default(autoincrement())
-  categoryId         Int
+  categoryId         Int?
   subCategoryId      Int?
   userPreferenceId   Int? // will change back to force user to have it
   clientName         String  @db.VarChar(255)
@@ -31,10 +31,11 @@ model User {
   password           String  @db.VarChar(255)
   sheetName          String  @db.VarChar(255)
   role               String  @db.VarChar(255)
+  guestSessionId     String? // Only useful for first time placing order
   createdAt          String?
   type               String?
 
-  category            Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category            Category?         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory         SubCategory?      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   preference          UserPreference?   @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
   Orders              Orders[]
@@ -124,7 +125,7 @@ model Orders {
   deliveredBy       String?
   addedToCODBy      String?
 
-  user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User?          @relation(fields: [userId], references: [id])
   items      OrderedItems[]
   CodBoard   CodBoard?      @relation(fields: [codBoardId], references: [id])
   codBoardId Int?
@@ -283,12 +284,13 @@ model InventoryItem {
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
-  preference   ItemPreference? @relation("InventoryItemToPreference")
+  preference   ItemPreference[]
 }
 
 model ItemPreference {
   id             Int      @id @default(autoincrement())
   image          String
+  name           String
   description    String
   isBestSeller   Boolean
   price          Float
@@ -298,12 +300,14 @@ model ItemPreference {
   createdAt String?
   createdBy String?
 
-  inventoryItemId Int @unique
+  inventoryItemId Int
+  inventoryUnitId Int
   typeId          Int
 
-  inventoryItem InventoryItem @relation("InventoryItemToPreference", fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   type          ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
   cartItems     CartItem[]
+  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
 }
 
 model ItemType {
@@ -353,8 +357,10 @@ model InventoryUnit {
   createdBy    String
   sellingItem  Item[]
 
-  vendorItem   VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
-  orderedItems OrderedItems[]
+  vendorItem      VendorItem       @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
+  orderedItems    OrderedItems[]
+  cartItems       CartItem[]
+  itemPreferences ItemPreference[]
 }
 
 model Action {
@@ -383,25 +389,28 @@ model CartItem {
   quantity         Int
   cartId           Int
   itemPreferenceId Int
+  inventoryUnitId  Int
   createdAt        String
   createdBy        String
 
+  inventoryUnit  InventoryUnit  @relation(fields: [inventoryUnitId], references: [id])
   itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id])
   cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
 }
 
 model Cart {
-  id          Int     @id @default(autoincrement())
-  subtotal    Float
-  discount    Float
-  GST         Float
-  PST         Float
-  shippingFee Float
-  totalPrice  Float
-  note        String?
-  userId      Int?
-  createdAt   String
-  createdBy   String
+  id             Int     @id @default(autoincrement())
+  subtotal       Float
+  discount       Float
+  GST            Float
+  PST            Float
+  shippingFee    Float
+  totalPrice     Float
+  note           String?
+  userId         Int?
+  guestSessionId String?
+  createdAt      String
+  createdBy      String
 
   items CartItem[]
   user  User?      @relation(fields: [userId], references: [id])

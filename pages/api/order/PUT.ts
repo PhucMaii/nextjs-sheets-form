@@ -22,7 +22,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const body = req.body as BodyProps;
 
     const session: any = await getServerSession(req, res, authOptions);
-    const existingUser = await prisma.user.findUnique({
+    const existingUser: any = await prisma.user.findUnique({
       where: {
         id: Number(session.user.id),
       },
@@ -150,7 +150,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const userCategory = await prisma.category.findUnique({
       where: {
-        id: existingUser?.categoryId,
+        id: existingUser.categoryId,
       },
     });
 

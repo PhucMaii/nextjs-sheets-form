@@ -15,7 +15,11 @@ const useLocalStorage = (key: string, defaultValue: any) => {
     if (typeof window !== 'undefined') {
       const storedValue = localStorage.getItem(key);
       if (storedValue && storedValue !== 'undefined') {
-        setValue(JSON.parse(storedValue));
+        try {
+          setValue(JSON.parse(storedValue));
+        } catch (e) {
+          setValue(storedValue);
+        }
       }
       setIsInitialized(true);
     }
