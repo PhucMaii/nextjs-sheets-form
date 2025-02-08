@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -29,7 +29,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { onSearchItems } from '../utils/array';
 import useNotification from '@/hooks/useNotification';
 
-export default function ProductPage() {
+const ProductPage = () => {
   const searchParams: any = useSearchParams();
   const queryParams = searchParams?.get('q');
 
@@ -391,5 +391,13 @@ export default function ProductPage() {
         </Box>
       </Box>
     </>
+  );
+}
+
+export default function page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductPage />
+    </Suspense>
   );
 }

@@ -1,10 +1,7 @@
 import { landingPagePrimaryColor } from '@/constant/landingPage';
 import useCart from '@/hooks/useCart';
 import { LoadingButton } from '@mui/lab';
-import {
-  Box,
-  Typography,
-} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -17,7 +14,7 @@ export default function OrderSummary() {
 
   const proceedToCheckout = () => {
     router.push('/checkout');
-  }
+  };
 
   // useEffect(() => {
   //   if (!address.fullName) {
@@ -77,7 +74,7 @@ export default function OrderSummary() {
   //     };
   //   });
   // }, []);
-  
+
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <Typography
@@ -93,11 +90,7 @@ export default function OrderSummary() {
 
       {renderDisplayTotal()}
 
-      <LoadingButton
-        onClick={proceedToCheckout}
-        variant="contained"
-        fullWidth
-      >
+      <LoadingButton onClick={proceedToCheckout} variant="contained" fullWidth>
         {/* TODO: will be changed to checkout */}
         Place order
       </LoadingButton>
