@@ -51,11 +51,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const wcodDay: any = getWCODDay(todayString);
     const last7Days = generate7DaysBefore(todayString);
 
+    console.log(last7Days, 'last7Days');
+
     // Check if boards are added already
     const newWCODBoardOrders = await prisma.orders.findMany({
       where: {
         deliveryDate: {
-          in: last7Days,
+          in: [...last7Days, todayString],
         },
         status: {
           not: ORDER_STATUS.VOID,

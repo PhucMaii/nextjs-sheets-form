@@ -116,6 +116,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     if (
       !updatedFields.includes('isShowDiscount') &&
+      !updatedFields.includes('prevPrice') &&
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME
     ) {
       delete updatedData.isShowDiscount;
