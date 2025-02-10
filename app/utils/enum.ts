@@ -75,6 +75,7 @@ export enum USER_ROLE {
   ADMIN = 'admin',
   DRIVER = 'driver',
   SYSTEM = 'system',
+  SUPER_ADMIN='super admin'
 }
 
 export enum FLAG_ORDER_TYPE {

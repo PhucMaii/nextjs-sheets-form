@@ -1,13 +1,12 @@
 'use client';
 import { SplashScreen } from '@/HOC/AuthenGuard';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
   Button,
   Fab,
   Grid,
-  IconButton,
   Menu,
   MenuItem,
   TextField,
@@ -36,9 +35,7 @@ import AddClient from '../components/Modals/add/AddClient';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import ClientDetails from '../components/Clients/ClientDetails';
-import { useReactToPrint } from 'react-to-print';
-import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import ClientListPrint from '../components/Printing/ClientListPrint';
+import ClientListCSV from '../components/CSV/ClientListCSV';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -61,8 +58,6 @@ export default function ClientsPage() {
     useState<any>(null);
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  
-  const clientPrintRef = useRef(null);
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const { showNotification, NotificationComp } = useNotification();
@@ -141,9 +136,9 @@ export default function ClientsPage() {
     setIsFetching(false);
   };
 
-  const onPrintClientList = useReactToPrint({
-    content: () => clientPrintRef.current,
-  });
+  // const onPrintClientList = useReactToPrint({
+  //   content: () => clientPrintRef.current,
+  // });
 
   const handleChangeClients = (clientId: number, updatedData: any) => {
     const newClientList = baseClientList.map((client: UserType) => {
@@ -344,12 +339,6 @@ export default function ClientsPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
-      <div style={{display: 'none'}}>
-        <ClientListPrint
-          ref={clientPrintRef}
-          clients={clients?.data || []}
-        />
-      </div>
       <LoadingModal open={isUpdating} />
       <AddClient
         open={isAddClientOpen}
@@ -417,7 +406,12 @@ export default function ClientsPage() {
             />
           </Grid>
           <Grid item xs={1} md={1.5} textAlign="center">
-            <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              gap={1}
+            >
               <Fab
                 size="medium"
                 onClick={() => setIsAddClientOpen(true)}
@@ -425,10 +419,13 @@ export default function ClientsPage() {
               >
                 <AddIcon />
               </Fab>
-              <IconButton color='primary' onClick={onPrintClientList}>
+              {/* <IconButton color='primary' onClick={onPrintClientList}>
                 <LocalPrintshopIcon />
-              </IconButton>
+              </IconButton> */}
             </Box>
+          </Grid>
+          <Grid item xs={12} textAlign="right">
+            <ClientListCSV clientData={clientList} style={{marginTop: '10px'}} />
           </Grid>
         </Grid>
         {clientList.length > 0 ? (
