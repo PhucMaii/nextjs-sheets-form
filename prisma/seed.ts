@@ -1,58 +1,130 @@
-import { ScheduledOrder } from '@/app/utils/type';
-import { PrismaClient, UserRoute } from '@prisma/client';
+import { ORDER_STATUS } from '@/app/utils/enum';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
 //   const koreanRange = /[\uAC00-\uD7AF]/;
 //   return koreanRange.test(text);
 // };
+
+
+export const normalizeDate = (date: Date | string) => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+export const days = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
+
 async function main() {
-  const routes = await prisma.route.findMany({
+  // const orders = await prisma.orders.findMany({
+  //   where: {
+  //     deliveryDate: '02/08/2025',
+  //     user: {
+  //       preference: {
+  //         paymentType: {
+  //           notIn: ['COD', 'WCOD'],
+  //         }
+  //       }
+  //     },
+  //     codBoardId: {
+  //       not: null
+  //     },
+  //   }
+  // });
+
+  // const orderIds = orders.map((order: any) => order.id);
+
+  // await prisma.orders.updateMany({
+  //   where: {
+  //     id: {
+  //       in: orderIds
+  //     }
+  //   },
+  //   data: {
+  //     codBoardId: null
+  //   }
+  // })
+  const satOrders: any[] = await prisma.orders.findMany({
+    where: {
+      deliveryDate: '02/08/2025',
+      codBoardId: null,
+      user: {
+        preference: {
+          paymentType: {
+            in: ['COD', 'WCOD'],
+          }
+        }
+      },
+      status: {
+        not: 'Void',
+      }
+    },
     include: {
-      clients: {
+      user: {
         include: {
-          user: {
+          routes: {
             include: {
-              scheduleOrders: true,
+              route: {
+                include: {
+                  driver: true,
+                },
+              },
             },
           },
+          preference: true,
+          category: true,
+        },
+      },
+      items: {
+        include: {
+          inventoryItem: true,
+          inventoryUnit: true,
+          fifo: true,
         },
       },
     },
   });
 
-  const indexPos = [];
+  // for (const order of satOrders) {
+  //   const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
+  //   const orderDayIndex = orderDeliveryDate.getDay();
+  //   const orderDay = days[orderDayIndex];
+  //   const orderRoute = order.user.routes.find((route: any) => {
+  //     return route.route.day === orderDay;
+  //   });
 
-  for (const route of routes) {
-    const scheduledOrders = route.clients
-      .map((client: UserRoute | any) => {
-        if (client.user.scheduleOrders.length === 0) {
-          return null;
-        }
-        const routePreOrder = client.user.scheduleOrders.find(
-          (scheduledOrder: ScheduledOrder) => {
-            return scheduledOrder.day === route.day;
-          },
-        );
+  //   const boardWithSameDriverId = satBoards.find((board: any) => {
+  //     return board.driverId === orderRoute?.route?.driver?.id;
+  //   });
 
-        return routePreOrder;
-      })
-      .sort(
-        (orderA: ScheduledOrder, orderB: ScheduledOrder) =>
-          orderA.id - orderB.id,
-      );
+  //   if (boardWithSameDriverId) {
+  //     await prisma.orders.update({
+  //       where: {
+  //         id: order.id,
+  //       },
+  //       data: {
+  //         codBoardId: boardWithSameDriverId.id,
+  //       }
+  //     });
+  //   }
 
-    for (let i = 0; i < scheduledOrders.length; i++) {
-      indexPos.push({
-        index: i,
-        scheduledOrderId: scheduledOrders[i].id,
-      });
-    }
-  }
+  //   console.log({
+  //     driver: orderRoute?.route?.driver?.name,
+  //     driverId: orderRoute?.route.driver.id,
+  //     clientName: order.user.clientName,
+  //   })
+  // }
 
-  await prisma.positionIndex.createMany({
-    data: indexPos,
-  });
+  console.log(satOrders);
 }
 
 main()
