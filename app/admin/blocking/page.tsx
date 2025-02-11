@@ -66,7 +66,7 @@ export default function BlockingPage() {
     ]);
   };
 
-  const handleAddRange = async () => {
+  const onAddRange = async () => {
     if (!newDateRange) {
       showNotification('error', 'No Day Range Selected');
       return;
@@ -108,7 +108,7 @@ export default function BlockingPage() {
     }
   };
 
-  const handleDeleteRange = async (deletedRange: any) => {
+  const onDeleteRange = async (deletedRange: any) => {
     setTargetRange(deletedRange);
     setIsDeleting(true);
     try {
@@ -259,7 +259,7 @@ export default function BlockingPage() {
             <LoadingButton
               loading={isAdding}
               loadingIndicator="Adding..."
-              onClick={handleAddRange}
+              onClick={onAddRange}
               disabled={
                 !selectedClient || selectedClient?.clientName === 'All Clients'
               }
@@ -301,7 +301,7 @@ export default function BlockingPage() {
                             isSaving={isSaving}
                             initializeEdit={initializeEdit}
                             handleEditRange={handleEditRange}
-                            handleDeleteRange={handleDeleteRange}
+                            handleDeleteRange={onDeleteRange}
                             setIsSelectRangeOpen={setIsSelectRangeOpen}
                           />
                         );
@@ -324,7 +324,7 @@ export default function BlockingPage() {
                   isSaving={isSaving}
                   initializeEdit={initializeEdit}
                   handleEditRange={handleEditRange}
-                  handleDeleteRange={handleDeleteRange}
+                  handleDeleteRange={onDeleteRange}
                   setIsSelectRangeOpen={setIsSelectRangeOpen}
                 />
               );

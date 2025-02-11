@@ -38,6 +38,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       createdBy = driver.name;
     } else if (role === USER_ROLE.ADMIN) {
       createdBy = `Admin - ${existingUser.clientName}`;
+    } else if (role === USER_ROLE.SUPER_ADMIN) {
+      createdBy = `S Admin - ${existingUser.clientName}`;
     }
 
     // Check is same start date or same end date exist

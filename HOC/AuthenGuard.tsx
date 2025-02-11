@@ -2,7 +2,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { FC, useEffect } from 'react';
 import LoadingComponent from '../app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
-import { API_URL } from '../app/utils/enum';
+import { API_URL, USER_ROLE } from '../app/utils/enum';
 import useSWR from 'swr';
 
 export const SplashScreen: FC = () => (
@@ -61,7 +61,7 @@ export default function AuthenGuard({ children }: any) {
     } else if (
       user &&
       !pathname?.startsWith('/admin') &&
-      user.data.role === 'admin'
+      (user.data.role === USER_ROLE.ADMIN || user.data.role === USER_ROLE.SUPER_ADMIN)
     ) {
       router.push('/admin/orders');
     } else if (driver && !pathname?.startsWith('/driver')) {

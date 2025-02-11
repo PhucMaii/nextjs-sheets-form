@@ -210,7 +210,8 @@ export const getCreatedBy = async (
     createdBy = `Driver - ${driverCreate.name}`;
   } else if (
     createdByRole === USER_ROLE.ADMIN ||
-    createdByRole === USER_ROLE.CLIENT
+    createdByRole === USER_ROLE.CLIENT || 
+    createdByRole === USER_ROLE.SUPER_ADMIN
   ) {
     const userCreate: any = await prisma.user.findUnique({
       where: {
@@ -220,6 +221,10 @@ export const getCreatedBy = async (
 
     if (userCreate.role === USER_ROLE.ADMIN) {
       createdBy = `Admin - ${userCreate.clientName}`;
+    }
+
+    if (userCreate.role === USER_ROLE.SUPER_ADMIN) {
+      createdBy = `S Admin - ${userCreate.clientName}`;
     }
 
     if (userCreate.role === USER_ROLE.CLIENT) {

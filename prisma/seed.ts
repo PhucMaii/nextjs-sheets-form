@@ -5,45 +5,55 @@ const prisma = new PrismaClient();
 //   const koreanRange = /[\uAC00-\uD7AF]/;
 //   return koreanRange.test(text);
 // };
+
+
+export const normalizeDate = (date: Date | string) => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+export const days = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
+
 async function main() {
-  const allItemPref = await prisma.itemPreference.findMany({
-    include: {
-      inventoryItem: {
-        include: {
-          vendorItem: {
-            include: {
-              unit: true,
-            },
-          },
-        },
-      },
-      inventoryUnit: true,
-    },
-  });
 
-  for (const itemPref of allItemPref) {
-    const unitRatioOf1 = itemPref.inventoryItem.vendorItem[0].unit.find(
-      (unit: any) => unit.ratio === 1,
-    );
-    if (!unitRatioOf1) {
-      console.log(
-        'Could not find unit',
-        itemPref.id,
-        itemPref.inventoryItem.name,
-      );
+  // for (const order of satOrders) {
+  //   const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
+  //   const orderDayIndex = orderDeliveryDate.getDay();
+  //   const orderDay = days[orderDayIndex];
+  //   const orderRoute = order.user.routes.find((route: any) => {
+  //     return route.route.day === orderDay;
+  //   });
 
-      continue;
-    }
-    console.log(itemPref.id, itemPref.inventoryItem.name);
-    await prisma.itemPreference.update({
-      where: {
-        id: itemPref.id,
-      },
-      data: {
-        inventoryUnitId: unitRatioOf1.id,
-      },
-    });
-  }
+  //   const boardWithSameDriverId = satBoards.find((board: any) => {
+  //     return board.driverId === orderRoute?.route?.driver?.id;
+  //   });
+
+  //   if (boardWithSameDriverId) {
+  //     await prisma.orders.update({
+  //       where: {
+  //         id: order.id,
+  //       },
+  //       data: {
+  //         codBoardId: boardWithSameDriverId.id,
+  //       }
+  //     });
+  //   }
+
+  //   console.log({
+  //     driver: orderRoute?.route?.driver?.name,
+  //     driverId: orderRoute?.route.driver.id,
+  //     clientName: order.user.clientName,
+  //   })
+  // }
 }
 
 main()
