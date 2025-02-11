@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState, Suspense } from "react";
-import Sidebar from "../components/Sidebar/Sidebar";
-import { Box, Tab, Tabs, Typography } from "@mui/material";
-import { settingsTabs } from "@/app/lib/constant";
-import { blueGrey } from "@mui/material/colors";
-import EditProfile from "../components/Settings/EditProfile";
-import ErrorComponent from "../components/ErrorComponent";
-import Announcement from "../components/Settings/Announcement";
-import ProductType from "../components/Settings/ProductType";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState, Suspense } from 'react';
+import Sidebar from '../components/Sidebar/Sidebar';
+import { Box, Tab, Tabs, Typography } from '@mui/material';
+import { settingsTabs } from '@/app/lib/constant';
+import { blueGrey } from '@mui/material/colors';
+import EditProfile from '../components/Settings/EditProfile';
+import ErrorComponent from '../components/ErrorComponent';
+import Announcement from '../components/Settings/Announcement';
+import ProductType from '../components/Settings/ProductType';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 function SettingsContent() {
   const [tabIndex, setTabIndex] = useState<number>(0);
@@ -17,23 +17,23 @@ function SettingsContent() {
   const router = useRouter();
 
   useEffect(() => {
-    const tab = searchParams?.get("tab");
+    const tab = searchParams?.get('tab');
     if (tab) {
       setTabIndex(parseInt(tab));
     }
-  }, [searchParams?.get("tab")]);
+  }, [searchParams?.get('tab')]);
 
   return (
     <>
       <Typography variant="h5" color={blueGrey[800]} sx={{ mb: 2 }}>
         Settings
       </Typography>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs
           aria-label="basic tabs"
           value={tabIndex}
           onChange={(e, newValue) =>
-            router.push("/admin/settings?tab=" + newValue)
+            router.push('/admin/settings?tab=' + newValue)
           }
           variant="scrollable"
           scrollButtons="auto"

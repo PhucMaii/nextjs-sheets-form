@@ -109,8 +109,11 @@
 //   }
 // };
 
-
-import { S3Client, PutObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 
 const s3 = new S3Client({
   region: 'us-west-2',
@@ -123,7 +126,9 @@ const s3 = new S3Client({
 export default async function uploadToS3(file: File, itemName: string) {
   try {
     if (!process.env.NEXT_PUBLIC_S3_BUCKET_NAME) {
-      throw new Error('Missing NEXT_PUBLIC_S3_BUCKET_NAME environment variable');
+      throw new Error(
+        'Missing NEXT_PUBLIC_S3_BUCKET_NAME environment variable',
+      );
     }
 
     const fileKey = `products/${itemName}/${Date.now()}-${file.name.replace(/\s/g, '-')}`;
@@ -161,7 +166,7 @@ export const getAllS3Images = async () => {
 
       const response: any = await s3.send(command);
       const objects = response.Contents || [];
-      
+
       const imageFiles = objects
         .map((obj: any) => obj.Key)
         .filter((key: string) => key.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i));

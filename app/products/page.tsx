@@ -228,13 +228,15 @@ const ProductPage = () => {
               <LucideIcons.ShoppingBasketIcon />
               <Typography>All</Typography>
             </Box>
-            {selectedType?.id === 0 && <div
-              style={{
-                width: '100%',
-                height: '2px',
-                backgroundColor: green[800],
-              }}
-            ></div>}
+            {selectedType?.id === 0 && (
+              <div
+                style={{
+                  width: '100%',
+                  height: '2px',
+                  backgroundColor: green[800],
+                }}
+              ></div>
+            )}
           </Box>
         </Button>
         {types?.data?.map((type: any, index: number) => {
@@ -279,13 +281,15 @@ const ProductPage = () => {
                   <IconComponent />
                   <Typography>{type.name}</Typography>
                 </Box>
-                {selectedType?.id === type.id && <div
-                  style={{
-                    width: '100%',
-                    height: '2px',
-                    backgroundColor: green[800],
-                  }}
-                ></div>}
+                {selectedType?.id === type.id && (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '2px',
+                      backgroundColor: green[800],
+                    }}
+                  ></div>
+                )}
               </Box>
             </Button>
           );
@@ -305,7 +309,7 @@ const ProductPage = () => {
         // justifyContent="space-between"
         mt={2}
         spacing={1}
-        sx={{px: 6}}
+        sx={{ px: 6 }}
       >
         <Grid item xs={2} md={1}>
           <Typography variant="h3" fontWeight="bold" sx={{ color: green[800] }}>

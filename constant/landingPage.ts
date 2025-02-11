@@ -2,8 +2,12 @@ import { blue, indigo, pink, yellow } from '@mui/material/colors';
 import {
   BadgeCheckIcon,
   BicepsFlexed,
+  ClipboardCheck,
+  Globe,
   HandshakeIcon,
   ShieldCheckIcon,
+  TreePalm,
+  Truck,
 } from 'lucide-react';
 
 export const landingPagePrimaryColor = '#2E7D32';
@@ -93,5 +97,30 @@ export const bestSellers: BestSellerType[] = [
   {
     name: 'JUMBO EGGS',
     image: '/images/landing/best_sellers/jumbo_egg.jpeg',
+  },
+];
+
+export const reasonList = [
+  {
+    icon: ClipboardCheck,
+    title: 'One Stop Solution',
+    description: 'Everything your restaurant needs under one roof.',
+  },
+  {
+    icon: TreePalm,
+    title: 'ECO Friendly',
+    description: 'Delivering with eco-friendly electric vehicles.',
+  },
+  {
+    icon: Globe,
+    title: 'Online Order',
+    description:
+      'Place orders online anytime via our website with your account.',
+  },
+  {
+    icon: Truck,
+    title: '7 Day Delievery',
+    description:
+      'We work tirelessly to ensure you receive the premium-quality products every day - because you deserve the best, always.',
   },
 ];
