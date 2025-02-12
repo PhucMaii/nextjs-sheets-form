@@ -40,6 +40,7 @@ export interface ICustomAmount {
   fifoId?: number;
   units?: any[];
   isCustomAmount: boolean;
+  cost?: number;
 }
 
 export interface Notification {

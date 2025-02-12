@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
 import { getDriverInfo } from '../../utils/auth';
-import { updateSingleInventoryItem } from '../../admin/orderedItems/single';
+import { generateCostAndProfit, updateSingleInventoryItem } from '../../admin/orderedItems/single';
 import { generateOrderTotalPrice } from '../../admin/orderedItems/PUT';
 
 interface IBody {
@@ -33,6 +33,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    const { cost } = await generateCostAndProfit(id); 
+
     const updatedOrderedItem = await prisma.orderedItems.update({
       where: {
         id,
@@ -40,6 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         quantity,
         price,
+        cost,
+        profit: price - cost,
       },
       include: {
         fifo: true,

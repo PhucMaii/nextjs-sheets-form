@@ -109,52 +109,6 @@ export default function AddCustomAmount({
             onUpdateUI={onUpdateUI}
           />
         )}
-
-        {/* <Box display="flex" flexDirection="column" gap={2}>
-          <Typography>Price</Typography>
-          <TextField
-            label="Price"
-            type="number"
-            value={customAmount.price}
-            onChange={(e: any) =>
-              setCustomAmount((prevState: any) => ({
-                ...prevState,
-                price: +e.target.value,
-              }))
-            }
-            placeholder="Enter price"
-            fullWidth
-          />
-
-          <Typography>Name</Typography>
-          <TextField
-            label="Name"
-            value={customAmount.name}
-            onChange={(e: any) =>
-              setCustomAmount((prevState: any) => ({
-                ...prevState,
-                name: e.target.value,
-              }))
-            }
-            placeholder="Enter name"
-            fullWidth
-          />
-
-          <Typography>Quantity</Typography>
-          <TextField
-            label="Quantity"
-            type="number"
-            value={customAmount.quantity}
-            onChange={(e: any) =>
-              setCustomAmount((prevState: any) => ({
-                ...prevState,
-                quantity: +e.target.value,
-              }))
-            }
-            placeholder="Enter quantity"
-            fullWidth
-          />
-        </Box> */}
       </BoxModal>
     </Modal>
   );

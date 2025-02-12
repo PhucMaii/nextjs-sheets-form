@@ -31,6 +31,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
 
+    const costAndProfit = await generateCostAndProfit(id);
+
     const updatedOrderedItem = await prisma.orderedItems.update({
       where: {
         id,
@@ -38,6 +40,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         quantity,
         price,
+        cost: costAndProfit.cost,
+        profit: price - costAndProfit.cost,
       },
       include: {
         fifo: true,
@@ -118,6 +122,50 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAdminAuthGuard(handler);
+
+export const generateCostAndProfit = async (orderedItemId: number) => {
+  try {
+    const prisma = new PrismaClient();
+
+    const existingItem = await prisma.orderedItems.findUnique({
+      where: {
+        id: orderedItemId,
+      },
+      include: {
+        fifo: {
+          include: {
+            vendorItem: {
+              include: {
+                unit: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!existingItem) {
+      throw new Error(
+        'Ordered item id not provided in generate cost and profit',
+      );
+    }
+
+    let cost = existingItem?.cost;
+
+    if (!cost) {
+      cost = existingItem?.fifo?.price
+        ? existingItem.fifo.price
+        : existingItem.fifo?.vendorItem?.unit?.find(
+            (unit: InventoryUnit) => unit.ratio === 1,
+          )?.unitPrice || 0;
+    }
+
+    return { cost, profit: existingItem.price - cost}
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+    throw new Error('Fail to generate cost and profit: ', error);
+  }
+};
 
 export const updateSingleInventoryItem = async (
   orderId: number,

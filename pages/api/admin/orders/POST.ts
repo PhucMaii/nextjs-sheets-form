@@ -1,5 +1,5 @@
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
-import { Orders, PrismaClient, User } from '@prisma/client';
+import { InventoryUnit, Orders, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { sendEmail } from '../../utils/email';
@@ -290,8 +290,20 @@ export const createOrderedItems = async (order: Orders, items: any) => {
   // STEP 1: Loop through each item
   const inventoryItems = await prisma.inventoryItem.findMany({
     include: {
-      vendorItem: true,
-      fifo: true,
+      vendorItem: {
+        include: {
+          unit: true,
+        },
+      },
+      fifo: {
+        include: {
+          vendorItem: {
+            include: {
+              unit: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -314,6 +326,8 @@ export const createOrderedItems = async (order: Orders, items: any) => {
         orderId: order.id,
         name: item.name,
         price: item.price,
+        cost: item.cost,
+        profit: item.price - item.cost,
         quantity: item.quantity,
         isCustomAmount: item.isCustomAmount,
       });
@@ -353,9 +367,15 @@ export const createOrderedItems = async (order: Orders, items: any) => {
         });
       }
 
+      const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
+        return unit.ratio === 1;
+      });
+
       newOrderedItems.push({
         orderId: order.id,
         fifoId: newFifo.id,
+        cost: unitRatioOf1?.unitPrice || 0,
+        profit: item.price - (unitRatioOf1?.unitPrice || 0),
         name: item.name,
         price: item.price,
         quantity: item.quantity,
@@ -441,11 +461,19 @@ export const createOrderedItems = async (order: Orders, items: any) => {
 
         allDeletedFifoIds.push(...deletedFifoIds);
 
+        const cost = sortedFifo[fifoIndex]?.price
+          ? sortedFifo[fifoIndex].price
+          : sortedFifo[fifoIndex].vendorItem.unit.find(
+              (unit: InventoryUnit) => unit.ratio === 1,
+            )?.unitPrice || 0;
+
         // STEP 6: Create ordered item with that fifo id attached
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[fifoIndex].id,
           name: item.name,
+          cost: cost,
+          profit: item.price - cost,
           price: item.price,
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
@@ -455,10 +483,18 @@ export const createOrderedItems = async (order: Orders, items: any) => {
           isCustomAmount: item?.isCustomAmount || false,
         });
       } else {
+        const cost = sortedFifo[0]?.price
+        ? sortedFifo[0].price
+        : sortedFifo[0].vendorItem.unit.find(
+            (unit: InventoryUnit) => unit.ratio === 1,
+          )?.unitPrice || 0;
+
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[0].id,
           name: item.name,
+          cost: cost,
+          profit: item.price - cost,
           price: item.price,
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
