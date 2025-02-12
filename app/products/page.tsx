@@ -13,7 +13,6 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import Navbar from '../components/LandingPage/Navbar';
 import { SWRFetchData } from '../utils/db';
 import { API_URL } from '../utils/enum';
 import { IItemPreference, IProductType } from '../utils/type';
@@ -28,6 +27,8 @@ import { onSearchItems } from '../utils/array';
 import useNotification from '@/hooks/useNotification';
 import './style.css';
 import { maxWidth } from '../lib/constant';
+import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
+import NavbarWrapper from '../lib/NavbarWrapper';
 
 const ProductPage = () => {
   const searchParams: any = useSearchParams();
@@ -191,10 +192,9 @@ const ProductPage = () => {
     return (
       <Box
         display="flex"
-        alignItems="flex-start"
+        alignItems={smDown ? 'flex-end' : "flex-start"}
         gap={2}
-        mt="150px"
-        sx={{ overflowX: 'auto', whiteSpace: 'nowrap', px: 6, py: 2 }}
+        sx={{ overflowX: 'auto', whiteSpace: 'nowrap' }}
       >
         <Button
           onClick={() => setSelectedType({ id: 0, name: 'All' })}
@@ -309,7 +309,7 @@ const ProductPage = () => {
         // justifyContent="space-between"
         mt={2}
         spacing={1}
-        sx={{ px: 6 }}
+        // sx={{ px: 6 }}
       >
         {/* <Box
           display="flex"
@@ -317,7 +317,7 @@ const ProductPage = () => {
           justifyContent="flex-end"
           gap={1}
         > */}
-        <Grid item xs={10}>
+        <Grid item xs={12} md={10}>
           <TextField
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}
@@ -340,7 +340,7 @@ const ProductPage = () => {
             }}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={12} md={2} textAlign="right">
           <FormControl sx={{ width: 'fit-content' }}>
             <InputLabel id="sort-by">Sort by</InputLabel>
             <Select
@@ -372,69 +372,73 @@ const ProductPage = () => {
   };
 
   return (
-    <>
+    <NavbarWrapper>
       <RequestToJoinModal
         open={isOpenSignUp}
         onClose={() => setIsOpenSignUp(false)}
       />
       {NotificationComp}
+
       <Box
         sx={{
-          pb: 2,
           backgroundColor: 'white',
-          maxHeight: '100vh',
-          overflowY: 'auto',
+          minHeight: '100vh',
+          minWidth: '100%',
+          maxWidth,
         }}
       >
-        <Navbar setIsOpenSignUp={setIsOpenSignUp} />
-        <Box sx={{ maxWidth: maxWidth, mx: 'auto' }}>
-          {renderProductTypes()}
+        {renderProductTypes()}
 
-          {/* <Divider sx={{ my: 1 }} /> */}
+        {/* <Divider sx={{ my: 1 }} /> */}
 
-          {renderSortAndSearch()}
-          {/* Product Display */}
-          <Grid
-            container
-            columnSpacing={2}
-            rowGap={4}
-            width="100%"
-            sx={{ my: 2, px: 4 }}
-          >
-            {displayItems?.length > 0 ? (
-              displayItems?.map((product: IItemPreference, index: number) => {
-                return (
-                  <Grid
-                    item
-                    xs={6}
-                    sm={4}
-                    md={2}
-                    key={index}
-                    sx={{ height: '370px' }}
-                  >
-                    <ProductListing
-                      product={product}
-                      onClick={() => router.push(`/products/${product.id}`)}
-                      showNotification={showNotification}
-                    />
-                  </Grid>
-                );
-              })
-            ) : (
-              <Grid item xs={12}>
-                <ErrorComponent errorText="No Product Available" />
-              </Grid>
-            )}
-          </Grid>
-        </Box>
+        {renderSortAndSearch()}
+        {/* Product Display */}
+        <Grid
+          container
+          // columnSpacing={1}
+          rowGap={4}
+          width="100%"
+          sx={{ my: 2, px: 2 }}
+        >
+          {displayItems?.length > 0 ? (
+            displayItems?.map((product: IItemPreference, index: number) => {
+              return (
+                <Grid
+                  item
+                  xs={6}
+                  sm={4}
+                  md={2}
+                  key={index}
+                  sx={{ height: '370px' }}
+                >
+                  <ProductListing
+                    product={product}
+                    onClick={() => router.push(`/products/${product.id}`)}
+                    showNotification={showNotification}
+                  />
+                </Grid>
+              );
+            })
+          ) : (
+            <Grid item xs={12}>
+              <ErrorComponent errorText="No Product Available" />
+            </Grid>
+          )}
+        </Grid>
       </Box>
-    </>
+    </NavbarWrapper>
   );
 };
 
 export default function page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div>
+          <LoadingComponent />
+        </div>
+      }
+    >
       <ProductPage />
     </Suspense>
   );

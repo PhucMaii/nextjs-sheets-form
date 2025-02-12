@@ -16,11 +16,10 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 interface IProps {
-  setIsOpenSignUp: React.Dispatch<React.SetStateAction<boolean>>;
   sx?: any;
 }
 
-export default function Header({ setIsOpenSignUp, sx }: IProps) {
+export default function Header({ sx }: IProps) {
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   const router = useRouter();
@@ -85,7 +84,7 @@ export default function Header({ setIsOpenSignUp, sx }: IProps) {
             gap={2}
           >
             <Button
-              onClick={() => setIsOpenSignUp(true)}
+              onClick={() => router.push('/partner-application-form')}
               variant="contained"
               sx={{
                 width: 'fit-content',

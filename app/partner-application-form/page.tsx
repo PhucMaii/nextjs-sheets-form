@@ -115,14 +115,14 @@ export default function PartnerApplicationForm() {
 
   if (user?.id > 0) {
     return (
-      <NavbarWrapper setIsOpenSignUp={() => {}}>
+      <NavbarWrapper>
         {renderAlreadyAppliedMsg()}
       </NavbarWrapper>
     );
   }
 
   return (
-    <NavbarWrapper setIsOpenSignUp={() => {}}>
+    <NavbarWrapper>
       {NotificationComp}
       <Box sx={{ maxWidth: maxWidth, mx: 'auto' }}>
         <ShadowSection

@@ -1,7 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import NavbarWrapper from '../lib/NavbarWrapper';
-import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
 import { Box, Grid, Typography } from '@mui/material';
 import { landingPagePrimaryColor, reasonList } from '@/constant/landingPage';
 import Logo from '../components/LandingPage/Logo';
@@ -9,8 +8,6 @@ import { green, grey } from '@mui/material/colors';
 import Footer from '../components/LandingPage/Footer';
 
 export default function AboutPage() {
-  const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
-
   const renderHeader = () => {
     return (
       <Box
@@ -35,7 +32,7 @@ export default function AboutPage() {
           >
             Freshness, Quality, and Variety
           </Typography>
-          <Typography sx={{ color: grey[600], mt: 2 }}>
+          <Typography sx={{ color: grey[600], mt: 2 }} textAlign="center">
             We are serving Vancouver, Burnaby, Richmond, Coquitiam, Langley,
             Surrey, and surrounding areas every day of the week.
           </Typography>
@@ -119,13 +116,8 @@ export default function AboutPage() {
   };
   return (
     <>
-      <RequestToJoinModal
-        open={isOpenSignUp}
-        onClose={() => setIsOpenSignUp(false)}
-      />
-      <NavbarWrapper setIsOpenSignUp={setIsOpenSignUp}>
+      <NavbarWrapper>
         <Box
-          mt="140px"
           sx={{
             backgroundColor: 'white',
             pt: 4,

@@ -4,13 +4,12 @@ import {
 } from '@/constant/landingPage';
 import { Box, Button, Typography } from '@mui/material';
 import { orange } from '@mui/material/colors';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
-interface IProps {
-  setIsOpenSignUp: React.Dispatch<React.SetStateAction<boolean>>;
-}
+export default function InvitationSection() {
+  const router = useRouter();
 
-export default function InvitationSection({ setIsOpenSignUp }: IProps) {
   return (
     <Box
       display="flex"
@@ -48,7 +47,7 @@ export default function InvitationSection({ setIsOpenSignUp }: IProps) {
           py: 2,
           ':hover': { backgroundColor: orange[800] },
         }}
-        onClick={() => setIsOpenSignUp(true)}
+        onClick={() => router.push('/partner-application-form')}
       >
         JOIN US TODAY
       </Button>

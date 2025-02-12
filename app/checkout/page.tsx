@@ -327,7 +327,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <NavbarWrapper setIsOpenSignUp={() => {}}>
+    <NavbarWrapper>
       {NotificationComp}
       <Box sx={{ maxWidth: maxWidth, mx: 'auto', p: 2 }}>
         <Grid container spacing={2}>

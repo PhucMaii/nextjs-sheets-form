@@ -14,18 +14,17 @@ export default function page() {
   const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
 
   return (
-    <NavbarWrapper setIsOpenSignUp={setIsOpenSignUp}>
+    <NavbarWrapper>
       <RequestToJoinModal
         open={isOpenSignUp}
         onClose={() => setIsOpenSignUp(false)}
       />
-      {/* <Navbar setIsOpenSignUp={setIsOpenSignUp} /> */}
-      <Header setIsOpenSignUp={setIsOpenSignUp} />
+      <Header />
       <HowItWorks />
       <TrustedBrand />
       <Box>
         <BestSeller />
-        <InvitationSection setIsOpenSignUp={setIsOpenSignUp} />
+        <InvitationSection />
       </Box>
       <Footer />
     </NavbarWrapper>

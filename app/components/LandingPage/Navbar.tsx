@@ -70,11 +70,7 @@ const tabs = [
 ];
 const drawerWidth = 250;
 
-interface IProps {
-  setIsOpenSignUp: any;
-  // cartId?: number;
-}
-export default function Navbar({ setIsOpenSignUp }: IProps) {
+export default function Navbar() {
   // const [cId, setCId] = useLocalStorage('cartId', cartId || '');
   const [guestSession, setGuestSession] = useLocalStorage('guest-session', {});
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
@@ -303,7 +299,7 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
                   py: 1,
                   borderRadius: 2,
                 }}
-                onClick={() => setIsOpenSignUp(true)}
+                onClick={proceedToApplicationForm}
               >
                 Sign up
               </Button>

@@ -71,14 +71,14 @@ export default function CartPage() {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <NavbarWrapper setIsOpenSignUp={() => {}}>
+      <NavbarWrapper>
         {renderEmptyCart()}
       </NavbarWrapper>
     );
   }
 
   return (
-    <NavbarWrapper setIsOpenSignUp={() => {}}>
+    <NavbarWrapper>
       {NotificationComp}
       <Box sx={{ maxWidth: maxWidth, mx: 'auto', p: 4 }}>
         <Typography
