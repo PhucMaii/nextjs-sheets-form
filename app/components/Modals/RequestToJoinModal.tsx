@@ -1,28 +1,37 @@
 import { BoxModal } from '@/app/admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
+import useLocalStorage from '@/hooks/useLocalStorage';
 import useNotification from '@/hooks/useNotification';
+import { AppDispatch } from '@/state/store';
+import { updateUser } from '@/state/user/userSlice';
 import { LoadingButton } from '@mui/lab';
 import { Box, Modal, Typography, TextField } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import axios from 'axios';
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
-interface IProps extends ModalProps {}
+interface IProps extends ModalProps {
+  onClick?: any;
+}
 
-export default function RequestToJoinModal({ open, onClose }: IProps) {
+export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
   const [clientInfo, setClientInfo] = useState<any>({
-    name: '',
+    clientName: '',
     email: '',
     contactNumber: '',
     deliveryAddress: '',
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [session] = useLocalStorage('guest-session', {});
+
+  const dispatch = useDispatch<AppDispatch>();
 
   const { showNotification, NotificationComp } = useNotification();
 
   const handleSendRequest = async () => {
     if (
-      !clientInfo.name ||
+      !clientInfo.clientName ||
       !clientInfo.email ||
       !clientInfo.contactNumber ||
       !clientInfo.deliveryAddress
@@ -33,16 +42,27 @@ export default function RequestToJoinModal({ open, onClose }: IProps) {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/signup', clientInfo);
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
+      if (onClick) {
+        await onClick({
+          ...clientInfo,
+          guestSessionId: session.sessionId,
+          guestSessionSignature: session.signature,
+        });
         setIsLoading(false);
-        return;
-      }
+      } else {
+        const response = await axios.post('/api/signup', clientInfo);
 
-      showNotification('success', response.data.message);
-      setIsLoading(false);
+        if (response.data.error) {
+          showNotification('error', response.data.error);
+          setIsLoading(false);
+          return;
+        }
+
+        showNotification('success', response.data.message);
+        setIsLoading(false);
+
+        dispatch(updateUser(response.data.data));
+      }
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification(
@@ -80,12 +100,12 @@ export default function RequestToJoinModal({ open, onClose }: IProps) {
               <TextField
                 size="small"
                 type="text"
-                placeholder="Please enter your company name..."
-                value={clientInfo.name}
+                placeholder="Please enter your company clientName..."
+                value={clientInfo.clientName}
                 onChange={(e: any) =>
                   setClientInfo((prevState: any) => ({
                     ...prevState,
-                    name: e.target.value,
+                    clientName: e.target.value,
                   }))
                 }
               />

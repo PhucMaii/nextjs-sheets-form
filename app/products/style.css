@@ -1,0 +1,18 @@
+.type {
+    /* Write an animation for transitioning the type */
+    opacity: transform 0.3s ease-in-out;
+}
+
+.type:hover {
+    transform: scale(1.1);
+}
+
+@keyframes transform {
+    /* Write the keyframes for the animation */
+    from {
+        transform: opacity(0);
+    }
+    to {
+        transform: opacity(1);
+    }
+}

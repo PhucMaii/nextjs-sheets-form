@@ -73,4 +73,6 @@ export const createGuestUser = createAsyncThunk(
   },
 );
 
+export const { updateUser } = userSlice.actions;
+
 export default userSlice.reducer;

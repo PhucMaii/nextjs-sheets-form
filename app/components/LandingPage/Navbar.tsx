@@ -42,6 +42,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateCart } from '@/state/cart/cartSlice';
 import axios from 'axios';
 import { RootState } from '@/state/store';
+import { updateUser } from '@/state/user/userSlice';
 
 const CartBadge = styled(Badge)`
   & .${badgeClasses.badge} {
@@ -157,7 +158,19 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
     try {
       // Check if a guest session ID already exists in local storage
       if (Object.keys(guestSession).length > 0) {
-        console.log('Existing guest session ID:', guestSession.sessionId);
+        // If yes -> Check if this session id already been a guest in db
+        const response = await axios.get(
+          `${API_URL.PUBLIC}/guest?guestSessionId=${guestSession.sessionId}`,
+        );
+
+        if (response.data.error) {
+          throw new Error('Something went wrong. ', response.data.error);
+        }
+
+        if (response.data.data) {
+          dispatch(updateUser(response.data.data));
+        }
+
         return; // Exit if a session ID already exists
       }
 
@@ -177,6 +190,10 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
         error,
       );
     }
+  };
+
+  const proceedToApplicationForm = () => {
+    router.push('/partner-application-form');
   };
 
   if (mdDown) {
@@ -332,7 +349,11 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
         <Logo />
         <Searchbar width="50%" />
         <Box display="flex" alignItems="center" gap={1}>
-          <IconButton size="large" sx={{ color: landingPagePrimaryColor }}>
+          <IconButton
+            onClick={proceedToApplicationForm}
+            size="large"
+            sx={{ color: landingPagePrimaryColor }}
+          >
             <UserIcon style={{ width: 30, height: 30 }} />
           </IconButton>
           <Divider orientation="vertical" flexItem />
@@ -347,25 +368,6 @@ export default function Navbar({ setIsOpenSignUp }: IProps) {
               overlap="circular"
             />
           </IconButton>
-          {/* <Button
-            onClick={() => router.push('/auth/login')}
-            sx={{ color: landingPageSecondaryColor }}
-          >
-            Sign in
-          </Button>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: landingPagePrimaryColor,
-              ':hover': { backgroundColor: landingPageSecondaryColor },
-              px: 2,
-              py: 1,
-              borderRadius: 2,
-            }}
-            onClick={() => setIsOpenSignUp(true)}
-          >
-            Sign Up
-          </Button> */}
         </Box>
       </Box>
 

@@ -14,6 +14,8 @@ export const landingPagePrimaryColor = '#2E7D32';
 export const landingPageSecondaryColor = '#FF7043';
 export const landingPageGreyColor = '#424242';
 
+export const maxWidth = '1500px';
+
 export type HowItWorksType = {
   title: string;
   description: string;

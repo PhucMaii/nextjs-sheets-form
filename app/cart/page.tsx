@@ -14,6 +14,8 @@ import { RootState } from '@/state/store';
 import CartItemTable from '../components/CartPage/CartItemTable';
 import { useRouter } from 'next/navigation';
 import OrderSummary from '../components/CartPage/OrderSummary';
+import { ArrowBack } from '@mui/icons-material';
+import { maxWidth } from '../lib/constant';
 
 export default function CartPage() {
   const router = useRouter();
@@ -78,7 +80,7 @@ export default function CartPage() {
   return (
     <NavbarWrapper setIsOpenSignUp={() => {}}>
       {NotificationComp}
-      <Box sx={{ maxWidth: '1500px', mx: 'auto', p: 4 }}>
+      <Box sx={{ maxWidth: maxWidth, mx: 'auto', p: 4 }}>
         <Typography
           variant="h5"
           fontWeight="bold"
@@ -91,10 +93,24 @@ export default function CartPage() {
             <ShadowSection>
               <CartItemTable showNotification={showNotification} />
             </ShadowSection>
+            <Button
+              sx={{
+                backgroundColor: landingPagePrimaryColor,
+                color: 'white',
+                mt: 4,
+              }}
+              variant="contained"
+              onClick={goToProductsPage}
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <ArrowBack />
+                <Typography fontWeight="bold">Back to Shopping</Typography>
+              </Box>
+            </Button>
           </Grid>
           <Grid item xs={12} md={4}>
             <ShadowSection>
-              <OrderSummary />
+              <OrderSummary showNotification={showNotification} />
             </ShadowSection>
           </Grid>
         </Grid>

@@ -26,6 +26,8 @@ import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { onSearchItems } from '../utils/array';
 import useNotification from '@/hooks/useNotification';
+import './style.css';
+import { maxWidth } from '../lib/constant';
 
 const ProductPage = () => {
   const searchParams: any = useSearchParams();
@@ -189,7 +191,7 @@ const ProductPage = () => {
     return (
       <Box
         display="flex"
-        alignItems="flex-end"
+        alignItems="flex-start"
         gap={2}
         mt="150px"
         sx={{ overflowX: 'auto', whiteSpace: 'nowrap', px: 6, py: 2 }}
@@ -228,15 +230,14 @@ const ProductPage = () => {
               <LucideIcons.ShoppingBasketIcon />
               <Typography>All</Typography>
             </Box>
-            {selectedType?.id === 0 && (
-              <div
-                style={{
-                  width: '100%',
-                  height: '2px',
-                  backgroundColor: green[800],
-                }}
-              ></div>
-            )}
+            <div
+              style={{
+                width: selectedType?.id === 0 ? '100%' : '0%',
+                height: '2px',
+                backgroundColor: green[800],
+                transition: 'width 0.3s ease-in-out',
+              }}
+            ></div>
           </Box>
         </Button>
         {types?.data?.map((type: any, index: number) => {
@@ -281,15 +282,14 @@ const ProductPage = () => {
                   <IconComponent />
                   <Typography>{type.name}</Typography>
                 </Box>
-                {selectedType?.id === type.id && (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '2px',
-                      backgroundColor: green[800],
-                    }}
-                  ></div>
-                )}
+                <div
+                  style={{
+                    width: selectedType?.id === type.id ? '100%' : '0%',
+                    height: '2px',
+                    backgroundColor: green[800],
+                    transition: 'width 0.3s ease-in-out',
+                  }}
+                />
               </Box>
             </Button>
           );
@@ -311,18 +311,13 @@ const ProductPage = () => {
         spacing={1}
         sx={{ px: 6 }}
       >
-        <Grid item xs={2} md={1}>
-          <Typography variant="h3" fontWeight="bold" sx={{ color: green[800] }}>
-            {selectedType?.name}
-          </Typography>
-        </Grid>
         {/* <Box
           display="flex"
           alignItems="center"
           justifyContent="flex-end"
           gap={1}
         > */}
-        <Grid item xs={8} md={10}>
+        <Grid item xs={10}>
           <TextField
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}
@@ -345,7 +340,7 @@ const ProductPage = () => {
             }}
           />
         </Grid>
-        <Grid item xs={2} md={1}>
+        <Grid item xs={2}>
           <FormControl sx={{ width: 'fit-content' }}>
             <InputLabel id="sort-by">Sort by</InputLabel>
             <Select
@@ -364,6 +359,11 @@ const ProductPage = () => {
               <MenuItem value="price-desc">Price: High to Low</MenuItem>
             </Select>
           </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="h3" fontWeight="bold" sx={{ color: green[800] }}>
+            {selectedType?.name}
+          </Typography>
         </Grid>
 
         {/* </Box> */}
@@ -387,7 +387,7 @@ const ProductPage = () => {
         }}
       >
         <Navbar setIsOpenSignUp={setIsOpenSignUp} />
-        <Box sx={{ maxWidth: '1500px', mx: 'auto' }}>
+        <Box sx={{ maxWidth: maxWidth, mx: 'auto' }}>
           {renderProductTypes()}
 
           {/* <Divider sx={{ my: 1 }} /> */}

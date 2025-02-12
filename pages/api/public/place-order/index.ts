@@ -1,16 +1,24 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createOrder } from '../../admin/orders/POST';
-import { getTodayDate } from '../../utils/date';
+import { checkOrderDeliveryDateValid, getTodayDate } from '../../utils/date';
+import { createGuest } from '../create-guest';
+import { sendEmail } from '../../utils/email';
 
 interface IBody {
   cartId: number;
   userId?: number;
   deliveryDate: string;
   guestSessionId?: string; // temporary
-  phoneNumber: string;
-  email: string;
   note: string;
+  client: {
+    clientName: string;
+    deliveryAdress: string;
+    contactNumber: string;
+    email: string;
+    guestSessionId: string;
+    guestSessionSignature: string;
+  };
 }
 
 export default async function handler(
@@ -29,24 +37,32 @@ export default async function handler(
     const { cartId, userId, guestSessionId, deliveryDate, note }: IBody =
       req.body;
 
-    // If none of authentication is provided -> error
+    let user;
     if (!userId && !guestSessionId) {
-      return res.status(400).json({
-        error: 'You are not authenticated - No authentication provided',
+      user = await createGuest({
+        client: req.body.client,
       });
+    } else {
+      // Verify User
+      const queryUser = userId
+        ? { id: userId }
+        : { guestSessionId: guestSessionId };
+      user = await prisma.user.findFirst({
+        where: queryUser,
+      });
+
+      if (!user) {
+        user = await createGuest({
+          client: req.body.client,
+        });
+      }
     }
 
-    // Verify User
-    const queryUser = userId
-      ? { id: userId }
-      : { guestSessionId: guestSessionId };
-    const existingUser = await prisma.user.findFirst({
-      where: queryUser,
-    });
-
-    if (!existingUser) {
+    //  Verify delivery date
+    const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
+    if (!isValidDate.ok) {
       return res.status(400).json({
-        error: 'User Not Found',
+        error: isValidDate.message,
       });
     }
 
@@ -103,17 +119,35 @@ export default async function handler(
     // Create order
     const { date, time } = getTodayDate();
     const newOrder = await createOrder(
-      existingUser,
+      user,
       formattedItems,
       deliveryDate,
       `${date} ${time}`,
-      `Guest - ${existingUser.clientId}`,
+      `Guest - ${user.clientId}`,
       note,
     );
 
+    // Send email
+    const isSendToAdmin = true;
+    await sendEmail(
+      user,
+      newOrder,
+      newOrder.id,
+      newOrder.deliveryDate,
+      isSendToAdmin,
+      note,
+    );
+
+    // Delete cart after place order successfully
+    await prisma.cart.delete({
+      where: {
+        id: cartId,
+      },
+    });
+
     return res
       .status(200)
-      .json({ newOrder, message: 'Order Placed Successfully' });
+      .json({ data: {order: newOrder, user}, message: 'Order Placed Successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

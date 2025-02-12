@@ -7,6 +7,7 @@ import { IItemPreference } from '@/app/utils/type';
 import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
+  maxWidth,
 } from '@/constant/landingPage';
 import useNotification from '@/hooks/useNotification';
 import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
@@ -130,7 +131,8 @@ export default function ItemPage() {
             variant="subtitle1"
             sx={{ color: landingPageSecondaryColor }}
           >
-            Want a better prices? Unlock wholesale savings - <a>Apply now</a>
+            Want a better prices? Unlock wholesale savings -{' '}
+            <a href="/partner-application-form">Apply now</a>
           </Typography>
         </Box>
 
@@ -233,7 +235,7 @@ export default function ItemPage() {
         display="flex"
         flexDirection="column"
         gap={4}
-        sx={{ maxWidth: '1500px', mx: 'auto', p: 4 }}
+        sx={{ maxWidth: maxWidth, mx: 'auto', p: 4 }}
       >
         <Grid container rowGap={2}>
           <Grid

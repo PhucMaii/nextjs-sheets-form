@@ -114,24 +114,29 @@ export const signUpRequest = (newClient: {
   email: string;
   contactNumber: string;
   deliveryAddress: string;
+  message: string;
 }) => {
   return `
     <div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px">
         <h4 style="font-weight: 100;">Name:</h4>
         <h4 style="font-weight: 300;">${newClient.name}</h4>
       </div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px">
         <h4 style="font-weight: 100;">Email:</h4>
         <h4 style="font-weight: 300;">${newClient.email}</h4>
       </div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px">
         <h4 style="font-weight: 100;">Contact Number:</h4>
         <h4 style="font-weight: 300;">${newClient.contactNumber}</h4>
       </div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px">
         <h4 style="font-weight: 100;">Delivery Address:</h4>
         <h4 style="font-weight: 300;">${newClient.deliveryAddress}</h4>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px">
+        <h4 style="font-weight: 100;">Message:</h4>
+        <h4 style="font-weight: 300;">${newClient.message}</h4>
       </div>
     </div>
   `;
