@@ -12,9 +12,10 @@ import { generateManifest } from '@/pages/api/utils/overview';
 interface IProps {
   orders: any;
   dateRange: any;
+  style?: any
 }
 
-export default function ClientDetailsContent({ orders, dateRange }: IProps) {
+export default function ClientDetailsContent({ orders, dateRange, style }: IProps) {
   const listOfDateString = useMemo(() => {
     const normalizedStartDate = normalizeDate(new Date(dateRange[0]));
     const normalizedEndDate = normalizeDate(new Date(dateRange[1]));
@@ -69,7 +70,7 @@ export default function ClientDetailsContent({ orders, dateRange }: IProps) {
   }, [orders]);
 
   return (
-    <Box m={2} pr={6}>
+    <Box sx={{...style}}>
       <ClientOrderOverview
         clientOrders={orders}
         startDate={dateRange[0]}

@@ -49,7 +49,7 @@ export default function ItemPage() {
 
   const [open, setOpen] = useMultipleBoolean({
     isAddItemOpen: false,
-    isSidebarOpen: true,
+    isSidebarOpen: false,
     isPasteModalOpen: false,
     isDeleteModalOpen: false,
     isEditCategoryOpen: false,

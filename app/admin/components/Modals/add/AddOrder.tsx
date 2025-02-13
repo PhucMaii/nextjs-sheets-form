@@ -401,10 +401,10 @@ export default function AddOrder({
                       + Custom Amount
                     </Button>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={12} md={6}>
                     DELIVERY DATE
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={12} md={6}>
                     <FormControl fullWidth>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
@@ -415,10 +415,10 @@ export default function AddOrder({
                       </LocalizationProvider>
                     </FormControl>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={12} md={6}>
                     NOTE
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Note"
@@ -445,7 +445,7 @@ export default function AddOrder({
                 itemList.map((item: IItem, index: number) => {
                   return (
                     <Fragment key={index}>
-                      <Grid item xs={6}>
+                      <Grid item xs={12} md={6}>
                         <Box display="flex" alignItems="center" gap={1}>
                           <SellingItemName item={item} />
                           {item?.id < 1 && (
@@ -458,7 +458,7 @@ export default function AddOrder({
                           )}
                         </Box>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid item xs={12} md={6}>
                         <TextField
                           fullWidth
                           label="Quantity"

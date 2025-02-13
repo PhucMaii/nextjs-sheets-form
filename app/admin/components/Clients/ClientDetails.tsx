@@ -1,4 +1,4 @@
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography, useMediaQuery } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
 import React, { useEffect, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -25,6 +25,8 @@ export default function ClientDetails({ clientId }: IProps) {
   const [orders, _mutateOrders, isValidating] = SWRFetchData(
     `${API_URL.ADMIN}/clients/orders?userId=${clientId}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (isValidating && !orders) {
@@ -63,7 +65,7 @@ export default function ClientDetails({ clientId }: IProps) {
         </Box>
       </Box>
 
-      <Box display={'flex'} justifyContent={'flex-end'} m={2} px={4}>
+      <Box display={'flex'} justifyContent={'flex-end'} m={smDown ? 0 : 2} px={smDown ? 0 : 2}>
         <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
       </Box>
 
@@ -73,6 +75,10 @@ export default function ClientDetails({ clientId }: IProps) {
         <ClientDetailsContent
           orders={orders?.data || []}
           dateRange={dateRange}
+          style={{
+             m: smDown ? 0 : 2, 
+             pr: smDown ? 0 : 2
+          }}
         />
       )}
     </Box>

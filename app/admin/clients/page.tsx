@@ -11,6 +11,7 @@ import {
   MenuItem,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
@@ -65,6 +66,8 @@ export default function ClientsPage() {
   // Data Fetching
   const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const router = useRouter();
 
@@ -397,7 +400,7 @@ export default function ClientsPage() {
           <Grid item xs={12} md={2.5}>
             {generalUpdate}
           </Grid>
-          <Grid item xs={11} md={8}>
+          <Grid item xs={12} md={8}>
             <TextField
               fullWidth
               variant="filled"
@@ -407,27 +410,43 @@ export default function ClientsPage() {
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          <Grid item xs={1} md={1.5} textAlign="center">
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              gap={1}
-            >
-              <Fab
-                size="medium"
-                onClick={() => setIsAddClientOpen(true)}
-                color="primary"
+          {!smDown && (
+            <Grid item xs={1} md={1.5} textAlign="center">
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                gap={1}
               >
-                <AddIcon />
-              </Fab>
-              {/* <IconButton color='primary' onClick={onPrintClientList}>
+                <Fab
+                  size="medium"
+                  onClick={() => setIsAddClientOpen(true)}
+                  color="primary"
+                >
+                  <AddIcon />
+                </Fab>
+                {/* <IconButton color='primary' onClick={onPrintClientList}>
                 <LocalPrintshopIcon />
               </IconButton> */}
+              </Box>
+            </Grid>
+          )}
+          <Grid item xs={12} md={12} textAlign="right">
+            <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
+              <ClientListCSV
+                clientData={clientList}
+                style={{ marginTop: '10px' }}
+              />
+              {smDown && (
+                <Fab
+                  size="medium"
+                  onClick={() => setIsAddClientOpen(true)}
+                  color="primary"
+                >
+                  <AddIcon />
+                </Fab>
+              )}
             </Box>
-          </Grid>
-          <Grid item xs={12} textAlign="right">
-            <ClientListCSV clientData={clientList} style={{marginTop: '10px'}} />
           </Grid>
         </Grid>
         {clientList.length > 0 ? (

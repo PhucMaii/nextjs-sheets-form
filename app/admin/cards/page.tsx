@@ -10,6 +10,7 @@ import {
   MenuItem,
   Select,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
 import SelectDateRange from '../components/Select/SelectDateRange';
@@ -67,6 +68,8 @@ export default function CardManagement() {
     Actions,
     AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   // Data Fetching
   const [paymentMethods, mutateMethod] = SWRFetchData(
@@ -282,9 +285,14 @@ export default function CardManagement() {
         handleDelete={handleDeleteMethod}
       />
 
-      <Box display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" flexDirection="column" gap={2} height="100vh" pb={2}>
         {/* Header */}
-        <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Box
+          display="flex"
+          flexDirection={smDown ? 'column' : 'row'}
+          alignItems="center"
+          justifyContent="space-between"
+        >
           <Box display="flex" alignItems="center" gap={1}>
             <IconButton
               onClick={() => setOpenModal({ ...openModal, addModal: true })}
@@ -323,7 +331,12 @@ export default function CardManagement() {
             </Box>
           </Box>
 
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box
+            display="flex"
+            flexDirection={smDown ? 'row-reverse' : 'row'}
+            alignItems="center"
+            gap={1}
+          >
             <Select
               value={JSON.stringify(selectedViewObj)}
               onChange={(e) => setSelectedViewObj(JSON.parse(e.target.value))}

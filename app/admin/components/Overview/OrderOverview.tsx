@@ -8,6 +8,7 @@ import {
   MenuItem,
   Select,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -19,6 +20,7 @@ import { primary, primaryColor } from '@/theme/color';
 import { getCODData } from '@/app/utils/array';
 import WCODInfo from '../Modals/WCODInfo';
 import AddTempCOD from '../Modals/AddTempCod/AddTempCOD';
+import { minifyNumber } from '@/app/utils/number';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -44,6 +46,8 @@ export default function OrderOverview({
   const [codData, setCodData] = useState<any>();
   const [isOpenAddTempCOD, setIsOpenAddTempCOD] = useState<boolean>(false);
   const [isOpenWCODInfo, setIsOpenWCODInfo] = useState<boolean>(false);
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (orderData && orderData.length > 0) {
@@ -178,7 +182,7 @@ export default function OrderOverview({
           item
           lg={3.9}
           md={5.9}
-          sm={12}
+          xs={12}
           display="flex"
           flexDirection="column"
           gap={2}
@@ -210,7 +214,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {lastWeekTotalGross.toFixed(2)}
+                {smDown ? minifyNumber(lastWeekTotalGross) : lastWeekTotalGross.toFixed(2)}
               </Typography>
             </Box>
             <Box
@@ -228,7 +232,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {todayTotalGross.toFixed(2)}
+                {smDown ? minifyNumber(todayTotalGross) : todayTotalGross.toFixed(2)}
               </Typography>
             </Box>
           </Box>
@@ -238,7 +242,7 @@ export default function OrderOverview({
           item
           lg={3.9}
           md={5.9}
-          sm={12}
+          xs={12}
           display="flex"
           flexDirection="column"
           gap={2}
@@ -297,7 +301,7 @@ export default function OrderOverview({
         {/* Track Bills Section */}
         <Grid
           item
-          sm={12}
+          xs={12}
           lg={3.9}
           md={5.9}
           display="flex"

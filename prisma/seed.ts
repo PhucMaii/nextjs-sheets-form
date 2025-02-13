@@ -117,11 +117,11 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const startDate = new Date('2025-02-01');
-  const endDate = getTodayDate();
-  const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`);
-  endDateFormatted.setDate(endDateFormatted.getDate() + 1);
-  const decemberDayList = generateListOfDateString(startDate, endDateFormatted);
+  // const startDate = new Date('2025-02-01');
+  // const endDate = getTodayDate();
+  // const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`);
+  // endDateFormatted.setDate(endDateFormatted.getDate() + 1);
+  // const decemberDayList = generateListOfDateString(startDate, endDateFormatted);
 
   const orderedItems = await prisma.orderedItems.findMany({
     where: {

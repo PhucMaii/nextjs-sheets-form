@@ -91,7 +91,10 @@ export default function CategorySidebar({
                         $textColor={blueGrey[900]}
                         $bgColor={blueGrey[50]}
                         key={index}
-                        onClick={() => handleChangeTab(category)}
+                        onClick={() => {
+                          handleChangeTab(category);
+                          setIsNavOpen('isSidebarOpen', false)
+                        }}
                       >
                         <ListItemText primary={category.name} />
                       </ListItemButtonStyled>

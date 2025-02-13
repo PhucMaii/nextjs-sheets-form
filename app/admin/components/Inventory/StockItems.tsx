@@ -71,7 +71,7 @@ export default function StockItems({
       />
       <Box display="flex" flexDirection="column">
         <Grid container alignItems="center" spacing={1}>
-          <Grid item xs={10.5}>
+          <Grid item xs={12} md={10.5}>
             <TextField
               label="Search"
               placeholder="Search items by name..."
@@ -83,7 +83,7 @@ export default function StockItems({
             />
           </Grid>
 
-          <Grid item xs={1.5}>
+          <Grid item xs={12} md={1.5} textAlign="right">
             <Button onClick={() => setIsOpenAddItem(true)}>
               <Box display="flex" alignItems="center" gap={0.5}>
                 <AddIcon />
