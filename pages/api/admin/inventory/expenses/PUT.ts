@@ -216,6 +216,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             },
             data: {
               quantity: newFifoQuantity,
+              price: item.unitPrice,
             },
           });
 

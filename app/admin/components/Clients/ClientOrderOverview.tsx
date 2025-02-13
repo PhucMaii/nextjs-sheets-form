@@ -5,7 +5,6 @@ import { primary } from '@/theme/color';
 import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import PaidIcon from '@mui/icons-material/Paid';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import useFilterOrders from '@/hooks/useFilterOrders';
 
@@ -20,45 +19,29 @@ export default function ClientOrderOverview({
   startDate,
   endDate,
 }: IProps) {
-  const dateDifference = useMemo(() => {
-    const difInMs = endDate.getTime() - startDate.getTime();
-
-    const diffInDays = Math.floor(difInMs / (1000 * 60 * 60 * 24)) + 1;
-
-    return diffInDays;
-  }, [startDate, endDate]);
-
-  const averageOrders = useMemo(() => {
-    if (dateDifference < 7 || clientOrders.length < 7) {
-      return clientOrders.length;
-    }
-
-    const numberOfWeeks = Math.floor(dateDifference / 7);
-    return Math.floor(clientOrders.length / numberOfWeeks);
-  }, [clientOrders, startDate, endDate]);
-
   const totalSpend = useMemo(() => {
-    return clientOrders.reduce((acc: number, order: any) => {
-      return acc + order.totalPrice;
-    }, 0);
-  }, [clientOrders, startDate, endDate]);
-
-  const averageSpend = useMemo(() => {
-    if (dateDifference < 7 || clientOrders.length < 7) {
-      return totalSpend;
+    if (clientOrders.length === 0) {
+      return 0;
     }
 
-    const numberOfWeeks = Math.floor(dateDifference / 7);
-    return Math.floor(totalSpend / numberOfWeeks);
-  }, [clientOrders, startDate, endDate]);
-
-  const paidOrders = useFilterOrders(clientOrders, [ORDER_STATUS.COMPLETED]);
-
-  const paidAmount = useMemo(() => {
-    return paidOrders.reduce((acc: number, order: any) => {
+    return clientOrders?.reduce((acc: number, order: any) => {
       return acc + order.totalPrice;
     }, 0);
-  }, [paidOrders]);
+  }, [clientOrders, startDate, endDate]);
+
+  const totalProfit = useMemo(() => {
+    if (clientOrders.length === 0) {
+      return 0;
+    }
+
+    return clientOrders?.reduce((acc: number, order: any) => {
+      return acc + (order?.profit || 0);
+    }, 0);
+  }, [clientOrders, startDate, endDate]);
+
+  const averageProfit = useMemo(() => {
+    return (totalProfit / clientOrders.length)?.toFixed(2);
+  }, [clientOrders, startDate, endDate]);
 
   const unpaidOrders = useFilterOrders(clientOrders, [
     ORDER_STATUS.INCOMPLETED,
@@ -75,9 +58,9 @@ export default function ClientOrderOverview({
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6} md={3}>
         <OverviewCard
-          icon={<ReceiptLongIcon fontSize="large" color={'primary'} />}
-          text="Average Orders"
-          value={averageOrders}
+          icon={<PaidIcon fontSize="large" color={'primary'} />}
+          text="Revenue"
+          value={`$${totalSpend}`}
           backgroundColor={primary.lightest}
           textColor={primary.main}
         />
@@ -85,17 +68,17 @@ export default function ClientOrderOverview({
       <Grid item xs={12} sm={6} md={3}>
         <OverviewCard
           icon={<PriceChangeIcon fontSize="large" color={'primary'} />}
-          text="Average Spend"
-          value={averageSpend}
+          text="Profit"
+          value={`$${totalProfit.toFixed(2)}`}
           backgroundColor={primary.lightest}
           textColor={primary.main}
         />
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
         <OverviewCard
-          icon={<PaidIcon fontSize="large" color={'primary'} />}
-          text="Paid Amount"
-          value={paidAmount}
+          icon={<PriceChangeIcon fontSize="large" color={'primary'} />}
+          text="Average Profit / Order"
+          value={`$${averageProfit}`}
           backgroundColor={primary.lightest}
           textColor={primary.main}
         />
@@ -104,7 +87,7 @@ export default function ClientOrderOverview({
         <OverviewCard
           icon={<MoneyOffIcon fontSize="large" color={'primary'} />}
           text="Unpaid Amount"
-          value={unpaidAmount}
+          value={`$${unpaidAmount.toFixed(2)}`}
           backgroundColor={primary.lightest}
           textColor={primary.main}
         />

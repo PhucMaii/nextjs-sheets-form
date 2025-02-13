@@ -23,12 +23,11 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import SelectDateRange from '../components/Select/SelectDateRange';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { blue, blueGrey } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
@@ -62,6 +61,7 @@ import LoadingModal from '../components/Modals/LoadingModal';
 import EditEmail from '../components/Modals/edit/EditEmail';
 import { onSelectAllOrders, onSelectOrders } from '@/app/utils/orders';
 import { renderType } from '@/app/lib/render';
+import { PriceChange } from '@mui/icons-material';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
@@ -116,19 +116,27 @@ export default function ReportPage() {
 
   const totalBill = useMemo(() => {
     if (!clientOrders || clientOrders.length === 0) {
-      return 0;
+      return {bill: 0, profit: 0};
     }
 
-    const bill = clientOrders.reduce((acc: number, cV: Order) => {
-      // Only calculate total incompleted and completed orders
-      if (
-        cV.status === ORDER_STATUS.DELIVERED ||
-        cV.status === ORDER_STATUS.INCOMPLETED
-      ) {
-        return acc + cV.totalPrice;
+    const bill = clientOrders.reduce((acc: any, cV: Order) => {
+      if (!acc.bill) {
+        acc.bill = 0;
       }
-      return acc + 0;
-    }, 0);
+
+      if (!acc.profit) {
+        acc.profit = 0;
+      }
+
+      if (cV.status === ORDER_STATUS.VOID) {
+        return acc;
+      }
+
+      acc.bill += cV.totalPrice;
+      acc.profit += (cV?.profit || 0);
+
+      return acc;
+    }, {});
 
     return bill;
   }, [clientOrders]);
@@ -687,26 +695,31 @@ export default function ReportPage() {
       <ShadowSection display="flex" alignItems="center">
         <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
           <Grid container spacing={3} mb={4}>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
                 icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
                 text="Total Orders"
                 value={clientOrders.length}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
-                icon={
-                  <AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />
-                }
+                icon={<MonetizationOnIcon sx={{fontSize: 50}} color="primary" />}
                 text="Total Bill"
-                value={`$${totalBill.toFixed(2)}`}
+                value={`$${totalBill.bill.toFixed(2)}`}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} lg={3}>
+              <OverviewCard
+                icon={<PriceChange sx={{fontSize: 50}} color="primary" />}
+                text="Profit"
+                value={`$${totalBill.profit.toFixed(2)}`}
+              />
+            </Grid>
+            <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
                 icon={
-                  <CheckCircleOutlineIcon
+                  <PendingIcon
                     sx={{ color: blue[700], fontSize: 50 }}
                   />
                 }

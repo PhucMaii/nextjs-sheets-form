@@ -34,8 +34,8 @@ import SingleFieldUpdate, {
 import AddClient from '../components/Modals/add/AddClient';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
-import ClientDetails from '../components/Clients/ClientDetails';
 import ClientListCSV from '../components/CSV/ClientListCSV';
+import { useRouter } from 'next/navigation';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -54,8 +54,8 @@ export default function ClientsPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isAddClientOpen, setIsAddClientOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [selectedDetailsClient, setSelectedDetailedClient] =
-    useState<any>(null);
+  // const [selectedDetailsClient, setSelectedDetailedClient] =
+  //   useState<any>(null);
   const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
@@ -65,6 +65,8 @@ export default function ClientsPage() {
   // Data Fetching
   const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (clients) {
@@ -92,7 +94,7 @@ export default function ClientsPage() {
   }, [debouncedKeywords, baseClientList]);
 
   const directToClientDetails = (clientData: any) => {
-    setSelectedDetailedClient(clientData);
+    router.push('/admin/clients/' + clientData.id);
   };
 
   const numberOfUserUsingApp = useCallback(() => {
@@ -317,16 +319,16 @@ export default function ClientsPage() {
     </Box>
   );
 
-  if (selectedDetailsClient) {
-    return (
-      <Sidebar noMargin>
-        <ClientDetails
-          clientData={selectedDetailsClient}
-          onClose={() => setSelectedDetailedClient(null)}
-        />
-      </Sidebar>
-    );
-  }
+  // if (selectedDetailsClient) {
+  //   return (
+  //     <Sidebar noMargin>
+  //       <ClientDetails
+  //         clientData={selectedDetailsClient}
+  //         onClose={() => setSelectedDetailedClient(null)}
+  //       />
+  //     </Sidebar>
+  //   );
+  // }
 
   if (isFetching) {
     return (

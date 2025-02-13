@@ -46,6 +46,7 @@ import LoadingModal from './Modals/LoadingModal';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LockIcon from '@mui/icons-material/Lock';
 import { renderType } from '@/app/lib/render';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 interface PropTypes {
   order: Order;
@@ -438,6 +439,13 @@ const OrderAccordion = ({
                   icon={<InfoIcon color="info" fontSize="small" />}
                 />
               )}
+              {order?.profit ? order.profit > 0 && (
+                <StatusText
+                  text={`Profit: $${order.profit.toFixed(2)}`}
+                  type={'success'}
+                  icon={<AttachMoneyIcon color="success" fontSize="small" />}
+                />
+              ) : null}
               {showAddedBy && order?.addedToCODBy && (
                 <StatusText
                   text={`Added by: ${order.addedToCODBy}`}
