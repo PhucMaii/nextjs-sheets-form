@@ -13,9 +13,12 @@ import {
   Box,
   Button,
   Divider,
+  FilledInput,
   FormControl,
   Grid,
   IconButton,
+  InputAdornment,
+  InputLabel,
   Modal,
   TextField,
   Typography,
@@ -23,6 +26,7 @@ import {
 import { BoxModal } from '../styled';
 import { IItem, UserType } from '@/app/utils/type';
 import axios from 'axios';
+import SearchIcon from '@mui/icons-material/Search';
 import {
   API_URL,
   FLAG_ORDER_TYPE,
@@ -48,6 +52,7 @@ import AddCustomAmount from './AddCustomAmount';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import order from '@/pages/api/order';
 import { SWRFetchData } from '@/app/utils/db';
+import useDebounce from '@/hooks/useDebounce';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -77,8 +82,12 @@ export default function AddOrder({
     useState<boolean>(false);
 
   const [itemList, setItemList] = useState<IItem[]>([]);
+  const [baseItems, setBaseItems] = useState<IItem[]>([]);
   const [note, setNote] = useState<string>('');
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
+
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [clientItems, _mutate, isValidating] = SWRFetchData(
     clientValue
@@ -89,12 +98,12 @@ export default function AddOrder({
   useEffect(() => {
     if (!clientItems && isValidating) {
       setIsFetching(true);
-      setItemList([]);
+      setBaseItems([]);
     } else {
       setIsFetching(false);
       initializeItems();
     }
-  }, [clientItems]);
+  }, [clientItems, clientValue]);
 
   useEffect(() => {
     if (unavailableRange) {
@@ -107,6 +116,23 @@ export default function AddOrder({
       setDeliveryDate(currentDate);
     }
   }, [currentDate]);
+
+  useEffect(() => {
+    setItemList(baseItems);
+  }, [baseItems]);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const keywords = debouncedKeywords.toLowerCase();
+      const newItems = baseItems?.filter((item: IItem) => {
+        return item?.name?.toLowerCase()?.includes(keywords);
+      });
+
+      setItemList(newItems);
+    } else {
+      setItemList(baseItems);
+    }
+  }, [debouncedKeywords, baseItems]);
 
   // useEffect(() => {
   //   if (clientValue) {
@@ -137,7 +163,7 @@ export default function AddOrder({
         note,
         createdAt: `${timeString} ${dateString}`,
         isCheckUnavailableRange,
-        items: itemList,
+        items: baseItems,
         createdBy: USER_ROLE.ADMIN,
         isForceOrder,
       };
@@ -187,7 +213,7 @@ export default function AddOrder({
         };
       });
 
-      setItemList(quantitySetUp);
+      setBaseItems(quantitySetUp)
     }
   };
 
@@ -230,46 +256,17 @@ export default function AddOrder({
   //   }
   // };
 
-  const fetchClientItems = async () => {
-    try {
-      setIsFetching(true);
-      const response = await axios.get(
-        `${API_URL.CLIENTS}/items?categoryId=${clientValue?.categoryId}`,
-      );
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        setIsFetching(false);
-        return;
-      }
-
-      const quantitySetUp = response.data.data.map((item: IItem) => {
-        return {
-          ...item,
-          quantity: 0,
-          totalPrice: 0,
-        };
-      });
-
-      setItemList(quantitySetUp);
-      setIsFetching(false);
-    } catch (error: any) {
-      console.log('Fail to fetch client items: ', error);
-      setIsFetching(false);
-      showNotification('error', 'Fail to copy from last order: ' + error);
-    }
-  };
-
   const handleChangeItem = (e: any, targetItem: any) => {
-    const newItems = itemList.map((item: any) => {
+    const newBaseItems = baseItems.map((item: any) => {
       if (item.id === targetItem.id) {
         const totalPrice = item.price * +e.target.value;
-        return { ...targetItem, quantity: +e.target.value, totalPrice };
+        return { ...item, quantity: +e.target.value, totalPrice };
       }
-      return item;
-    });
 
-    setItemList(newItems);
+      return item;
+    })
+
+    setBaseItems(newBaseItems);
   };
 
   const handleDateChange = (e: any) => {
@@ -309,8 +306,9 @@ export default function AddOrder({
   };
 
   const removeItemFromItemList = (item: any) => {
-    const newItems = itemList.filter((i: any) => i.name !== item.name);
-    setItemList(newItems);
+    const newBaseItems = baseItems.filter((i: any) => i.name !== item.name);
+
+    setBaseItems(newBaseItems);
   };
 
   return (
@@ -318,7 +316,7 @@ export default function AddOrder({
       <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
-        setItemList={setItemList}
+        setItemList={setBaseItems}
         showNotification={showNotification}
       />
       <ConfirmModal
@@ -427,6 +425,25 @@ export default function AddOrder({
                       type="text"
                       inputProps={{ min: 0 }}
                     />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormControl variant="filled" fullWidth>
+                      <InputLabel htmlFor="search">Search</InputLabel>
+                      <FilledInput
+                        id="search"
+                        fullWidth
+                        value={searchKeywords}
+                        onChange={(e: any) => setSearchKeywords(e.target.value)}
+                        type="text"
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <IconButton>
+                              <SearchIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        }
+                      />
+                    </FormControl>
                   </Grid>
                 </>
               )}
