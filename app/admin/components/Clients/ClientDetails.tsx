@@ -8,19 +8,22 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import ClientDetailsContent from './ClientDetailsContent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
-  clientData: any;
-  onClose: () => void;
+  clientId: number;
+  // onClose: () => void;
 }
 
-export default function ClientDetails({ clientData, onClose }: IProps) {
+export default function ClientDetails({ clientId }: IProps) {
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const router = useRouter();
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orders, _mutateOrders, isValidating] = SWRFetchData(
-    `${API_URL.ADMIN}/clients/orders?userId=${clientData.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    `${API_URL.ADMIN}/clients/orders?userId=${clientId}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   useEffect(() => {
@@ -43,19 +46,19 @@ export default function ClientDetails({ clientData, onClose }: IProps) {
         pr={6}
         sx={{ boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px' }}
       >
-        <IconButton onClick={onClose}>
+        <IconButton onClick={() => router.push('/admin/clients')}>
           <ArrowBackIcon fontSize="medium" />
         </IconButton>
         <Box>
           <Typography variant="h5" color={blueGrey[800]} textAlign={'right'}>
-            {clientData.clientName}
+            {orders?.data[0]?.user?.clientName}
           </Typography>
           <Typography
             variant="subtitle1"
             color={blueGrey[200]}
             textAlign={'right'}
           >
-            {clientData.clientId}
+            {orders?.data[0]?.user?.clientId}
           </Typography>
         </Box>
       </Box>

@@ -121,6 +121,8 @@ export interface Order {
   notInRoute?: boolean;
   notInBoard?: boolean;
   addedToCODBy?: string;
+  cost?: number;
+  profit?: number;
 }
 
 const orderPerPage = 10;

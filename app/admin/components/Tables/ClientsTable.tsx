@@ -2,8 +2,8 @@
 import {
   AlertColor,
   Box,
+  Button,
   Checkbox,
-  IconButton,
   MenuItem,
   Paper,
   Select,
@@ -23,7 +23,6 @@ import { Category } from '@prisma/client';
 import axios from 'axios';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditClient from '../Modals/edit/EditClient';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { renderType } from '@/app/lib/render';
 import { grey } from '@mui/material/colors';
 
@@ -87,7 +86,7 @@ const ClientsTable = ({
             onClick={handleSelectAll}
           />
         </TableCell>
-        <TableCell style={{ width: 50 }}></TableCell>
+        {/* <TableCell style={{ width: 50 }}></TableCell> */}
         <TableCell variant="head" style={{ width: 200 }}>
           <Typography fontWeight="bold">Payment Type</Typography>
         </TableCell>
@@ -126,14 +125,14 @@ const ClientsTable = ({
             checked={isClientSelected}
           />
         </TableCell>
-        <TableCell align="center">
+        {/* <TableCell align="center">
           <IconButton
             color="primary"
             onClick={() => handleDirectToDetails(client)}
           >
             <VisibilityIcon />
           </IconButton>
-        </TableCell>
+        </TableCell> */}
         <TableCell>
           <Select
             value={client.preference?.paymentType || 'N/A'}
@@ -174,6 +173,7 @@ const ClientsTable = ({
               categories={categories}
               onUpdateClient={onUpdateClient}
             />
+            <Button onClick={() => handleDirectToDetails(client)}>View</Button>
           </Box>
         </TableCell>
       </>
