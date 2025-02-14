@@ -65,13 +65,13 @@ export default function AddItem({
     }
   }, [categoryId]);
 
-  useEffect(() => {
-    setNewItem((prevState: any) => ({ ...prevState, unit: selectedUnit }));
-  }, [selectedUnit]);
+  // useEffect(() => {
+  //   setNewItem((prevState: any) => ({ ...prevState, unit: selectedUnit }));
+  // }, [selectedUnit]);
 
-  useEffect(() => {
-    setNewItem((prevState: any) => ({ ...prevState, units }));
-  }, [units]);
+  // useEffect(() => {
+  //   setNewItem((prevState: any) => ({ ...prevState, units }));
+  // }, [units]);
 
   useEffect(() => {
     if (categories) {
@@ -83,7 +83,12 @@ export default function AddItem({
   }, [categories]);
 
   const handleAddItem = async () => {
-    const updatedNewItem = { ...newItem, name: newItem.name.toUpperCase() };
+    const updatedNewItem = {
+      ...newItem,
+      units,
+      unit: selectedUnit,
+      name: newItem.name.toUpperCase(),
+    };
     setIsAdding(true);
 
     const categoryIds = selectedCategories.map((cat: any) => cat.id);

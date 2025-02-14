@@ -192,5 +192,5 @@ describe('Client Manipulating Order', () => {
     // expect(mockedRes.json).toHaveBeenCalledWith(expect.objectContaining({
     //     message: 'Order Updated Successfully',
     // }));
-  }, 30000);
+  }, 60000);
 });

@@ -147,6 +147,7 @@ export interface OrderedItems {
   inventoryUnitId?: number;
   inventoryUnit?: any;
   isCustomAmount?: boolean;
+  units?: IInventoryUnit[];
 }
 
 export interface ScheduledOrder {

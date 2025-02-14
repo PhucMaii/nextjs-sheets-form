@@ -89,6 +89,8 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   }, [pathname]);
 
   const handleChangeTab = (path: string) => {
+    console.log('handleChangeTab called with path:', path);
+    console.log('router object:', router);
     router.push(path);
   };
 

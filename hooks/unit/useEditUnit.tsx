@@ -34,10 +34,10 @@ const useEditUnit = (
   const [selectedUnit, setSelectedUnit] = useState<IInventoryUnit | null>(
     initialSelectedUnit,
   );
-  const [units, setUnits] = useState<IInventoryUnit[]>(initialUnits);
+  const [units, setUnits] = useState<IInventoryUnit[]>([...initialUnits]);
 
   useEffect(() => {
-    setUnits(initialUnits);
+    setUnits([...initialUnits]);
   }, [initialUnits]);
 
   useEffect(() => {
@@ -161,6 +161,7 @@ const useEditUnit = (
       onClose={() => onChangeAddUnitBoolean('open', false)}
       addUnit={addUnit}
       noClose={addUnitBoolean.disabledClose}
+      vendorItemId={initialSelectedUnit?.vendorItemId}
     />
   );
 

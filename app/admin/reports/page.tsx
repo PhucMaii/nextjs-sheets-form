@@ -116,7 +116,7 @@ export default function ReportPage() {
 
   const totalBill = useMemo(() => {
     if (!clientOrders || clientOrders.length === 0) {
-      return {bill: 0, profit: 0};
+      return { bill: 0, profit: 0 };
     }
 
     const bill = clientOrders.reduce((acc: any, cV: Order) => {
@@ -133,7 +133,7 @@ export default function ReportPage() {
       }
 
       acc.bill += cV.totalPrice;
-      acc.profit += (cV?.profit || 0);
+      acc.profit += cV?.profit || 0;
 
       return acc;
     }, {});
@@ -704,25 +704,23 @@ export default function ReportPage() {
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
-                icon={<MonetizationOnIcon sx={{fontSize: 50}} color="primary" />}
+                icon={
+                  <MonetizationOnIcon sx={{ fontSize: 50 }} color="primary" />
+                }
                 text="Total Bill"
                 value={`$${totalBill.bill.toFixed(2)}`}
               />
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
-                icon={<PriceChange sx={{fontSize: 50}} color="primary" />}
+                icon={<PriceChange sx={{ fontSize: 50 }} color="primary" />}
                 text="Profit"
                 value={`$${totalBill.profit.toFixed(2)}`}
               />
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
-                icon={
-                  <PendingIcon
-                    sx={{ color: blue[700], fontSize: 50 }}
-                  />
-                }
+                icon={<PendingIcon sx={{ color: blue[700], fontSize: 50 }} />}
                 text="Unpaid orders"
                 value={unpaidOrders.length}
               />

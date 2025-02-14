@@ -129,7 +129,10 @@ export const getLastMonthRevenue = async (
 
 export const getCustomersInDebt = (debtOrders: Order[]) => {
   const customersInDebt = debtOrders.reduce((acc: any, order: any) => {
-    if (order.user.role === USER_ROLE.ADMIN || order.user.role === USER_ROLE.SUPER_ADMIN) {
+    if (
+      order.user.role === USER_ROLE.ADMIN ||
+      order.user.role === USER_ROLE.SUPER_ADMIN
+    ) {
       return acc;
     }
     const key = `${order.user.clientName} __ ${order.user.clientId}`;

@@ -43,13 +43,12 @@ export const generateCostAndProfit = async (orderedItemId: number) => {
           )?.unitPrice || 0;
     }
 
-    return { cost, profit: existingItem.price - cost}
+    return { cost, profit: existingItem.price - cost };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     throw new Error('Fail to generate cost and profit: ', error);
   }
 };
-
 
 export const normalizeDate = (date: Date | string) => {
   const normalized = new Date(date);
@@ -130,8 +129,17 @@ async function main() {
       },
       Orders: {
         deliveryDate: {
-          in: ['02/13/2025', '02/14/2025', '02/15/2025', '02/16/2025', '02/17/2025', '02/18/2025', '02/19/2025', '02/20/2025']
-        }
+          in: [
+            '02/13/2025',
+            '02/14/2025',
+            '02/15/2025',
+            '02/16/2025',
+            '02/17/2025',
+            '02/18/2025',
+            '02/19/2025',
+            '02/20/2025',
+          ],
+        },
       },
       quantity: {
         gt: 0,
@@ -141,9 +149,9 @@ async function main() {
       Orders: {
         include: {
           user: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   for (const item of orderedItems) {
@@ -152,18 +160,18 @@ async function main() {
       orderId: item.orderId,
       clientName: item?.Orders?.user?.clientName,
       deliveryDate: item?.Orders?.deliveryDate,
-    })
+    });
     const { cost } = await generateCostAndProfit(item.id);
 
     await prisma.orderedItems.update({
       where: {
-        id: item.id
+        id: item.id,
       },
       data: {
         cost,
-        profit: item.price - cost
-      }
-    })
+        profit: item.price - cost,
+      },
+    });
   }
 
   console.log(orderedItems.length);
@@ -176,3 +184,38 @@ main()
     await prisma.$disconnect();
     // process.exit(1);
   });
+
+//{
+//   orderId: 34722,
+//   customAmount: {
+//     name: 'MEDIUM FIRM TOFU',
+//     price: 30,
+//     quantity: 2,
+//     units: [ [Object] ],
+//     inventoryUnit: {
+//       id: 120,
+//       vendorItemId: 96,
+//       unit: 'cases',
+//       unitPrice: 25,
+//       ratio: 1,
+//       createdAt: '18:06:10 2025-01-05',
+//       createdBy: 'Admin - Bao Bao'
+//     },
+//     isCustomAmount: true,
+//     inventoryItem: {
+//       id: 53,
+//       name: 'MEDIUM FIRM TOFU',
+//       hasPST: null,
+//       hasGST: null,
+//       createdAt: '09:58:44 2024-11-09',
+//       createdBy: 'Admin - Bao Bao',
+//       fifo: [Array],
+//       vendorItem: [Array],
+//       totalValue: 142.2,
+//       quantity: 6,
+//       stockStatus: 'Low Stock'
+//     },
+//     inventoryItemId: 53,
+//     inventoryUnitId: 120
+//   }
+// }

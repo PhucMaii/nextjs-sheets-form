@@ -133,7 +133,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const userCategory = await prisma.category.findUnique({
       where: {
-        id: existingUser?.categoryId || -1
+        id: existingUser?.categoryId || -1,
       },
     });
 

@@ -49,7 +49,7 @@ export default function ItemPage() {
 
   const [open, setOpen] = useMultipleBoolean({
     isAddItemOpen: false,
-    isSidebarOpen: false,
+    isSidebarOpen: true,
     isPasteModalOpen: false,
     isDeleteModalOpen: false,
     isEditCategoryOpen: false,
@@ -307,6 +307,12 @@ export default function ItemPage() {
   const switchCurrentCategory = (newCategory: Category) => {
     setCurrentCategory(newCategory);
   };
+
+  // return (
+  //   <Sidebar noMargin>
+  //     <Typography>Hello world</Typography>
+  //   </Sidebar>
+  // )
 
   return (
     <Sidebar noMargin>

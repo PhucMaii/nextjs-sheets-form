@@ -25,7 +25,7 @@ export default function DriverTable({
   mutateDrivers,
 }: IProps) {
   return (
-    <Paper sx={{overflow: 'scroll'}}>
+    <Paper sx={{ overflow: 'scroll' }}>
       <Table>
         <TableHead>
           <TableRow>
@@ -62,7 +62,6 @@ export default function DriverTable({
             })}
         </TableBody>
       </Table>
-
     </Paper>
   );
 }

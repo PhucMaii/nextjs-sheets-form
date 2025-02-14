@@ -38,13 +38,28 @@ export const updateOrderedItems = async (
   order: Order,
   updatedItem: OrderedItems,
   showNotification: any,
+  isConvertToCustom: boolean = false,
 ) => {
   try {
-    const response = await axios.put(`${API_URL.ADMIN}/orderedItems/single`, {
-      ...updatedItem,
-      orderId: order.id,
-      orderTotalPrice,
-    });
+    let response: any;
+
+    if (isConvertToCustom) {
+      response = await axios.put(
+        `${API_URL.ADMIN}/orderedItems/single/convert-to-custom`,
+        {
+          ...updatedItem,
+          orderId: order.id,
+          newUnits: updatedItem.units,
+          inventoryUnit: updatedItem.inventoryUnit,
+        },
+      );
+    } else {
+      response = await axios.put(`${API_URL.ADMIN}/orderedItems/single`, {
+        ...updatedItem,
+        orderId: order.id,
+        orderTotalPrice,
+      });
+    }
 
     if (response.data.error) {
       showNotification('error', response.data.error);

@@ -347,7 +347,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             clientName: userManifest.user.clientName,
             clientId: userManifest.user.clientId,
             note: userManifest.order.note,
-
           };
         });
 

@@ -14,7 +14,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const admins = await prisma.user.findMany({
       where: {
         role: {
-          in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN]
+          in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN],
         },
       },
     });

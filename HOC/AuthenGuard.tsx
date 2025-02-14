@@ -60,7 +60,8 @@ export default function AuthenGuard({ children }: any) {
     } else if (
       user &&
       !pathname?.startsWith('/admin') &&
-      (user.data.role === USER_ROLE.ADMIN || user.data.role === USER_ROLE.SUPER_ADMIN)
+      (user.data.role === USER_ROLE.ADMIN ||
+        user.data.role === USER_ROLE.SUPER_ADMIN)
     ) {
       router.push('/admin/orders');
     } else if (driver && !pathname?.startsWith('/driver')) {

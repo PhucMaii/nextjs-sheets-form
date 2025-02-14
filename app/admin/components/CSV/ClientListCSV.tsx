@@ -32,7 +32,11 @@ const ClientListCSV = ({ clientData, style }: IProps) => {
 
   return (
     <CSVLink data={clientData} headers={headers} aria-disabled={true}>
-      <Button disabled={user?.role !== USER_ROLE.SUPER_ADMIN} size="small" {...style}>
+      <Button
+        disabled={user?.role !== USER_ROLE.SUPER_ADMIN}
+        size="small"
+        {...style}
+      >
         <Box display="flex" alignItems="center" gap={1}>
           <DownloadIcon />
           <Typography sx={{ fontSize: 15 }} fontWeight="bold">
