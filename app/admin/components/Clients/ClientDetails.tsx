@@ -65,7 +65,12 @@ export default function ClientDetails({ clientId }: IProps) {
         </Box>
       </Box>
 
-      <Box display={'flex'} justifyContent={'flex-end'} m={smDown ? 0 : 2} px={smDown ? 0 : 2}>
+      <Box
+        display={'flex'}
+        justifyContent={'flex-end'}
+        m={smDown ? 0 : 2}
+        px={smDown ? 0 : 2}
+      >
         <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
       </Box>
 
@@ -76,8 +81,8 @@ export default function ClientDetails({ clientId }: IProps) {
           orders={orders?.data || []}
           dateRange={dateRange}
           style={{
-             m: smDown ? 0 : 2, 
-             pr: smDown ? 0 : 2
+            m: smDown ? 0 : 2,
+            pr: smDown ? 0 : 2,
           }}
         />
       )}

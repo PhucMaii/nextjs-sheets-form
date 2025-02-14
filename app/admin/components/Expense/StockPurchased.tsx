@@ -748,7 +748,8 @@ export default function StockPurchased({
                   <MenuItem
                     value={item.id}
                     disabled={
-                      (role !== USER_ROLE.ADMIN && role !== USER_ROLE.SUPER_ADMIN) &&
+                      role !== USER_ROLE.ADMIN &&
+                      role !== USER_ROLE.SUPER_ADMIN &&
                       item.id === mainPaymentMethodId
                     }
                   >

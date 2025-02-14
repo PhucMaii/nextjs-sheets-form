@@ -93,7 +93,7 @@ export default function CategorySidebar({
                         key={index}
                         onClick={() => {
                           handleChangeTab(category);
-                          setIsNavOpen('isSidebarOpen', false)
+                          setIsNavOpen('isSidebarOpen', false);
                         }}
                       >
                         <ListItemText primary={category.name} />

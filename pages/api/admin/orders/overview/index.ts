@@ -143,12 +143,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       const orderProfit = calculateOrderProfit(order.items);
-      const newTotalProfit = acc[clientKey].amount + orderProfit
+      const newTotalProfit = acc[clientKey].amount + orderProfit;
 
       acc[clientKey] = {
         amount: newTotalProfit,
-        percentage: (newTotalProfit / profit) * 100 
-      }
+        percentage: (newTotalProfit / profit) * 100,
+      };
 
       return acc;
     }, {});

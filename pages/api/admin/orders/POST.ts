@@ -17,6 +17,7 @@ import { checkHasClientOrder } from '../../import-sheets/utils';
 import { generateOrderTotalPrice } from '../orderedItems/PUT';
 import { checkOrderValidToAffectInventory } from '../../utils/order';
 import { categorizeUser } from '../../utils/user';
+import { checkAndUpdateUnits } from '../inventory/expenses/POST';
 
 export const config = {
   api: {
@@ -254,7 +255,7 @@ export const createOrder = async (
       },
     });
 
-    await createOrderedItems(newOrder, items);
+    await createOrderedItems(newOrder, items, createdBy);
 
     const updatedOrder = await prisma.orders.findUnique({
       where: {
@@ -284,7 +285,11 @@ export const createOrder = async (
   }
 };
 
-export const createOrderedItems = async (order: Orders, items: any) => {
+export const createOrderedItems = async (
+  order: Orders,
+  items: any,
+  createdBy: string = '',
+) => {
   const prisma = new PrismaClient();
 
   // STEP 1: Loop through each item
@@ -339,6 +344,34 @@ export const createOrderedItems = async (order: Orders, items: any) => {
       continue;
     }
 
+    // If item is custom amount and is assigned to a new unit
+    let unitId = item.inventoryUnitId;
+
+    if (item.inventoryUnitId < 1) {
+      const dbUnits = await prisma.inventoryUnit.findMany({
+        where: {
+          vendorItemId: item.inventoryUnit.vendorItemId,
+        },
+      });
+      const updatedAt = getTodayDate();
+      await checkAndUpdateUnits(
+        dbUnits,
+        item.units,
+        item.inventoryUnit.vendorItemId,
+        `${updatedAt.date} ${updatedAt.time}`,
+        createdBy,
+      );
+
+      const targetUnit = await prisma.inventoryUnit.findFirst({
+        where: {
+          vendorItemId: item.inventoryUnit.vendorItemId,
+          ratio: item.inventoryUnit.ratio,
+        },
+      });
+
+      unitId = targetUnit?.id;
+    }
+
     // console.log({ targetedItem, item }, 'targetedItem');
     // CASE 1:Check if vendor item has no batch
     if (targetedItem.fifo.length === 0) {
@@ -379,7 +412,7 @@ export const createOrderedItems = async (order: Orders, items: any) => {
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        inventoryUnitId: item.inventoryUnitId,
+        inventoryUnitId: unitId,
         inventoryItemId: item.inventoryItemId,
         isCustomAmount: item?.isCustomAmount || false,
       });
@@ -478,16 +511,16 @@ export const createOrderedItems = async (order: Orders, items: any) => {
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
           prevPrice: item?.prevPrice,
-          inventoryUnitId: item.inventoryUnitId,
+          inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
         });
       } else {
         const cost = sortedFifo[0]?.price
-        ? sortedFifo[0].price
-        : sortedFifo[0].vendorItem.unit.find(
-            (unit: InventoryUnit) => unit.ratio === 1,
-          )?.unitPrice || 0;
+          ? sortedFifo[0].price
+          : sortedFifo[0].vendorItem.unit.find(
+              (unit: InventoryUnit) => unit.ratio === 1,
+            )?.unitPrice || 0;
 
         newOrderedItems.push({
           orderId: order.id,
@@ -499,7 +532,7 @@ export const createOrderedItems = async (order: Orders, items: any) => {
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
           prevPrice: item?.prevPrice,
-          inventoryUnitId: item.inventoryUnitId,
+          inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
         });

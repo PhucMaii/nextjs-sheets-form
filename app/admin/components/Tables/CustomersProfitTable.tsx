@@ -1,4 +1,12 @@
-import { Paper, Table, TableBody, TableCell, TableHead, TablePagination, TableRow } from '@mui/material';
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
+} from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import { rowsPerPage } from './CustomersInDebt';
 
@@ -23,7 +31,7 @@ export default function CustomersProfitTable({ customersProfit }: any) {
   const onChangePage = (event: any, newPage: any) => {
     setPage(newPage);
   };
-  
+
   return (
     <Paper elevation={0}>
       <Table>

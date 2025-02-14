@@ -40,7 +40,7 @@ export default function VendorTable({ vendors, showNotification }: IProps) {
   };
 
   return (
-    <Paper sx={{overflow: 'scroll'}}>
+    <Paper sx={{ overflow: 'scroll' }}>
       <Table>
         <TableHead>
           <TableRow>

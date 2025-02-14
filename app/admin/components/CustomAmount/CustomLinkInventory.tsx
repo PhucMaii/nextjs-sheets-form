@@ -38,7 +38,7 @@ const CustomLinkInventory = ({
 
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
 
-  const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
+  const { units, selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
     useEditUnit(
       customAmount.units,
       customAmount.inventoryUnit,
@@ -85,6 +85,8 @@ const CustomLinkInventory = ({
   //     }))
   // }, [selectedUnit]);
 
+  console.log(customAmount, 'custom amount');
+
   const onAddCustomAmountDB = async () => {
     if (!orderId) {
       showNotification('error', 'Please select an order');
@@ -96,7 +98,7 @@ const CustomLinkInventory = ({
       return;
     }
 
-    if (!customAmount.inventoryUnit || !customAmount.inventoryUnitId) {
+    if (!customAmount.inventoryUnit) {
       showNotification('error', 'Please select an inventory unit');
       return;
     }
@@ -106,7 +108,14 @@ const CustomLinkInventory = ({
         `${API_URL.ADMIN}/custom-amount/link-inventory`,
         {
           orderId,
-          customAmount,
+          customAmount: {
+            ...customAmount,
+            inventoryUnit: {
+              ...selectedUnit,
+              vendorItemId: units[0].vendorItemId,
+            },
+            units,
+          },
         },
       );
 
@@ -141,6 +150,11 @@ const CustomLinkInventory = ({
             id: 0,
             availability: true,
             totalPrice: customAmount.price,
+            inventoryUnit: {
+              ...selectedUnit,
+              vendorItemId: units[0].vendorItemId,
+            },
+            units,
           },
           ...prevState,
         ]);

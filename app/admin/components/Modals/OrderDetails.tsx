@@ -29,6 +29,7 @@ interface IProps extends ModalProps {
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom?: boolean,
   ) => Promise<void>;
   showNotification: (type: AlertColor, message: string) => void;
 }
@@ -164,7 +165,6 @@ export default function OrderDetails({
                 setItems={setItems}
                 handleUpdateItem={handleUpdateItem}
                 abilityToEdit
-                showNotification={showNotification}
                 role={USER_ROLE.ADMIN}
               />
             </Grid>

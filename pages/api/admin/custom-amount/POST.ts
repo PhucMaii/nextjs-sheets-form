@@ -52,7 +52,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         quantity: customAmount.quantity,
         isCustomAmount: true,
         cost: customAmount?.cost || 0,
-        profit: customAmount.price - (customAmount.cost || 0)
+        profit: customAmount.price - (customAmount.cost || 0),
       },
     });
 

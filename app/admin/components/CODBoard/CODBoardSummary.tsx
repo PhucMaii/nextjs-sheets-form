@@ -120,11 +120,18 @@ export default function CODBoardSummary({
           </Grid>
 
           <Grid item xs={12} md={6} textAlign="right">
-            <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-end"
+              gap={1}
+            >
               <StatusText
                 text={boardData.status}
                 type={
-                  boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'
+                  boardData.status === COD_STATUS.CLEARED
+                    ? 'success'
+                    : 'warning'
                 }
                 icon={
                   boardData.status === COD_STATUS.CLEARED ? (

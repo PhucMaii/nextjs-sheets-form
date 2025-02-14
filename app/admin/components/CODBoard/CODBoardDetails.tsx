@@ -205,6 +205,7 @@ export default function CODBoardDetails({
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom: boolean = false,
   ) => {
     try {
       await updateOrderedItems(
@@ -212,6 +213,7 @@ export default function CODBoardDetails({
         order,
         updatedItem,
         showNotification,
+        isConvertToCustom,
       );
       mutateBoard();
     } catch (error: any) {

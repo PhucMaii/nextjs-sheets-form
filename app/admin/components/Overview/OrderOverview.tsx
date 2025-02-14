@@ -214,7 +214,9 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {smDown ? minifyNumber(lastWeekTotalGross) : lastWeekTotalGross.toFixed(2)}
+                {smDown
+                  ? minifyNumber(lastWeekTotalGross)
+                  : lastWeekTotalGross.toFixed(2)}
               </Typography>
             </Box>
             <Box
@@ -232,7 +234,9 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {smDown ? minifyNumber(todayTotalGross) : todayTotalGross.toFixed(2)}
+                {smDown
+                  ? minifyNumber(todayTotalGross)
+                  : todayTotalGross.toFixed(2)}
               </Typography>
             </Box>
           </Box>

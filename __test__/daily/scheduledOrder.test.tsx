@@ -41,11 +41,17 @@ describe('Pre order check', () => {
         continue;
       }
       if (scheduleOrderItem.isShowDiscount !== categoryItem.isShowDiscount) {
-        if (scheduleOrderItem.isShowDiscount === false && categoryItem.isShowDiscount === null) {
+        if (
+          scheduleOrderItem.isShowDiscount === false &&
+          categoryItem.isShowDiscount === null
+        ) {
           continue;
-        } 
+        }
 
-        if (categoryItem.isShowDiscount === false && scheduleOrderItem.isShowDiscount === null) {
+        if (
+          categoryItem.isShowDiscount === false &&
+          scheduleOrderItem.isShowDiscount === null
+        ) {
           continue;
         }
         console.error(

@@ -28,6 +28,7 @@ interface IProps {
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom?: boolean,
   ) => Promise<void>;
   abilityToEdit?: boolean;
   showNotification?: (type: AlertColor, message: string) => void;
@@ -108,10 +109,9 @@ export default function OrderDetailsTable({
           setSelectedItem({});
         }}
         item={updatedItem}
-        setItem={setUpdatedItem}
         handleUpdateItem={handleUpdateItem}
         order={order}
-        // role={role as USER_ROLE}
+        role={role as USER_ROLE}
       />
       <Table sx={{ maxWidth: '100%', overflow: 'hidden' }}>
         <TableHead>
