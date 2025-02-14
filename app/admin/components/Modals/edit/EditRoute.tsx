@@ -133,7 +133,7 @@ export default function EditRoute({
               <Typography variant="h6">Route Name:</Typography>
               <TextField
                 label="Route Name"
-                value={updatedRoute.name}
+                value={updatedRoute?.name || ''}
                 onChange={(e) =>
                   setUpdatedRoute({ ...updatedRoute, name: e.target.value })
                 }
@@ -144,7 +144,7 @@ export default function EditRoute({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Driver:</Typography>
               <Select
-                value={updatedRoute.driverId}
+                value={updatedRoute?.driverId}
                 onChange={(e) =>
                   setUpdatedRoute({
                     ...updatedRoute,

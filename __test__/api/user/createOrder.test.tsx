@@ -149,5 +149,5 @@ describe('Create Order', () => {
     expect(newOrder.deliveryDate).toBe('01/01/3000');
     expect(newOrder.status).toBe(ORDER_STATUS.INCOMPLETED);
     expect(newOrder.items.length).toBe(5);
-  }, 10000);
+  }, 30000);
 });

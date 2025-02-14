@@ -151,22 +151,22 @@ export default function StockPurchased({
     }
   }, [selectedVendorId]);
 
-  useEffect(() => {
-    setPromptedItem((prevState: any) => ({
-      ...prevState,
-      unit: units[0],
-      units: units,
-    }));
-  }, [units]);
+  // useEffect(() => {
+  //   setPromptedItem((prevState: any) => ({
+  //     ...prevState,
+  //     unit: units[0],
+  //     units: units,
+  //   }));
+  // }, [units]);
 
-  useEffect(() => {
-    if (selectedUnit) {
-      setPromptedItem((prevState: any) => ({
-        ...prevState,
-        unit: selectedUnit,
-      }));
-    }
-  }, [selectedUnit]);
+  // useEffect(() => {
+  //   if (selectedUnit) {
+  //     setPromptedItem((prevState: any) => ({
+  //       ...prevState,
+  //       unit: selectedUnit,
+  //     }));
+  //   }
+  // }, [selectedUnit]);
 
   const handleOnChangeUnitPrice = (e: any) => {
     const newUnitPrice = +e.target.value;
@@ -255,7 +255,7 @@ export default function StockPurchased({
       return;
     }
 
-    setPurchasedItems([...purchasedItems, promptedItem]);
+    setPurchasedItems([...purchasedItems, {...promptedItem, unit: selectedUnit, units}]);
     setPromptedItem({
       id: -1,
       quantity: 0,
@@ -748,7 +748,8 @@ export default function StockPurchased({
                   <MenuItem
                     value={item.id}
                     disabled={
-                      (role !== USER_ROLE.ADMIN && role !== USER_ROLE.SUPER_ADMIN) &&
+                      role !== USER_ROLE.ADMIN &&
+                      role !== USER_ROLE.SUPER_ADMIN &&
                       item.id === mainPaymentMethodId
                     }
                   >

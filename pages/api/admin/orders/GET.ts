@@ -177,8 +177,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
 export const calculateOrderProfit = (items: OrderedItems[]) => {
   const profit = items.reduce((acc: number, item: OrderedItems) => {
-    return acc + ((item?.profit || 0) * item.quantity);
+    return acc + (item?.profit || 0) * item.quantity;
   }, 0);
 
   return profit;
-}
+};

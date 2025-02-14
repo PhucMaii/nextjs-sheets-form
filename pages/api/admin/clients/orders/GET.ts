@@ -92,7 +92,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       // ...user for printing, regular user for displaying in table
       const { user, ...restOfData } = order;
-      return { ...user, ...restOfData, user, items: formatItems, profit: profit || 0 };
+      return {
+        ...user,
+        ...restOfData,
+        user,
+        items: formatItems,
+        profit: profit || 0,
+      };
     });
 
     return res.status(200).json({

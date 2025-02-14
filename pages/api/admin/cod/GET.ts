@@ -134,9 +134,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         0,
       );
 
-      const expenseAmount = codBoard.expense.reduce((acc: number, item: any) => {
-        return acc + item.amount;
-      }, 0);
+      const expenseAmount = codBoard.expense.reduce(
+        (acc: number, item: any) => {
+          return acc + item.amount;
+        },
+        0,
+      );
 
       const cashDiff = Math.abs(
         codBoard.cash + expenseAmount - uncollectedAmount,
@@ -459,11 +462,9 @@ const calculateCashDiff = (board: IBoard, totalAmount: number) => {
   if (board?.expense && board?.expense.length > 0) {
     amount = board.expense.reduce((acc: number, expense: any) => {
       return acc + expense.amount;
-    }, 0)
+    }, 0);
   }
-  const cashDiff = Math.abs(
-    board.cash + amount - totalAmount,
-  );
+  const cashDiff = Math.abs(board.cash + amount - totalAmount);
 
   return cashDiff;
 };

@@ -28,6 +28,7 @@ interface IProps {
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom?: boolean,
   ) => Promise<void>;
   abilityToEdit?: boolean;
   showNotification?: (type: AlertColor, message: string) => void;
@@ -55,6 +56,8 @@ export default function OrderDetailsTable({
     totalPrice: 0,
     quantity: 0,
   });
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (Object.keys(selectedItem).length > 0) {
@@ -108,16 +111,15 @@ export default function OrderDetailsTable({
           setSelectedItem({});
         }}
         item={updatedItem}
-        setItem={setUpdatedItem}
         handleUpdateItem={handleUpdateItem}
         order={order}
-        // role={role as USER_ROLE}
+        role={role as USER_ROLE}
       />
       <Table sx={{ maxWidth: '100%', overflow: 'hidden' }}>
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Quantity</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', width: 50 }}>{smDown ? 'Qty' : 'Quantity'}</TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Price</TableCell>
             {!mdDown && <TableCell></TableCell>}
           </TableRow>
@@ -154,9 +156,9 @@ export default function OrderDetailsTable({
                     </>
                   )}
                 </TableCell>
-                <TableCell>{item.quantity}</TableCell>
+                <TableCell sx={{ width: 50 }}>{item.quantity}</TableCell>
                 <TableCell>
-                  <Box display="flex" flexDirection="row" gap={1}>
+                  <Box display="flex" flexDirection={smDown ? "column" : "row"} gap={1}>
                     {item?.isShowDiscount &&
                       item?.prevPrice &&
                       (item.prevPrice * item.quantity).toFixed(2) !==

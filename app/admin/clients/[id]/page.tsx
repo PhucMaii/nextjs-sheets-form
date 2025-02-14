@@ -5,7 +5,7 @@ import Sidebar from '../../components/Sidebar/Sidebar';
 import { useParams } from 'next/navigation';
 
 export default function ClientDetailsPage() {
-    const { id }: any = useParams();
+  const { id }: any = useParams();
 
   return (
     <Sidebar noMargin>

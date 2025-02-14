@@ -146,9 +146,7 @@ export default function Overview() {
               Calculate based on all orders in selected date range
             </Typography>
           </Box>
-          <CustomersProfitTable
-            customersProfit={customersProfit}
-          />
+          <CustomersProfitTable customersProfit={customersProfit} />
         </Grid>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" my={2}>

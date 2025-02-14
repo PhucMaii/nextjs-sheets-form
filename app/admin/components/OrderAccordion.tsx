@@ -58,6 +58,7 @@ interface PropTypes {
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom?: boolean,
   ) => Promise<void>;
   mutateOrders: any;
   handleOpenDetails?: any;
@@ -526,7 +527,7 @@ const OrderAccordion = ({
               </Box>
             </Grid>
           )}
-          <Grid item xs={12} md={4} textAlign={mdDown ? "center" : "left"}>
+          <Grid item xs={12} md={4} textAlign={mdDown ? 'center' : 'left'}>
             <Button
               color="info"
               variant="contained"

@@ -143,7 +143,7 @@ export default function Orders() {
   const [filterOptions, setFilterOptions] = useState<PAYMENT_TYPE[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isExecutingAction, setIsExecutingAction] = useState<boolean>(false);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
+  // const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [incomingOrder, setIncomingOrder] = useState<Order | null>(null);
   const [orderData, setOrderData] = useState<Order[]>([]);
   const [routeOrders, setRouteOrders] = useState<Order[]>([]);
@@ -364,17 +364,19 @@ export default function Orders() {
     setActionButtonAnchor(null);
   };
 
-  const handleUpdateItem = async (
+  const onUpdateItem = async (
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom: boolean = false,
   ) => {
     try {
-      const response: any = await updateOrderedItems(
+      const response = await updateOrderedItems(
         orderTotalPrice,
         order,
         updatedItem,
         showNotification,
+        isConvertToCustom,
       );
 
       // Optimistic update
@@ -803,7 +805,7 @@ export default function Orders() {
         currentDate={date}
         // createOrder={addOrder}
       />
-      <SearchModal
+      {/* <SearchModal
         open={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         baseOrderList={baseOrderData}
@@ -812,14 +814,14 @@ export default function Orders() {
         selectedOrders={selectedOrders}
         handleSelectOrder={handleSelectOrder}
         // subcategories={subCategories?.data || []}
-        handleUpdateItem={handleUpdateItem}
-      />
+        handleUpdateItem={onUpdateItem}
+      /> */}
       {selectedOrderDetails && (
         <OrderDetails
           open={!!selectedOrderDetails}
           onClose={() => setSelectedOrderDetails(null)}
           order={selectedOrderDetails}
-          handleUpdateItem={handleUpdateItem}
+          handleUpdateItem={onUpdateItem}
           showNotification={showNotification}
         />
       )}

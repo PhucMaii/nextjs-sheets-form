@@ -123,7 +123,7 @@ export default function CustomAmount({
               placeholder="Enter price"
               fullWidth
             />
-          </Box> 
+          </Box>
         </Grid>
         <Grid item xs={6}>
           <Box display="flex" flexDirection="column" gap={2}>

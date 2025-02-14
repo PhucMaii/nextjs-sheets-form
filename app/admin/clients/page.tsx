@@ -432,7 +432,12 @@ export default function ClientsPage() {
             </Grid>
           )}
           <Grid item xs={12} md={12} textAlign="right">
-            <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1}>
+            <Box
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="center"
+              gap={1}
+            >
               <ClientListCSV
                 clientData={clientList}
                 style={{ marginTop: '10px' }}

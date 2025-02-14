@@ -213,7 +213,7 @@ export default function AddOrder({
         };
       });
 
-      setBaseItems(quantitySetUp)
+      setBaseItems(quantitySetUp);
     }
   };
 
@@ -264,7 +264,7 @@ export default function AddOrder({
       }
 
       return item;
-    })
+    });
 
     setBaseItems(newBaseItems);
   };
