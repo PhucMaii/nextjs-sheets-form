@@ -34,14 +34,12 @@ const useEditUnit = (
   const [selectedUnit, setSelectedUnit] = useState<IInventoryUnit | null>(
     initialSelectedUnit,
   );
-  const [units, setUnits] = useState<IInventoryUnit[]>(initialUnits);
+  const [units, setUnits] = useState<IInventoryUnit[]>([...initialUnits]);
 
   console.log('units', units);
 
   useEffect(() => {
-    if (initialUnits.length !== units.length) {
-      setUnits(initialUnits);
-    }
+    setUnits([...initialUnits]);
   }, [initialUnits]);
 
   useEffect(() => {
@@ -161,16 +159,14 @@ const useEditUnit = (
     // });
   };
 
-  const AddUnitModal = useMemo(
-    () => (
-      <AddUnit
-        open={addUnitBoolean.open}
-        onClose={() => onChangeAddUnitBoolean('open', false)}
-        addUnit={addUnit}
-        noClose={addUnitBoolean.disabledClose}
-      />
-    ),
-    [addUnitBoolean],
+  const AddUnitModal = (
+    <AddUnit
+      open={addUnitBoolean.open}
+      onClose={() => onChangeAddUnitBoolean('open', false)}
+      addUnit={addUnit}
+      noClose={addUnitBoolean.disabledClose}
+      vendorItemId={initialSelectedUnit?.vendorItemId}
+    />
   );
 
   const EditUnitModal = useMemo(

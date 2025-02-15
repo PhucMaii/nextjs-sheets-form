@@ -1,7 +1,7 @@
 import { API_URL } from '@/app/utils/enum';
 import { ICustomAmount } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
-import { AlertColor, Box, TextField, Typography } from '@mui/material';
+import { AlertColor, Box, Grid, TextField, Typography } from '@mui/material';
 import axios from 'axios';
 import React, { useState } from 'react';
 
@@ -27,6 +27,7 @@ export default function CustomAmount({
     name: '',
     price: 0,
     quantity: 1,
+    cost: 0,
     isCustomAmount: true,
   });
 
@@ -85,6 +86,7 @@ export default function CustomAmount({
             quantity: customAmount.quantity,
             price: customAmount.price,
             totalPrice: customAmount.price,
+            cost: customAmount.cost,
             availability: true,
             isCustomAmount: true,
           },
@@ -104,20 +106,44 @@ export default function CustomAmount({
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
-      <Typography>Price</Typography>
-      <TextField
-        label="Price"
-        type="number"
-        value={customAmount.price}
-        onChange={(e: any) =>
-          setCustomAmount((prevState: any) => ({
-            ...prevState,
-            price: +e.target.value,
-          }))
-        }
-        placeholder="Enter price"
-        fullWidth
-      />
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography>Cost</Typography>
+            <TextField
+              label="Cost"
+              type="number"
+              value={customAmount.cost}
+              onChange={(e: any) =>
+                setCustomAmount((prevState: any) => ({
+                  ...prevState,
+                  cost: +e.target.value,
+                }))
+              }
+              placeholder="Enter price"
+              fullWidth
+            />
+          </Box>
+        </Grid>
+        <Grid item xs={6}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography>Price</Typography>
+            <TextField
+              label="Price"
+              type="number"
+              value={customAmount.price}
+              onChange={(e: any) =>
+                setCustomAmount((prevState: any) => ({
+                  ...prevState,
+                  price: +e.target.value,
+                }))
+              }
+              placeholder="Enter price"
+              fullWidth
+            />
+          </Box>
+        </Grid>
+      </Grid>
 
       <Typography>Name</Typography>
       <TextField

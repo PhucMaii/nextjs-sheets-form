@@ -6,6 +6,7 @@ import {
   ListItemText,
   Slide,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { Category } from '@prisma/client';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -35,6 +36,8 @@ export default function CategorySidebar({
   onOpenAddCategory,
   children,
 }: IProps) {
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
   return (
     <>
       {!isNavOpen && (
@@ -91,7 +94,13 @@ export default function CategorySidebar({
                         $textColor={blueGrey[900]}
                         $bgColor={blueGrey[50]}
                         key={index}
-                        onClick={() => handleChangeTab(category)}
+                        onClick={() => {
+                          handleChangeTab(category);
+
+                          if (smDown) {
+                            setIsNavOpen('isSidebarOpen', false);
+                          }
+                        }}
                       >
                         <ListItemText primary={category.name} />
                       </ListItemButtonStyled>

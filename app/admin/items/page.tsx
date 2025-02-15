@@ -308,6 +308,12 @@ export default function ItemPage() {
     setCurrentCategory(newCategory);
   };
 
+  // return (
+  //   <Sidebar noMargin>
+  //     <Typography>Hello world</Typography>
+  //   </Sidebar>
+  // )
+
   return (
     <Sidebar noMargin>
       <AddCategory

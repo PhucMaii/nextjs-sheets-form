@@ -51,6 +51,12 @@ export default function AuthenGuard({ children }: any) {
       !pathname?.startsWith('/') &&
       pathname !== '/driver/login'
     ) {
+      router.push('/auth/login');
+    } else if (
+      user &&
+      (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
+      user.data.role === USER_ROLE.CLIENT
+    ) {
       router.push('/');
     } else if (
       user &&
@@ -61,7 +67,8 @@ export default function AuthenGuard({ children }: any) {
     } else if (
       user &&
       !pathname?.startsWith('/admin') &&
-      (user.data.role === USER_ROLE.ADMIN || user.data.role === USER_ROLE.SUPER_ADMIN)
+      (user.data.role === USER_ROLE.ADMIN ||
+        user.data.role === USER_ROLE.SUPER_ADMIN)
     ) {
       router.push('/admin/orders');
     } else if (driver && !pathname?.startsWith('/driver')) {

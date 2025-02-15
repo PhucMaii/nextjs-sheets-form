@@ -43,7 +43,7 @@ export default function TransactionOverview({ transactions }: IProps) {
           textColor={primary.main}
           backgroundColor={primary.lightest}
           icon={<PointOfSaleIcon fontSize="large" color="primary" />}
-          text="Total Transactions"
+          text="Transactions"
           value={transactions?.length || 0}
         />
       </Grid>

@@ -44,6 +44,7 @@ export interface ICustomAmount {
   fifoId?: number;
   units?: any[];
   isCustomAmount: boolean;
+  cost?: number;
 }
 
 export interface Notification {
@@ -150,6 +151,7 @@ export interface OrderedItems {
   inventoryUnitId?: number;
   inventoryUnit?: any;
   isCustomAmount?: boolean;
+  units?: IInventoryUnit[];
 }
 
 export interface ScheduledOrder {

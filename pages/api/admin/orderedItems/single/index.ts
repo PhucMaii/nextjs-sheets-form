@@ -8,6 +8,18 @@ import {
   formatItemsWithTotalPrice,
 } from '@/pages/api/utils/order';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { IInventoryUnit } from '@/app/utils/type';
+import { getAllUnitsByInventoryItemId } from '@/pages/api/utils/units';
+
+interface IBody {
+  id: number;
+  orderId: number;
+  quantity: number;
+  price: number;
+  name?: string;
+  inventoryUnit: IInventoryUnit;
+  newUnits?: IInventoryUnit[];
+}
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -16,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const prisma = new PrismaClient();
-    const { id, orderId, quantity, price } = req.body as any;
+    const { id, orderId, quantity, price } = req.body as IBody;
 
     const existingOrderedItem = await prisma.orderedItems.findUnique({
       where: {
@@ -31,6 +43,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
 
+    const costAndProfit = await generateCostAndProfit(id);
+
     const updatedOrderedItem = await prisma.orderedItems.update({
       where: {
         id,
@@ -38,6 +52,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         quantity,
         price,
+        cost: costAndProfit.cost,
+        profit: price - costAndProfit.cost,
       },
       include: {
         fifo: true,
@@ -65,11 +81,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         inventoryUnit: true,
       },
     });
-    // const updatedOrder = await updateOrderTotalPrice(
-    //   orderId,
-    //   orderTotalPrice,
-    //   `Admin - ${adminUpdate.clientName}`,
-    // );
+
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
     const updatedAt = getTodayDate();
     const updatedTime = new Date(`${updatedAt.date} ${updatedAt.time}`);
@@ -88,17 +100,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         updateTime: updatedTime,
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            fifo: true,
+            inventoryUnit: true,
+            inventoryItem: true,
+          },
+        },
         user: true,
       },
     });
-
-    // const itemsWithTotalPrice = updatedOrder.items.map((item) => {
-    //   return {
-    //     ...item,
-    //     totalPrice: item.quantity * item.price,
-    //   };
-    // });
 
     const itemsWithTotalPrice = formatItemsWithTotalPrice(updatedOrder.items);
 
@@ -118,6 +129,51 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default withAdminAuthGuard(handler);
+
+export const generateCostAndProfit = async (orderedItemId: number) => {
+  try {
+    const prisma = new PrismaClient();
+
+    const existingItem = await prisma.orderedItems.findUnique({
+      where: {
+        id: orderedItemId,
+      },
+      include: {
+        fifo: {
+          include: {
+            vendorItem: {
+              include: {
+                unit: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!existingItem) {
+      throw new Error(
+        'Ordered item id not provided in generate cost and profit',
+      );
+    }
+
+    let cost = existingItem?.cost;
+
+    const allUnits = await getAllUnitsByInventoryItemId(existingItem?.inventoryItemId || -1);
+    const itemUnit = allUnits?.find((unit: any) => unit.id === existingItem?.inventoryUnitId);
+
+    if (!cost) {
+      cost = existingItem?.fifo?.price
+        ? existingItem.fifo.price
+        : itemUnit?.unitPrice || 0;
+    }
+
+    return { cost: cost || 0, profit: existingItem.price - (cost || 0) };
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+    throw new Error('Fail to generate cost and profit: ', error);
+  }
+};
 
 export const updateSingleInventoryItem = async (
   orderId: number,
@@ -168,6 +224,8 @@ export const updateSingleInventoryItem = async (
     const ratio = unit?.ratio || 1;
     const updatedQuantity =
       lastUpdatedFifo.quantity - newQuantity * ratio + previousQuantity * ratio;
+
+    console.log({ unit, updatedQuantity });
     await prisma.fifo.update({
       where: {
         id: fifo.id,

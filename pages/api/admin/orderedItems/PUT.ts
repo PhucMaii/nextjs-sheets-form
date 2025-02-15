@@ -2,7 +2,7 @@
 import { Item, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
-import { updateSingleInventoryItem } from './single';
+import { generateCostAndProfit, updateSingleInventoryItem } from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { getDifferentItems } from '@/app/utils/array';
 import { ORDER_STATUS } from '@/app/utils/enum';
@@ -96,6 +96,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
+      const { cost } = await generateCostAndProfit(item.id);
+
       await prisma.orderedItems.update({
         where: {
           id: item.id,
@@ -103,6 +105,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         data: {
           price: item.price,
           quantity: item.quantity,
+          cost,
+          profit: item.price - cost,
         },
       });
 

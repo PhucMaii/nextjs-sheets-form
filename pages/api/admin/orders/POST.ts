@@ -17,6 +17,8 @@ import { checkHasClientOrder } from '../../import-sheets/utils';
 import { generateOrderTotalPrice } from '../orderedItems/PUT';
 import { checkOrderValidToAffectInventory } from '../../utils/order';
 import { categorizeUser } from '../../utils/user';
+import { checkAndUpdateUnits } from '../inventory/expenses/POST';
+import { getAllUnitsByInventoryItemId } from '../../utils/units';
 
 export const config = {
   api: {
@@ -70,16 +72,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     for (const scheduleOrder of scheduleOrderList) {
       const returnOrder = {
         id: scheduleOrder.id,
-        items: scheduleOrder.items.map((item: any) => {
-          return {
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-          };
-        }),
-        totalPrice: scheduleOrder.totalPrice,
-        userId: scheduleOrder.user.id,
-        createdAt: createdAt,
+        // items: scheduleOrder.items.map((item: any) => {
+        //   return {
+        //     name: item.name,
+        //     quantity: item.quantity,
+        //     price: item.price,
+        //   };
+        // }),
+        // totalPrice: scheduleOrder.totalPrice,
+        // userId: scheduleOrder.user.id,
+        // createdAt: createdAt,
       };
       try {
         // Check if the order has no items existed
@@ -103,7 +105,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger(
             'admin-schedule-order',
             'pre-order',
-            existingOrder,
+            {id: existingOrder?.id},
           );
           // console.log({ alreadyOrder: scheduleOrder });
           continue;
@@ -114,7 +116,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger(
             'admin-schedule-order',
             'pre-order',
-            returnOrder,
+            {id: returnOrder?.id},
           );
           // console.log({ inactiveAccount: scheduleOrder });
           continue;
@@ -153,7 +155,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger(
             'admin-schedule-order',
             'pre-order',
-            returnOrder,
+            {id: returnOrder?.id},
           );
           // console.log({ unavailableTime: scheduleOrder });
           continue;
@@ -172,7 +174,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         await sendEmail(
           scheduleOrder.user,
-          scheduleOrder,
+          newOrder,
           newOrder.id,
           deliveryDate,
           isSendToAdmin,
@@ -182,7 +184,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         await pusherServer?.trigger(
           'admin-schedule-order',
           'pre-order',
-          newOrder,
+          {id: newOrder?.id},
         );
         // console.log({ successful: scheduleOrder });
       } catch (error: any) {
@@ -257,7 +259,7 @@ export const createOrder = async (
       },
     });
 
-    await createOrderedItems(newOrder, items);
+    await createOrderedItems(newOrder, items, createdBy);
 
     const updatedOrder = await prisma.orders.findUnique({
       where: {
@@ -287,14 +289,30 @@ export const createOrder = async (
   }
 };
 
-export const createOrderedItems = async (order: Orders, items: any) => {
+export const createOrderedItems = async (
+  order: Orders,
+  items: any,
+  createdBy: string = '',
+) => {
   const prisma = new PrismaClient();
 
   // STEP 1: Loop through each item
   const inventoryItems = await prisma.inventoryItem.findMany({
     include: {
-      vendorItem: true,
-      fifo: true,
+      vendorItem: {
+        include: {
+          unit: true,
+        },
+      },
+      fifo: {
+        include: {
+          vendorItem: {
+            include: {
+              unit: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -317,6 +335,8 @@ export const createOrderedItems = async (order: Orders, items: any) => {
         orderId: order.id,
         name: item.name,
         price: item.price,
+        cost: item.cost,
+        profit: item.price - item.cost,
         quantity: item.quantity,
         isCustomAmount: item.isCustomAmount,
       });
@@ -327,6 +347,37 @@ export const createOrderedItems = async (order: Orders, items: any) => {
       console.error('Conflict Inventory Item Not Found');
       continue;
     }
+
+    // If item is custom amount and is assigned to a new unit
+    let unitId = item.inventoryUnitId;
+
+    if (item.inventoryUnitId < 1) {
+      const dbUnits = await prisma.inventoryUnit.findMany({
+        where: {
+          vendorItemId: item.inventoryUnit.vendorItemId,
+        },
+      });
+      const updatedAt = getTodayDate();
+      await checkAndUpdateUnits(
+        dbUnits,
+        item.units,
+        item.inventoryUnit.vendorItemId,
+        `${updatedAt.date} ${updatedAt.time}`,
+        createdBy,
+      );
+
+      const targetUnit = await prisma.inventoryUnit.findFirst({
+        where: {
+          vendorItemId: item.inventoryUnit.vendorItemId,
+          ratio: item.inventoryUnit.ratio,
+        },
+      });
+
+      unitId = targetUnit?.id;
+    }
+
+    const allUnits = await getAllUnitsByInventoryItemId(item.inventoryItemId);
+    const itemUnit = allUnits?.find((unit: any) => unit.id === unitId);
 
     // console.log({ targetedItem, item }, 'targetedItem');
     // CASE 1:Check if vendor item has no batch
@@ -356,13 +407,19 @@ export const createOrderedItems = async (order: Orders, items: any) => {
         });
       }
 
+      // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
+      //   return unit.ratio === 1;
+      // });
+
       newOrderedItems.push({
         orderId: order.id,
         fifoId: newFifo.id,
+        cost: itemUnit?.unitPrice || 0,
+        profit: item.price - (itemUnit?.unitPrice || 0),
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        inventoryUnitId: item.inventoryUnitId,
+        inventoryUnitId: unitId,
         inventoryItemId: item.inventoryItemId,
         isCustomAmount: item?.isCustomAmount || false,
       });
@@ -444,29 +501,41 @@ export const createOrderedItems = async (order: Orders, items: any) => {
 
         allDeletedFifoIds.push(...deletedFifoIds);
 
+        const cost = sortedFifo[fifoIndex]?.price
+          ? sortedFifo[fifoIndex].price
+          : itemUnit?.unitPrice || 0;
+
         // STEP 6: Create ordered item with that fifo id attached
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[fifoIndex].id,
           name: item.name,
+          cost: cost,
+          profit: item.price - cost,
           price: item.price,
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
           prevPrice: item?.prevPrice,
-          inventoryUnitId: item.inventoryUnitId,
+          inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
         });
       } else {
+        const cost = sortedFifo[0]?.price
+          ? sortedFifo[0].price
+          : itemUnit?.unitPrice || 0;
+
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[0].id,
           name: item.name,
+          cost: cost,
+          profit: item.price - cost,
           price: item.price,
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
           prevPrice: item?.prevPrice,
-          inventoryUnitId: item.inventoryUnitId,
+          inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
         });

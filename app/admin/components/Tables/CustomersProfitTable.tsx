@@ -1,4 +1,3 @@
-'use client';
 import {
   Paper,
   Table,
@@ -9,30 +8,25 @@ import {
   TableRow,
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
+import { rowsPerPage } from './CustomersInDebt';
 
-interface IProps {
-  customersInDebt: any;
-}
-
-export const rowsPerPage = 10;
-export default function CustomersInDebt({ customersInDebt }: IProps) {
+export default function CustomersProfitTable({ customersProfit }: any) {
   const [page, setPage] = useState<number>(0);
 
   const sortedCustomers = useMemo(() => {
-    if (!customersInDebt) {
+    if (!customersProfit) {
       return null;
     }
 
-    return Object.keys(customersInDebt)
-      .filter(
-        (customer: string) =>
-          customersInDebt[customer][0] > 0 && customersInDebt[customer][1] > 0,
-      )
-      .sort(
-        (customer1: string, customer2: string) =>
-          customersInDebt[customer2][1] - customersInDebt[customer1][1],
-      );
-  }, [customersInDebt]);
+    return Object.keys(customersProfit).sort(
+      (clientKeyA: string, clientKeyB: string) => {
+        return (
+          customersProfit[clientKeyB].amount -
+          customersProfit[clientKeyA].amount
+        );
+      },
+    );
+  }, [customersProfit]);
 
   const onChangePage = (event: any, newPage: any) => {
     setPage(newPage);
@@ -45,8 +39,8 @@ export default function CustomersInDebt({ customersInDebt }: IProps) {
           <TableRow>
             <TableCell>Client Id</TableCell>
             <TableCell>Client Name</TableCell>
-            <TableCell>Unpaid Orders</TableCell>
-            <TableCell>Total Amount</TableCell>
+            <TableCell>Profit ($)</TableCell>
+            <TableCell>Profit (%)</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -55,13 +49,13 @@ export default function CustomersInDebt({ customersInDebt }: IProps) {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((customer: string, index: number) => {
                 const [clientName, clientId] = customer.split(' __ ');
-                const [unpaidOrders, unpaidAmount] = customersInDebt[customer];
+                const { amount, percentage } = customersProfit[customer];
                 return (
                   <TableRow key={index}>
                     <TableCell>{clientId}</TableCell>
                     <TableCell>{clientName}</TableCell>
-                    <TableCell>{unpaidOrders}</TableCell>
-                    <TableCell>{unpaidAmount.toFixed(2)}</TableCell>
+                    <TableCell>${amount.toFixed(2)}</TableCell>
+                    <TableCell>{percentage.toFixed(2)}%</TableCell>
                   </TableRow>
                 );
               })}

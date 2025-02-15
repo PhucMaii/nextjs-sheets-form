@@ -3,6 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createOrderedItems } from '../../orders/POST';
 import { generateOrderTotalPrice } from '../../orderedItems/PUT';
+import { checkAndUpdateUnits } from '../../inventory/expenses/POST';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { getUserInfo } from '@/pages/api/utils/auth';
 
 interface IBody {
   orderId: number;
@@ -25,8 +28,37 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    const { date, time } = getTodayDate();
+    const createdBy = await getUserInfo(req, res);
+    const dbUnits = await prisma.inventoryUnit.findMany({
+      where: {
+        vendorItemId: customAmount.inventoryUnit.vendorItemId,
+      },
+    });
+
+    console.log(customAmount.units, 'units');
+
+    await checkAndUpdateUnits(
+      dbUnits,
+      customAmount?.units || [],
+      customAmount.inventoryUnit.vendorItemId,
+      `${date} ${time}`,
+      `Admin - ${createdBy?.clientName}`,
+    );
+
+    const targetUnit = await prisma.inventoryUnit.findFirst({
+      where: {
+        vendorItemId: customAmount.inventoryUnit.vendorItemId,
+        ratio: customAmount.inventoryUnit.ratio,
+      },
+    });
+
     const orderedItems = await createOrderedItems(existingOrder, [
-      customAmount,
+      {
+        ...customAmount,
+        inventoryUnit: targetUnit,
+        inventoryUnitId: targetUnit?.id,
+      },
     ]);
 
     // Generate total price order newly added custom amount order

@@ -94,6 +94,8 @@ model OrderedItems {
   inventoryUnitId  Int?
   inventoryItemId  Int?
   isCustomAmount   Boolean?
+  cost             Float?
+  profit            Float?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -339,6 +341,7 @@ model Fifo {
   inventoryItemId Int
   vendorItemId    Int
   quantity        Float
+  price           Float?
   createdAt       String
   createdBy       String
 

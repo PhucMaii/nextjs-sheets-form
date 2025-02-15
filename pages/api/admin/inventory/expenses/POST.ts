@@ -112,7 +112,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const inventoryItems = await prisma.inventoryItem.findMany({});
 
-    // 3 CASES for each item
+    // 3 CASES for each item - Brand new item, New vendor item but inventory exists, Item already exists
 
     const itemsAlreadyExist = items.filter((item: any) => item.id > 0);
     const itemsToCreate = items.filter((item: any) => item.id === 0);
@@ -637,6 +637,7 @@ export const createFifo = async (
           quantity: itemQuantity + negativeFifo.quantity, // subtract to negative mean subtract
           inventoryItemId: item.inventoryItemId,
           vendorItemId: item.id,
+          price: item.unit?.unitPrice / item?.unit?.ratio,
           createdAt,
           createdBy,
         },
@@ -671,6 +672,7 @@ export const createFifo = async (
         inventoryItemId: item.inventoryItemId,
         vendorItemId: item.id,
         quantity: item.quantity * item?.unit?.ratio,
+        price: item.unit?.unitPrice / item?.unit?.ratio,
         createdAt,
         createdBy,
       };

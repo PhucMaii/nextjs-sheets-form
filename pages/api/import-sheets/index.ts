@@ -135,7 +135,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Handle is user has already ordered for target date
     if (userOrder) {
-      if ((createdBy === USER_ROLE.ADMIN || createdBy === USER_ROLE.SUPER_ADMIN) && isForceOrder) {
+      if (
+        (createdBy === USER_ROLE.ADMIN ||
+          createdBy === USER_ROLE.SUPER_ADMIN) &&
+        isForceOrder
+      ) {
         const newOrder: any = await createOrder(
           existingUser,
           items,

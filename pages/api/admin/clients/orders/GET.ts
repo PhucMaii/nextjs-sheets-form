@@ -3,6 +3,7 @@ import { normalizeDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { calculateOrderProfit } from '../../orders/GET';
 
 interface RequestQuery {
   userId?: string;
@@ -31,14 +32,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         normalizedStartDate,
         normalizedEndDate,
       );
-
-      console.log({
-        normalizedStartDate,
-        normalizedEndDate,
-        listOfDateString,
-        startDate,
-        endDate,
-      });
 
       userOrders = await prisma.orders.findMany({
         where: {
@@ -95,10 +88,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const formatUserOrders = userOrders.map((order: any) => {
       const formatItems = formatItemsWithTotalPrice(order.items);
+      const profit = calculateOrderProfit(formatItems);
 
       // ...user for printing, regular user for displaying in table
       const { user, ...restOfData } = order;
-      return { ...user, ...restOfData, user, items: formatItems };
+      return {
+        ...user,
+        ...restOfData,
+        user,
+        items: formatItems,
+        profit: profit || 0,
+      };
     });
 
     return res.status(200).json({

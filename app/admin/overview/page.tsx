@@ -19,10 +19,12 @@ import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import useNotification from '@/hooks/useNotification';
 import OverviewData from '../components/Overview/OverviewData';
+import CustomersProfitTable from '../components/Tables/CustomersProfitTable';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
+  const [customersProfit, setCustomersProfit] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [overviewData, setOverviewData] = useState<any>();
@@ -62,6 +64,7 @@ export default function Overview() {
     setRevenueData(overviewFetchedData.reports);
     setBeansproutsData(overviewFetchedData.beansprouts);
     setCustomersInDebt(overviewFetchedData.customersInDebt);
+    setCustomersProfit(overviewFetchedData.customersProfit);
   };
 
   const handlePrintCustomersInDebt = useReactToPrint({
@@ -133,6 +136,17 @@ export default function Overview() {
               sx={{ width: '100% !important', height: '390px !important' }}
             />
           )}
+        </Grid>
+        <Grid item xs={12}>
+          <Box display="flex" flexDirection="column" my={2}>
+            <Typography variant="h5" fontWeight="bold">
+              Customer's Profit
+            </Typography>
+            <Typography variant="subtitle2">
+              Calculate based on all orders in selected date range
+            </Typography>
+          </Box>
+          <CustomersProfitTable customersProfit={customersProfit} />
         </Grid>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" my={2}>

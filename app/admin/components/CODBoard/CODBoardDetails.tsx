@@ -205,6 +205,7 @@ export default function CODBoardDetails({
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom: boolean = false,
   ) => {
     try {
       await updateOrderedItems(
@@ -212,6 +213,7 @@ export default function CODBoardDetails({
         order,
         updatedItem,
         showNotification,
+        isConvertToCustom,
       );
       mutateBoard();
     } catch (error: any) {
@@ -521,7 +523,7 @@ export default function CODBoardDetails({
 
         {/* Search Bar */}
         <Grid container alignItems="center" spacing={2}>
-          <Grid item xs={10}>
+          <Grid item xs={12} md={10}>
             <TextField
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
@@ -530,12 +532,13 @@ export default function CODBoardDetails({
               variant="filled"
             />
           </Grid>
-          <Grid item xs={2} textAlign="right">
+          <Grid item xs={12} md={2} textAlign="right">
             <Box
               display="flex"
               alignItems="center"
               gap={1}
-              justifyContent="flex-end"
+              justifyContent="center"
+              width="100%"
             >
               {actions}
               <Divider orientation="vertical" flexItem />

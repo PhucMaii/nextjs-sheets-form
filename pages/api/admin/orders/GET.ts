@@ -143,6 +143,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return route.route.day === orderDay;
       });
 
+      // Calculate order profit
+      const profit = calculateOrderProfit(formattedItems);
+
       return {
         ...order,
         items: formattedItems,
@@ -156,6 +159,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         orderRoute: orderRoute
           ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
           : 'No route - N/A',
+        profit,
       };
     });
 
@@ -170,3 +174,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+export const calculateOrderProfit = (items: OrderedItems[]) => {
+  const profit = items.reduce((acc: number, item: OrderedItems) => {
+    return acc + (item?.profit || 0) * item.quantity;
+  }, 0);
+
+  return profit;
+};

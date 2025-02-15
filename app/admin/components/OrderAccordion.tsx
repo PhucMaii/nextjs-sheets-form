@@ -13,6 +13,7 @@ import {
   MenuItem,
   Switch,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Order } from '../orders/page';
@@ -47,6 +48,7 @@ import LoadingModal from './Modals/LoadingModal';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LockIcon from '@mui/icons-material/Lock';
 import { renderType } from '@/app/lib/render';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 interface PropTypes {
   order: Order;
@@ -57,6 +59,7 @@ interface PropTypes {
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
+    isConvertToCustom?: boolean,
   ) => Promise<void>;
   mutateOrders: any;
   handleOpenDetails?: any;
@@ -103,7 +106,7 @@ const OrderAccordion = ({
 
   const { discountPrice, DiscountText } = useDiscount(order.items, order);
 
-  // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const isOrderSelected = selectedOrders.some(
     (targetOrder: Order) => order.id === targetOrder.id,
@@ -387,7 +390,7 @@ const OrderAccordion = ({
           showNotification={showNotification}
         />
       )}
-      <ShadowSection>
+      <ShadowSection my={2}>
         <Grid container alignItems="center" columnSpacing={1} rowGap={1}>
           <Grid item sm={0.5} xs={2}>
             <Checkbox
@@ -449,7 +452,25 @@ const OrderAccordion = ({
             </Box>
           </Grid>
           <Grid item xs={12} md={2.5} textAlign="right">
-            {actions}
+            <Box
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="center"
+              gap={1}
+            >
+              {order?.profit
+                ? order.profit > 0 && (
+                    <StatusText
+                      text={`Profit: $${order.profit.toFixed(2)}`}
+                      type={'success'}
+                      icon={
+                        <AttachMoneyIcon color="success" fontSize="small" />
+                      }
+                    />
+                  )
+                : null}
+              {actions}
+            </Box>
           </Grid>
           <Grid item xs={6}>
             <StatusText text={statusText.text} type={statusText.type} />
@@ -480,7 +501,34 @@ const OrderAccordion = ({
             </Typography>
             <Typography variant="body2">Order at: {order.orderTime}</Typography>
           </Grid>
-          <Grid item xs={12} md={4}>
+          {mdDown && (
+            <Grid item xs={12} textAlign="right">
+              <Box
+                display="flex"
+                gap={1}
+                alignItems="center"
+                justifyContent="flex-end"
+              >
+                <Typography
+                  fontWeight="bold"
+                  variant="subtitle1"
+                  textAlign="right"
+                >
+                  Delivery Date: {order.deliveryDate}
+                </Typography>
+                <IconButton
+                  sx={{ width: '25px', height: '25px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditDateOpen(true);
+                  }}
+                >
+                  <EditIcon sx={{ width: '20px', height: '20px' }} />
+                </IconButton>
+              </Box>
+            </Grid>
+          )}
+          <Grid item xs={12} md={4} textAlign={mdDown ? 'center' : 'left'}>
             <Button
               color={
                 order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'success'
@@ -500,32 +548,88 @@ const OrderAccordion = ({
               </Box>
             </Button>
           </Grid>
-          <Grid item xs={12} md={4} textAlign="right">
-            <Box
-              display="flex"
-              gap={1}
-              alignItems="center"
-              justifyContent="flex-end"
-            >
-              <Typography
-                fontWeight="bold"
-                variant="subtitle1"
-                textAlign="right"
+          {!mdDown && (
+            <Grid item xs={4} textAlign="right">
+              <Box
+                display="flex"
+                gap={1}
+                alignItems="center"
+                justifyContent="flex-end"
               >
-                Delivery Date: {order.deliveryDate}
-              </Typography>
-              <IconButton
-                sx={{ width: '25px', height: '25px' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditDateOpen(true);
-                }}
+                <Typography
+                  fontWeight="bold"
+                  variant="subtitle1"
+                  textAlign="right"
+                >
+                  Delivery Date: {order.deliveryDate}
+                </Typography>
+                <IconButton
+                  sx={{ width: '25px', height: '25px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditDateOpen(true);
+                  }}
+                >
+                  <EditIcon sx={{ width: '20px', height: '20px' }} />
+                </IconButton>
+              </Box>
+            </Grid>
+          )}
+          {mdDown && (
+            <Grid item xs={12}>
+              <Box
+                display="flex"
+                flexDirection="row"
+                gap={2}
+                alignItems="center"
+                justifyContent="space-between"
               >
-                <EditIcon sx={{ width: '20px', height: '20px' }} />
-              </IconButton>
-            </Box>
-          </Grid>
-          <Grid item xs={4} md={4}>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  justifyContent="center"
+                  gap={1}
+                >
+                  <RememberMeIcon fontSize="small" color="primary" />
+                  <Typography textAlign="center" variant="subtitle2">
+                    {latestUpdatePerson}
+                  </Typography>
+                </Box>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  gap={1}
+                  alignItems="center"
+                >
+                  <LocalShippingIcon color="primary" />
+                  <Typography textAlign="center" variant="subtitle2">
+                    {order?.orderRoute || ''}
+                  </Typography>
+                </Box>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  gap={1}
+                  alignItems="center"
+                >
+                  <Typography textAlign="center" variant="subtitle2">
+                    {order?.deliveredBy ? `Delivered:` : 'Driver:'}
+                  </Typography>
+                  <Typography textAlign="center" variant="subtitle2">
+                    {order?.deliveredBy
+                      ? `${order?.deliveredBy}`
+                      : order?.orderRoute
+                        ? `${order?.orderRoute?.split(' - ')[1]}`
+                        : 'N/A'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          )}
+          <Grid item xs={6} md={4}>
             <Box display="flex" gap={1} alignItems="center">
               <SellIcon color="primary" />
               <Typography color="primary" variant="subtitle1">
@@ -533,38 +637,40 @@ const OrderAccordion = ({
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={4} md={4}>
-            <Box
-              display="flex"
-              flexDirection="column"
-              gap={1}
-              alignItems="flex-start"
-              justifyContent="flex-start"
-            >
-              <Box display="flex" alignItems="center" gap={0.5}>
-                <RememberMeIcon fontSize="small" color="primary" />
-                <Typography variant="subtitle2">
-                  {latestUpdatePerson}
-                </Typography>
+          {!mdDown && (
+            <Grid item xs={4}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                gap={1}
+                alignItems="flex-start"
+                justifyContent="flex-start"
+              >
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <RememberMeIcon fontSize="small" color="primary" />
+                  <Typography variant="subtitle2">
+                    {latestUpdatePerson}
+                  </Typography>
+                </Box>
+                <Box display="flex" gap={1} alignItems="center">
+                  <LocalShippingIcon color="primary" />
+                  <Typography variant="subtitle2">
+                    {order?.orderRoute || ''}
+                  </Typography>
+                </Box>
+                <Box display="flex" gap={1} alignItems="center">
+                  <Typography variant="subtitle2">
+                    {order?.deliveredBy
+                      ? `Delivered: ${order?.deliveredBy}`
+                      : order?.orderRoute
+                        ? `Driver: ${order?.orderRoute?.split(' - ')[1]}`
+                        : 'Driver: N/A'}
+                  </Typography>
+                </Box>
               </Box>
-              <Box display="flex" gap={1} alignItems="center">
-                <LocalShippingIcon color="primary" />
-                <Typography variant="subtitle2">
-                  {order?.orderRoute || ''}
-                </Typography>
-              </Box>
-              <Box display="flex" gap={1} alignItems="center">
-                <Typography variant="subtitle2">
-                  {order?.deliveredBy
-                    ? `Delivered: ${order?.deliveredBy}`
-                    : order?.orderRoute
-                      ? `Driver: ${order?.orderRoute?.split(' - ')[1]}`
-                      : 'Driver: N/A'}
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-          <Grid item xs={4} md={4} textAlign="right">
+            </Grid>
+          )}
+          <Grid item xs={6} md={4} textAlign="right">
             <Box
               display="flex"
               alignItems="center"

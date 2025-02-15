@@ -222,14 +222,14 @@ export default function ItemPage() {
 
   if (isLoading) {
     return (
-      <NavbarWrapper setIsOpenSignUp={() => {}}>
+      <NavbarWrapper>
         <LoadingComponent />
       </NavbarWrapper>
     );
   }
 
   return (
-    <NavbarWrapper setIsOpenSignUp={() => {}}>
+    <NavbarWrapper>
       {NotificationComp}
       <Box
         display="flex"

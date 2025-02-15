@@ -5,12 +5,11 @@ import {
   AlertColor,
   Box,
   Grid,
-  IconButton,
   MenuItem,
   Select,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TodayIcon from '@mui/icons-material/Today';
@@ -19,12 +18,9 @@ import { ShadowSection } from '../../reports/styled';
 import { IRoutes } from '@/app/utils/type';
 import { primary, primaryColor } from '@/theme/color';
 import { getCODData } from '@/app/utils/array';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import WCODInfo from '../Modals/WCODInfo';
-import { blueGrey } from '@mui/material/colors';
-import AddIcon from '@mui/icons-material/Add';
 import AddTempCOD from '../Modals/AddTempCod/AddTempCOD';
-import ReplayIcon from '@mui/icons-material/Replay';
+import { minifyNumber } from '@/app/utils/number';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -50,6 +46,8 @@ export default function OrderOverview({
   const [codData, setCodData] = useState<any>();
   const [isOpenAddTempCOD, setIsOpenAddTempCOD] = useState<boolean>(false);
   const [isOpenWCODInfo, setIsOpenWCODInfo] = useState<boolean>(false);
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (orderData && orderData.length > 0) {
@@ -79,6 +77,30 @@ export default function OrderOverview({
       ? lastWeekOrderData.reduce((acc: number, order: Order) => {
           if (order.status !== ORDER_STATUS.VOID) {
             return acc + order.totalPrice;
+          }
+
+          return acc;
+        }, 0)
+      : 0;
+  }, [lastWeekOrderData]);
+
+  const todayTotalProfit = useMemo(() => {
+    return allRouteOrderData.length > 0
+      ? allRouteOrderData.reduce((acc: number, order: Order) => {
+          if (order.status !== ORDER_STATUS.VOID) {
+            return acc + (order?.profit || 0);
+          }
+
+          return acc;
+        }, 0)
+      : 0;
+  }, [allRouteOrderData]);
+
+  const lastWeekTotalProfit = useMemo(() => {
+    return lastWeekOrderData.length > 0
+      ? lastWeekOrderData.reduce((acc: number, order: Order) => {
+          if (order.status !== ORDER_STATUS.VOID) {
+            return acc + (order?.profit || 0);
           }
 
           return acc;
@@ -160,7 +182,7 @@ export default function OrderOverview({
           item
           lg={3.9}
           md={5.9}
-          sm={12}
+          xs={12}
           display="flex"
           flexDirection="column"
           gap={2}
@@ -192,7 +214,9 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {lastWeekTotalGross.toFixed(2)}
+                {smDown
+                  ? minifyNumber(lastWeekTotalGross)
+                  : lastWeekTotalGross.toFixed(2)}
               </Typography>
             </Box>
             <Box
@@ -210,7 +234,69 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {todayTotalGross.toFixed(2)}
+                {smDown
+                  ? minifyNumber(todayTotalGross)
+                  : todayTotalGross.toFixed(2)}
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
+
+        <Grid
+          item
+          lg={3.9}
+          md={5.9}
+          xs={12}
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          sx={{
+            backgroundColor: primary.lightest,
+            padding: 5,
+            borderRadius: 5,
+          }}
+        >
+          <Typography variant="h5">Total Profit</Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            gap={4}
+            alignItems="center"
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <DateRangeIcon />
+                <Typography variant="subtitle2">Last Week</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {lastWeekTotalProfit.toFixed(2)}
+              </Typography>
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              gap={1.5}
+            >
+              <Box display="flex" gap={1} alignItems="center">
+                <TodayIcon />
+                <Typography variant="subtitle1">Today</Typography>
+              </Box>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                sx={{ color: `${primaryColor} !important` }}
+              >
+                {todayTotalProfit.toFixed(2)}
               </Typography>
             </Box>
           </Box>
@@ -219,7 +305,7 @@ export default function OrderOverview({
         {/* Track Bills Section */}
         <Grid
           item
-          sm={12}
+          xs={12}
           lg={3.9}
           md={5.9}
           display="flex"
@@ -276,9 +362,8 @@ export default function OrderOverview({
             </Box>
           </Box>
         </Grid>
-
         {/* COD Section */}
-        <Grid
+        {/* <Grid
           item
           sm={12}
           lg={3.9}
@@ -363,7 +448,7 @@ export default function OrderOverview({
               </Typography>
             </Box>
           </Box>
-        </Grid>
+        </Grid> */}
       </Grid>
     </ShadowSection>
   );

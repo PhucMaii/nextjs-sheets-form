@@ -8,6 +8,7 @@ interface IBody {
     quantity: number;
     price: number;
     name: string;
+    cost?: number;
   };
 }
 
@@ -50,6 +51,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         price: customAmount.price,
         quantity: customAmount.quantity,
         isCustomAmount: true,
+        cost: customAmount?.cost || 0,
+        profit: customAmount.price - (customAmount.cost || 0),
       },
     });
 

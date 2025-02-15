@@ -101,43 +101,55 @@ export default function CODBoardSummary({
       />
       <ShadowSection display="flex" flexDirection="column" gap={1} p={2}>
         {/* First Row */}
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box display="flex" alignItems="center" gap={2}>
-            <Box display="flex" alignItems="center" gap={0.5}>
-              <RememberMeIcon fontSize="small" color="primary" />
-              <Typography variant="body2">{boardData.createdBy}</Typography>
-            </Box>
+        <Grid container alignItems="center" spacing={1}>
+          <Grid item xs={12} md={6}>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <RememberMeIcon fontSize="small" color="primary" />
+                <Typography variant="body2">{boardData.createdBy}</Typography>
+              </Box>
 
-            {boardData.cashDiff > 5 && (
-              <StatusText
-                text={`Exceeding $${boardData.cashDiff.toFixed(2)} `}
-                type="error"
-                icon={<ErrorOutlineIcon fontSize="small" color="error" />}
-              />
-            )}
-          </Box>
-          <Box display="flex" alignItems="center" gap={1}>
-            <StatusText
-              text={boardData.status}
-              type={
-                boardData.status === COD_STATUS.CLEARED ? 'success' : 'warning'
-              }
-              icon={
-                boardData.status === COD_STATUS.CLEARED ? (
-                  <CheckIcon fontSize="small" color="success" />
-                ) : (
-                  <PendingIcon fontSize="small" color="warning" />
-                )
-              }
-            />
-            <IconButton
-              color="error"
-              onClick={() => handleDeleteBoard(boardData.id)}
+              {boardData.cashDiff > 5 && (
+                <StatusText
+                  text={`Exceeding $${boardData.cashDiff.toFixed(2)} `}
+                  type="error"
+                  icon={<ErrorOutlineIcon fontSize="small" color="error" />}
+                />
+              )}
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} md={6} textAlign="right">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-end"
+              gap={1}
             >
-              <RemoveCircleIcon fontSize="large" />
-            </IconButton>
-          </Box>
-        </Box>
+              <StatusText
+                text={boardData.status}
+                type={
+                  boardData.status === COD_STATUS.CLEARED
+                    ? 'success'
+                    : 'warning'
+                }
+                icon={
+                  boardData.status === COD_STATUS.CLEARED ? (
+                    <CheckIcon fontSize="small" color="success" />
+                  ) : (
+                    <PendingIcon fontSize="small" color="warning" />
+                  )
+                }
+              />
+              <IconButton
+                color="error"
+                onClick={() => handleDeleteBoard(boardData.id)}
+              >
+                <RemoveCircleIcon fontSize="large" />
+              </IconButton>
+            </Box>
+          </Grid>
+        </Grid>
 
         <Grid container alignItems="stretch">
           <Grid item xs={12} md={8.9}>

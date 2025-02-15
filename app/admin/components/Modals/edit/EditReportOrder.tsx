@@ -291,7 +291,7 @@ const EditReportOrder = ({
         }
         targetObj={deleteItemProps.targetObj}
         handleDelete={onDeleteCustomAmount}
-        showTargetObj={deleteItemProps.targetObj.name}
+        showTargetObj={deleteItemProps?.targetObj?.name}
       />
       <AddCustomAmount
         open={isOpenAddCustomAmount}

@@ -13,6 +13,7 @@ import {
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { calculateOrderProfit } from '../GET';
 
 interface IQuery {
   startDate?: string;
@@ -134,6 +135,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const lastMonthProfit = lastMonthRevenueReport.revenue - lastMonthExpenses;
     const profitChange = ((profit - lastMonthProfit) / lastMonthProfit) * 100;
 
+    // Calculate each customer's profit
+    const customersProfit = orders.reduce((acc: any, order: any) => {
+      const clientKey = `${order.user.clientName} __ ${order.user.clientId}`;
+      if (!acc[clientKey]) {
+        acc[clientKey] = { amount: 0, percentage: 0 };
+      }
+
+      const orderProfit = calculateOrderProfit(order.items);
+      const newTotalProfit = acc[clientKey].amount + orderProfit;
+
+      acc[clientKey] = {
+        amount: newTotalProfit,
+        percentage: (newTotalProfit / profit) * 100,
+      };
+
+      return acc;
+    }, {});
+
     console.log('profitChange', {
       profitChange,
       lastMonthProfit,
@@ -155,17 +174,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       profit,
       profitChange,
     };
-
-    // Get beansprout data
-    // Loop through each order, count the quantity of beansprouts if user.subCategoryId = 1 and = 2
-    // const BKRevenue = 0;
-    // const BKQuantity = 0;
-    // const PPQuantity = 0;
-    // const PPRevenue = 0;
-    // const totalItems = 0;
-
-    // const BKPercentage = (BKRevenue / revenue) * 100;
-    // const PPPercentage = (PPRevenue / revenue) * 100;
 
     // Calculate customers in debt
     const debtRange = generateListOfDateString(
@@ -202,21 +210,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       debtFetchSkip += fetchedDebtOrders.length;
     }
 
-    // const henlongOrders = debtOrders.filter((order: any) => {
-    //   return order.user.clientId === "00130";
-    // }).map((order: any) => {
-    //   return {
-    //     date: order.deliveryDate,
-    //     amount: order.totalPrice,
-    //   }
-    // });
-
     const customersInDebt = getCustomersInDebt(debtOrders);
 
     return res.status(200).json({
       data: {
         customersInDebt,
         overviewData,
+        customersProfit,
         reports: {
           thisMonth: thisMonthRevenueReport.values,
           lastMonth: lastMonthRevenueReport.chartData,
