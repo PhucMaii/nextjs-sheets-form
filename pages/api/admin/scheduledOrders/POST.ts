@@ -261,7 +261,14 @@ export const getRouteScheduledOrders = async (routeId: number) => {
               include: {
                 scheduleOrders: {
                   include: {
+                    user: true,
                     positionIndex: true,
+                    items: {
+                      include: {
+                        inventoryItem: true,
+                        inventoryUnit: true,
+                      },
+                    },
                   },
                 },
               },

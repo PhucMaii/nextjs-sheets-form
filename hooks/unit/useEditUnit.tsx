@@ -36,8 +36,6 @@ const useEditUnit = (
   );
   const [units, setUnits] = useState<IInventoryUnit[]>([...initialUnits]);
 
-  console.log('units', units);
-
   useEffect(() => {
     setUnits([...initialUnits]);
   }, [initialUnits]);
