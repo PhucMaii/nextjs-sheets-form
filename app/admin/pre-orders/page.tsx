@@ -29,7 +29,6 @@ import { blue } from '@mui/material/colors';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import { OrderedItems, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
@@ -51,11 +50,13 @@ import { SWRFetchData } from '@/app/utils/db';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import useNotification from '@/hooks/useNotification';
 import ReArrangementModal from '../components/Modals/ReArrangementModal';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import { checkIsPreOrderQualified } from '@/app/utils/orders';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
-  const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
+  // const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -70,13 +71,18 @@ export default function ScheduledOrderPage() {
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [dayIndex, setDayIndex] = useState<number>(() => {
     const dateObj = new Date();
+    const pstTime = dateObj.toLocaleString("en-US", {timeZone: 'America/Los_Angeles', hour12: false});
+    console.log(pstTime, 'pstTime');
+    const hour = Number(pstTime.split(', ')[1].split(':')[0]);
+    const minute = Number(pstTime.split(', ')[1].split(':')[1]);
+    console.log(hour, 'hour')
     // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() > limitOrderHour) {
+    if (hour > limitOrderHour) {
       dateObj.setDate(dateObj.getDate() + 1);
     }
 
-    if (dateObj.getHours() === limitOrderHour) {
-      if (dateObj.getMinutes() > limitOrderMinutes) {
+    if (hour === limitOrderHour) {
+      if (minute > limitOrderMinutes) {
         dateObj.setDate(dateObj.getDate() + 1);
       }
     }
@@ -139,14 +145,14 @@ export default function ScheduledOrderPage() {
     }
   }, [routes, routeIndex, orders]);
 
-  useEffect(() => {
-    if (preOrderProgress === 100) {
-      setTimeout(() => {
-        setIsPreOrderOpen(false);
-        setPreOrderProgress(0);
-      }, 1000);
-    }
-  }, [preOrderProgress]);
+  // useEffect(() => {
+  //   if (preOrderProgress === 100) {
+  //     setTimeout(() => {
+  //       setIsPreOrderOpen(false);
+  //       setPreOrderProgress(0);
+  //     }, 1000);
+  //   }
+  // }, [preOrderProgress]);
 
   useEffect(() => {
     pusherClient?.subscribe('admin-schedule-order');
@@ -167,28 +173,28 @@ export default function ScheduledOrderPage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (selectedOrders.length > 0) {
-      // Filter out item has same id
-      const filteredOrderLength = createdOrders.reduce(
-        (accumulator: any, currentOrder: Order) => {
-          const foundItem = accumulator.find((order: Order) => {
-            return order?.id === currentOrder.id;
-          });
+  // useEffect(() => {
+  //   if (selectedOrders.length > 0) {
+  //     // Filter out item has same id
+  //     const filteredOrderLength = createdOrders.reduce(
+  //       (accumulator: any, currentOrder: Order) => {
+  //         const foundItem = accumulator.find((order: Order) => {
+  //           return order?.id === currentOrder.id;
+  //         });
 
-          if (!foundItem) {
-            accumulator = accumulator.concat(currentOrder);
-          }
+  //         if (!foundItem) {
+  //           accumulator = accumulator.concat(currentOrder);
+  //         }
 
-          return accumulator;
-        },
-        [],
-      );
-      setPreOrderProgress(
-        (filteredOrderLength.length / selectedOrders.length) * 100,
-      );
-    }
-  }, [createdOrders]);
+  //         return accumulator;
+  //       },
+  //       [],
+  //     );
+  //     setPreOrderProgress(
+  //       (filteredOrderLength.length / selectedOrders.length) * 100,
+  //     );
+  //   }
+  // }, [createdOrders]);
 
   useEffect(() => {
     if (routesResponse) {
@@ -256,23 +262,14 @@ export default function ScheduledOrderPage() {
     return totalPrice.toFixed(2);
   }, [orderList]);
 
-  const calculateTotalClient = useCallback((): number => {
-    const trackClients: ScheduledOrder[] = [];
-    const clients = orderList.filter((order: ScheduledOrder) => {
-      const isExistedClient = trackClients.find(
-        (foundOrder: ScheduledOrder) =>
-          order.user.clientId === foundOrder.user.clientId,
-      );
+  const calculateToCreateOrders = useCallback(() => {
+    const toCreateOrders = orderList.filter((order: ScheduledOrder) => {
+      const isQualified = checkIsPreOrderQualified(order);
 
-      if (!isExistedClient) {
-        trackClients.push(order);
-        return true;
-      } else {
-        return false;
-      }
-    }, 0);
+      return isQualified;
+    });
 
-    return clients.length;
+    return toCreateOrders.length;
   }, [orderList]);
 
   const calculateTotalBillOneOrder = (items: OrderedItems[]) => {
@@ -368,7 +365,7 @@ export default function ScheduledOrderPage() {
     setIsFetchingRoute(false);
   };
 
-  const handleAddRouteUI = (targetRoute: IRoutes) => {
+  const onAddRouteUI = (targetRoute: IRoutes) => {
     setRoutes([...routes, targetRoute]);
     // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
     mutateClients();
@@ -534,7 +531,7 @@ export default function ScheduledOrderPage() {
         // clientList={clients?.data?.clientList || []}
         // disabledClientList={clients?.data?.existedUserRoute || []}
         showNotification={showNotification}
-        handleAddRouteUI={handleAddRouteUI}
+        handleAddRouteUI={onAddRouteUI}
       />
       <DeleteModal
         open={isDeleteModalOpen}
@@ -548,7 +545,7 @@ export default function ScheduledOrderPage() {
         isPreOrder
         showNotification={showNotification}
         // handlePreOrder={handlePreOrder}
-        progress={preOrderProgress}
+        // progress={preOrderProgress}
         scheduleOrderList={selectedOrders}
       />
       <ReArrangementModal
@@ -579,16 +576,16 @@ export default function ScheduledOrderPage() {
         </Grid>
         <Grid item xs={12} md={4}>
           <OverviewCard
-            icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
-            text="Total Bill"
-            value={calculateTotalBill()}
+            icon={<VerifiedIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Qualify for Placement"
+            value={calculateToCreateOrders() as number}
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <OverviewCard
-            icon={<PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />}
-            text="Total Clients"
-            value={calculateTotalClient() as number}
+            icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Total Bill"
+            value={calculateTotalBill()}
           />
         </Grid>
       </Grid>

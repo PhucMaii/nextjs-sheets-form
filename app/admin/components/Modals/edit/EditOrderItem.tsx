@@ -54,6 +54,8 @@ export default function EditItemModal({
     `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`,
   );
 
+  console.log(item, 'item');
+
   const {
     units: newUnits,
     selectedUnit,

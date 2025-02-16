@@ -1,4 +1,4 @@
-import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import { ACTION, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { Orders, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
@@ -42,6 +42,29 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const requestBodySize = Buffer.byteLength(JSON.stringify(req.body));
     console.log('Request Body Size:', requestBodySize, 'bytes');
     const { deliveryDate, scheduleOrderIds, createdAt } = req.body as BodyTypes;
+
+    // Get person create info
+    const adminCreate: any = await getUserInfo(req, res);
+
+    // Update to start track inventory when admin start pre order
+    const { date, time } = getTodayDate();
+    const isTrackInventoryActionTaken = await prisma.action.findFirst({
+      where: {
+        name: ACTION.TRACK_INVENTORY,
+        date,
+      },
+    });
+
+    if (!isTrackInventoryActionTaken) {
+      await prisma.action.create({
+        data: {
+          name: ACTION.TRACK_INVENTORY,
+          date,
+          createdAt: `${time} ${date}`,
+          createdBy: `Admin - ${adminCreate?.clientName}`,
+        },
+      });
+    }
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];
@@ -102,22 +125,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
 
         if (existingOrder) {
-          await pusherServer?.trigger(
-            'admin-schedule-order',
-            'pre-order',
-            {id: existingOrder?.id},
-          );
+          await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+            id: existingOrder?.id,
+          });
           // console.log({ alreadyOrder: scheduleOrder });
           continue;
         }
 
         // Check if user is inactive
         if (scheduleOrder?.user?.type === USER_CATEGORIZED.INACTIVE) {
-          await pusherServer?.trigger(
-            'admin-schedule-order',
-            'pre-order',
-            {id: returnOrder?.id},
-          );
+          await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+            id: returnOrder?.id,
+          });
           // console.log({ inactiveAccount: scheduleOrder });
           continue;
         }
@@ -152,17 +171,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
 
         if (trackIndex <= unavailableRanges.length - 1) {
-          await pusherServer?.trigger(
-            'admin-schedule-order',
-            'pre-order',
-            {id: returnOrder?.id},
-          );
+          await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+            id: returnOrder?.id,
+          });
           // console.log({ unavailableTime: scheduleOrder });
           continue;
         }
-
-        // Get person create info
-        const adminCreate: any = await getUserInfo(req, res);
 
         const newOrder: any = await createOrder(
           scheduleOrder.user,
@@ -181,11 +195,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
         updatedOrderList.push(newOrder);
 
-        await pusherServer?.trigger(
-          'admin-schedule-order',
-          'pre-order',
-          {id: newOrder?.id},
-        );
+        await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+          id: newOrder?.id,
+        });
         // console.log({ successful: scheduleOrder });
       } catch (error: any) {
         console.error('Fail to pre order: ', error);

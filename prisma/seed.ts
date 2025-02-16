@@ -124,9 +124,7 @@ async function main() {
 
   const orderedItems = await prisma.orderedItems.findMany({
     where: {
-      orderId: {
-        not: null,
-      },
+      orderId: 34926,
       Orders: {
         deliveryDate: {
           in: [
@@ -142,8 +140,8 @@ async function main() {
         },
       },
       quantity: {
-        gt: 0,
-      },
+        gt: 0
+      }
     },
     include: {
       Orders: {
@@ -151,30 +149,10 @@ async function main() {
           user: true,
         },
       },
+      inventoryUnit: true,
     },
   });
-
-  for (const item of orderedItems) {
-    console.log({
-      name: item.name,
-      orderId: item.orderId,
-      clientName: item?.Orders?.user?.clientName,
-      deliveryDate: item?.Orders?.deliveryDate,
-    });
-    const { cost } = await generateCostAndProfit(item.id);
-
-    await prisma.orderedItems.update({
-      where: {
-        id: item.id,
-      },
-      data: {
-        cost,
-        profit: item.price - cost,
-      },
-    });
-  }
-
-  console.log(orderedItems.length);
+  console.log(orderedItems);
 }
 
 main()

@@ -104,22 +104,26 @@ export default function OrderDetailsTable({
         }
         showTargetObj={deleteModalProps.targetObj?.name}
       />
-      <EditItemModal
-        open={isOpenEditModal}
-        onClose={() => {
-          setIsOpenEditModal(false);
-          setSelectedItem({});
-        }}
-        item={updatedItem}
-        handleUpdateItem={handleUpdateItem}
-        order={order}
-        role={role as USER_ROLE}
-      />
+      {updatedItem.id ? (
+        <EditItemModal
+          open={isOpenEditModal}
+          onClose={() => {
+            setIsOpenEditModal(false);
+            setSelectedItem({});
+          }}
+          item={updatedItem}
+          handleUpdateItem={handleUpdateItem}
+          order={order}
+          role={role as USER_ROLE}
+        />
+      ): null}
       <Table sx={{ maxWidth: '100%', overflow: 'hidden' }}>
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold' }}>Item</TableCell>
-            <TableCell sx={{ fontWeight: 'bold', width: 50 }}>{smDown ? 'Qty' : 'Quantity'}</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', width: 50 }}>
+              {smDown ? 'Qty' : 'Quantity'}
+            </TableCell>
             <TableCell sx={{ fontWeight: 'bold' }}>Price</TableCell>
             {!mdDown && <TableCell></TableCell>}
           </TableRow>
@@ -158,7 +162,11 @@ export default function OrderDetailsTable({
                 </TableCell>
                 <TableCell sx={{ width: 50 }}>{item.quantity}</TableCell>
                 <TableCell>
-                  <Box display="flex" flexDirection={smDown ? "column" : "row"} gap={1}>
+                  <Box
+                    display="flex"
+                    flexDirection={smDown ? 'column' : 'row'}
+                    gap={1}
+                  >
                     {item?.isShowDiscount &&
                       item?.prevPrice &&
                       (item.prevPrice * item.quantity).toFixed(2) !==

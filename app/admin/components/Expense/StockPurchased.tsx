@@ -89,6 +89,8 @@ export default function StockPurchased({
     EditUnitModal,
     UnitDisplay,
     onChangeAddUnitBoolean,
+    setSelectedUnit,
+    setUnits,
   } = useEditUnit(
     promptedItem.units,
     promptedItem.unit,
@@ -98,6 +100,7 @@ export default function StockPurchased({
   );
 
   console.log(units, 'units');
+  console.log(purchasedItems, 'purchasedItems');
 
   // console.log(promptedItem?.units, 'promptedItem?.units');
 
@@ -170,23 +173,25 @@ export default function StockPurchased({
   //   }
   // }, [selectedUnit]);
 
-  const handleOnChangeUnitPrice = (e: any) => {
+  const onChangeUnitPrice = (e: any) => {
     const newUnitPrice = +e.target.value;
 
     // Update units immutably
-    const newUnits = promptedItem?.units?.map(
+    const newUnits = units?.map(
       (unit: any) =>
-        unit.ratio === promptedItem?.unit?.ratio
+        unit.ratio === selectedUnit?.ratio
           ? { ...unit, unitPrice: newUnitPrice } // Replace the matching unit
           : unit, // Keep the other units unchanged
     );
 
     // Update state
-    setPromptedItem({
-      ...promptedItem,
-      unit: { ...promptedItem.unit, unitPrice: newUnitPrice },
-      units: newUnits,
-    });
+    // setPromptedItem({
+    //   ...promptedItem,
+    //   unit: { ...selectedUnit, unitPrice: newUnitPrice },
+    //   units: newUnits,
+    // });
+    setSelectedUnit((prevState: any) => ({ ...prevState, unitPrice: newUnitPrice }));
+    setUnits(newUnits);
   };
 
   const selectPromptedItem = (newValue: any) => {
@@ -257,7 +262,14 @@ export default function StockPurchased({
       return;
     }
 
-    setPurchasedItems([...purchasedItems, {...promptedItem, unit: selectedUnit, units}]);
+    setPurchasedItems([
+      ...purchasedItems,
+      {
+        ...promptedItem,
+        unit: selectedUnit,
+        units: units,
+      },
+    ]);
     setPromptedItem({
       id: -1,
       quantity: 0,
@@ -316,7 +328,7 @@ export default function StockPurchased({
     }));
   };
 
-  const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
+  const onChangeItem = (e: any, targetItem: any, keyChange: string) => {
     e.preventDefault();
     const newItemList = purchasedItems.map((item: any) => {
       // If it is a new item
@@ -532,7 +544,7 @@ export default function StockPurchased({
               disabled={selectedVendorId === -1}
             />
           </Grid>
-          {promptedItem?.units && promptedItem?.units.length > 0 && (
+          {units && units.length > 0 && (
             <Grid item xs={12}>
               {UnitDisplay}
             </Grid>
@@ -543,8 +555,8 @@ export default function StockPurchased({
               fullWidth
               label="Unit Price"
               type="number"
-              value={promptedItem?.unit?.unitPrice || 0}
-              onChange={handleOnChangeUnitPrice}
+              value={selectedUnit?.unitPrice || 0}
+              onChange={onChangeUnitPrice}
               disabled={
                 role === USER_ROLE.DRIVER ||
                 selectedVendorId === -1 ||
@@ -591,7 +603,7 @@ export default function StockPurchased({
                     <TextField
                       label="Unit Price ($)"
                       value={item?.unit?.unitPrice}
-                      onChange={(e) => handleChangeItem(e, item, 'unitPrice')}
+                      onChange={(e) => onChangeItem(e, item, 'unitPrice')}
                       type="number"
                       inputProps={{ min: 0 }}
                       disabled={role === USER_ROLE.DRIVER}
@@ -603,7 +615,7 @@ export default function StockPurchased({
                       fullWidth
                       label="Quantity"
                       value={item.quantity}
-                      onChange={(e) => handleChangeItem(e, item, 'quantity')}
+                      onChange={(e) => onChangeItem(e, item, 'quantity')}
                       type="number"
                       inputProps={{ min: 0 }}
                     />
