@@ -41,12 +41,12 @@ export const generateMinDate = () => {
   return minDate;
 };
 
-export const generateRecommendDate = () => {
+export const generateRecommendDate = (limitHour: number = limitOrderHour) => {
   // format initial date
   const dateObj = new Date();
   // if current hour is greater limit hour, then recommend the next day
   if (
-    dateObj.getHours() >= limitOrderHour ||
+    dateObj.getHours() >= limitHour ||
     (dateObj.getMonth() === 11 && dateObj.getDate() === 25) || // December 25th
     (dateObj.getMonth() === 0 && dateObj.getDate() === 1) // January 1st
   ) {

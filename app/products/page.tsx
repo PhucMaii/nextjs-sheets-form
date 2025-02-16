@@ -192,7 +192,7 @@ const ProductPage = () => {
     return (
       <Box
         display="flex"
-        alignItems={smDown ? 'flex-end' : "flex-start"}
+        alignItems={smDown ? 'flex-end' : 'flex-start'}
         gap={2}
         sx={{ overflowX: 'auto', whiteSpace: 'nowrap' }}
       >
@@ -383,48 +383,53 @@ const ProductPage = () => {
         sx={{
           backgroundColor: 'white',
           minHeight: '100vh',
-          minWidth: '100%',
-          maxWidth,
         }}
       >
-        {renderProductTypes()}
-
-        {/* <Divider sx={{ my: 1 }} /> */}
-
-        {renderSortAndSearch()}
-        {/* Product Display */}
-        <Grid
-          container
-          // columnSpacing={1}
-          rowGap={4}
-          width="100%"
-          sx={{ my: 2, px: 2 }}
+        <Box
+          sx={{
+            maxWidth: maxWidth,
+            mx: 'auto',
+          }}
         >
-          {displayItems?.length > 0 ? (
-            displayItems?.map((product: IItemPreference, index: number) => {
-              return (
-                <Grid
-                  item
-                  xs={6}
-                  sm={4}
-                  md={2}
-                  key={index}
-                  sx={{ height: '370px' }}
-                >
-                  <ProductListing
-                    product={product}
-                    onClick={() => router.push(`/products/${product.id}`)}
-                    showNotification={showNotification}
-                  />
-                </Grid>
-              );
-            })
-          ) : (
-            <Grid item xs={12}>
-              <ErrorComponent errorText="No Product Available" />
-            </Grid>
-          )}
-        </Grid>
+          {renderProductTypes()}
+
+          {/* <Divider sx={{ my: 1 }} /> */}
+
+          {renderSortAndSearch()}
+          {/* Product Display */}
+          <Grid
+            container
+            // columnSpacing={1}
+            rowGap={4}
+            width="100%"
+            sx={{ my: 2, px: 2 }}
+          >
+            {displayItems?.length > 0 ? (
+              displayItems?.map((product: IItemPreference, index: number) => {
+                return (
+                  <Grid
+                    item
+                    xs={6}
+                    sm={4}
+                    md={2}
+                    key={index}
+                    sx={{ height: '370px' }}
+                  >
+                    <ProductListing
+                      product={product}
+                      onClick={() => router.push(`/products/${product.id}`)}
+                      showNotification={showNotification}
+                    />
+                  </Grid>
+                );
+              })
+            ) : (
+              <Grid item xs={12}>
+                <ErrorComponent errorText="No Product Available" />
+              </Grid>
+            )}
+          </Grid>
+        </Box>
       </Box>
     </NavbarWrapper>
   );

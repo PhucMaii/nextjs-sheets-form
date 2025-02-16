@@ -9,12 +9,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 
-const useDatePicker = () => {
+const useDatePicker = (limitHour: number = limitOrderHour) => {
   const [deliveryDate, setDeliveryDate] = useState<string>(() =>
-    generateRecommendDate(),
+    generateRecommendDate(limitHour),
   );
   let today: any = dayjs();
-  if (today.$H >= limitOrderHour) {
+  if (today.$H >= limitHour) {
     today = today.add(1, 'day');
   }
 

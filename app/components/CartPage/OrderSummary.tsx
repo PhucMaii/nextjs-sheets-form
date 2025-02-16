@@ -1,7 +1,6 @@
 import { API_URL } from '@/app/utils/enum';
 import { landingPagePrimaryColor } from '@/constant/landingPage';
 import useCart from '@/hooks/useCart';
-import { LoadingButton } from '@mui/lab';
 import {
   AlertColor,
   Box,
@@ -43,7 +42,7 @@ export default function OrderSummary({ showNotification }: IProps) {
   const user = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch<AppDispatch>();
-  const { renderDatePicker, deliveryDate } = useDatePicker();
+  const { renderDatePicker, deliveryDate } = useDatePicker(0);
 
   const onPlaceOrder = async (clientInfo: ClientInfo) => {
     if (!deliveryDate) {
@@ -83,9 +82,9 @@ export default function OrderSummary({ showNotification }: IProps) {
     router.push('/login');
   }
 
-  const proceedToCheckout = () => {
-    router.push('/checkout');
-  };
+  // const proceedToCheckout = () => {
+  //   router.push('/checkout');
+  // };
 
   const renderOrderInfo = () => {
     return (
@@ -157,14 +156,13 @@ export default function OrderSummary({ showNotification }: IProps) {
             >
               Place Order & Be Our Partner
             </Button>
-            <LoadingButton
+            {/* <LoadingButton
               onClick={proceedToCheckout}
               variant="outlined"
               fullWidth
             >
-              {/* TODO: will be changed to checkout */}
-              Go to checkout
-            </LoadingButton>
+              Place order
+            </LoadingButton> */}
             <Typography variant="subtitle2" sx={{ color: grey[500] }}>
               * Partner with us and no upfront payment required. Receive your
               products first and pay later.

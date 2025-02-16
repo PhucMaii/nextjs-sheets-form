@@ -326,6 +326,8 @@ export default function CheckoutPage() {
     );
   };
 
+  return null;
+
   return (
     <NavbarWrapper>
       {NotificationComp}
