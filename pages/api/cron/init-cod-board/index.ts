@@ -80,6 +80,7 @@ export default async function handler(req: any, res: any) {
             },
           },
         },
+        codBoardId: null,
       },
       include: {
         items: true,

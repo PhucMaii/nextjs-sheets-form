@@ -48,7 +48,7 @@ describe('Pre Order', () => {
       const order = await createOrder(
         scheduledOrder.user,
         scheduledOrder.items,
-        '01/01/2030',
+        '01/01/3000',
         `${date} ${time}`,
         'Admin - Admin Test',
         'Automated Test Order',

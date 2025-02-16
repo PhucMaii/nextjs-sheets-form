@@ -49,6 +49,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       items,
     }: IBody = req.body;
 
+    console.log(items, 'items');
+
     const existingMethod = await prisma.paymentMethod.findUnique({
       where: {
         id: paymentMethodId,

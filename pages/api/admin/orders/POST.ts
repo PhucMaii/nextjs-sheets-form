@@ -2,7 +2,7 @@ import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { Orders, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
-import { sendEmail } from '../../utils/email';
+// import { sendEmail } from '../../utils/email';
 import { pusherServer } from '@/app/pusher';
 import {
   checkOrderDeliveryDateValid,
@@ -43,7 +43,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log('Request Body Size:', requestBodySize, 'bytes');
     const { deliveryDate, scheduleOrderIds, createdAt } = req.body as BodyTypes;
 
-    const isSendToAdmin = false;
+    // const isSendToAdmin = false;
     const updatedOrderList: any = [];
 
     const scheduleOrderList: any = await prisma.scheduleOrders.findMany({
@@ -172,13 +172,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           `Admin - ${adminCreate.clientName}`,
         );
 
-        await sendEmail(
-          scheduleOrder.user,
-          newOrder,
-          newOrder.id,
-          deliveryDate,
-          isSendToAdmin,
-        );
+        // await sendEmail(
+        //   scheduleOrder.user,
+        //   newOrder,
+        //   newOrder.id,
+        //   deliveryDate,
+        //   isSendToAdmin,
+        // );
         updatedOrderList.push(newOrder);
 
         await pusherServer?.trigger(
