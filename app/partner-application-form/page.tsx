@@ -219,7 +219,7 @@ export default function PartnerApplicationForm() {
                 onChange={(e: any) =>
                   setClientInfo((prevState: any) => ({
                     ...prevState,
-                    deliveryAddress: e.target.value,
+                    message: e.target.value,
                   }))
                 }
               />

@@ -21,6 +21,7 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
     email: '',
     contactNumber: '',
     deliveryAddress: '',
+    message: '',
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [session] = useLocalStorage('guest-session', {});
@@ -151,6 +152,24 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
                   setClientInfo((prevState: any) => ({
                     ...prevState,
                     deliveryAddress: e.target.value,
+                  }))
+                }
+              />
+            </Box>
+
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography>Message (Optional)</Typography>
+              <TextField
+                size="small"
+                multiline
+                rows={2}
+                type="text"
+                placeholder="Please enter your message..."
+                value={clientInfo.message}
+                onChange={(e: any) =>
+                  setClientInfo((prevState: any) => ({
+                    ...prevState,
+                    message: e.target.value,
                   }))
                 }
               />

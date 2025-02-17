@@ -2,7 +2,11 @@
 import React from 'react';
 import NavbarWrapper from '../lib/NavbarWrapper';
 import { Box, Grid, Typography } from '@mui/material';
-import { landingPagePrimaryColor, reasonList } from '@/constant/landingPage';
+import {
+  landingPagePrimaryColor,
+  maxWidth,
+  reasonList,
+} from '@/constant/landingPage';
 import Logo from '../components/LandingPage/Logo';
 import { green, grey } from '@mui/material/colors';
 import Footer from '../components/LandingPage/Footer';
@@ -46,7 +50,7 @@ export default function AboutPage() {
       <Grid
         spacing={2}
         container
-        sx={{ backgroundColor: green[700], p: 3, mt: 2 }}
+        sx={{ maxWidth: maxWidth, mx: 'auto', p: 3, mt: 2 }}
       >
         <Grid item xs={12} md={4}>
           <Box
@@ -127,7 +131,7 @@ export default function AboutPage() {
         >
           {renderHeader()}
 
-          {renderAboutUs()}
+          <Box sx={{ backgroundColor: green[700] }}>{renderAboutUs()}</Box>
           <Footer />
         </Box>
       </NavbarWrapper>

@@ -309,7 +309,7 @@ const ProductPage = () => {
         // justifyContent="space-between"
         mt={2}
         spacing={1}
-        // sx={{ px: 6 }}
+        sx={{ px: 2 }}
       >
         {/* <Box
           display="flex"

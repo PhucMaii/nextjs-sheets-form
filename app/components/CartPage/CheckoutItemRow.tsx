@@ -130,7 +130,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
           <Box
             component="a"
             aria-disabled={isLoading}
-            href={isLoading ? undefined : `/product/${item.id}`}
+            href={isLoading ? undefined : `/products/${item.id}`}
             sx={{
               textDecoration: 'none',
               cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -143,7 +143,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
             }}
           >
             <Typography variant="h6">
-              {item.itemPreference.inventoryItem.name}
+              {item.itemPreference?.name || item.itemPreference?.inventoryItem?.name}
             </Typography>
           </Box>
         </Box>

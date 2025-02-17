@@ -110,7 +110,8 @@ export default async function handler(
       return {
         ...item.itemPreference,
         quantity: item.quantity,
-        name: item.itemPreference.inventoryItem.name,
+        name:
+          item.itemPreference?.name || item.itemPreference.inventoryItem.name,
         inventoryUnitId: item.inventoryUnitId,
         inventoryUnit: item.inventoryUnit,
       };
@@ -147,7 +148,10 @@ export default async function handler(
 
     return res
       .status(200)
-      .json({ data: {order: newOrder, user}, message: 'Order Placed Successfully' });
+      .json({
+        data: { order: newOrder, user },
+        message: 'Order Placed Successfully',
+      });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

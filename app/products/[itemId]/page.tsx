@@ -108,7 +108,7 @@ export default function ItemPage() {
           fontWeight="medium"
           sx={{ color: landingPagePrimaryColor }}
         >
-          {itemData?.inventoryItem.name}
+          {itemData?.name || itemData?.inventoryItem?.name}
         </Typography>
 
         <Typography
