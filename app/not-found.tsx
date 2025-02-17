@@ -11,7 +11,7 @@ import {
 import { useRouter } from 'next/navigation';
 
 export default function NotFoundPage() {
-    const router = useRouter();
+  const router = useRouter();
 
   return (
     <NavbarWrapper>
@@ -24,11 +24,19 @@ export default function NotFoundPage() {
         sx={{ width: '100%', backgroundColor: 'white', height: '100vh', mt: 4 }}
       >
         <CircleX style={{ color: errorColor, width: '80', height: '80px' }} />
-        <Typography variant="h4" fontWeight="bold" sx={{color: landingPagePrimaryColor, mt: 2}}>
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          sx={{ color: landingPagePrimaryColor, mt: 2 }}
+        >
           🌾 404 - This Page Has Gone Back to Nature
         </Typography>
-        <Typography variant="h5" fontWeight="normal" sx={{ color: landingPagePrimaryColor }}>
-            But our garden is still thriving!
+        <Typography
+          variant="h5"
+          fontWeight="normal"
+          sx={{ color: landingPagePrimaryColor }}
+        >
+          But our garden is still thriving!
         </Typography>
         <Button
           sx={{

@@ -80,7 +80,7 @@ export default function OrderSummary({ showNotification }: IProps) {
 
   const proceedToLoginPage = () => {
     router.push('/login');
-  }
+  };
 
   // const proceedToCheckout = () => {
   //   router.push('/checkout');
@@ -136,10 +136,7 @@ export default function OrderSummary({ showNotification }: IProps) {
         {renderOrderInfo()}
         {user?.id > 0 ? (
           <>
-            <Button
-              variant="contained"
-              onClick={proceedToLoginPage}
-            >
+            <Button variant="contained" onClick={proceedToLoginPage}>
               Login To Our Partner Portal
             </Button>
             <Typography variant="subtitle2" sx={{ color: grey[500] }}>

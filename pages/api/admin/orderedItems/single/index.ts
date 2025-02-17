@@ -159,8 +159,12 @@ export const generateCostAndProfit = async (orderedItemId: number) => {
 
     let cost = existingItem?.cost;
 
-    const allUnits = await getAllUnitsByInventoryItemId(existingItem?.inventoryItemId || -1);
-    const itemUnit = allUnits?.find((unit: any) => unit.id === existingItem?.inventoryUnitId);
+    const allUnits = await getAllUnitsByInventoryItemId(
+      existingItem?.inventoryItemId || -1,
+    );
+    const itemUnit = allUnits?.find(
+      (unit: any) => unit.id === existingItem?.inventoryUnitId,
+    );
 
     if (!cost) {
       cost = existingItem?.fifo?.price

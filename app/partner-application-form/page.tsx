@@ -114,11 +114,7 @@ export default function PartnerApplicationForm() {
   };
 
   if (user?.id > 0) {
-    return (
-      <NavbarWrapper>
-        {renderAlreadyAppliedMsg()}
-      </NavbarWrapper>
-    );
+    return <NavbarWrapper>{renderAlreadyAppliedMsg()}</NavbarWrapper>;
   }
 
   return (

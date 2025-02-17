@@ -21,17 +21,19 @@ export default async function handler(
     return res.status(500).json({ error: 'Only POST method allowed' });
   }
   try {
-    const { name, email, contactNumber, deliveryAddress, message }: IBody = req.body;
+    const { name, email, contactNumber, deliveryAddress, message }: IBody =
+      req.body;
 
     // Verify address
     const address = await generateLatLng(deliveryAddress);
 
     if (!address.latitude || !address.longitude) {
-      return res
-        .status(400)
-        .json({ error: 'Delivery Address is not valid' });
+      return res.status(400).json({ error: 'Delivery Address is not valid' });
     }
-    const isAddressValid = verifyDeliveryAddress(address.latitude, address.longitude);
+    const isAddressValid = verifyDeliveryAddress(
+      address.latitude,
+      address.longitude,
+    );
 
     if (!isAddressValid) {
       return res
@@ -53,7 +55,7 @@ export default async function handler(
       email,
       contactNumber,
       deliveryAddress,
-      message
+      message,
     });
     await emailHandler(
       'maithienphuc0102@gmail.com',
@@ -64,7 +66,10 @@ export default async function handler(
 
     return res
       .status(200)
-      .json({ data: newGuest, message: 'Your Request has been sent successfully' });
+      .json({
+        data: newGuest,
+        message: 'Your Request has been sent successfully',
+      });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: 'Internal Server Error' });

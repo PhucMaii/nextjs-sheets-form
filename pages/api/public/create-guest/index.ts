@@ -199,7 +199,7 @@ export const createGuest = async ({ client }: any) => {
 
     // Generate client id
     const clientId = await generateGuestClientId();
-    
+
     const { date, time } = getTodayDate();
 
     const newGuest = await prisma.user.create({

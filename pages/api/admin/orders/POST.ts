@@ -1,4 +1,4 @@
-import { ACTION, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { Orders, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
@@ -47,24 +47,24 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const adminCreate: any = await getUserInfo(req, res);
 
     // Update to start track inventory when admin start pre order
-    const { date, time } = getTodayDate();
-    const isTrackInventoryActionTaken = await prisma.action.findFirst({
-      where: {
-        name: ACTION.TRACK_INVENTORY,
-        date,
-      },
-    });
+    // const { date, time } = getTodayDate();
+    // const isTrackInventoryActionTaken = await prisma.action.findFirst({
+    //   where: {
+    //     name: ACTION.TRACK_INVENTORY,
+    //     date,
+    //   },
+    // });
 
-    if (!isTrackInventoryActionTaken) {
-      await prisma.action.create({
-        data: {
-          name: ACTION.TRACK_INVENTORY,
-          date,
-          createdAt: `${time} ${date}`,
-          createdBy: `Admin - ${adminCreate?.clientName}`,
-        },
-      });
-    }
+    // if (!isTrackInventoryActionTaken) {
+    //   await prisma.action.create({
+    //     data: {
+    //       name: ACTION.TRACK_INVENTORY,
+    //       date,
+    //       createdAt: `${time} ${date}`,
+    //       createdBy: `Admin - ${adminCreate?.clientName}`,
+    //     },
+    //   });
+    // }
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];

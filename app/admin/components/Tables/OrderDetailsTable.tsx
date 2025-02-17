@@ -116,7 +116,7 @@ export default function OrderDetailsTable({
           order={order}
           role={role as USER_ROLE}
         />
-      ): null}
+      ) : null}
       <Table sx={{ maxWidth: '100%', overflow: 'hidden' }}>
         <TableHead>
           <TableRow>

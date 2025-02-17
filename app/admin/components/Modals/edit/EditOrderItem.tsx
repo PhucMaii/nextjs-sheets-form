@@ -47,7 +47,6 @@ export default function EditItemModal({
   });
   const [unitList, setUnitList] = useState<any[]>([]);
 
-
   const { showNotification, NotificationComp } = useNotification();
 
   const [units] = SWRFetchData(
@@ -62,11 +61,7 @@ export default function EditItemModal({
     AddUnitModal,
     EditUnitModal,
     UnitDisplay,
-  } = useEditUnit(
-    unitList,
-    updatedItem.inventoryUnit,
-    showNotification,
-  );
+  } = useEditUnit(unitList, updatedItem.inventoryUnit, showNotification);
 
   useEffect(() => {
     if (units) {

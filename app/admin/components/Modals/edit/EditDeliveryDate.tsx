@@ -57,7 +57,7 @@ export default function EditDeliveryDate({
   });
 
   useEffect(() => {
-    console.log('changing')
+    console.log('changing');
     setProgress(0);
   }, [scheduleOrderList]);
 

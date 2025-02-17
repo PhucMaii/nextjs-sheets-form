@@ -12,7 +12,7 @@ import React from 'react';
 export default function HowItWorks() {
   return (
     <Box sx={{ backgroundColor: green[700] }} px={6} py={4}>
-      <Box sx={{maxWidth: maxWidth, mx: 'auto'}}>
+      <Box sx={{ maxWidth: maxWidth, mx: 'auto' }}>
         <Typography variant="h3" sx={{ color: 'white', textAlign: 'center' }}>
           How It Works
         </Typography>
@@ -73,7 +73,6 @@ export default function HowItWorks() {
             );
           })}
         </Grid>
-
       </Box>
     </Box>
   );

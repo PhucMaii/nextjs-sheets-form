@@ -10,7 +10,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { vendorItemId } = req.query as IQuery;
-    console.log(vendorItemId)
+    console.log(vendorItemId);
 
     if (!vendorItemId) {
       return res.status(404).json({
