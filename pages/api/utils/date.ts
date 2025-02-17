@@ -116,14 +116,14 @@ export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
   const selectedDate = normalizeDate(deliveryDate);
   const today = getTodayDate();
   const currentDate = new Date(today.date);
-  console.log(currentDate.getHours());
+  // console.log(currentDate.getHours());
 
-  console.log({
-    selectedDate,
-    currentDate,
-    compare: selectedDate.getTime() === currentDate.getTime(),
-    today,
-  });
+  // console.log({
+  //   selectedDate,
+  //   currentDate,
+  //   compare: selectedDate.getTime() === currentDate.getTime(),
+  //   today,
+  // });
 
   if (selectedDate.getTime() < currentDate.getTime()) {
     return { ok: false, message: 'Cannot create order for past date' };

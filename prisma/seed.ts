@@ -124,7 +124,6 @@ async function main() {
 
   const orderedItems = await prisma.orderedItems.findMany({
     where: {
-      orderId: 34926,
       Orders: {
         deliveryDate: {
           in: [
@@ -139,9 +138,7 @@ async function main() {
           ],
         },
       },
-      quantity: {
-        gt: 0
-      }
+      inventoryUnitId: null,
     },
     include: {
       Orders: {
@@ -149,9 +146,15 @@ async function main() {
           user: true,
         },
       },
-      inventoryUnit: true,
+      // inventoryUnit: true,
     },
   });
+  // console.log(orderedItems);
+
+  // const invalidItems = orderedItems.filter((item) => {
+  //   return !item.inventoryUnit || !item.inventoryUnit.vendorItemId;
+  // });
+
   console.log(orderedItems);
 }
 
