@@ -71,11 +71,12 @@ export default function ScheduledOrderPage() {
   const [orderList, setOrderList] = useState<ScheduledOrder[]>([]);
   const [dayIndex, setDayIndex] = useState<number>(() => {
     const dateObj = new Date();
-    const pstTime = dateObj.toLocaleString("en-US", {timeZone: 'America/Los_Angeles', hour12: false});
-    console.log(pstTime, 'pstTime');
+    const pstTime = dateObj.toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      hour12: false,
+    });
     const hour = Number(pstTime.split(', ')[1].split(':')[0]);
     const minute = Number(pstTime.split(', ')[1].split(':')[1]);
-    console.log(hour, 'hour')
     // if current hour is greater limit hour, then recommend the next day
     if (hour > limitOrderHour) {
       dateObj.setDate(dateObj.getDate() + 1);
@@ -101,12 +102,19 @@ export default function ScheduledOrderPage() {
     // format initial date
     const dateObj = new Date();
     // if current hour is greater limit hour, then recommend the next day
-    if (dateObj.getHours() > limitOrderHour) {
+    const pstTime = dateObj.toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      hour12: false,
+    });
+    const hour = Number(pstTime.split(', ')[1].split(':')[0]);
+    const minute = Number(pstTime.split(', ')[1].split(':')[1]);
+    // if current hour is greater limit hour, then recommend the next day
+    if (hour > limitOrderHour) {
       dateObj.setDate(dateObj.getDate() + 1);
     }
 
-    if (dateObj.getHours() === limitOrderHour) {
-      if (dateObj.getMinutes() > limitOrderMinutes) {
+    if (hour === limitOrderHour) {
+      if (minute > limitOrderMinutes) {
         dateObj.setDate(dateObj.getDate() + 1);
       }
     }
