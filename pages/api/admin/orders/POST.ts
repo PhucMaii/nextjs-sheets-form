@@ -1,4 +1,4 @@
-import { ACTION, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { Orders, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
@@ -47,24 +47,24 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const adminCreate: any = await getUserInfo(req, res);
 
     // Update to start track inventory when admin start pre order
-    const { date, time } = getTodayDate();
-    const isTrackInventoryActionTaken = await prisma.action.findFirst({
-      where: {
-        name: ACTION.TRACK_INVENTORY,
-        date,
-      },
-    });
+    // const { date, time } = getTodayDate();
+    // const isTrackInventoryActionTaken = await prisma.action.findFirst({
+    //   where: {
+    //     name: ACTION.TRACK_INVENTORY,
+    //     date,
+    //   },
+    // });
 
-    if (!isTrackInventoryActionTaken) {
-      await prisma.action.create({
-        data: {
-          name: ACTION.TRACK_INVENTORY,
-          date,
-          createdAt: `${time} ${date}`,
-          createdBy: `Admin - ${adminCreate?.clientName}`,
-        },
-      });
-    }
+    // if (!isTrackInventoryActionTaken) {
+    //   await prisma.action.create({
+    //     data: {
+    //       name: ACTION.TRACK_INVENTORY,
+    //       date,
+    //       createdAt: `${time} ${date}`,
+    //       createdBy: `Admin - ${adminCreate?.clientName}`,
+    //     },
+    //   });
+    // }
 
     const isSendToAdmin = false;
     const updatedOrderList: any = [];
@@ -114,7 +114,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             'pre-order',
             returnOrder,
           );
-          // console.log({ zeroTotalPrice: scheduleOrder });
+          console.log({ zeroTotalPrice: scheduleOrder });
           continue;
         }
 
@@ -128,7 +128,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
             id: existingOrder?.id,
           });
-          // console.log({ alreadyOrder: scheduleOrder });
+          console.log({ alreadyOrder: scheduleOrder });
           continue;
         }
 
@@ -137,7 +137,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
             id: returnOrder?.id,
           });
-          // console.log({ inactiveAccount: scheduleOrder });
+          console.log({ inactiveAccount: scheduleOrder });
           continue;
         }
 
@@ -174,7 +174,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
             id: returnOrder?.id,
           });
-          // console.log({ unavailableTime: scheduleOrder });
+          console.log({ unavailableTime: scheduleOrder });
           continue;
         }
 
@@ -198,7 +198,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
           id: newOrder?.id,
         });
-        // console.log({ successful: scheduleOrder });
+        console.log({ successful: scheduleOrder });
       } catch (error: any) {
         console.error('Fail to pre order: ', error);
         // await pusherServer?.trigger(
@@ -206,8 +206,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         //   'pre-order',
         //   scheduleOrder,
         // );
+        console.log({ fail: scheduleOrder });
         continue;
-        // console.log({ fail: scheduleOrder });
       }
     }
 

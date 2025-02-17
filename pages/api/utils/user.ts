@@ -23,7 +23,7 @@ export const categorizeUser = async (userId: number) => {
       firstDayOfLast3Months,
       lastDayOfLastMonth,
     );
-    console.log(listOfDateString, 'list of date string');
+    // console.log(listOfDateString, 'list of date string');
 
     const prisma = new PrismaClient();
     const userOrdersLast3Months = await prisma.orders.findMany({

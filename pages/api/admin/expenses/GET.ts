@@ -39,7 +39,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedEndDate,
     );
 
-    console.log(listOfDateString, 'listOfDateString');
+    // console.log(listOfDateString, 'listOfDateString');
 
     if (!id || Number(id) <= 0) {
       const expenses = await prisma.expense.findMany({

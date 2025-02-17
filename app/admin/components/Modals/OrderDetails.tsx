@@ -168,6 +168,7 @@ export default function OrderDetails({
                 handleUpdateItem={handleUpdateItem}
                 abilityToEdit
                 role={USER_ROLE.ADMIN}
+                showNotification={showNotification}
               />
             </Grid>
             <Grid

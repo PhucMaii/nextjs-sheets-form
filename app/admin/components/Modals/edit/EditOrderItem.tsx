@@ -47,11 +47,12 @@ export default function EditItemModal({
   });
   const [unitList, setUnitList] = useState<any[]>([]);
 
-
   const { showNotification, NotificationComp } = useNotification();
 
   const [units] = SWRFetchData(
-    `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`,
+    item?.inventoryUnit?.vendorItemId
+      ? `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`
+      : '',
   );
 
   console.log(item, 'item');
@@ -62,11 +63,7 @@ export default function EditItemModal({
     AddUnitModal,
     EditUnitModal,
     UnitDisplay,
-  } = useEditUnit(
-    unitList,
-    updatedItem.inventoryUnit,
-    showNotification,
-  );
+  } = useEditUnit(unitList, updatedItem.inventoryUnit, showNotification);
 
   useEffect(() => {
     if (units) {
@@ -109,7 +106,7 @@ export default function EditItemModal({
         ...updatedItem,
         inventoryUnit: {
           ...selectedUnit,
-          vendorItemId: item.inventoryUnit.vendorItemId,
+          vendorItemId: item?.inventoryUnit?.vendorItemId,
         },
         units: newUnits,
       },
