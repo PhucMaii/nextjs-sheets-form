@@ -252,6 +252,18 @@ export default function ReportPage() {
         order.status === ORDER_STATUS.INCOMPLETED
       );
     });
+
+    if (selectedOrders.length > 0) {
+      const newSelectedOrders = selectedOrders.map((order: Order) => {
+        const newOrder = orders?.data.find((o: Order) => {
+          return o.id === order.id;
+        });
+
+        return newOrder;
+      });
+
+      setSelectedOrders(newSelectedOrders);
+    }
     setUnpaidOrders(newUnpaidOrders);
     setClientOrders(orderData);
     setBaseClientOrders(orderData);

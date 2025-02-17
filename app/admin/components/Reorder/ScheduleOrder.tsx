@@ -8,13 +8,15 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import DeleteScheduleOrder from '../Modals/delete/DeleteScheduleOrder';
 import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import EditScheduleOrder from '../Modals/edit/EditScheduleOrder';
 import { green, grey } from '@mui/material/colors';
+import { checkIsPreOrderQualified } from '@/app/utils/orders';
+import { Verified } from '@mui/icons-material';
 
 interface PropTypes {
   selectedOrders: ScheduledOrder[];
@@ -46,6 +48,12 @@ export default function ScheduleOrder({
 }: PropTypes) {
   const [isSelected, setIsSelected] = useState<boolean>(false);
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  const isOrderQualified = useMemo(() => {
+    const isQualify = checkIsPreOrderQualified(scheduleOrder);
+
+    return isQualify;
+  }, [scheduleOrder]);
 
   useEffect(() => {
     const isChecked = selectedOrders.some(
@@ -137,9 +145,16 @@ export default function ScheduleOrder({
           </Typography>
         </Grid>
         <Grid item md={2} xs={12} textAlign={mdDown ? 'right' : 'left'}>
-          <Typography variant="subtitle1">
-            ${scheduleOrder.totalPrice.toFixed(2)}
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="subtitle1">
+              ${scheduleOrder.totalPrice.toFixed(2)}
+            </Typography>
+            { isOrderQualified && (
+              <Verified fontSize="small" sx={{ color: green[500] }} />
+            )
+
+            }
+          </Box>
         </Grid>
         {!mdDown && (
           <Grid item md={2}>

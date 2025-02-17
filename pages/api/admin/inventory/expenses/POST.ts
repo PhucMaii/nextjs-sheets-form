@@ -21,7 +21,7 @@ interface IBody {
   items: {
     id: number;
     quantity: number;
-    unitPrice: number;
+    // unitPrice: number;
     vendorId: number;
     unit: IInventoryUnit;
     units: IInventoryUnit[];
@@ -767,7 +767,7 @@ export const createOrderedItems = async (
     data: orderedItems,
   });
 
-  return { ok: true, error: null };
+  return { ok: true, error: null, orderedItems };
 };
 
 //[

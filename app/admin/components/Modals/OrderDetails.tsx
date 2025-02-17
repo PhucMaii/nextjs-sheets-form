@@ -46,6 +46,8 @@ export default function OrderDetails({
     useState<boolean>(false);
   const billPrintRef: any = useRef();
 
+  console.log(order, 'order');
+
   useEffect(() => {
     setItems(order.items);
   }, [order.items]);

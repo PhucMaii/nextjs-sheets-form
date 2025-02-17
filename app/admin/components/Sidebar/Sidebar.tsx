@@ -33,8 +33,13 @@ import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
-import { primary, primaryColor } from '@/theme/color';
+import { primary } from '@/theme/color';
 import { MaintenanceContext } from '@/app/context/MaintenanceProvider';
+import { generateRecommendDate } from '@/app/utils/time';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
+import StatusText from '../StatusText';
+import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   children: ReactNode;
@@ -45,15 +50,20 @@ const drawerWidth = 250;
 export default function Sidebar({ children, noMargin }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [invalidOrders, setInvalidOrders] = useState<Order[]>([]);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
   const { isMaintenance, setIsMaintenance } = useContext(MaintenanceContext);
   const url = process.env.NEXT_PUBLIC_WEB_URL;
 
+  const recommendDate = generateRecommendDate();
+
   const singlePrintRef: any = useRef();
   const allPrintRef: any = useRef();
+
+  console.log(invalidOrders, 'invalidOrders');
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
@@ -88,6 +98,26 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
     setCurrentTab(pathname);
   }, [pathname]);
 
+  const onFetchInvalidOrders = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `${API_URL.ADMIN}/orders/invalid-orders`,
+      );
+
+      if (response.data.error) {
+        console.error('Error fetching invalid orders:', response.data.error);
+      } else {
+        setInvalidOrders(response.data.data);
+      }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching invalid orders:', error);
+      setIsLoading(false);
+    }
+  };
+
   const handleChangeTab = (path: string) => {
     console.log('handleChangeTab called with path:', path);
     console.log('router object:', router);
@@ -95,14 +125,6 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   };
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-
-  const handleOnDataReceived = (data: any) => {
-    if (data.length > 1) {
-      setOrders(data);
-    } else {
-      setSingleOrder(data);
-    }
-  };
 
   const content = (
     <>
@@ -122,6 +144,31 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         />
       </Toolbar>
 
+      {/* {invalidOrders.length > 0 && (
+        <Toolbar sx={{ mt: 4 }}>
+          <Box display="flex" flexDirection="column" rowGap={2}>
+            {invalidOrders.map((order: any, index: number) => {
+              return (
+                <StatusText
+                  key={index}
+                  type="error"
+                  text={`Order ID: ${order.id} - Client: ${order.user.clientName}`}
+                />
+              );
+            })}
+          </Box>
+        </Toolbar>
+      )} */}
+
+      {/* <Toolbar sx={{ mt: 6 }}>
+        <LoadingButton
+          loading={isLoading}
+          onClick={onFetchInvalidOrders}
+          variant="outlined"
+        >
+          Check Invalid Orders
+        </LoadingButton>
+      </Toolbar> */}
       <List
         sx={{ width: '100%', maxWidth: 300, bgcolor: 'background', mt: 4 }}
         component="nav"

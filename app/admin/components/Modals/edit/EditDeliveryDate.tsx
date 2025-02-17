@@ -7,7 +7,7 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import axios from 'axios';
@@ -24,13 +24,14 @@ import {
 } from '@/app/utils/time';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LoadingButton } from '@mui/lab';
+// import { checkIsPreOrderQualified } from '@/app/utils/orders';
 
 interface PropTypes extends ModalProps {
   order?: Order;
   showNotification: (type: AlertColor, message: string) => void;
   isPreOrder?: boolean;
   scheduleOrderList?: ScheduledOrder[];
-  progress?: number;
+  // progress?: number;
   mutateOrders?: any;
 }
 
@@ -41,10 +42,11 @@ export default function EditDeliveryDate({
   showNotification,
   isPreOrder,
   scheduleOrderList,
-  progress,
+  // progress,
   mutateOrders,
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
     if (order) {
       return order.deliveryDate;
@@ -54,28 +56,61 @@ export default function EditDeliveryDate({
     return deliveryDate;
   });
 
+  useEffect(() => {
+    console.log('changing')
+    setProgress(0);
+  }, [scheduleOrderList]);
+
   const handlePreOrder = async () => {
+    if (!scheduleOrderList) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       const createdAt = generateCurrentTime();
       const submittedData: any = { deliveryDate: updatedDate, createdAt };
 
-      if (scheduleOrderList) {
-        submittedData.scheduleOrderIds = scheduleOrderList.map((order) => {
+      // const qualifiedOrderToBePlaced = scheduleOrderList?.filter((order) => {
+      //   const isQualified = checkIsPreOrderQualified(order);
+
+      //   return isQualified;
+      // });
+
+      // if (scheduleOrderList) {
+      //   submittedData.scheduleOrderIds = scheduleOrderList.map((order) => {
+      //     return order.id;
+      //   });
+      // }
+      let orderIndex = 0;
+      while (orderIndex < scheduleOrderList.length) {
+        const toCreateOrders = scheduleOrderList.slice(
+          orderIndex,
+          orderIndex + 10,
+        );
+
+        submittedData.scheduleOrderIds = toCreateOrders.map((order: any) => {
           return order.id;
         });
-      }
 
-      const response = await axios.post(API_URL.ORDER, submittedData);
+        // console.log(toCreateOrders, 'toCreateOrders');
 
-      if (response.data.error) {
-        setIsLoading(false);
-        showNotification('error', response.data.error);
-        return;
+        const response = await axios.post(API_URL.ORDER, submittedData);
+        if (response.data.error) {
+          setIsLoading(false);
+          showNotification('error', response.data.error);
+          return;
+        }
+
+        showNotification(
+          'success',
+          `Place orders successfully for ${toCreateOrders.length + orderIndex} orders`,
+        );
+        orderIndex += 10;
+        setProgress((orderIndex + 1 / scheduleOrderList.length) * 100);
       }
 
       setIsLoading(false);
-      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to update date: ', error);
       setIsLoading(false);

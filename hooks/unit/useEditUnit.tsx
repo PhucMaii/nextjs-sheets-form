@@ -223,6 +223,8 @@ const useEditUnit = (
     EditUnitModal,
     UnitDisplay,
     selectedUnit,
+    setSelectedUnit,
+    setUnits,
     onChangeAddUnitBoolean,
   };
 };

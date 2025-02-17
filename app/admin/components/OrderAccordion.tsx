@@ -104,6 +104,8 @@ const OrderAccordion = ({
             : COLOR_TYPE.ERROR,
   };
 
+  console.log(order,'orders in accordion');
+
   const { discountPrice, DiscountText } = useDiscount(order.items, order);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));

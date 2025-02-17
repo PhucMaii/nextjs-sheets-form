@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Order } from '../admin/orders/page';
 import { API_URL } from './enum';
-import { OrderedItems } from './type';
+import { OrderedItems, ScheduledOrder } from './type';
 import { Dispatch, SetStateAction } from 'react';
 
 export const updateStatus = async (
@@ -106,4 +106,13 @@ export const onSelectAllOrders = (
   } else {
     setSelectedOrders(baseOrders);
   }
+};
+
+export const checkIsPreOrderQualified = (scheduledOrder: ScheduledOrder) => {
+  const totalPriceGt0 = scheduledOrder.totalPrice > 0;
+  const hasItems = scheduledOrder.items.length > 0;
+  const hasOrdered = scheduledOrder?.alreadyOrder;
+  const isInactive = scheduledOrder?.blocked;
+
+  return totalPriceGt0 && hasItems && !hasOrdered && !isInactive;
 };
