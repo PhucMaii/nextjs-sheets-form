@@ -18,11 +18,8 @@ import AutoCompleteAddress from '../admin/components/AutoCompleteAddress';
 import { ShadowSection } from '../admin/reports/styled';
 import useCart from '@/hooks/useCart';
 import useNotification from '@/hooks/useNotification';
-import axios from 'axios';
-import { API_URL } from '../utils/enum';
-import useLocalStorage from '@/hooks/useLocalStorage';
-import { LoadingButton } from '@mui/lab';
 import useDatePicker from '@/hooks/useDatePicker';
+import CheckoutButton from '../admin/components/CheckoutButton';
 
 export default function CheckoutPage() {
   const [address, setAddress] = useState<any>({
@@ -34,12 +31,12 @@ export default function CheckoutPage() {
     lng: 0,
     fullName: '',
   });
-  const [guestSession] = useLocalStorage('guest-session', '');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<any>({
     name: '',
     email: '',
     contactNumber: '',
+    contactName: '',
     deliveryAddress: '',
   });
 
@@ -127,30 +124,30 @@ export default function CheckoutPage() {
   }, []);
 
   // Place order before payment for now.
-  const onPlaceOrder = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.post(`${API_URL.PUBLIC}/place-order`, {
-        cartId: cart.id,
-        guestSessionId: guestSession?.sessionId,
-        deliveryDate,
-        note,
-      });
+  // const onPlaceOrder = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await axios.post(`${API_URL.PUBLIC}/place-order`, {
+  //       cartId: cart.id,
+  //       guestSessionId: guestSession?.sessionId,
+  //       deliveryDate,
+  //       note,
+  //     });
 
-      if (response.data.error) {
-        setIsLoading(false);
-        showNotification('error', response.data.error);
-        return;
-      }
+  //     if (response.data.error) {
+  //       setIsLoading(false);
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
 
-      setIsLoading(false);
-      showNotification('success', 'Success to place order');
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error.response.data.error);
-      setIsLoading(true);
-      showNotification('error', error?.response?.data?.error);
-    }
-  };
+  //     setIsLoading(false);
+  //     showNotification('success', 'Success to place order');
+  //   } catch (error: any) {
+  //     console.log('Internal Server Error: ', error.response.data.error);
+  //     setIsLoading(true);
+  //     showNotification('error', error?.response?.data?.error);
+  //   }
+  // };
 
   const renderAddressInput = () => {
     return (
@@ -326,8 +323,6 @@ export default function CheckoutPage() {
     );
   };
 
-  return null;
-
   return (
     <NavbarWrapper>
       {NotificationComp}
@@ -350,15 +345,20 @@ export default function CheckoutPage() {
               {renderNoteInput()}
               <Divider>Total</Divider>
               {renderDisplayTotal()}
-              <LoadingButton
+              {/* <LoadingButton
                 variant="contained"
                 onClick={onPlaceOrder}
                 fullWidth
                 loading={isLoading}
                 sx={{ mt: 2 }}
               >
-                Checkout / Place order
-              </LoadingButton>
+                Checkout
+              </LoadingButton> */}
+              <CheckoutButton
+                style={{ width: '100%', mt: 2 }}
+                deliveryDate={deliveryDate}
+                clientData={userInfo}
+              />
             </ShadowSection>
           </Grid>
         </Grid>

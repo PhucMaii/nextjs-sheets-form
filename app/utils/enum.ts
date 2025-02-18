@@ -118,5 +118,7 @@ export enum USER_CATEGORIZED {
   SILVER = 'Silver',
   BRONZE = 'Bronze',
   INACTIVE = 'Inactive',
+  PENDING = 'Pending',
+  GUEST = 'Guest',
   NONE = 'None',
 }

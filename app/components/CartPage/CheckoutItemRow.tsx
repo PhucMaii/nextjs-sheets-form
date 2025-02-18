@@ -130,7 +130,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
           <Box
             component="a"
             aria-disabled={isLoading}
-            href={isLoading ? undefined : `/products/${item.id}`}
+            href={isLoading ? undefined : `/products/${item.itemPreferenceId}`}
             sx={{
               textDecoration: 'none',
               cursor: isLoading ? 'not-allowed' : 'pointer',

@@ -19,6 +19,7 @@ const initialState: UserState = {
   clientName: '',
   clientId: '',
   email: '',
+  contactName: '',
   contactNumber: '',
   deliveryAddress: '',
   deliveryAddressLat: 0,
@@ -31,7 +32,7 @@ const initialState: UserState = {
   role: USER_ROLE.GUEST,
   createdAt: '',
   guestSessionId: null,
-  type: USER_CATEGORIZED.INACTIVE,
+  type: USER_CATEGORIZED.GUEST,
 };
 
 const userSlice = createSlice({

@@ -37,7 +37,7 @@ export default function AboutPage() {
             Freshness, Quality, and Variety
           </Typography>
           <Typography sx={{ color: grey[600], mt: 2 }} textAlign="center">
-            We are serving Vancouver, Burnaby, Richmond, Coquitiam, Langley,
+            We are serving Greater of Vancouver, Burnaby, Richmond, Coquitiam, Langley,
             Surrey, and surrounding areas every day of the week.
           </Typography>
         </Box>

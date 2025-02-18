@@ -16,7 +16,7 @@ export default function TrustedBrand() {
         🌱 A Trusted Partner in Freshness and Quality
       </Typography>
       <Typography variant="h6" textAlign="center" fontWeight="normal">
-        Over 200 Businesses Across Vancouver Trust Supreme Sprouts
+        Over Hundreds of Businesses Across Vancouver Trust Supreme Sprouts
       </Typography>
 
       <Grid container columnSpacing={2} rowGap={4} mt={4} px={4}>

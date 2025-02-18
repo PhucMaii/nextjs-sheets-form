@@ -23,6 +23,7 @@ export default function PartnerApplicationForm() {
     name: '',
     email: '',
     contactNumber: '',
+    contactName: '',
     deliveryAddress: '',
     message: '',
   });
@@ -38,6 +39,7 @@ export default function PartnerApplicationForm() {
   const onSendRequest = async () => {
     if (
       !clientInfo.name ||
+      !clientInfo.contactName ||
       !clientInfo.email ||
       !clientInfo.contactNumber ||
       !clientInfo.deliveryAddress
@@ -154,6 +156,21 @@ export default function PartnerApplicationForm() {
                   setClientInfo((prevState: any) => ({
                     ...prevState,
                     name: e.target.value,
+                  }))
+                }
+              />
+            </Box>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography>Main Contact Name</Typography>
+              <TextField
+                size="small"
+                type="text"
+                placeholder="Please enter your main contact name..."
+                value={clientInfo.contactName}
+                onChange={(e: any) =>
+                  setClientInfo((prevState: any) => ({
+                    ...prevState,
+                    contactName: e.target.value,
                   }))
                 }
               />

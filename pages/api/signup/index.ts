@@ -4,11 +4,13 @@ import { signUpRequest } from '@/config/email';
 import { verifyDeliveryAddress } from '../utils/address';
 import { generateLatLng } from '../admin/clients/POST';
 import { createGuest } from '../public/create-guest';
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 
 interface IBody {
   name: string;
   email: string;
   contactNumber: string;
+  contactName: string;
   deliveryAddress: string;
   message: string;
 }
@@ -21,7 +23,7 @@ export default async function handler(
     return res.status(500).json({ error: 'Only POST method allowed' });
   }
   try {
-    const { name, email, contactNumber, deliveryAddress, message }: IBody =
+    const { name, email, contactName, contactNumber, deliveryAddress, message }: IBody =
       req.body;
 
     // Verify address
@@ -46,7 +48,9 @@ export default async function handler(
       clientName: name,
       email,
       contactNumber,
+      contactName,
       deliveryAddress,
+      type: USER_CATEGORIZED.GUEST,
     });
 
     // Send Email to Admin

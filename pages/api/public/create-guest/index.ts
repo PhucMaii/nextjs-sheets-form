@@ -13,6 +13,7 @@ interface IBody {
   guestSessionId: string;
   guestSessionSignature: string;
   name: string;
+  contactName: string;
   email: string;
   contactNumber: string;
   deliveryAddress: string;
@@ -27,24 +28,17 @@ export default async function handler(
       guestSessionId,
       guestSessionSignature,
       name,
+      contactName,
       email,
       contactNumber,
       deliveryAddress,
     }: IBody = req.body;
 
-    console.log({
-      guestSessionId,
-      guestSessionSignature,
-      name,
-      email,
-      contactNumber,
-      deliveryAddress,
-    });
-
     const newGuest = await createGuest({
       guestSessionId,
       guestSessionSignature,
       clientName: name,
+      contactName,
       email,
       contactNumber,
       deliveryAddress,
@@ -148,7 +142,7 @@ const generateGuestClientId = async () => {
   return clientId;
 };
 
-export const createGuest = async ({ client }: any) => {
+export const createGuest = async ({ client, type }: any) => {
   const prisma = new PrismaClient();
   try {
     if (!client.guestSessionId || !client.guestSessionSignature) {
@@ -209,6 +203,7 @@ export const createGuest = async ({ client }: any) => {
         password,
         categoryId: 334,
         sheetName: clientId,
+        contactName: client?.contactName,
         email: client.email,
         contactNumber: client.contactNumber,
         deliveryAddress: client.deliveryAddress,
@@ -217,6 +212,7 @@ export const createGuest = async ({ client }: any) => {
         role: USER_ROLE.GUEST,
         guestSessionId: client.guestSessionId,
         createdAt: `${date} ${time}`,
+        type,
       },
     });
 

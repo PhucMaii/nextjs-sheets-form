@@ -4,6 +4,7 @@ import { createOrder } from '../../admin/orders/POST';
 import { checkOrderDeliveryDateValid, getTodayDate } from '../../utils/date';
 import { createGuest } from '../create-guest';
 import { sendEmail } from '../../utils/email';
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 
 interface IBody {
   cartId: number;
@@ -41,6 +42,7 @@ export default async function handler(
     if (!userId && !guestSessionId) {
       user = await createGuest({
         client: req.body.client,
+        type: USER_CATEGORIZED.GUEST
       });
     } else {
       // Verify User
@@ -54,6 +56,7 @@ export default async function handler(
       if (!user) {
         user = await createGuest({
           client: req.body.client,
+          type: USER_CATEGORIZED.GUEST
         });
       }
     }
@@ -106,16 +109,7 @@ export default async function handler(
       });
     }
     // Format items to passed to createOrder function
-    const formattedItems = cartItems.map((item: any) => {
-      return {
-        ...item.itemPreference,
-        quantity: item.quantity,
-        name:
-          item.itemPreference?.name || item.itemPreference.inventoryItem.name,
-        inventoryUnitId: item.inventoryUnitId,
-        inventoryUnit: item.inventoryUnit,
-      };
-    });
+    const formattedItems = convertCartItemsToOrderItems(cartItems);
 
     // Create order
     const { date, time } = getTodayDate();
@@ -156,4 +150,19 @@ export default async function handler(
       error: 'Internal Server Error: ' + error,
     });
   }
+}
+
+export const convertCartItemsToOrderItems = (cartItems: any) => {
+  const formattedItems = cartItems.map((item: any) => {
+    return {
+      ...item.itemPreference,
+      quantity: item.quantity,
+      name:
+        item.itemPreference?.name || item.itemPreference.inventoryItem.name,
+      inventoryUnitId: item.inventoryUnitId,
+      inventoryUnit: item.inventoryUnit,
+    };
+  });
+
+  return formattedItems;
 }

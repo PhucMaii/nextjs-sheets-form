@@ -4,7 +4,6 @@ import {
   Box,
   FormGroup,
   InputLabel,
-  TextareaAutosize,
   TextField,
   Typography,
 } from '@mui/material';

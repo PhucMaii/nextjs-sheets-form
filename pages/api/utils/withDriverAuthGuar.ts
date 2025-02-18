@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 
-type HandlerFunction = (
+export type HandlerFunction = (
   req: NextApiRequest,
   res: NextApiResponse,
 ) => Promise<any>;

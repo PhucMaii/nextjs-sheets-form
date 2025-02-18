@@ -22,6 +22,7 @@ model User {
   subCategoryId      Int?
   userPreferenceId   Int? // will change back to force user to have it
   clientName         String  @db.VarChar(255)
+  contactName        String?
   clientId           String  @unique @db.VarChar(255)
   contactNumber      String  @db.VarChar(11)
   deliveryAddress    String  @db.VarChar(255)

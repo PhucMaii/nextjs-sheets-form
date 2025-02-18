@@ -20,6 +20,7 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
     clientName: '',
     email: '',
     contactNumber: '',
+    contactName: '',
     deliveryAddress: '',
     message: '',
   });
@@ -30,9 +31,10 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
 
   const { showNotification, NotificationComp } = useNotification();
 
-  const handleSendRequest = async () => {
+  const onSendRequest = async () => {
     if (
       !clientInfo.clientName ||
+      !clientInfo.contactName ||
       !clientInfo.email ||
       !clientInfo.contactNumber ||
       !clientInfo.deliveryAddress
@@ -101,12 +103,27 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
               <TextField
                 size="small"
                 type="text"
-                placeholder="Please enter your company clientName..."
+                placeholder="Please enter your company..."
                 value={clientInfo.clientName}
                 onChange={(e: any) =>
                   setClientInfo((prevState: any) => ({
                     ...prevState,
                     clientName: e.target.value,
+                  }))
+                }
+              />
+            </Box>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography>Main Contact Name</Typography>
+              <TextField
+                size="small"
+                type="text"
+                placeholder="Please enter your main contact name..."
+                value={clientInfo.contactName}
+                onChange={(e: any) =>
+                  setClientInfo((prevState: any) => ({
+                    ...prevState,
+                    contactName: e.target.value,
                   }))
                 }
               />
@@ -181,7 +198,7 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
             </Typography>
 
             <LoadingButton
-              onClick={handleSendRequest}
+              onClick={onSendRequest}
               loading={isLoading}
               variant="contained"
             >
