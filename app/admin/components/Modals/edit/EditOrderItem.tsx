@@ -50,7 +50,9 @@ export default function EditItemModal({
   const { showNotification, NotificationComp } = useNotification();
 
   const [units] = SWRFetchData(
-    `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`,
+    item?.inventoryUnit?.vendorItemId
+      ? `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`
+      : '',
   );
 
   console.log(item, 'item');
@@ -104,7 +106,7 @@ export default function EditItemModal({
         ...updatedItem,
         inventoryUnit: {
           ...selectedUnit,
-          vendorItemId: item.inventoryUnit.vendorItemId,
+          vendorItemId: item?.inventoryUnit?.vendorItemId,
         },
         units: newUnits,
       },

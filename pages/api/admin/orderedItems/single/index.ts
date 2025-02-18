@@ -36,6 +36,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    console.log('existingOrderedItem: ', existingOrderedItem);
+
     if (!existingOrderedItem) {
       return res.status(404).json({ error: 'Item Not Found' });
     }
@@ -44,6 +46,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const adminUpdate: any = await getUserInfo(req, res);
 
     const costAndProfit = await generateCostAndProfit(id);
+
+    console.log('costAndProfit: ', costAndProfit);
 
     const updatedOrderedItem = await prisma.orderedItems.update({
       where: {

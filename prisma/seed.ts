@@ -6,7 +6,157 @@ const prisma = new PrismaClient();
 //   return koreanRange.test(text);
 // };
 
-async function main() {}
+export const generateCostAndProfit = async (orderedItemId: number) => {
+  try {
+    const prisma = new PrismaClient();
+
+    const existingItem = await prisma.orderedItems.findUnique({
+      where: {
+        id: orderedItemId,
+      },
+      include: {
+        fifo: {
+          include: {
+            vendorItem: {
+              include: {
+                unit: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!existingItem) {
+      throw new Error(
+        'Ordered item id not provided in generate cost and profit',
+      );
+    }
+
+    let cost = existingItem?.cost;
+
+    if (!cost) {
+      cost = existingItem?.fifo?.price
+        ? existingItem.fifo.price
+        : existingItem.fifo?.vendorItem?.unit?.find(
+            (unit: any) => unit.ratio === 1,
+          )?.unitPrice || 0;
+    }
+
+    return { cost, profit: existingItem.price - cost };
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+    throw new Error('Fail to generate cost and profit: ', error);
+  }
+};
+
+export const normalizeDate = (date: Date | string) => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+export const days = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
+
+export const getTodayDate = (
+  dateStyle: 'short' | 'long' | 'full' | 'medium' | undefined = 'short',
+  timeStyle: 'short' | 'long' = 'long',
+) => {
+  const pstDate = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    dateStyle,
+    timeStyle,
+    // timeStyle,
+  }).format(new Date());
+
+  const date = pstDate.split(',')[0];
+  const dateSplitted = date.split('/');
+
+  const month = dateSplitted[0].padStart(2, '0');
+  const day = dateSplitted[1].padStart(2, '0');
+  const year = dateSplitted[2];
+
+  return { date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1] };
+};
+
+export const YYYYMMDDFormat = (date: Date) => {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  const formattedDate = `${month.toString().padStart(2, '0')}/${day
+    .toString()
+    .padStart(2, '0')}/${year.toString().padStart(2, '0')}`;
+
+  return formattedDate;
+};
+
+export const generateListOfDateString = (startDate: Date, endDate: Date) => {
+  const startDateString = YYYYMMDDFormat(startDate);
+  const dates = [startDateString];
+  const currentDate = startDate;
+  currentDate.setDate(currentDate.getDate() + 1);
+
+  while (currentDate.getTime() <= endDate.getTime()) {
+    // dates.push(currentDate);
+    const currentDateString = YYYYMMDDFormat(currentDate);
+    dates.push(currentDateString);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
+};
+
+async function main() {
+  // const startDate = new Date('2025-02-01');
+  // const endDate = getTodayDate();
+  // const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`);
+  // endDateFormatted.setDate(endDateFormatted.getDate() + 1);
+  // const decemberDayList = generateListOfDateString(startDate, endDateFormatted);
+
+  const orderedItems = await prisma.orderedItems.findMany({
+    where: {
+      Orders: {
+        deliveryDate: {
+          in: [
+            '02/13/2025',
+            '02/14/2025',
+            '02/15/2025',
+            '02/16/2025',
+            '02/17/2025',
+            '02/18/2025',
+            '02/19/2025',
+            '02/20/2025',
+          ],
+        },
+      },
+      inventoryUnitId: null,
+    },
+    include: {
+      Orders: {
+        include: {
+          user: true,
+        },
+      },
+      // inventoryUnit: true,
+    },
+  });
+  // console.log(orderedItems);
+
+  // const invalidItems = orderedItems.filter((item) => {
+  //   return !item.inventoryUnit || !item.inventoryUnit.vendorItemId;
+  // });
+
+  console.log(orderedItems);
+}
 
 main()
   .then(() => prisma.$disconnect())
