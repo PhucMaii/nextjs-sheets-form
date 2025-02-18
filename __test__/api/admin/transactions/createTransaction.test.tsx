@@ -217,7 +217,6 @@ describe('Create Transaction', () => {
     //     createdBy,
     //   },
     // });
-
     // const items: any = [
     //   {
     //     id: 0,

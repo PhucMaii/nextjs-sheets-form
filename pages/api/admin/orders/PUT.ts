@@ -9,21 +9,33 @@ import {
 
 interface BodyPropTypes {
   orderId: number;
-  deliveryDate: string;
+  deliveryDate?: string;
   status?: ORDER_STATUS;
+  note?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { orderId, deliveryDate, status } = req.body as BodyPropTypes;
+    const { orderId, deliveryDate, status, note } = req.body as BodyPropTypes;
 
-    const updateData: { deliveryDate: string; status?: ORDER_STATUS } = {
-      deliveryDate,
-    };
+    const updateData: any = {};
+    if (deliveryDate) {
+      updateData.deliveryDate = deliveryDate;
+    }
 
     if (status) {
       updateData.status = status;
+    }
+
+    if (note) {
+      updateData.note = note;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        error: 'No Data To Update',
+      });
     }
 
     const existingOrder = await prisma.orders.findUnique({

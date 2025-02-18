@@ -149,11 +149,9 @@ export default function ScheduleOrder({
             <Typography variant="subtitle1">
               ${scheduleOrder.totalPrice.toFixed(2)}
             </Typography>
-            { isOrderQualified && (
+            {isOrderQualified && (
               <Verified fontSize="small" sx={{ color: green[500] }} />
-            )
-
-            }
+            )}
           </Box>
         </Grid>
         {!mdDown && (

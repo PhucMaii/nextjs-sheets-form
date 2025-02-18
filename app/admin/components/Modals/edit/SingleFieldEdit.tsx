@@ -7,7 +7,7 @@ import {
   Select,
   TextField,
 } from '@mui/material';
-import React, { memo, useState } from 'react';
+import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 
@@ -34,6 +34,8 @@ const SingleFieldEdit = ({
 }: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [value, setValue] = useState<any>(defaultValue ? defaultValue : null);
+
+  console.log('re render');
 
   const handleSubmit = async () => {
     try {
@@ -82,7 +84,7 @@ const SingleFieldEdit = ({
           </FormControl>
         ) : (
           <FormControl fullWidth>
-            <InputLabel htmlFor="text-field">{inputLabel}</InputLabel>
+            {/* <InputLabel htmlFor="text-field">{inputLabel}</InputLabel> */}
             <TextField
               fullWidth
               id="text-field"
@@ -98,10 +100,4 @@ const SingleFieldEdit = ({
   );
 };
 
-export default memo(SingleFieldEdit, (prev, next) => {
-  return (
-    prev.title === next.title &&
-    prev.inputLabel === next.inputLabel &&
-    prev.renderField === next.renderField
-  );
-});
+export default SingleFieldEdit;

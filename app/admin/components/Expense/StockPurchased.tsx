@@ -190,7 +190,10 @@ export default function StockPurchased({
     //   unit: { ...selectedUnit, unitPrice: newUnitPrice },
     //   units: newUnits,
     // });
-    setSelectedUnit((prevState: any) => ({ ...prevState, unitPrice: newUnitPrice }));
+    setSelectedUnit((prevState: any) => ({
+      ...prevState,
+      unitPrice: newUnitPrice,
+    }));
     setUnits(newUnits);
   };
 

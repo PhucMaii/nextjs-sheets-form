@@ -8,7 +8,7 @@ import {
   Modal,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import CloseIcon from '@mui/icons-material/Close';
@@ -21,7 +21,10 @@ import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import OrderDetailsTable from '../Tables/OrderDetailsTable';
 import AddCustomAmount from './add/AddCustomAmount';
-import { TYPE, USER_ROLE } from '@/app/utils/enum';
+import EditIcon from '@mui/icons-material/Edit';
+import { API_URL, TYPE, USER_ROLE } from '@/app/utils/enum';
+import SingleFieldEdit from './edit/SingleFieldEdit';
+import axios from 'axios';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -34,23 +37,26 @@ interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function OrderDetails({
+const OrderDetails = ({
   open,
   onClose,
   order,
   handleUpdateItem,
   showNotification,
-}: IProps) {
+}: IProps) => {
   const [items, setItems] = useState<OrderedItems[]>(order.items);
+  const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
     useState<boolean>(false);
   const billPrintRef: any = useRef();
 
-  console.log(order, 'order');
-
   useEffect(() => {
-    setItems(order.items);
-  }, [order.items]);
+    if (order.items) {
+      setItems(order.items);
+    }
+
+    // setUpdatedNote(order?.note || '');
+  }, [order]);
 
   const handlePrinting = useReactToPrint({
     content: () => billPrintRef.current,
@@ -63,6 +69,29 @@ export default function OrderDetails({
 
     return quantity;
   }, [order]);
+
+  const onUpdateNote = async (updatedNote: string) => {
+    if (updatedNote === order?.note) {
+      showNotification('error', 'No update provided to note');
+      return;
+    }
+    try {
+      const response = await axios.put(API_URL.ORDER, {
+        orderId: order.id,
+        note: updatedNote,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to update note: ', error);
+      showNotification('error', error?.response?.data?.error || error);
+    }
+  };
 
   // const handleAddCustomAmount = async (customAmount: any) => {
   //   try {
@@ -101,6 +130,15 @@ export default function OrderDetails({
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />
       </div>
+      <SingleFieldEdit
+        open={isOpenEditNote}
+        onClose={() => setIsOpenEditNote(false)}
+        handleUpdate={onUpdateNote}
+        title="Note"
+        inputLabel="Note"
+        renderField="Note"
+        defaultValue={order?.note || ''}
+      />
       <Modal open={open} onClose={onClose}>
         <BoxModal
           display="flex"
@@ -185,9 +223,19 @@ export default function OrderDetails({
                 </Typography>
               </Grid>
               <Grid item xs={12}>
-                <Typography variant="subtitle1">
-                  {order.note ? order.note : 'N/A'}
-                </Typography>
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  gap={1}
+                  alignItems="center"
+                >
+                  <Typography variant="subtitle1">
+                    {order.note ? order.note : 'N/A'}
+                  </Typography>
+                  <IconButton onClick={() => setIsOpenEditNote(true)}>
+                    <EditIcon />
+                  </IconButton>
+                </Box>
               </Grid>
               <Grid item xs={12} mt={4}>
                 <Typography fontWeight="bold" variant="h6">
@@ -268,4 +316,13 @@ export default function OrderDetails({
       </Modal>
     </>
   );
-}
+};
+
+export default memo(OrderDetails, (prev, next) => {
+  return (
+    Object.is(prev.order, next.order) &&
+    // Object.is(prev.handleUpdateItem, next.handleUpdateItem) &&
+    prev.open === next.open
+    // Object.is(prev.onClose, next.onClose)
+  );
+});

@@ -47,12 +47,10 @@ export default async function handler(
 
     console.log(invalidOrders);
 
-    return res
-      .status(200)
-      .json({
-        data: invalidOrders,
-        message: 'Fetch Invalid Orders Successfully',
-      });
+    return res.status(200).json({
+      data: invalidOrders,
+      message: 'Fetch Invalid Orders Successfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

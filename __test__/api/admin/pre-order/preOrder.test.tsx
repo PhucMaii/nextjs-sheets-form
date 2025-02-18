@@ -83,6 +83,6 @@ describe('Pre Order', () => {
           in: newOrders.map((order: Order) => order.id),
         },
       },
-    })
+    });
   }, 90000);
 });
