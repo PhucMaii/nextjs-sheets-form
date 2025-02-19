@@ -35,11 +35,13 @@ import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primary } from '@/theme/color';
 import { MaintenanceContext } from '@/app/context/MaintenanceProvider';
-import { generateRecommendDate } from '@/app/utils/time';
+import { generateMonthRange, generateRecommendDate } from '@/app/utils/time';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import StatusText from '../StatusText';
 import { LoadingButton } from '@mui/lab';
+import { SWRFetchData } from '@/app/utils/db';
+import ErrorIcon from '@mui/icons-material/Error';
 
 interface PropTypes {
   children: ReactNode;
@@ -51,19 +53,22 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [invalidOrders, setInvalidOrders] = useState<Order[]>([]);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
   const { isMaintenance, setIsMaintenance } = useContext(MaintenanceContext);
   const url = process.env.NEXT_PUBLIC_WEB_URL;
 
-  const recommendDate = generateRecommendDate();
+  const recommendDateRange = generateMonthRange();
+
+  const [bugOrders] = SWRFetchData(
+    `${API_URL.ADMIN}/orders/invalid-orders?startDate=${recommendDateRange[0]}&endDate=${recommendDateRange[1]}`,
+  );
 
   const singlePrintRef: any = useRef();
   const allPrintRef: any = useRef();
 
-  console.log(invalidOrders, 'invalidOrders');
+  console.log(bugOrders, 'bug orders');
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
@@ -98,25 +103,25 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
     setCurrentTab(pathname);
   }, [pathname]);
 
-  const onFetchInvalidOrders = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `${API_URL.ADMIN}/orders/invalid-orders`,
-      );
+  // const onFetchInvalidOrders = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await axios.get(
+  //       `${API_URL.ADMIN}/orders/invalid-orders`,
+  //     );
 
-      if (response.data.error) {
-        console.error('Error fetching invalid orders:', response.data.error);
-      } else {
-        setInvalidOrders(response.data.data);
-      }
+  //     if (response.data.error) {
+  //       console.error('Error fetching invalid orders:', response.data.error);
+  //     } else {
+  //       setInvalidOrders(response.data.data);
+  //     }
 
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error fetching invalid orders:', error);
-      setIsLoading(false);
-    }
-  };
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error('Error fetching invalid orders:', error);
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handleChangeTab = (path: string) => {
     console.log('handleChangeTab called with path:', path);
@@ -125,6 +130,14 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   };
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  const renderIncorrectOrders = (order: Order) => {
+    return (
+      <Box display="flex" flexDirection="column" rowGap={2}>
+        <Typography></Typography>
+      </Box>
+    );
+  };
 
   const content = (
     <>
@@ -144,22 +157,6 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         />
       </Toolbar>
 
-      {/* {invalidOrders.length > 0 && (
-        <Toolbar sx={{ mt: 4 }}>
-          <Box display="flex" flexDirection="column" rowGap={2}>
-            {invalidOrders.map((order: any, index: number) => {
-              return (
-                <StatusText
-                  key={index}
-                  type="error"
-                  text={`Order ID: ${order.id} - Client: ${order.user.clientName}`}
-                />
-              );
-            })}
-          </Box>
-        </Toolbar>
-      )} */}
-
       {/* <Toolbar sx={{ mt: 6 }}>
         <LoadingButton
           loading={isLoading}
@@ -174,6 +171,38 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         component="nav"
         aria-labelledby="nested-list-subheader"
       >
+        {bugOrders && bugOrders?.data?.length > 0 && (
+          <Toolbar sx={{ mt: 2 }}>
+            <Box display="flex" flexDirection="column" rowGap={2}>
+              {bugOrders?.data.map((order: any, index: number) => {
+                return (
+                  <StatusText
+                    key={index}
+                    type="error"
+                    // text={`Order ID: ${order.id} - Client: ${order.user.clientName}`}
+                    icon={<ErrorIcon />}
+                    renderText={() => {
+                      return (
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="flex-start"
+                        >
+                          <Typography fontWeight="bold" flexWrap={'wrap'}>
+                            Error: {order?.errorType}
+                          </Typography>
+                          <Typography>Id: {order.id}</Typography>
+                          <Typography>Date: {order.deliveryDate}</Typography>
+                          <Typography>{order.user.clientName}</Typography>
+                        </Box>
+                      );
+                    }}
+                  />
+                );
+              })}
+            </Box>
+          </Toolbar>
+        )}
         <Box display="flex" flexDirection="column" rowGap={2}>
           {Object.keys(adminTabs).map((section: string, index: number) => {
             const sectionKey = section as keyof typeof adminTabs;

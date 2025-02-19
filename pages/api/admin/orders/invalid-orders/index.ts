@@ -1,8 +1,11 @@
+import { generateListOfDateString } from '@/app/utils/time';
+import { normalizeDate } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
-  deliveryDate?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export default async function handler(
@@ -14,17 +17,26 @@ export default async function handler(
       return res.status(404).json({ error: 'Your method is not supported' });
     }
 
-    const { deliveryDate }: IQuery = req.query;
+    const { startDate, endDate }: IQuery = req.query;
 
-    if (!deliveryDate) {
+    if (!startDate || !endDate) {
       return res.status(404).json({ error: 'You are missing selected date' });
     }
 
     const prisma = new PrismaClient();
 
+    const normalizedStartDate = normalizeDate(new Date(startDate));
+    const normalizedEndDate = normalizeDate(new Date(endDate));
+    const deliveryDate = generateListOfDateString(
+      normalizedStartDate,
+      normalizedEndDate,
+    );
+
     const orders = await prisma.orders.findMany({
       where: {
-        deliveryDate,
+        deliveryDate: {
+          in: deliveryDate,
+        },
       },
       include: {
         items: true,
@@ -32,20 +44,29 @@ export default async function handler(
       },
     });
 
-    const invalidOrders = orders.filter((order) => {
-      const hasItems = order.items.length > 0;
-      const actualSubtotal = order.items.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0,
-      );
+    const invalidOrders = orders
+      .map((order) => {
+        const hasItems = order.items.length > 0;
+        const actualSubtotal = order.items.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0,
+        );
 
-      const isSubtotalMatch =
-        actualSubtotal.toFixed(2) === order.subTotal?.toFixed(2);
+        const isSubtotalMatch =
+          actualSubtotal.toFixed(2) === order.subTotal?.toFixed(2);
 
-      return !hasItems || !isSubtotalMatch;
-    });
+        // return !hasItems || !isSubtotalMatch;
+        if (!hasItems) {
+          return { ...order, errorType: 'No Items' };
+        }
 
-    console.log(invalidOrders);
+        if (!isSubtotalMatch) {
+          return { ...order, errorType: 'Subtotal Mismatch' };
+        }
+
+        return null;
+      })
+      .filter((order) => order !== null);
 
     return res.status(200).json({
       data: invalidOrders,
