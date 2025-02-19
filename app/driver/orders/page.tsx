@@ -323,11 +323,9 @@ export default function OrdersPage() {
         handleUpdateItem={handleUpdateItem}
         showNotification={showNotification}
       />
-      {
-        isFetching ? (
-          <Typography>Loading... {ordersResponse?.data?.length || 0}</Typography>
-        ) : null
-      }
+      {isFetching ? (
+        <Typography>Loading... {ordersResponse?.data?.length || 0}</Typography>
+      ) : null}
       <Grid container alignItems="center">
         <Grid item xs={4}></Grid>
         <Grid item xs={4} textAlign="center">

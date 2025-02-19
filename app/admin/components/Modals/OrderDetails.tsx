@@ -25,6 +25,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import { API_URL, TYPE, USER_ROLE } from '@/app/utils/enum';
 import SingleFieldEdit from './edit/SingleFieldEdit';
 import axios from 'axios';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteModal from './delete/DeleteModal';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -46,6 +48,7 @@ const OrderDetails = ({
 }: IProps) => {
   const [items, setItems] = useState<OrderedItems[]>(order.items);
   const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
+  const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
   const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
     useState<boolean>(false);
   const billPrintRef: any = useRef();
@@ -69,6 +72,24 @@ const OrderDetails = ({
 
     return quantity;
   }, [order]);
+
+  const onClearNote = async (selectedOrder: Order) => {
+    try {
+      const response = await axios.put(`${API_URL.ADMIN}/orders/clear-note`, {
+        orderId: selectedOrder.id,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to clear note: ', error);
+      showNotification('error', error?.response?.data?.error || error);
+    }
+  };
 
   const onUpdateNote = async (updatedNote: string) => {
     if (updatedNote === order?.note) {
@@ -126,6 +147,13 @@ const OrderDetails = ({
         }
         orderId={order.id}
         showNotification={showNotification}
+      />
+      <DeleteModal
+        open={isOpenClearNote}
+        handleCloseModal={() => setIsOpenClearNote(false)}
+        handleDelete={onClearNote}
+        targetObj={order}
+        message="Are you sure to clear note ?"
       />
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />
@@ -232,9 +260,17 @@ const OrderDetails = ({
                   <Typography variant="subtitle1">
                     {order.note ? order.note : 'N/A'}
                   </Typography>
-                  <IconButton onClick={() => setIsOpenEditNote(true)}>
-                    <EditIcon />
-                  </IconButton>
+                  <Box display="flex" alignItems="center">
+                    <IconButton
+                      color="error"
+                      onClick={() => setIsOpenClearNote(true)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton onClick={() => setIsOpenEditNote(true)}>
+                      <EditIcon />
+                    </IconButton>
+                  </Box>
                 </Box>
               </Grid>
               <Grid item xs={12} mt={4}>

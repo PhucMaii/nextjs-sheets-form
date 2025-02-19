@@ -195,7 +195,7 @@ export default function EditDeliveryDate({
               />
             </LocalizationProvider>
           </FormControl>
-          {progress !== undefined ? (
+          {scheduleOrderList ? (
             <LinearProgress variant="determinate" value={progress} />
           ) : (
             ''
