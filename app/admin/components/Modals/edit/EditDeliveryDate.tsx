@@ -83,10 +83,11 @@ export default function EditDeliveryDate({
       //   });
       // }
       let orderIndex = 0;
+      const batchOrders = 5;
       while (orderIndex < scheduleOrderList.length) {
         const toCreateOrders = scheduleOrderList.slice(
           orderIndex,
-          orderIndex + 10,
+          orderIndex + batchOrders,
         );
 
         submittedData.scheduleOrderIds = toCreateOrders.map((order: any) => {
@@ -106,7 +107,7 @@ export default function EditDeliveryDate({
           'success',
           `Place orders successfully for ${toCreateOrders.length + orderIndex} orders`,
         );
-        orderIndex += 10;
+        orderIndex += batchOrders;
         setProgress((orderIndex + 1 / scheduleOrderList.length) * 100);
       }
 
