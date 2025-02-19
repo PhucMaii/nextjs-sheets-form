@@ -135,7 +135,7 @@ export default function OrderSummary({ showNotification }: IProps) {
 
         <Divider>Other Information</Divider>
         {renderOrderInfo()}
-        {user?.id > 0 ? (
+        {user?.type === USER_CATEGORIZED.PENDING ? (
           <>
             <Button variant="contained" onClick={proceedToLoginPage}>
               Login To Our Partner Portal
@@ -151,6 +151,11 @@ export default function OrderSummary({ showNotification }: IProps) {
             <Button
               variant="contained"
               onClick={() => setIsOpenJoinModal(true)}
+              disabled={
+                user?.type === USER_CATEGORIZED.PENDING &&
+                user?.Orders &&
+                user?.Orders?.length > 0
+              }
             >
               Place Order & Be Our Partner
             </Button>

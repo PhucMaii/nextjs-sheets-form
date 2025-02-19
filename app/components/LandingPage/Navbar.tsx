@@ -152,6 +152,7 @@ export default function Navbar() {
 
   const fetchGuestSessionId = async () => {
     try {
+      console.log('fetchGuestSessionId called', guestSession);
       // Check if a guest session ID already exists in local storage
       if (Object.keys(guestSession).length > 0) {
         // If yes -> Check if this session id already been a guest in db

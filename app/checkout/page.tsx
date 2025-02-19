@@ -17,7 +17,7 @@ import { grey } from '@mui/material/colors';
 import AutoCompleteAddress from '../admin/components/AutoCompleteAddress';
 import { ShadowSection } from '../admin/reports/styled';
 import useCart from '@/hooks/useCart';
-import useNotification from '@/hooks/useNotification';
+// import useNotification from '@/hooks/useNotification';
 import useDatePicker from '@/hooks/useDatePicker';
 import CheckoutButton from '../admin/components/CheckoutButton';
 
@@ -31,7 +31,7 @@ export default function CheckoutPage() {
     lng: 0,
     fullName: '',
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<any>({
     name: '',
     email: '',
@@ -41,14 +41,15 @@ export default function CheckoutPage() {
   });
 
   const {
-    cart,
+    // cart,
     renderDisplayTotal,
     renderItemsDisplay,
-    note,
+    // note,
     renderNoteInput,
   }: any = useCart();
+
   const { renderDatePicker, deliveryDate } = useDatePicker();
-  const { showNotification, NotificationComp } = useNotification();
+  // const { showNotification, NotificationComp } = useNotification();
 
   const onChangeField = (field: string, value: string | number) => {
     setUserInfo((prevState: any) => {
@@ -325,7 +326,7 @@ export default function CheckoutPage() {
 
   return (
     <NavbarWrapper>
-      {NotificationComp}
+      {/* {NotificationComp} */}
       <Box sx={{ maxWidth: maxWidth, mx: 'auto', p: 2 }}>
         <Grid container spacing={2}>
           {/* Checkout info */}

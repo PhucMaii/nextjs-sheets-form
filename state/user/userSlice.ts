@@ -1,9 +1,12 @@
+import { Order } from '@/app/admin/orders/page';
 import { API_URL, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import { User } from '@prisma/client';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-interface UserState extends User {}
+interface UserState extends User {
+  Orders: Order[];
+}
 
 export interface GuestUserParams {
   guestSessionId: string;
@@ -33,6 +36,7 @@ const initialState: UserState = {
   createdAt: '',
   guestSessionId: null,
   type: USER_CATEGORIZED.GUEST,
+  Orders: [],
 };
 
 const userSlice = createSlice({

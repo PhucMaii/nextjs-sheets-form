@@ -1,9 +1,12 @@
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 import useCart from '@/hooks/useCart';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { CheckoutClientData } from '@/pages/api/stripe';
+import { RootState } from '@/state/store';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 interface IProps {
   style?: any;
@@ -40,6 +43,7 @@ export default function CheckoutButton({
   const [guestSession] = useLocalStorage('guest-session', '');
 
   const { cart } = useCart();
+  const user = useSelector((state: RootState) => state.user);
 
   const onPayment = async () => {
     setIsLoading(true);
@@ -57,8 +61,14 @@ export default function CheckoutButton({
   };
 
   return (
-    <LoadingButton variant="contained" fullWidth onClick={onPayment} loading={isLoading} {...style}>
-      Checkout
+    <LoadingButton
+      variant="contained"
+      fullWidth
+      onClick={onPayment}
+      loading={isLoading}
+      {...style}
+    >
+      {user?.type === USER_CATEGORIZED.PENDING ? 'Back to Cart' : 'Checkout'}
     </LoadingButton>
   );
 }

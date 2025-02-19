@@ -1,4 +1,3 @@
-import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -17,8 +16,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const guest = await prisma.user.findFirst({
       where: {
         guestSessionId: guestSessionId as string,
-        role: USER_ROLE.GUEST,
       },
+      include: {
+        Orders: true,
+      }
     });
 
     return res.status(200).json({
