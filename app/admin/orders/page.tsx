@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -331,8 +337,17 @@ export default function Orders() {
 
   const initializeOrder = () => {
     setPages(Math.ceil(orders.data / orderPerPage));
-    setBaseOrderData(orders.data);
+    setBaseOrderData([...(orders?.data || [])]);
     setCurrentPage(1);
+    if (selectedOrderDetails) {
+      const updatedOrderDetails = orders.data.find(
+        (order: Order) => order.id === selectedOrderDetails.id,
+      );
+
+      if (updatedOrderDetails) {
+        setSelectedOrderDetails(updatedOrderDetails);
+      }
+    }
   };
 
   const generateOrderData = (orderList = baseOrderData) => {
@@ -364,37 +379,40 @@ export default function Orders() {
     setActionButtonAnchor(null);
   };
 
-  const onUpdateItem = async (
-    orderTotalPrice: number,
-    order: Order,
-    updatedItem: OrderedItems,
-    isConvertToCustom: boolean = false,
-  ) => {
-    try {
-      const response = await updateOrderedItems(
-        orderTotalPrice,
-        order,
-        updatedItem,
-        showNotification,
-        isConvertToCustom,
-      );
+  const onUpdateItem = useCallback(
+    async (
+      orderTotalPrice: number,
+      order: Order,
+      updatedItem: OrderedItems,
+      isConvertToCustom: boolean = false,
+    ) => {
+      try {
+        const response = await updateOrderedItems(
+          orderTotalPrice,
+          order,
+          updatedItem,
+          showNotification,
+          isConvertToCustom,
+        );
 
-      // Optimistic update
-      handleUpdateUISingleOrder(order, response.data.data);
-      setSelectedOrderDetails(response.data.updatedOrder);
+        // Optimistic update
+        handleUpdateUISingleOrder(order, response.data.data);
+        setSelectedOrderDetails(response.data.updatedOrder);
 
-      // Mutate to update real data
-      mutate();
+        // Mutate to update real data
+        mutate();
 
-      showNotification('success', 'Update Item Successfully');
-    } catch (error: any) {
-      console.log('Fail to update order items: ', error);
-      showNotification(
-        'error',
-        'Fail to update order items: ' + error.response.data.error,
-      );
-    }
-  };
+        showNotification('success', 'Update Item Successfully');
+      } catch (error: any) {
+        console.log('Fail to update order items: ', error);
+        showNotification(
+          'error',
+          'Fail to update order items: ' + error.response.data.error,
+        );
+      }
+    },
+    [],
+  );
 
   const handleDeleteSelectedOrders = async () => {
     setIsExecutingAction(true);

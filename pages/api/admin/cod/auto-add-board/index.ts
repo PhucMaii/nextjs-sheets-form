@@ -14,10 +14,9 @@ import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// interface IBody {
-//   todayString: string;
-//   createdAt: string;
-// }
+interface IBody {
+  todayString: string;
+}
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -27,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    // const { createdAt }: IBody = req.body;
+    const { todayString }: IBody = req.body;
 
     const user = await getUserInfo(req, res);
 
@@ -37,7 +36,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const { date: todayString, time } = getTodayDate();
+    const { date, time } = getTodayDate();
 
     const boards: any = await prisma.codBoard.findMany({
       where: {
@@ -165,7 +164,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         driverId: route.driverId,
         note: '',
         status: COD_STATUS.IN_PROCESS,
-        createdAt: `${todayString} ${time}`,
+        createdAt: `${date} ${time}`,
         createdBy: `Admin - ${user.clientName}`,
       };
     });

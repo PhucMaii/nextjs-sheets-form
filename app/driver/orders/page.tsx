@@ -94,7 +94,7 @@ export default function OrdersPage() {
   const { showNotification, NotificationComp } = useNotification();
   // const { date: datePicker, SelectDate } = useSelectDate(today);
 
-  const [ordersResponse, mutateOrders] = SWRFetchData(
+  const [ordersResponse, mutateOrders, isValidating] = SWRFetchData(
     `${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`,
   );
   const [board, mutateBoard] = SWRFetchData(
@@ -106,14 +106,19 @@ export default function OrdersPage() {
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
   }, []);
 
+  // Handle loading
+  useEffect(() => {
+    if (isValidating && !ordersResponse) {
+      setIsFetching(true);
+    } else if (!isValidating && ordersResponse) {
+      setIsFetching(false);
+    }
+  }, [ordersResponse, isValidating]);
+
   useEffect(() => {
     if (ordersResponse) {
       initializeOrders();
-    } else {
-      setOrders([]);
-      setDisplayOrders([]);
     }
-    setIsFetching(false);
   }, [currentTab, ordersResponse, board]);
 
   const deliveredOrders = useMemo(() => {
@@ -319,6 +324,9 @@ export default function OrdersPage() {
         handleUpdateItem={handleUpdateItem}
         showNotification={showNotification}
       />
+      {isFetching ? (
+        <Typography>Loading... {ordersResponse?.data?.length || 0}</Typography>
+      ) : null}
       <Grid container alignItems="center">
         <Grid item xs={4}></Grid>
         <Grid item xs={4} textAlign="center">
