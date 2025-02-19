@@ -53,7 +53,11 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
         });
         setIsLoading(false);
       } else {
-        const response = await axios.post('/api/signup', clientInfo);
+        const response = await axios.post('/api/signup', {
+          ...clientInfo,
+          guestSessionId: session.sessionId,
+          guestSessionSignature: session.signature,
+        });
 
         if (response.data.error) {
           showNotification('error', response.data.error);

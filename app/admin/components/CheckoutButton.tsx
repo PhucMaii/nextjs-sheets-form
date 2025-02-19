@@ -5,6 +5,7 @@ import { CheckoutClientData } from '@/pages/api/stripe';
 import { RootState } from '@/state/store';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -44,10 +45,18 @@ export default function CheckoutButton({
 
   const { cart } = useCart();
   const user = useSelector((state: RootState) => state.user);
+  const router = useRouter();
 
   const onPayment = async () => {
     setIsLoading(true);
     try {
+      if (user?.type === USER_CATEGORIZED.PENDING) {
+        router.push('/auth/login');
+        setIsLoading(false);
+
+        return;
+      }
+
       await onStripePayment(cart.id, deliveryDate, {
         ...clientData,
         guestSessionId: guestSession.sessionId,
@@ -66,9 +75,9 @@ export default function CheckoutButton({
       fullWidth
       onClick={onPayment}
       loading={isLoading}
-      {...style}
+      style={{ ...style }}
     >
-      {user?.type === USER_CATEGORIZED.PENDING ? 'Back to Cart' : 'Checkout'}
+      {user?.type === USER_CATEGORIZED.PENDING ? 'Login to order' : 'Checkout'}
     </LoadingButton>
   );
 }

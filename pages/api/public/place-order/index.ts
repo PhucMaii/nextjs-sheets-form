@@ -40,10 +40,12 @@ export default async function handler(
 
     let user;
     if (!userId && !guestSessionId) {
-      user = await createGuest({
-        client: req.body.client,
-        type: USER_CATEGORIZED.GUEST
-      });
+      user = await createGuest(
+        {
+          ...req.body.client,
+          type: USER_CATEGORIZED.GUEST
+        }
+      );
     } else {
       // Verify User
       const queryUser = userId
@@ -55,7 +57,7 @@ export default async function handler(
 
       if (!user) {
         user = await createGuest({
-          client: req.body.client,
+          ...req.body.client,
           type: USER_CATEGORIZED.GUEST
         });
       }

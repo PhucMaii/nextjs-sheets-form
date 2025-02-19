@@ -142,7 +142,7 @@ const generateGuestClientId = async () => {
   return clientId;
 };
 
-export const createGuest = async ({ client, type }: any) => {
+export const createGuest = async (client: any) => {
   const prisma = new PrismaClient();
   try {
     if (!client.guestSessionId || !client.guestSessionSignature) {
@@ -196,6 +196,8 @@ export const createGuest = async ({ client, type }: any) => {
 
     const { date, time } = getTodayDate();
 
+    console.log(client.guestSessionId);
+
     const newGuest = await prisma.user.create({
       data: {
         clientName: client.clientName,
@@ -212,7 +214,7 @@ export const createGuest = async ({ client, type }: any) => {
         role: USER_ROLE.GUEST,
         guestSessionId: client.guestSessionId,
         createdAt: `${date} ${time}`,
-        type,
+        type: client?.type,
       },
     });
 

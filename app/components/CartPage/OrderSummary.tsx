@@ -42,6 +42,8 @@ export default function OrderSummary({ showNotification }: IProps) {
   const { cart, renderDisplayTotal } = useCart();
   const user = useSelector((state: RootState) => state.user);
 
+  console.log('user: ', user);
+
   const dispatch = useDispatch<AppDispatch>();
   const { renderDatePicker, deliveryDate } = useDatePicker(0);
 

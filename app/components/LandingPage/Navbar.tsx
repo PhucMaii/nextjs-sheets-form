@@ -113,7 +113,7 @@ export default function Navbar() {
 
   useEffect(() => {
     fetchGuestSessionId();
-  }, []);
+  }, [guestSession]);
 
   useEffect(() => {
     if (cart?.data) {
@@ -163,6 +163,8 @@ export default function Navbar() {
         if (response.data.error) {
           throw new Error('Something went wrong. ', response.data.error);
         }
+
+        console.log(response.data.data);
 
         if (response.data.data) {
           dispatch(updateUser(response.data.data));

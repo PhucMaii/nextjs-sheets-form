@@ -17,6 +17,7 @@ import {
   maxWidth,
 } from '@/constant/landingPage';
 import { useRouter } from 'next/navigation';
+import useLocalStorage from '@/hooks/useLocalStorage';
 
 export default function PartnerApplicationForm() {
   const [clientInfo, setClientInfo] = useState<any>({
@@ -27,6 +28,7 @@ export default function PartnerApplicationForm() {
     deliveryAddress: '',
     message: '',
   });
+  const [guestSession] = useLocalStorage('guest-session', {});
 
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
@@ -50,7 +52,11 @@ export default function PartnerApplicationForm() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/signup', clientInfo);
+      const response = await axios.post('/api/signup', {
+        ...clientInfo,
+        guestSessionId: guestSession.sessionId,
+        guestSessionSignature: guestSession.signature,
+      });
 
       if (response.data.error) {
         showNotification('error', response.data.error);

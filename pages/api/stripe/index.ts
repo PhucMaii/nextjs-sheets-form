@@ -77,8 +77,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const stripeSession = await stripe.checkout.sessions.create({
-      success_url: `${process.env.NEXTAUTH_URL}/success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/cancel`,
+      success_url: `${process.env.NEXTAUTH_URL}/payment/success`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
       mode: 'payment',
       billing_address_collection: 'auto',
       customer_email: clientData.email,

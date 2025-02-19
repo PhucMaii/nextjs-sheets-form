@@ -356,7 +356,7 @@ export default function CheckoutPage() {
                 Checkout
               </LoadingButton> */}
               <CheckoutButton
-                style={{ width: '100%', mt: 2 }}
+                style={{ width: '100%', marginTop: 6 }}
                 deliveryDate={deliveryDate}
                 clientData={userInfo}
               />

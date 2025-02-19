@@ -45,6 +45,10 @@ export default function SearchPopover({
           width: popoverWidth, // Set width dynamically
           maxHeight: '50vh',
           overflowY: 'auto',
+          borderColor: landingPagePrimaryColor,
+        },
+        '&:focus': {
+          borderColor: landingPagePrimaryColor,
         },
       }}
     >

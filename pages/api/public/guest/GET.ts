@@ -13,6 +13,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    console.log(guestSessionId, 'guestSessionId');
+
     const guest = await prisma.user.findFirst({
       where: {
         guestSessionId: guestSessionId as string,
@@ -21,6 +23,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         Orders: true,
       }
     });
+
+    console.log(guest, 'guest');
 
     return res.status(200).json({
       data: guest,

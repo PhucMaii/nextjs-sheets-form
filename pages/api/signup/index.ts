@@ -13,6 +13,8 @@ interface IBody {
   contactName: string;
   deliveryAddress: string;
   message: string;
+  guestSessionId: string;
+  guestSessionSignature: string;
 }
 
 export default async function handler(
@@ -23,8 +25,17 @@ export default async function handler(
     return res.status(500).json({ error: 'Only POST method allowed' });
   }
   try {
-    const { name, email, contactName, contactNumber, deliveryAddress, message }: IBody =
-      req.body;
+    const {
+      name,
+      email,
+      contactName,
+      contactNumber,
+      guestSessionId,
+      guestSessionSignature,
+      deliveryAddress,
+      message,
+    }: IBody = req.body;
+    console.log(req.body);
 
     // Verify address
     const address = await generateLatLng(deliveryAddress);
@@ -47,10 +58,12 @@ export default async function handler(
     const newGuest = await createGuest({
       clientName: name,
       email,
+      guestSessionId,
+      guestSessionSignature: guestSessionSignature,
       contactNumber,
       contactName,
       deliveryAddress,
-      type: USER_CATEGORIZED.GUEST,
+      type: USER_CATEGORIZED.PENDING,
     });
 
     // Send Email to Admin
@@ -68,14 +81,12 @@ export default async function handler(
       template,
     );
 
-    return res
-      .status(200)
-      .json({
-        data: newGuest,
-        message: 'Your Request has been sent successfully',
-      });
-  } catch (error) {
+    return res.status(200).json({
+      data: newGuest,
+      message: 'Your Request has been sent successfully',
+    });
+  } catch (error: any) {
     console.log(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: error.message });
   }
 }
