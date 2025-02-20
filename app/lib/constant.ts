@@ -136,11 +136,12 @@ export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (
 export const testAccountId = 223;
 
 export const sendChequeMsg = `
-* Please send your payment by cheque to:
+* Please either send your payment by cheque 
+with company name or memo with client number to:
 Unit 1 - 6420 Beresford Street
 Burnaby, British Columbia V5E 1B6, Canada
 
-if we are unable to collect it in person.
+Or e-transfer at info@supremesprouts.com
 Thank you for your cooperation. *
 `;
 
@@ -212,7 +213,7 @@ export const adminTabs = {
       path: '/admin/items',
     },
     {
-      name: 'Clients',
+      name: 'Users',
       icon: PeopleIcon,
       path: '/admin/clients',
     },
