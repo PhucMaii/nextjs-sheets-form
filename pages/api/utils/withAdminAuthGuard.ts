@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
+import { USER_ROLE } from '@/app/utils/enum';
 
 type HandlerFunction = (
   req: NextApiRequest,
@@ -9,7 +10,10 @@ type HandlerFunction = (
 ) => Promise<any>;
 
 const withAdminAuthGuard =
-  <T extends HandlerFunction>(handler: T) =>
+  <T extends HandlerFunction>(
+    handler: T,
+    isSuperAdminPrivilege: boolean = false,
+  ) =>
   async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const prisma = new PrismaClient();
@@ -31,6 +35,15 @@ const withAdminAuthGuard =
       }
 
       if (existingUser.role === 'client') {
+        return res
+          .status(404)
+          .json({ error: 'You are not authorized to access' });
+      }
+
+      if (
+        isSuperAdminPrivilege &&
+        existingUser.role !== USER_ROLE.SUPER_ADMIN
+      ) {
         return res
           .status(404)
           .json({ error: 'You are not authorized to access' });
