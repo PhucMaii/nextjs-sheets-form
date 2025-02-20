@@ -212,7 +212,7 @@ export const adminTabs = {
       path: '/admin/items',
     },
     {
-      name: 'Clients',
+      name: 'Users',
       icon: PeopleIcon,
       path: '/admin/clients',
     },

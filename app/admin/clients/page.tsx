@@ -9,6 +9,8 @@ import {
   Grid,
   Menu,
   MenuItem,
+  Tab,
+  Tabs,
   TextField,
   Typography,
   useMediaQuery,
@@ -37,13 +39,14 @@ import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import ClientListCSV from '../components/CSV/ClientListCSV';
 import { useRouter } from 'next/navigation';
+import AdminTable from '../components/Tables/AdminTable';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
-  const [baseClientList, setBaseClientList] = useState<UserType[]>([]);
-  const [clientList, setClientList] = useState<UserType[]>([]);
+  const [baseUsersList, setBaseUsersList] = useState<UserType[]>([]);
+  const [userList, setUserList] = useState<UserType[]>([]);
   const [singleFieldUpdateProps, setSingleFieldUpdateProps] =
     useState<SingleFieldUpdateProps>({
       open: false,
@@ -55,16 +58,21 @@ export default function ClientsPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isAddClientOpen, setIsAddClientOpen] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  // const [selectedDetailsClient, setSelectedDetailedClient] =
-  //   useState<any>(null);
-  const [selectedClients, setSelectedClients] = useState<UserType[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<UserType[]>([]);
+  const [selectedTab, setSelectedTab] = useState<number>(0);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
-  const [clients, mutateClients] = SWRFetchData(API_URL.CLIENTS);
+  const [users, mutateClients] = SWRFetchData(
+    selectedTab === 0
+      ? API_URL.CLIENTS
+      : selectedTab === 1
+        ? API_URL.ADMIN
+        : '',
+  );
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -72,14 +80,14 @@ export default function ClientsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (clients) {
-      initializeClients();
+    if (users) {
+      initializeUsers();
     }
-  }, [clients]);
+  }, [users]);
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newClientList = baseClientList.filter((client: UserType) => {
+      const newClientList = baseUsersList.filter((client: UserType) => {
         if (
           client.clientId.includes(debouncedKeywords) ||
           client.clientName
@@ -90,54 +98,54 @@ export default function ClientsPage() {
         }
         return false;
       });
-      setClientList(newClientList);
+      setUserList(newClientList);
     } else {
-      setClientList(baseClientList);
+      setUserList(baseUsersList);
     }
-  }, [debouncedKeywords, baseClientList]);
+  }, [debouncedKeywords, baseUsersList]);
 
   const directToClientDetails = (clientData: any) => {
     router.push('/admin/clients/' + clientData.id);
   };
 
   const numberOfUserUsingApp = useCallback(() => {
-    const totalUserUsingApp = baseClientList.filter((client: UserType) => {
+    const totalUserUsingApp = baseUsersList.filter((client: UserType) => {
       return client?.preference?.orderType === ORDER_TYPE.QR_CODE;
     });
 
     const percentageTaken =
-      (totalUserUsingApp.length / baseClientList.length) * 100;
+      (totalUserUsingApp.length / baseUsersList.length) * 100;
     return {
       numberOfUsers: totalUserUsingApp.length,
       percentage: percentageTaken.toFixed(2),
     };
-  }, [baseClientList]);
+  }, [baseUsersList]);
 
   const numberOfUserPayMonthly = useCallback(() => {
-    const totalUserPayMonthly = baseClientList.filter((client: UserType) => {
+    const totalUserPayMonthly = baseUsersList.filter((client: UserType) => {
       return client?.preference?.paymentType === PAYMENT_TYPE.MONTHLY;
     });
 
     const percentageTaken =
-      (totalUserPayMonthly.length / baseClientList.length) * 100;
+      (totalUserPayMonthly.length / baseUsersList.length) * 100;
     return {
       numberOfUsers: totalUserPayMonthly.length,
       percentage: percentageTaken.toFixed(2),
     };
-  }, [baseClientList]);
+  }, [baseUsersList]);
 
   const onAddClientUI = (newClient: UserType) => {
-    setBaseClientList([...baseClientList, newClient]);
-    setClientList([...clientList, newClient]);
+    setBaseUsersList([...baseUsersList, newClient]);
+    setUserList([...userList, newClient]);
   };
 
   const handleCloseAnchor = () => {
     setActionButtonAnchor(null);
   };
 
-  const initializeClients = () => {
-    setClientList(clients?.data);
-    setBaseClientList(clients?.data);
+  const initializeUsers = () => {
+    setUserList(users?.data);
+    setBaseUsersList(users?.data);
     setIsFetching(false);
   };
 
@@ -146,32 +154,32 @@ export default function ClientsPage() {
   // });
 
   const handleChangeClients = (clientId: number, updatedData: any) => {
-    const newClientList = baseClientList.map((client: UserType) => {
+    const newClientList = baseUsersList.map((client: UserType) => {
       if (client.id === clientId) {
         return { ...client, ...updatedData };
       }
       return client;
     });
-    setClientList(newClientList);
-    setBaseClientList(newClientList);
+    setUserList(newClientList);
+    setBaseUsersList(newClientList);
   };
 
   const handleDeleteClientUI = (clientId: number) => {
-    const newClientList = clientList.filter((client: UserType) => {
+    const newClientList = userList.filter((client: UserType) => {
       return client.id !== clientId;
     });
 
-    setClientList(newClientList);
-    setBaseClientList(newClientList);
+    setUserList(newClientList);
+    setBaseUsersList(newClientList);
   };
 
   const handleBulkUpdate = async (key: string, value: any) => {
-    if (!selectedClients) {
+    if (!selectedUsers) {
       return;
     }
     try {
       const response = await axios.put(API_URL.CLIENTS, {
-        clientList: selectedClients,
+        clientList: selectedUsers,
         [key]: value,
       });
 
@@ -183,7 +191,7 @@ export default function ClientsPage() {
       mutateClients();
 
       // reset after update successfully
-      setSelectedClients([]);
+      setSelectedUsers([]);
       handleCloseAnchor();
 
       showNotification('success', response.data.message);
@@ -228,25 +236,25 @@ export default function ClientsPage() {
 
   const handleSelectClient = (e: any, targetClient: UserType) => {
     e.preventDefault();
-    const selectedClient = selectedClients.find((client: UserType) => {
+    const selectedClient = selectedUsers.find((client: UserType) => {
       return client.id === targetClient.id;
     });
 
     if (selectedClient) {
-      const newSelectedClients = selectedClients.filter((client: UserType) => {
+      const newSelectedUsers = selectedUsers.filter((client: UserType) => {
         return client.id !== targetClient.id;
       });
-      setSelectedClients(newSelectedClients);
+      setSelectedUsers(newSelectedUsers);
     } else {
-      setSelectedClients([...selectedClients, targetClient]);
+      setSelectedUsers([...selectedUsers, targetClient]);
     }
   };
 
   const handleSelectAll = () => {
-    if (selectedClients.length === clientList.length) {
-      setSelectedClients([]);
+    if (selectedUsers.length === userList.length) {
+      setSelectedUsers([]);
     } else {
-      setSelectedClients(clientList);
+      setSelectedUsers(userList);
     }
   };
 
@@ -262,7 +270,7 @@ export default function ClientsPage() {
         aria-controls={openDropdown ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={openDropdown ? 'true' : undefined}
-        disabled={selectedClients.length === 0}
+        disabled={selectedUsers.length === 0}
         onClick={(e) => setActionButtonAnchor(e.currentTarget)}
         endIcon={<ArrowDownwardIcon />}
         variant="outlined"
@@ -375,7 +383,7 @@ export default function ClientsPage() {
           <OverviewCard
             icon={<PeopleOutlineIcon sx={{ color: blue[700], fontSize: 50 }} />}
             text="Total Clients"
-            value={baseClientList.length}
+            value={baseUsersList.length}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -396,6 +404,19 @@ export default function ClientsPage() {
         </Grid>
       </Grid>
       <ShadowSection>
+        <Box
+          sx={{ borderBottom: 1, width: '100%', borderColor: 'divider', mb: 2 }}
+        >
+          <Tabs
+            variant="fullWidth"
+            value={selectedTab}
+            onChange={(e: any, value: number) => setSelectedTab(value)}
+          >
+            <Tab value={0} label="Clients" />
+            <Tab value={1} label="Admins" />
+            <Tab value={2} label="Guests" />
+          </Tabs>
+        </Box>
         <Grid container spacing={1} alignItems="center">
           <Grid item xs={12} md={2.5}>
             {generalUpdate}
@@ -439,7 +460,7 @@ export default function ClientsPage() {
               gap={1}
             >
               <ClientListCSV
-                clientData={clientList}
+                clientData={userList}
                 style={{ marginTop: '10px' }}
               />
               {smDown && (
@@ -454,22 +475,24 @@ export default function ClientsPage() {
             </Box>
           </Grid>
         </Grid>
-        {clientList.length > 0 ? (
+        {selectedTab === 0 ? (
           <ClientsTable
             categories={categories?.data || []}
-            clients={clientList}
+            clients={userList}
             onUpdateClient={onUpdateClient}
             handleDeleteClientUI={handleDeleteClientUI}
             showNotification={showNotification}
-            selectedClients={selectedClients}
+            selectedClients={selectedUsers}
             handleSelectClient={handleSelectClient}
             handleSelectAll={handleSelectAll}
             // subCategories={subCategories?.data || []}
             mutateClients={mutateClients}
             handleDirectToDetails={directToClientDetails}
           />
+        ) : selectedTab === 1 ? (
+          <AdminTable admins={userList} showNotification={showNotification} />
         ) : (
-          <ErrorComponent errorText="No User Found" />
+          <ErrorComponent errorText="Coming Soon..." />
         )}
       </ShadowSection>
       {/* </AuthenGuard> */}

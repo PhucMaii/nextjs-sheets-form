@@ -102,6 +102,9 @@ const ClientsTable = ({
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Category</Typography>
         </TableCell>
+        <TableCell variant="head" style={{ width: 250 }}>
+          <Typography fontWeight="bold">Email</Typography>
+        </TableCell>
         <TableCell variant="head" style={{ width: 120 }}>
           <Typography fontWeight="bold">Contact Number</Typography>
         </TableCell>
@@ -125,14 +128,6 @@ const ClientsTable = ({
             checked={isClientSelected}
           />
         </TableCell>
-        {/* <TableCell align="center">
-          <IconButton
-            color="primary"
-            onClick={() => handleDirectToDetails(client)}
-          >
-            <VisibilityIcon />
-          </IconButton>
-        </TableCell> */}
         <TableCell>
           <Select
             value={client.preference?.paymentType || 'N/A'}
@@ -158,6 +153,7 @@ const ClientsTable = ({
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
         <TableCell>{client.category.name}</TableCell>
+        <TableCell>{client?.email}</TableCell>
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
         <TableCell>
