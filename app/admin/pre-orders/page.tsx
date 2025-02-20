@@ -55,7 +55,6 @@ import { checkIsPreOrderQualified } from '@/app/utils/orders';
 
 export default function ScheduledOrderPage() {
   const [baseOrderList, setBaseOrderList] = useState<ScheduledOrder[]>([]);
-  const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
   // const [preOrderProgress, setPreOrderProgress] = useState<number>(0);
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isAddRouteOpen, setIsAddRouteOpen] = useState<boolean>(false);
@@ -161,26 +160,6 @@ export default function ScheduledOrderPage() {
   //     }, 1000);
   //   }
   // }, [preOrderProgress]);
-
-  useEffect(() => {
-    pusherClient?.subscribe('admin-schedule-order');
-
-    const handleReceiveOrder = (incomingOrder: Order) => {
-      const sameIdOrder = createdOrders.some(
-        (order: Order) => order.id === incomingOrder.id,
-      );
-
-      if (!sameIdOrder) {
-        setCreatedOrders((prevOrders) => [...prevOrders, incomingOrder]);
-      }
-    };
-    pusherClient?.bind('pre-order', handleReceiveOrder);
-
-    return () => {
-      pusherClient?.unsubscribe('admin-schedule-order');
-    };
-  }, []);
-
   // useEffect(() => {
   //   if (selectedOrders.length > 0) {
   //     // Filter out item has same id
