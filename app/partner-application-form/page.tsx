@@ -18,6 +18,7 @@ import {
 } from '@/constant/landingPage';
 import { useRouter } from 'next/navigation';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import { USER_CATEGORIZED } from '../utils/enum';
 
 export default function PartnerApplicationForm() {
   const [clientInfo, setClientInfo] = useState<any>({
@@ -121,7 +122,7 @@ export default function PartnerApplicationForm() {
     );
   };
 
-  if (user?.id > 0) {
+  if (user?.type === USER_CATEGORIZED.PENDING) {
     return <NavbarWrapper>{renderAlreadyAppliedMsg()}</NavbarWrapper>;
   }
 

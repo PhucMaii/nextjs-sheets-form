@@ -208,7 +208,7 @@ export const createGuest = async (client: any) => {
         contactName: client?.contactName,
         email: client.email,
         contactNumber: client.contactNumber,
-        deliveryAddress: client.deliveryAddress,
+        deliveryAddress: address.fullName,
         deliveryAddressLat: address.latitude,
         deliveryAddressLng: address.longitude,
         role: USER_ROLE.GUEST,

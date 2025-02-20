@@ -20,7 +20,7 @@ import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import { blue } from '@mui/material/colors';
 import { UserType } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
+import { API_URL, ORDER_TYPE, PAYMENT_TYPE, USER_ROLE } from '@/app/utils/enum';
 import ClientsTable from '../components/Tables/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { ShadowSection } from '../reports/styled';
@@ -29,7 +29,6 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import AddIcon from '@mui/icons-material/Add';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ErrorComponent from '../components/ErrorComponent';
 import { DropdownItemContainer } from '../orders/styled';
 import SingleFieldUpdate, {
   SingleFieldUpdateProps,
@@ -40,6 +39,7 @@ import useNotification from '@/hooks/useNotification';
 import ClientListCSV from '../components/CSV/ClientListCSV';
 import { useRouter } from 'next/navigation';
 import AdminTable from '../components/Tables/AdminTable';
+import GuestTable from '../components/Tables/GuestTable';
 
 export default function ClientsPage() {
   const [actionButtonAnchor, setActionButtonAnchor] =
@@ -71,7 +71,7 @@ export default function ClientsPage() {
       ? API_URL.CLIENTS
       : selectedTab === 1
         ? API_URL.ADMIN
-        : '',
+        : `${API_URL.CLIENTS}?role=${USER_ROLE.GUEST}`,
   );
   const [categories, mutateCategories] = SWRFetchData(API_URL.CATEGORIES);
 
@@ -491,9 +491,9 @@ export default function ClientsPage() {
           />
         ) : selectedTab === 1 ? (
           <AdminTable admins={userList} showNotification={showNotification} />
-        ) : (
-          <ErrorComponent errorText="Coming Soon..." />
-        )}
+        ) : selectedTab === 2 ? (
+          <GuestTable guests={userList} showNotification={showNotification}/>
+        ) : null}
       </ShadowSection>
       {/* </AuthenGuard> */}
     </Sidebar>

@@ -1,20 +1,22 @@
+import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface QueryTypes {
   dayRoute?: string;
+  role?: USER_ROLE;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { dayRoute }: QueryTypes = req.query;
+    const { dayRoute, role }: QueryTypes = req.query;
 
     // Get all clients
     const clientList = await prisma.user.findMany({
       where: {
-        role: 'client',
+        role: role || USER_ROLE.CLIENT,
       },
       include: {
         category: true,

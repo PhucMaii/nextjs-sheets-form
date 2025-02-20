@@ -96,7 +96,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
 export const generateLatLng = async (deliveryAddress: string) => {
   if (deliveryAddress === 'N/A') {
-    return { latitude: null, longitude: null };
+    return { latitude: null, longitude: null, fullName: null };
   }
 
   const response = await axios.get(GEOCODING_API_URL, {
@@ -111,8 +111,8 @@ export const generateLatLng = async (deliveryAddress: string) => {
   if (response.data.status === 'OK') {
     const location = response.data.results[0].geometry.location;
     console.log(location, 'location');
-    return { latitude: location.lat, longitude: location.lng };
+    return { latitude: location.lat, longitude: location.lng, fullName: response.data.results[0].formatted_address };
   }
 
-  return { latitude: null, longitude: null };
+  return { latitude: null, longitude: null, fullName: null };
 };

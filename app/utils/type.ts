@@ -94,6 +94,7 @@ export interface UserType {
   id: number;
   clientId: string;
   clientName: string;
+  contactName?: string;
   contactNumber: string;
   password?: string;
   email?: string;
