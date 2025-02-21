@@ -86,6 +86,10 @@ export default function AddOrder({
     isCheckUnavailableRange: boolean = true,
     isForceOrder: boolean = false,
   ) => {
+    if (!order.items || order.items.length === 0) {
+      showNotification('error', 'Please select at least one item');
+      return;
+    }
     try {
       // Format data to have the same structure as backend
       const submittedData: any = {

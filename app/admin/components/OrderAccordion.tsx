@@ -368,7 +368,6 @@ const OrderAccordion = ({
       <EditPrice
         open={isOpenEditPrice}
         onClose={() => setIsOpenEditPrice(false)}
-        items={order.items}
         showNotification={showNotification}
         order={order}
         mutateOrders={mutateOrders}

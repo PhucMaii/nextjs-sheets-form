@@ -13,7 +13,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IItem } from '../utils/type';
 import { primary } from '@/theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
@@ -42,27 +42,33 @@ export enum ORDER_USAGE_PURPOSE {
 
 interface IProps {
   items: IItem[];
+  defaultOrderedItems?: IItem[];
+  defaultOrder?: Order;
   purpose?: ORDER_USAGE_PURPOSE; // If null, means for order
   onSubmit: (order: Order) => Promise<void>;
   isModal?: boolean;
 }
 
-export default function OrderView({
+const OrderView = ({
   items,
   purpose,
   onSubmit,
   isModal,
-}: IProps) {
-  const [displayItems, setDisplayItems] = useState<IItem[]>([...items]);
+  defaultOrderedItems,
+  defaultOrder,
+}: IProps) => {
+  const [displayItems, setDisplayItems] = useState<IItem[]>(items);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [orderedItems, setOrderedItems] = useState<IItem[]>([]);
+  const [orderedItems, setOrderedItems] = useState<IItem[]>(
+    defaultOrderedItems || [],
+  );
   const [order, setOrder] = useState<any | null>({
     subTotal: 0,
     totalPrice: 0,
     PST: 0,
     GST: 0,
-    note: '',
-    deliveryDate: generateRecommendDate(),
+    note: defaultOrder?.note || '',
+    deliveryDate: defaultOrder?.deliveryDate || generateRecommendDate(),
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [tabIdx, setTabIdx] = useState<number>(0);
@@ -73,6 +79,9 @@ export default function OrderView({
 
   const minDate = generateMinDate();
 
+  // Because the item id is not the same as ordered item id when it comes to edit item
+  const comparedField = purpose === ORDER_USAGE_PURPOSE.ITEM ? 'name' : 'id';
+
   const totalQuantity = useMemo(() => {
     if (!orderedItems || orderedItems.length === 0) return 0;
 
@@ -81,6 +90,14 @@ export default function OrderView({
       0,
     );
   }, [orderedItems]);
+
+  console.log('re render order view');
+
+  //   useEffect(() => {
+  //     if (defaultOrderedItems) {
+  //       setOrderedItems(defaultOrderedItems);
+  //     }
+  //   }, [defaultOrderedItems]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -105,12 +122,13 @@ export default function OrderView({
 
   const onAddItem = (item: IItem) => {
     // Check if item is already in orderedItems
-    const existingItem = orderedItems.find((i) => i.id === item.id);
-    let newItems = [...orderedItems];
+    const existingItem = orderedItems.find(
+      (i) => i[comparedField] === item[comparedField],
+    );
 
     if (existingItem) {
       const newOrderedItems = orderedItems.map((i) => {
-        if (i.id === item.id) {
+        if (i[comparedField] === item[comparedField]) {
           return {
             ...i,
             quantity: (i?.quantity || 0) + 1,
@@ -119,18 +137,16 @@ export default function OrderView({
         return i;
       });
 
-      newItems = [...newOrderedItems];
       setOrderedItems(newOrderedItems);
     } else {
       // Add item to orderedItems
-      newItems.push({ ...item, quantity: 1 });
       setOrderedItems([...orderedItems, { ...item, quantity: 1 }]);
     }
   };
 
   const onEditItemQuantity = (item: IItem, quantity: number) => {
     const newItems = orderedItems.map((i) => {
-      if (i.id === item.id) {
+      if (i[comparedField] === item[comparedField]) {
         return {
           ...i,
           quantity: quantity,
@@ -151,7 +167,7 @@ export default function OrderView({
 
   const onIncrementQuantity = (item: IItem) => {
     const newItems = orderedItems.map((i) => {
-      if (i.id === item.id) {
+      if (i[comparedField] === item[comparedField]) {
         return {
           ...i,
           quantity: (i?.quantity || 0) + 1,
@@ -169,7 +185,7 @@ export default function OrderView({
     }
 
     const newItems = orderedItems.map((i) => {
-      if (i.id === item.id) {
+      if (i[comparedField] === item[comparedField]) {
         return {
           ...i,
           quantity: (i?.quantity || 0) - 1,
@@ -196,7 +212,7 @@ export default function OrderView({
     }
   };
 
-  const renderPlaceOrdeButton = () => {
+  const renderPlaceOrdeButton = useCallback(() => {
     return (
       <Box sx={{ position: 'sticky', bottom: 0, width: '100%' }}>
         <LoadingButton
@@ -206,11 +222,11 @@ export default function OrderView({
           variant="contained"
           sx={{ mt: 2 }}
         >
-          {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Add Item' : 'Place Order'}
+          {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
         </LoadingButton>
       </Box>
     );
-  };
+  }, [onSubmitOrder, isLoading]);
 
   const renderDisplayItems = () => {
     return (
@@ -330,8 +346,9 @@ export default function OrderView({
 
                 <Box
                   display="flex"
-                  alignItems="center"
+                  alignItems={isModal && !smDown ? 'flex-start' : 'center'}
                   justifyContent="space-between"
+                  flexDirection={isModal && !smDown ? 'column' : 'row'}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography fontWeight="bold">
@@ -556,4 +573,6 @@ export default function OrderView({
       </Grid>
     </Grid>
   );
-}
+};
+
+export default OrderView;
