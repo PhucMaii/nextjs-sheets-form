@@ -1,6 +1,6 @@
 import { UPDATE_OPTION } from '@/app/admin/components/Modals/edit/EditItem';
 import { IItem } from '@/app/utils/type';
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -192,61 +192,96 @@ const updateAllScheduleOrderItems = async (
     }
 
     // CASE 2: UPDATE ONLY SELECTED ITEM -  Find all users that has same categoryId
-    const userList = await prisma.user.findMany({
+    const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
-        categoryId: oldItem.categoryId,
-      },
-      include: {
-        scheduleOrders: {
-          include: {
-            items: true,
-          },
+        user: {
+          categoryId: oldItem.categoryId,
         },
       },
+      include: {
+        items: true,
+      },
+    })
+
+    // Flat items in schedule orders
+    const scheduleOrderItems = scheduleOrders.flatMap(
+      (scheduleOrder: any) => scheduleOrder.items,
+    );
+
+    // Filter items that match with old item
+    const matchedItems = scheduleOrderItems.filter(
+      (item: any) => item.inventoryItemId === oldItem.inventoryItemId,
+    );
+
+    // Update matched items
+    await prisma.orderedItems.updateMany({
+      where: {
+        id: {
+          in: matchedItems.map((item: any) => item.id),
+        },
+      },
+      data: updatedData,
     });
 
-    // Use 2 loops - O(n ^ 2) to update all items that qualified for update in schedule orders
-    for (const user of userList) {
-      // Access to each user
-      for (const scheduleOrder of user.scheduleOrders) {
-        // Access to each schedule order
-        if (scheduleOrder) {
-          // Get the item to be updated, then subtract it from total price and add the its new price
-          const itemToBeUpdated = scheduleOrder.items.find(
-            (item: OrderedItems) =>
-              item?.inventoryItemId === oldItem.inventoryItemId,
-          );
+    // Update all orders total price
+    for (const scheduleOrder of scheduleOrders) {
+      const totalPrice = scheduleOrder.items.reduce(
+        (total: number, item: any) => total + item.totalPrice,
+        0,
+      );
 
-          if (!itemToBeUpdated) {
-            continue;
-          }
-
-          const oldItemPrice =
-            itemToBeUpdated?.price * itemToBeUpdated?.quantity;
-          const newItemPrice = updatedItem.price * itemToBeUpdated.quantity;
-
-          const newTotalPrice =
-            scheduleOrder.totalPrice - oldItemPrice + newItemPrice;
-
-          await prisma.orderedItems.update({
-            where: {
-              id: itemToBeUpdated.id,
-            },
-            data: updatedData,
-          });
-
-          // Update new total price
-          await prisma.scheduleOrders.update({
-            where: {
-              id: scheduleOrder.id,
-            },
-            data: {
-              totalPrice: newTotalPrice,
-            },
-          });
-        }
-      }
+      await prisma.scheduleOrders.update({
+        where: {
+          id: scheduleOrder.id,
+        },
+        data: {
+          totalPrice,
+        },
+      });
     }
+
+    // // Use 2 loops - O(n ^ 2) to update all items that qualified for update in schedule orders
+    // for (const user of userList) {
+    //   // Access to each user
+    //   for (const scheduleOrder of user.scheduleOrders) {
+    //     // Access to each schedule order
+    //     if (scheduleOrder) {
+    //       // Get the item to be updated, then subtract it from total price and add the its new price
+    //       const itemToBeUpdated = scheduleOrder.items.find(
+    //         (item: OrderedItems) =>
+    //           item?.inventoryItemId === oldItem.inventoryItemId,
+    //       );
+
+    //       if (!itemToBeUpdated) {
+    //         continue;
+    //       }
+
+    //       const oldItemPrice =
+    //         itemToBeUpdated?.price * itemToBeUpdated?.quantity;
+    //       const newItemPrice = updatedItem.price * itemToBeUpdated.quantity;
+
+    //       const newTotalPrice =
+    //         scheduleOrder.totalPrice - oldItemPrice + newItemPrice;
+
+    //       await prisma.orderedItems.update({
+    //         where: {
+    //           id: itemToBeUpdated.id,
+    //         },
+    //         data: updatedData,
+    //       });
+
+    //       // Update new total price
+    //       await prisma.scheduleOrders.update({
+    //         where: {
+    //           id: scheduleOrder.id,
+    //         },
+    //         data: {
+    //           totalPrice: newTotalPrice,
+    //         },
+    //       });
+    //     }
+    //   }
+    // }
 
     return { ok: true };
   } catch (error: any) {

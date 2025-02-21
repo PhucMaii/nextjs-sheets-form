@@ -45,7 +45,7 @@ export default async function DELETE(
 
         const newTotalPrice =
           scheduledOrder.totalPrice -
-          deletedItem.price * targetdOrderedItems.quantity;
+          (deletedItem.price * targetdOrderedItems.quantity);
 
         await prisma.scheduleOrders.update({
           where: {

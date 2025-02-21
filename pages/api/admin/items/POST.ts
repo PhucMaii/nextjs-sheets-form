@@ -142,9 +142,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Get categories that have been added
-    const addedCategoryIds = newItemsInMultiCategory.map((item: any) => {
-      return item.categoryId;
-    });
+    // const addedCategoryIds = newItemsInMultiCategory.map((item: any) => {
+    //   return item.categoryId;
+    // });
 
     // const createdItem = await prisma.item.create({
     //   data: {
@@ -158,30 +158,30 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // });
 
     // Add new item into all schedule orders related to this category
-    const scheduleOrders = await prisma.scheduleOrders.findMany({
-      where: {
-        user: {
-          categoryId: {
-            in: addedCategoryIds,
-          },
-        },
-      },
-    });
+    // const scheduleOrders = await prisma.scheduleOrders.findMany({
+    //   where: {
+    //     user: {
+    //       categoryId: {
+    //         in: addedCategoryIds,
+    //       },
+    //     },
+    //   },
+    // });
 
-    const scheduledOrderedItems = scheduleOrders.map((scheduleOrder: any) => {
-      return {
-        name: newItem.name,
-        price: newItem.price,
-        scheduledOrderId: scheduleOrder.id,
-        inventoryItemId: newItem.inventoryItemId,
-        inventoryUnitId: selectedUnit.id,
-        quantity: 0,
-      };
-    });
+    // const scheduledOrderedItems = scheduleOrders.map((scheduleOrder: any) => {
+    //   return {
+    //     name: newItem.name,
+    //     price: newItem.price,
+    //     scheduledOrderId: scheduleOrder.id,
+    //     inventoryItemId: newItem.inventoryItemId,
+    //     inventoryUnitId: selectedUnit.id,
+    //     quantity: 0,
+    //   };
+    // });
 
-    await prisma.orderedItems.createMany({
-      data: scheduledOrderedItems,
-    });
+    // await prisma.orderedItems.createMany({
+    //   data: scheduledOrderedItems,
+    // });
 
     // for (const scheduleOrder of scheduleOrders) {
     //   await prisma.orderedItems.create({
