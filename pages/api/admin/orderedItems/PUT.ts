@@ -12,7 +12,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
 import { createOrderedItems, formatItemsWithTotalPrice } from '../../utils/order';
 
-enum ITEM_CATEGORIZED {
+export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
   UPDATE = 'update',
   CREATE = 'create',

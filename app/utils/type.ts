@@ -155,7 +155,7 @@ export interface ScheduledOrder {
   id: number;
   userId: number;
   totalPrice: number;
-  items: OrderedItems[];
+  items: OrderedItems[] | any[];
   user: UserType;
   day: string;
   alreadyOrder?: boolean;

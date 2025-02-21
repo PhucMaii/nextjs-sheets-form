@@ -48,11 +48,13 @@ export enum ORDER_USAGE_PURPOSE {
 
 interface IProps {
   items: IItem[];
+  defaultDeliveryDate?: string;
   defaultOrderedItems?: IItem[];
   defaultOrder?: Order;
   purpose?: ORDER_USAGE_PURPOSE; // If null, means for order
   onSubmit: (order: Order) => Promise<void>;
   isModal?: boolean;
+  isPreOrder?: boolean;
   role?: USER_ROLE;
 }
 
@@ -61,6 +63,8 @@ const OrderView = ({
   purpose,
   onSubmit,
   isModal,
+  isPreOrder,
+  defaultDeliveryDate,
   defaultOrderedItems,
   defaultOrder,
   role,
@@ -84,7 +88,10 @@ const OrderView = ({
     PST: 0,
     GST: 0,
     note: defaultOrder?.note || '',
-    deliveryDate: defaultOrder?.deliveryDate || generateRecommendDate(),
+    deliveryDate:
+      defaultOrder?.deliveryDate ||
+      defaultDeliveryDate ||
+      generateRecommendDate(),
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [tabIdx, setTabIdx] = useState<number>(0);
@@ -353,9 +360,10 @@ const OrderView = ({
               );
             })}
 
-          {/* Only admin can add custom amount at order mode, not edit mode for now */}
+          {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
           {role === USER_ROLE.ADMIN &&
-            purpose === ORDER_USAGE_PURPOSE.ORDER && (
+            purpose === ORDER_USAGE_PURPOSE.ORDER &&
+            !isPreOrder && (
               <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
                 <Button onClick={() => setIsOpenAddCustomAmount(true)}>
                   <Box
@@ -516,7 +524,7 @@ const OrderView = ({
           <ErrorComponent errorText="Your order is empty" />
         )}
 
-        {renderDateAndNoteInput()}
+        {!isPreOrder && renderDateAndNoteInput()}
         {renderTotal()}
         {renderPlaceOrdeButton()}
       </ShadowSection>

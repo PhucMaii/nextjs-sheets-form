@@ -1,14 +1,16 @@
 import { UserType } from '@/app/utils/type';
-import { Item, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { UpdateOption } from '../orderedItems/PUT';
+import {
+  categorizeUpdatedItems,
+  ITEM_CATEGORIZED,
+} from '../orderedItems/PUT';
 import { getRouteScheduledOrders, refactorRouteArrangement } from './POST';
 
 interface BodyTypes {
   user: UserType;
   items?: any[];
   scheduledOrderId: number;
-  updateOption?: UpdateOption;
   oldRouteId?: number;
   newRouteId?: number;
 }
@@ -17,14 +19,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const {
-      user,
-      items,
-      scheduledOrderId,
-      updateOption,
-      oldRouteId,
-      newRouteId,
-    } = req.body as BodyTypes;
+    const { user, items, scheduledOrderId, oldRouteId, newRouteId } =
+      req.body as BodyTypes;
+
+    console.log(req.body, "REQ BODY");
 
     // CASE: Move to new route
     if (oldRouteId && newRouteId) {
@@ -80,15 +78,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // CASE: Update items
     if (!items) {
       return res.status(404).json({
         error: 'Item List Not Provided',
       });
     }
-
-    const totalPrice = items.reduce((acc: number, cV: any) => {
-      return acc + cV.totalPrice;
-    }, 0);
 
     const existingScheduleOrder = await prisma.scheduleOrders.findUnique({
       where: {
@@ -105,10 +100,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    let baseOrderItemList = existingScheduleOrder.items;
+    // Attach type of items: CREATE, UPDATE, DELETE
+    const categorizedItems = categorizeUpdatedItems(
+      existingScheduleOrder.items,
+      items,
+    );
+
+    const deletedItemIds = [];
     // Update items in schedule order
-    for (const item of items) {
-      if (!item.id) {
+    for (const item of categorizedItems) {
+      // CREATE
+      if (item.type == ITEM_CATEGORIZED.CREATE) {
         await prisma.orderedItems.create({
           data: {
             scheduledOrderId,
@@ -122,44 +124,50 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           },
         });
         continue;
-      }
-
-      const targetItem = await prisma.orderedItems.findUnique({
-        where: {
-          id: item.id,
-        },
-      });
-
-      if (!targetItem) {
-        return res.status(404).json({
-          error: `Item ${item.id} Not Found`,
+      } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
+        // REMAIN
+        continue;
+      } else if (item.type === ITEM_CATEGORIZED.UPDATE) {
+        // UPDATE
+        await prisma.orderedItems.update({
+          where: {
+            id: item.id,
+          },
+          data: {
+            quantity: item.quantity,
+            price: item.price, // Price might be useless, since it is not able to update price at front end
+          },
         });
+      } else if (item.type === ITEM_CATEGORIZED.DELETE) {
+        // DELETE
+        deletedItemIds.push(item.id);
+      } else {
+        return res.status(500).json({
+          error: 'Something went wrong with categorized items',
+        })
       }
-
-      await prisma.orderedItems.update({
-        where: {
-          id: item.id,
-        },
-        data: {
-          quantity: item.quantity,
-          price: item.price,
-        },
-      });
-
-      baseOrderItemList = baseOrderItemList.filter(
-        (baseItem: any) => baseItem.id !== item.id,
-      );
     }
 
-    if (baseOrderItemList.length > 0) {
+    if (deletedItemIds.length > 0) {
       await prisma.orderedItems.deleteMany({
         where: {
           id: {
-            in: baseOrderItemList.map((item: any) => item.id),
+            in: deletedItemIds,
           },
         },
       });
     }
+
+    const newItems = await prisma.orderedItems.findMany({
+      where: {
+        scheduledOrderId,
+      },
+    });
+
+    // Calculate total price
+    const totalPrice = newItems.reduce((acc: number, item: any) => {
+      return acc + item.price * item.quantity;
+    }, 0);
 
     // Apply new total price on schedule order
     const updatedScheduledOrder = await prisma.scheduleOrders.update({
@@ -170,91 +178,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         totalPrice,
       },
     });
-
-    if (!updateOption || updateOption === UpdateOption.NONE) {
-      return res.status(200).json({
-        data: updatedScheduledOrder,
-        message: 'Scheduled Order Updated Succesfully',
-      });
-    }
-
-    // If update option equal to Update Category
-    const userCategory = await prisma.category.findUnique({
-      where: {
-        id: user.categoryId,
-      },
-    });
-
-    if (!userCategory) {
-      return res.status(404).json({
-        error: 'User Category Not Found',
-      });
-    }
-
-    // base item list to track the updating process
-    let baseItemList = await prisma.item.findMany({
-      where: {
-        categoryId: userCategory.id,
-      },
-    });
-
-    for (const item of items) {
-      let existingItem = null;
-      if (item?.inventoryItemId) {
-        existingItem = await prisma.item.findFirst({
-          where: {
-            categoryId: userCategory.id,
-            inventoryItemId: item.inventoryItemId,
-          },
-        });
-      } else {
-        existingItem = await prisma.item.findFirst({
-          where: {
-            name: item.name,
-            categoryId: userCategory.id,
-          },
-        });
-      }
-
-      if (existingItem) {
-        const updatedItem = await prisma.item.update({
-          where: {
-            id: existingItem.id,
-          },
-          data: {
-            price: item.price,
-          },
-        });
-
-        // Pop item off the category
-        const newBaseItemList = baseItemList.filter((item: Item) => {
-          return item.id !== updatedItem.id;
-        });
-        baseItemList = newBaseItemList;
-      } else {
-        await prisma.item.create({
-          data: {
-            name: item.name,
-            categoryId: userCategory.id,
-            price: item.price,
-            availability: true,
-            inventoryItemId: item.inventoryItemId,
-            inventoryUnitId: item.inventoryUnitId,
-          },
-        });
-      }
-    }
-
-    // Delete the rest of item that admin wants to delete it
-    if (baseItemList.length > 0) {
-      for (const item of baseItemList) {
-        await prisma.item.delete({
-          where: {
-            id: item.id,
-          },
-        });
-      }
-    }
 
     return res.status(200).json({
       data: updatedScheduledOrder,
