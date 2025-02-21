@@ -128,6 +128,7 @@ export default function OrderForm() {
           onSubmit={onSubmit}
           items={itemList}
           purpose={ORDER_USAGE_PURPOSE.ORDER}
+          role={USER_ROLE.CLIENT}
         />
       </Box>
     </Sidebar>

@@ -7,7 +7,7 @@ import React from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { Order } from '../../../orders/page';
 import ModalHead from '@/app/lib/ModalHead';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
@@ -53,11 +53,13 @@ export default function EditPrice({
   //   setNewItem({ ...newItem, [key]: value });
   // };
 
-  const onUpdateOrder = async (order: Order) => {
+  const onUpdateOrder = async (orderParam: Order) => {
     try {
       const response = await axios.put(API_URL.ORDERED_ITEMS, {
-        updatedItems: order.items,
+        updatedItems: orderParam.items,
         orderId: order.id,
+        note: orderParam.note,
+        deliveryDate: orderParam.deliveryDate,
       });
 
       if (response.data.error) {
@@ -125,6 +127,7 @@ export default function EditPrice({
           purpose={ORDER_USAGE_PURPOSE.ITEM}
           onSubmit={onUpdateOrder}
           isModal
+          role={USER_ROLE.ADMIN}
         />
       </BoxModal>
     </Modal>

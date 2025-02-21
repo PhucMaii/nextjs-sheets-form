@@ -3,10 +3,12 @@ import {
   Button,
   Divider,
   Fab,
+  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
   OutlinedInput,
+  Switch,
   Tab,
   Tabs,
   TextField,
@@ -34,6 +36,10 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { Order } from '../admin/orders/page';
+import { API_URL, USER_ROLE } from '../utils/enum';
+import axios from 'axios';
+import useNotification from '@/hooks/useNotification';
+import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
 
 export enum ORDER_USAGE_PURPOSE {
   ORDER = 'order',
@@ -47,6 +53,7 @@ interface IProps {
   purpose?: ORDER_USAGE_PURPOSE; // If null, means for order
   onSubmit: (order: Order) => Promise<void>;
   isModal?: boolean;
+  role?: USER_ROLE;
 }
 
 const OrderView = ({
@@ -56,13 +63,22 @@ const OrderView = ({
   isModal,
   defaultOrderedItems,
   defaultOrder,
+  role,
 }: IProps) => {
   const [displayItems, setDisplayItems] = useState<IItem[]>(items);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderedItems, setOrderedItems] = useState<IItem[]>(
     defaultOrderedItems || [],
   );
+  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
+    useState<boolean>(false);
+  const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] =
+    useState<boolean>(false);
+  const [isAffectInventory, setIsAffectInventory] = useState<boolean>(
+    defaultOrder?.isAffectInventory || false,
+  );
   const [order, setOrder] = useState<any | null>({
+    id: defaultOrder?.id || -1,
     subTotal: 0,
     totalPrice: 0,
     PST: 0,
@@ -78,6 +94,8 @@ const OrderView = ({
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const minDate = generateMinDate();
+
+  const { NotificationComp, showNotification } = useNotification();
 
   // Because the item id is not the same as ordered item id when it comes to edit item
   const comparedField = purpose === ORDER_USAGE_PURPOSE.ITEM ? 'name' : 'id';
@@ -119,6 +137,38 @@ const OrderView = ({
       GST: newSubtotal?.GST || 0,
     });
   }, [orderedItems]);
+
+  const onAvoidInventory = async (e: any) => {
+    if (order.id < 1) return;
+
+    setIsUpdatingAvoidInventory(true);
+    try {
+      setIsAffectInventory(e.target.checked);
+      const response = await axios.put(
+        `${API_URL.ADMIN}/orders/isAffectInventory`,
+        {
+          id: order.id,
+          isAffectInventory: e.target.checked,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsUpdatingAvoidInventory(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsUpdatingAvoidInventory(false);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error.response.data.error);
+      showNotification(
+        'error',
+        'Internal Server Error: ' + error.response.data.error,
+      );
+      setIsUpdatingAvoidInventory(false);
+    }
+  };
 
   const onAddItem = (item: IItem) => {
     // Check if item is already in orderedItems
@@ -253,7 +303,13 @@ const OrderView = ({
           {displayItems.length > 0 &&
             displayItems.map((item: IItem) => {
               return (
-                <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+                <Grid
+                  key={item.id}
+                  item
+                  xs={6}
+                  sm={isModal ? 6 : 4}
+                  md={isModal ? 6 : 3}
+                >
                   <Button
                     key={item.id}
                     sx={{ width: '100%', height: '100%' }}
@@ -296,6 +352,34 @@ const OrderView = ({
                 </Grid>
               );
             })}
+
+          {/* Only admin can add custom amount at order mode, not edit mode for now */}
+          {role === USER_ROLE.ADMIN &&
+            purpose === ORDER_USAGE_PURPOSE.ORDER && (
+              <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+                <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="flex-end"
+                    gap={2}
+                    alignItems="flex-start"
+                    sx={{
+                      p: 1,
+                      backgroundColor: blueGrey[50],
+                      borderRadius: 1,
+                      width: '100%',
+                      height: '100%',
+                      color: blueGrey[800],
+                    }}
+                  >
+                    <Typography fontWeight="bold" textAlign="left">
+                      + Add Custom Amount
+                    </Typography>
+                  </Box>
+                </Button>
+              </Grid>
+            )}
         </Grid>
         {smDown && renderPlaceOrdeButton()}
       </ShadowSection>
@@ -310,6 +394,18 @@ const OrderView = ({
         gap={1}
         sx={{ position: 'sticky', top: 0 }}
       >
+        {/* Only admin can affect inventory for an order in edit mode */}
+        {role === USER_ROLE.ADMIN && purpose === ORDER_USAGE_PURPOSE.ITEM && (
+          <FormControlLabel
+            control={
+              <Switch checked={isAffectInventory} onChange={onAvoidInventory} />
+            }
+            label={
+              isUpdatingAvoidInventory ? 'Updating...' : 'Affect Inventory'
+            }
+          />
+        )}
+
         <Typography variant="h6" textAlign="center">
           My Order
         </Typography>
@@ -436,8 +532,8 @@ const OrderView = ({
           </Typography>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              disablePast
-              minDate={minDate}
+              disablePast={role === USER_ROLE.CLIENT}
+              minDate={role === USER_ROLE.CLIENT ? minDate : null}
               value={dayjs(order.deliveryDate)}
               onChange={onDateChange}
               sx={{ width: '100%' }}
@@ -544,34 +640,54 @@ const OrderView = ({
 
   if (smDown) {
     return (
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Box sx={{ borderColor: 'divider', borderBottom: 1 }}>
-          <Tabs
-            value={tabIdx}
-            variant="fullWidth"
-            onChange={(e, value) => setTabIdx(value)}
-          >
-            <Tab label="Menu" value={0} />
-            <Tab label={`Order (${totalQuantity})`} value={1} />
-          </Tabs>
-        </Box>
+      <>
+        <AddCustomAmount
+          open={isOpenAddCustomAmount}
+          onClose={() => setIsOpenAddCustomAmount(false)}
+          setItemList={setOrderedItems}
+          // addCustomAmount={addCustomAmount}
+          showNotification={showNotification}
+        />
+        {NotificationComp}
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Box sx={{ borderColor: 'divider', borderBottom: 1 }}>
+            <Tabs
+              value={tabIdx}
+              variant="fullWidth"
+              onChange={(e, value) => setTabIdx(value)}
+            >
+              <Tab label="Menu" value={0} />
+              <Tab label={`Order (${totalQuantity})`} value={1} />
+            </Tabs>
+          </Box>
 
-        {tabIdx === 0 && renderDisplayItems()}
-        {tabIdx === 1 && renderMyOrder()}
-      </Box>
+          {tabIdx === 0 && renderDisplayItems()}
+          {tabIdx === 1 && renderMyOrder()}
+        </Box>
+      </>
     );
   }
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={isModal ? 7 : 8}>
-        {renderDisplayItems()}
-      </Grid>
+    <>
+      <AddCustomAmount
+        open={isOpenAddCustomAmount}
+        onClose={() => setIsOpenAddCustomAmount(false)}
+        setItemList={setOrderedItems}
+        // addCustomAmount={addCustomAmount}
+        showNotification={showNotification}
+      />
+      {NotificationComp}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={isModal ? 7 : 8}>
+          {renderDisplayItems()}
+        </Grid>
 
-      <Grid item xs={12} sm={isModal ? 5 : 4}>
-        {renderMyOrder()}
+        <Grid item xs={12} sm={isModal ? 5 : 4}>
+          {renderMyOrder()}
+        </Grid>
       </Grid>
-    </Grid>
+    </>
   );
 };
 

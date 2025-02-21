@@ -403,6 +403,7 @@ export default function AddOrder({
                   onSubmit={async (order: Order) => {
                     await addOrder(order);
                   }}
+                  role={USER_ROLE.ADMIN}
                 />
                 // itemList.map((item: IItem, index: number) => {
                 //   return (

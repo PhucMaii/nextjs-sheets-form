@@ -145,6 +145,7 @@ const CustomLinkInventory = ({
     try {
       if (setItemList) {
         setItemList((prevState: any) => [
+          ...prevState,
           {
             ...customAmount,
             id: 0,
@@ -156,7 +157,6 @@ const CustomLinkInventory = ({
             },
             units,
           },
-          ...prevState,
         ]);
         onClose();
         return;
