@@ -280,7 +280,7 @@ const OrderAccordion = ({
           disabled={order?.type === TYPE.LOCKED}
           onClick={() => setIsOpenEditPrice(true)}
         >
-          Edit price
+          Edit order
         </MenuItem>
         <MenuItem
           onClick={(e) => {
