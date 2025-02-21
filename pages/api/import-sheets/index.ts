@@ -27,7 +27,6 @@ interface IBody {
   items: any[];
   createdBy: USER_ROLE;
   isForceOrder?: boolean;
-  createdAt: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -45,12 +44,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       items,
       createdBy,
       isForceOrder,
-      createdAt,
     }: IBody = req.body;
 
     console.log('body', req.body);
 
-    if (!deliveryDate || !items || !createdAt) {
+    if (!deliveryDate || !items) {
       return res.status(400).json({
         error: 'Missing required fields. Please refresh and try again',
       });
@@ -144,7 +142,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           existingUser,
           items,
           deliveryDate,
-          createdAt,
           formattedCreatedBy,
           note,
         );
@@ -201,7 +198,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       existingUser,
       items,
       deliveryDate,
-      createdAt,
       formattedCreatedBy,
       note,
     );

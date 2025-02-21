@@ -1,32 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import {
   AlertColor,
   Autocomplete,
   Box,
-  Button,
   Divider,
-  FilledInput,
-  FormControl,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
   Modal,
   TextField,
-  Typography,
 } from '@mui/material';
 import { BoxModal } from '../styled';
 import { IItem, UserType } from '@/app/utils/type';
 import axios from 'axios';
-import SearchIcon from '@mui/icons-material/Search';
 import {
   API_URL,
   FLAG_ORDER_TYPE,
@@ -35,24 +21,14 @@ import {
 } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ErrorComponent from '../../ErrorComponent';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import {
-  disableChristmasAndNewYear,
-  formatDateChanged,
-  generateRecommendDate,
-} from '@/app/utils/time';
+import { formatDateChanged, generateRecommendDate } from '@/app/utils/time';
 import OrderOnVacationModal from '../OrderOnVacationModal';
 import ModalHead from '@/app/lib/ModalHead';
-import moment from 'moment';
 import ConfirmModal from '../ConfirmModal';
-import SellingItemName from '@/app/components/SellingItemName';
 import AddCustomAmount from './AddCustomAmount';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import order from '@/pages/api/order';
 import { SWRFetchData } from '@/app/utils/db';
-import useDebounce from '@/hooks/useDebounce';
+import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
+import { Order } from '@/app/admin/orders/page';
 
 interface PropTypes extends ModalProps {
   clientList: UserType[];
@@ -69,11 +45,11 @@ export default function AddOrder({
   currentDate,
   createScheduledOrder,
 }: PropTypes) {
+  const [cachedOrder, setCachedOrder] = useState<any | null>(null);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [deliveryDate, setDeliveryDate] = useState<string>(
     currentDate || generateRecommendDate(),
   );
-  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isOrderOnVacationOpen, setIsOrderOnVacationOpen] =
     useState<boolean>(false);
@@ -81,13 +57,7 @@ export default function AddOrder({
   const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
     useState<boolean>(false);
 
-  const [itemList, setItemList] = useState<IItem[]>([]);
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
-  const [note, setNote] = useState<string>('');
-  const [searchKeywords, setSearchKeywords] = useState<string>('');
-  const [unavailableRange, setUnavailableRange] = useState<Date[] | null>(null);
-
-  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const [clientItems, _mutate, isValidating] = SWRFetchData(
     clientValue
@@ -106,71 +76,26 @@ export default function AddOrder({
   }, [clientItems, clientValue]);
 
   useEffect(() => {
-    if (unavailableRange) {
-      setIsOrderOnVacationOpen(true);
-    }
-  }, [unavailableRange]);
-
-  useEffect(() => {
     if (currentDate) {
       setDeliveryDate(currentDate);
     }
   }, [currentDate]);
 
-  useEffect(() => {
-    setItemList(baseItems);
-  }, [baseItems]);
-
-  useEffect(() => {
-    if (debouncedKeywords) {
-      const keywords = debouncedKeywords.toLowerCase();
-      const newItems = baseItems?.filter((item: IItem) => {
-        return item?.name?.toLowerCase()?.includes(keywords);
-      });
-
-      setItemList(newItems);
-    } else {
-      setItemList(baseItems);
-    }
-  }, [debouncedKeywords, baseItems]);
-
-  // useEffect(() => {
-  //   if (clientValue) {
-  //     fetchClientItems();
-  //   } else {
-  //     setItemList([]);
-  //   }
-  // }, [clientValue]);
-
   const addOrder = async (
-    clientValue: UserType | null,
-    deliveryDate: string,
-    note: string,
-    itemList: any,
+    order: Order,
     isCheckUnavailableRange: boolean = true,
     isForceOrder: boolean = false,
   ) => {
     try {
-      const currentDate = new Date();
-      const dateString = moment(currentDate).format('YYYY-MM-DD');
-      const timeString = moment(currentDate).format('HH:mm:ss');
-
       // Format data to have the same structure as backend
       const submittedData: any = {
-        // ['DELIVERY DATE']: deliveryDate,
-        // ['NOTE']: note,
-        deliveryDate,
-        note,
-        createdAt: `${timeString} ${dateString}`,
+        deliveryDate: order.deliveryDate,
+        note: order.note,
         isCheckUnavailableRange,
-        items: baseItems,
+        items: order.items,
         createdBy: USER_ROLE.ADMIN,
         isForceOrder,
       };
-
-      // for (const item of itemList) {
-      //   submittedData = { ...submittedData, [item.name]: item.quantity };
-      // }
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${clientValue?.id}`,
@@ -185,7 +110,16 @@ export default function AddOrder({
       if (response.data.warning) {
         if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
           // showNotification('warning', response.data.warning);
+          setCachedOrder(submittedData);
           setIsOpenConfirmModal(true);
+          return;
+        } else if (response.data.flag === FLAG_ORDER_TYPE.VACATION_ORDER) {
+          setCachedOrder({
+            ...submittedData,
+            startDate: response.data.data.unavailableRange[0],
+            endDate: response.data.data.unavailableRange[1],
+          });
+          setIsOrderOnVacationOpen(true);
           return;
         } else {
           return response;
@@ -256,60 +190,60 @@ export default function AddOrder({
   //   }
   // };
 
-  const handleChangeItem = (e: any, targetItem: any) => {
-    const newBaseItems = baseItems.map((item: any) => {
-      if (item.id === targetItem.id) {
-        const totalPrice = item.price * +e.target.value;
-        return { ...item, quantity: +e.target.value, totalPrice };
-      }
+  // const handleChangeItem = (e: any, targetItem: any) => {
+  //   const newBaseItems = baseItems.map((item: any) => {
+  //     if (item.id === targetItem.id) {
+  //       const totalPrice = item.price * +e.target.value;
+  //       return { ...item, quantity: +e.target.value, totalPrice };
+  //     }
 
-      return item;
-    });
+  //     return item;
+  //   });
 
-    setBaseItems(newBaseItems);
-  };
+  //   setBaseItems(newBaseItems);
+  // };
 
-  const handleDateChange = (e: any) => {
-    const formattedDate = formatDateChanged(e);
-    setDeliveryDate(formattedDate);
-  };
+  // const handleDateChange = (e: any) => {
+  //   const formattedDate = formatDateChanged(e);
+  //   setDeliveryDate(formattedDate);
+  // };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsButtonLoading(true);
-    try {
-      if (createScheduledOrder && clientValue) {
-        await createScheduledOrder(clientValue.id, itemList);
-        setIsButtonLoading(false);
-        return;
-      }
+  // const handleSubmit = async (e: any) => {
+  //   e.preventDefault();
+  //   setIsButtonLoading(true);
+  //   try {
+  //     if (createScheduledOrder && clientValue) {
+  //       await createScheduledOrder(clientValue.id, itemList);
+  //       setIsButtonLoading(false);
+  //       return;
+  //     }
 
-      const response: any = await addOrder(
-        clientValue,
-        deliveryDate,
-        note,
-        itemList,
-      );
-      if (response && response.data.warning) {
-        setUnavailableRange(response.data.data.unavailableRange);
-      }
-      setIsButtonLoading(false);
-      return;
-    } catch (error: any) {
-      console.log(error);
-      showNotification(
-        'error',
-        'There was an error: ' + error.response.data.error,
-      );
-      setIsButtonLoading(false);
-    }
-  };
+  //     const response: any = await addOrder(
+  //       clientValue,
+  //       deliveryDate,
+  //       note,
+  //       itemList,
+  //     );
+  //     if (response && response.data.warning) {
+  //       setUnavailableRange(response.data.data.unavailableRange);
+  //     }
+  //     setIsButtonLoading(false);
+  //     return;
+  //   } catch (error: any) {
+  //     console.log(error);
+  //     showNotification(
+  //       'error',
+  //       'There was an error: ' + error.response.data.error,
+  //     );
+  //     setIsButtonLoading(false);
+  //   }
+  // };
 
-  const removeItemFromItemList = (item: any) => {
-    const newBaseItems = baseItems.filter((i: any) => i.name !== item.name);
+  // const removeItemFromItemList = (item: any) => {
+  //   const newBaseItems = baseItems.filter((i: any) => i.name !== item.name);
 
-    setBaseItems(newBaseItems);
-  };
+  //   setBaseItems(newBaseItems);
+  // };
 
   return (
     <>
@@ -322,27 +256,25 @@ export default function AddOrder({
       <ConfirmModal
         open={isOpenConfirmModal}
         onClose={() => setIsOpenConfirmModal(false)}
-        handleSubmit={() =>
-          addOrder(clientValue, deliveryDate, note, itemList, true, true)
-        }
+        handleSubmit={async () => await addOrder(cachedOrder, true, true)}
         title="This client already order for selected date, are you sure to create new order?"
         showNotification={showNotification}
       />
-      {unavailableRange && (
+      {isOrderOnVacationOpen && (
         <OrderOnVacationModal
           open={isOrderOnVacationOpen}
           onClose={() => setIsOrderOnVacationOpen(false)}
           clientName={clientValue?.clientName || ''}
-          startDate={new Date(unavailableRange[0])}
-          endDate={new Date(unavailableRange[1])}
+          startDate={new Date(cachedOrder.startDate)}
+          endDate={new Date(cachedOrder.endDate)}
           handleContinueOrder={async () =>
-            await addOrder(clientValue, deliveryDate, note, itemList, false)
+            await addOrder(cachedOrder, false, true)
           }
         />
       )}
       <Modal open={open} onClose={onClose}>
         <BoxModal
-          sx={{ width: '600px' }}
+          // sx={{ maxWidth: '800px' }}
           display="flex"
           flexDirection="column"
           gap={2}
@@ -350,8 +282,9 @@ export default function AddOrder({
           <ModalHead
             heading="Add Order"
             buttonLabel="Add"
-            buttonProps={{ loading: isButtonLoading }}
-            onClick={handleSubmit}
+            buttonProps={{}}
+            onClick={() => {}}
+            onlyHeading
             onClose={onClose}
           />
           <Divider />
@@ -392,7 +325,7 @@ export default function AddOrder({
               <Grid item xs={12}>
                 <Divider textAlign="center">Items</Divider>
               </Grid>
-              {!createScheduledOrder && (
+              {/* {!createScheduledOrder && (
                 <>
                   <Grid item xs={12} textAlign="right">
                     <Button onClick={() => setIsOpenAddCustomAmount(true)}>
@@ -446,7 +379,7 @@ export default function AddOrder({
                     </FormControl>
                   </Grid>
                 </>
-              )}
+              )} */}
               {isFetching ? (
                 <Box
                   display="flex"
@@ -456,38 +389,46 @@ export default function AddOrder({
                 >
                   <LoadingComponent />
                 </Box>
-              ) : itemList.length === 0 ? (
+              ) : baseItems.length === 0 ? (
                 <ErrorComponent errorText="User Has No Items" />
               ) : (
-                itemList.map((item: IItem, index: number) => {
-                  return (
-                    <Fragment key={index}>
-                      <Grid item xs={12} md={6}>
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <SellingItemName item={item} />
-                          {item?.id < 1 && (
-                            <IconButton
-                              onClick={() => removeItemFromItemList(item)}
-                              color="error"
-                            >
-                              <RemoveCircleIcon color="error" />
-                            </IconButton>
-                          )}
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Quantity"
-                          value={item.quantity}
-                          onChange={(e) => handleChangeItem(e, item)}
-                          type="number"
-                          inputProps={{ min: 0 }}
-                        />
-                      </Grid>
-                    </Fragment>
-                  );
-                })
+                <OrderView
+                  items={baseItems}
+                  purpose={ORDER_USAGE_PURPOSE.ORDER}
+                  isModal
+                  onSubmit={async (order: Order) => {
+                    await addOrder(order);
+                  }}
+                />
+                // itemList.map((item: IItem, index: number) => {
+                //   return (
+                //     <Fragment key={index}>
+                //       <Grid item xs={12} md={6}>
+                //         <Box display="flex" alignItems="center" gap={1}>
+                //           <SellingItemName item={item} />
+                //           {item?.id < 1 && (
+                //             <IconButton
+                //               onClick={() => removeItemFromItemList(item)}
+                //               color="error"
+                //             >
+                //               <RemoveCircleIcon color="error" />
+                //             </IconButton>
+                //           )}
+                //         </Box>
+                //       </Grid>
+                //       <Grid item xs={12} md={6}>
+                //         <TextField
+                //           fullWidth
+                //           label="Quantity"
+                //           value={item.quantity}
+                //           onChange={(e) => handleChangeItem(e, item)}
+                //           type="number"
+                //           inputProps={{ min: 0 }}
+                //         />
+                //       </Grid>
+                //     </Fragment>
+                //   );
+                // })
               )}
             </Grid>
           </Box>

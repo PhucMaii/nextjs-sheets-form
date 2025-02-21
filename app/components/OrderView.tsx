@@ -44,9 +44,15 @@ interface IProps {
   items: IItem[];
   purpose?: ORDER_USAGE_PURPOSE; // If null, means for order
   onSubmit: (order: Order) => Promise<void>;
+  isModal?: boolean;
 }
 
-export default function OrderView({ items, purpose, onSubmit }: IProps) {
+export default function OrderView({
+  items,
+  purpose,
+  onSubmit,
+  isModal,
+}: IProps) {
   const [displayItems, setDisplayItems] = useState<IItem[]>([...items]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderedItems, setOrderedItems] = useState<IItem[]>([]);
@@ -190,6 +196,22 @@ export default function OrderView({ items, purpose, onSubmit }: IProps) {
     }
   };
 
+  const renderPlaceOrdeButton = () => {
+    return (
+      <Box sx={{ position: 'sticky', bottom: 0, width: '100%' }}>
+        <LoadingButton
+          loading={isLoading}
+          onClick={onSubmitOrder}
+          fullWidth
+          variant="contained"
+          sx={{ mt: 2 }}
+        >
+          {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Add Item' : 'Place Order'}
+        </LoadingButton>
+      </Box>
+    );
+  };
+
   const renderDisplayItems = () => {
     return (
       <ShadowSection>
@@ -215,7 +237,7 @@ export default function OrderView({ items, purpose, onSubmit }: IProps) {
           {displayItems.length > 0 &&
             displayItems.map((item: IItem) => {
               return (
-                <Grid item xs={6} sm={4} md={3}>
+                <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
                   <Button
                     key={item.id}
                     sx={{ width: '100%', height: '100%' }}
@@ -259,13 +281,19 @@ export default function OrderView({ items, purpose, onSubmit }: IProps) {
               );
             })}
         </Grid>
+        {smDown && renderPlaceOrdeButton()}
       </ShadowSection>
     );
   };
 
   const renderMyOrder = () => {
     return (
-      <ShadowSection display="flex" flexDirection="column" gap={1}>
+      <ShadowSection
+        display="flex"
+        flexDirection="column"
+        gap={1}
+        sx={{ position: 'sticky', top: 0 }}
+      >
         <Typography variant="h6" textAlign="center">
           My Order
         </Typography>
@@ -377,6 +405,7 @@ export default function OrderView({ items, purpose, onSubmit }: IProps) {
 
         {renderDateAndNoteInput()}
         {renderTotal()}
+        {renderPlaceOrdeButton()}
       </ShadowSection>
     );
   };
@@ -490,17 +519,8 @@ export default function OrderView({ items, purpose, onSubmit }: IProps) {
             ${order?.totalPrice?.toFixed(2)}
           </Typography>
         </Grid>
-        <Grid item xs={12}>
-          <LoadingButton
-            loading={isLoading}
-            onClick={onSubmitOrder}
-            fullWidth
-            variant="contained"
-            sx={{ mt: 2 }}
-          >
-            {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Add Item' : 'Place Order'}
-          </LoadingButton>
-        </Grid>
+        {/* <Grid item xs={12}> */}
+        {/* </Grid> */}
       </Grid>
     );
   };
@@ -527,11 +547,11 @@ export default function OrderView({ items, purpose, onSubmit }: IProps) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={8}>
+      <Grid item xs={12} sm={isModal ? 7 : 8}>
         {renderDisplayItems()}
       </Grid>
 
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={isModal ? 5 : 4}>
         {renderMyOrder()}
       </Grid>
     </Grid>
