@@ -75,7 +75,6 @@ export default function EditScheduleOrder({
 
   const updateItems = async (orderParam: Order) => {
     try {
-      setIsSubmitting(true);
       // const totalPrice = calculateNewTotalPrice();
       const response = await axios.put(API_URL.SCHEDULED_ORDER, {
         user: order.user,
@@ -84,7 +83,6 @@ export default function EditScheduleOrder({
       });
 
       if (response.data.error) {
-        setIsSubmitting(false);
         showNotification('error', response.data.error);
         return;
       }
@@ -98,10 +96,8 @@ export default function EditScheduleOrder({
       mutateOrders();
 
       showNotification('success', response.data.message);
-      setIsSubmitting(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
-      setIsSubmitting(false);
       showNotification('error', 'Fail to update item: ' + error);
     }
   };
