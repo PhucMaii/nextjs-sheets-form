@@ -55,6 +55,7 @@ interface IProps {
   onSubmit: (order: Order) => Promise<void>;
   isModal?: boolean;
   isPreOrder?: boolean;
+  clientName?: string;
   role?: USER_ROLE;
 }
 
@@ -67,6 +68,7 @@ const OrderView = ({
   defaultDeliveryDate,
   defaultOrderedItems,
   defaultOrder,
+  clientName,
   role,
 }: IProps) => {
   const [displayItems, setDisplayItems] = useState<IItem[]>(items);
@@ -415,7 +417,7 @@ const OrderView = ({
         )}
 
         <Typography variant="h6" textAlign="center">
-          My Order
+          {clientName ? `${clientName}'s` : 'My'} Order
         </Typography>
 
         {orderedItems.length > 0 ? (

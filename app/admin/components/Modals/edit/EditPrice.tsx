@@ -121,6 +121,7 @@ export default function EditPrice({
           defaultOrder={order}
           purpose={ORDER_USAGE_PURPOSE.ITEM}
           onSubmit={onUpdateOrder}
+          clientName={order?.user?.clientName}
           isModal
           role={USER_ROLE.ADMIN}
         />

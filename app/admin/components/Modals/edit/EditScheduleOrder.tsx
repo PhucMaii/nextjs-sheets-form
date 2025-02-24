@@ -11,7 +11,7 @@ import {
 import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import { IRoutes, ScheduledOrder, IItem } from '@/app/utils/type';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import ModalHead from '@/app/lib/ModalHead';
@@ -168,6 +168,8 @@ export default function EditScheduleOrder({
               purpose={ORDER_USAGE_PURPOSE.ITEM}
               isPreOrder
               isModal
+              role={USER_ROLE.ADMIN}
+              clientName={order?.user?.clientName}
             />
           </Box>
         </BoxModal>

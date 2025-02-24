@@ -137,6 +137,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
           onSubmit={addOrder}
           defaultDeliveryDate={deliveryDate}
           role={USER_ROLE.DRIVER}
+          clientName={selectedClient?.clientName}
         />
         {/* <Box mb={4} display="flex" flexDirection="column" gap={1}>
           <Typography fontWeight="bold" variant="subtitle1">

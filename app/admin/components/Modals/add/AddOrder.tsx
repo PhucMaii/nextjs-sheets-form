@@ -277,6 +277,7 @@ export default function AddOrder({
                   }}
                   isPreOrder={createScheduledOrder !== undefined}
                   defaultDeliveryDate={deliveryDate}
+                  clientName={clientValue?.clientName}
                   role={USER_ROLE.ADMIN}
                 />
               )}

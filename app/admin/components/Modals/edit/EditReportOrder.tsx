@@ -195,6 +195,7 @@ const EditReportOrder = ({
           onSubmit={onUpdateItem}
           isModal
           role={USER_ROLE.ADMIN}
+          clientName={order?.user?.clientName}
         />
       </BoxModal>
     </Modal>
