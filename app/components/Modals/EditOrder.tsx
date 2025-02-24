@@ -1,23 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BoxModal } from '@/app/admin/components/Modals/styled';
 import { ModalProps } from '@/app/admin/components/Modals/type';
-import { Item, Order } from '@/app/admin/orders/page';
-import { infoColor } from '@/theme/color';
-import { LoadingButton } from '@mui/lab';
-import {
-  AlertColor,
-  Box,
-  Button,
-  Divider,
-  Grid,
-  Modal,
-  TextField,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
+import { Order } from '@/app/admin/orders/page';
+import { AlertColor, Box, Divider, Modal, Typography } from '@mui/material';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import { grey } from '@mui/material/colors';
+import OrderView, { ORDER_USAGE_PURPOSE } from '../OrderView';
+import { SWRFetchData } from '@/app/utils/db';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -32,58 +21,64 @@ export default function EditOrder({
   showNotification,
   handleUpdateOrderUI,
 }: PropTypes) {
-  const [itemList, setItemList] = useState<Item[]>(
-    (order.items as Item[]) || [],
-  );
-  const [isOverriding, setIsOverriding] = useState<boolean>(false);
-  const [note, setNote] = useState<string>(order.note || '');
+  const [items] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${order.userId}`);
 
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  // const handleChangeItem = (e: any, itemId: number) => {
+  //   const newItemList = itemList.map((item: Item) => {
+  //     if (item.id === itemId) {
+  //       return { ...item, quantity: +e.target.value };
+  //     }
+  //     return item;
+  //   });
 
-  const handleChangeItem = (e: any, itemId: number) => {
-    const newItemList = itemList.map((item: Item) => {
-      if (item.id === itemId) {
-        return { ...item, quantity: +e.target.value };
-      }
-      return item;
-    });
+  //   setItemList(newItemList);
+  // };
 
-    setItemList(newItemList);
-  };
-
-  const handleOverrideOrder = async () => {
+  const onOverrideOrder = async (orderParam: Order) => {
     try {
-      setIsOverriding(true);
-
       const response = await axios.put(API_URL.CLIENT_ORDER, {
-        deliveryDate: order.deliveryDate,
-        note,
-        items: [...itemList],
+        deliveryDate: orderParam.deliveryDate,
+        note: orderParam.note,
+        items: orderParam.items,
         orderId: order.id,
       });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
-        setIsOverriding(false);
       }
 
       handleUpdateOrderUI(response.data.data);
       showNotification('success', response.data.message);
-      setIsOverriding(false);
       onClose();
     } catch (error: any) {
       console.log('Fail to override order: ', error);
       showNotification('error', 'Fail to override order: ' + error);
-      setIsOverriding(false);
     }
   };
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+      <BoxModal
+        display="flex"
+        maxHeight="80vh"
+        overflow="auto"
+        flexDirection="column"
+        gap={2}
+      >
+        <Box display="flex" flexDirection="column" alignItems="center">
           <Typography variant="h4">Override Order</Typography>
-          {!mdDown && (
+
+          <Divider />
+          <OrderView
+            items={items?.data?.items || []}
+            onSubmit={onOverrideOrder}
+            defaultDeliveryDate={order.deliveryDate}
+            defaultOrderedItems={order.items}
+            defaultOrder={order}
+            purpose={ORDER_USAGE_PURPOSE.ITEM}
+            isModal
+          />
+          {/* {!mdDown && (
             <LoadingButton
               variant="contained"
               disabled={itemList.length === 0}
@@ -99,8 +94,8 @@ export default function EditOrder({
               SAVE
             </LoadingButton>
           )}
-        </Box>
-        <Divider />
+        </Box> */}
+          {/* <Divider />
         <Box overflow="auto" maxHeight="70vh">
           <Grid container rowGap={3}>
             {itemList.length > 0 &&
@@ -162,7 +157,7 @@ export default function EditOrder({
                 </Grid>
               </Grid>
             )}
-          </Grid>
+          </Grid> */}
         </Box>
       </BoxModal>
     </Modal>

@@ -397,35 +397,35 @@ export default function ScheduledOrderPage() {
     }
   };
 
-  const handleUpdateOrderUI = (updatedOrder: ScheduledOrder) => {
-    // update base order list
-    const newBaseOrderList = baseOrderList.map((order: ScheduledOrder) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  // const handleUpdateOrderUI = (updatedOrder: ScheduledOrder) => {
+  //   // update base order list
+  //   const newBaseOrderList = baseOrderList.map((order: ScheduledOrder) => {
+  //     if (order.id === updatedOrder.id) {
+  //       return updatedOrder;
+  //     }
+  //     return order;
+  //   });
 
-    // update current displaying order list
-    const newOrderList = orderList.map((order: ScheduledOrder) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  //   // update current displaying order list
+  //   const newOrderList = orderList.map((order: ScheduledOrder) => {
+  //     if (order.id === updatedOrder.id) {
+  //       return updatedOrder;
+  //     }
+  //     return order;
+  //   });
 
-    // Update selected orders if any
-    const newSelectedOrders = selectedOrders.map((order: ScheduledOrder) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  //   // Update selected orders if any
+  //   const newSelectedOrders = selectedOrders.map((order: ScheduledOrder) => {
+  //     if (order.id === updatedOrder.id) {
+  //       return updatedOrder;
+  //     }
+  //     return order;
+  //   });
 
-    setSelectedOrders(newSelectedOrders);
-    setBaseOrderList(newBaseOrderList);
-    setOrderList(newOrderList);
-  };
+  //   setSelectedOrders(newSelectedOrders);
+  //   setBaseOrderList(newBaseOrderList);
+  //   setOrderList(newOrderList);
+  // };
 
   const handleUpdateRouteUI = (targetRoute: IRoutes) => {
     const newRoutes = routes.map((route: IRoutes) => {
@@ -800,7 +800,6 @@ export default function ScheduledOrderPage() {
                           key={order.id}
                           scheduleOrder={order}
                           handleDeleteOrderUI={handleDeleteOrderUI}
-                          handleUpdateOrderUI={handleUpdateOrderUI}
                           mutateOrders={mutateOrders}
                           selectedOrders={selectedOrders}
                           handleSelectOrder={handleSelectOrder}

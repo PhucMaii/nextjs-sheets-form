@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   AlertColor,
   Autocomplete,
@@ -7,27 +7,23 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { OrderedItems, UserType } from '@/app/utils/type';
+import { UserType } from '@/app/utils/type';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
-import ErrorComponent from '@/app/admin/components/ErrorComponent';
-import moment from 'moment';
 import axios from 'axios';
-import { LoadingButton } from '@mui/lab';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
-import SellingItemName from '@/app/components/SellingItemName';
+import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
+import { Order } from '@/app/admin/orders/page';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function PlaceOrder({ showNotification }: IProps) {
-  const [itemList, setItemList] = useState<OrderedItems[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [note, setNote] = useState<string>('');
+  // const [itemList, setItemList] = useState<OrderedItems[] | any>([]);
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
 
-  const { date: deliveryDate, SelectDate } = useSelectDate('', true);
+  const { date: deliveryDate } = useSelectDate('', true);
 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
@@ -36,36 +32,26 @@ export default function PlaceOrder({ showNotification }: IProps) {
     `${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`,
   );
 
-  useEffect(() => {
-    if (items) {
-      initializeItems();
-    }
-  }, [items]);
+  // useEffect(() => {
+  //   if (items) {
+  //     initializeItems();
+  //   }
+  // }, [items]);
 
-  const addOrder = async () => {
-    const isInputValid = handleCheckUserHasInput();
-    if (!isInputValid) {
-      showNotification('error', 'Please Enter Quantity for Items');
-      return;
-    }
-    setIsSubmitting(true);
+  const addOrder = async (order: Order) => {
+    // const isInputValid = handleCheckUserHasInput();
+    // if (!isInputValid) {
+    //   showNotification('error', 'Please Enter Quantity for Items');
+    //   return;
+    // }
     try {
-      const currentDate = new Date();
-      const dateString = moment(currentDate).format('YYYY-MM-DD');
-      const timeString = moment(currentDate).format('HH:mm:ss');
-
       // Format data to have the same structure as backend
       const submittedData: any = {
-        deliveryDate,
-        note,
-        createdAt: `${timeString} ${dateString}`,
-        items: itemList,
+        deliveryDate: order.deliveryDate,
+        note: order.note,
+        items: order.items,
         createdBy: USER_ROLE.DRIVER,
       };
-
-      // for (const item of itemList) {
-      //   submittedData = { ...submittedData, [item.name]: item.quantity };
-      // }
 
       const response = await axios.post(
         `${API_URL.IMPORT_SHEETS}?userId=${selectedClient?.id}`,
@@ -74,13 +60,11 @@ export default function PlaceOrder({ showNotification }: IProps) {
 
       if (response.data.error) {
         showNotification('error', response.data.error);
-        setIsSubmitting(false);
         return;
       }
 
       if (response.data.warning) {
         showNotification('warning', response.data.warning);
-        setIsSubmitting(false);
         return;
       }
 
@@ -89,39 +73,37 @@ export default function PlaceOrder({ showNotification }: IProps) {
         `Placed Order Successfully for ${selectedClient?.clientName}`,
       );
 
-      setIsSubmitting(false);
     } catch (error: any) {
       console.log(error);
       showNotification('error', error.response.data.error);
-      setIsSubmitting(false);
       return;
     }
   };
 
-  const initializeItems = () => {
-    const formatItems = items.data.items.map((item: any) => {
-      return { ...item, quantity: 0 };
-    });
+  // const initializeItems = () => {
+  //   const formatItems = items.data.items.map((item: any) => {
+  //     return { ...item, quantity: 0 };
+  //   });
 
-    setItemList(formatItems);
-  };
+  //   setItemList(formatItems);
+  // };
 
-  const handleChangeItem = (e: any, targetItem: any) => {
-    const newItems = itemList.map((item: any) => {
-      if (item.id === targetItem.id) {
-        return { ...targetItem, quantity: +e.target.value };
-      }
-      return item;
-    });
+  // const handleChangeItem = (e: any, targetItem: any) => {
+  //   const newItems = itemList.map((item: any) => {
+  //     if (item.id === targetItem.id) {
+  //       return { ...targetItem, quantity: +e.target.value };
+  //     }
+  //     return item;
+  //   });
 
-    setItemList(newItems);
-  };
+  //   setItemList(newItems);
+  // };
 
-  const handleCheckUserHasInput = () => {
-    return itemList.some((item: any) => {
-      return item.quantity > 0;
-    });
-  };
+  // const handleCheckUserHasInput = () => {
+  //   return itemList.some((item: any) => {
+  //     return item.quantity > 0;
+  //   });
+  // };
 
   return (
     <>
@@ -149,13 +131,20 @@ export default function PlaceOrder({ showNotification }: IProps) {
             sx={{ width: 'auto' }}
           />
         </Box>
-        <Box mb={4} display="flex" flexDirection="column" gap={1}>
+        <OrderView 
+          items={items?.data?.items || []}
+          purpose={ORDER_USAGE_PURPOSE.ORDER}
+          onSubmit={addOrder}
+          defaultDeliveryDate={deliveryDate}
+          role={USER_ROLE.DRIVER}
+        />
+        {/* <Box mb={4} display="flex" flexDirection="column" gap={1}>
           <Typography fontWeight="bold" variant="subtitle1">
             DELIVERY DATE
           </Typography>
           {SelectDate}
-        </Box>
-        {selectedClient ? (
+        </Box> */}
+        {/* {selectedClient ? (
           <>
             {itemList.length > 0 &&
               itemList.map((item: any, index: number) => {
@@ -166,19 +155,6 @@ export default function PlaceOrder({ showNotification }: IProps) {
                     flexDirection="column"
                     gap={1}
                   >
-                    {/* <Typography
-                      sx={{ color: item.availability ? 'black' : grey[500] }}
-                      fontWeight="bold"
-                      variant="subtitle1"
-                    >
-                      {`${item.name} - ${
-                        !item.availability
-                          ? 'Out of stock'
-                          : item.price === 0
-                            ? ' Variable price'
-                            : `$${item.price.toFixed(2)}`
-                      }`}
-                    </Typography> */}
                     <SellingItemName item={item} />
                     <TextField
                       type="number"
@@ -189,8 +165,8 @@ export default function PlaceOrder({ showNotification }: IProps) {
                     />
                   </Box>
                 );
-              })}
-            <Box display="flex" flexDirection="column" gap={1}>
+              })} */}
+            {/* <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="subtitle1">NOTE</Typography>
               <TextField
                 multiline
@@ -200,13 +176,13 @@ export default function PlaceOrder({ showNotification }: IProps) {
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Writing your note here..."
               />
-            </Box>
-          </>
-        ) : (
+            </Box> */}
+          {/* </> */}
+        {/* ) : (
           <ErrorComponent errorText="Please select a client " />
-        )}
+        )} */}
 
-        <LoadingButton
+        {/* <LoadingButton
           disabled={!selectedClient}
           variant="contained"
           onClick={addOrder}
@@ -215,7 +191,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
           sx={{ mt: 2 }}
         >
           Submit
-        </LoadingButton>
+        </LoadingButton> */}
       </Box>
     </>
   );
