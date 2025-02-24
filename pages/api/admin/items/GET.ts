@@ -75,7 +75,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     return res.status(404).json({
       error: 'No provided information',
-    })
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

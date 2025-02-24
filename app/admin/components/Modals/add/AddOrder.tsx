@@ -156,7 +156,7 @@ export default function AddOrder({
     } catch (error: any) {
       console.log('There was an error: ', error);
     }
-  }
+  };
 
   const initializeItems = () => {
     if (clientItems) {

@@ -10,7 +10,10 @@ import {
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
-import { createOrderedItems, formatItemsWithTotalPrice } from '../../utils/order';
+import {
+  createOrderedItems,
+  formatItemsWithTotalPrice,
+} from '../../utils/order';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -59,7 +62,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const existingOrder = await prisma.orders.findUnique({
       where: {
         id: orderId,
-      }, 
+      },
       include: {
         items: {
           include: {
@@ -230,17 +233,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export const categorizeUpdatedItems = (baseItems: any, updatedItems: any) => {
+export const categorizeUpdatedItems = (
+  baseItems: any,
+  updatedItems: any,
+  comparedField: string = 'id',
+) => {
   let trackBaseItems = [...baseItems];
 
   const newItems = updatedItems.map((updatedItem: any) => {
     const baseItem = baseItems.find((item: any) => {
-      return item.id === updatedItem.id;
+      return item[comparedField] === updatedItem[comparedField];
     });
 
     if (baseItem) {
       trackBaseItems = trackBaseItems.filter((item: any) => {
-        return item.id !== updatedItem.id;
+        return item[comparedField] !== updatedItem[comparedField];
       });
 
       if (baseItem.quantity !== updatedItem.quantity) {

@@ -7,8 +7,7 @@ import {
 import React from 'react';
 import { BoxModal } from '../styled';
 import { Order } from '../../../orders/page';
-import {
-} from '@/app/utils/time';
+import {} from '@/app/utils/time';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import axios from 'axios';
 import { ModalProps } from '../type';

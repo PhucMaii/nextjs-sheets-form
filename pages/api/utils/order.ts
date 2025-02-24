@@ -60,7 +60,6 @@ export const checkOrderValidToAffectInventory = async (
   }
 };
 
-
 export const createOrderedItems = async (
   order: Orders,
   items: any,

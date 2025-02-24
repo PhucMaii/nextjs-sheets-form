@@ -1,10 +1,7 @@
 import { UserType } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import {
-  categorizeUpdatedItems,
-  ITEM_CATEGORIZED,
-} from '../orderedItems/PUT';
+import { categorizeUpdatedItems, ITEM_CATEGORIZED } from '../orderedItems/PUT';
 import { getRouteScheduledOrders, refactorRouteArrangement } from './POST';
 
 interface BodyTypes {
@@ -22,7 +19,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const { user, items, scheduledOrderId, oldRouteId, newRouteId } =
       req.body as BodyTypes;
 
-    console.log(req.body, "REQ BODY");
+    console.log(req.body, 'REQ BODY');
 
     // CASE: Move to new route
     if (oldRouteId && newRouteId) {
@@ -144,7 +141,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       } else {
         return res.status(500).json({
           error: 'Something went wrong with categorized items',
-        })
+        });
       }
     }
 

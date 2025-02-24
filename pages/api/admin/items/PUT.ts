@@ -201,7 +201,7 @@ const updateAllScheduleOrderItems = async (
       include: {
         items: true,
       },
-    })
+    });
 
     // Flat items in schedule orders
     const scheduleOrderItems = scheduleOrders.flatMap(
@@ -216,6 +216,9 @@ const updateAllScheduleOrderItems = async (
     // Update matched items
     await prisma.orderedItems.updateMany({
       where: {
+        scheduledOrderId: {
+          not: null,
+        },
         id: {
           in: matchedItems.map((item: any) => item.id),
         },

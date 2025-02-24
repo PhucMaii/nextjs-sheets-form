@@ -1,8 +1,4 @@
-import {
-  AlertColor,
-  Divider,
-  Modal,
-} from '@mui/material';
+import { AlertColor, Divider, Modal } from '@mui/material';
 import React from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
@@ -39,7 +35,6 @@ export default function EditPrice({
 
   //   return itemList.some((item: any) => !item?.inventoryItemId);
   // }, [itemList]);
-
 
   // const calculateNewTotalPrice = () => {
   //   const totalPrice = itemList.reduce((acc: number, cV: any) => {
