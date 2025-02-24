@@ -545,8 +545,11 @@ export const createOrderedItems = async (
         allDeletedFifoIds.push(...deletedFifoIds);
 
         const cost = sortedFifo[fifoIndex]?.price
-          ? sortedFifo[fifoIndex].price
+          ? sortedFifo[fifoIndex].price * itemUnit?.ratio
           : itemUnit?.unitPrice || 0;
+
+        console.log(itemUnit, 'item unit');
+        console.log(sortedFifo[fifoIndex].price, 'sortedFifo[fifoIndex].price');
 
         // STEP 6: Create ordered item with that fifo id attached
         newOrderedItems.push({
