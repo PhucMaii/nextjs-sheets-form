@@ -118,8 +118,6 @@ const OrderView = ({
     );
   }, [orderedItems]);
 
-  console.log('re render order view');
-
   //   useEffect(() => {
   //     if (defaultOrderedItems) {
   //       setOrderedItems(defaultOrderedItems);
@@ -238,7 +236,7 @@ const OrderView = ({
   };
 
   const onDecrementQuantity = (item: IItem) => {
-    if (item?.quantity === 1) {
+    if (item.quantity && item?.quantity <= 1) {
       onRemoveItem(item);
       return;
     }
@@ -261,6 +259,13 @@ const OrderView = ({
   };
 
   const onSubmitOrder = async () => {
+    const isItemsValid = orderedItems.every((i: any) => i.quantity > 0);
+
+    if (!isItemsValid) {
+      showNotification('error', 'Items quantity must be greater than 0');
+      return;
+    }
+
     setIsLoading(true);
     try {
       await onSubmit({ ...order, items: orderedItems });
@@ -490,6 +495,7 @@ const OrderView = ({
                       size="small"
                       type="number"
                       value={item.quantity}
+                      inputProps={{ min: 1 }}
                       onChange={(e) =>
                         onEditItemQuantity(item, +e.target.value)
                       }
