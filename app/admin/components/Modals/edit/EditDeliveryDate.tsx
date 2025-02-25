@@ -24,6 +24,7 @@ import {
 } from '@/app/utils/time';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LoadingButton } from '@mui/lab';
+import { pusherClient } from '@/app/pusher';
 // import { checkIsPreOrderQualified } from '@/app/utils/orders';
 
 interface PropTypes extends ModalProps {
@@ -47,6 +48,8 @@ export default function EditDeliveryDate({
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
+
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
     if (order) {
       return order.deliveryDate;
@@ -57,7 +60,48 @@ export default function EditDeliveryDate({
   });
 
   useEffect(() => {
-    console.log('changing');
+    pusherClient?.subscribe('admin-schedule-order');
+
+    const handleReceiveOrder = (incomingOrder: Order) => {
+      const sameIdOrder = createdOrders.some(
+        (order: Order) => order.id === incomingOrder.id,
+      );
+
+      if (!sameIdOrder) {
+        setCreatedOrders((prevOrders) => [...prevOrders, incomingOrder]);
+      }
+    };
+    pusherClient?.bind('pre-order', handleReceiveOrder);
+
+    return () => {
+      pusherClient?.unsubscribe('admin-schedule-order');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (scheduleOrderList && scheduleOrderList.length > 0) {
+      // Filter out item has same id
+      const filteredOrderLength = createdOrders.reduce(
+        (accumulator: any, currentOrder: Order) => {
+          const foundItem = accumulator.find((order: Order) => {
+            return order?.id === currentOrder.id;
+          });
+
+          if (!foundItem) {
+            accumulator = accumulator.concat(currentOrder);
+          }
+
+          return accumulator;
+        },
+        [],
+      );
+      setProgress(
+        (filteredOrderLength.length / scheduleOrderList.length) * 100,
+      );
+    }
+  }, [createdOrders]);
+
+  useEffect(() => {
     setProgress(0);
   }, [scheduleOrderList]);
 

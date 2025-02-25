@@ -114,7 +114,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             'pre-order',
             returnOrder,
           );
-          console.log({ zeroTotalPrice: scheduleOrder });
+          console.log({
+            zeroTotalPrice: {
+              id: scheduleOrder.id,
+              user: scheduleOrder.user.clientId,
+              deliveryDate,
+              clientName: scheduleOrder.user.clientName,
+            },
+          });
           continue;
         }
 
@@ -128,7 +135,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
             id: existingOrder?.id,
           });
-          console.log({ alreadyOrder: scheduleOrder });
+          console.log({
+            alreadyOrder: {
+              id: scheduleOrder.id,
+              user: scheduleOrder.user.clientId,
+              deliveryDate,
+              clientName: scheduleOrder.user.clientName,
+            },
+          });
           continue;
         }
 
@@ -137,7 +151,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
             id: returnOrder?.id,
           });
-          console.log({ inactiveAccount: scheduleOrder });
+          console.log({
+            inactiveOrder: {
+              id: scheduleOrder.id,
+              user: scheduleOrder.user.clientId,
+              deliveryDate,
+              clientName: scheduleOrder.user.clientName,
+            },
+          });
           continue;
         }
 
@@ -174,7 +195,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
             id: returnOrder?.id,
           });
-          console.log({ unavailableTime: scheduleOrder });
+          console.log({
+            duringBlocking: {
+              id: scheduleOrder.id,
+              user: scheduleOrder.user.clientId,
+              deliveryDate,
+              clientName: scheduleOrder.user.clientName,
+            },
+          });
           continue;
         }
 
@@ -198,7 +226,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
           id: newOrder?.id,
         });
-        console.log({ successful: scheduleOrder });
+        console.log({
+          successful: {
+            id: scheduleOrder.id,
+            user: scheduleOrder.user.clientId,
+            deliveryDate,
+            clientName: scheduleOrder.user.clientName,
+          },
+        });
       } catch (error: any) {
         console.error('Fail to pre order: ', error);
         // await pusherServer?.trigger(
@@ -514,8 +549,11 @@ export const createOrderedItems = async (
         allDeletedFifoIds.push(...deletedFifoIds);
 
         const cost = sortedFifo[fifoIndex]?.price
-          ? sortedFifo[fifoIndex].price
+          ? sortedFifo[fifoIndex].price * itemUnit?.ratio
           : itemUnit?.unitPrice || 0;
+
+        console.log(itemUnit, 'item unit');
+        console.log(sortedFifo[fifoIndex].price, 'sortedFifo[fifoIndex].price');
 
         // STEP 6: Create ordered item with that fifo id attached
         newOrderedItems.push({
