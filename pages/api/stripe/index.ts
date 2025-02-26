@@ -19,7 +19,7 @@ export type CheckoutClientData = {
 interface IBody {
   cartId: number;
   deliveryDate: string;
-  clientData: CheckoutClientData
+  clientData: CheckoutClientData;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -73,15 +73,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(200).json({
         data: newOrder,
         message: 'Place an order successfully',
-      })
+      });
     }
 
+    console.log({ cart, items: cart.items, clientData }, 'cart');
+
     const stripeSession = await stripe.checkout.sessions.create({
-      success_url: `${process.env.NEXTAUTH_URL}/payment/success`,
+      success_url: `${process.env.NEXTAUTH_URL}/payment/successful`,
       cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
       mode: 'payment',
       billing_address_collection: 'auto',
       customer_email: clientData.email,
+      currency: 'cad',
+      payment_intent_data: {
+        metadata: {
+          cartId: String(cartId),
+          deliveryDate: String(deliveryDate),
+          guestSessionId: String(cart?.guestSessionId) || '',
+          clientData: JSON.stringify(clientData),
+        },
+      },
       line_items: cart?.items.map((item) => ({
         price_data: {
           currency: 'cad',
@@ -89,44 +100,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             name:
               item.itemPreference?.name ||
               item.itemPreference.inventoryItem.name,
-            description: `Quantity: ${item.quantity}`,
+            // description: `Quantity: ${item.quantity}`,
           },
-          unit_amount: item.itemPreference.price * 100,
+          unit_amount: item.itemPreference.price * 1000,
         },
         quantity: item.quantity,
-        metadata: {
-          cartId: cartId,
-          deliveryDate: deliveryDate,
-          guestSessionId: cart?.guestSessionId || '',
-          clientData
-        },
       })),
+      metadata: {
+        cartId: String(cartId),
+        deliveryDate: String(deliveryDate),
+        guestSessionId: String(cart?.guestSessionId) || '',
+        clientData: JSON.stringify(clientData),
+      },
     });
-
-    // const stripeSession = await stripe.checkout.sessions.create({
-    //   success_url: `${process.env.NEXTAUTH_URL}/success`,
-    //   cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
-    //   mode: 'payment',
-    //   billing_address_collection: 'auto',
-    //   customer_email: 'maithienphuc0102@gmail.com',
-    //   line_items: [
-    //     {
-    //       price_data: {
-    //         currency: 'cad',
-    //         product_data: {
-    //           name: 'BEAN 5 LB',
-    //           description: `Quantity: 2`,
-    //         },
-    //         unit_amount: 1000,
-    //       },
-    //       quantity: 2,
-    //       // metadata: {
-    //       //   userId: 1,
-    //       //   guestSessionId: 'suchscuudschyfvgir',
-    //       // },
-    //     },
-    //   ],
-    // });
 
     return res.status(200).json({
       url: stripeSession.url,

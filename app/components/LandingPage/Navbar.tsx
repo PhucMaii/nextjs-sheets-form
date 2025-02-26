@@ -351,13 +351,30 @@ export default function Navbar() {
           <IconButton
             onClick={proceedToApplicationForm}
             size="large"
-            sx={{ color: landingPagePrimaryColor }}
+            sx={{
+              color: landingPagePrimaryColor,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
           >
             <UserIcon style={{ width: 30, height: 30 }} />
+            <Box sx={{ display: "flex", alignItems: "center", height: 0 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: landingPagePrimaryColor,
+                  fontWeight: 'bold',
+                  mt: 2,
+                }}
+              >
+                Log in
+              </Typography>
+            </Box>
           </IconButton>
           <Divider orientation="vertical" flexItem />
           <IconButton
-            sx={{ color: landingPagePrimaryColor, position: 'relative' }}
+            sx={{ color: landingPagePrimaryColor }}
             onClick={() => router.push('/cart')}
           >
             <ShoppingCartIcon style={{ width: 30, height: 30 }} />

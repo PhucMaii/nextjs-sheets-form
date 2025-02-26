@@ -33,7 +33,7 @@ export default function CheckoutPage() {
   });
   // const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<any>({
-    name: '',
+    clientName: '',
     email: '',
     contactNumber: '',
     contactName: '',
@@ -274,8 +274,19 @@ export default function CheckoutPage() {
             <TextField
               id="name"
               placeholder="Enter your name or company name"
-              value={userInfo.name}
-              onChange={(e) => onChangeField('name', e.target.value)}
+              value={userInfo.clientName}
+              onChange={(e) => onChangeField('clientName', e.target.value)}
+            />
+          </FormGroup>
+        </Grid>
+        <Grid item xs={12}>
+          <FormGroup>
+            <InputLabel htmlFor="name">Main Contact Name</InputLabel>
+            <TextField
+              id="contactName"
+              placeholder="Enter your main contact name"
+              value={userInfo.contactName}
+              onChange={(e) => onChangeField('contactName', e.target.value)}
             />
           </FormGroup>
         </Grid>
@@ -358,7 +369,7 @@ export default function CheckoutPage() {
               <CheckoutButton
                 style={{ width: '100%', marginTop: 6 }}
                 deliveryDate={deliveryDate}
-                clientData={userInfo}
+                clientData={{...userInfo, deliveryAddress: address.fullName}}
               />
             </ShadowSection>
           </Grid>

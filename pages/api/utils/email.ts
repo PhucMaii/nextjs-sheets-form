@@ -13,7 +13,7 @@ const emailHandler = async (
   email: string,
   subject: string,
   title: string,
-  template: string,
+  template: string = '',
 ) => {
   try {
     console.log(
@@ -36,7 +36,7 @@ const emailHandler = async (
       to: email,
       subject: subject,
       text: title,
-      html: template,
+      html: template || '',
     });
   } catch (error) {
     console.log('Fail to send email, ', error);
@@ -171,5 +171,40 @@ Unit 1 - 6420 Beresford Street Burnaby,
 British Columbia V5E 1B6, Canada
 if we are unable to collect it in person.
 Thank you for your cooperation.
+  `;
+};
+
+export const sendWelcomeEmail = async (guest: User) => {
+  if (!guest.email) {
+    return;
+  }
+
+  await emailHandler(
+    guest.email,
+    'Welcome to Supreme Sprouts',
+    generateWelcomeEmail(guest.clientName),
+  );
+}
+
+export const generateWelcomeEmail = (clientName: string) => {
+  return `
+Dear ${clientName},
+
+We hope you're having a fantastic day. At Supreme Sprouts, we’re thrilled to announce some wonderful news—your interest in partnering with us has brought us great joy and excitement!
+
+At Supreme Sprouts, providing the highest quality ingredients is our top priority. We take pride in offering a wide range of vegetables that meet the needs of restaurants, markets, and supermarkets. 
+By partnering with us, you’ll have access to fresh, premium produce that will set you apart, helping you attract more customers and grow your business.
+
+We know that your dedication to excellence means we can continue to grow together and deliver even better produce solutions to our customers. 
+This collaboration is proof to our shared commitment to quality and innovation in the food industry.
+
+Thank you for choosing Supreme Sprouts. We’re eager to welcome you as part of our expanding family and look forward to working with you to make an impact on the industry.
+We’ll be reaching out shortly with more details about how we can collaborate effectively. In the meantime, feel free to reach out if you have any questions or need anything from us.
+
+Best regards,
+
+Tim
+Supreme Sprouts Ltd
+
   `;
 };

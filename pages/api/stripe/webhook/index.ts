@@ -1,65 +1,75 @@
 import { stripe } from '@/app/lib/stripe';
-import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { createGuest } from '../../public/create-guest';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
-import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { createOrder } from '../../admin/orders/POST';
 import { convertCartItemsToOrderItems } from '../../public/place-order';
 import { getTodayDate } from '../../utils/date';
-import { sendEmail } from '../../utils/email';
+import { sendEmail, sendWelcomeEmail } from '../../utils/email';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-const handler = async (req: Request) => {
-    if (req.method !== 'POST') {
-      return new NextResponse('Your method is not supported', { status: 404 });
-    }
+export const config = {
+  api: {
+    bodyParser: false, // ⛔ Disable automatic body parsing
+  },
+};
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
   try {
-    const body = await req.text();
+    const buf = await buffer(req);
+    const webhookSecret =
+      'whsec_01a334a8b9bc36bfd9d6d88351918a7e18917556f0e350eab907e01b72d5d062';
 
     const prisma = new PrismaClient();
 
-    const signature = headers().get('Stripe-Signature') as string;
-
+    const signature = req.headers['stripe-signature'] as string;
     // const event: Stripe.Event;
 
     const event: Stripe.Event = stripe.webhooks.constructEvent(
-      body,
+      buf,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET as string,
+      webhookSecret,
     );
 
     const session: any = event.data.object as Stripe.Checkout.Session;
 
     if (!session.metadata) {
-      return new NextResponse('No metadata provided', { status: 400 });
+      return res.status(404).json({ error: 'Metadata not found' });
     }
 
-    // When payment is start processing
-    if (event.type === 'payment_intent.processing') {
+    // console.log(session.metadata, 'metadata');
+    // console.log(session.payment_intent_data.metadata, 'payment_intent_data.metadata');
+
+    // When payment is complete
+    if (event.type === 'checkout.session.completed') {
       // Create guest user
+      const clientInfo = JSON.parse(session.metadata.clientData);
+      console.log(
+        { clientInfo, session: session.metadata.clientData },
+        'clientInfo',
+      );
+      // Convert to pending client
       const newGuest = await createGuest({
-        ...session.metadata.clientInfo,
-        type: USER_CATEGORIZED.GUEST,
+        ...clientInfo,
+        type: USER_CATEGORIZED.PENDING,
       });
 
+      console.log(
+        newGuest,
+        'created guest successfully and proceed to create order',
+      );
+
       // Attach to cart
-      await prisma.cart.update({
+      const cart = await prisma.cart.update({
         where: {
           id: Number(session.metadata.cartId),
         },
         data: {
           userId: newGuest.id,
-        },
-      });
-    }
-
-    // When payment is complete
-    if (event.type === 'payment_intent.succeeded') {
-      // Create order
-      const cart = await prisma.cart.findUnique({
-        where: {
-          id: Number(session.metadata.cartId),
         },
         include: {
           items: {
@@ -76,50 +86,76 @@ const handler = async (req: Request) => {
         },
       });
 
+      console.log(
+        cart.user,
+        'cart - created guest successfully and proceed to create order',
+      );
+
       if (!cart) {
-        return new NextResponse('No cart found', { status: 400 });
+        return res.status(404).json({ error: 'Cart not found' });
       }
 
-      if (!cart.user) {
-        return new NextResponse('No user found attach to cart', {
-          status: 400,
-        });
+      if (!newGuest) {
+        return res.status(404).json({ error: 'Guest not found' });
       }
 
       const { date, time } = getTodayDate();
       const formattedItems = convertCartItemsToOrderItems(cart.items);
+      // Create order
       const newOrder = await createOrder(
-        cart.user,
+        newGuest,
         formattedItems,
         session.metadata.deliveryDate,
         `${date} ${time}`,
         `Client - ${session.metadata.clientId}`,
       );
 
+      console.log('create order successfully');
+
       // Send confirmation email
       const isSendToAdmin = true;
       await sendEmail(
-        cart.user,
+        newGuest,
         newOrder,
         newOrder.id,
         newOrder.deliveryDate,
         isSendToAdmin,
         newOrder.note,
-      )
+      );
 
-      // Delete cart
+      // TODO: Send email confirmation of request to be partner
+      await sendWelcomeEmail(newGuest);
+
+      // Delete Cart
       await prisma.cart.delete({
         where: {
           id: Number(session.metadata.cartId),
         },
       });
-
-
     }
+
+    return res.status(200).json({ message: 'Success' });
   } catch (error: any) {
     console.log('Fail to create checkout session: ', error);
-    return new NextResponse(error, { status: 400 });
+    return res.status(500).json({ error: error.message });
   }
 };
 
 export default handler;
+
+// Function to get raw body
+const buffer = (req: NextApiRequest) => {
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+
+    req.on('data', (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
+
+    req.on('end', () => {
+      resolve(Buffer.concat(chunks));
+    });
+
+    req.on('error', reject);
+  });
+};
