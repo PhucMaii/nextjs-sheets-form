@@ -68,8 +68,6 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
   const singlePrintRef: any = useRef();
   const allPrintRef: any = useRef();
 
-  console.log(bugOrders, 'bug orders');
-
   // Subscribe admin whenever they logged in
   useEffect(() => {
     pusherClient?.subscribe('admin');
