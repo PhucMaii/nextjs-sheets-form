@@ -108,6 +108,7 @@ const CustomLinkInventory = ({
           orderId,
           customAmount: {
             ...customAmount,
+            inventoryUnitId: selectedUnit?.id,
             inventoryUnit: {
               ...selectedUnit,
               vendorItemId: selectedUnit?.vendorItemId || units[0].vendorItemId,
@@ -148,6 +149,7 @@ const CustomLinkInventory = ({
             id: 0,
             availability: true,
             totalPrice: customAmount.price,
+            inventoryUnitId: selectedUnit?.id,
             inventoryUnit: {
               ...selectedUnit,
               vendorItemId: selectedUnit?.vendorItemId || units[0].vendorItemId,

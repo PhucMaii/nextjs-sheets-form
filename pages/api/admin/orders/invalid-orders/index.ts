@@ -39,7 +39,13 @@ export default async function handler(
         },
       },
       include: {
-        items: true,
+        items: {
+          where: {
+            quantity: {
+              gt: 0,
+            },
+          },
+        },
         user: true,
       },
     });
