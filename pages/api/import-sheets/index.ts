@@ -96,6 +96,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+
+    // Check if any item quantity is decimal number
+    for (const item of items) {
+      if (item.quantity % 1 !== 0) {
+        return res.status(400).json({
+          error: 'Quantity must be whole number',
+        });
+      }
+    }
+
+
     const formattedCreatedBy = await getCreatedBy(req, res, createdBy);
 
     // Check is delivery date in client's vacation range

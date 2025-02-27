@@ -85,8 +85,6 @@ const CustomLinkInventory = ({
   //     }))
   // }, [selectedUnit]);
 
-  console.log(customAmount, 'custom amount');
-
   const onAddCustomAmountDB = async () => {
     if (!orderId) {
       showNotification('error', 'Please select an order');
@@ -112,7 +110,7 @@ const CustomLinkInventory = ({
             ...customAmount,
             inventoryUnit: {
               ...selectedUnit,
-              vendorItemId: selectedUnit?.vendorItemId || units[0].vendorItemId
+              vendorItemId: selectedUnit?.vendorItemId || units[0].vendorItemId,
             },
             units,
           },

@@ -268,6 +268,13 @@ export const createOrder = async (
   try {
     const prisma = new PrismaClient();
 
+    // Check if any item quantity is decimal number
+    for (const item of items) {
+      if (item.quantity % 1 !== 0) {
+        throw new Error('Invalid Quantity');
+      }
+    }
+
     // Check if user is inactive
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
       throw new Error('Client Account Is INACTIVE');
