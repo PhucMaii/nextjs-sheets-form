@@ -80,31 +80,6 @@ export default function PlaceOrder({ showNotification }: IProps) {
     }
   };
 
-  // const initializeItems = () => {
-  //   const formatItems = items.data.items.map((item: any) => {
-  //     return { ...item, quantity: 0 };
-  //   });
-
-  //   setItemList(formatItems);
-  // };
-
-  // const handleChangeItem = (e: any, targetItem: any) => {
-  //   const newItems = itemList.map((item: any) => {
-  //     if (item.id === targetItem.id) {
-  //       return { ...targetItem, quantity: +e.target.value };
-  //     }
-  //     return item;
-  //   });
-
-  //   setItemList(newItems);
-  // };
-
-  // const handleCheckUserHasInput = () => {
-  //   return itemList.some((item: any) => {
-  //     return item.quantity > 0;
-  //   });
-  // };
-
   return (
     <>
       <Typography variant="h4" textAlign="center">
@@ -139,60 +114,6 @@ export default function PlaceOrder({ showNotification }: IProps) {
           role={USER_ROLE.DRIVER}
           clientName={selectedClient?.clientName}
         />
-        {/* <Box mb={4} display="flex" flexDirection="column" gap={1}>
-          <Typography fontWeight="bold" variant="subtitle1">
-            DELIVERY DATE
-          </Typography>
-          {SelectDate}
-        </Box> */}
-        {/* {selectedClient ? (
-          <>
-            {itemList.length > 0 &&
-              itemList.map((item: any, index: number) => {
-                return (
-                  <Box
-                    key={index}
-                    display="flex"
-                    flexDirection="column"
-                    gap={1}
-                  >
-                    <SellingItemName item={item} />
-                    <TextField
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => handleChangeItem(e, item)}
-                      placeholder={`Enter ${item.name} here...`}
-                      disabled={!item.availability}
-                    />
-                  </Box>
-                );
-              })} */}
-            {/* <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="subtitle1">NOTE</Typography>
-              <TextField
-                multiline
-                maxRows={4}
-                value={note}
-                className="border-neutral-400 h-full mb-4"
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Writing your note here..."
-              />
-            </Box> */}
-          {/* </> */}
-        {/* ) : (
-          <ErrorComponent errorText="Please select a client " />
-        )} */}
-
-        {/* <LoadingButton
-          disabled={!selectedClient}
-          variant="contained"
-          onClick={addOrder}
-          loading={isSubmitting}
-          fullWidth
-          sx={{ mt: 2 }}
-        >
-          Submit
-        </LoadingButton> */}
       </Box>
     </>
   );

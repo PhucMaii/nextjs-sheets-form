@@ -15,7 +15,13 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { IItem } from '../utils/type';
 import { primary } from '@/theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
@@ -118,14 +124,25 @@ const OrderView = ({
   const comparedField = purpose === ORDER_USAGE_PURPOSE.ITEM ? 'name' : 'id';
 
   const itemTypes = useMemo(() => {
-    const uniqueTypes = new Set<string>();
-    items.forEach((item) => {
-      if (item?.type?.name) {
-        uniqueTypes.add(item.type.name);
-      }
-    });
+    if (items.length === 0) {
+      return {};
+    }
 
-    return Array.from(uniqueTypes);
+    const typesObj = items.reduce((acc: any, item: any) => {
+      if (!item.type) {
+        acc['Others'] = [...(acc['Others'] || []), item];
+        return acc;
+      }
+
+      if (!acc[item.type.name]) {
+        acc[item?.type?.name] = [item];
+      } else {
+        acc[item?.type?.name] = [...acc[item.type.name], item];
+      }
+      return acc;
+    }, {});
+
+    return typesObj;
   }, [items]);
 
   const totalQuantity = useMemo(() => {
@@ -249,18 +266,18 @@ const OrderView = ({
     });
   };
 
-  const onEditItemQuantity = (item: IItem, quantity: number) => {
-    const newItems = orderedItems.map((i) => {
-      if (i[comparedField] === item[comparedField]) {
-        return {
-          ...i,
-          quantity: quantity,
-        };
-      }
-      return i;
-    });
-    setOrderedItems(newItems);
-  };
+  // const onEditItemQuantity = (item: IItem, quantity: number) => {
+  //   const newItems = orderedItems.map((i) => {
+  //     if (i[comparedField] === item[comparedField]) {
+  //       return {
+  //         ...i,
+  //         quantity: quantity,
+  //       };
+  //     }
+  //     return i;
+  //   });
+  //   setOrderedItems(newItems);
+  // };
 
   const onDateChange = (e: any) => {
     const formattedDate = formatDateChanged(e);
@@ -324,6 +341,193 @@ const OrderView = ({
     }
   };
 
+  const renderByItems = () => {
+    return (
+      <>
+        {displayItems.length > 0 &&
+          displayItems.map((item: IItem) => {
+            return (
+              <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+                <Button
+                  key={item.id}
+                  sx={{ width: '100%', height: '100%' }}
+                  onClick={() =>
+                    setSingleFieldProps({
+                      open: true,
+                      item,
+                      defaultValue: 1,
+                    })
+                  }
+                >
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="space-between"
+                    gap={2}
+                    alignItems="flex-start"
+                    sx={{
+                      p: 1,
+                      backgroundColor: blue[50],
+                      borderRadius: 1,
+                      width: '100%',
+                      height: '100%',
+                      color: blueGrey[800],
+                    }}
+                  >
+                    <Typography fontWeight="bold" textAlign="left">
+                      {item.name}
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography fontWeight="bold">
+                        ${item.price?.toFixed(2)}
+                      </Typography>
+                      {item.isShowDiscount && item.prevPrice && (
+                        <Typography
+                          fontWeight="bold"
+                          sx={{ textDecoration: 'line-through' }}
+                          color="error"
+                        >
+                          ${item.prevPrice.toFixed(2)}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </Button>
+              </Grid>
+            );
+          })}
+      </>
+    );
+  };
+
+  const renderItemsByType = () => {
+    return (
+      <>
+        {Object.keys(itemTypes).length > 0 &&
+          Object.keys(itemTypes).map((type: string) => {
+            if (type === 'Others') return null;
+            return (
+              <Fragment key={type}>
+                <Grid item xs={12} mt={2}>
+                  <Typography variant="h6">{type}</Typography>
+                </Grid>
+
+                {itemTypes[type].map((item: IItem) => {
+                  return (
+                    <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+                      <Button
+                        key={item.id}
+                        sx={{ width: '100%', height: '100%' }}
+                        onClick={() =>
+                          setSingleFieldProps({
+                            open: true,
+                            item,
+                            defaultValue: 1,
+                          })
+                        }
+                      >
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          justifyContent="space-between"
+                          gap={2}
+                          alignItems="flex-start"
+                          sx={{
+                            p: 1,
+                            backgroundColor: blue[50],
+                            borderRadius: 1,
+                            width: '100%',
+                            height: '100%',
+                            color: blueGrey[800],
+                          }}
+                        >
+                          <Typography fontWeight="bold" textAlign="left">
+                            {item.name}
+                          </Typography>
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <Typography fontWeight="bold">
+                              ${item.price?.toFixed(2)}
+                            </Typography>
+                            {item.isShowDiscount && item.prevPrice && (
+                              <Typography
+                                fontWeight="bold"
+                                sx={{ textDecoration: 'line-through' }}
+                                color="error"
+                              >
+                                ${item.prevPrice.toFixed(2)}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      </Button>
+                    </Grid>
+                  );
+                })}
+              </Fragment>
+            );
+          })}
+
+        <Fragment>
+          <Grid item xs={12} mt={2}>
+            <Typography variant="h6">Others</Typography>
+          </Grid>
+
+          {itemTypes['Others'] && itemTypes['Others'].map((item: IItem) => {
+            return (
+              <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+                <Button
+                  key={item.id}
+                  sx={{ width: '100%', height: '100%' }}
+                  onClick={() =>
+                    setSingleFieldProps({
+                      open: true,
+                      item,
+                      defaultValue: 1,
+                    })
+                  }
+                >
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="space-between"
+                    gap={2}
+                    alignItems="flex-start"
+                    sx={{
+                      p: 1,
+                      backgroundColor: blue[50],
+                      borderRadius: 1,
+                      width: '100%',
+                      height: '100%',
+                      color: blueGrey[800],
+                    }}
+                  >
+                    <Typography fontWeight="bold" textAlign="left">
+                      {item.name}
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography fontWeight="bold">
+                        ${item.price?.toFixed(2)}
+                      </Typography>
+                      {item.isShowDiscount && item.prevPrice && (
+                        <Typography
+                          fontWeight="bold"
+                          sx={{ textDecoration: 'line-through' }}
+                          color="error"
+                        >
+                          ${item.prevPrice.toFixed(2)}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </Button>
+              </Grid>
+            );
+          })}
+        </Fragment>
+      </>
+    );
+  };
+
   const renderPlaceOrdeButton = useCallback(() => {
     return (
       <Box sx={{ position: 'sticky', bottom: 0, width: '100%' }}>
@@ -359,7 +563,8 @@ const OrderView = ({
             onClick={() => setSelectedItemType('All')}
             mode="edit"
           />
-          {itemTypes.map((itemType: string, index: number) => {
+          {Object.keys(itemTypes).map((itemType: string, index: number) => {
+            if (itemType === 'Others') return null;
             return (
               <ItemTypeButton
                 key={index}
@@ -389,67 +594,12 @@ const OrderView = ({
         />
 
         <Typography variant="h6" sx={{ mt: 2 }}>
-          All Items
+          {selectedItemType} Items
         </Typography>
         <Grid container mt={2}>
-          {displayItems.length > 0 &&
-            displayItems.map((item: IItem) => {
-              return (
-                <Grid
-                  key={item.id}
-                  item
-                  xs={6}
-                  sm={isModal ? 6 : 4}
-                  md={isModal ? 6 : 3}
-                >
-                  <Button
-                    key={item.id}
-                    sx={{ width: '100%', height: '100%' }}
-                    onClick={() =>
-                      setSingleFieldProps({
-                        open: true,
-                        item,
-                        defaultValue: 1,
-                      })
-                    }
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      justifyContent="space-between"
-                      gap={2}
-                      alignItems="flex-start"
-                      sx={{
-                        p: 1,
-                        backgroundColor: blue[50],
-                        borderRadius: 1,
-                        width: '100%',
-                        height: '100%',
-                        color: blueGrey[800],
-                      }}
-                    >
-                      <Typography fontWeight="bold" textAlign="left">
-                        {item.name}
-                      </Typography>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography fontWeight="bold">
-                          ${item.price?.toFixed(2)}
-                        </Typography>
-                        {item.isShowDiscount && item.prevPrice && (
-                          <Typography
-                            fontWeight="bold"
-                            sx={{ textDecoration: 'line-through' }}
-                            color="error"
-                          >
-                            ${item.prevPrice.toFixed(2)}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  </Button>
-                </Grid>
-              );
-            })}
+          {selectedItemType === 'All' && !debouncedKeywords
+            ? renderItemsByType()
+            : renderByItems()}
 
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
           {role === USER_ROLE.ADMIN &&
@@ -494,7 +644,7 @@ const OrderView = ({
         sx={{ position: 'sticky', top: 0 }}
       >
         {/* Only admin can affect inventory for an order in edit mode */}
-        {role === USER_ROLE.ADMIN && purpose === ORDER_USAGE_PURPOSE.ITEM && (
+        {role === USER_ROLE.ADMIN && purpose === ORDER_USAGE_PURPOSE.ITEM && !isPreOrder && (
           <FormControlLabel
             control={
               <Switch checked={isAffectInventory} onChange={onAvoidInventory} />
@@ -541,9 +691,10 @@ const OrderView = ({
 
                 <Box
                   display="flex"
-                  alignItems={smDown ? 'flex-start' : 'center'}
+                  alignItems={smDown || isModal ? 'flex-start' : 'center'}
                   justifyContent="space-between"
-                  flexDirection={smDown ? 'column' : 'row'}
+                  flexDirection={smDown || isModal ? 'column' : 'row'}
+                  gap={2}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography fontWeight="bold">
@@ -574,8 +725,8 @@ const OrderView = ({
                     >
                       -
                     </Fab>
-                    {/* <Typography fontWeight="bold">{item.quantity}</Typography> */}
-                    <OutlinedInput
+                    <Typography fontWeight="bold">{item.quantity}</Typography>
+                    {/* <OutlinedInput
                       size="small"
                       type="number"
                       value={item.quantity}
@@ -593,7 +744,7 @@ const OrderView = ({
                         maxWidth: 100,
                         textAlign: 'center',
                       }}
-                    />
+                    /> */}
                     <Fab
                       size="small"
                       sx={{
@@ -764,7 +915,13 @@ const OrderView = ({
           }}
         />
         {NotificationComp}
-        <Box display="flex" flexDirection="column" gap={2} width="100%" overflow="auto">
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          width="100%"
+          overflow="auto"
+        >
           <Box sx={{ borderColor: 'divider', borderBottom: 1 }}>
             <Tabs
               value={tabIdx}
