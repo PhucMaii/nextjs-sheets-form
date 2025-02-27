@@ -46,10 +46,11 @@ import ErrorIcon from '@mui/icons-material/Error';
 interface PropTypes {
   children: ReactNode;
   noMargin?: boolean;
+  overflow?: string;
 }
 
 const drawerWidth = 250;
-export default function Sidebar({ children, noMargin }: PropTypes) {
+export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -334,6 +335,7 @@ export default function Sidebar({ children, noMargin }: PropTypes) {
         <Box
           display="flex"
           width="100%"
+          overflow={overflow ? overflow : 'hidden'}
           flexDirection="column"
           m={noMargin ? 0 : 2}
           gap={2}

@@ -59,6 +59,7 @@ export default async function handler(
         prevPrice: item?.prevPrice,
         inventoryItemId: item?.inventoryItemId,
         inventoryUnitId: item?.inventoryUnitId,
+        typeId: item?.typeId || null,
       };
     });
 

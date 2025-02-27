@@ -8,6 +8,7 @@ import {
   Fifo,
   InventoryItem,
   InventoryUnit,
+  ItemType,
   PaymentMethod,
   PositionIndex,
   Route,
@@ -130,6 +131,8 @@ export interface IItem {
   prevPrice?: number;
   isShowDiscount?: boolean;
   order?: any;
+  typeId?: number;
+  type?: ItemType;
 }
 
 export interface OrderedItems {
@@ -213,6 +216,7 @@ export interface IInventoryItem extends InventoryItem {
   fifo: IFifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
+  type?: ItemType;
 }
 
 export interface IVendorItem extends VendorItem {

@@ -40,6 +40,8 @@ import { API_URL, USER_ROLE } from '../utils/enum';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
+import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
+import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
 
 export enum ORDER_USAGE_PURPOSE {
   ORDER = 'order',
@@ -96,6 +98,12 @@ const OrderView = ({
       generateRecommendDate(),
   });
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const [selectedItemType, setSelectedItemType] = useState<string>('All');
+  const [singleFieldProps, setSingleFieldProps] = useState<any>({
+    open: false,
+    item: null,
+    defaultValue: 1,
+  });
   const [tabIdx, setTabIdx] = useState<number>(0);
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -108,6 +116,17 @@ const OrderView = ({
 
   // Because the item id is not the same as ordered item id when it comes to edit item
   const comparedField = purpose === ORDER_USAGE_PURPOSE.ITEM ? 'name' : 'id';
+
+  const itemTypes = useMemo(() => {
+    const uniqueTypes = new Set<string>();
+    items.forEach((item) => {
+      if (item?.type?.name) {
+        uniqueTypes.add(item.type.name);
+      }
+    });
+
+    return Array.from(uniqueTypes);
+  }, [items]);
 
   const totalQuantity = useMemo(() => {
     if (!orderedItems || orderedItems.length === 0) return 0;
@@ -132,6 +151,15 @@ const OrderView = ({
       setDisplayItems(items);
     }
   }, [debouncedKeywords, items]);
+
+  useEffect(() => {
+    if (selectedItemType !== 'All') {
+      const newItems = items.filter((i) => i?.type?.name === selectedItemType);
+      setDisplayItems(newItems);
+    } else {
+      setDisplayItems(items);
+    }
+  }, [selectedItemType]);
 
   useEffect(() => {
     // Update order whenever the orderedItems change
@@ -177,7 +205,18 @@ const OrderView = ({
     }
   };
 
-  const onAddItem = (item: IItem) => {
+  const onAddItem = (quantity: number) => {
+    if (quantity % 1 !== 0) {
+      showNotification('error', 'Quantity must be an whole number');
+      return;
+    }
+
+    if (quantity < 1) {
+      showNotification('error', 'Quantity must be greater than 0');
+      return;
+    }
+
+    const item = singleFieldProps.item;
     // Check if item is already in orderedItems
     const existingItem = orderedItems.find(
       (i) => i[comparedField] === item[comparedField],
@@ -188,7 +227,7 @@ const OrderView = ({
         if (i[comparedField] === item[comparedField]) {
           return {
             ...i,
-            quantity: (i?.quantity || 0) + 1,
+            quantity: Number(quantity),
           };
         }
         return i;
@@ -197,8 +236,17 @@ const OrderView = ({
       setOrderedItems(newOrderedItems);
     } else {
       // Add item to orderedItems
-      setOrderedItems([...orderedItems, { ...item, quantity: 1 }]);
+      setOrderedItems([
+        ...orderedItems,
+        { ...item, quantity: Number(quantity) },
+      ]);
     }
+
+    setSingleFieldProps({
+      open: false,
+      item: null,
+      defaultValue: 1,
+    });
   };
 
   const onEditItemQuantity = (item: IItem, quantity: number) => {
@@ -295,6 +343,36 @@ const OrderView = ({
   const renderDisplayItems = () => {
     return (
       <ShadowSection>
+        {/* Item types */}
+        <Box
+          display="flex"
+          alignItems="center"
+          width="100%"
+          overflow="auto"
+          gap={0.5}
+          whiteSpace="nowrap"
+        >
+          <ItemTypeButton
+            style={{ minWidth: 'auto' }}
+            type="All"
+            isSelected={selectedItemType === 'All'}
+            onClick={() => setSelectedItemType('All')}
+            mode="edit"
+          />
+          {itemTypes.map((itemType: string, index: number) => {
+            return (
+              <ItemTypeButton
+                key={index}
+                type={itemType}
+                isSelected={itemType === selectedItemType}
+                onClick={() => setSelectedItemType(itemType)}
+                style={{ minWidth: 'auto' }}
+                mode="view"
+              />
+            );
+          })}
+        </Box>
+
         {/* Search bar */}
         <OutlinedInput
           fullWidth
@@ -327,7 +405,13 @@ const OrderView = ({
                   <Button
                     key={item.id}
                     sx={{ width: '100%', height: '100%' }}
-                    onClick={() => onAddItem(item)}
+                    onClick={() =>
+                      setSingleFieldProps({
+                        open: true,
+                        item,
+                        defaultValue: 1,
+                      })
+                    }
                   >
                     <Box
                       display="flex"
@@ -457,9 +541,9 @@ const OrderView = ({
 
                 <Box
                   display="flex"
-                  alignItems={isModal && !smDown ? 'flex-start' : 'center'}
+                  alignItems={smDown ? 'flex-start' : 'center'}
                   justifyContent="space-between"
-                  flexDirection={isModal && !smDown ? 'column' : 'row'}
+                  flexDirection={smDown ? 'column' : 'row'}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography fontWeight="bold">
@@ -664,8 +748,23 @@ const OrderView = ({
           // addCustomAmount={addCustomAmount}
           showNotification={showNotification}
         />
+        <SingleFieldEdit
+          title={`How many ${singleFieldProps?.item?.name}?`}
+          inputLabel="Quantity"
+          open={singleFieldProps.open}
+          handleUpdate={onAddItem}
+          onClose={() => setSingleFieldProps({ open: false, defaultValue: 1 })}
+          defaultValue={singleFieldProps.defaultValue}
+          buttonLabel="Add"
+          inputProps={{
+            type: 'number',
+            inputProps: {
+              min: 1,
+            },
+          }}
+        />
         {NotificationComp}
-        <Box display="flex" flexDirection="column" gap={2}>
+        <Box display="flex" flexDirection="column" gap={2} width="100%" overflow="auto">
           <Box sx={{ borderColor: 'divider', borderBottom: 1 }}>
             <Tabs
               value={tabIdx}
@@ -692,6 +791,21 @@ const OrderView = ({
         setItemList={setOrderedItems}
         // addCustomAmount={addCustomAmount}
         showNotification={showNotification}
+      />
+      <SingleFieldEdit
+        title={`How many ${singleFieldProps?.item?.name}?`}
+        inputLabel="Quantity"
+        open={singleFieldProps.open}
+        handleUpdate={onAddItem}
+        onClose={() => setSingleFieldProps({ open: false, defaultValue: 1 })}
+        defaultValue={singleFieldProps.defaultValue}
+        buttonLabel="Add"
+        inputProps={{
+          type: 'number',
+          inputProps: {
+            min: 1,
+          },
+        }}
       />
       {NotificationComp}
       <Grid container spacing={2}>

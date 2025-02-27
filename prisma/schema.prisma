@@ -72,11 +72,13 @@ model Item {
   availability    Boolean
   inventoryItemId Int?
   inventoryUnitId Int?
+  typeId          Int?
 
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
+  type          ItemType?       @relation(fields: [typeId], references: [id])
 
   @@index([categoryId])
 }
@@ -280,6 +282,7 @@ model InventoryItem {
   name      String
   hasPST    Boolean?
   hasGST    Boolean?
+  typeId    Int?
   createdAt String
   createdBy String
 
@@ -288,6 +291,7 @@ model InventoryItem {
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
+  type         ItemType?       @relation(fields: [typeId], references: [id])
 }
 
 model ItemPreference {
@@ -321,6 +325,8 @@ model ItemType {
   createdBy String?
 
   itemPreferences ItemPreference[]
+  inventoryItems   InventoryItem[]
+  sellingItems    Item[]
 }
 
 model VendorItem {

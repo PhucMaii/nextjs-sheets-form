@@ -26,7 +26,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     // Check and Update Units
 
-    const selectedInvetoryItem = await prisma.inventoryItem.findUnique({
+    const selectedInventoryItem = await prisma.inventoryItem.findUnique({
       where: {
         id: newItem.inventoryItemId,
       },
@@ -39,7 +39,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    if (!selectedInvetoryItem) {
+    if (!selectedInventoryItem) {
       return res.status(500).json({
         error: 'Inventory Item Not Found',
       });
@@ -48,9 +48,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const user = await getUserInfo(req, res);
     const createdBy = `Admin - ${user?.clientName}`;
 
-    console.log(newItem.units);
-
-    for (const vItem of selectedInvetoryItem.vendorItem) {
+    for (const vItem of selectedInventoryItem.vendorItem) {
       const clientVendorItemUnits = newItem.units.filter(
         (unit: any) => unit.vendorItemId === vItem.id,
       );
@@ -73,7 +71,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       await prisma.inventoryUnit.createMany({
         data: brandNewUnit.map((unit: any) => {
           return {
-            vendorItemId: selectedInvetoryItem.vendorItem[0].id,
+            vendorItemId: selectedInventoryItem.vendorItem[0].id,
             unit: unit.unit,
             ratio: unit.ratio,
             unitPrice: unit.unitPrice,
@@ -88,7 +86,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         vendorItemId:
           newItem.unit.vendorItemId < 1
-            ? selectedInvetoryItem.vendorItem[0].id
+            ? selectedInventoryItem.vendorItem[0].id
             : newItem.unit.vendorItemId,
         unit: newItem.unit.unit,
         ratio: newItem.unit.ratio,
@@ -130,6 +128,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           availability: newItem?.availability || true,
           inventoryItemId: newItem?.inventoryItemId || null,
           inventoryUnitId: selectedUnit.id,
+          typeId: selectedInventoryItem?.typeId || null,
           categoryId,
         };
       })

@@ -18,6 +18,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         inventoryItem: true,
         inventoryUnit: true,
+        type: true,
       },
     });
 

@@ -28,6 +28,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               },
             },
           },
+          type: true,
         },
       });
       return res.status(200).json({
@@ -64,6 +65,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               },
             },
           },
+          type: true,
         },
       });
 

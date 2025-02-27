@@ -31,6 +31,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   unit: true,
                 },
               },
+              type: true,
             },
           },
         },
@@ -81,6 +82,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               unit: true,
             },
           },
+          type: true,
         },
       });
 
@@ -124,6 +126,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             unit: true,
           },
         },
+        type: true,
       },
     });
 
