@@ -53,6 +53,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    console.log(targetUnit, 'targetUnit');
+
     const orderedItems = await createOrderedItems(existingOrder, [
       {
         ...customAmount,

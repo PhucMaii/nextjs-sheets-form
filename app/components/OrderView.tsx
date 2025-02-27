@@ -472,7 +472,7 @@ const OrderView = ({
             <Typography variant="h6">Others</Typography>
           </Grid>
 
-          {itemTypes['Others'] && itemTypes['Others'].map((item: IItem) => {
+          {itemTypes['Others'] && itemTypes['Others'].length > 0 && itemTypes['Others'].map((item: IItem) => {
             return (
               <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
                 <Button
