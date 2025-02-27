@@ -116,46 +116,6 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  // const startDate = new Date('2025-02-01');
-  // const endDate = getTodayDate();
-  // const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`);
-  // endDateFormatted.setDate(endDateFormatted.getDate() + 1);
-  // const decemberDayList = generateListOfDateString(startDate, endDateFormatted);
-
-  const orderedItems = await prisma.orderedItems.findMany({
-    where: {
-      Orders: {
-        deliveryDate: {
-          in: [
-            '02/13/2025',
-            '02/14/2025',
-            '02/15/2025',
-            '02/16/2025',
-            '02/17/2025',
-            '02/18/2025',
-            '02/19/2025',
-            '02/20/2025',
-          ],
-        },
-      },
-      inventoryUnitId: null,
-    },
-    include: {
-      Orders: {
-        include: {
-          user: true,
-        },
-      },
-      // inventoryUnit: true,
-    },
-  });
-  // console.log(orderedItems);
-
-  // const invalidItems = orderedItems.filter((item) => {
-  //   return !item.inventoryUnit || !item.inventoryUnit.vendorItemId;
-  // });
-
-  console.log(orderedItems);
 }
 
 main()

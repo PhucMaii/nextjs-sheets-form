@@ -86,8 +86,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const totalPrice = items.reduce((acc: number, cV: any) => {
-      return acc + cV.totalPrice;
+    const totalPrice = items.reduce((acc: number, item: any) => {
+      return acc + (item.quantity * item.price);
     }, 0);
 
     const existingScheduleOrder = await prisma.scheduleOrders.findUnique({
@@ -108,7 +108,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     let baseOrderItemList = existingScheduleOrder.items;
     // Update items in schedule order
     for (const item of items) {
-      if (!item.id) {
+      if (!item.id || item.id < 1) {
         await prisma.orderedItems.create({
           data: {
             scheduledOrderId,

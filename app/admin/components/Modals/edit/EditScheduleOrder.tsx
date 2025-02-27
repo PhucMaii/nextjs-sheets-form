@@ -17,6 +17,8 @@ import { OrderedItems, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
+import { SWRFetchData } from '@/app/utils/db';
+import useDebounce from '@/hooks/useDebounce';
 
 interface IProps {
   order: ScheduledOrder;
@@ -37,14 +39,8 @@ export default function EditScheduleOrder({
   routeId,
   mutateOrders,
 }: IProps) {
+  const [baseItems, setBaseItems] = useState<OrderedItems[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  // const [newItem, setNewItem] = useState<any>({
-  //   name: '',
-  //   price: 0,
-  //   quantity: 0,
-  //   totalPrice: 0,
-  //   inventoryItemId: -1,
-  // });
   const [newRouteId, setNewRouteId] = useState<number>(routeId);
   const [itemList, setItemList] = useState<OrderedItems[]>(() => {
     const formattedItems = order.items.map((item: OrderedItems) => {
@@ -55,6 +51,44 @@ export default function EditScheduleOrder({
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [updateOption] = useState<UpdateOption>(UpdateOption.NONE);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const [clientItems] = SWRFetchData(
+    `${API_URL.ADMIN}/items?categoryId=${order?.user?.categoryId}`,
+  );
+
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
+
+  useEffect(() => {
+    if (debouncedKeywords) {
+      const newOrderList = clientItems?.data?.filter((item: OrderedItems) => {
+        const isExisted = itemList.find(
+          (orderItem: OrderedItems) => orderItem.name === item.name,
+        );
+
+        if (isExisted) {
+          return false;
+        }
+        if (item.name.toLowerCase().includes(debouncedKeywords.toLowerCase())) {
+          return true;
+        }
+        return false;
+      });
+      setBaseItems(newOrderList || []);
+    } else {
+      const newOrderList = clientItems?.data?.filter((item: OrderedItems) => {
+        const isExisted = itemList.find(
+          (orderItem: OrderedItems) => orderItem.name === item.name,
+        );
+
+        if (isExisted) {
+          return false;
+        }
+        return true;
+      });
+      setBaseItems(newOrderList || []);
+    }
+  }, [debouncedKeywords, clientItems]);
 
   useEffect(() => {
     const formattedItems = order.items.map((item: OrderedItems) => {
@@ -64,43 +98,6 @@ export default function EditScheduleOrder({
 
     setItemList(formattedItems);
   }, [order]);
-
-  // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
-
-  // const addNewItem = (e: any) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-
-  //   if (newItem.inventoryItemId === -1) {
-  //     showNotification('error', 'Inventory Item Is Missing');
-  //     return;
-  //   }
-
-  //   const newItemName = newItem.name.toUpperCase();
-  //   const hasNameExisted = itemList.some(
-  //     (item: OrderedItems) =>
-  //       item.name === newItemName ||
-  //       item.inventoryItemId === newItem.inventoryItemId,
-  //   );
-
-  //   if (newItem.name.trim() === '') {
-  //     showNotification('error', 'Item Name Is Missing');
-  //     return;
-  //   }
-
-  //   if (hasNameExisted) {
-  //     showNotification('error', 'Inventory Item Existed Already');
-  //   } else {
-  //     const totalPrice = newItem.quantity * newItem.price;
-  //     setItemList([...itemList, { ...newItem, totalPrice, name: newItemName }]);
-  //     setNewItem({
-  //       name: '',
-  //       price: 0,
-  //       quantity: 0,
-  //       totalPrice: 0,
-  //     });
-  //   }
-  // };
 
   const calculateNewTotalPrice = () => {
     const totalPrice = itemList.reduce((acc: number, cV: any) => {
@@ -116,6 +113,16 @@ export default function EditScheduleOrder({
     keyChange: string,
   ) => {
     e.preventDefault();
+
+    if (keyChange === 'quantity' && +e.target.value < 1) {
+      const newItemList = itemList.filter(
+        (item: OrderedItems) => item.name !== targetItem.name,
+      );
+
+      setItemList(newItemList);
+      return;
+    }
+    
     const newItemList = itemList.map((item: OrderedItems) => {
       if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {
@@ -146,6 +153,48 @@ export default function EditScheduleOrder({
 
   //   setItemList(newItemList);
   // };
+
+  const onChangeNewItemQuantity = (e: any, item: any) => {
+    const newQuantity = +e.target.value;
+
+    if (newQuantity < 1) {
+      const newItemList = itemList.filter(
+        (orderItem: OrderedItems) => orderItem.name !== item.name,
+      );
+
+      setItemList(newItemList);
+      return;
+    }
+
+    const isExistedInItemList = itemList.find(
+      (orderItem: OrderedItems) => orderItem.name === item.name,
+    );
+
+    if (isExistedInItemList) {
+      const newItemList = itemList.map((orderItem: OrderedItems) => {
+        if (orderItem.name === item.name) {
+          return { ...orderItem, quantity: newQuantity };
+        }
+        return orderItem;
+      });
+      setItemList(newItemList);
+    } else {
+      setItemList([...itemList, { ...item, id: -1, quantity: newQuantity }]);
+    }
+  }
+
+  const onChangeNewItemPrice = (e: any, item: any) => {
+    const newPrice = +e.target.value;
+
+    const newBaseItems = baseItems.map((baseItem: any) => {
+      if (baseItem.id === item.id) {
+        return { ...baseItem, price: newPrice };
+      }
+      return baseItem;
+    });
+
+    setBaseItems(newBaseItems);
+  }
 
   const switchRoute = async () => {
     if (newRouteId === routeId) {
@@ -270,96 +319,70 @@ export default function EditScheduleOrder({
           </Divider> */}
           <Box>
             <Grid container spacing={3} mb={2}>
-              {/* <Grid item xs={12}>
-                <UpdateChoiceSelection
-                  updateOption={updateOption}
-                  setUpdateOption={setUpdateOption}
-                  noCreate
+              <Grid item xs={12}>
+                <Divider>Category Items</Divider>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Search items"
+                  value={searchKeywords}
+                  onChange={(e) => setSearchKeywords(e.target.value)}
+                  type="text"
+                  placeholder="Search items"
                 />
               </Grid>
+              {baseItems.length > 0 && debouncedKeywords !== '' && (
+                <>
+                  {/* <Grid item xs={12}>
+                    <Typography variant="h6">New items</Typography>
+                  </Grid> */}
+                  {baseItems.map((item: OrderedItems, index) => {
+                    return (
+                      <Fragment key={index}>
+                        <Grid item xs={12} fontWeight="bold">
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <Typography variant="h6" fontWeight="bold">
+                              {item.name}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item container columnSpacing={2}>
+                          <Grid item xs={6} textAlign="right">
+                            <TextField
+                              fullWidth
+                              label="Unit Price ($)"
+                              value={item.price}
+                              onChange={(e) =>
+                                // handleChangeItem(e, item, 'price')
+                                onChangeNewItemPrice(e, item)
+                              }
+                              type="number"
+                              inputProps={{ min: 0 }}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              label="Quantity"
+                              value={item.quantity}
+                              onChange={(e) =>
+                                onChangeNewItemQuantity(e, item)
+                              }
+                              type="number"
+                              inputProps={{ min: 0 }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </Fragment>
+                    );
+                  })}
+                </>
+              )}
+
               <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <Autocomplete
-                    id="inventory-item"
-                    options={inventoryItems?.data || []}
-                    getOptionLabel={(option: any) => option?.name || ''}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Inventory Item" />
-                    )}
-                    value={
-                      inventoryItems?.data?.find(
-                        (item: any) => item.name === newItem.name,
-                      ) || null
-                    }
-                    onChange={(e, newValue: any) => {
-                      setNewItem({
-                        ...newItem,
-                        name: newValue.name || '',
-                        price: newValue?.unitPrice || 0,
-                        inventoryItemId: newValue.id,
-                      });
-                    }}
-                    onInputChange={(e, newInputValue) => {
-                      setNewItem({ ...newItem, name: newInputValue });
-                    }}
-                    sx={{ width: 'auto' }}
-                    freeSolo
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="item-name-label">Item name</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    label="Item name"
-                    value={newItem.name}
-                    onChange={(e) =>
-                      handleNewItemOnChange('name', e.target.value)
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="item-price-label">Unit price ($)</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    label="Unit price"
-                    type="number"
-                    value={newItem.price}
-                    onChange={(e) =>
-                      handleNewItemOnChange('price', +e.target.value)
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="item-quantity-label">Quantity</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    label="Quantity"
-                    type="number"
-                    value={newItem.quantity}
-                    onChange={(e) =>
-                      handleNewItemOnChange('quantity', +e.target.value)
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="info"
-                  onClick={addNewItem}
-                >
-                  + Add
-                </Button>
-              </Grid> */}
-              <Grid item xs={12}>
-                <Divider>Items</Divider>
+                <Divider>Current items</Divider>
               </Grid>
               {itemList.length > 0 &&
                 itemList.map((item: OrderedItems, index) => {
@@ -370,9 +393,6 @@ export default function EditScheduleOrder({
                           <Typography variant="h6" fontWeight="bold">
                             {item.name}
                           </Typography>
-                          {/* <IconButton onClick={() => removeItem(item.name)}>
-                            <RemoveCircleIcon sx={{ color: errorColor }} />
-                          </IconButton> */}
                         </Box>
                       </Grid>
                       <Grid item container columnSpacing={2}>

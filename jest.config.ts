@@ -13,7 +13,7 @@ const config: Config.InitialOptions = {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy', // Mock CSS imports
     '^@/(.*)$': '<rootDir>/$1',
   },
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom', // jsdom for front end test and node for back end test
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[tj]s?(x)'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   transformIgnorePatterns: [
