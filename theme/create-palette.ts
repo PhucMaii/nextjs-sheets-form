@@ -2,6 +2,8 @@ import { common } from '@mui/material/colors';
 import { error, info, neutral, primary, success, warning } from './color';
 import { alpha } from '@mui/material';
 
+const blackColor = "#444444";
+
 export function createPalette() {
   return {
     action: {
@@ -22,11 +24,11 @@ export function createPalette() {
     neutral,
     primary: primary,
     success,
-    // text: {
-    //   primary: neutral[700],
-    //   secondary: neutral[500],
-    //   disabled: alpha(neutral[900], 0.38),
-    // },
+    text: {
+      primary: blackColor,
+      secondary: blackColor,
+      disabled: alpha(neutral[900], 0.38),
+    },
     warning,
   };
 }

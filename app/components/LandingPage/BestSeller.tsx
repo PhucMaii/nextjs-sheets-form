@@ -1,13 +1,37 @@
+import { generateImgUrl } from '@/app/lib/s3';
+import { API_URL } from '@/app/utils/enum';
 import {
-  bestSellers,
-  BestSellerType,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { Box, Typography } from '@mui/material';
-import Image from 'next/image';
-import React from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function BestSeller() {
+  const [bestSellerItems, setBestSellerItems] = useState<any[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchBestSellers = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL.PUBLIC}/products/best-seller`,
+        );
+
+        if (response.data.error) {
+          return;
+        }
+
+        setBestSellerItems(response.data.data);
+      } catch (error: any) {
+        console.log('Internal Server Error: ', error);
+      }
+    };
+
+    fetchBestSellers();
+  }, []);
+
   return (
     <Box
       display="flex"
@@ -32,7 +56,7 @@ export default function BestSeller() {
         flexWrap="wrap"
         gap={3}
       >
-        {bestSellers.map((bestSellerItem: BestSellerType, index: number) => {
+        {bestSellerItems.map((bestSellerItem: any, index: number) => {
           return (
             <Box
               key={index}
@@ -41,9 +65,14 @@ export default function BestSeller() {
               justifyContent="center"
               alignItems="center"
               gap={2}
+              onClick={() => router.push(`/products/${bestSellerItem.id}`)}
             >
-              <Image
-                src={bestSellerItem.image}
+              <img
+                src={
+                  bestSellerItem?.image
+                    ? generateImgUrl(bestSellerItem.image)
+                    : '/image/landing/image_not_found.jpeg'
+                }
                 alt={bestSellerItem.name}
                 width={250}
                 height={150}

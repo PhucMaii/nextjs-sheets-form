@@ -17,7 +17,7 @@ interface IProps {
 }
 
 export default function CartItemTable({ showNotification }: IProps) {
-  const cart = useSelector((state: RootState) => state.cart);
+  const cart: any = useSelector((state: RootState) => state.cart);
 
   return (
     <Table>

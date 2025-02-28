@@ -69,7 +69,7 @@ export default function useCart() {
           >
             <Box display="flex" gap={1}>
               <img
-                src={generateImgUrl(item.itemPreference.image)}
+                src={ item.itemPreference.image ? generateImgUrl(item.itemPreference.image) : '/images/landing/image_not_found.jpeg'}
                 style={{ width: '100px', height: '100%', objectFit: 'contain' }}
               />
               <Box>

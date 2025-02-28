@@ -123,7 +123,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
             src={
               item.itemPreference?.image
                 ? generateImgUrl(item.itemPreference.image)
-                : ''
+                : 'images/landing/image_not_found.jpeg'
             }
             alt=""
           />

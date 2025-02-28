@@ -79,6 +79,7 @@ export type BestSellerType = {
   name: string;
   image: string;
 };
+
 export const bestSellers: BestSellerType[] = [
   {
     name: 'BEAN SPROUTS',
@@ -126,3 +127,6 @@ export const reasonList = [
       'We work tirelessly to ensure you receive the premium-quality products every day - because you deserve the best, always.',
   },
 ];
+
+
+export const bestSellerItemIds = [10, 24, 11, 21, 13]

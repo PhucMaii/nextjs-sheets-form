@@ -237,7 +237,7 @@ export default function ItemPage() {
         gap={4}
         sx={{ maxWidth: maxWidth, mx: 'auto', p: 4 }}
       >
-        <Grid container rowGap={2}>
+        <Grid container rowGap={2} columnSpacing={2}>
           <Grid
             item
             xs={12}
@@ -249,7 +249,7 @@ export default function ItemPage() {
             }}
           >
             <img
-              src={itemData?.image && generateImgUrl(itemData?.image)}
+              src={itemData?.image ? generateImgUrl(itemData?.image) : '/images/landing/image_not_found.jpeg'}
               alt={itemData?.inventoryItem.name}
               style={{
                 maxWidth: '100%',
