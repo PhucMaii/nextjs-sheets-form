@@ -141,8 +141,8 @@ export default function InventoryTable({
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox
-                checked={selectedItems.length === inventoryItems.length}
-                onClick={onSelectAll}
+                  checked={selectedItems.length === inventoryItems.length}
+                  onClick={onSelectAll}
                 />
               </TableCell>
               <TableCell style={{ width: 50 }}></TableCell>
@@ -166,7 +166,7 @@ export default function InventoryTable({
               return (
                 <TableRow key={index}>
                   <TableCell padding="checkbox">
-                    <Checkbox 
+                    <Checkbox
                       checked={isSelected}
                       onClick={() => onSelectItem(item)}
                     />

@@ -412,9 +412,15 @@ const OrderView = ({
                   <Typography variant="h6">{type}</Typography>
                 </Grid>
 
-                {itemTypes[type].map((item: IItem) => {
+                {itemTypes[type].map((item: IItem, index: number) => {
                   return (
-                    <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+                    <Grid
+                      data-tour={index === 0 ? 'third-step' : ''}
+                      item
+                      xs={6}
+                      sm={isModal ? 6 : 4}
+                      md={isModal ? 6 : 3}
+                    >
                       <Button
                         key={item.id}
                         sx={{ width: '100%', height: '100%' }}
@@ -472,57 +478,59 @@ const OrderView = ({
             <Typography variant="h6">Others</Typography>
           </Grid>
 
-          {itemTypes['Others'] && itemTypes['Others'].length > 0 && itemTypes['Others'].map((item: IItem) => {
-            return (
-              <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-                <Button
-                  key={item.id}
-                  sx={{ width: '100%', height: '100%' }}
-                  onClick={() =>
-                    setSingleFieldProps({
-                      open: true,
-                      item,
-                      defaultValue: 1,
-                    })
-                  }
-                >
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="space-between"
-                    gap={2}
-                    alignItems="flex-start"
-                    sx={{
-                      p: 1,
-                      backgroundColor: blue[50],
-                      borderRadius: 1,
-                      width: '100%',
-                      height: '100%',
-                      color: blueGrey[800],
-                    }}
+          {itemTypes['Others'] &&
+            itemTypes['Others'].length > 0 &&
+            itemTypes['Others'].map((item: IItem) => {
+              return (
+                <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+                  <Button
+                    key={item.id}
+                    sx={{ width: '100%', height: '100%' }}
+                    onClick={() =>
+                      setSingleFieldProps({
+                        open: true,
+                        item,
+                        defaultValue: 1,
+                      })
+                    }
                   >
-                    <Typography fontWeight="bold" textAlign="left">
-                      {item.name}
-                    </Typography>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography fontWeight="bold">
-                        ${item.price?.toFixed(2)}
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      justifyContent="space-between"
+                      gap={2}
+                      alignItems="flex-start"
+                      sx={{
+                        p: 1,
+                        backgroundColor: blue[50],
+                        borderRadius: 1,
+                        width: '100%',
+                        height: '100%',
+                        color: blueGrey[800],
+                      }}
+                    >
+                      <Typography fontWeight="bold" textAlign="left">
+                        {item.name}
                       </Typography>
-                      {item.isShowDiscount && item.prevPrice && (
-                        <Typography
-                          fontWeight="bold"
-                          sx={{ textDecoration: 'line-through' }}
-                          color="error"
-                        >
-                          ${item.prevPrice.toFixed(2)}
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Typography fontWeight="bold">
+                          ${item.price?.toFixed(2)}
                         </Typography>
-                      )}
+                        {item.isShowDiscount && item.prevPrice && (
+                          <Typography
+                            fontWeight="bold"
+                            sx={{ textDecoration: 'line-through' }}
+                            color="error"
+                          >
+                            ${item.prevPrice.toFixed(2)}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
-                </Button>
-              </Grid>
-            );
-          })}
+                  </Button>
+                </Grid>
+              );
+            })}
         </Fragment>
       </>
     );
@@ -530,7 +538,10 @@ const OrderView = ({
 
   const renderPlaceOrdeButton = useCallback(() => {
     return (
-      <Box sx={{ position: 'sticky', bottom: 0, width: '100%' }}>
+      <Box
+        sx={{ position: 'sticky', bottom: 0, width: '100%' }}
+        data-tour="fifth-step"
+      >
         <LoadingButton
           loading={isLoading}
           onClick={onSubmitOrder}
@@ -546,7 +557,7 @@ const OrderView = ({
 
   const renderDisplayItems = () => {
     return (
-      <ShadowSection>
+      <ShadowSection width="100%">
         {/* Item types */}
         <Box
           display="flex"
@@ -557,6 +568,7 @@ const OrderView = ({
           whiteSpace="nowrap"
         >
           <ItemTypeButton
+            data-tour="first-step"
             style={{ minWidth: 'auto' }}
             type="All"
             isSelected={selectedItemType === 'All'}
@@ -581,6 +593,7 @@ const OrderView = ({
         {/* Search bar */}
         <OutlinedInput
           fullWidth
+          data-tour="second-step"
           //   label="Search item"
           placeholder="Bean sprouts..."
           value={searchKeywords}
@@ -641,19 +654,25 @@ const OrderView = ({
         display="flex"
         flexDirection="column"
         gap={1}
-        sx={{ position: 'sticky', top: 0 }}
+        sx={{ position: 'sticky', top: 0, width: '100%' }}
+        data-tour="fourth-step"
       >
         {/* Only admin can affect inventory for an order in edit mode */}
-        {role === USER_ROLE.ADMIN && purpose === ORDER_USAGE_PURPOSE.ITEM && !isPreOrder && (
-          <FormControlLabel
-            control={
-              <Switch checked={isAffectInventory} onChange={onAvoidInventory} />
-            }
-            label={
-              isUpdatingAvoidInventory ? 'Updating...' : 'Affect Inventory'
-            }
-          />
-        )}
+        {role === USER_ROLE.ADMIN &&
+          purpose === ORDER_USAGE_PURPOSE.ITEM &&
+          !isPreOrder && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isAffectInventory}
+                  onChange={onAvoidInventory}
+                />
+              }
+              label={
+                isUpdatingAvoidInventory ? 'Updating...' : 'Affect Inventory'
+              }
+            />
+          )}
 
         <Typography variant="h6" textAlign="center">
           {clientName ? `${clientName}'s` : 'My'} Order
@@ -929,7 +948,11 @@ const OrderView = ({
               onChange={(e, value) => setTabIdx(value)}
             >
               <Tab label="Menu" value={0} />
-              <Tab label={`Order (${totalQuantity})`} value={1} />
+              <Tab
+                data-tour="fourth-step"
+                label={`Order (${totalQuantity})`}
+                value={1}
+              />
             </Tabs>
           </Box>
 
@@ -965,7 +988,7 @@ const OrderView = ({
         }}
       />
       {NotificationComp}
-      <Grid container spacing={2}>
+      <Grid container spacing={2} width="100%">
         <Grid item xs={12} sm={isModal ? 7 : 8}>
           {renderDisplayItems()}
         </Grid>

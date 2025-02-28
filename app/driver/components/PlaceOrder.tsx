@@ -72,7 +72,6 @@ export default function PlaceOrder({ showNotification }: IProps) {
         'success',
         `Placed Order Successfully for ${selectedClient?.clientName}`,
       );
-
     } catch (error: any) {
       console.log(error);
       showNotification('error', error.response.data.error);
@@ -106,7 +105,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
             sx={{ width: 'auto' }}
           />
         </Box>
-        <OrderView 
+        <OrderView
           items={items?.data?.items || []}
           purpose={ORDER_USAGE_PURPOSE.ORDER}
           onSubmit={addOrder}

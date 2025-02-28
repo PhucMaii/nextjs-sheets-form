@@ -116,26 +116,6 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  // update all items typeId to be inventoryItem.typeId
-  const items = await prisma.item.findMany({
-    include: {
-      inventoryItem: true,
-    },
-  });
-
-  console.log(items.length);
-
-  for (const item of items) {
-    console.log({name: item.name});
-    await prisma.item.update({
-      where: {
-        id: item.id,
-      },
-      data: {
-        typeId: item?.inventoryItem?.typeId,
-      },
-    });
-  }
 }
 
 main()

@@ -107,7 +107,7 @@ export default function InventoryPage() {
         <Tab label="Order Stock" value={1} />
       </Tabs>
 
-      <ShadowSection sx={{overflow: 'scroll', width: '100%'}}>
+      <ShadowSection sx={{ overflow: 'scroll', width: '100%' }}>
         {tabIndex === 0 ? (
           <StockItems
             showNotification={showNotification}

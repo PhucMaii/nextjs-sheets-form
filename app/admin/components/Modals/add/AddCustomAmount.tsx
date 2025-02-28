@@ -1,4 +1,4 @@
- import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import { AlertColor, Box, Divider, Modal, Tab, Tabs } from '@mui/material';
 import { ModalProps } from '../type';

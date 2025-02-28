@@ -277,14 +277,14 @@ export default function Sidebar({ children }: PropTypes) {
         >
           {content}
         </Drawer>
-        <Box width="100%">
+        <Box sx={{ flexGrow: 1, maxWidth: `calc(100% - ${drawerWidth}px)` }}>
           {isOpenSnackbar && (
             <EmailAlert
               setIsOpenSnackbar={setIsOpenSnackbar}
               showNotification={showNotification}
             />
           )}
-          <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
+          <Box display="flex" flexDirection="column" m={1} gap={2}>
             {/* <HolidayText /> */}
             {children}
           </Box>

@@ -14,6 +14,32 @@ import { SWRFetchData } from '../utils/db';
 import OrderView, { ORDER_USAGE_PURPOSE } from '../components/OrderView';
 import NotificationPopup from '../admin/components/Notification';
 import { useRouter } from 'next/navigation';
+import { TourProvider } from '@reactour/tour';
+import TourStartButton from './TourStartButton';
+
+const steps = [
+  {
+    selector: '[data-tour="first-step"]',
+    content: 'These categories help you quickly find and select items.',
+  },
+  {
+    selector: '[data-tour="second-step"]',
+    content: 'Use search to quickly find what you need',
+  },
+  {
+    selector: '[data-tour="third-step"]',
+    content:
+      'Click on item you want, then type the quantity you need on the pop up screen',
+  },
+  {
+    selector: '[data-tour="fourth-step"]',
+    content: 'You can view your order summary here.',
+  },
+  {
+    selector: '[data-tour="fifth-step"]',
+    content: 'Finally, place your order and we will take care of the rest',
+  },
+];
 
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
@@ -114,163 +140,28 @@ export default function OrderForm() {
   }
 
   return (
-    <Sidebar>
-      <NotificationPopup
-        notification={notification}
-        onClose={() => {
-          setTimeout(() => {
-            closeNotification();
-          }, 3000);
-        }}
-      />
-      <Box pb={6}>
-        <OrderView
-          onSubmit={onSubmit}
-          items={itemList}
-          purpose={ORDER_USAGE_PURPOSE.ORDER}
-          role={USER_ROLE.CLIENT}
+    <TourProvider steps={steps}>
+      <Sidebar>
+        <NotificationPopup
+          notification={notification}
+          onClose={() => {
+            setTimeout(() => {
+              closeNotification();
+            }, 3000);
+          }}
         />
-      </Box>
-    </Sidebar>
+        <Box display="flex" justifyContent="flex-end">
+          <TourStartButton />
+        </Box>
+        <Box pb={6} width="100%">
+          <OrderView
+            onSubmit={onSubmit}
+            items={itemList}
+            purpose={ORDER_USAGE_PURPOSE.ORDER}
+            role={USER_ROLE.CLIENT}
+          />
+        </Box>
+      </Sidebar>
+    </TourProvider>
   );
-
-  //   return (
-  //     <FadeIn>
-  //       <Sidebar>
-  //         <SearchItem
-  //           open={isOpenSearch}
-  //           onClose={() => setIsOpenSearch(false)}
-  //           items={itemList}
-  //           setItems={setItemList}
-  //         />
-  //         <NotificationPopup
-  //           notification={notification}
-  //           onClose={() => {
-  //             setTimeout(() => {
-  //               closeNotification();
-  //             }, 3000);
-  //           }}
-  //           anchorOrigin={{
-  //             vertical: 'top',
-  //             horizontal: 'right',
-  //           }}
-  //         />
-  //         <ChangePasswordModal
-  //           isOpen={isOpenSecurityModal}
-  //           onClose={() => setIsOpenSecurityModal(false)}
-  //         />
-  //         {lastOrder && (
-  //           <OverrideOrder
-  //             open={isOverrideOrderOpen}
-  //             onClose={() => setIsOverrideOrderOpen(false)}
-  //             currentItems={itemList}
-  //             currentNote={note}
-  //             lastOrder={lastOrder}
-  //             deliveryDate={deliveryDate}
-  //             showNotification={showNotification}
-  //           />
-  //         )}
-  //         {unavailableRange && (
-  //           <OrderOnVacationModal
-  //             clientName={clientName}
-  //             open={isOrderOnVacationOpen}
-  //             onClose={() => setIsOrderOnVacationOpen(false)}
-  //             startDate={new Date(unavailableRange[0])}
-  //             endDate={new Date(unavailableRange[1])}
-  //             handleContinueOrder={(e: any) => onSubmit(e, false)}
-  //           />
-  //         )}
-  //         <div className="w-full mx-auto pb-6">
-  //           {smDown && <Navbar />}
-  //           {/* <form className="relative bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 overflow-scroll"> */}
-  //           <Box
-  //             sx={{ position: 'relative', backgroundColor: 'white' }}
-  //             borderRadius={2}
-  //             px={4}
-  //             py={2}
-  //           >
-  //             {/* <h4 className="text-center font-bold text-4xl px-8 mb-8">
-  //               {clientName}
-  //             </h4> */}
-  //             <Grid container alignItems="center" rowGap={2} mb={2}>
-  //               <Grid item xs={2}></Grid>
-  //               <Grid item xs={8}>
-  //                 <Typography variant="h4" textAlign="center">
-  //                   {clientName}
-  //                 </Typography>
-  //               </Grid>
-  //               <Grid item xs={2} textAlign="right">
-  //                 <IconButton size="large" onClick={() => setIsOpenSearch(true)}>
-  //                   <SearchIcon fontSize="large" />
-  //                 </IconButton>
-  //               </Grid>
-  //             </Grid>
-  //             <Box mb={4}>
-  //               <Typography fontWeight="bold" variant="subtitle1" color="error">
-  //                 DELIVERY DATE
-  //               </Typography>
-  //               <LocalizationProvider dateAdapter={AdapterDayjs}>
-  //                 <DatePicker
-  //                   disablePast
-  //                   minDate={minDate}
-  //                   value={dayjs(deliveryDate)}
-  //                   onChange={onDateChange}
-  //                   sx={{ width: '100%' }}
-  //                   shouldDisableDate={disableChristmasAndNewYear}
-  //                 />
-  //               </LocalizationProvider>
-  //             </Box>
-  //             <Box display="flex" flexDirection="column" gap={4}>
-  //               {itemList.length > 0 &&
-  //                 itemList.map((item: any, index: number) => {
-  //                   return (
-  //                     <Box
-  //                       key={index}
-  //                       display="flex"
-  //                       flexDirection="column"
-  //                       gap={1}
-  //                     >
-  //                       <SellingItemName item={item} />
-  //                       <TextField
-  //                         type="number"
-  //                         value={item.quantity}
-  //                         onChange={(e) => onChangeItem(e, item)}
-  //                         placeholder={`Enter ${item.name} here...`}
-  //                         disabled={!item.availability}
-  //                         inputProps={{ min: 0 }}
-  //                       />
-  //                     </Box>
-  //                   );
-  //                 })}
-  //               <Box display="flex" flexDirection="column" gap={1}>
-  //                 <Typography variant="subtitle1">NOTE</Typography>
-  //                 <TextField
-  //                   multiline
-  //                   maxRows={4}
-  //                   value={note}
-  //                   className="border-neutral-400 h-full mb-4"
-  //                   onChange={(e) => setNote(e.target.value)}
-  //                   placeholder="Writing your note here..."
-  //                 />
-  //               </Box>
-  //             </Box>
-
-  //             <Box display="flex" justifyContent={'center'}>
-  //               <LoadingButton
-  //                 variant="contained"
-  //                 onClick={onSubmit}
-  //                 type="submit"
-  //                 loading={isButtonLoading}
-  //                 fullWidth
-  //                 // sx={{ mt: 2}}
-  //               >
-  //                 Submit
-  //               </LoadingButton>
-  //             </Box>
-  //             {/* </form> */}
-  //           </Box>
-  //         </div>
-  //       </Sidebar>
-  //     </FadeIn>
-  //   );
 }

@@ -38,7 +38,9 @@ export const ItemTypeButton = ({
   onEdit,
   onDelete,
   style,
-  mode
+  mode,
+  className,
+  ...props
 }: {
   type: string;
   isSelected: boolean;
@@ -46,10 +48,16 @@ export const ItemTypeButton = ({
   style?: any;
   onEdit?: any;
   onDelete?: any;
-  mode: 'edit' | 'view'
+  mode: 'edit' | 'view';
+  className?: string;
 }) => {
   return (
-    <Button onClick={onClick} sx={{ ...style }}>
+    <Button
+      className={className}
+      onClick={onClick}
+      sx={{ ...style }}
+      {...props}
+    >
       <Box
         sx={{
           px: 2,

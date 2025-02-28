@@ -53,7 +53,7 @@ export default async function DELETE(
       where: {
         id: {
           not: Number(id),
-        }
+        },
       },
     });
     await prisma.itemPreference.updateMany({

@@ -11,7 +11,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         users: true,
         items: {
           include: {
-            type: true
+            type: true,
           },
         },
       },
