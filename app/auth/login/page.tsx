@@ -126,6 +126,7 @@ export default function LoginPage() {
               </Box>
               <Box display="flex" flexDirection="column" gap={4}>
                 <TextField
+                  data-testid="clientId-input"
                   id="clientId-input"
                   name="clientId"
                   label="Client Id"
@@ -139,6 +140,7 @@ export default function LoginPage() {
                   variant="standard"
                 />
                 <TextField
+                  data-testid="password-input"
                   id="password-input"
                   name="password"
                   label="Password"
@@ -152,6 +154,7 @@ export default function LoginPage() {
                   variant="standard"
                 />
                 <LoadingButton
+                  data-testid="login-button"
                   variant="contained"
                   fullWidth
                   loading={isLoading}
