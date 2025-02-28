@@ -45,7 +45,7 @@ export default function InventoryPage() {
   const handleTrackInventory = async () => {
     try {
       setIsTrackingInventory(true);
-      const response = await axios.post(`/api/track-inventory`);
+      const response = await axios.post(`/api/cron/track-inventory`);
 
       if (response.data.error) {
         showNotification('error', response.data.error);

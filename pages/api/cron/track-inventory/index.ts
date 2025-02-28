@@ -124,8 +124,9 @@ export default async function handler(
 
     // Create a set of same items and quantity
     const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
-      if (!item.inventoryItemId) return acc; // Make sure again not touching the custom amount
+      if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
       if (!acc[item.inventoryItemId]) {
+        console.log(item, 'item');
         acc[item.inventoryItemId] = {
           quantity: item.quantity * item.inventoryUnit.ratio,
           inventoryItem: item.inventoryItem,

@@ -134,10 +134,11 @@ export default async function uploadToS3(file: File, itemName: string) {
     const fileKey = `products/${itemName}/${Date.now()}-${file.name.replace(/\s/g, '-')}`;
     console.log(fileKey, 'fileKey');
 
-    const params = {
+    const params: any = {
       Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
       Key: fileKey,
-      Body: file,
+      Body: await file.arrayBuffer(),
+      ContentType: file.type,
     };
 
     const command = new PutObjectCommand(params);

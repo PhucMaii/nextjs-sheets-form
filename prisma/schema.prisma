@@ -398,7 +398,7 @@ model CartItem {
   createdBy        String
 
   inventoryUnit  InventoryUnit  @relation(fields: [inventoryUnitId], references: [id])
-  itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id])
+  itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id], onDelete: Cascade)
   cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
 }
 

@@ -40,7 +40,7 @@ export default function FileUpload({
         setIsUploading(true);
         console.log('BEFORE ON DROP');
         const data = await uploadToS3(files, item.name);
-        if (!data?.fileKey || !data?.fileName) {
+        if (!data?.fileKey) {
           showNotification('error', 'Something went wrong');
           return;
         }

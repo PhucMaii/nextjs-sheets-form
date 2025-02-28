@@ -77,7 +77,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
       include: {
-        items: true,
+        items: {
+          where: {
+            quantity: {
+              gt: 0
+            }
+          }
+        },
         user: true,
       },
     });
