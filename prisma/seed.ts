@@ -118,29 +118,29 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 async function main() {
   const prisma = new PrismaClient();
 
-  const itemsInMassRetails = await prisma.item.findMany({
-    where: {
-      categoryId: 243
-    },
+  const allInventoryItems: any = await prisma.inventoryItem.findMany({
+    include: {
+      preference: true,
+    }
   });
 
-  const allItemsPref = await prisma.itemPreference.findMany({});
+  for (const item of allInventoryItems) {
+    if (item.preference.length > 0) continue;
 
-  for (const itemPref of allItemsPref) {
-    const existingItem = itemsInMassRetails.find(
-      (item) => item.inventoryItemId === itemPref.inventoryItemId,
-    );
-
-    if (existingItem) {
-      await prisma.itemPreference.update({
-        where: {
-          id: itemPref.id,
-        },
-        data: {
-          price: existingItem.price * 1.1,
-        },
-      });
-    }
+    await prisma.itemPreference.create({
+      data: {
+        inventoryItemId: item.id,
+        name: item.name,
+        image: '',
+        description: item?.description || '',
+        price: item?.price || 0,
+        isShowDiscount: item.isShowDiscount,
+        prevPrice: item.prevPrice,
+        isBestSeller: item?.isBestSeller || false,
+        typeId: item.typeId,
+        inventoryUnitId: item.inventoryUnitId,
+      },
+    })
   }
 }
 

@@ -72,7 +72,7 @@ const drawerWidth = 250;
 
 export default function Navbar() {
   // const [cId, setCId] = useLocalStorage('cartId', cartId || '');
-  const [guestSession, setGuestSession] = useLocalStorage('guest-session', {});
+  const [guestSession, setGuestSession, isInitialized] = useLocalStorage('guest-session', {});
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
 
@@ -112,7 +112,9 @@ export default function Navbar() {
   }, [cart]);
 
   useEffect(() => {
-    fetchGuestSessionId();
+    if (isInitialized) {
+      fetchGuestSessionId();
+    }
   }, [guestSession]);
 
   useEffect(() => {
