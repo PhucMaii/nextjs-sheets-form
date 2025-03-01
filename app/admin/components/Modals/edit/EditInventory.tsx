@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Divider,
+  IconButton,
   Modal,
   Switch,
   TextField,
@@ -21,6 +22,11 @@ import EditUnit from './EditUnit';
 import UnitRadio from '../../Radio/UnitRadio';
 import ErrorComponent from '../../ErrorComponent';
 import { generateCurrentTime } from '@/app/utils/time';
+import { ColorPicker, useColor } from 'react-color-palette';
+import { ItemButton } from '@/app/components/OrderView';
+import EditIcon from '@mui/icons-material/Edit';
+import EditOffIcon from '@mui/icons-material/EditOff';
+import { handleResetColor, infoBackground } from '@/theme/color';
 
 interface IProps {
   inventoryItem: IInventoryItem;
@@ -35,7 +41,9 @@ export default function EditInventory({
     open: false,
     selectedVendorId: -1,
   });
+  const [color, setColor] = useColor(inventoryItem?.color || infoBackground);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isEditColor, setIsEditColor] = useState<boolean>(false);
   const [editUnit, setEditUnit] = useState<any>({
     open: false,
     unit: null,
@@ -82,9 +90,7 @@ export default function EditInventory({
     }
   }, [inventoryItem]);
 
-  // console.log(updatedVendorItems, 'updatedVendorItems');
   useEffect(() => {
-    // console.log(selectedVendors, 'selectedVendors');
     // Whenever selected vendors change then set new vendor items
     if (selectedVendors.length > 0) {
       const newVItems = selectedVendors.map((vendor) => {
@@ -132,6 +138,7 @@ export default function EditInventory({
       const response = await axios.put(`${API_URL.ADMIN}/inventory`, {
         id: inventoryItem.id,
         ...updatedItem,
+        color: color.hex,
         // name: updatedItem.name,
         vendorItems: updatedVendorItems,
         updatedAt,
@@ -345,6 +352,48 @@ export default function EditInventory({
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" flexDirection="column" gap={3}>
+            {/* <Saturation height={300} color={color} onChange={setColor} />
+            <Hue color={color} onChange={setColor} /> */}
+            <Box>
+              <Box display="flex" alignItems="center" gap={2}>
+                <Typography variant="h6">Appearance:</Typography>
+                <ItemButton
+                  item={{ ...updatedItem, price: 15.5 }}
+                  onClick={() => {}}
+                  style={{ width: 'fit-content', maxWidth: 300 }}
+                  containerStyle={{ backgroundColor: color.hex }}
+                />
+                <Box display="flex" gap={1} alignItems="center">
+                  {color.hex !== inventoryItem.color && (
+                    <Button
+                      onClick={() =>
+                        setColor(
+                          handleResetColor(inventoryItem.color || '#e3f2fd'),
+                        )
+                      }
+                    >
+                      Reset
+                    </Button>
+                  )}
+                  <IconButton
+                    color="primary"
+                    onClick={() => setIsEditColor(!isEditColor)}
+                  >
+                    {isEditColor ? <EditOffIcon /> : <EditIcon />}
+                  </IconButton>
+                </Box>
+              </Box>
+
+              {isEditColor && (
+                <ColorPicker
+                  height={100}
+                  color={color}
+                  onChange={(color: any) => setColor(color)}
+                  // hideAlpha
+                  hideInput={['hsv', 'rgb']}
+                />
+              )}
+            </Box>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Tax</Typography>
               <Divider />

@@ -116,6 +116,11 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
+  await prisma.inventoryItem.updateMany({
+    data: {
+      color: '#e3f2fd'
+    }
+  });
 }
 
 main()

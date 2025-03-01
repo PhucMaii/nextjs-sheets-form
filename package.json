@@ -71,6 +71,7 @@
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-calendar": "^4.8.0",
+    "react-color-palette": "^7.3.0",
     "react-csv": "^2.2.2",
     "react-dnd": "^15.1.2",
     "react-dnd-html5-backend": "^15.1.3",

@@ -283,6 +283,7 @@ model InventoryItem {
   hasPST    Boolean?
   hasGST    Boolean?
   typeId    Int?
+  color     String?
   createdAt String
   createdBy String
 

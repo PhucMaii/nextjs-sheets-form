@@ -2,6 +2,7 @@ import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IInventoryUnit, IVendorItem } from '@/app/utils/type';
 import { getUserInfo } from '@/pages/api/utils/auth';
 import { deleteInventoryUnit } from '@/pages/api/utils/inventoryUnit';
+import { infoBackground } from '@/theme/color';
 import { InventoryUnit, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -212,6 +213,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             name: item.name,
             createdAt,
             createdBy,
+            color: infoBackground
           };
         }),
       });

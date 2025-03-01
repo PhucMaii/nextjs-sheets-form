@@ -23,7 +23,7 @@ import React, {
   useState,
 } from 'react';
 import { IItem } from '../utils/type';
-import { primary } from '@/theme/color';
+import { infoBackground, primary } from '@/theme/color';
 import { blue, blueGrey } from '@mui/material/colors';
 import { ShadowSection } from '../admin/reports/styled';
 import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
@@ -48,6 +48,59 @@ import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
 import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
 import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
+
+export const ItemButton = ({
+  item,
+  onClick,
+  style,
+  containerStyle,
+}: {
+  item: IItem;
+  onClick?: any;
+  style?: any;
+  containerStyle?: any;
+}) => {
+  return (
+    <Button
+      key={item.id}
+      sx={{ width: '100%', height: '100%', ...style }}
+      onClick={onClick}
+    >
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="space-between"
+        gap={2}
+        alignItems="flex-start"
+        sx={{
+          p: 1,
+          backgroundColor: blue[50],
+          borderRadius: 1,
+          width: '100%',
+          height: '100%',
+          color: blueGrey[800],
+          ...containerStyle,
+        }}
+      >
+        <Typography fontWeight="bold" textAlign="left">
+          {item.name}
+        </Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography fontWeight="bold">${item.price?.toFixed(2)}</Typography>
+          {item.isShowDiscount && item.prevPrice && (
+            <Typography
+              fontWeight="bold"
+              sx={{ textDecoration: 'line-through' }}
+              color="error"
+            >
+              ${item.prevPrice.toFixed(2)}
+            </Typography>
+          )}
+        </Box>
+      </Box>
+    </Button>
+  );
+};
 
 export enum ORDER_USAGE_PURPOSE {
   ORDER = 'order',
@@ -348,7 +401,7 @@ const OrderView = ({
           displayItems.map((item: IItem) => {
             return (
               <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-                <Button
+                {/* <Button
                   key={item.id}
                   sx={{ width: '100%', height: '100%' }}
                   onClick={() =>
@@ -392,7 +445,21 @@ const OrderView = ({
                       )}
                     </Box>
                   </Box>
-                </Button>
+                </Button> */}
+                <ItemButton
+                  item={item}
+                  onClick={() =>
+                    setSingleFieldProps({
+                      open: true,
+                      item,
+                      defaultValue: 1,
+                    })
+                  }
+                  containerStyle={{
+                    backgroundColor:
+                      item?.inventoryItem?.color || infoBackground,
+                  }}
+                />
               </Grid>
             );
           })}
@@ -421,7 +488,7 @@ const OrderView = ({
                       sm={isModal ? 6 : 4}
                       md={isModal ? 6 : 3}
                     >
-                      <Button
+                      {/* <Button
                         key={item.id}
                         sx={{ width: '100%', height: '100%' }}
                         onClick={() =>
@@ -465,7 +532,21 @@ const OrderView = ({
                             )}
                           </Box>
                         </Box>
-                      </Button>
+                      </Button> */}
+                      <ItemButton
+                        item={item}
+                        onClick={() =>
+                          setSingleFieldProps({
+                            open: true,
+                            item,
+                            defaultValue: 1,
+                          })
+                        }
+                        containerStyle={{
+                          backgroundColor:
+                            item?.inventoryItem?.color || infoBackground,
+                        }}
+                      />
                     </Grid>
                   );
                 })}

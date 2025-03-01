@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
+import { infoBackground } from '@/theme/color';
 
 interface IBody {
   name: string;
@@ -56,6 +57,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         hasGST,
         createdAt,
         createdBy,
+        color: infoBackground
       },
     });
 
