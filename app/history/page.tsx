@@ -34,8 +34,8 @@ import {
 import { blue, blueGrey } from '@mui/material/colors';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import useSWR from 'swr';
 import ErrorComponent from '../admin/components/ErrorComponent';
+import { SWRFetchData } from '../utils/db';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -55,7 +55,8 @@ export default function HistoryPage() {
   const totalPositionRef: any = useRef(null);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  const { data: orderData, isValidating } = useSWR(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [orderData, _mutateOrders, isValidating] = SWRFetchData(
     `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
@@ -252,7 +253,7 @@ export default function HistoryPage() {
           </Box>
         </Grid>
         <Grid item xs={12}>
-          {isValidating ? (
+          {isValidating && !clientOrders ? (
             <SplashScreen />
           ) : clientOrders.length > 0 ? (
             <Virtuoso
