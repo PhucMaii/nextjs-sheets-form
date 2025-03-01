@@ -47,7 +47,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         categoryId: item.categoryId,
         inventoryItemId: item?.inventoryItemId,
         inventoryUnitId: item?.inventoryUnitId,
-        typeId: item?.typeId,
       };
     });
 

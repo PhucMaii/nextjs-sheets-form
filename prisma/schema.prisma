@@ -72,13 +72,11 @@ model Item {
   availability    Boolean
   inventoryItemId Int?
   inventoryUnitId Int?
-  typeId          Int?
 
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
-  type          ItemType?       @relation(fields: [typeId], references: [id])
 
   @@index([categoryId])
 }
@@ -98,7 +96,7 @@ model OrderedItems {
   inventoryItemId  Int?
   isCustomAmount   Boolean?
   cost             Float?
-  profit            Float?
+  profit           Float?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -292,7 +290,7 @@ model InventoryItem {
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
-  type         ItemType?       @relation(fields: [typeId], references: [id])
+  type         ItemType?        @relation(fields: [typeId], references: [id])
 }
 
 model ItemPreference {
@@ -326,8 +324,7 @@ model ItemType {
   createdBy String?
 
   itemPreferences ItemPreference[]
-  inventoryItems   InventoryItem[]
-  sellingItems    Item[]
+  inventoryItems  InventoryItem[]
 }
 
 model VendorItem {

@@ -24,9 +24,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         categoryId: existingUser?.categoryId,
       },
       include: {
-        inventoryItem: true,
+        inventoryItem: {
+          include: {
+            type: true,
+          }
+        },
         inventoryUnit: true,
-        type: true,
       },
     });
 

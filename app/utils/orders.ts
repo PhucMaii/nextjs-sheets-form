@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Order } from '../admin/orders/page';
-import { API_URL } from './enum';
+import { API_URL, USER_CATEGORIZED } from './enum';
 import { OrderedItems, ScheduledOrder } from './type';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -112,7 +112,9 @@ export const checkIsPreOrderQualified = (scheduledOrder: ScheduledOrder) => {
   const totalPriceGt0 = scheduledOrder.totalPrice > 0;
   const hasItems = scheduledOrder.items.length > 0;
   const hasOrdered = scheduledOrder?.alreadyOrder;
-  const isInactive = scheduledOrder?.blocked;
+  const isBlocked = scheduledOrder?.blocked;
+  const isInactive = scheduledOrder?.user?.type === USER_CATEGORIZED.INACTIVE;
 
-  return totalPriceGt0 && hasItems && !hasOrdered && !isInactive;
+
+  return totalPriceGt0 && hasItems && !hasOrdered && !isInactive && !isBlocked;
 };

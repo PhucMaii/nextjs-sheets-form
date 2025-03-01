@@ -38,15 +38,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      // Update all related selling items
-      await prisma.item.updateMany({
-        where: {
-          inventoryItemId: id,
-        },
-        data: {
-          typeId,
-        },
-      });
+      // // Update all related selling items
+      // await prisma.item.updateMany({
+      //   where: {
+      //     inventoryItemId: id,
+      //   },
+      //   data: {
+      //     typeId,
+      //   },
+      // });
 
       return res.status(200).json({
         data: updatedInventory,
@@ -64,17 +64,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      // Update all related selling items
-      await prisma.item.updateMany({
-        where: {
-          inventoryItemId: {
-            in: idList,
-          },
-        },
-        data: {
-          typeId,
-        },
-      });
+      // // Update all related selling items
+      // await prisma.item.updateMany({
+      //   where: {
+      //     inventoryItemId: {
+      //       in: idList,
+      //     },
+      //   },
+      //   data: {
+      //     typeId,
+      //   },
+      // });
 
       return res.status(200).json({
         data: updatedInventory,

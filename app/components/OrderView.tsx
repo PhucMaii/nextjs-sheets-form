@@ -182,15 +182,17 @@ const OrderView = ({
     }
 
     const typesObj = items.reduce((acc: any, item: any) => {
-      if (!item.type) {
+      const type = item?.inventoryItem?.type;
+
+      if (!type) {
         acc['Others'] = [...(acc['Others'] || []), item];
         return acc;
       }
 
-      if (!acc[item.type.name]) {
-        acc[item?.type?.name] = [item];
+      if (!acc[type.name]) {
+        acc[type?.name] = [item];
       } else {
-        acc[item?.type?.name] = [...acc[item.type.name], item];
+        acc[type?.name] = [...acc[type.name], item];
       }
       return acc;
     }, {});
@@ -224,7 +226,7 @@ const OrderView = ({
 
   useEffect(() => {
     if (selectedItemType !== 'All') {
-      const newItems = items.filter((i) => i?.type?.name === selectedItemType);
+      const newItems = items.filter((i) => i?.inventoryItem?.type?.name === selectedItemType);
       setDisplayItems(newItems);
     } else {
       setDisplayItems(items);

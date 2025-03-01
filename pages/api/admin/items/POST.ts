@@ -128,7 +128,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           availability: newItem?.availability || true,
           inventoryItemId: newItem?.inventoryItemId || null,
           inventoryUnitId: selectedUnit.id,
-          typeId: selectedInventoryItem?.typeId || null,
           categoryId,
         };
       })

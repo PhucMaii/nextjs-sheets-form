@@ -8,7 +8,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const itemTypes = await prisma.itemType.findMany({
       include: {
         inventoryItems: true,
-        sellingItems: true,
       },
     });
 

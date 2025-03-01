@@ -28,15 +28,15 @@ export default async function DELETE(
       });
     }
 
-    // Remove item type id in all the selling items related
-    await prisma.item.updateMany({
-      where: {
-        typeId: Number(id),
-      },
-      data: {
-        typeId: null,
-      },
-    });
+    // // Remove item type id in all the selling items related
+    // await prisma.item.updateMany({
+    //   where: {
+    //     typeId: Number(id),
+    //   },
+    //   data: {
+    //     typeId: null,
+    //   },
+    // });
 
     // Remove item type id in all the inventory items related
     await prisma.inventoryItem.updateMany({
