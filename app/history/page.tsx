@@ -36,6 +36,7 @@ import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ErrorComponent from '../admin/components/ErrorComponent';
 import { SWRFetchData } from '../utils/db';
+import { filterDateRangeOrders } from '@/pages/api/utils/date';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -102,8 +103,13 @@ export default function HistoryPage() {
   };
 
   const initializeOrders = () => {
-    setClientOrders(orderData.data.userOrders);
-    setBaseClientOrders(orderData.data.userOrders);
+    const filteredOrders = filterDateRangeOrders(
+      orderData.data.userOrders,
+      dateRange[0],
+      dateRange[1],
+    );
+    setClientOrders(filteredOrders);
+    setBaseClientOrders(filteredOrders);
   };
 
   const resetOrders = () => {
