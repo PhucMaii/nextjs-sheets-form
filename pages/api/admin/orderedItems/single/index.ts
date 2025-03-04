@@ -10,6 +10,7 @@ import {
 import { getTodayDate } from '@/pages/api/utils/date';
 import { IInventoryUnit } from '@/app/utils/type';
 import { getAllUnitsByInventoryItemId } from '@/pages/api/utils/units';
+import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 
 interface IBody {
   id: number;
@@ -19,6 +20,7 @@ interface IBody {
   name?: string;
   inventoryUnit: IInventoryUnit;
   newUnits?: IInventoryUnit[];
+  itemId?: number;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -28,52 +30,90 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const prisma = new PrismaClient();
-    const { id, orderId, quantity, price } = req.body as IBody;
+    const { id, orderId, quantity, price, itemId } = req.body as IBody;
 
-    const existingOrderedItem = await prisma.orderedItems.findUnique({
+    let updatedOrderedItem;
+
+    const existingOrder = await prisma.orders.findUnique({
       where: {
-        id,
+        id: orderId,
+      },
+      include: {
+        items: true,
       },
     });
 
-    console.log('existingOrderedItem: ', existingOrderedItem);
+    if (!existingOrder) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
 
-    if (!existingOrderedItem) {
-      return res.status(404).json({ error: 'Item Not Found' });
+    // Handle create new ordered items
+    // WILL BE DELETED IN THE NEW VERSION
+
+    if (id < 1 && itemId) {
+      const targetItem = await prisma.item.findUnique({
+        where: {
+          id: itemId,
+        },
+        include: {
+          inventoryItem: true,
+          inventoryUnit: true,
+        },
+      });
+
+      if (!targetItem) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+
+      updatedOrderedItem = await createOrderedItems(existingOrder, [
+        { ...targetItem, price, quantity },
+      ]);
+    } else {
+      const existingOrderedItem = await prisma.orderedItems.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      console.log('existingOrderedItem: ', existingOrderedItem);
+
+      if (!existingOrderedItem) {
+        return res.status(404).json({ error: 'Item Not Found' });
+      }
+
+      const costAndProfit = await generateCostAndProfit(id);
+
+      console.log('costAndProfit: ', costAndProfit);
+
+      updatedOrderedItem = await prisma.orderedItems.update({
+        where: {
+          id,
+        },
+        data: {
+          quantity,
+          price,
+          cost: costAndProfit.cost,
+          profit: price - costAndProfit.cost,
+        },
+        include: {
+          fifo: true,
+          inventoryUnit: true,
+        },
+      });
+
+      if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
+        await updateSingleInventoryItem(
+          orderId,
+          updatedOrderedItem.fifo,
+          updatedOrderedItem.inventoryUnit,
+          quantity,
+          existingOrderedItem.quantity,
+        );
+      }
     }
 
     // Get admin update info
     const adminUpdate: any = await getUserInfo(req, res);
-
-    const costAndProfit = await generateCostAndProfit(id);
-
-    console.log('costAndProfit: ', costAndProfit);
-
-    const updatedOrderedItem = await prisma.orderedItems.update({
-      where: {
-        id,
-      },
-      data: {
-        quantity,
-        price,
-        cost: costAndProfit.cost,
-        profit: price - costAndProfit.cost,
-      },
-      include: {
-        fifo: true,
-        inventoryUnit: true,
-      },
-    });
-
-    if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
-      await updateSingleInventoryItem(
-        orderId,
-        updatedOrderedItem.fifo,
-        updatedOrderedItem.inventoryUnit,
-        quantity,
-        existingOrderedItem.quantity,
-      );
-    }
 
     const orderedItems = await prisma.orderedItems.findMany({
       where: {
@@ -233,7 +273,6 @@ export const updateSingleInventoryItem = async (
     const updatedQuantity =
       lastUpdatedFifo.quantity - newQuantity * ratio + previousQuantity * ratio;
 
-    console.log({ unit, updatedQuantity });
     await prisma.fifo.update({
       where: {
         id: fifo.id,

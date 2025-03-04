@@ -22,12 +22,13 @@ import useNotification from '@/hooks/useNotification';
 
 interface PropTypes extends ModalProps {
   order: Order;
-  item: OrderedItems;
+  item: OrderedItems | any;
   handleUpdateItem: (
     orderTotalPrice: number,
     order: Order,
     updatedItem: OrderedItems,
     isConvertToCustom?: boolean,
+    itemId?: number,
   ) => Promise<void>;
   role: USER_ROLE;
 }
@@ -42,7 +43,7 @@ export default function EditItemModal({
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isConvertToCustom, setIsConvertToCustom] = useState<boolean>(false);
-  const [updatedItem, setUpdatedItem] = useState<OrderedItems>({
+  const [updatedItem, setUpdatedItem] = useState<OrderedItems  | any>({
     ...item,
   });
   const [unitList, setUnitList] = useState<any[]>([]);
@@ -111,6 +112,7 @@ export default function EditItemModal({
         units: newUnits,
       },
       isConvertToCustom,
+      (item?.itemId || null),
     );
     setIsLoading(false);
     setIsConvertToCustom(false);
@@ -149,7 +151,7 @@ export default function EditItemModal({
             </LoadingButton>
           </Box>
           <Divider />
-          {role === USER_ROLE.ADMIN && !item?.isCustomAmount && (
+          {role === USER_ROLE.ADMIN && !item?.isCustomAmount && item.id > 0 && (
             <Box display="flex" justifyContent="flex-end" width="100%">
               <FormControlLabel
                 control={
@@ -236,7 +238,7 @@ export default function EditItemModal({
             <Typography variant="h6">Total Price</Typography>
             <Typography variant="h6">
               {updatedItem?.totalPrice?.toFixed(2) ||
-                item.totalPrice.toFixed(2)}
+                item?.totalPrice?.toFixed(2) || (item?.price * item?.quantity)?.toFixed(2)}
             </Typography>
           </Box>
         </BoxModal>

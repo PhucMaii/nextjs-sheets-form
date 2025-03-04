@@ -226,6 +226,7 @@ export default function AddClient({
                 value={newClient.role}
                 onChange={(e) => handleOnChangeClient('role', e.target.value)}
                 fullWidth
+                size="small"
               >
                 <MenuItem value={USER_ROLE.CLIENT}>Client</MenuItem>
                 <MenuItem value={USER_ROLE.ADMIN}>Admin</MenuItem>
@@ -248,6 +249,7 @@ export default function AddClient({
                   </IconButton>
                 </Box>
                 <Select
+                  size="small"
                   // key={newClient.categoryId}
                   value={newClient.category.name} // Serialize the object
                   onChange={(e) =>
@@ -283,6 +285,7 @@ export default function AddClient({
                   }
                   placeholder="-- Choose an order type --"
                   fullWidth
+                  size="small"
                 >
                   <MenuItem value="">-- Choose an order type --</MenuItem>
                   {orderTypes &&
@@ -310,6 +313,7 @@ export default function AddClient({
                   }
                   fullWidth
                   placeholder="-- Choose a payment type --"
+                  size="small"
                 >
                   <MenuItem value="">-- Choose a payment type --</MenuItem>
                   {paymentTypes &&

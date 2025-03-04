@@ -97,6 +97,7 @@ export default function SelectRoute({
       <Box display="flex" flexDirection="column" gap={1.5} mt={2}>
         <Typography variant="subtitle1">Route</Typography>
         <Select
+          size="small"
           sx={{ background: 'white' }}
           value={currentRoute}
           onChange={(e: any) => setCurrentRoute(+e.target.value)}

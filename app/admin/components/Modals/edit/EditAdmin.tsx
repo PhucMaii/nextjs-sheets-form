@@ -86,6 +86,7 @@ export default function EditAdmin({ showNotification, admin }: IProps) {
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography>Role</Typography>
               <Select
+                size="small"
                 value={adminData.role}
                 onChange={(e) =>
                   setAdminData({ ...adminData, role: e.target.value })
