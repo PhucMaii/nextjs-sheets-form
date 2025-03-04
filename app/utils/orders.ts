@@ -39,6 +39,7 @@ export const updateOrderedItems = async (
   updatedItem: OrderedItems,
   showNotification: any,
   isConvertToCustom: boolean = false,
+  itemId = null
 ) => {
   try {
     let response: any;
@@ -51,6 +52,7 @@ export const updateOrderedItems = async (
           orderId: order.id,
           newUnits: updatedItem.units,
           inventoryUnit: updatedItem.inventoryUnit,
+          itemId: itemId,
         },
       );
     } else {

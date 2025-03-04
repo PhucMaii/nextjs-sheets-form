@@ -6,6 +6,7 @@ import {
   Grid,
   IconButton,
   Modal,
+  TextField,
   Typography,
 } from '@mui/material';
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
@@ -27,6 +28,9 @@ import SingleFieldEdit from './edit/SingleFieldEdit';
 import axios from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteModal from './delete/DeleteModal';
+import useDebounce from '@/hooks/useDebounce';
+import { SWRFetchData } from '@/app/utils/db';
+import { Item } from '@prisma/client';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -46,20 +50,63 @@ const OrderDetails = ({
   handleUpdateItem,
   showNotification,
 }: IProps) => {
-  const [items, setItems] = useState<OrderedItems[]>(order.items);
+  const [baseItems, setBaseItems] = useState<any[]>([]);
+  const [items, setItems] = useState<OrderedItems[] | any[]>(order.items);
   const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
   const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
     useState<boolean>(false);
   const billPrintRef: any = useRef();
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const [clientItems] = SWRFetchData(
+    `${API_URL.ITEM}?categoryId=${order?.user?.categoryId}`,
+  );
+
+  const debounceKeywords = useDebounce(searchKeywords, 1000);
+
+  // useEffect(() => {
+  //   if (order.items) {
+  //     setItems(order.items);
+  //   }
+
+  //   // setUpdatedNote(order?.note || '');
+  // }, [order]);
+  useEffect(() => {
+    if (clientItems?.data && order.items) {
+      const newBaseItems = clientItems?.data.map((item: Item) => {
+        const isExistedInOrder = order.items.find(
+          (orderItem: OrderedItems) => orderItem.name === item.name,
+        );
+
+        if (isExistedInOrder) {
+          return isExistedInOrder
+        }
+
+        return {
+          ...item,
+          id: 0,
+          quantity: 0,
+          itemId: item.id,
+          orderId: order.id
+        }
+      });
+
+      setBaseItems(newBaseItems);
+    }
+  }, [order, clientItems]);
 
   useEffect(() => {
-    if (order.items) {
-      setItems(order.items);
-    }
+    if (debounceKeywords) {
+      const newBaseItems = baseItems.filter((item: Item) => {
+        return item.name.toLowerCase().includes(debounceKeywords.toLowerCase());
+      });
 
-    // setUpdatedNote(order?.note || '');
-  }, [order]);
+      setItems(newBaseItems);
+    } else {
+      setItems(order?.items || []);
+    }  
+  }, [debounceKeywords, baseItems]);
 
   const handlePrinting = useReactToPrint({
     content: () => billPrintRef.current,
@@ -226,6 +273,32 @@ const OrderDetails = ({
                 </Button>
               )}
             </Grid>
+            <Grid item xs={12}>
+              <Divider>Category Items</Divider>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField 
+                fullWidth
+                label="Search"
+                placeholder="Search items..."
+                onChange={(e) => setSearchKeywords(e.target.value)}
+              />
+            </Grid>
+            {/* {
+              categoryItems.length > 0 && (
+                <Grid item xs={12}>
+                  <OrderDetailsTable 
+                    order={order}
+                    items={categoryItems}
+                    setItems={setCategoryItems}
+                    handleUpdateItem={handleUpdateItem}
+                    abilityToEdit
+                    role={USER_ROLE.ADMIN}
+                    showNotification={showNotification}
+                  />
+                </Grid>
+              )
+            } */}
             <Grid item textAlign="center" xs={12}>
               <OrderDetailsTable
                 order={order}
