@@ -189,6 +189,7 @@ const EditClient = ({
             </Grid>
             <Grid item xs={12} md={6}>
               <Select
+                size="small"
                 value={JSON.stringify(updatedClient.category)} // Serialize the object
                 onChange={(e) =>
                   onChangeClient('category', JSON.parse(e.target.value))

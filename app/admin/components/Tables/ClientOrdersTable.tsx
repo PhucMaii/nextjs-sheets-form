@@ -28,6 +28,7 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { renderType } from '@/app/lib/render';
+import { grey } from '@mui/material/colors';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -186,9 +187,16 @@ const ClientOrdersTable = ({
         <TableCell>
           <Select
             value={order.status}
-            onChange={(e) =>
+            onChange={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
               updateStatus(order, e.target.value as ORDER_STATUS)
-            }
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            size="small"
           >
             <MenuItem value={ORDER_STATUS.COMPLETED}>
               <StatusText text="Completed" type="success" />
@@ -253,7 +261,10 @@ const ClientOrdersTable = ({
         <TableRow
           aria-checked={isOrderSelected}
           selected={isOrderSelected}
-          sx={{ cursor: 'pointer' }}
+          sx={{ cursor: 'pointer', '&:hover': { backgroundColor: grey[50] } }}
+          onClick={() => {
+            setOpenEdit(() => ({ order: item, open: true }));
+          }}
           {...props}
         />
       );

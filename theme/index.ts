@@ -23,6 +23,18 @@ export function createTheme() {
       borderRadius: 8,
     },
     typography,
+    components: {
+      MuiTextField: {
+        defaultProps: {
+          size: 'small', // Set default size to 'small'
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: 'small', // Default size for Select
+        },
+      },
+    },
   });
 }
 

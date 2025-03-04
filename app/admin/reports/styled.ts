@@ -6,5 +6,5 @@ export const ShadowSection = styled(Box)`
   // width: 100%;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 `;

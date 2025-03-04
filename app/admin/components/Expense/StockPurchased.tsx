@@ -518,6 +518,7 @@ export default function StockPurchased({
                   purchasedItems.length > 0 &&
                   purchasedItems[0].vendorId === selectedVendorId
                 }
+                size="small"
               >
                 <MenuItem value={-1} disabled>
                   -- Choose a vendor --
@@ -755,6 +756,7 @@ export default function StockPurchased({
                 });
               }
             }}
+            size="small"
           >
             <MenuItem value={-1} disabled>
               -- Choose a method --
@@ -788,6 +790,7 @@ export default function StockPurchased({
               onChange={(e) =>
                 setNewExpense({ ...newExpense, spentBy: e.target.value })
               }
+              size="small"
             >
               <MenuItem value={'-- Choose who spent --'} disabled>
                 -- Choose who spent --

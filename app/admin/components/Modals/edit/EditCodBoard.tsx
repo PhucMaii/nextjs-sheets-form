@@ -104,6 +104,7 @@ export default function EditCodBoard({
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">Driver</Typography>
             <Select
+              size="small"
               value={updatedBoard?.driverId || ''}
               onChange={(e: any) =>
                 onChangeUpdatedBoard('driverId', +e.target.value)
