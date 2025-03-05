@@ -97,36 +97,47 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    let expenses = await prisma.expense.findMany({
-      where: {
+    let expenses = [];
+    if (id) {
+      expenses = await getTransactions({
         date: {
-          in: listOfDateString,
+          in: listOfDateString
         },
-        paymentMethodId: Number(id),
-      },
-      include: {
-        paymentMethod: true,
-        vendors: {
-          include: {
-            vendor: true,
-          },
-        },
-        orderedItems: {
-          include: {
-            inventoryUnit: true,
-            fifo: {
-              select: {
-                _count: {
-                  select: {
-                    orderedItems: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+        paymentMethodId: Number(id)
+      })
+    }
+
+
+    // let expenses = await prisma.expense.findMany({
+    //   where: {
+    //     date: {
+    //       in: listOfDateString,
+    //     },
+    //     paymentMethodId: Number(id),
+    //   },
+    //   include: {
+    //     paymentMethod: true,
+    //     vendors: {
+    //       include: {
+    //         vendor: true,
+    //       },
+    //     },
+    //     orderedItems: {
+    //       include: {
+    //         inventoryUnit: true,
+    //         fifo: {
+    //           select: {
+    //             _count: {
+    //               select: {
+    //                 orderedItems: true,
+    //               },
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
 
     if (type && type === VIEW_TYPE.VENDOR) {
       const vendor = await prisma.vendor.findUnique({
@@ -177,6 +188,28 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
 
       expenses = vendor.expense.map((expense: any) => expense.expense);
+    } else if (type && type === VIEW_TYPE.STOCK_PURCHASED) {
+      const stockPurchased = await getTransactions({
+        date: {
+          in: listOfDateString
+        },
+        orderedItems: {
+          some: {}
+        }
+      })
+
+      expenses = [...stockPurchased];
+    } else if (type && type === VIEW_TYPE.CUSTOM_PURCHASED) {
+      const stockPurchased = await getTransactions({
+        date: {
+          in: listOfDateString,
+        },
+        orderedItems: {
+          none: {},
+        }
+      });
+
+      expenses = [...stockPurchased]
     }
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);
@@ -207,6 +240,38 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
+
+const getTransactions = async (condition: any) => {
+  const prisma = new PrismaClient();
+
+  const res = await prisma.expense.findMany({
+    where: condition,
+    include: {
+      paymentMethod: true,
+      vendors: {
+        include: {
+          vendor: true,
+        },
+      },
+      orderedItems: {
+        include: {
+          inventoryUnit: true,
+          fifo: {
+            select: {
+              _count: {
+                select: {
+                  orderedItems: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return res;
+};
 
 const generateChartDataForm = (
   transactionBasedOnDate: any,

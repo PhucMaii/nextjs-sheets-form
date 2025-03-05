@@ -122,14 +122,17 @@ export default function InventoryTable({
                       <IconButton
                         size="small"
                         color="primary"
-                        onClick={() =>
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+
                           setViewItemMissingProps((prevState: any) => ({
                             ...prevState,
                             open: true,
                             inventoryItem: item,
                             quantity: item.quantity,
-                          }))
-                        }
+                          }));
+                        }}
                       >
                         <PhoneIcon size={20} />
                       </IconButton>
