@@ -24,6 +24,7 @@ import { PhoneIcon } from 'lucide-react';
 import ViewItemMissing from '../Modals/ViewItemMissing';
 import { ItemType } from '@prisma/client';
 import LoadingModal from '../Modals/LoadingModal';
+import { grey } from '@mui/material/colors';
 
 interface IProps {
   inventoryItems: IInventoryItem[];
@@ -41,6 +42,10 @@ export default function InventoryTable({
   setSelectedItems,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [editItemProps, setEditItemProps] = useState<any>({
+    open: false,
+    inventoryItem: null,
+  });
   const [viewItemMissingProps, setViewItemMissingProps] = useState<any>({
     open: false,
     inventoryItem: inventoryItems[0],
@@ -101,7 +106,8 @@ export default function InventoryTable({
     }
   };
 
-  const onSelectItem = (item: IInventoryItem) => {
+  const onSelectItem = (e: any, item: IInventoryItem) => {
+    e.stopPropagation();
     const isExisted = selectedItems.find((i) => i.id === item.id);
 
     if (isExisted) {
@@ -122,6 +128,19 @@ export default function InventoryTable({
   return (
     <>
       <LoadingModal open={isLoading} />
+      {editItemProps.inventoryItem && (
+        <EditInventory
+          inventoryItem={editItemProps.inventoryItem}
+          open={editItemProps.open}
+          onClose={() =>
+            setEditItemProps(() => ({
+              inventoryItem: null,
+              open: false,
+            }))
+          }
+          showNotification={showNotification}
+        />
+      )}
       {viewItemMissingProps && (
         <ViewItemMissing
           open={viewItemMissingProps.open}
@@ -164,11 +183,21 @@ export default function InventoryTable({
               const isSelected = selectedItems.some((i) => i.id === item.id);
 
               return (
-                <TableRow key={index}>
+                <TableRow
+                  key={index}
+                  sx={{ '&:hover': { backgroundColor: grey[50] } }}
+                  onClick={() =>
+                    setEditItemProps((prevState: any) => ({
+                      ...prevState,
+                      open: true,
+                      inventoryItem: item,
+                    }))
+                  }
+                >
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={isSelected}
-                      onClick={() => onSelectItem(item)}
+                      onClick={(e: any) => onSelectItem(e, item)}
                     />
                   </TableCell>
                   <TableCell>
@@ -224,8 +253,13 @@ export default function InventoryTable({
                       })}
                     </Box>
                   </TableCell>
-                  <TableCell>
-                    <Box display="flex" gap={1} alignItems="center">
+                  <TableCell sx={{ width: 200 }}>
+                    <Box
+                      display="flex"
+                      gap={1}
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
                       <Typography>
                         {item?.quantity} {unit?.unit}
                       </Typography>
@@ -244,10 +278,7 @@ export default function InventoryTable({
                         includedButton
                         targetObj={item}
                         handleDelete={handleDelete}
-                      />
-                      <EditInventory
-                        inventoryItem={item}
-                        showNotification={showNotification}
+                        showTargetObj={item.name}
                       />
                     </Box>
                   </TableCell>

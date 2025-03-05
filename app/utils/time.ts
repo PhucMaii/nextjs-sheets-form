@@ -79,12 +79,20 @@ export const generateMonthRange = () => {
 };
 
 export const generateListOfDateString = (startDate: Date, endDate: Date) => {
-  const startDateString = YYYYMMDDFormat(startDate);
+  const formattedStartDate = startDate;
+  const formattedEndDate = endDate;
+
+  // if (startDate.getTimezoneOffset() === 0 || endDate.getTimezoneOffset() === 0) {
+  //   formattedStartDate = convertToPSTDate(startDate);
+  //   formattedEndDate = convertToPSTDate(endDate);
+  // }
+
+  const startDateString = YYYYMMDDFormat(formattedStartDate);
   const dates = [startDateString];
-  const currentDate = startDate;
+  const currentDate = formattedStartDate;
   currentDate.setDate(currentDate.getDate() + 1);
 
-  while (currentDate.getTime() <= endDate.getTime()) {
+  while (currentDate.getTime() <= formattedEndDate.getTime()) {
     // dates.push(currentDate);
     const currentDateString = YYYYMMDDFormat(currentDate);
     dates.push(currentDateString);

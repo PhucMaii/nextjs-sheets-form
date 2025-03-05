@@ -340,6 +340,7 @@ export default function CardManagement() {
             <Select
               value={JSON.stringify(selectedViewObj)}
               onChange={(e) => setSelectedViewObj(JSON.parse(e.target.value))}
+              size="small"
             >
               <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
                 -- Choose Payment Method --

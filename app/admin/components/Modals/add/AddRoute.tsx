@@ -113,6 +113,7 @@ export default function AddRoute({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Driver:</Typography>
               <Select
+                size="small"
                 value={newRoute.driverId}
                 onChange={(e) =>
                   setNewRoute({ ...newRoute, driverId: +e.target.value })

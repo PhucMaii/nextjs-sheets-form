@@ -26,11 +26,25 @@ export default function BatchQuantityModal({
 
   return (
     <>
-      <IconButton onClick={() => setOpen(true)} size="small">
+      <IconButton
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
+        size="small"
+      >
         <EditIcon fontSize="small" />
       </IconButton>
       <Modal open={open} onClose={() => setOpen(false)}>
-        <BoxModal maxHeight="80vh" overflow="scroll">
+        <BoxModal
+          maxHeight="80vh"
+          overflow="scroll"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           <Typography>Batch Quantity</Typography>
 
           <Box

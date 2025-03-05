@@ -36,11 +36,54 @@ export default function EditScheduleOrder({
   routeId,
   mutateOrders,
 }: IProps) {
+  // const [baseItems, setBaseItems] = useState<OrderedItems[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [newRouteId, setNewRouteId] = useState<number>(routeId);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [sellingItems] = SWRFetchData(`${API_URL.ITEM}?userId=${order.userId}`);
+
+  // const onChangeNewItemQuantity = (e: any, item: any) => {
+  //   const newQuantity = +e.target.value;
+
+  //   if (newQuantity < 1) {
+  //     const newItemList = itemList.filter(
+  //       (orderItem: OrderedItems) => orderItem.name !== item.name,
+  //     );
+
+  //     setItemList(newItemList);
+  //     return;
+  //   }
+
+  //   const isExistedInItemList = itemList.find(
+  //     (orderItem: OrderedItems) => orderItem.name === item.name,
+  //   );
+
+  //   if (isExistedInItemList) {
+  //     const newItemList = itemList.map((orderItem: OrderedItems) => {
+  //       if (orderItem.name === item.name) {
+  //         return { ...orderItem, quantity: newQuantity };
+  //       }
+  //       return orderItem;
+  //     });
+  //     setItemList(newItemList);
+  //   } else {
+  //     setItemList([...itemList, { ...item, id: -1, quantity: newQuantity }]);
+  //   }
+  // }
+
+  // const onChangeNewItemPrice = (e: any, item: any) => {
+  //   const newPrice = +e.target.value;
+
+  //   const newBaseItems = baseItems.map((baseItem: any) => {
+  //     if (baseItem.id === item.id) {
+  //       return { ...baseItem, price: newPrice };
+  //     }
+  //     return baseItem;
+  //   });
+
+  //   setBaseItems(newBaseItems);
+  // }
 
   const switchRoute = async () => {
     if (newRouteId === routeId) {

@@ -398,9 +398,9 @@ export const createOrderedItems = async (
       continue;
     }
 
-    // If item is custom amount and is assigned to a new unit
     let unitId = item.inventoryUnitId;
-
+    
+    // If item is custom amount and is assigned to a new unit
     if (item.inventoryUnitId < 1) {
       const dbUnits = await prisma.inventoryUnit.findMany({
         where: {
@@ -457,10 +457,7 @@ export const createOrderedItems = async (
         });
       }
 
-      // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
-      //   return unit.ratio === 1;
-      // });
-
+      // We don't know the cost at this stage since there is no batch available yet.
       newOrderedItems.push({
         orderId: order.id,
         fifoId: newFifo.id,

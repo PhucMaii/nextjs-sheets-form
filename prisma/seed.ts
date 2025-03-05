@@ -115,52 +115,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-const lighterGreen = '#99FF99'; // Lighter Green
-const lighterLimeGreen = '#CCFF99'; // Lighter Lime Green
-const lightBananaYellow = '#FFFF99'; // Light Banana Yellow
-const lightCoralRed = '#FF9999'; // Light Coral Red
-const lightSkyBlue = '#99CCFF'; // Light Sky Blue
-const lightPeriwinkle = '#CCCCFF'; // Light Periwinkle
-const lightMintGreen = '#CCFFCC'; // Light Mint Green
-const lightSalmonPink = '#FFCCCB'; // Light Salmon Pink
-const lightLavender = '#E6E6FA'; // Light Lavender
-const lightPastelYellow = '#FFFFE0'; // Light Pastel Yellow
-const lightPeach = '#FFDAB9'; // Light Peach
-const lightTurquoise = '#AFEEEE'; // Light Turquoise
-const lightPaleGreen = '#98FB98'; // Light Pale Green
-
-export const productColors = [
-  lighterGreen, // BEAN 10 LB
-  lighterLimeGreen, // BEAN 5 LB
-  lightBananaYellow, // BASIL
-  lightCoralRed, // BEAN 24X1 LB
-  lightSkyBlue, // SOYA 10 LBS
-  lightPeriwinkle, // SOYA 5 LBS
-  lightMintGreen, // SOYA 24X1 LB
-  lightSalmonPink, // MUSHROOM
-  lightLavender, // JUMBO EGG
-  lightPastelYellow, // RICE NOODLE
-  lightPeach, // LIQUID EGG
-  lightTurquoise, // EGG PLANT
-  lightPaleGreen, // LIME NO. 1
-];
-
 async function main() {
-  const preOrders = await prisma.scheduleOrders.findMany({
-    include: {
-      items: true,
-    },
-  });
-
-  const hasItem0 = [];
-  for (const preOrder of preOrders) {
-    const isHasItem0 = preOrder.items.some((item) => item.quantity === 0);
-    if (isHasItem0) {
-      hasItem0.push(preOrder);
-    }
-  }
-
-  console.log(hasItem0);
 }
 
 main()

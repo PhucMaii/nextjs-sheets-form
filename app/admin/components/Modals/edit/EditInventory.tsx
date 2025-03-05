@@ -29,11 +29,15 @@ import EditOffIcon from '@mui/icons-material/EditOff';
 import { handleResetColor, infoBackground } from '@/theme/color';
 
 interface IProps {
+  open: boolean;
+  onClose: () => void;
   inventoryItem: IInventoryItem;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function EditInventory({
+  open,
+  onClose,
   inventoryItem,
   showNotification,
 }: IProps) {
@@ -50,7 +54,7 @@ export default function EditInventory({
     unitIndex: -1,
     selectedVendorId: -1,
   });
-  const [open, setOpen] = useState<boolean>(false);
+  // const [open, setOpen] = useState<boolean>(false);
   const [updatedItem, setUpdatedItem] = useState<any>(inventoryItem);
   const [updatedVendorItems, setUpdatedVendorItems] = useState<any[]>(
     inventoryItem.vendorItem,
@@ -151,7 +155,7 @@ export default function EditInventory({
       }
 
       showNotification('success', response.data.message);
-      setOpen(false);
+      onClose();
       setIsLoading(false);
     } catch (error: any) {
       console.log('Fail to save update: ', error);
@@ -338,14 +342,14 @@ export default function EditInventory({
           updateUnit(updatedUnit, editUnit.unitIndex)
         }
       />
-      <Button onClick={() => setOpen(true)}>Edit</Button>
-      <Modal open={open} onClose={() => setOpen(false)}>
+      {/* <Button onClick={() => setOpen(true)}>Edit</Button> */}
+      <Modal open={open} onClose={onClose}>
         <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Inventory"
             buttonLabel="EDIT"
             buttonProps={{ loading: isLoading }}
-            onClose={() => setOpen(false)}
+            onClose={onClose}
             onClick={handleUpdate}
           />
 
