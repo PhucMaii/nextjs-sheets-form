@@ -5,6 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 import { SWRConfig } from 'swr';
 import AuthenGuard from '../HOC/AuthenGuard';
 import MaintenanceProvider from './context/MaintenanceProvider';
+import { DragDropProvider } from '@dnd-kit/react';
 
 type Props = {
   children?: React.ReactNode;
@@ -14,13 +15,15 @@ export const Providers = ({ children }: Props) => {
   return (
     <SessionProvider>
       <AuthenGuard>
-        <SWRConfig
-          value={{
-            fetcher: (url: string) => axios.get(url).then((r) => r.data),
-          }}
-        >
-          <MaintenanceProvider>{children}</MaintenanceProvider>
-        </SWRConfig>
+        <DragDropProvider>
+          <SWRConfig
+            value={{
+              fetcher: (url: string) => axios.get(url).then((r) => r.data),
+            }}
+          >
+            <MaintenanceProvider>{children}</MaintenanceProvider>
+          </SWRConfig>
+        </DragDropProvider>
       </AuthenGuard>
     </SessionProvider>
   );

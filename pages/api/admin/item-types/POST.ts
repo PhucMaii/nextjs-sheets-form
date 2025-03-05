@@ -25,12 +25,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    return res
-      .status(200)
-      .json({
-        data: newItemType,
-        message: 'Create New Item Type Successfully',
-      });
+    return res.status(200).json({
+      data: newItemType,
+      message: 'Create New Item Type Successfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

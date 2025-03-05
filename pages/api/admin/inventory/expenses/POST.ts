@@ -213,7 +213,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             name: item.name,
             createdAt,
             createdBy,
-            color: infoBackground
+            color: infoBackground,
           };
         }),
       });

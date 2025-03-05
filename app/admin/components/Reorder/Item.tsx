@@ -3,7 +3,7 @@ import { AlertColor, Box, Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
 import EditItemAvailability from '../Modals/edit/EditItemAvailability';
 import DeleteModal from '../Modals/delete/DeleteModal';
-import EditItem from '../Modals/edit/EditItem';
+// import EditItem from '../Modals/edit/EditItem';
 
 interface IProps {
   item: IItem;
@@ -41,11 +41,11 @@ export default function Item({
               handleDelete={handleDeleteItem}
               includedButton
             />
-            <EditItem
+            {/* <EditItem
               targetItem={item}
               handleUpdateItem={handleUpdateItem}
               showNotification={showNotification}
-            />
+            /> */}
           </Box>
         </Grid>
       </Grid>

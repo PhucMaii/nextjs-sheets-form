@@ -115,6 +115,5 @@ export const checkIsPreOrderQualified = (scheduledOrder: ScheduledOrder) => {
   const isBlocked = scheduledOrder?.blocked;
   const isInactive = scheduledOrder?.user?.type === USER_CATEGORIZED.INACTIVE;
 
-
   return totalPriceGt0 && hasItems && !hasOrdered && !isInactive && !isBlocked;
 };

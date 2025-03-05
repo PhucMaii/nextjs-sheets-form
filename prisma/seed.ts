@@ -148,8 +148,8 @@ export const productColors = [
 async function main() {
   const preOrders = await prisma.scheduleOrders.findMany({
     include: {
-      items: true
-    }
+      items: true,
+    },
   });
 
   const hasItem0 = [];

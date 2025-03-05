@@ -9,6 +9,7 @@ import {
   InventoryItem,
   InventoryUnit,
   ItemType,
+  ItemType_Category,
   PaymentMethod,
   PositionIndex,
   Route,
@@ -108,12 +109,15 @@ export interface UserType {
 export interface ICategory extends Category {
   users?: User[];
   items?: IItem[];
+
+  itemType_category?: ItemType_Category[];
 }
 
 export interface IItem {
   id: number;
   name: string;
   categoryId: number;
+  category?: ICategory;
   // subCategoryId?: number | null;
   price: number;
   quantity?: number;
@@ -132,7 +136,7 @@ export interface IItem {
   isShowDiscount?: boolean;
   order?: any;
   typeId?: number;
-  type?: ItemType;
+  type?: any;
 }
 
 export interface OrderedItems {

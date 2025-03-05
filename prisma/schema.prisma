@@ -48,10 +48,11 @@ model User {
 }
 
 model Category {
-  id    Int    @id @default(autoincrement())
-  name  String @unique @db.VarChar(255)
-  users User[]
-  items Item[]
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique @db.VarChar(255)
+  users             User[]
+  items             Item[]
+  itemType_category ItemType_Category[]
 }
 
 model SubCategory {
@@ -323,8 +324,20 @@ model ItemType {
   createdAt String?
   createdBy String?
 
-  itemPreferences ItemPreference[]
-  inventoryItems  InventoryItem[]
+  itemPreferences   ItemPreference[]
+  inventoryItems    InventoryItem[]
+  itemType_category ItemType_Category[]
+}
+
+model ItemType_Category {
+  itemTypeId Int
+  categoryId Int
+  priority   Int
+
+  itemType ItemType @relation(fields: [itemTypeId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([itemTypeId, categoryId])
 }
 
 model VendorItem {

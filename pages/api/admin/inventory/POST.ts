@@ -57,7 +57,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         hasGST,
         createdAt,
         createdBy,
-        color: infoBackground
+        color: infoBackground,
       },
     });
 

@@ -26,10 +26,23 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         inventoryItem: {
           include: {
-            type: true,
-          }
+            type: {
+              include: {
+                itemType_category: true,
+              },
+            },
+          },
         },
         inventoryUnit: true,
+        category: {
+          include: {
+            itemType_category: {
+              include: {
+                itemType: true,
+              },
+            },
+          },
+        },
       },
     });
 

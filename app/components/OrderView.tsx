@@ -48,23 +48,27 @@ import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
 import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
 import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
+import { convertItemArrayToMap } from '../utils/item';
 
 export const ItemButton = ({
   item,
   onClick,
   style,
   containerStyle,
+  ref,
 }: {
   item: IItem;
   onClick?: any;
   style?: any;
   containerStyle?: any;
+  ref?: any;
 }) => {
   return (
     <Button
       key={item.id}
       sx={{ width: '100%', height: '100%', ...style }}
       onClick={onClick}
+      ref={ref}
     >
       <Box
         display="flex"
@@ -177,25 +181,7 @@ const OrderView = ({
   const comparedField = purpose === ORDER_USAGE_PURPOSE.ITEM ? 'name' : 'id';
 
   const itemTypes = useMemo(() => {
-    if (items.length === 0) {
-      return {};
-    }
-
-    const typesObj = items.reduce((acc: any, item: any) => {
-      const type = item?.inventoryItem?.type;
-
-      if (!type) {
-        acc['Others'] = [...(acc['Others'] || []), item];
-        return acc;
-      }
-
-      if (!acc[type.name]) {
-        acc[type?.name] = [item];
-      } else {
-        acc[type?.name] = [...acc[type.name], item];
-      }
-      return acc;
-    }, {});
+    const typesObj = convertItemArrayToMap(items);
 
     return typesObj;
   }, [items]);
@@ -226,7 +212,9 @@ const OrderView = ({
 
   useEffect(() => {
     if (selectedItemType !== 'All') {
-      const newItems = items.filter((i) => i?.inventoryItem?.type?.name === selectedItemType);
+      const newItems = items.filter(
+        (i) => i?.inventoryItem?.type?.name === selectedItemType,
+      );
       setDisplayItems(newItems);
     } else {
       setDisplayItems(items);
@@ -403,51 +391,6 @@ const OrderView = ({
           displayItems.map((item: IItem) => {
             return (
               <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-                {/* <Button
-                  key={item.id}
-                  sx={{ width: '100%', height: '100%' }}
-                  onClick={() =>
-                    setSingleFieldProps({
-                      open: true,
-                      item,
-                      defaultValue: 1,
-                    })
-                  }
-                >
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="space-between"
-                    gap={2}
-                    alignItems="flex-start"
-                    sx={{
-                      p: 1,
-                      backgroundColor: blue[50],
-                      borderRadius: 1,
-                      width: '100%',
-                      height: '100%',
-                      color: blueGrey[800],
-                    }}
-                  >
-                    <Typography fontWeight="bold" textAlign="left">
-                      {item.name}
-                    </Typography>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography fontWeight="bold">
-                        ${item.price?.toFixed(2)}
-                      </Typography>
-                      {item.isShowDiscount && item.prevPrice && (
-                        <Typography
-                          fontWeight="bold"
-                          sx={{ textDecoration: 'line-through' }}
-                          color="error"
-                        >
-                          ${item.prevPrice.toFixed(2)}
-                        </Typography>
-                      )}
-                    </Box>
-                  </Box>
-                </Button> */}
                 <ItemButton
                   item={item}
                   onClick={() =>
@@ -472,8 +415,9 @@ const OrderView = ({
   const renderItemsByType = () => {
     return (
       <>
-        {Object.keys(itemTypes).length > 0 &&
-          Object.keys(itemTypes).map((type: string) => {
+        {itemTypes?.sortedKeysByPriority &&
+          itemTypes?.sortedKeysByPriority?.length > 0 &&
+          itemTypes?.sortedKeysByPriority?.map((type: string) => {
             if (type === 'Others') return null;
             return (
               <Fragment key={type}>
@@ -481,7 +425,7 @@ const OrderView = ({
                   <Typography variant="h6">{type}</Typography>
                 </Grid>
 
-                {itemTypes[type].map((item: IItem, index: number) => {
+                {itemTypes.typesObj[type].map((item: IItem, index: number) => {
                   return (
                     <Grid
                       data-tour={index === 0 ? 'third-step' : ''}
@@ -490,51 +434,6 @@ const OrderView = ({
                       sm={isModal ? 6 : 4}
                       md={isModal ? 6 : 3}
                     >
-                      {/* <Button
-                        key={item.id}
-                        sx={{ width: '100%', height: '100%' }}
-                        onClick={() =>
-                          setSingleFieldProps({
-                            open: true,
-                            item,
-                            defaultValue: 1,
-                          })
-                        }
-                      >
-                        <Box
-                          display="flex"
-                          flexDirection="column"
-                          justifyContent="space-between"
-                          gap={2}
-                          alignItems="flex-start"
-                          sx={{
-                            p: 1,
-                            backgroundColor: blue[50],
-                            borderRadius: 1,
-                            width: '100%',
-                            height: '100%',
-                            color: blueGrey[800],
-                          }}
-                        >
-                          <Typography fontWeight="bold" textAlign="left">
-                            {item.name}
-                          </Typography>
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <Typography fontWeight="bold">
-                              ${item.price?.toFixed(2)}
-                            </Typography>
-                            {item.isShowDiscount && item.prevPrice && (
-                              <Typography
-                                fontWeight="bold"
-                                sx={{ textDecoration: 'line-through' }}
-                                color="error"
-                              >
-                                ${item.prevPrice.toFixed(2)}
-                              </Typography>
-                            )}
-                          </Box>
-                        </Box>
-                      </Button> */}
                       <ItemButton
                         item={item}
                         onClick={() =>
@@ -561,14 +460,14 @@ const OrderView = ({
             <Typography variant="h6">Others</Typography>
           </Grid>
 
-          {itemTypes['Others'] &&
-            itemTypes['Others'].length > 0 &&
-            itemTypes['Others'].map((item: IItem) => {
+          {itemTypes?.sortedKeysByPriority?.includes('Others') &&
+            itemTypes?.typesObj['Others'] &&
+            itemTypes?.typesObj['Others']?.length > 0 &&
+            itemTypes?.typesObj['Others'].map((item: IItem) => {
               return (
                 <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-                  <Button
-                    key={item.id}
-                    sx={{ width: '100%', height: '100%' }}
+                  <ItemButton
+                    item={item}
                     onClick={() =>
                       setSingleFieldProps({
                         open: true,
@@ -576,41 +475,11 @@ const OrderView = ({
                         defaultValue: 1,
                       })
                     }
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      justifyContent="space-between"
-                      gap={2}
-                      alignItems="flex-start"
-                      sx={{
-                        p: 1,
-                        backgroundColor: blue[50],
-                        borderRadius: 1,
-                        width: '100%',
-                        height: '100%',
-                        color: blueGrey[800],
-                      }}
-                    >
-                      <Typography fontWeight="bold" textAlign="left">
-                        {item.name}
-                      </Typography>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography fontWeight="bold">
-                          ${item.price?.toFixed(2)}
-                        </Typography>
-                        {item.isShowDiscount && item.prevPrice && (
-                          <Typography
-                            fontWeight="bold"
-                            sx={{ textDecoration: 'line-through' }}
-                            color="error"
-                          >
-                            ${item.prevPrice.toFixed(2)}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  </Button>
+                    containerStyle={{
+                      backgroundColor:
+                        item?.inventoryItem?.color || infoBackground,
+                    }}
+                  />
                 </Grid>
               );
             })}
@@ -658,19 +527,22 @@ const OrderView = ({
             onClick={() => setSelectedItemType('All')}
             mode="edit"
           />
-          {Object.keys(itemTypes).map((itemType: string, index: number) => {
-            if (itemType === 'Others') return null;
-            return (
-              <ItemTypeButton
-                key={index}
-                type={itemType}
-                isSelected={itemType === selectedItemType}
-                onClick={() => setSelectedItemType(itemType)}
-                style={{ minWidth: 'auto' }}
-                mode="view"
-              />
-            );
-          })}
+          {itemTypes?.sortedKeysByPriority &&
+            itemTypes.sortedKeysByPriority.map(
+              (itemType: string, index: number) => {
+                if (itemType === 'Others') return null;
+                return (
+                  <ItemTypeButton
+                    key={index}
+                    type={itemType}
+                    isSelected={itemType === selectedItemType}
+                    onClick={() => setSelectedItemType(itemType)}
+                    style={{ minWidth: 'auto' }}
+                    mode="view"
+                  />
+                );
+              },
+            )}
         </Box>
 
         {/* Search bar */}

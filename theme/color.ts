@@ -100,7 +100,6 @@ export const greyBackground = blueGrey[700];
 
 export const primaryColor = blue[800];
 
-
 export const handleResetColor = (color: string) => {
   return ColorService.convert('hex', color);
-}
+};

@@ -26,9 +26,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   unit: true,
                 },
               },
-              type: true,
+              type: {
+                include: {
+                  itemType_category: true,
+                },
+              },
             },
           },
+          category: {
+            include: {
+              itemType_category: {
+                include: {
+                  itemType: true,
+                },
+              },
+            },
+          }
         },
       });
       return res.status(200).json({
@@ -66,6 +79,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               type: true,
             },
           },
+          category: {
+            include: {
+              itemType_category: {
+                include: {
+                  itemType: true,
+                },
+              },
+            },
+          }
         },
       });
 

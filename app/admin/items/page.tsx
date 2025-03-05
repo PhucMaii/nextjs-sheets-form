@@ -11,7 +11,6 @@ import { SWRFetchData } from '@/app/utils/db';
 import {
   Box,
   Button,
-  Divider,
   Grid,
   IconButton,
   TextField,
@@ -24,10 +23,7 @@ import axios from 'axios';
 import AddItem from '../components/Modals/add/AddItem';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import EditCategory from '../components/Modals/edit/EditCategory';
-import { Reorder } from 'framer-motion';
-import Item from '../components/Reorder/Item';
 import { LoadingButton } from '@mui/lab';
-import { UPDATE_OPTION } from '../components/Modals/edit/EditItem';
 import { blueGrey } from '@mui/material/colors';
 import useNotification from '@/hooks/useNotification';
 import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';
@@ -37,6 +33,7 @@ import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateCurrentTime } from '@/app/utils/time';
 import AddCategory from '../components/Modals/add/AddCategory';
+import ItemsGrid from './ItemsGrid';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -180,39 +177,6 @@ export default function ItemPage() {
     }
   };
 
-  const handleDeleteItem = async (targetItem: IItem) => {
-    try {
-      const response = await axios.delete(API_URL.ITEM, {
-        data: { removedId: targetItem.id },
-      });
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      // Optimistic UI Update
-      handleDeleteItemUI(targetItem);
-
-      // Update Real Data
-      mutateItems();
-
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      showNotification('error', error.response.data.error);
-    }
-  };
-
-  const handleDeleteItemUI = (targetItem: IItem) => {
-    const newItems = items.filter((item: IItem) => {
-      return item.id !== targetItem.id;
-    });
-
-    setItems(newItems);
-    setBaseItems(newItems);
-  };
-
   const handleUpdateCategoryName = async (newName: string) => {
     if (newName.trim() === '') {
       showNotification('error', 'Item Name Must Not Be Blank');
@@ -240,39 +204,12 @@ export default function ItemPage() {
     }
   };
 
-  const handleUpdateItem = async (
-    updatedItem: IItem,
-    updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
-    updatedFields: string[] = [],
-  ) => {
-    try {
-      const response = await axios.put(API_URL.ITEM, {
-        updatedItem,
-        updateOption,
-        updatedFields,
-      });
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      // Update Real Data
-      mutateItems();
-
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      showNotification('error', error.response.data.error);
-    }
-  };
-
   const saveItemArrangement = async () => {
     try {
       setIsSavingArrangement(true);
       const newListWithId = items.map((item: IItem, index: number) => {
-        const newOrderId = baseItems[index].id;
-        return { ...item, id: newOrderId };
+        const newPlacementId = baseItems[index].id;
+        return { ...item, id: newPlacementId };
       });
 
       const updatedIdList = newListWithId.map((item: IItem) => item.id);
@@ -433,35 +370,8 @@ export default function ItemPage() {
           {isFetching ? (
             <SplashScreen />
           ) : (
-            <Reorder.Group
-              values={items}
-              onReorder={setItems}
-              style={{ padding: 0 }}
-            >
-              {items.map((item: IItem) => {
-                return (
-                  <Reorder.Item
-                    key={item.id}
-                    value={item}
-                    style={{ listStyle: 'none' }}
-                    transition={{
-                      type: 'spring',
-                      damping: 10,
-                      stiffness: 300,
-                      mass: 0.5,
-                    }}
-                  >
-                    <Item
-                      item={item}
-                      handleUpdateItem={handleUpdateItem}
-                      handleDeleteItem={handleDeleteItem}
-                      showNotification={showNotification}
-                    />
-                    <Divider />
-                  </Reorder.Item>
-                );
-              })}
-            </Reorder.Group>
+            <ItemsGrid items={items} showNotification={showNotification} category={currentCategory} />
+
           )}
         </ShadowSection>
       </CategorySidebar>
