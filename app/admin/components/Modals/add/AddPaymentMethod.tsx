@@ -117,7 +117,7 @@ export default function AddPaymentMethod({
             <Select
               value={newPaymentMethod.type}
               onChange={(e) => onChangePaymentMethod('type', e.target.value)}
-              size="small"              
+              size="small"
             >
               {methodTypes.map((method: PAYMENT_METHOD_TYPE) => (
                 <MenuItem key={method} value={method}>

@@ -79,8 +79,7 @@ const EditItemType = ({
     console.log({ category, type });
     if (category.itemType_category && type?.id) {
       const itemTypeCategory = category?.itemType_category.find(
-        (typeCategory) =>
-          typeCategory.itemTypeId === type.id,
+        (typeCategory) => typeCategory.itemTypeId === type.id,
       );
 
       setPriority(itemTypeCategory?.priority || 0);
@@ -163,28 +162,29 @@ const EditItemType = ({
 
           <Divider sx={{ my: 2 }} />
 
+          {type?.name !== 'Others' && (
+            <>
+              <Typography
+                variant="h6"
+                fontWeight="regular"
+                sx={{ color: grey[800] }}
+              >
+                Priority
+              </Typography>
+              <TextField
+                variant="outlined"
+                fullWidth
+                // label="Priority"
+                type="number"
+                sx={{ mt: 1 }}
+                size="small"
+                value={priority}
+                onChange={(e) => setPriority(Number(e.target.value))}
+              />
 
-          {type?.name !== 'Others' && <>
-            <Typography
-              variant="h6"
-              fontWeight="regular"
-              sx={{ color: grey[800] }}
-            >
-              Priority
-            </Typography>
-            <TextField
-              variant="outlined"
-              fullWidth
-              // label="Priority"
-              type="number"
-              sx={{ mt: 1 }}
-              size="small"
-              value={priority}
-              onChange={(e) => setPriority(Number(e.target.value))}
-            />
-
-            <Divider sx={{ my: 2 }}>Items Arrangment</Divider>
-          </>}
+              <Divider sx={{ my: 2 }}>Items Arrangment</Divider>
+            </>
+          )}
 
           <DndContext onDragEnd={onDragEnd} collisionDetection={closestCenter}>
             <Grid

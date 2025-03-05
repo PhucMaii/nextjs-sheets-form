@@ -191,7 +191,6 @@
 
 //     expect(response.ok).toBeTruthy();
 
-
 //     // Delete transaction
 //     await prisma.expense.delete({
 //       where: {

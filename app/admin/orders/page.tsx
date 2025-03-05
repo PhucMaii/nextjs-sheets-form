@@ -381,7 +381,7 @@ export default function Orders() {
       order: Order,
       updatedItem: OrderedItems,
       isConvertToCustom: boolean = false,
-      itemId = null
+      itemId = null,
     ) => {
       try {
         const response = await updateOrderedItems(

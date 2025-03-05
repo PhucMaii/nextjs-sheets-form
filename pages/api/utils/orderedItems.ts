@@ -1,8 +1,8 @@
-import { Orders, PrismaClient } from "@prisma/client";
-import { checkOrderValidToAffectInventory } from "./order";
-import { getTodayDate, sortByDeliveryDate } from "./date";
-import { checkAndUpdateUnits } from "../admin/inventory/expenses/POST";
-import { getAllUnitsByInventoryItemId } from "./units";
+import { Orders, PrismaClient } from '@prisma/client';
+import { checkOrderValidToAffectInventory } from './order';
+import { getTodayDate, sortByDeliveryDate } from './date';
+import { checkAndUpdateUnits } from '../admin/inventory/expenses/POST';
+import { getAllUnitsByInventoryItemId } from './units';
 
 export const createOrderedItems = async (
   order: Orders,

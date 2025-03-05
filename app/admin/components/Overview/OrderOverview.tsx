@@ -192,7 +192,13 @@ export default function OrderOverview({
             borderRadius: 5,
           }}
         >
-          <Typography variant="h5" fontWeight="regular" sx={{brightness: 0.5}}>Total Gross</Typography>
+          <Typography
+            variant="h5"
+            fontWeight="regular"
+            sx={{ brightness: 0.5 }}
+          >
+            Total Gross
+          </Typography>
           <Box
             display="flex"
             justifyContent="space-between"
@@ -256,7 +262,9 @@ export default function OrderOverview({
             borderRadius: 5,
           }}
         >
-          <Typography variant="h5" fontWeight="regular">Total Profit</Typography>
+          <Typography variant="h5" fontWeight="regular">
+            Total Profit
+          </Typography>
           <Box
             display="flex"
             justifyContent="space-between"
@@ -317,7 +325,9 @@ export default function OrderOverview({
             borderRadius: 5,
           }}
         >
-          <Typography variant="h5" fontWeight="regular">Current Bills</Typography>
+          <Typography variant="h5" fontWeight="regular">
+            Current Bills
+          </Typography>
           <Box
             display="flex"
             justifyContent="space-between"

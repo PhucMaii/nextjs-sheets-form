@@ -399,7 +399,7 @@ export const createOrderedItems = async (
     }
 
     let unitId = item.inventoryUnitId;
-    
+
     // If item is custom amount and is assigned to a new unit
     if (item.inventoryUnitId < 1) {
       const dbUnits = await prisma.inventoryUnit.findMany({

@@ -370,8 +370,11 @@ export default function ItemPage() {
           {isFetching ? (
             <SplashScreen />
           ) : (
-            <ItemsGrid items={items} showNotification={showNotification} category={currentCategory} />
-
+            <ItemsGrid
+              items={items}
+              showNotification={showNotification}
+              category={currentCategory}
+            />
           )}
         </ShadowSection>
       </CategorySidebar>

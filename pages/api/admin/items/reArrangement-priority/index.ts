@@ -33,7 +33,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     console.log({
       priority,
       typeId,
-      categoryId,})
+      categoryId,
+    });
     if (priority && typeId && categoryId) {
       // Find if the itemType_category exist
       const existingItemTypeCategory =
