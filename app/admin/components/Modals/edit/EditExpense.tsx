@@ -194,6 +194,7 @@ export default function EditExpense({
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Payment Method</Typography>
               <Select
+                size="small"
                 value={updatedExpense?.paymentMethodId}
                 onChange={(e: any) =>
                   onChangeExpense('paymentMethodId', +e.target.value)
@@ -218,6 +219,7 @@ export default function EditExpense({
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography variant="h6">Spent By</Typography>
               <Select
+                size="small"
                 value={updatedExpense?.spentBy}
                 onChange={(e) => onChangeExpense('spentBy', e.target.value)}
               >

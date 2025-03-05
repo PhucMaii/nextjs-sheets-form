@@ -48,7 +48,7 @@ interface PropTypes {
   noMargin?: boolean;
 }
 
-const drawerWidth = 250;
+const drawerWidth = 210;
 export default function Sidebar({ children, noMargin }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);

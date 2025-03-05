@@ -29,6 +29,7 @@ interface IProps {
     order: Order,
     updatedItem: OrderedItems,
     isConvertToCustom?: boolean,
+    itemId?: number,
   ) => Promise<void>;
   abilityToEdit?: boolean;
   showNotification?: (type: AlertColor, message: string) => void;
@@ -104,7 +105,7 @@ export default function OrderDetailsTable({
         }
         showTargetObj={deleteModalProps.targetObj?.name}
       />
-      {updatedItem.id ? (
+      {updatedItem.id !== undefined ? (
         <EditItemModal
           open={isOpenEditModal}
           onClose={() => {
@@ -167,10 +168,10 @@ export default function OrderDetailsTable({
                     flexDirection={smDown ? 'column' : 'row'}
                     gap={1}
                   >
-                    {item?.isShowDiscount &&
+                    {item.quantity > 0 && item?.isShowDiscount &&
                       item?.prevPrice &&
                       (item.prevPrice * item.quantity).toFixed(2) !==
-                        item.totalPrice.toFixed(2) && (
+                        item?.totalPrice?.toFixed(2) && (
                         <Typography
                           sx={{ textDecoration: 'line-through' }}
                           color="error"
@@ -179,7 +180,7 @@ export default function OrderDetailsTable({
                         </Typography>
                       )}
                     <Typography>
-                      ${item?.totalPrice?.toFixed(2) || 0}
+                      ${item?.totalPrice?.toFixed(2) || (item?.price * item.quantity)?.toFixed(2) || 0}
                     </Typography>
                   </Box>
                 </TableCell>

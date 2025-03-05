@@ -19,6 +19,7 @@ import { API_URL } from '@/app/utils/enum';
 import BatchQuantityModal from '../Inventory/BatchQuantityModal';
 import { PhoneIcon } from 'lucide-react';
 import ViewItemMissing from '../Modals/ViewItemMissing';
+import { grey } from '@mui/material/colors';
 
 interface IProps {
   inventoryItems: IInventoryItem[];
@@ -29,6 +30,10 @@ export default function InventoryTable({
   inventoryItems,
   showNotification,
 }: IProps) {
+  const [editItemProps, setEditItemProps] = useState<any>({
+    open: false,
+    inventoryItem: null,
+  });
   const [viewItemMissingProps, setViewItemMissingProps] = useState<any>({
     open: false,
     inventoryItem: inventoryItems[0],
@@ -55,6 +60,19 @@ export default function InventoryTable({
 
   return (
     <>
+      {editItemProps.inventoryItem && (
+        <EditInventory
+          inventoryItem={editItemProps.inventoryItem}
+          open={editItemProps.open}
+          onClose={() =>
+            setEditItemProps(() => ({
+              inventoryItem: null,
+              open: false,
+            }))
+          }
+          showNotification={showNotification}
+        />
+      )}
       {viewItemMissingProps && (
         <ViewItemMissing
           open={viewItemMissingProps.open}
@@ -88,7 +106,17 @@ export default function InventoryTable({
               }
 
               return (
-                <TableRow key={index}>
+                <TableRow
+                  key={index}
+                  sx={{ '&:hover': { backgroundColor: grey[50] } }}
+                  onClick={() =>
+                    setEditItemProps((prevState: any) => ({
+                      ...prevState,
+                      open: true,
+                      inventoryItem: item,
+                    }))
+                  }
+                >
                   <TableCell>
                     {item.quantity < 0 ? (
                       <IconButton
@@ -125,8 +153,13 @@ export default function InventoryTable({
                       })}
                     </Box>
                   </TableCell>
-                  <TableCell>
-                    <Box display="flex" gap={1} alignItems="center">
+                  <TableCell sx={{ width: 200 }}>
+                    <Box
+                      display="flex"
+                      gap={1}
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
                       <Typography>
                         {item?.quantity} {unit?.unit}
                       </Typography>
@@ -145,10 +178,6 @@ export default function InventoryTable({
                         includedButton
                         targetObj={item}
                         handleDelete={handleDelete}
-                      />
-                      <EditInventory
-                        inventoryItem={item}
-                        showNotification={showNotification}
                       />
                     </Box>
                   </TableCell>

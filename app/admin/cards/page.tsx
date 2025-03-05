@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
+  Divider,
   Grid,
   IconButton,
   ListSubheader,
@@ -176,6 +177,25 @@ export default function CardManagement() {
       );
     }
 
+    if (
+      selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED ||
+      selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED
+    ) {
+      return {
+        id: -1,
+        name:
+          selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED
+            ? 'Custom Purchased'
+            : 'Stock Purchased',
+        type: PAYMENT_METHOD_TYPE.CASH,
+        transactions: [],
+        balance: 0,
+        createdAt: '',
+        createdBy: '',
+        updatedBy: null,
+        updatedAt: null,
+      };
+    }
     const selectedVendor = vendors?.data.find(
       (vendor: IVendor) => vendor.id === selectedViewObj.id,
     );
@@ -323,6 +343,8 @@ export default function CardManagement() {
                 disabled={
                   selectedViewObj.id === -1 ||
                   selectedViewObj.type === VIEW_TYPE.VENDOR ||
+                  selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED ||
+                  selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED ||
                   selectedViewObj.type === VIEW_TYPE.ALL
                 }
               >
@@ -340,6 +362,7 @@ export default function CardManagement() {
             <Select
               value={JSON.stringify(selectedViewObj)}
               onChange={(e) => setSelectedViewObj(JSON.parse(e.target.value))}
+              size="small"
             >
               <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
                 -- Choose Payment Method --
@@ -360,6 +383,25 @@ export default function CardManagement() {
                     {method.name}
                   </MenuItem>
                 ))}
+              <Divider />
+              <ListSubheader>Transaction Type</ListSubheader>
+              <MenuItem
+                value={JSON.stringify({
+                  type: VIEW_TYPE.STOCK_PURCHASED,
+                  id: 1,
+                })}
+              >
+                Stock Purchased
+              </MenuItem>
+              <MenuItem
+                value={JSON.stringify({
+                  type: VIEW_TYPE.CUSTOM_PURCHASED,
+                  id: 1,
+                })}
+              >
+                Custom Purchased
+              </MenuItem>
+              <Divider />
               <ListSubheader>Vendors</ListSubheader>
               {vendors &&
                 vendors.data.map((vendor: IVendor) => (

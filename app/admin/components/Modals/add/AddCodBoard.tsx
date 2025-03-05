@@ -122,6 +122,7 @@ export default function AddCodBoard({
                 onChangeNewBoard('driverId', +e.target.value)
               }
               fullWidth
+              size="small"
             >
               <MenuItem value={-1}>-- Choose a driver --</MenuItem>
               {drivers &&

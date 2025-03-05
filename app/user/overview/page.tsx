@@ -18,6 +18,7 @@ import OrderAccordion from '../../components/OrderAccordion';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import useNotification from '@/hooks/useNotification';
+import { filterDateRangeOrders } from '@/pages/api/utils/date';
 
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
@@ -107,7 +108,14 @@ export default function MainPage() {
 
     setClient(clientOrders.data.user);
     setUserOrder({ ...clientOrders.data.user, ...orderToday });
-    setThisMonthOrders(clientOrders.data.userOrders);
+
+    const orderList = filterDateRangeOrders(
+      clientOrders.data.userOrders,
+      dateRange[0],
+      dateRange[1],
+    );
+
+    setThisMonthOrders(orderList);
   };
 
   const handleUpdateOrderUI = (updatedOrder: Order) => {

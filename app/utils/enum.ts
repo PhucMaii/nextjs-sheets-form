@@ -23,6 +23,8 @@ export enum API_URL {
 }
 
 export enum VIEW_TYPE {
+  STOCK_PURCHASED = 'stock_purchased',
+  CUSTOM_PURCHASED = 'custom_purchased',
   VENDOR = 'vendor',
   PAYMENT_METHOD = 'paymentMethod',
   ALL = 'all',

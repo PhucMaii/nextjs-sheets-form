@@ -52,7 +52,7 @@ export default function OverviewCard({
           <Box display="flex" alignItems="flex-end" gap={1}>
             <Typography
               fontWeight="bold"
-              variant="h4"
+              variant="h3"
               sx={{ color: textColor }}
             >
               {value}
@@ -62,6 +62,7 @@ export default function OverviewCard({
                 {extraTextIcon}
                 <Typography
                   variant="h6"
+                  fontWeight="regular"
                   sx={{ color: extraText.color, ...extraTextStyle }}
                 >
                   {extraText.text}
@@ -83,9 +84,8 @@ export default function OverviewCard({
           )}
           <Typography
             marginTop={helperText ? '0px' : '8px'}
-            fontWeight="bold"
             sx={{
-              color: textColor ? textColor : grey[500],
+              color: textColor ? textColor : grey[600],
               width: '90% !important',
             }}
           >

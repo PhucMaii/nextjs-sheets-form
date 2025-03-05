@@ -19,6 +19,7 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import EditStockPurchased from '../Modals/edit/EditStockPurchased';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { IExpense } from '@/app/utils/type';
+import { grey } from '@mui/material/colors';
 
 interface IProps {
   transactions: IExpense[];
@@ -164,7 +165,20 @@ const TransactionsTable = ({
                   (expense: IExpense) => expense.id === transaction.id,
                 );
                 return (
-                  <TableRow key={index}>
+                  <TableRow
+                    key={index}
+                    sx={{ '&:hover': { backgroundColor: grey[50] } }}
+                    onClick={() =>
+                      setEditProps({
+                        open: true,
+                        transaction,
+                        type:
+                          transaction?.orderedItems?.length > 0
+                            ? ExpenseType.stockPurchased
+                            : ExpenseType.other,
+                      })
+                    }
+                  >
                     {selectedExpense && (
                       <TableCell padding="checkbox">
                         <Checkbox
@@ -218,9 +232,11 @@ const TransactionsTable = ({
                           /> */}
                           <Button
                             color="error"
-                            onClick={() =>
-                              setDeleteProps({ open: true, transaction })
-                            }
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              setDeleteProps({ open: true, transaction });
+                            }}
                           >
                             Delete
                           </Button>

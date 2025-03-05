@@ -36,11 +36,8 @@ import AddOrder from '../components/Modals/add/AddOrder';
 import ErrorComponent from '../components/ErrorComponent';
 import { Virtuoso } from 'react-virtuoso';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
-import moment from 'moment';
 import { days, statusTabs } from '@/app/lib/constant';
 import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import SearchModal from '../components/Modals/SearchModal';
 import useDebounce from '@/hooks/useDebounce';
 import OrderOverview from '../components/Overview/OrderOverview';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -385,6 +382,7 @@ export default function Orders() {
       order: Order,
       updatedItem: OrderedItems,
       isConvertToCustom: boolean = false,
+      itemId = null
     ) => {
       try {
         const response = await updateOrderedItems(
@@ -393,6 +391,7 @@ export default function Orders() {
           updatedItem,
           showNotification,
           isConvertToCustom,
+          itemId,
         );
 
         // Optimistic update

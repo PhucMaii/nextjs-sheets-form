@@ -116,6 +116,7 @@ export default function PasteItemsModal({
             <Select
               value={selectedCategoryId}
               onChange={(e) => setSelectedCategoryId(+e.target.value)}
+              size="small"
             >
               <MenuItem value={-1}>-- Select Category --</MenuItem>
               {categories &&

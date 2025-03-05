@@ -130,6 +130,7 @@ export default function OtherExpense({
             onChange={(e) =>
               onChangeNewExpense('paymentMethodId', +e.target.value)
             }
+            size="small"
           >
             <MenuItem value={4} disabled>
               {paymentMethods?.data[0]?.name}
@@ -141,6 +142,7 @@ export default function OtherExpense({
             onChange={(e) =>
               onChangeNewExpense('paymentMethodId', +e.target.value)
             }
+            size="small"
           >
             <MenuItem value={-1} disabled>
               -- Choose payment method --
@@ -164,6 +166,7 @@ export default function OtherExpense({
         <Select
           value={newExpense.spentBy}
           onChange={(e) => onChangeNewExpense('spentBy', e.target.value)}
+          size="small"
         >
           <MenuItem value="-- Choose who spent --" disabled>
             -- Choose who spent --

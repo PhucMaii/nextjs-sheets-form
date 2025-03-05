@@ -727,7 +727,7 @@ export default function ReportPage() {
               <OverviewCard
                 icon={<PriceChange sx={{ fontSize: 50 }} color="primary" />}
                 text="Profit"
-                value={`$${totalBill.profit.toFixed(2)}`}
+                value={`$${totalBill.profit > 0 ? totalBill.profit.toFixed(2) : 0}`}
               />
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
