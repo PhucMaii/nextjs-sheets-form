@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
-  // Button,
   Grid,
-  // Menu,
   MenuItem,
   Select,
   TextField,
@@ -99,15 +97,6 @@ export default function Transactions() {
       setAdminsAndDrivers(adminsAndDriversRes?.data);
     }
   }, [adminsAndDriversRes]);
-
-  // useEffect(() => {
-  //   fetchAdminsAndDrivers();
-  // }, []);
-
-  // const fetchAdminsAndDrivers = async () => {
-  //   const users: any = await getAdminsAndDrivers(showNotification);
-  //   setAdminsAndDrivers(users);
-  // };
 
   const initializeTransactions = () => {
     setBaseTransactions(transactions?.data || []);
