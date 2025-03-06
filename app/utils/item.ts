@@ -1,4 +1,4 @@
-import { IItem } from './type';
+import { IInventoryItem, IItem, IItemType } from './type';
 
 export const convertItemArrayToMap = (items: IItem[]) => {
   if (items.length === 0) {
@@ -42,5 +42,42 @@ export const convertItemArrayToMap = (items: IItem[]) => {
       sortedKeysByPriority.length === 0
         ? Object.keys(typesObj)
         : sortedKeysByPriority,
+  };
+};
+
+export const convertInventoryItemArrayToMap = (items: IInventoryItem[]) => {
+  if (items.length === 0) {
+    return {};
+  }
+
+  const types: IItemType[] = [];
+
+  const typesObj = items.reduce((acc: any, item: any) => {
+    const type = item?.type;
+    
+    if (!type) {
+      acc['Others'] = [...(acc['Others'] || []), item];
+      return acc;
+    }
+    
+    const typeKey = type?.name;
+    
+    if (!acc[typeKey]) {
+      types.push(type);
+      acc[typeKey] = [item];
+    } else {
+      acc[typeKey] = [...acc[typeKey], item];
+    }
+    return acc;
+  }, {});
+
+  const sortedKeysByPriority = Object.keys(typesObj).sort((a: any, b: any) => {
+    return (typesObj[a][0]?.type?.priority || 0) - (typesObj[b][0]?.type?.priority || 0);
+  });
+
+  return {
+    typesObj,
+    sortedKeysByPriority,
+    types
   };
 };

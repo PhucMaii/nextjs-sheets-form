@@ -283,6 +283,7 @@ model InventoryItem {
   hasGST    Boolean?
   typeId    Int?
   color     String?
+  indexPos  Int?
   createdAt String
   createdBy String
 
@@ -321,6 +322,7 @@ model ItemType {
   id        Int     @id @default(autoincrement())
   name      String  @unique
   icon      String?
+  priority  Int?
   createdAt String?
   createdBy String?
 

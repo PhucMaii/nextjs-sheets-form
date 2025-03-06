@@ -128,6 +128,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         type: true,
       },
+      orderBy: {
+        indexPos: 'asc',
+      }
     });
 
     const formattedInventory =
@@ -147,8 +150,23 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
+    const types = await prisma.itemType.findMany({
+      include: {
+        inventoryItems: {
+          include: {
+            vendorItem: {
+              include: {
+                vendor: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
     return res.status(200).json({
       data: sortedInventoryItem,
+      types,
       message: 'Fetch Inventory Successfully',
     });
   } catch (error: any) {

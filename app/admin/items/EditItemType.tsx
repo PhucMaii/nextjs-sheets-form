@@ -76,7 +76,6 @@ const EditItemType = ({
   }, [items]);
 
   useEffect(() => {
-    console.log({ category, type });
     if (category.itemType_category && type?.id) {
       const itemTypeCategory = category?.itemType_category.find(
         (typeCategory) => typeCategory.itemTypeId === type.id,
