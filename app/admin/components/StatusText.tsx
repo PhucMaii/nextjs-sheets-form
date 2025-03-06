@@ -97,10 +97,10 @@ export default function StatusText({
       gap={1}
       sx={{
         ...textColor,
-        borderRadius: 2,
+        borderRadius: 1,
         textAlign: 'center',
-        py: '5px',
-        px: '10px',
+        py: '3px',
+        px: '8px',
         width: 'fit-content',
       }}
     >
