@@ -68,6 +68,7 @@ const ProductPage = () => {
       }
       const newDisplayItems = onSearchItems(displayItems || [], queryParams, [
         'inventoryItem.name',
+        'inventoryItem.type.name'
       ]);
       setDisplayItems(newDisplayItems);
     } else {
@@ -200,16 +201,14 @@ const ProductPage = () => {
           onClick={() => setSelectedType({ id: 0, name: 'All' })}
           variant="contained"
           sx={{
-            // px: 2,
-            // py: 1,
             borderRadius: 2,
             minWidth: 150,
             width: 'fit-content',
             backgroundColor: 'white',
-            color: selectedType?.id === 0 ? green[800] : 'black',
+            color: selectedType?.id === 0 ? green[900] : 'black',
             boxShadow: 'none',
             '&:hover': {
-              color: green[500],
+              color: green[900],
               backgroundColor: 'white',
               boxShadow: 'none',
             },
@@ -228,7 +227,7 @@ const ProductPage = () => {
               gap={1}
             >
               <LucideIcons.ShoppingBasketIcon />
-              <Typography>All</Typography>
+              <Typography fontWeight="medium">All</Typography>
             </Box>
             <div
               style={{
@@ -255,8 +254,6 @@ const ProductPage = () => {
                 borderRadius: 2,
                 width: 'fit-content',
                 backgroundColor: 'white',
-                textDecoration:
-                  selectedType?.id === type.id ? 'underline' : 'none',
                 color: selectedType?.id === type.id ? green[800] : 'black',
                 boxShadow: 'none',
                 minWidth: 150,
@@ -280,7 +277,7 @@ const ProductPage = () => {
                   gap={1}
                 >
                   <IconComponent />
-                  <Typography>{type.name}</Typography>
+                  <Typography fontWeight="medium">{type.name}</Typography>
                 </Box>
                 <div
                   style={{
@@ -306,17 +303,10 @@ const ProductPage = () => {
         flexWrap="wrap"
         alignItems="center"
         width="100%"
-        // justifyContent="space-between"
         mt={2}
         spacing={1}
         sx={{ px: 2 }}
       >
-        {/* <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="flex-end"
-          gap={1}
-        > */}
         <Grid item xs={12} md={10}>
           <TextField
             value={searchKeywords}

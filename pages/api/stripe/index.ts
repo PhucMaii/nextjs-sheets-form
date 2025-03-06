@@ -5,6 +5,9 @@ import { createOrder } from '../admin/orders/POST';
 import { convertCartItemsToOrderItems } from '../public/place-order';
 import { getTodayDate } from '../utils/date';
 import { withGuestSessionGuard } from '../utils/withGuestSessionGuard';
+import { calculateShippingFee } from '@/app/utils/shipping';
+import { generateLatLng } from '../admin/clients/POST';
+import { verifyDeliveryAddress } from '../utils/address';
 
 export type CheckoutClientData = {
   guestSessionId: string;
@@ -53,8 +56,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    if (!cart) {
+    if (!cart || !cart.items) {
       return res.status(404).json({ error: 'Cart not found' });
+    }
+
+    if (cart.items.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
     }
 
     // If cart already had user -> place an order for user and send them to order successful page
@@ -76,7 +83,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    console.log({ cart, items: cart.items, clientData }, 'cart');
+    const addressLatAndLng = await generateLatLng(clientData.deliveryAddress);
+    const isAddressValid = verifyDeliveryAddress(
+      addressLatAndLng.latitude,
+      addressLatAndLng.longitude,
+    );
+    if (!isAddressValid) {
+      return res.status(404).json({
+        error: 'Delivery address is not valid',
+      });
+    }
+
+    // const distanceFromFactory = calculateDistance(
+    //   homeLat,
+    //   homeLng,
+    //   addressLatAndLng.latitude,
+    //   addressLatAndLng.longitude,
+    // );
+
+    const cartItems = convertCartItemsToOrderItems(cart.items);
+    const totalProfit = calculateCartProfit(cartItems);
+
+    const shippingFee = calculateShippingFee(
+      isAddressValid.distance,
+      totalProfit
+    );
+    console.log(shippingFee, 'shipping fee');
 
     const stripeSession = await stripe.checkout.sessions.create({
       success_url: `${process.env.NEXTAUTH_URL}/payment/successful`,
@@ -93,24 +125,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           clientData: JSON.stringify(clientData),
         },
       },
-      line_items: cart?.items.map((item) => ({
-        price_data: {
-          currency: 'cad',
-          product_data: {
-            name:
-              item.itemPreference?.name ||
-              item.itemPreference.inventoryItem.name,
-            // description: `Quantity: ${item.quantity}`,
+      line_items: [
+        ...cart.items.map((item) => ({
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name:
+                item.itemPreference?.name ||
+                item.itemPreference.inventoryItem.name,
+            },
+            unit_amount: Number(item.itemPreference.price.toFixed(2)) * 100,
           },
-          unit_amount: item.itemPreference.price * 1000,
+          quantity: item.quantity,
+        })),
+        // Add shipping fee as an additional line item
+        {
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: 'Shipping Fee',
+            },
+            unit_amount: Number(shippingFee.toFixed(2)) * 100,
+          },
+          quantity: 1,
         },
-        quantity: item.quantity,
-      })),
+      ],
       metadata: {
         cartId: String(cartId),
         deliveryDate: String(deliveryDate),
         guestSessionId: String(cart?.guestSessionId) || '',
-        clientData: JSON.stringify(clientData),
+        clientData: JSON.stringify({...clientData, deliveryAddress: addressLatAndLng.fullName}),
       },
     });
 
@@ -120,8 +164,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
-    return res.status(500).json({ error: 'Internal Server Error: ' + error });
+    return res.status(500).json({ error: 'Something went wrong' + error });
   }
 };
 
 export default withGuestSessionGuard(handler);
+
+
+const calculateCartProfit = (items: any[]) => {
+  // const orderItems = convertCartItemsToOrderItems(items);
+  // console.log({orderItems, items}, 'order items');
+
+  let profit = 0;
+  for (const item of items) {
+    profit += (item.price - item.inventoryUnit.unitPrice) * item.quantity;
+  }
+
+  console.log(profit)
+
+  return profit;
+}

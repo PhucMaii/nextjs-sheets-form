@@ -12,7 +12,11 @@ export default async function handler(req: any, res: any) {
 
     const products = await prisma.itemPreference.findMany({
       include: {
-        inventoryItem: true,
+        inventoryItem: {
+          include: {
+            type: true,
+          }
+        },
       },
       orderBy: {
         typeId: 'asc',

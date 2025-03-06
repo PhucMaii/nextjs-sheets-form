@@ -23,20 +23,20 @@ export default function AboutPage() {
       >
         <Box display="flex" flexDirection="column" gap={1}>
           <Typography
-            sx={{ color: landingPagePrimaryColor }}
+            // sx={{ color: landingPagePrimaryColor }}
             textAlign="center"
             variant="h3"
           >
-            Supreme Sprouts LTD
+            Supreme Sprouts LTD.
           </Typography>
           <Typography
-            sx={{ color: landingPagePrimaryColor, fontWeight: 'normal' }}
+            sx={{fontWeight: 'normal' }}
             textAlign="center"
             variant="h5"
           >
             Freshness, Quality, and Variety
           </Typography>
-          <Typography sx={{ color: grey[600], mt: 2 }} textAlign="center">
+          <Typography sx={{ mt: 2, opacity: 0.8 }} textAlign="center">
             We are serving Greater of Vancouver, Burnaby, Richmond, Coquitiam, Langley,
             Surrey, and surrounding areas every day of the week.
           </Typography>

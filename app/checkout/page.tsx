@@ -20,6 +20,7 @@ import useCart from '@/hooks/useCart';
 // import useNotification from '@/hooks/useNotification';
 import useDatePicker from '@/hooks/useDatePicker';
 import CheckoutButton from '../admin/components/CheckoutButton';
+import useNotification from '@/hooks/useNotification';
 
 export default function CheckoutPage() {
   const [address, setAddress] = useState<any>({
@@ -49,7 +50,7 @@ export default function CheckoutPage() {
   }: any = useCart();
 
   const { renderDatePicker, deliveryDate } = useDatePicker();
-  // const { showNotification, NotificationComp } = useNotification();
+  const { showNotification, NotificationComp } = useNotification();
 
   const onChangeField = (field: string, value: string | number) => {
     setUserInfo((prevState: any) => {
@@ -255,16 +256,6 @@ export default function CheckoutPage() {
         <Grid item xs={12}>
           <FormGroup>
             <InputLabel htmlFor="name">Delivery Date</InputLabel>
-            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  disablePast
-                  minDate={minDate}
-                  value={dayjs(deliveryDate)}
-                  onChange={onDateChange}
-                  sx={{ width: '100%' }}
-                  shouldDisableDate={disableChristmasAndNewYear}
-                />
-              </LocalizationProvider> */}
             {renderDatePicker()}
           </FormGroup>
         </Grid>
@@ -337,7 +328,7 @@ export default function CheckoutPage() {
 
   return (
     <NavbarWrapper>
-      {/* {NotificationComp} */}
+      {NotificationComp}
       <Box sx={{ maxWidth: maxWidth, mx: 'auto', p: 2 }}>
         <Grid container spacing={2}>
           {/* Checkout info */}
@@ -369,7 +360,11 @@ export default function CheckoutPage() {
               <CheckoutButton
                 style={{ width: '100%', marginTop: 6 }}
                 deliveryDate={deliveryDate}
-                clientData={{...userInfo, deliveryAddress: address.fullName}}
+                clientData={{
+                  ...userInfo,
+                  deliveryAddress: `${address?.address}, ${address?.city}, ${address.province} ${address?.postalCode}`,
+                }}
+                showNotification={showNotification}
               />
             </ShadowSection>
           </Grid>

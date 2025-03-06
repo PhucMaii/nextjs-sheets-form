@@ -160,7 +160,7 @@ export const convertCartItemsToOrderItems = (cartItems: any) => {
       ...item.itemPreference,
       quantity: item.quantity,
       name:
-        item.itemPreference?.name || item.itemPreference.inventoryItem.name,
+        item.itemPreference?.name || item?.itemPreference?.inventoryItem?.name,
       inventoryUnitId: item.inventoryUnitId,
       inventoryUnit: item.inventoryUnit,
     };

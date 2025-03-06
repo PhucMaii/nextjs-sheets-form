@@ -1,4 +1,4 @@
-import LoginPage from '@/app/auth/login/page';
+import LoginPage from '@/app/account/login/page';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

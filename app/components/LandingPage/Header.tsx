@@ -112,6 +112,7 @@ export default function Header({ sx }: IProps) {
                   color: 'white',
                 },
               }}
+              onClick={() => router.push('/about')}
             >
               Learn More
             </Button>
@@ -140,8 +141,8 @@ export default function Header({ sx }: IProps) {
                       sx={{
                         backgroundColor: landingPagePrimaryColor,
                         color: 'white',
-                        padding: '10px 16px',
-                        borderRadius: 2,
+                        padding: '',
+                        borderRadius: 1,
                         ':hover': {
                           backgroundColor: landingPageSecondaryColor,
                         },

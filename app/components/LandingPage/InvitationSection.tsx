@@ -1,5 +1,4 @@
 import {
-  landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { Box, Button, Typography } from '@mui/material';
@@ -18,13 +17,11 @@ export default function InvitationSection() {
       flexDirection="column"
       gap={4}
       p={4}
-      sx={{ backgroundColor: landingPagePrimaryColor }}
     >
       <Typography
         variant="h3"
         fontWeight="bold"
         textAlign="center"
-        sx={{ color: 'white' }}
       >
         Let&apos;s Join Today
       </Typography>
@@ -32,7 +29,7 @@ export default function InvitationSection() {
         variant="h4"
         fontWeight="normal"
         textAlign="center"
-        sx={{ color: 'white', lineHeight: 1.5 }}
+        sx={{ lineHeight: 1.5 }}
       >
         Grow Your Business with Supreme Sprouts <br />
         Partner with Vancouver&apos;s Trusted Freshness Experts!" 🌱✨
@@ -41,7 +38,7 @@ export default function InvitationSection() {
         variant="contained"
         sx={{
           width: 'fit-content',
-          fontSize: 'large',
+          // fontSize: 're',
           backgroundColor: landingPageSecondaryColor,
           px: 3,
           py: 2,

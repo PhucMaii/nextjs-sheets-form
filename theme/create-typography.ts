@@ -2,6 +2,8 @@ export const createTypography = () => {
   return {
     fontFamily:
       '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"',
+    fontWeightMedium: 600,
+    fontWeightSemiBold: 600,
     body1: {
       fontSize: '1rem',
       fontWeight: 400,
@@ -47,7 +49,7 @@ export const createTypography = () => {
       fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: '3.5rem',
-      lineHeight: 1.2,
+      lineHeight: 1.5,
       color: "inherit"
 
     },
@@ -55,35 +57,35 @@ export const createTypography = () => {
       fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: '3rem',
-      lineHeight: 1.2,
+      lineHeight: 1.5,
       color: "inherit"
     },
     h3: {
       fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: '2.25rem',
-      lineHeight: 1.2,
+      lineHeight: 1.5,
       color: "inherit"
     },
     h4: {
       fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: '2rem',
-      lineHeight: 1.2,
+      lineHeight: 1.5,
       color: "inherit"
     },
     h5: {
       fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: '1.5rem',
-      lineHeight: 1.2,
+      lineHeight: 1.5,
       color: "inherit"
     },
     h6: {
       fontFamily: "'Inter', sans-serif",
       fontWeight: 700,
       fontSize: '1.125rem',
-      lineHeight: 1.2,
+      lineHeight: 1.5,
       color: "inherit"
     },
   };

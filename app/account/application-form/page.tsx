@@ -1,10 +1,10 @@
 'use client';
 import React, { useState } from 'react';
-import NavbarWrapper from '../lib/NavbarWrapper';
+import NavbarWrapper from '../../lib/NavbarWrapper';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
-import { ShadowSection } from '../admin/reports/styled';
+import { ShadowSection } from '../../admin/reports/styled';
 import useNotification from '@/hooks/useNotification';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,9 +18,10 @@ import {
 } from '@/constant/landingPage';
 import { useRouter } from 'next/navigation';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { USER_CATEGORIZED } from '../utils/enum';
+import { USER_CATEGORIZED } from '../../utils/enum';
+import Link from 'next/link';
 
-export default function PartnerApplicationForm() {
+export default function ApplicatinForm() {
   const [clientInfo, setClientInfo] = useState<any>({
     name: '',
     email: '',
@@ -129,7 +130,7 @@ export default function PartnerApplicationForm() {
   return (
     <NavbarWrapper>
       {NotificationComp}
-      <Box sx={{ maxWidth: maxWidth, mx: 'auto' }}>
+      <Box sx={{ maxWidth: maxWidth, mx: 'auto', py: 4 }}>
         <ShadowSection
           sx={{ p: 4, maxWidth: '800px', mx: 'auto' }}
           display="flex"
@@ -257,6 +258,10 @@ export default function PartnerApplicationForm() {
             >
               Submit
             </LoadingButton>
+
+            <Link href="/account/login">
+              <Typography textAlign="center">Already have an account? Login here</Typography>
+            </Link>
           </Box>
         </ShadowSection>
       </Box>

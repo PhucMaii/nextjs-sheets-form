@@ -194,7 +194,7 @@ export default function Navbar() {
   };
 
   const proceedToApplicationForm = () => {
-    router.push('/partner-application-form');
+    router.push('/account/login');
   };
 
   if (mdDown) {

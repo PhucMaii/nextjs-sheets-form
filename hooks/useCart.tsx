@@ -74,7 +74,7 @@ export default function useCart() {
               />
               <Box>
                 <Typography fontWeight="bold">
-                  {item.itemPreference.inventoryItem.name}
+                  {item.itemPreference?.name || item.itemPreference.inventoryItem.name}
                 </Typography>
                 <Typography>x{item.quantity}</Typography>
               </Box>
