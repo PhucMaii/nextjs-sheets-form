@@ -66,6 +66,8 @@ export default function InsertOrderToCodBoard({
 
   const [orders] = SWRFetchData(fetchUrl());
 
+  console.log('orders: ', orders);
+
   const [clients] = SWRFetchData(
     `${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/clients`,
   );
@@ -77,7 +79,8 @@ export default function InsertOrderToCodBoard({
   }, [tabIndex]);
 
   const onChangeSelectOrders = (e: any, value: Order[]) => {
-    setSelectedOrders(value);
+    console.log('value: ', value);
+    setSelectedOrders(value.length ? value : []);
   };
 
   const handleInsertOrders = async () => {
@@ -197,7 +200,7 @@ export default function InsertOrderToCodBoard({
             <Box display="flex" flexDirection={'column'} gap={1}>
               <Typography variant="h6">Orders</Typography>
               <OrderSearch
-                orders={orders?.data ? orders?.data : []}
+                orders={orders?.data ? orders.data : []}
                 onChangeSelectOrders={onChangeSelectOrders}
                 selectedOrders={selectedOrders}
               />
