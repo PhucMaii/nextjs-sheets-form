@@ -24,7 +24,6 @@ export default function InventoryPage() {
   const [isOpenAddStockPurchased, setIsOpenAddStockPurchased] =
     useState<boolean>(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
-  // const [isOpenOrderPrompt, setIsOpenOrderPrompt] = useState<boolean>(false);
   const [isOpenTrackInventoryRecord, setIsOpenTrackInventoryRecord] =
     useState<boolean>(false);
   const [tabIndex, setTabIndex] = useState<number>(0);

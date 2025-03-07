@@ -10,7 +10,6 @@ import Sidebar from '../components/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import { Box, Divider, Grid, IconButton, Typography } from '@mui/material';
 import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { blue, blueGrey } from '@mui/material/colors';
@@ -34,7 +33,7 @@ export default function MainPage() {
   });
   const [userOrder, setUserOrder] = useState<Order | null>(null);
   const [thisMonthOrders, setThisMonthOrders] = useState<Order[]>([]);
-  const [totalBill, setTotalBill] = useState<number>(0);
+  // const [totalBill, setTotalBill] = useState<number>(0);
 
   const router: any = useRouter();
   const { showNotification, NotificationComp } = useNotification();
@@ -56,19 +55,19 @@ export default function MainPage() {
     }
   }, [clientOrders]);
 
-  useEffect(() => {
-    if (thisMonthOrders.length > 0) {
-      calculateTotalBill();
-    }
-  }, [thisMonthOrders]);
+  // useEffect(() => {
+  //   if (thisMonthOrders.length > 0) {
+  //     calculateTotalBill();
+  //   }
+  // }, [thisMonthOrders]);
 
-  const calculateTotalBill = () => {
-    const total = thisMonthOrders.reduce((acc: number, order: Order) => {
-      return acc + order.totalPrice;
-    }, 0);
+  // const calculateTotalBill = () => {
+  //   const total = thisMonthOrders.reduce((acc: number, order: Order) => {
+  //     return acc + order.totalPrice;
+  //   }, 0);
 
-    setTotalBill(total);
-  };
+  //   setTotalBill(total);
+  // };
 
   const handleDeleteOrder = async (orderId: number) => {
     try {
@@ -161,6 +160,14 @@ export default function MainPage() {
             This month
           </Typography>
         </Grid>
+        {/* <Grid item xs={12} md={6}>
+          <OverviewCard
+            icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
+            text="Balance Due"
+            value={totalBill?.toFixed(2)}
+            onClick={() => router.push('/history')}
+          />
+        </Grid>
         <Grid item xs={12} md={6}>
           <OverviewCard
             icon={<ReceiptLongIcon sx={{ color: blue[700], fontSize: 50 }} />}
@@ -168,13 +175,32 @@ export default function MainPage() {
             value={thisMonthOrders.length}
             onClick={() => router.push('/history')}
           />
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Grid> */}
+        <Grid item xs={12}>
           <OverviewCard
-            icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
-            text="Balance Due"
-            value={totalBill?.toFixed(2)}
-            onClick={() => router.push('/history')}
+            text="Over Due"
+            value={clientOrders?.data?.dueAmount?.toFixed(2) || 0}
+            icon={
+              <AttachMoneyIcon
+                sx={{ fontSize: 50 }}
+                fontSize="large"
+                color="primary"
+              />
+            }
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <OverviewCard
+            text="Current Month ($)"
+            value={clientOrders?.data?.currentMonthBill?.toFixed(2) || 0}
+            // icon={<MonetizationOnIcon fontSize="large" color="primary" />}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <OverviewCard
+            text="Total Orders"
+            value={thisMonthOrders.length}
+            // icon={<ReceiptLongIcon sx={{fontSize: 50}} fontSize="large" color="primary" />}
           />
         </Grid>
       </Grid>

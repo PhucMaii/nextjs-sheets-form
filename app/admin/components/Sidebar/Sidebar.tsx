@@ -49,7 +49,7 @@ interface PropTypes {
   overflow?: string;
 }
 
-const drawerWidth = 250;
+const drawerWidth = 210;
 export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
