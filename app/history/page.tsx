@@ -249,7 +249,7 @@ export default function HistoryPage() {
         <Grid item xs={12}>
           <OverviewCard
             text="Due Amount"
-            value={orderData?.data?.dueAmount || 0}
+            value={orderData?.data?.dueAmount?.toFixed(2) || 0}
             icon={
               <AttachMoneyIcon
                 sx={{ fontSize: 50 }}
@@ -262,7 +262,7 @@ export default function HistoryPage() {
         <Grid item xs={6}>
           <OverviewCard
             text="Current Month ($)"
-            value={orderData?.data?.currentMonthBill || 0}
+            value={orderData?.data?.currentMonthBill?.toFixed(2) || 0}
             // icon={<MonetizationOnIcon fontSize="large" color="primary" />}
           />
         </Grid>
