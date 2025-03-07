@@ -178,7 +178,7 @@ export default function MainPage() {
         </Grid> */}
         <Grid item xs={12}>
           <OverviewCard
-            text="Due Amount"
+            text="Over Due"
             value={clientOrders?.data?.dueAmount?.toFixed(2) || 0}
             icon={
               <AttachMoneyIcon

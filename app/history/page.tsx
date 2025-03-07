@@ -248,7 +248,7 @@ export default function HistoryPage() {
         </Grid> */}
         <Grid item xs={12}>
           <OverviewCard
-            text="Due Amount"
+            text="Over Due"
             value={orderData?.data?.dueAmount?.toFixed(2) || 0}
             icon={
               <AttachMoneyIcon
