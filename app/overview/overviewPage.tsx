@@ -161,7 +161,7 @@ export default function MainPage() {
             This month
           </Typography>
         </Grid>
-        <Grid item xs={12} md={6}>
+        {/* <Grid item xs={12} md={6}>
           <OverviewCard
             icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
             text="Balance Due"
@@ -175,6 +175,33 @@ export default function MainPage() {
             text="Total Orders"
             value={thisMonthOrders.length}
             onClick={() => router.push('/history')}
+          />
+        </Grid> */}
+        <Grid item xs={12}>
+          <OverviewCard
+            text="Due Amount"
+            value={clientOrders?.data?.dueAmount || 0}
+            icon={
+              <AttachMoneyIcon
+                sx={{ fontSize: 50 }}
+                fontSize="large"
+                color="primary"
+              />
+            }
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <OverviewCard
+            text="Current Month ($)"
+            value={clientOrders?.data?.currentMonthBill || 0}
+            // icon={<MonetizationOnIcon fontSize="large" color="primary" />}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <OverviewCard
+            text="Total Orders"
+            value={thisMonthOrders.length}
+            // icon={<ReceiptLongIcon sx={{fontSize: 50}} fontSize="large" color="primary" />}
           />
         </Grid>
       </Grid>

@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { generateListOfDateString } from '@/app/utils/time';
+import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 import { normalizeDate } from '../utils/date';
 
 interface IQuery {
@@ -54,8 +54,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedEndDate,
     );
 
-    console.log({dateList, formattedStartDate, formattedEndDate, startDate, endDate});
-
     const userOrders: any = await prisma.orders.findMany({
       where: {
         userId: existingUser.id,
@@ -77,30 +75,64 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
+        user: true
       },
       orderBy: {
         id: 'desc',
       },
     });
 
-    const newOrders = userOrders.map((order: any) => {
-      const items = order.items.map((item: any) => {
-        const totalPrice = item.quantity * item.price;
-        return { ...item, totalPrice };
-      });
+    const newOrders = formatReturnOrders(userOrders);
+    const totalAmount = userOrders.reduce((acc: number, order: Orders) => {
+      return acc + order.totalPrice;
+    }, 0)
 
-      return {
-        ...order,
-        items,
-        ...existingUser,
-        category: existingUser.category,
-        id: order.id,
-      };
+
+    // Get debt data
+    const monthRange = generateMonthRange();
+    const currentMonthListOfDateString = generateListOfDateString(
+      monthRange[0],
+      monthRange[1],
+    );
+
+    console.log(currentMonthListOfDateString, 'currentMonthListOfDateString');
+
+    const incompletedOrders: any = await prisma.orders.findMany({
+      where: {
+        userId: existingUser.id,
+        status: {
+          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+        },
+        deliveryDate: {
+          notIn: currentMonthListOfDateString,
+        },
+      },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          },
+        },
+        user: true
+      },
+      orderBy: {
+        id: 'desc',
+      },
     });
+
+    const dueAmount = incompletedOrders.reduce((acc: number, order: Orders) => {
+      return acc + order.totalPrice;
+    }, 0);
+
+    const dueOrders = formatReturnOrders(incompletedOrders);
 
     return res.status(200).json({
       data: {
         user: existingUser,
+        currentMonthBill: totalAmount,
+        dueAmount,
+        dueOrders,
         userOrders: newOrders,
       },
       message: 'Fetch User Orders Successfully',
@@ -111,4 +143,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       error: 'Internal Server Error: ' + error,
     });
   }
+}
+
+const formatReturnOrders = (orders: any) => {
+  const newOrders = orders.map((order: any) => {
+    const items = order.items.map((item: any) => {
+      const totalPrice = item.quantity * item.price;
+      return { ...item, totalPrice };
+    });
+
+    return {
+      ...order,
+      items,
+      ...order.user,
+      id: order.id,
+    };
+  });
+
+  return newOrders;
 }
