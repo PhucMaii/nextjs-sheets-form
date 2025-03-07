@@ -335,5 +335,5 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
 };
 
 export default memo(EditItem, (prev, next) => {
-  return prev.targetItem === next.targetItem;
+  return (prev.targetItem === next.targetItem && prev.open === next.open);
 });

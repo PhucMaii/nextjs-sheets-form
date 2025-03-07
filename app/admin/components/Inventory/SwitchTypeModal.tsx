@@ -69,7 +69,7 @@ export default function SwitchTypeModal({
     <Modal open={open} onClose={onClose}>
       <BoxModal>
         <ModalHead
-          heading="Switch Type"
+          heading={item?.name}
           buttonLabel="Save"
           onClose={onClose}
           onClick={handleSave}

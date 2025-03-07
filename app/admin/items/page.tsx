@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { ICategory, IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
@@ -11,6 +11,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import {
   Box,
   Button,
+  Divider,
   Grid,
   IconButton,
   TextField,
@@ -23,7 +24,8 @@ import axios from 'axios';
 import AddItem from '../components/Modals/add/AddItem';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import EditCategory from '../components/Modals/edit/EditCategory';
-import { LoadingButton } from '@mui/lab';
+import Item from '../components/Reorder/Item';
+import { UPDATE_OPTION } from '../components/Modals/edit/EditItem';
 import { blueGrey } from '@mui/material/colors';
 import useNotification from '@/hooks/useNotification';
 import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';
@@ -33,14 +35,13 @@ import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateCurrentTime } from '@/app/utils/time';
 import AddCategory from '../components/Modals/add/AddCategory';
-import ItemsGrid from './ItemsGrid';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [items, setItems] = useState<IItem[]>([]);
-  const [isSavingArrangement, setIsSavingArrangement] =
-    useState<boolean>(false);
+  // const [isSavingArrangement, setIsSavingArrangement] =
+  //   useState<boolean>(false);
   const [isOpenAddCategory, setIsOpenAddCategory] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
@@ -177,6 +178,39 @@ export default function ItemPage() {
     }
   };
 
+  const handleDeleteItem = async (targetItem: IItem) => {
+    try {
+      const response = await axios.delete(API_URL.ITEM, {
+        data: { removedId: targetItem.id },
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      // Optimistic UI Update
+      handleDeleteItemUI(targetItem);
+
+      // Update Real Data
+      mutateItems();
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  };
+
+  const handleDeleteItemUI = (targetItem: IItem) => {
+    const newItems = items.filter((item: IItem) => {
+      return item.id !== targetItem.id;
+    });
+
+    setItems(newItems);
+    setBaseItems(newItems);
+  };
+
   const handleUpdateCategoryName = async (newName: string) => {
     if (newName.trim() === '') {
       showNotification('error', 'Item Name Must Not Be Blank');
@@ -204,42 +238,69 @@ export default function ItemPage() {
     }
   };
 
-  const saveItemArrangement = async () => {
+  const handleUpdateItem = async (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
+    updatedFields: string[] = [],
+  ) => {
     try {
-      setIsSavingArrangement(true);
-      const newListWithId = items.map((item: IItem, index: number) => {
-        const newPlacementId = baseItems[index].id;
-        return { ...item, id: newPlacementId };
-      });
-
-      const updatedIdList = newListWithId.map((item: IItem) => item.id);
-
-      const response = await axios.put(`${API_URL.ITEM}/reArrangement`, {
-        removedItemIdList: updatedIdList,
-        updatedItemList: newListWithId,
+      const response = await axios.put(API_URL.ITEM, {
+        updatedItem,
+        updateOption,
+        updatedFields,
       });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
-
-        setIsSavingArrangement(false);
-
         return;
       }
 
+      // Update Real Data
       mutateItems();
 
-      setIsSavingArrangement(false);
       showNotification('success', response.data.message);
     } catch (error: any) {
-      console.log('There was an error in rearrangement: ', error);
-      showNotification(
-        'error',
-        'There was an error in rearrangement: ' + error,
-      );
-      setIsSavingArrangement(false);
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
     }
   };
+
+  // const saveItemArrangement = async () => {
+  //   try {
+  //     setIsSavingArrangement(true);
+  //     const newListWithId = items.map((item: IItem, index: number) => {
+  //       const newOrderId = baseItems[index].id;
+  //       return { ...item, id: newOrderId };
+  //     });
+
+  //     const updatedIdList = newListWithId.map((item: IItem) => item.id);
+
+  //     const response = await axios.put(`${API_URL.ITEM}/reArrangement`, {
+  //       removedItemIdList: updatedIdList,
+  //       updatedItemList: newListWithId,
+  //     });
+
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+
+  //       setIsSavingArrangement(false);
+
+  //       return;
+  //     }
+
+  //     mutateItems();
+
+  //     setIsSavingArrangement(false);
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('There was an error in rearrangement: ', error);
+  //     showNotification(
+  //       'error',
+  //       'There was an error in rearrangement: ' + error,
+  //     );
+  //     setIsSavingArrangement(false);
+  //   }
+  // };
 
   const switchCurrentCategory = (newCategory: Category) => {
     setCurrentCategory(newCategory);
@@ -355,7 +416,7 @@ export default function ItemPage() {
                 </IconButton>
               </Box>
             </Grid>
-            <Grid item xs={12} textAlign="right">
+            {/* <Grid item xs={12} textAlign="right">
               <LoadingButton
                 loading={isSavingArrangement}
                 onClick={saveItemArrangement}
@@ -365,16 +426,43 @@ export default function ItemPage() {
               >
                 Save Arrangement
               </LoadingButton>
-            </Grid>
+            </Grid> */}
           </Grid>
           {isFetching ? (
             <SplashScreen />
           ) : (
-            <ItemsGrid
-              items={items}
-              showNotification={showNotification}
-              category={currentCategory}
-            />
+            // <Reorder.Group
+            //   values={items}
+            //   onReorder={setItems}
+            //   style={{ padding: 0 }}
+            // >
+            <Box mt={2}>
+              {items.map((item: IItem) => {
+                return (
+                  // <Reorder.Item
+                  //   key={item.id}
+                  //   value={item}
+                  //   style={{ listStyle: 'none' }}
+                  //   transition={{
+                  //     type: 'spring',
+                  //     damping: 10,
+                  //     stiffness: 300,
+                  //     mass: 0.5,
+                  //   }}
+                  // >
+                  <Fragment key={item.id}>
+                    <Item
+                      item={item}
+                      handleUpdateItem={handleUpdateItem}
+                      handleDeleteItem={handleDeleteItem}
+                      showNotification={showNotification}
+                    />
+                    <Divider />
+                  </Fragment>
+                  // </Reorder.Item>
+                );
+              })}
+            </Box>
           )}
         </ShadowSection>
       </CategorySidebar>
