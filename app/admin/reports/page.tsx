@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Divider,
   Grid,
   Menu,
   MenuItem,
@@ -32,7 +33,7 @@ import { blue, blueGrey } from '@mui/material/colors';
 import useDebounce from '@/hooks/useDebounce';
 import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import { generateMonthRange } from '@/app/utils/time';
+import { convertToMonthText, generateMonthRange } from '@/app/utils/time';
 import { useReactToPrint } from 'react-to-print';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
 import { DropdownItemContainer } from '../orders/styled';
@@ -62,6 +63,7 @@ import EditEmail from '../components/Modals/edit/EditEmail';
 import { onSelectAllOrders, onSelectOrders } from '@/app/utils/orders';
 import { renderType } from '@/app/lib/render';
 import { PriceChange } from '@mui/icons-material';
+import UploadChequeModal from '../components/Modals/UploadChequeModal';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
@@ -81,6 +83,8 @@ export default function ReportPage() {
     useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isOpenUploadChequeModal, setIsOpenUploadChequeModal] =
+    useState<boolean>(false);
   const [isOpenEditEmail, setIsOpenEditEmail] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
@@ -278,35 +282,6 @@ export default function ReportPage() {
     setStatementAnchor(null);
   };
 
-  // const handleDeleteOrderUI = (deletedOrder: Order) => {
-  //   // update base order list
-  //   const newBaseOrderList = baseClientOrders.filter((order: Order) => {
-  //     return order.id !== deletedOrder.id;
-  //   });
-
-  //   // update current displaying list
-  //   const newOrderList = clientOrders.filter((order: Order) => {
-  //     return order.id !== deletedOrder.id;
-  //   });
-
-  //   // update unpaid order list
-  //   if (
-  //     deletedOrder.status === ORDER_STATUS.INCOMPLETED ||
-  //     deletedOrder.status === ORDER_STATUS.DELIVERED
-  //   ) {
-  //     const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-  //       return (
-  //         order.status === ORDER_STATUS.INCOMPLETED ||
-  //         order.status === ORDER_STATUS.DELIVERED
-  //       );
-  //     });
-  //     setUnpaidOrders(newUnpaidOrders);
-  //   }
-
-  //   setBaseClientOrders(newBaseOrderList);
-  //   setClientOrders(newOrderList);
-  // };
-
   const handleInvoicePrint = useReactToPrint({
     content: () => invoicePrint.current,
   });
@@ -329,7 +304,6 @@ export default function ReportPage() {
   };
 
   const onUpdateOrderUI = (updatedOrder: Order) => {
-    console.log(updatedOrder, 'updated order');
     // update base order list
     const newBaseOrderList = baseClientOrders.map((order: Order) => {
       if (order.id === updatedOrder.id) {
@@ -459,6 +433,10 @@ export default function ReportPage() {
           'aria-labelledby': 'basic-button',
         }}
       >
+        <MenuItem onClick={() => setIsOpenUploadChequeModal(true)}>
+          Upload Cheque
+        </MenuItem>
+        <Divider />
         <MenuItem
           onClick={() => {
             handleWeeklyPrint();
@@ -479,10 +457,6 @@ export default function ReportPage() {
           disabled={!clientValue?.email || false}
           onClick={async () => {
             setIsOpenEditEmail(true);
-            // setIsSendLoading(true);
-            // await handleSendInvoice();
-            // setIsSendLoading(false);
-            // handleCloseStatementAnchor();
           }}
         >
           {'Send to client'}
@@ -607,6 +581,14 @@ export default function ReportPage() {
       />
       <LoadingModal open={isLoading} />
       {NotificationComp}
+      <UploadChequeModal 
+        open={isOpenUploadChequeModal}
+        onClose={() => setIsOpenUploadChequeModal(false)}
+        showNotification={showNotification}
+        year={dateRange[1].getFullYear()}
+        month={convertToMonthText(dateRange[1].getMonth())}
+        clientId={clientValue?.clientId || ''}
+      />
 
       {/* PRINT SLOWS DOWN THE PAGE */}
       {clientValue?.clientName !== 'All Clients' && (

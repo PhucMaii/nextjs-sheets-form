@@ -48,10 +48,11 @@ model User {
 }
 
 model Category {
-  id    Int    @id @default(autoincrement())
-  name  String @unique @db.VarChar(255)
-  users User[]
-  items Item[]
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique @db.VarChar(255)
+  users             User[]
+  items             Item[]
+  itemType_category ItemType_Category[]
 }
 
 model SubCategory {
@@ -96,7 +97,7 @@ model OrderedItems {
   inventoryItemId  Int?
   isCustomAmount   Boolean?
   cost             Float?
-  profit            Float?
+  profit           Float?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -280,6 +281,9 @@ model InventoryItem {
   name      String
   hasPST    Boolean?
   hasGST    Boolean?
+  typeId    Int?
+  color     String?
+  indexPos  Int?
   createdAt String
   createdBy String
 
@@ -288,6 +292,7 @@ model InventoryItem {
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
+  type         ItemType?        @relation(fields: [typeId], references: [id])
 }
 
 model ItemPreference {
@@ -317,10 +322,24 @@ model ItemType {
   id        Int     @id @default(autoincrement())
   name      String  @unique
   icon      String?
+  priority  Int?
   createdAt String?
   createdBy String?
 
-  itemPreferences ItemPreference[]
+  itemPreferences   ItemPreference[]
+  inventoryItems    InventoryItem[]
+  itemType_category ItemType_Category[]
+}
+
+model ItemType_Category {
+  itemTypeId Int
+  categoryId Int
+  priority   Int
+
+  itemType ItemType @relation(fields: [itemTypeId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([itemTypeId, categoryId])
 }
 
 model VendorItem {
@@ -376,6 +395,16 @@ model Action {
   createdBy   String?
 }
 
+model ChequeImages {
+  id      Int     @id @default(autoincrement())
+  fileKey  String
+  createdAt   String
+  createdBy   String
+  statementId   Int
+
+  statement     ClientStatement @relation(fields: [statementId], references: [id])
+}
+
 model ClientStatement {
   id        Int     @id @default(autoincrement())
   month     String
@@ -386,6 +415,7 @@ model ClientStatement {
   createdAt String
 
   user User @relation(fields: [userId], references: [id])
+  chequeImages ChequeImages[]
 }
 
 model CartItem {

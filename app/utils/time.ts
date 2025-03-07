@@ -1,5 +1,5 @@
 import dayjs, { Dayjs } from 'dayjs';
-import { days, limitOrderHour } from '../lib/constant';
+import { days, limitOrderHour, months } from '../lib/constant';
 import moment from 'moment';
 import { PAYMENT_TYPE } from './enum';
 
@@ -133,3 +133,7 @@ export const disableChristmasAndNewYear = (date: Dayjs) => {
     (date.date() === 1 && date.month() === 0) // January 1st
   );
 };
+
+export const convertToMonthText = (month: number) => {
+  return months[month];
+}
