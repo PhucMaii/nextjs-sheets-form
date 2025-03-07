@@ -43,6 +43,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
+        orderBy: {
+          inventoryItem: {
+            indexPos: 'asc'
+          }
+        }
       });
       return res.status(200).json({
         data: items,
@@ -89,6 +94,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
+        orderBy: {
+          inventoryItem: {
+            indexPos: 'asc'
+          }
+        }
       });
 
       return res.status(200).json({

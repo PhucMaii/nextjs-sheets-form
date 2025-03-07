@@ -418,7 +418,6 @@ const OrderView = ({
         {itemTypes?.sortedKeysByPriority &&
           itemTypes?.sortedKeysByPriority?.length > 0 &&
           itemTypes?.sortedKeysByPriority?.map((type: string) => {
-            if (type === 'Others') return null;
             return (
               <Fragment key={type}>
                 <Grid item xs={12} mt={2}>
@@ -455,7 +454,7 @@ const OrderView = ({
             );
           })}
 
-        <Fragment>
+        {/* <Fragment>
           <Grid item xs={12} mt={2}>
             <Typography variant="h6">Others</Typography>
           </Grid>
@@ -483,7 +482,7 @@ const OrderView = ({
                 </Grid>
               );
             })}
-        </Fragment>
+        </Fragment> */}
       </>
     );
   };
@@ -530,7 +529,6 @@ const OrderView = ({
           {itemTypes?.sortedKeysByPriority &&
             itemTypes.sortedKeysByPriority.map(
               (itemType: string, index: number) => {
-                if (itemType === 'Others') return null;
                 return (
                   <ItemTypeButton
                     key={index}

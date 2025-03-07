@@ -7,9 +7,23 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const itemTypes = await prisma.itemType.findMany({
       include: {
-        inventoryItems: true,
-        itemType_category: true,
+        inventoryItems: {
+          include: {
+            vendorItem: {
+              include: {
+                vendor: true,
+              },
+            },
+          },
+          orderBy: {
+            indexPos: 'asc',
+          }
+        },
+        itemType_category: true
       },
+      orderBy: {
+        priority: 'asc',
+      }
     });
 
     return res.status(200).json({ data: itemTypes });

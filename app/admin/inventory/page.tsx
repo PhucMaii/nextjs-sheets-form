@@ -16,7 +16,7 @@ import { LoadingButton } from '@mui/lab';
 import { FileClockIcon } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import ConfirmModal from '../components/Modals/ConfirmModal';
-import Appearance from '../components/Inventory/Appearance';
+// import Appearance from '../components/Inventory/Appearance';
 
 export default function InventoryPage() {
   const [isTrackingInventory, setIsTrackingInventory] =
@@ -105,7 +105,7 @@ export default function InventoryPage() {
         onChange={(e, index) => setTabIndex(index)}
       >
         <Tab label="Inventory" value={0} />
-        <Tab label="Appearance" value={1} />
+        <Tab label="Order Stock" value={1} />
       </Tabs>
 
       <ShadowSection sx={{ overflow: 'scroll', width: '100%' }}>
@@ -115,11 +115,11 @@ export default function InventoryPage() {
             inventoryItems={inventoryItems}
           />
         ) : (
-          // <OrderStock
-          //   openAddStockPurchased={() => setIsOpenAddStockPurchased(true)}
-          //   showNotification={showNotification}
-          // />
-          <Appearance types={inventoryItems?.types || []}/>
+          <OrderStock
+            openAddStockPurchased={() => setIsOpenAddStockPurchased(true)}
+            showNotification={showNotification}
+          />
+          // <Appearance types={inventoryItems?.types || []}/>
         )}
       </ShadowSection>
     </Sidebar>

@@ -183,27 +183,22 @@ export const inventoryOrder = [
 ];
 
 async function main() {
-  const inventoryItems = await prisma.inventoryItem.findMany({});
-  const itemNames = inventoryItems.map((item: any) => item.name);
+  const otherType = await prisma.itemType.create({
+    data: {
+      name: 'Others',
+    },
+  });
 
-  const sortedItems = sortedItemKeys(itemNames, inventoryOrder);
+  await prisma.inventoryItem.updateMany({
+    where: {
+      typeId: null,
+    },
+    data: {
+      typeId: otherType.id,
+    },
+  });
 
-  let idx = 1;
-  for (const item of sortedItems) {
-    const inventoryItem = inventoryItems.find((i: any) => i.name === item);
-    if (inventoryItem) {
-      console.log(item, 'item')
-      await prisma.inventoryItem.update({
-        where: {
-          id: inventoryItem.id,
-        },
-        data: {
-          indexPos: idx,
-        },
-      });
-      idx++
-    }
-  }
+  console.log(otherType.id);
 }
 
 main()

@@ -28,6 +28,7 @@ import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import WysiwygIcon from '@mui/icons-material/Wysiwyg';
 import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import {
   errorColor,
@@ -250,6 +251,11 @@ export const adminTabs = {
       path: '/admin/statements',
     },
     {
+      name: 'Order Layout',
+      icon: WysiwygIcon,
+      path: '/admin/order-layout',
+    },
+    {
       name: 'Blocking',
       icon: AppBlockingIcon,
       path: '/admin/blocking',
@@ -443,3 +449,5 @@ export const userCategorizedColor: any = {
     backgroundColor: grey[200],
   },
 };
+
+export const otherTypeId = 19;

@@ -29,12 +29,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(200).json({ data: existingInventory });
       }
 
+      const existingType = await prisma.itemType.findUnique({
+        where: {
+          id: typeId,
+        },
+        include: {
+          inventoryItems: true
+        }
+      });
+
+      if (!existingType) {
+        return res.status(404).json({ error: 'Item type not found' });
+      }
+
       const updatedInventory = await prisma.inventoryItem.update({
         where: {
           id,
         },
         data: {
           typeId,
+          indexPos: existingType.inventoryItems.length,
         },
       });
 

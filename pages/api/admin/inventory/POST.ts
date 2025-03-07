@@ -2,9 +2,11 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
 import { infoBackground } from '@/theme/color';
+import { otherTypeId } from '@/app/lib/constant';
 
 interface IBody {
   name: string;
+  typeId: number;
   hasPST: boolean;
   hasGST: boolean;
   vendorItems: any[];
@@ -15,7 +17,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, hasPST, hasGST, vendorItems, createdAt }: IBody = req.body;
+    const { name, typeId, hasPST, hasGST, vendorItems, createdAt }: IBody = req.body;
 
     const vendorIds = vendorItems.map((vendorItem: any) => {
       return vendorItem.vendorId;
@@ -58,6 +60,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt,
         createdBy,
         color: infoBackground,
+        typeId: typeId > 0 ? typeId : otherTypeId,
+        indexPos: 1,
       },
     });
 

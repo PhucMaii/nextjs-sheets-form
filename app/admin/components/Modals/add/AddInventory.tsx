@@ -3,7 +3,9 @@ import {
   Box,
   Button,
   Divider,
+  MenuItem,
   Modal,
+  Select,
   Switch,
   TextField,
   Typography,
@@ -50,11 +52,13 @@ export default function AddInventory({
     name: '',
     hasPST: false,
     hasGST: false,
+    typeId: -1,
   });
   const [newVendorItems, setNewVendorItems] = useState<any[]>([]);
   const [selectedVendors, setSelectedVendors] = useState<IVendor[]>([]);
 
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+  const [itemTypes] = SWRFetchData(`${API_URL.ADMIN}/item-types`);
 
   useEffect(() => {
     // Whenever selected vendors change then set new vendor items
@@ -95,6 +99,7 @@ export default function AddInventory({
       const createdAt = generateCurrentTime();
       const response = await axios.post(`${API_URL.ADMIN}/inventory`, {
         name: newItem.name,
+        typeId: newItem.typeId,
         hasPST: newItem.hasPST,
         hasGST: newItem.hasGST,
         vendorItems: newVendorItems,
@@ -358,6 +363,18 @@ export default function AddInventory({
                   setNewItem({ ...newItem, name: e.target.value })
                 }
               />
+            </Box>
+
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Type</Typography>
+              <Select onChange={(e) => setNewItem({ ...newItem, type: e.target.value })} value={newItem.type}>
+                <MenuItem value={-1} disabled>-- Choose type --</MenuItem>
+                {
+                  itemTypes?.data && itemTypes?.data.map((type: any) => (
+                    <MenuItem key={type.id} value={type.id}>{type.name}</MenuItem>
+                  ))
+                }
+              </Select>
             </Box>
 
             <Box display="flex" flexDirection="column" gap={1}>

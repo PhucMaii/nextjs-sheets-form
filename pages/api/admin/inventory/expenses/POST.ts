@@ -1,3 +1,4 @@
+import { otherTypeId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IInventoryUnit, IVendorItem } from '@/app/utils/type';
 import { getUserInfo } from '@/pages/api/utils/auth';
@@ -214,6 +215,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             createdAt,
             createdBy,
             color: infoBackground,
+            typeId: otherTypeId,
+            indexPos: 1,
           };
         }),
       });

@@ -8,7 +8,6 @@ import {
   Fifo,
   InventoryItem,
   InventoryUnit,
-  Item,
   ItemType,
   ItemType_Category,
   PaymentMethod,
