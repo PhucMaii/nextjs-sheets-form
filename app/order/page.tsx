@@ -4,7 +4,7 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import axios from 'axios';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import dayjs from 'dayjs';
-import { Box } from '@mui/material';
+import { Box, Tab, Tabs } from '@mui/material';
 import moment from 'moment';
 import { limitOrderHour } from '../lib/constant';
 import { Order } from '../admin/orders/page';
@@ -16,6 +16,8 @@ import NotificationPopup from '../admin/components/Notification';
 import { useRouter } from 'next/navigation';
 import { TourProvider } from '@reactour/tour';
 import TourStartButton from './TourStartButton';
+import { grey } from '@mui/material/colors';
+import OldOrderVersion from './OldOrderVersion';
 
 const steps = [
   {
@@ -44,10 +46,15 @@ const steps = [
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [tabIdx, setTabIdx] = useState<number>(0);
 
   const router = useRouter();
-  const { showNotification, notification, closeNotification } =
-    useNotification();
+  const { showNotification, notification, closeNotification } = useNotification(
+    {
+      vertical: 'top',
+      horizontal: 'right',
+    },
+  );
 
   let today: any = dayjs();
   if (today.$H >= limitOrderHour) {
@@ -82,7 +89,7 @@ export default function OrderForm() {
     setItemList(formatItems);
   };
 
-  const onSubmit = async (order: Order) => {
+  const onSubmit = async (order: Order): Promise<any> => {
     // Check if items are selected
     if (order.items.length === 0) {
       showNotification('error', 'Please select at least one item');
@@ -119,10 +126,22 @@ export default function OrderForm() {
 
       const response = await axios.post(API_URL.IMPORT_SHEETS, submittedData);
 
-      // SHOULD BE /user/overview after website is done
-      router.push('/');
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return response;
+      }
 
+      if (response.data.warning) {
+        showNotification('warning', response.data.warning);
+        return response;
+      }
       showNotification('success', response.data.message);
+
+
+      // SHOULD BE /user/overview after website is done
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     } catch (error: any) {
       console.log(error);
       showNotification('error', error.response.data.error);
@@ -149,18 +168,36 @@ export default function OrderForm() {
               closeNotification();
             }, 3000);
           }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         />
-        <Box display="flex" justifyContent="flex-end">
-          <TourStartButton />
-        </Box>
-        <Box pb={6} width="100%">
-          <OrderView
-            onSubmit={onSubmit}
-            items={itemList}
-            purpose={ORDER_USAGE_PURPOSE.ORDER}
-            role={USER_ROLE.CLIENT}
-          />
-        </Box>
+
+        <Tabs variant="fullWidth" sx={{ backgroundColor: grey[50] }} value={tabIdx} onChange={(e, value) => setTabIdx(value)}>
+          <Tab value={0} label="New Version ✨" />
+          <Tab value={1} label="Old Version" />
+        </Tabs>
+
+        { tabIdx === 0 ?
+          <>
+            <Box display="flex" justifyContent="flex-end">
+              <TourStartButton />
+            </Box>
+            <Box pb={6} width="100%">
+              <OrderView
+                onSubmit={onSubmit}
+                items={itemList}
+                purpose={ORDER_USAGE_PURPOSE.ORDER}
+                role={USER_ROLE.CLIENT}
+              />
+            </Box>
+          </> : (
+            <OldOrderVersion 
+              onSubmit={onSubmit}
+              itemList={itemList}
+              setItemList={setItemList}
+              minDate={minDate}
+            />
+          )
+        }
       </Sidebar>
     </TourProvider>
   );

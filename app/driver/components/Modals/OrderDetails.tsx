@@ -1,56 +1,51 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BoxModal } from '@/app/admin/components/Modals/styled';
-import OrderDetailsTable from '@/app/admin/components/Tables/OrderDetailsTable';
 import {
-  Box,
-  Button,
-  Divider,
-  Grid,
-  IconButton,
+  AlertColor,
   Modal,
-  Typography,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import SellIcon from '@mui/icons-material/Sell';
-import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
-import { LoadingButton } from '@mui/lab';
-import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { OrderedItems } from '@/app/utils/type';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
+import { SWRFetchData } from '@/app/utils/db';
+import axios from 'axios';
 
 interface IProps extends ModalProps {
   order: Order;
-  totalQuantity: number;
-  handleUpdateStatus: (
-    orderId: number,
-    updatedStatus: ORDER_STATUS,
-  ) => Promise<void>;
-  handleUpdateItem: (
-    orderTotalPrice: number,
-    order: Order,
-    updatedItem: OrderedItems,
-  ) => Promise<void>;
-  abilityToEdit: boolean;
+  showNotification: (type: AlertColor, message: string) => void;
 }
 
 export default function OrderDetails({
   open,
   onClose,
   order,
-  totalQuantity,
-  handleUpdateStatus,
-  handleUpdateItem,
-  abilityToEdit,
+  showNotification,
 }: IProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleOnClick = async (updatedStatus: ORDER_STATUS) => {
-    setIsLoading(true);
-    await handleUpdateStatus(order.id, updatedStatus);
-    setIsLoading(false);
-    onClose();
+  const [items] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${order.userId}`);
+  const onUpdateOrder = async (orderParam: Order) => {
+    try {
+      const response = await axios.put(`${API_URL.DRIVER}/orderedItems/update`, {
+        updatedItems: orderParam.items,
+        orderId: order.id,
+        note: orderParam.note,
+        deliveryDate: orderParam.deliveryDate,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification(
+        'error',
+        'Fail to update price: ' + error.response.data.error,
+      );
+    }
   };
 
   return (
@@ -62,110 +57,17 @@ export default function OrderDetails({
         maxHeight="80vh"
         sx={{ overflowY: 'auto', overflowX: 'hidden', p: 2 }}
       >
-        <Grid container alignItems="center">
-          <Grid item xs={4}>
-            <Typography variant="h6">#{order.id}</Typography>
-          </Grid>
-          <Grid item xs={4} textAlign="center">
-            <Typography variant="h6">{order.clientName}</Typography>
-          </Grid>
-          <Grid item xs={4} textAlign="right">
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </Grid>
-          <Grid item xs={10} md={6}>
-            <Typography>Order at: {order.orderTime}</Typography>
-          </Grid>
-          <Grid item xs={2} textAlign="right">
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
-              target="_blank"
-              aria-disabled={
-                !order.user?.deliveryAddressLat ||
-                !order.user?.deliveryAddressLng
-              }
-            >
-              <AssistantDirectionIcon />
-            </a>
-          </Grid>
-        </Grid>
-        <Box display="flex" justifyContent="space-between">
-          <Box display="flex" alignItems="center" gap={1}>
-            <SellIcon color="primary" />
-            <Typography color="primary" variant="subtitle1">
-              {totalQuantity}
-            </Typography>
-          </Box>
-          <Box display="flex" alignItems="center" gap={1}>
-            <LocalShippingIcon color="primary" />
-            <Typography color="primary" variant="subtitle1">
-              {order.deliveryDate}
-            </Typography>
-          </Box>
-          <Button variant="outlined">${order.totalPrice.toFixed(2)}</Button>
-        </Box>
-        <Divider />
-        <Grid container rowGap={4} columnSpacing={1} alignItems="flex-start">
-          <Grid item textAlign="center" xs={12}>
-            <Typography fontWeight="bold" variant="h6">
-              ORDER
-            </Typography>
-            <OrderDetailsTable
-              order={order}
-              items={order.items}
-              handleUpdateItem={handleUpdateItem}
-              abilityToEdit={abilityToEdit}
-              role={USER_ROLE.DRIVER}
-            />
-          </Grid>
-          <Grid
-            container
-            item
-            textAlign="center"
-            alignItems="center"
-            rowGap={2}
-            xs={12}
-          >
-            <Grid item xs={12}>
-              <Typography fontWeight="bold" variant="h6">
-                NOTE
-              </Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1">
-                {order.note ? order.note : 'N/A'}
-              </Typography>
-            </Grid>
-          </Grid>
-          {abilityToEdit && (
-            <Box mt={2} position="sticky" bottom={0} sx={{ width: '100%' }}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={6}>
-                  <LoadingButton
-                    onClick={() => handleOnClick(ORDER_STATUS.DELIVERED)}
-                    loading={isLoading}
-                    fullWidth
-                    variant="contained"
-                  >
-                    Delivered
-                  </LoadingButton>
-                </Grid>
-                <Grid item xs={6}>
-                  <LoadingButton
-                    onClick={() => handleOnClick(ORDER_STATUS.COMPLETED)}
-                    loading={isLoading}
-                    color="success"
-                    fullWidth
-                    variant="contained"
-                  >
-                    Collected
-                  </LoadingButton>
-                </Grid>
-              </Grid>
-            </Box>
-          )}
-        </Grid>
+        <OrderView
+          items={items?.data?.items || []}
+          purpose={ORDER_USAGE_PURPOSE.ITEM}
+          isModal
+          defaultDeliveryDate={order.deliveryDate}
+          defaultOrderedItems={order?.items || []}
+          defaultOrder={order}
+          clientName={order?.clientName || order?.user?.clientName}
+          role={USER_ROLE.DRIVER}
+          onSubmit={onUpdateOrder}
+        />
       </BoxModal>
     </Modal>
   );

@@ -15,9 +15,9 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { blue, blueGrey } from '@mui/material/colors';
 import OrderAccordion from '../components/OrderAccordion';
 import { useRouter } from 'next/navigation';
-import useSWR from 'swr';
 import useNotification from '@/hooks/useNotification';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import { SWRFetchData } from '../utils/db';
 
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
@@ -45,7 +45,8 @@ export default function MainPage() {
   const endDate = dateRange[1];
   endDate.setDate(today.getDate() + 2);
 
-  const { data: clientOrders, isValidating } = useSWR(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [clientOrders, _mutate, isValidating] = SWRFetchData(
     `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
@@ -129,7 +130,7 @@ export default function MainPage() {
     setThisMonthOrders(newOrders);
   };
 
-  if (isValidating) {
+  if (isValidating && !clientOrders) {
     return (
       <Sidebar>
         <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">

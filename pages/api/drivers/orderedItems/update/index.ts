@@ -1,53 +1,33 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Orders, PrismaClient } from '@prisma/client';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '../../utils/auth';
+import { ORDER_STATUS } from '@/app/utils/enum';
+import {
+  categorizeUpdatedItems,
+  generateOrderTotalPrice,
+  ITEM_CATEGORIZED,
+} from '@/pages/api/admin/orderedItems/PUT';
 import {
   generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
-} from './single';
-import { gstRate, pstRate } from '@/app/lib/constant';
-import { ORDER_STATUS } from '@/app/utils/enum';
-import { getTodayDate } from '../../utils/date';
+} from '@/pages/api/admin/orderedItems/single';
+import { getUserInfo } from '@/pages/api/utils/auth';
+import { getTodayDate } from '@/pages/api/utils/date';
 import {
   createOrderedItems,
   formatItemsWithTotalPrice,
-} from '../../utils/order';
+} from '@/pages/api/utils/order';
+import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
+import { PrismaClient } from '@prisma/client';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export enum ITEM_CATEGORIZED {
-  REMAIN = 'remain',
-  UPDATE = 'update',
-  CREATE = 'create',
-  DELETE = 'delete',
-}
-
-interface UpdatedItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
+interface IBody {
   orderId: number;
-  totalPrice: number;
-  inventoryItemId?: number;
-  inventoryUnitId?: number;
+  updatedItems: any[];
+  note?: string;
+  deliveryDate?: string;
+  // updateOption?: string;
 }
 
-export enum UpdateOption {
-  NONE = 'none',
-  CREATE = 'create',
-  UPDATE = 'update',
-}
-
-interface BodyType {
-  orderId: number;
-  updatedItems: UpdatedItem[];
-  note: string;
-  deliveryDate: string;
-  // updateOption?: UpdateOption;
-}
-
-export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
     const updatedData = req.body as any;
@@ -57,7 +37,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       note,
       deliveryDate,
       // updateOption,
-    } = updatedData as BodyType;
+    } = updatedData as IBody;
 
     const existingOrder = await prisma.orders.findUnique({
       where: {
@@ -229,105 +209,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       error: 'Internal Server Error: ' + error,
     });
   }
-}
-
-export const categorizeUpdatedItems = (
-  baseItems: any,
-  updatedItems: any,
-  comparedField: string = 'id',
-) => {
-  let trackBaseItems = [...baseItems];
-
-  const newItems = updatedItems.map((updatedItem: any) => {
-    const baseItem = baseItems.find((item: any) => {
-      return item[comparedField] === updatedItem[comparedField];
-    });
-
-    if (baseItem) {
-      trackBaseItems = trackBaseItems.filter((item: any) => {
-        return item[comparedField] !== updatedItem[comparedField];
-      });
-
-      if (baseItem.quantity !== updatedItem.quantity) {
-        return {
-          ...baseItem,
-          quantity: updatedItem.quantity,
-          type: ITEM_CATEGORIZED.UPDATE,
-        };
-      } else {
-        return {
-          ...baseItem,
-          type: ITEM_CATEGORIZED.REMAIN,
-        };
-      }
-    } else {
-      return {
-        ...updatedItem,
-        type: ITEM_CATEGORIZED.CREATE,
-      };
-    }
-  });
-
-  const deletedItems = trackBaseItems.map((item: any) => {
-    return {
-      ...item,
-      type: ITEM_CATEGORIZED.DELETE,
-    };
-  });
-
-  return [...newItems, ...deletedItems];
 };
 
-export const generateOrderTotalPrice = (listOfItems: any[]) => {
-  try {
-    const total = listOfItems.reduce((acc: any, item: any) => {
-      if (!acc?.subTotal) {
-        acc.subTotal = 0;
-      }
-
-      if (!acc?.totalWithoutDiscount) {
-        acc.totalWithoutDiscount = 0;
-      }
-
-      if (!acc?.PST) {
-        acc.PST = 0;
-      }
-
-      if (!acc?.GST) {
-        acc.GST = 0;
-      }
-
-      if (!acc?.discount) {
-        acc.discount = 0;
-      }
-
-      acc.totalWithoutDiscount =
-        (item?.isShowDiscount && item?.prevPrice
-          ? item.prevPrice
-          : item.price) * item.quantity;
-
-      acc.subTotal += item.price * item.quantity;
-
-      if (item?.inventoryItem?.hasPST) {
-        acc.PST += item.price * item.quantity * pstRate;
-      }
-
-      if (item?.inventoryItem?.hasGST) {
-        acc.GST += item.price * item.quantity * gstRate;
-      }
-
-      if (item?.isShowDiscount && item?.prevPrice) {
-        acc.discount += (item.prevPrice - item.price) * item.quantity;
-      }
-
-      return acc;
-    }, {});
-
-    return {
-      ...total,
-      totalPrice: total.subTotal + total.PST + total.GST,
-    };
-  } catch (error: any) {
-    console.log('Internal Server Error: ', error);
-  }
-};
+export default withDriverAuthGuard(handler);

@@ -44,7 +44,6 @@ interface IProps {
 export default function OrderComponent({
   order,
   handleUpdateStatus,
-  handleUpdateItem,
   showNotification,
 }: IProps) {
   const [confirmModalProps, setConfirmModalProps] = useState<any>({
@@ -135,15 +134,12 @@ export default function OrderComponent({
         updatedStatus={confirmModalProps.updatedStatus}
         orderId={order.id}
       />
-      <OrderDetails
+      {isOpenDetails && <OrderDetails
         open={isOpenDetails}
         onClose={() => setIsOpenDetails(false)}
         order={order}
-        totalQuantity={totalQuantity}
-        handleUpdateStatus={handleUpdateStatus}
-        handleUpdateItem={handleUpdateItem}
-        abilityToEdit={abilityToEdit}
-      />
+        showNotification={showNotification}
+      />}
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={1}>
           <IconButton onClick={() => setIsOpenDetails(true)}>

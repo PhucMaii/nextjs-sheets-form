@@ -1,12 +1,12 @@
 import { IInventoryItem, IItem, IItemType } from './type';
 
 export const convertItemArrayToMap = (items: IItem[]) => {
-  if (items.length === 0) {
+  if (!items || items.length === 0) {
     return {};
   }
 
   const types: IItemType[] = [];
-  const typesObj = items.reduce((acc: any, item: any) => {
+  const typesObj = items?.reduce((acc: any, item: any) => {
     const type = item?.inventoryItem?.type;
 
     if (!type) {

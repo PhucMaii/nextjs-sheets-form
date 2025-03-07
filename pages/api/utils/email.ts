@@ -78,7 +78,12 @@ export const sendEmail = async (
     invoiceId,
   );
 
-  if (sendToAdmin) {
+  const isToAdmin =
+    process.env.NEXT_PUBLIC_CURRENT_STATE === 'development'
+      ? false
+      : sendToAdmin;
+
+  if (isToAdmin) {
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;
     await emailHandler(
       emailSendTo,

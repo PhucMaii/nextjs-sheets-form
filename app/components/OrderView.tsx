@@ -186,6 +186,18 @@ const OrderView = ({
     return typesObj;
   }, [items]);
 
+  const orderDiscount = useMemo(() => {
+    if (!orderedItems || orderedItems.length === 0) return 0;
+    const discountItems = orderedItems.filter(
+      (item: any) => item.isShowDiscount && item.prevPrice,
+    );
+    const discount = discountItems.reduce((acc: number, item: any) => {
+      return acc + (item.prevPrice - item.price) * item.quantity;
+    }, 0);
+
+    return discount;
+  }, [orderedItems]);
+
   const totalQuantity = useMemo(() => {
     if (!orderedItems || orderedItems.length === 0) return 0;
 
@@ -390,7 +402,12 @@ const OrderView = ({
         {displayItems.length > 0 &&
           displayItems.map((item: IItem) => {
             return (
-              <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+              <Grid
+                item
+                xs={isModal ? 12 : 6}
+                sm={isModal ? 6 : 4}
+                md={isModal ? 6 : 3}
+              >
                 <ItemButton
                   item={item}
                   onClick={() =>
@@ -429,7 +446,7 @@ const OrderView = ({
                     <Grid
                       data-tour={index === 0 ? 'third-step' : ''}
                       item
-                      xs={6}
+                      xs={isModal ? 12 : 6}
                       sm={isModal ? 6 : 4}
                       md={isModal ? 6 : 3}
                     >
@@ -499,6 +516,7 @@ const OrderView = ({
           fullWidth
           variant="contained"
           sx={{ mt: 2 }}
+          disabled={orderedItems.length === 0}
         >
           {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
         </LoadingButton>
@@ -799,14 +817,14 @@ const OrderView = ({
         <Grid item xs={12}>
           <Divider />
         </Grid>
-        {order?.discount && order.discount > 0 ? (
+        {orderDiscount && orderDiscount > 0 ? (
           <>
             <Grid item xs={4} textAlign="left" ml={2}>
               <Typography>Discount ($)</Typography>
             </Grid>
             <Grid item xs={6} textAlign="right">
               <Typography fontWeight="bold">
-                -${order?.discount?.toFixed(2)}
+                -${orderDiscount?.toFixed(2)}
               </Typography>
             </Grid>
             <Grid item xs={12}>
