@@ -367,13 +367,21 @@ export default function AddInventory({
 
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Type</Typography>
-              <Select onChange={(e) => setNewItem({ ...newItem, type: e.target.value })} value={newItem.type}>
-                <MenuItem value={-1} disabled>-- Choose type --</MenuItem>
-                {
-                  itemTypes?.data && itemTypes?.data.map((type: any) => (
-                    <MenuItem key={type.id} value={type.id}>{type.name}</MenuItem>
-                  ))
+              <Select
+                onChange={(e) =>
+                  setNewItem({ ...newItem, type: e.target.value })
                 }
+                value={newItem.type}
+              >
+                <MenuItem value={-1} disabled>
+                  -- Choose type --
+                </MenuItem>
+                {itemTypes?.data &&
+                  itemTypes?.data.map((type: any) => (
+                    <MenuItem key={type.id} value={type.id}>
+                      {type.name}
+                    </MenuItem>
+                  ))}
               </Select>
             </Box>
 

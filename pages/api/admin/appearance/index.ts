@@ -87,7 +87,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
 
       // Check if any item has been re arranged
-      if (JSON.stringify(inventoryItemNames) !== JSON.stringify(dbItemArrangementMap[itemType.id])) {
+      if (
+        JSON.stringify(inventoryItemNames) !==
+        JSON.stringify(dbItemArrangementMap[itemType.id])
+      ) {
         // Re arrange
         let indexPos = 1;
         for (let i = 0; i < itemType.inventoryItems.length; i++) {
@@ -102,7 +105,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     return res.status(200).json({ message: 'Update Successfully' });
-    
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

@@ -90,7 +90,9 @@ export default function DeleteModal({
         >
           <ErrorIcon sx={{ color: errorColor, fontSize: 50 }} />
           <Typography variant="h6" sx={{ color: grey[600] }} fontWeight="bold">
-            {message ? message : `Are you sure to delete ${showTargetObj ? showTargetObj : 'this'} ?`}
+            {message
+              ? message
+              : `Are you sure to delete ${showTargetObj ? showTargetObj : 'this'} ?`}
           </Typography>
           <Box display="flex" gap={2}>
             <LoadingButton

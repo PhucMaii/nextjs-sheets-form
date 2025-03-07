@@ -45,7 +45,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         orderBy: [
           { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
-          { inventoryItem: { indexPos: 'asc' } },           // Then by indexPos
+          { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
         ],
       });
       return res.status(200).json({
@@ -95,9 +95,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         orderBy: {
           inventoryItem: {
-            indexPos: 'asc'
-          }
-        }
+            indexPos: 'asc',
+          },
+        },
       });
 
       return res.status(200).json({

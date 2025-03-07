@@ -34,8 +34,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           id: typeId,
         },
         include: {
-          inventoryItems: true
-        }
+          inventoryItems: true,
+        },
       });
 
       if (!existingType) {

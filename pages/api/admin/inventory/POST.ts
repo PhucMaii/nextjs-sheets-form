@@ -17,7 +17,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, typeId, hasPST, hasGST, vendorItems, createdAt }: IBody = req.body;
+    const { name, typeId, hasPST, hasGST, vendorItems, createdAt }: IBody =
+      req.body;
 
     const vendorIds = vendorItems.map((vendorItem: any) => {
       return vendorItem.vendorId;

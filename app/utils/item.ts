@@ -8,12 +8,12 @@ export const convertItemArrayToMap = (items: IItem[]) => {
   const types: IItemType[] = [];
   const typesObj = items.reduce((acc: any, item: any) => {
     const type = item?.inventoryItem?.type;
-    
+
     if (!type) {
       acc['Others'] = [...(acc['Others'] || []), item];
       return acc;
     }
-    
+
     if (!acc[type.name]) {
       types.push(type);
       acc[type?.name] = [item];
@@ -22,10 +22,12 @@ export const convertItemArrayToMap = (items: IItem[]) => {
     }
     return acc;
   }, {});
-  
-  const sortedKeysByPriority = types.sort((typePriorityA: any, typePriorityB: any) => {
-    return typePriorityA?.priority - typePriorityB?.priority;
-  }).map((type: any) => type.name);
+
+  const sortedKeysByPriority = types
+    .sort((typePriorityA: any, typePriorityB: any) => {
+      return typePriorityA?.priority - typePriorityB?.priority;
+    })
+    .map((type: any) => type.name);
 
   // let sortedKeysByPriority =
   //   items[0]?.category?.itemType_category
@@ -44,7 +46,7 @@ export const convertItemArrayToMap = (items: IItem[]) => {
 
   return {
     typesObj,
-    sortedKeysByPriority
+    sortedKeysByPriority,
   };
 };
 
@@ -57,14 +59,14 @@ export const convertInventoryItemArrayToMap = (items: IInventoryItem[]) => {
 
   const typesObj = items.reduce((acc: any, item: any) => {
     const type = item?.type;
-    
+
     if (!type) {
       acc['Others'] = [...(acc['Others'] || []), item];
       return acc;
     }
-    
+
     const typeKey = type?.name;
-    
+
     if (!acc[typeKey]) {
       types.push(type);
       acc[typeKey] = [item];
@@ -75,12 +77,15 @@ export const convertInventoryItemArrayToMap = (items: IInventoryItem[]) => {
   }, {});
 
   const sortedKeysByPriority = Object.keys(typesObj).sort((a: any, b: any) => {
-    return (typesObj[a][0]?.type?.priority || 0) - (typesObj[b][0]?.type?.priority || 0);
+    return (
+      (typesObj[a][0]?.type?.priority || 0) -
+      (typesObj[b][0]?.type?.priority || 0)
+    );
   });
 
   return {
     typesObj,
     sortedKeysByPriority,
-    types
+    types,
   };
 };

@@ -101,12 +101,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     if (id) {
       expenses = await getTransactions({
         date: {
-          in: listOfDateString
+          in: listOfDateString,
         },
-        paymentMethodId: Number(id)
-      })
+        paymentMethodId: Number(id),
+      });
     }
-
 
     // let expenses = await prisma.expense.findMany({
     //   where: {
@@ -191,12 +190,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     } else if (type && type === VIEW_TYPE.STOCK_PURCHASED) {
       const stockPurchased = await getTransactions({
         date: {
-          in: listOfDateString
+          in: listOfDateString,
         },
         orderedItems: {
-          some: {}
-        }
-      })
+          some: {},
+        },
+      });
 
       expenses = [...stockPurchased];
     } else if (type && type === VIEW_TYPE.CUSTOM_PURCHASED) {
@@ -206,10 +205,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         orderedItems: {
           none: {},
-        }
+        },
       });
 
-      expenses = [...stockPurchased]
+      expenses = [...stockPurchased];
     }
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);

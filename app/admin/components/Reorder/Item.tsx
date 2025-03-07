@@ -36,10 +36,10 @@ export default function Item({
           '&:hover': { cursor: 'pointer', backgroundColor: grey[50] },
         }}
         onClick={() => {
-          setIsOpenEditItem(true)
+          setIsOpenEditItem(true);
         }}
       >
-        <Grid container alignItems="center" columnSpacing={1} >
+        <Grid container alignItems="center" columnSpacing={1}>
           <Grid item lg={1} md={12}>
             <EditItemAvailability
               item={item}

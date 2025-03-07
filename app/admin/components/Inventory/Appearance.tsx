@@ -1,4 +1,12 @@
-import { AlertColor, Box, FormControlLabel, Grid, IconButton, Switch, Typography } from '@mui/material';
+import {
+  AlertColor,
+  Box,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  Switch,
+  Typography,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { IInventoryItem, IItem, IItemType } from '@/app/utils/type';
 import { ItemButton } from '@/app/components/OrderView';
@@ -129,10 +137,7 @@ interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function Appearance({
-  types,
-  showNotification,
-}: IProps) {
+export default function Appearance({ types, showNotification }: IProps) {
   const [activeItemId, setActiveItemId] = useState<UniqueIdentifier | null>(
     null,
   );
@@ -483,13 +488,15 @@ export default function Appearance({
             }
             label="Drag and Drop Mode"
           />
-          {dndMode && <LoadingButton
-            loading={isLoading}
-            onClick={handleSaveArrangement}
-            variant="contained"
-          >
-            Save Arrangement
-          </LoadingButton>}
+          {dndMode && (
+            <LoadingButton
+              loading={isLoading}
+              onClick={handleSaveArrangement}
+              variant="contained"
+            >
+              Save Arrangement
+            </LoadingButton>
+          )}
         </Box>
         <DndContext
           sensors={sensors}

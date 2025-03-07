@@ -183,9 +183,7 @@ export const inventoryOrder = [
 ];
 
 async function main() {
-  const inventoryItems = await prisma.inventoryItem.findMany({
-    
-  });
+  const inventoryItems = await prisma.inventoryItem.findMany({});
 
   for (const item of inventoryItems) {
     console.log(item, 'item');
@@ -195,8 +193,8 @@ async function main() {
       },
       data: {
         id: item.id + 10000,
-      }
-    })
+      },
+    });
   }
 }
 

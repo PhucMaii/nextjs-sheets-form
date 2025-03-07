@@ -9,7 +9,6 @@ import { ShadowSection } from '../reports/styled';
 import useNotification from '@/hooks/useNotification';
 
 export default function OrderLayoutPage() {
-
   const [itemTypes] = SWRFetchData(`${API_URL.ADMIN}/item-types`);
 
   const { showNotification, NotificationComp } = useNotification();
@@ -22,7 +21,10 @@ export default function OrderLayoutPage() {
       </Box>
 
       <ShadowSection>
-        <Appearance types={itemTypes?.data || []} showNotification={showNotification} />
+        <Appearance
+          types={itemTypes?.data || []}
+          showNotification={showNotification}
+        />
       </ShadowSection>
     </Sidebar>
   );
