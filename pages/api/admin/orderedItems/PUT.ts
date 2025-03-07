@@ -244,14 +244,19 @@ export const categorizeUpdatedItems = (
     });
 
     if (baseItem) {
+      console.log({ baseItem, updatedItem });
       trackBaseItems = trackBaseItems.filter((item: any) => {
         return item[comparedField] !== updatedItem[comparedField];
       });
 
-      if (baseItem.quantity !== updatedItem.quantity) {
+      if (
+        baseItem.quantity !== updatedItem.quantity ||
+        updatedItem.price !== baseItem.price
+      ) {
         return {
           ...baseItem,
           quantity: updatedItem.quantity,
+          price: updatedItem.price,
           type: ITEM_CATEGORIZED.UPDATE,
         };
       } else {

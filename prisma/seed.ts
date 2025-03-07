@@ -115,7 +115,16 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-async function main() {}
+async function main() {
+  await prisma.orderedItems.deleteMany({
+    where: {
+      scheduledOrderId: {
+        not: null,
+      },
+      quantity: 0,
+    },
+  });
+}
 
 main()
   .then(() => prisma.$disconnect())

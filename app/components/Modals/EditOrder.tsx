@@ -4,7 +4,7 @@ import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { AlertColor, Box, Divider, Modal, Typography } from '@mui/material';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import OrderView, { ORDER_USAGE_PURPOSE } from '../OrderView';
 import { SWRFetchData } from '@/app/utils/db';
 
@@ -77,6 +77,7 @@ export default function EditOrder({
             defaultOrder={order}
             purpose={ORDER_USAGE_PURPOSE.ITEM}
             isModal
+            role={USER_ROLE.CLIENT}
           />
           {/* {!mdDown && (
             <LoadingButton

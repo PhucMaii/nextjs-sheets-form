@@ -9,7 +9,7 @@ import {
   restockInventoryItem,
   updateSingleInventoryItem,
 } from '@/pages/api/admin/orderedItems/single';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import {
   createOrderedItems,
@@ -137,7 +137,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Get admin update info
-    const adminUpdate: any = await getUserInfo(req, res);
+    const driverUpdate: any = await getDriverInfo(req, res);
     // await updateOrderTotalPrice(
     //   orderId,
     //   newTotalPrice,
@@ -170,7 +170,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
-        updatedBy: `Admin - ${adminUpdate.clientName}`,
+        updatedBy: `Driver - ${driverUpdate?.name}`,
         updateTime,
       },
       include: {

@@ -24,13 +24,14 @@ import React, {
 } from 'react';
 import { IItem } from '../utils/type';
 import { infoBackground, primary } from '@/theme/color';
-import { blue, blueGrey } from '@mui/material/colors';
+import { blue, blueGrey, grey } from '@mui/material/colors';
 import { ShadowSection } from '../admin/reports/styled';
 import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
 import { SearchIcon, Trash2 } from 'lucide-react';
 import ErrorComponent from '../admin/components/ErrorComponent';
 import useDebounce from '@/hooks/useDebounce';
 import { handleSearch } from '../utils/search';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { LoadingButton } from '@mui/lab';
 import {
   disableChristmasAndNewYear,
@@ -82,6 +83,7 @@ export const ItemButton = ({
           borderRadius: 1,
           width: '100%',
           height: '100%',
+          border: `1px solid ${grey[200]}`,
           color: blueGrey[800],
           ...containerStyle,
         }}
@@ -396,6 +398,19 @@ const OrderView = ({
     }
   };
 
+  const onEditOrderedItemPrice = (item: IItem, price: number) => {
+    const newItems = orderedItems.map((i) => {
+      if (i[comparedField] === item[comparedField]) {
+        return {
+          ...i,
+          price: price,
+        };
+      }
+      return i;
+    });
+    setOrderedItems(newItems);
+  };
+
   const renderByItems = () => {
     return (
       <>
@@ -687,9 +702,25 @@ const OrderView = ({
                   gap={2}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Typography fontWeight="bold">
-                      ${item.price.toFixed(2)}
-                    </Typography>
+                    {role === USER_ROLE.ADMIN ? (
+                      <OutlinedInput
+                        size="small"
+                        type="number"
+                        value={item.price}
+                        onChange={(e) =>
+                          onEditOrderedItemPrice(item, +e.target.value)
+                        }
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <AttachMoneyIcon fontSize="small" />
+                          </InputAdornment>
+                        }
+                      />
+                    ) : (
+                      <Typography fontWeight="bold">
+                        ${item.price.toFixed(2)}
+                      </Typography>
+                    )}
                     {item.isShowDiscount && item.prevPrice && (
                       <Typography
                         fontWeight="bold"
@@ -779,6 +810,7 @@ const OrderView = ({
               onChange={onDateChange}
               sx={{ width: '100%' }}
               shouldDisableDate={disableChristmasAndNewYear}
+              disabled={(role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER) && purpose === ORDER_USAGE_PURPOSE.ITEM}
             />
           </LocalizationProvider>
         </Box>
@@ -794,6 +826,7 @@ const OrderView = ({
             placeholder="Leave us a note here..."
             value={order.note}
             onChange={(e) => setOrder({ ...order, note: e.target.value })}
+            disabled={role === USER_ROLE.DRIVER && purpose === ORDER_USAGE_PURPOSE.ITEM}
           />
         </Box>
       </Box>

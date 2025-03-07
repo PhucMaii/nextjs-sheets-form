@@ -1,11 +1,5 @@
 'use client';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -27,7 +21,7 @@ import {
 import { API_URL, ORDER_STATUS, PAYMENT_TYPE, TYPE } from '../../utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import { IItem, IRoutes, OrderedItems } from '@/app/utils/type';
+import { IItem, IRoutes } from '@/app/utils/type';
 import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
@@ -48,7 +42,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import { filterByRoute } from '@/app/utils/array';
-import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
+import { updateStatus } from '@/app/utils/orders';
 import OrderDetails from '../components/Modals/OrderDetails';
 import { DropdownItemContainer } from './styled';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -375,42 +369,42 @@ export default function Orders() {
     setActionButtonAnchor(null);
   };
 
-  const onUpdateItem = useCallback(
-    async (
-      orderTotalPrice: number,
-      order: Order,
-      updatedItem: OrderedItems,
-      isConvertToCustom: boolean = false,
-      itemId = null,
-    ) => {
-      try {
-        const response = await updateOrderedItems(
-          orderTotalPrice,
-          order,
-          updatedItem,
-          showNotification,
-          isConvertToCustom,
-          itemId,
-        );
+  // const onUpdateItem = useCallback(
+  //   async (
+  //     orderTotalPrice: number,
+  //     order: Order,
+  //     updatedItem: OrderedItems,
+  //     isConvertToCustom: boolean = false,
+  //     itemId = null,
+  //   ) => {
+  //     try {
+  //       const response = await updateOrderedItems(
+  //         orderTotalPrice,
+  //         order,
+  //         updatedItem,
+  //         showNotification,
+  //         isConvertToCustom,
+  //         itemId,
+  //       );
 
-        // Optimistic update
-        handleUpdateUISingleOrder(order, response.data.data);
-        setSelectedOrderDetails(response.data.updatedOrder);
+  //       // Optimistic update
+  //       handleUpdateUISingleOrder(order, response.data.data);
+  //       setSelectedOrderDetails(response.data.updatedOrder);
 
-        // Mutate to update real data
-        mutate();
+  //       // Mutate to update real data
+  //       mutate();
 
-        showNotification('success', 'Update Item Successfully');
-      } catch (error: any) {
-        console.log('Fail to update order items: ', error);
-        showNotification(
-          'error',
-          'Fail to update order items: ' + error.response.data.error,
-        );
-      }
-    },
-    [],
-  );
+  //       showNotification('success', 'Update Item Successfully');
+  //     } catch (error: any) {
+  //       console.log('Fail to update order items: ', error);
+  //       showNotification(
+  //         'error',
+  //         'Fail to update order items: ' + error.response.data.error,
+  //       );
+  //     }
+  //   },
+  //   [],
+  // );
 
   const handleDeleteSelectedOrders = async () => {
     setIsExecutingAction(true);
@@ -435,29 +429,29 @@ export default function Orders() {
     }
   };
 
-  const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
-    const newOrderData: Order[] = baseOrderData.map((order: Order) => {
-      // If order is at targetOrder, then update
-      if (order.id === targetOrder.id) {
-        // update total price of the order
-        let orderTotalPrice = 0;
+  // const handleUpdateUISingleOrder = (targetOrder: Order, targetItem: Item) => {
+  //   const newOrderData: Order[] = baseOrderData.map((order: Order) => {
+  //     // If order is at targetOrder, then update
+  //     if (order.id === targetOrder.id) {
+  //       // update total price of the order
+  //       let orderTotalPrice = 0;
 
-        const newItems = order.items.map((item: Item) => {
-          if (item.id === targetItem.id) {
-            const totalPrice = targetItem.quantity * targetItem.price;
-            orderTotalPrice += totalPrice;
-            return { ...targetItem, totalPrice };
-          }
-          orderTotalPrice += item.totalPrice;
-          return item;
-        });
-        return { ...order, items: newItems, totalPrice: orderTotalPrice };
-      }
-      return order;
-    });
+  //       const newItems = order.items.map((item: Item) => {
+  //         if (item.id === targetItem.id) {
+  //           const totalPrice = targetItem.quantity * targetItem.price;
+  //           orderTotalPrice += totalPrice;
+  //           return { ...targetItem, totalPrice };
+  //         }
+  //         orderTotalPrice += item.totalPrice;
+  //         return item;
+  //       });
+  //       return { ...order, items: newItems, totalPrice: orderTotalPrice };
+  //     }
+  //     return order;
+  //   });
 
-    setBaseOrderData(newOrderData);
-  };
+  //   setBaseOrderData(newOrderData);
+  // };
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     setIsExecutingAction(true);
@@ -826,7 +820,7 @@ export default function Orders() {
           open={!!selectedOrderDetails}
           onClose={() => setSelectedOrderDetails(null)}
           order={selectedOrderDetails}
-          handleUpdateItem={onUpdateItem}
+          // handleUpdateItem={onUpdateItem}
           showNotification={showNotification}
         />
       )}

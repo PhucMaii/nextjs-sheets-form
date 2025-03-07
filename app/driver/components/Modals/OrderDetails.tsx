@@ -1,9 +1,6 @@
 import React from 'react';
 import { BoxModal } from '@/app/admin/components/Modals/styled';
-import {
-  AlertColor,
-  Modal,
-} from '@mui/material';
+import { AlertColor, Modal } from '@mui/material';
 import { ModalProps } from '@/app/admin/components/Modals/type';
 import { Order } from '@/app/admin/orders/page';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
@@ -22,16 +19,18 @@ export default function OrderDetails({
   order,
   showNotification,
 }: IProps) {
-
   const [items] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${order.userId}`);
   const onUpdateOrder = async (orderParam: Order) => {
     try {
-      const response = await axios.put(`${API_URL.DRIVER}/orderedItems/update`, {
-        updatedItems: orderParam.items,
-        orderId: order.id,
-        note: orderParam.note,
-        deliveryDate: orderParam.deliveryDate,
-      });
+      const response = await axios.put(
+        `${API_URL.DRIVER}/orderedItems/update`,
+        {
+          updatedItems: orderParam.items,
+          orderId: order.id,
+          note: orderParam.note,
+          deliveryDate: orderParam.deliveryDate,
+        },
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);

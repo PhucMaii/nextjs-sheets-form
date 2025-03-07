@@ -137,7 +137,6 @@ export default function OrderForm() {
       }
       showNotification('success', response.data.message);
 
-
       // SHOULD BE /user/overview after website is done
       setTimeout(() => {
         router.push('/');
@@ -171,12 +170,17 @@ export default function OrderForm() {
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         />
 
-        <Tabs variant="fullWidth" sx={{ backgroundColor: grey[50] }} value={tabIdx} onChange={(e, value) => setTabIdx(value)}>
+        <Tabs
+          variant="fullWidth"
+          sx={{ backgroundColor: grey[50] }}
+          value={tabIdx}
+          onChange={(e, value) => setTabIdx(value)}
+        >
           <Tab value={0} label="New Version ✨" />
           <Tab value={1} label="Old Version" />
         </Tabs>
 
-        { tabIdx === 0 ?
+        {tabIdx === 0 ? (
           <>
             <Box display="flex" justifyContent="flex-end">
               <TourStartButton />
@@ -189,15 +193,15 @@ export default function OrderForm() {
                 role={USER_ROLE.CLIENT}
               />
             </Box>
-          </> : (
-            <OldOrderVersion 
-              onSubmit={onSubmit}
-              itemList={itemList}
-              setItemList={setItemList}
-              minDate={minDate}
-            />
-          )
-        }
+          </>
+        ) : (
+          <OldOrderVersion
+            onSubmit={onSubmit}
+            itemList={itemList}
+            setItemList={setItemList}
+            minDate={minDate}
+          />
+        )}
       </Sidebar>
     </TourProvider>
   );

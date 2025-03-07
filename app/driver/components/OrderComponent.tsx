@@ -134,12 +134,14 @@ export default function OrderComponent({
         updatedStatus={confirmModalProps.updatedStatus}
         orderId={order.id}
       />
-      {isOpenDetails && <OrderDetails
-        open={isOpenDetails}
-        onClose={() => setIsOpenDetails(false)}
-        order={order}
-        showNotification={showNotification}
-      />}
+      {isOpenDetails && (
+        <OrderDetails
+          open={isOpenDetails}
+          onClose={() => setIsOpenDetails(false)}
+          order={order}
+          showNotification={showNotification}
+        />
+      )}
       <Grid container alignItems="center" spacing={1}>
         <Grid item xs={1}>
           <IconButton onClick={() => setIsOpenDetails(true)}>

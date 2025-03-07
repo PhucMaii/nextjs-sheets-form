@@ -119,3 +119,19 @@ export const checkIsPreOrderQualified = (scheduledOrder: ScheduledOrder) => {
 
   return totalPriceGt0 && hasItems && !hasOrdered && !isInactive && !isBlocked;
 };
+
+export const onUpdateOrder = async (orderId: number, orderParam: Order) => {
+  try {
+    const response = await axios.put(API_URL.ORDERED_ITEMS, {
+      updatedItems: orderParam.items,
+      orderId,
+      note: orderParam.note,
+      deliveryDate: orderParam.deliveryDate,
+    });
+
+    return response;
+  } catch (error: any) {
+    console.log('There was an error: ', error);
+    throw new Error('There was an error: ' + error?.response?.data?.error);
+  }
+};

@@ -1,6 +1,9 @@
 import { ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
-import { restockInventoryItem, updateSingleInventoryItem } from '../admin/orderedItems/single';
+import {
+  restockInventoryItem,
+  updateSingleInventoryItem,
+} from '../admin/orderedItems/single';
 import { sendEmail } from '../utils/email';
 import { pusherServer } from '@/app/pusher';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -114,12 +117,12 @@ export const overrideOrder = async (
             inventoryItem: true,
           },
         });
-  
+
         itemList.push({
           ...newItem,
           totalPrice: newItem.quantity * newItem.price,
         });
-  
+
         // Update inventory item
         if (existingItem?.fifo && existingItem.inventoryUnit) {
           await updateSingleInventoryItem(
@@ -137,7 +140,7 @@ export const overrideOrder = async (
       }
     }
 
-    // Delete and restock old items 
+    // Delete and restock old items
     if (trackDeletedItems.length > 0) {
       for (const item of trackDeletedItems) {
         if (item?.fifo && item?.inventoryUnit) {

@@ -221,7 +221,11 @@ const ClientOrdersTable = ({
             /> */}
             <Button
               color="error"
-              onClick={() => setOpenDelete(() => ({ order, open: true }))}
+              onClick={(e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setOpenDelete(() => ({ order, open: true }));
+              }}
             >
               Delete
             </Button>

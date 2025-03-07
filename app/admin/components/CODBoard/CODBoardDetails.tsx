@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { IBoard, OrderedItems } from '@/app/utils/type';
+import { IBoard } from '@/app/utils/type';
 import { blueGrey } from '@mui/material/colors';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import OverviewBoard from '../Overview/OverviewBoard';
@@ -21,7 +21,7 @@ import useDebounce from '@/hooks/useDebounce';
 import TuneIcon from '@mui/icons-material/Tune';
 import OrderAccordion from '../OrderAccordion';
 import { Order } from '../../orders/page';
-import { updateOrderedItems, updateStatus } from '@/app/utils/orders';
+import { updateStatus } from '@/app/utils/orders';
 import { API_URL, ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -201,27 +201,27 @@ export default function CODBoardDetails({
     }
   };
 
-  const handleUpdateOrderedItem = async (
-    orderTotalPrice: number,
-    order: Order,
-    updatedItem: OrderedItems,
-    isConvertToCustom: boolean = false,
-  ) => {
-    try {
-      await updateOrderedItems(
-        orderTotalPrice,
-        order,
-        updatedItem,
-        showNotification,
-        isConvertToCustom,
-      );
-      mutateBoard();
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification('error', error.response.data.error);
-      return;
-    }
-  };
+  // const handleUpdateOrderedItem = async (
+  //   orderTotalPrice: number,
+  //   order: Order,
+  //   updatedItem: OrderedItems,
+  //   isConvertToCustom: boolean = false,
+  // ) => {
+  //   try {
+  //     await updateOrderedItems(
+  //       orderTotalPrice,
+  //       order,
+  //       updatedItem,
+  //       showNotification,
+  //       isConvertToCustom,
+  //     );
+  //     mutateBoard();
+  //   } catch (error: any) {
+  //     console.log('Internal Server Error: ', error);
+  //     showNotification('error', error.response.data.error);
+  //     return;
+  //   }
+  // };
 
   const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
     setIsUpdating(true);
@@ -480,7 +480,6 @@ export default function CODBoardDetails({
         orders={unsettledOrders.orders}
         onClose={() => setUnsettledOrders({ isOpen: false, orders: [] })}
         showNotification={showNotification}
-        handleUpdateItem={handleUpdateOrderedItem}
         selectedOrders={selectedOrders}
         handleSelectOrder={handleSelectOrder}
         mutateOrders={mutateBoard}
@@ -604,7 +603,7 @@ export default function CODBoardDetails({
               key={index}
               order={order}
               showNotification={showNotification}
-              handleUpdateItem={handleUpdateOrderedItem}
+              // handleUpdateItem={handleUpdateOrderedItem}
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               mutateOrders={mutateBoard}
