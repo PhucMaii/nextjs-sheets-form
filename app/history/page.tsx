@@ -58,7 +58,7 @@ export default function HistoryPage() {
   const debouncedKeywords = useDebounce(searchKeywords, 800);
 
   // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  
+
   const monthRange = useMemo(() => {
     return generateMonthRange();
   }, []);
@@ -116,7 +116,8 @@ export default function HistoryPage() {
   };
 
   const initializeOrders = () => {
-    const orders = tabIdx === 0 ? orderData.data.userOrders : orderData.data.dueOrders;
+    const orders =
+      tabIdx === 0 ? orderData.data.userOrders : orderData.data.dueOrders;
     const filteredOrders = filterDateRangeOrders(
       orders,
       monthRange[0],
@@ -281,7 +282,7 @@ export default function HistoryPage() {
             onChange={(e: any, value) => setTabIdx(value)}
           >
             <Tab value={0} label="Current Month" />
-            <Tab value={1} label="Due Orders" />
+            <Tab value={1} label="Over Due" />
           </Tabs>
         </Grid>
         <Grid item xs={11}>

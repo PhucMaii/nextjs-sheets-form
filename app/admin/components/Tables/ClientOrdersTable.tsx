@@ -190,7 +190,7 @@ const ClientOrdersTable = ({
             onChange={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              updateStatus(order, e.target.value as ORDER_STATUS)
+              updateStatus(order, e.target.value as ORDER_STATUS);
             }}
             onClick={(e) => {
               e.stopPropagation();

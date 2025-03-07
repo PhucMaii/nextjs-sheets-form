@@ -49,7 +49,7 @@ const OrderSearch = ({
     return res;
   };
 
-  console.log(orders,' orders in order search')
+  console.log(orders, ' orders in order search');
   return (
     <Autocomplete
       multiple
@@ -123,11 +123,11 @@ const OrderSearch = ({
       onChange={onChangeSelectOrders}
     />
   );
-}
+};
 
 export default memo(OrderSearch, (prev, next) => {
   return (
     Object.is(prev.orders, next.orders) &&
     Object.is(prev.selectedOrders, next.selectedOrders)
   );
-})
+});

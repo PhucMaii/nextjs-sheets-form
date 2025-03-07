@@ -80,7 +80,7 @@ const OrderDetails = ({
         );
 
         if (isExistedInOrder) {
-          return isExistedInOrder
+          return isExistedInOrder;
         }
 
         return {
@@ -88,8 +88,8 @@ const OrderDetails = ({
           id: 0,
           quantity: 0,
           itemId: item.id,
-          orderId: order.id
-        }
+          orderId: order.id,
+        };
       });
 
       setBaseItems(newBaseItems);
@@ -105,7 +105,7 @@ const OrderDetails = ({
       setItems(newBaseItems);
     } else {
       setItems(order?.items || []);
-    }  
+    }
   }, [debounceKeywords, baseItems]);
 
   const handlePrinting = useReactToPrint({
@@ -277,7 +277,7 @@ const OrderDetails = ({
               <Divider>Category Items</Divider>
             </Grid>
             <Grid item xs={12}>
-              <TextField 
+              <TextField
                 fullWidth
                 variant="filled"
                 label="Search"

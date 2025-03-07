@@ -168,7 +168,8 @@ export default function OrderDetailsTable({
                     flexDirection={smDown ? 'column' : 'row'}
                     gap={1}
                   >
-                    {item.quantity > 0 && item?.isShowDiscount &&
+                    {item.quantity > 0 &&
+                      item?.isShowDiscount &&
                       item?.prevPrice &&
                       (item.prevPrice * item.quantity).toFixed(2) !==
                         item?.totalPrice?.toFixed(2) && (
@@ -180,7 +181,10 @@ export default function OrderDetailsTable({
                         </Typography>
                       )}
                     <Typography>
-                      ${item?.totalPrice?.toFixed(2) || (item?.price * item.quantity)?.toFixed(2) || 0}
+                      $
+                      {item?.totalPrice?.toFixed(2) ||
+                        (item?.price * item.quantity)?.toFixed(2) ||
+                        0}
                     </Typography>
                   </Box>
                 </TableCell>

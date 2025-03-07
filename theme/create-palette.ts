@@ -2,7 +2,7 @@ import { common } from '@mui/material/colors';
 import { error, info, neutral, primary, success, warning } from './color';
 import { alpha } from '@mui/material';
 
-const blackColor = "#444444";
+const blackColor = '#444444';
 
 export function createPalette() {
   return {

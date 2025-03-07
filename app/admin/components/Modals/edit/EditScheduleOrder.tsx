@@ -122,7 +122,7 @@ export default function EditScheduleOrder({
       setItemList(newItemList);
       return;
     }
-    
+
     const newItemList = itemList.map((item: OrderedItems) => {
       if (item.id === targetItem.id) {
         if (keyChange === 'quantity') {
@@ -181,7 +181,7 @@ export default function EditScheduleOrder({
     } else {
       setItemList([...itemList, { ...item, id: -1, quantity: newQuantity }]);
     }
-  }
+  };
 
   const onChangeNewItemPrice = (e: any, item: any) => {
     const newPrice = +e.target.value;
@@ -194,7 +194,7 @@ export default function EditScheduleOrder({
     });
 
     setBaseItems(newBaseItems);
-  }
+  };
 
   const switchRoute = async () => {
     if (newRouteId === routeId) {
@@ -367,9 +367,7 @@ export default function EditScheduleOrder({
                               fullWidth
                               label="Quantity"
                               value={item.quantity}
-                              onChange={(e) =>
-                                onChangeNewItemQuantity(e, item)
-                              }
+                              onChange={(e) => onChangeNewItemQuantity(e, item)}
                               type="number"
                               inputProps={{ min: 0 }}
                             />

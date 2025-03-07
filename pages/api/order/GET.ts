@@ -75,7 +75,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
-        user: true
+        user: true,
       },
       orderBy: {
         id: 'desc',
@@ -85,8 +85,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const newOrders = formatReturnOrders(userOrders);
     const totalAmount = userOrders.reduce((acc: number, order: Orders) => {
       return acc + order.totalPrice;
-    }, 0)
-
+    }, 0);
 
     // Get debt data
     const monthRange = generateMonthRange();
@@ -114,7 +113,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
-        user: true
+        user: true,
       },
       orderBy: {
         id: 'desc',
@@ -161,4 +160,4 @@ const formatReturnOrders = (orders: any) => {
   });
 
   return newOrders;
-}
+};

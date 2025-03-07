@@ -98,7 +98,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-
     // Check if any item quantity is decimal number
     for (const item of items) {
       if (item.quantity % 1 !== 0) {
@@ -107,7 +106,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       }
     }
-
 
     const formattedCreatedBy = await getCreatedBy(req, res, createdBy);
 

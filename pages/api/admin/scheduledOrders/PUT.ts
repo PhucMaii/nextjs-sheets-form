@@ -87,7 +87,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const totalPrice = items.reduce((acc: number, item: any) => {
-      return acc + (item.quantity * item.price);
+      return acc + item.quantity * item.price;
     }, 0);
 
     const existingScheduleOrder = await prisma.scheduleOrders.findUnique({
