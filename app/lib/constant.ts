@@ -134,6 +134,7 @@ export const productColors = [
 ];
 export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (0 = January)
 export const testAccountId = 223;
+export const clientMaxWidth = '1250px';
 
 export const sendChequeMsg = `
 * Please either send your payment by cheque 

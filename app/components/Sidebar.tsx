@@ -20,7 +20,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
-import { clientTabs } from '@/app/lib/constant';
+import { clientMaxWidth, clientTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
@@ -284,7 +284,14 @@ export default function Sidebar({ children }: PropTypes) {
               showNotification={showNotification}
             />
           )}
-          <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
+          <Box
+            display="flex"
+            width="100%"
+            flexDirection="column"
+            m={1}
+            gap={2}
+            sx={{ maxWidth: clientMaxWidth, mx: 'auto' }}
+          >
             {/* <HolidayText /> */}
             {children}
           </Box>

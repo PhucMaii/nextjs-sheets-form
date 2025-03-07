@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SplashScreen } from '../../HOC/AuthenGuard';
 import Sidebar from '../components/Sidebar';
 import {
@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PendingIcon from '@mui/icons-material/Pending';
 import SelectDateRange from '../admin/components/Select/SelectDateRange';
 import { generateMonthRange } from '../utils/time';
@@ -25,18 +24,21 @@ import OrderAccordion from '../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
 import { DropdownItemContainer } from '../admin/orders/styled';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import {
   errorColor,
   infoColor,
   successColor,
   warningColor,
 } from '../../theme/color';
-import { blue, blueGrey } from '@mui/material/colors';
+import { blue } from '@mui/material/colors';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ErrorComponent from '../admin/components/ErrorComponent';
 import { SWRFetchData } from '../utils/db';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -53,13 +55,23 @@ export default function HistoryPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
   const debouncedKeywords = useDebounce(searchKeywords, 800);
-  const totalPositionRef: any = useRef(null);
+  // const totalPositionRef: any = useRef(null);
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderData, _mutateOrders, isValidating] = SWRFetchData(
     `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
+
+  const unpaidTotal = useMemo(() => {
+    const unpaidOrders = baseClientOrders.filter((order: Order) => {
+      return order.status !== ORDER_STATUS.COMPLETED;
+    });
+
+    return unpaidOrders.reduce((total: number, order: Order) => {
+      return total + order.totalPrice;
+    }, 0);
+  }, [baseClientOrders]);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -77,7 +89,8 @@ export default function HistoryPage() {
       const newOrderData = baseClientOrders.filter((order: Order) => {
         if (
           order.id.toString().includes(debouncedKeywords) ||
-          order.status.toLowerCase() === debouncedKeywords.toLowerCase()
+          order.status.toLowerCase() === debouncedKeywords.toLowerCase() ||
+          order.deliveryDate.includes(debouncedKeywords)
         ) {
           return true;
         }
@@ -231,11 +244,32 @@ export default function HistoryPage() {
         <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
         </Grid>
+        <Grid item xs={12}>
+          <OverviewCard
+            text="Due Amount"
+            value={unpaidTotal}
+            icon={<AttachMoneyIcon sx={{fontSize: 50}} fontSize="large" color="primary" />}
+          />
+        </Grid>
+        {/* <Grid item xs={6}>
+          <OverviewCard
+            text="Total Bill ($)"
+            value={totalBill}
+            // icon={<MonetizationOnIcon fontSize="large" color="primary" />}
+          />
+        </Grid> */}
+        <Grid item xs={12}>
+          <OverviewCard
+            text="Total Orders"
+            value={baseClientOrders.length}
+            icon={<ReceiptLongIcon sx={{fontSize: 50}} fontSize="large" color="primary" />}
+          />
+        </Grid>
         <Grid item xs={11}>
           <TextField
             fullWidth
             variant="filled"
-            placeholder="Search by invoice id or status"
+            placeholder="Search by invoice id, date or status"
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}
           />
@@ -243,7 +277,7 @@ export default function HistoryPage() {
         <Grid item xs={1} textAlign="right">
           {filterDropdown}
         </Grid>
-        <Grid item xs={12} ref={totalPositionRef}>
+        {/* <Grid item xs={12} ref={totalPositionRef}>
           <Box
             sx={{
               backgroundColor: blueGrey[800],
@@ -257,7 +291,7 @@ export default function HistoryPage() {
               Total: {clientOrders.length} orders
             </Typography>
           </Box>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           {isValidating && !clientOrders ? (
             <SplashScreen />
