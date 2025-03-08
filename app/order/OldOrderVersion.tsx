@@ -75,7 +75,7 @@ export default function OldOrderVersion({
 
       {unavailableRange && (
         <OrderOnVacationModal
-          clientName={client.clientName}
+          clientName={client?.clientName || ''}
           open={isOrderOnVacationOpen}
           onClose={() => setIsOrderOnVacationOpen(false)}
           startDate={new Date(unavailableRange[0])}
@@ -98,7 +98,7 @@ export default function OldOrderVersion({
             <Grid item xs={2}></Grid>
             <Grid item xs={8}>
               <Typography variant="h4" textAlign="center">
-                {client.clientName}
+                {client?.clientName || ''}
               </Typography>
             </Grid>
             <Grid item xs={2} textAlign="right">
