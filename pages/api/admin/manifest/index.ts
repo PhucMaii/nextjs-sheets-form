@@ -350,7 +350,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           };
         });
 
-      console.log({ manifestDetail });
+      // console.log({ manifestDetail });
 
       itemManifest[itemRoute] = {
         details: manifestDetail,

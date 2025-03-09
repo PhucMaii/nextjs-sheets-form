@@ -35,6 +35,7 @@ import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import { generateMonthRange } from '@/app/utils/time';
 import { useReactToPrint } from 'react-to-print';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
+import MoneyOffCsredIcon from '@mui/icons-material/MoneyOffCsred';
 import { DropdownItemContainer } from '../orders/styled';
 import {
   errorColor,
@@ -141,6 +142,26 @@ export default function ReportPage() {
     return bill;
   }, [clientOrders]);
 
+  // const unpaidAmount = useMemo(() => {
+  //   if (!unpaidOrders || unpaidOrders.length === 0) {
+  //     return 0;
+  //   }
+
+  //   const overDue = unpaidOrders.reduce((acc: number, order: Order) => {
+  //     if (order.status === ORDER_STATUS.VOID) {
+  //       return acc;
+  //     }
+
+  //     if (order.status === ORDER_STATUS.COMPLETED) {
+  //       return acc; // Skip paid orders
+  //     }
+
+  //     return acc + order.totalPrice;
+  //   }, 0);
+
+  //   return overDue;
+  // }, [unpaidOrders]);
+
   useEffect(() => {
     pusherClient?.subscribe('admin-delete-order');
 
@@ -209,32 +230,11 @@ export default function ReportPage() {
         }
         return false;
       });
-      // const newOrderData = handleSearch(debouncedKeywords, baseClientOrders, [
-      //   'id',
-      //   'user.clientId',
-      //   'user.clientName',
-      //   'status',
-      // ]);
       setClientOrders(newOrderData);
     } else {
       setClientOrders(baseClientOrders);
     }
   }, [debouncedKeywords, baseClientOrders]);
-
-  // const calculateTotalBill = () => {
-  //   const bill = clientOrders.reduce((acc: number, cV: Order) => {
-  //     // Only calculate total incompleted and completed orders
-  //     if (
-  //       cV.status === ORDER_STATUS.DELIVERED ||
-  //       cV.status === ORDER_STATUS.INCOMPLETED
-  //     ) {
-  //       return acc + cV.totalPrice;
-  //     }
-  //     return acc + 0;
-  //   }, 0);
-
-  //   setTotalBill(bill);
-  // };
 
   const initializeOrders = () => {
     let orderData = orders.data;
@@ -479,10 +479,6 @@ export default function ReportPage() {
           disabled={!clientValue?.email || false}
           onClick={async () => {
             setIsOpenEditEmail(true);
-            // setIsSendLoading(true);
-            // await handleSendInvoice();
-            // setIsSendLoading(false);
-            // handleCloseStatementAnchor();
           }}
         >
           {'Send to client'}
@@ -731,12 +727,31 @@ export default function ReportPage() {
               />
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
+              {orders?.overDueOrders ? (
+                <OverviewCard
+                  icon={
+                    <MoneyOffCsredIcon
+                      sx={{ color: blue[700], fontSize: 50 }}
+                    />
+                  }
+                  text="Over Due"
+                  value={orders?.overDueAmount?.toFixed(2)}
+                />
+              ) : (
+                <OverviewCard
+                  icon={<PendingIcon sx={{ color: blue[700], fontSize: 50 }} />}
+                  text="Unpaid orders"
+                  value={unpaidOrders.length}
+                />
+              )}
+            </Grid>
+            {/* <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
                 icon={<PendingIcon sx={{ color: blue[700], fontSize: 50 }} />}
                 text="Unpaid orders"
                 value={unpaidOrders.length}
               />
-            </Grid>
+            </Grid> */}
           </Grid>
           <Grid container spacing={1} alignItems="center">
             <Grid item md={2} xs={12}>

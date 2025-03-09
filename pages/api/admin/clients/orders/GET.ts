@@ -1,9 +1,10 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
-import { PrismaClient } from '@prisma/client';
+import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateOrderProfit } from '../../orders/GET';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface RequestQuery {
   userId?: string;
@@ -20,6 +21,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     // Check if there is no userId, then fetch all orders with specific delivery date
     let userOrders: any = [];
+
+    let overDueOrders: any = null;
     if (userId && !isNaN(Number(userId))) {
       if (!startDate || !endDate) {
         return res.status(400).json({
@@ -47,6 +50,36 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           deliveryDate: {
             in: listOfDateString,
           },
+        },
+        include: {
+          items: {
+            include: {
+              inventoryItem: true,
+              inventoryUnit: true,
+              fifo: true,
+            },
+          },
+          user: {
+            include: {
+              category: true,
+              preference: true,
+            },
+          },
+        },
+        orderBy: {
+          id: 'desc',
+        },
+      });
+
+      overDueOrders = await prisma.orders.findMany({
+        where: {
+          userId: Number(userId),
+          deliveryDate: {
+            notIn: listOfDateString,
+          },
+          status: {
+            in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+          }
         },
         include: {
           items: {
@@ -109,8 +142,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       };
     });
 
+    const overDueAmount = overDueOrders?.reduce((acc: number, order: Orders) => {
+      return acc + order.totalPrice;
+    }, 0) || 0;
+
     return res.status(200).json({
       data: formatUserOrders,
+      overDueOrders,
+      overDueAmount,
       message: 'Fetch User Orders In Date Range Successfully',
     });
   } catch (error: any) {
