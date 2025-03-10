@@ -3,8 +3,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
+import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '../utils/date';
+import { getOverdueOrders } from '../utils/order';
 
 interface IQuery {
   startDate?: string;
@@ -88,41 +89,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }, 0);
 
     // Get debt data
-    const monthRange = generateMonthRange();
-    const currentMonthListOfDateString = generateListOfDateString(
-      monthRange[0],
-      monthRange[1],
-    );
-
-    console.log(currentMonthListOfDateString, 'currentMonthListOfDateString');
-
-    const incompletedOrders: any = await prisma.orders.findMany({
-      where: {
-        userId: existingUser.id,
-        status: {
-          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
-        },
-        deliveryDate: {
-          notIn: currentMonthListOfDateString,
-        },
-      },
-      include: {
-        items: {
-          include: {
-            inventoryItem: true,
-            inventoryUnit: true,
-          },
-        },
-        user: true,
-      },
-      orderBy: {
-        id: 'desc',
-      },
-    });
-
-    const dueAmount = incompletedOrders.reduce((acc: number, order: Orders) => {
-      return acc + order.totalPrice;
-    }, 0);
+    const { orders: incompletedOrders, overDue: dueAmount } =
+      await getOverdueOrders(existingUser.id);
 
     const dueOrders = formatReturnOrders(incompletedOrders);
 

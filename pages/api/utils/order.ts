@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { Orders, PrismaClient } from '@prisma/client';
 import { getTodayDate, normalizeDate } from './date';
-import { ACTION } from '@/app/utils/enum';
+import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
+import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 
 export const formatItemsWithTotalPrice = (items: any[]) => {
   return items.map((item: any) => {
@@ -55,5 +56,52 @@ export const checkOrderValidToAffectInventory = async (
   } catch (error: any) {
     console.log('Fail to check order valid to affect inventory: ', error);
     return false;
+  }
+};
+
+export const getOverdueOrders = async (userId: number) => {
+  try {
+    const monthRange = generateMonthRange();
+    const currentMonthListOfDateString = generateListOfDateString(
+      monthRange[0],
+      monthRange[1],
+    );
+
+    const prisma = new PrismaClient();
+
+    const incompletedOrders: any = await prisma.orders.findMany({
+      where: {
+        userId,
+        status: {
+          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+        },
+        deliveryDate: {
+          notIn: currentMonthListOfDateString,
+        },
+      },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          },
+        },
+        user: true,
+      },
+      orderBy: {
+        id: 'desc',
+      },
+    });
+
+    const dueAmount = incompletedOrders.reduce((acc: number, order: Orders) => {
+      return acc + order.totalPrice;
+    }, 0);
+
+    return {
+      orders: incompletedOrders,
+      overDue: dueAmount,
+    };
+  } catch (error: any) {
+    throw new Error('Fail to get overdue orders');
   }
 };

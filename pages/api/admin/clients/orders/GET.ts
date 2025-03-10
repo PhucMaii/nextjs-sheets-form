@@ -1,10 +1,9 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '@/pages/api/utils/date';
-import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import { formatItemsWithTotalPrice, getOverdueOrders } from '@/pages/api/utils/order';
 import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateOrderProfit } from '../../orders/GET';
-import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface RequestQuery {
   userId?: string;
@@ -71,35 +70,38 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      overDueOrders = await prisma.orders.findMany({
-        where: {
-          userId: Number(userId),
-          deliveryDate: {
-            notIn: listOfDateString,
-          },
-          status: {
-            in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
-          }
-        },
-        include: {
-          items: {
-            include: {
-              inventoryItem: true,
-              inventoryUnit: true,
-              fifo: true,
-            },
-          },
-          user: {
-            include: {
-              category: true,
-              preference: true,
-            },
-          },
-        },
-        orderBy: {
-          id: 'desc',
-        },
-      });
+      const { orders } = await getOverdueOrders(Number(userId));
+      overDueOrders = orders;
+
+      // overDueOrders = await prisma.orders.findMany({
+      //   where: {
+      //     userId: Number(userId),
+      //     deliveryDate: {
+      //       notIn: listOfDateString,
+      //     },
+      //     status: {
+      //       in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+      //     }
+      //   },
+      //   include: {
+      //     items: {
+      //       include: {
+      //         inventoryItem: true,
+      //         inventoryUnit: true,
+      //         fifo: true,
+      //       },
+      //     },
+      //     user: {
+      //       include: {
+      //         category: true,
+      //         preference: true,
+      //       },
+      //     },
+      //   },
+      //   orderBy: {
+      //     id: 'desc',
+      //   },
+      // });
     } else {
       userOrders = await prisma.orders.findMany({
         where: {
