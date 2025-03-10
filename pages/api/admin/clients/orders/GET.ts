@@ -1,6 +1,9 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '@/pages/api/utils/date';
-import { formatItemsWithTotalPrice, getOverdueOrders } from '@/pages/api/utils/order';
+import {
+  formatItemsWithTotalPrice,
+  getOverdueOrders,
+} from '@/pages/api/utils/order';
 import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateOrderProfit } from '../../orders/GET';
@@ -144,9 +147,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       };
     });
 
-    const overDueAmount = overDueOrders?.reduce((acc: number, order: Orders) => {
-      return acc + order.totalPrice;
-    }, 0) || 0;
+    const overDueAmount =
+      overDueOrders?.reduce((acc: number, order: Orders) => {
+        return acc + order.totalPrice;
+      }, 0) || 0;
 
     return res.status(200).json({
       data: formatUserOrders,
