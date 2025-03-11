@@ -702,7 +702,7 @@ const OrderView = ({
                   gap={2}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
-                    {role === USER_ROLE.ADMIN ? (
+                    {role !== USER_ROLE.CLIENT ? (
                       <OutlinedInput
                         size="small"
                         type="number"

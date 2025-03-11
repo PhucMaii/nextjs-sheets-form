@@ -15,7 +15,6 @@ import {
   closestCorners,
   DndContext,
   DragEndEvent,
-  DragMoveEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -95,14 +94,12 @@ const SortableItem = ({
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
     isDragging,
   } = useSortable({ id: item.id, data: { type: 'item' } });
 
   const style = {
-    transition,
-    transform: CSS.Transform.toString(transform),
+    transition: 'none',
+    // transform: CSS.Transform.toString(transform),
     opacity: isDragging ? 0.5 : 1,
   };
 
@@ -209,7 +206,17 @@ export default function Appearance({ types, showNotification }: IProps) {
     setActiveItemId(`${activeType} - ${id}`);
   };
 
-  const onDragMove = (event: DragMoveEvent) => {
+  const swapElements = (array: any[], indexA: number, indexB: number) => {
+    [array[indexA], array[indexB]] = [array[indexB], array[indexA]];
+
+    return array;
+  };
+
+  // const swapItemsInDifferentContainers = (
+    
+  // )
+
+  const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     const activeType = active.data.current?.type;
     const overType = over?.data.current?.type;
@@ -250,7 +257,12 @@ export default function Appearance({ types, showNotification }: IProps) {
       // In the same container
       if (activeContainerIndex === overContainerIndex) {
         const newItems = [...itemTypes];
-        newItems[activeContainerIndex].inventoryItems = arrayMove(
+        // newItems[activeContainerIndex].inventoryItems = arrayMove(
+        //   newItems[activeContainerIndex].inventoryItems,
+        //   activeItemIndex,
+        //   overItemIndex,
+        // );
+        newItems[activeContainerIndex].inventoryItems = swapElements(
           newItems[activeContainerIndex].inventoryItems,
           activeItemIndex,
           overItemIndex,
@@ -311,14 +323,7 @@ export default function Appearance({ types, showNotification }: IProps) {
       newItems[overContainerIndex].inventoryItems.push(removedItem);
       setItemTypes(newItems);
     }
-  };
 
-  const onDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    const activeType = active.data.current?.type;
-    const overType = over?.data.current?.type;
-
-    // Handle Container Sorting
     if (
       activeType === 'container' &&
       overType &&
@@ -339,109 +344,138 @@ export default function Appearance({ types, showNotification }: IProps) {
       newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
       setItemTypes(newItems);
     }
-
-    // Handle Item Sorting
-    if (
-      activeType === 'item' &&
-      overType &&
-      overType === 'item' &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the active container and over container
-      const activeContainer = findValueOfItems(active.id, 'item');
-      const overContainer = findValueOfItems(over.id, 'item');
-
-      // If the active or over container is undefined, return
-      if (!activeContainer || !overContainer) {
-        return;
-      }
-
-      // Find the index of the active and over container
-      const activeContainerIndex = itemTypes.findIndex(
-        (type) => type.id === activeContainer.id,
-      );
-      const overContainerIndex = itemTypes.findIndex(
-        (type) => type.id === overContainer.id,
-      );
-
-      // Find he index of the active item and over item
-      const activeItemIndex = activeContainer.inventoryItems.findIndex(
-        (item) => item.id === active.id,
-      );
-      const overItemIndex = overContainer.inventoryItems.findIndex(
-        (item) => item.id === over.id,
-      );
-
-      // In the same container
-      if (activeContainerIndex === overContainerIndex) {
-        const newItems = [...itemTypes];
-        newItems[activeContainerIndex].inventoryItems = arrayMove(
-          newItems[activeContainerIndex].inventoryItems,
-          activeItemIndex,
-          overItemIndex,
-        );
-
-        setItemTypes(newItems);
-      } else {
-        // In different container
-        const newItems = [...itemTypes];
-        const [removedItem] = newItems[
-          activeContainerIndex
-        ].inventoryItems.splice(activeItemIndex, 1);
-
-        newItems[overContainerIndex].inventoryItems.splice(
-          overItemIndex,
-          0,
-          removedItem,
-        );
-
-        setItemTypes(newItems);
-      }
-    }
-
-    // Handling Item Drop into a container
-    if (
-      activeType === 'item' &&
-      overType &&
-      overType === 'container' &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      const activeContainer = findValueOfItems(active.id, 'item');
-      const overContainer = findValueOfItems(over.id, 'container');
-
-      // If the active or over container is undefined, return
-      if (!activeContainer || !overContainer) {
-        return;
-      }
-
-      // Find the index of the active and over container
-      const activeContainerIndex = itemTypes.findIndex(
-        (type) => type.id === activeContainer.id,
-      );
-      const overContainerIndex = itemTypes.findIndex(
-        (type) => type.id === overContainer.id,
-      );
-
-      // Find the index of the active item
-      const activeItemIndex = activeContainer.inventoryItems.findIndex(
-        (item) => item.id === active.id,
-      );
-
-      const newItems = [...itemTypes];
-      const [removedItem] = newItems[
-        activeContainerIndex
-      ].inventoryItems.splice(activeItemIndex, 1);
-
-      newItems[overContainerIndex].inventoryItems.push(removedItem);
-
-      setItemTypes(newItems);
-    }
     setActiveItemId(null);
   };
+
+  // const onDragEnd = (event: DragEndEvent) => {
+  //   const { active, over } = event;
+  //   const activeType = active.data.current?.type;
+  //   const overType = over?.data.current?.type;
+
+  //   // Handle Container Sorting
+  //   if (
+  //     activeType === 'container' &&
+  //     overType &&
+  //     overType === 'container' &&
+  //     active &&
+  //     over &&
+  //     active.id !== over.id
+  //   ) {
+  //     const activeContainerIndex = itemTypes.findIndex(
+  //       (type) => type.id === active.id,
+  //     );
+  //     const overContainerIndex = itemTypes.findIndex(
+  //       (type) => type.id === over.id,
+  //     );
+
+  //     // Swap the active and over container
+  //     let newItems = [...itemTypes];
+  //     newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
+  //     setItemTypes(newItems);
+  //   }
+
+  //   // Handle Item Sorting
+  //   if (
+  //     activeType === 'item' &&
+  //     overType &&
+  //     overType === 'item' &&
+  //     active &&
+  //     over &&
+  //     active.id !== over.id
+  //   ) {
+  //     // Find the active container and over container
+  //     const activeContainer = findValueOfItems(active.id, 'item');
+  //     const overContainer = findValueOfItems(over.id, 'item');
+
+  //     // If the active or over container is undefined, return
+  //     if (!activeContainer || !overContainer) {
+  //       return;
+  //     }
+
+  //     // Find the index of the active and over container
+  //     const activeContainerIndex = itemTypes.findIndex(
+  //       (type) => type.id === activeContainer.id,
+  //     );
+  //     const overContainerIndex = itemTypes.findIndex(
+  //       (type) => type.id === overContainer.id,
+  //     );
+
+  //     // Find he index of the active item and over item
+  //     const activeItemIndex = activeContainer.inventoryItems.findIndex(
+  //       (item) => item.id === active.id,
+  //     );
+  //     const overItemIndex = overContainer.inventoryItems.findIndex(
+  //       (item) => item.id === over.id,
+  //     );
+
+  //     // In the same container
+  //     if (activeContainerIndex === overContainerIndex) {
+  //       const newItems = [...itemTypes];
+  //       newItems[activeContainerIndex].inventoryItems = arrayMove(
+  //         newItems[activeContainerIndex].inventoryItems,
+  //         activeItemIndex,
+  //         overItemIndex,
+  //       );
+
+  //       setItemTypes(newItems);
+  //     } else {
+  //       // In different container
+  //       const newItems = [...itemTypes];
+  //       const [removedItem] = newItems[
+  //         activeContainerIndex
+  //       ].inventoryItems.splice(activeItemIndex, 1);
+
+  //       newItems[overContainerIndex].inventoryItems.splice(
+  //         overItemIndex,
+  //         0,
+  //         removedItem,
+  //       );
+
+  //       setItemTypes(newItems);
+  //     }
+  //   }
+
+  //   // Handling Item Drop into a container
+  //   if (
+  //     activeType === 'item' &&
+  //     overType &&
+  //     overType === 'container' &&
+  //     active &&
+  //     over &&
+  //     active.id !== over.id
+  //   ) {
+  //     const activeContainer = findValueOfItems(active.id, 'item');
+  //     const overContainer = findValueOfItems(over.id, 'container');
+
+  //     // If the active or over container is undefined, return
+  //     if (!activeContainer || !overContainer) {
+  //       return;
+  //     }
+
+  //     // Find the index of the active and over container
+  //     const activeContainerIndex = itemTypes.findIndex(
+  //       (type) => type.id === activeContainer.id,
+  //     );
+  //     const overContainerIndex = itemTypes.findIndex(
+  //       (type) => type.id === overContainer.id,
+  //     );
+
+  //     // Find the index of the active item
+  //     const activeItemIndex = activeContainer.inventoryItems.findIndex(
+  //       (item) => item.id === active.id,
+  //     );
+
+  //     const newItems = [...itemTypes];
+  //     const [removedItem] = newItems[
+  //       activeContainerIndex
+  //     ].inventoryItems.splice(activeItemIndex, 1);
+
+  //     newItems[overContainerIndex].inventoryItems.push(removedItem);
+
+  //     setItemTypes(newItems);
+  //   }
+  //   setActiveItemId(null);
+  // };
 
   const onOpenSwitchType = (item: IInventoryItem) => {
     setSwitchTypeProps({ open: true, item });
@@ -501,7 +535,7 @@ export default function Appearance({ types, showNotification }: IProps) {
         <DndContext
           sensors={sensors}
           onDragStart={onDragStart}
-          onDragMove={onDragMove}
+          // onDragMove={onDragMove}
           onDragEnd={onDragEnd}
           collisionDetection={closestCorners}
         >
