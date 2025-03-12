@@ -116,14 +116,28 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.orderedItems.deleteMany({
-    where: {
-      scheduledOrderId: {
-        not: null,
-      },
-      quantity: 0,
-    },
+  const allTypes = await prisma.itemType.findMany({
+    include: {
+      inventoryItems: true
+    }
   });
+
+  for (const type of allTypes) {
+    let indexPos = 1;
+    for (const item of type.inventoryItems) {
+      console.log(item, 'item');
+      await prisma.inventoryItem.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          indexPos
+        }
+      });
+      indexPos++;
+    }
+
+  }
 }
 
 main()

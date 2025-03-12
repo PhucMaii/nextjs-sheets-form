@@ -1,15 +1,14 @@
 'use client';
 import React from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import Appearance from '../components/Inventory/Appearance';
+import Appearance from '../components/Appearance/Appearance';
 import { SWRFetchData } from '../../utils/db';
-import { API_URL } from '../../utils/enum';
 import { Box, Typography } from '@mui/material';
 import { ShadowSection } from '../reports/styled';
 import useNotification from '@/hooks/useNotification';
 
 export default function OrderLayoutPage() {
-  const [itemTypes] = SWRFetchData(`${API_URL.ADMIN}/item-types`);
+  const [itemTypes] = SWRFetchData(`/api/appearance`);
 
   const { showNotification, NotificationComp } = useNotification();
 

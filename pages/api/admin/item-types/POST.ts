@@ -22,6 +22,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newItemType = await prisma.itemType.create({
       data: {
         name,
+        rows: 1,
       },
     });
 

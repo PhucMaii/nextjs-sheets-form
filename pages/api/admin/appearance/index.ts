@@ -45,10 +45,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'No data found' });
     }
 
-    // Get 2 array of names for easy compare from itemTypes and dbTypes
+    // Get 2 array of type names for easy compare from itemTypes and dbTypes
     const updatedTypeNames = itemTypes.map((itemType) => {
       return itemType.name;
     });
+
     const dbTypeNames = dbTypes.map((itemType) => {
       return itemType.name;
     });
@@ -82,23 +83,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       convertInventoryItemsToTypeMap(dbInventoryItems);
 
     for (const itemType of itemTypes) {
-      const inventoryItemNames = itemType.inventoryItems.map(
-        (item) => item.name,
-      );
+      const inventoryItemNames = fillInEmptyPosition(itemType.inventoryItems);
+      const dbItemNames = fillInEmptyPosition(dbItemArrangementMap[itemType.id]);
 
-      // Check if any item has been re arranged
+      // Check if any item has been re arranged and only update re arranged items
       if (
         JSON.stringify(inventoryItemNames) !==
-        JSON.stringify(dbItemArrangementMap[itemType.id])
+        JSON.stringify(dbItemNames)
       ) {
         // Re arrange
         let indexPos = 1;
         for (let i = 0; i < itemType.inventoryItems.length; i++) {
           const inventoryItem = itemType.inventoryItems[i];
-          await prisma.inventoryItem.update({
-            where: { id: inventoryItem.id },
-            data: { indexPos, typeId: itemType.id },
-          });
+
+          if (inventoryItem.name !== 'Empty') {
+            await prisma.inventoryItem.update({
+              where: { id: inventoryItem.id },
+              data: { indexPos, typeId: itemType.id },
+            });
+          }
+
           indexPos++;
         }
       }
@@ -116,8 +120,9 @@ export default withAdminAuthGuard(handler);
 const convertInventoryItemsToTypeMap = (inventoryItems: IInventoryItem[]) => {
   const itemTypeMap = inventoryItems.reduce(
     (map: any, item: IInventoryItem) => {
-      const key = item?.type?.id;
+      const key = item?.typeId;
 
+      // If reach to empty element, then skip
       if (!key) {
         return map;
       }
@@ -126,7 +131,7 @@ const convertInventoryItemsToTypeMap = (inventoryItems: IInventoryItem[]) => {
         map[key] = [];
       }
 
-      map[key].push(item.name);
+      map[key].push(item);
 
       return map;
     },
@@ -134,4 +139,33 @@ const convertInventoryItemsToTypeMap = (inventoryItems: IInventoryItem[]) => {
   );
 
   return itemTypeMap;
+};
+
+export const fillInEmptyPosition = (inventoryItems: IInventoryItem[]) => {
+  const itemNames: string[] = [];
+
+  if (!inventoryItems || inventoryItems.length === 0) {
+    return [];
+  }
+
+  for (let i = 0; i < inventoryItems.length; i++) {
+    const item = inventoryItems[i];
+
+    if (!item) {
+      itemNames.push('Empty');
+    } else {
+      if (item.indexPos !== i + 1) {
+        let pos = i + 1;
+
+        while (pos < (item?.indexPos || 1)) {
+          itemNames.push('Empty');
+          pos++;
+        }
+      }
+
+      itemNames.push(item.name);
+    }
+  }
+
+  return itemNames
 };
