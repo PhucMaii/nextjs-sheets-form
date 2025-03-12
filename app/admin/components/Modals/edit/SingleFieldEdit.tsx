@@ -42,7 +42,7 @@ const SingleFieldEdit = ({
   inputProps,
 }: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [value, setValue] = useState<any>(defaultValue ? defaultValue : null);
+  const [value, setValue] = useState<any>(defaultValue !== undefined ? defaultValue : null);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
@@ -58,6 +58,7 @@ const SingleFieldEdit = ({
       await handleUpdate(value);
 
       setIsLoading(false);
+      setValue(0);
     } catch (error: any) {
       console.log('Internal Server Error: ', error.response.data.error);
       setIsLoading(false);

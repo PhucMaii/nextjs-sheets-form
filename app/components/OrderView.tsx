@@ -167,7 +167,7 @@ const OrderView = ({
   const [singleFieldProps, setSingleFieldProps] = useState<any>({
     open: false,
     item: null,
-    defaultValue: 1,
+    defaultValue: 0,
   });
   const [tabIdx, setTabIdx] = useState<number>(0);
 
@@ -209,11 +209,9 @@ const OrderView = ({
     );
   }, [orderedItems]);
 
-  //   useEffect(() => {
-  //     if (defaultOrderedItems) {
-  //       setOrderedItems(defaultOrderedItems);
-  //     }
-  //   }, [defaultOrderedItems]);
+  useEffect(() => {
+    setOrderedItems(defaultOrderedItems || []);
+  }, [clientName, defaultOrderedItems]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -281,7 +279,7 @@ const OrderView = ({
 
   const onAddItem = (quantity: number) => {
     if (quantity % 1 !== 0) {
-      showNotification('error', 'Quantity must be an whole number');
+      showNotification('error', 'Quantity must be a whole number');
       return;
     }
 
@@ -319,7 +317,7 @@ const OrderView = ({
     setSingleFieldProps({
       open: false,
       item: null,
-      defaultValue: 1,
+      defaultValue: 0,
     });
   };
 
@@ -391,6 +389,7 @@ const OrderView = ({
     setIsLoading(true);
     try {
       await onSubmit({ ...order, items: orderedItems });
+      setOrderedItems([]);
       setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -429,7 +428,7 @@ const OrderView = ({
                     setSingleFieldProps({
                       open: true,
                       item,
-                      defaultValue: 1,
+                      defaultValue: 0,
                     })
                   }
                   containerStyle={{
@@ -471,7 +470,7 @@ const OrderView = ({
                           setSingleFieldProps({
                             open: true,
                             item,
-                            defaultValue: 1,
+                            defaultValue: 0,
                           })
                         }
                         containerStyle={{
@@ -810,7 +809,10 @@ const OrderView = ({
               onChange={onDateChange}
               sx={{ width: '100%' }}
               shouldDisableDate={disableChristmasAndNewYear}
-              disabled={(role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER) && purpose === ORDER_USAGE_PURPOSE.ITEM}
+              disabled={
+                (role === USER_ROLE.CLIENT || role === USER_ROLE.DRIVER) &&
+                purpose === ORDER_USAGE_PURPOSE.ITEM
+              }
             />
           </LocalizationProvider>
         </Box>
@@ -826,7 +828,9 @@ const OrderView = ({
             placeholder="Leave us a note here..."
             value={order.note}
             onChange={(e) => setOrder({ ...order, note: e.target.value })}
-            disabled={role === USER_ROLE.DRIVER && purpose === ORDER_USAGE_PURPOSE.ITEM}
+            disabled={
+              role === USER_ROLE.DRIVER && purpose === ORDER_USAGE_PURPOSE.ITEM
+            }
           />
         </Box>
       </Box>
@@ -927,8 +931,8 @@ const OrderView = ({
           inputLabel="Quantity"
           open={singleFieldProps.open}
           handleUpdate={onAddItem}
-          onClose={() => setSingleFieldProps({ open: false, defaultValue: 1 })}
-          defaultValue={singleFieldProps.defaultValue}
+          onClose={() => setSingleFieldProps({ open: false, defaultValue: 0 })}
+          defaultValue={singleFieldProps?.defaultValue || 0}
           buttonLabel="Add"
           inputProps={{
             type: 'number',
@@ -981,7 +985,7 @@ const OrderView = ({
         inputLabel="Quantity"
         open={singleFieldProps.open}
         handleUpdate={onAddItem}
-        onClose={() => setSingleFieldProps({ open: false, defaultValue: 1 })}
+        onClose={() => setSingleFieldProps({ open: false, defaultValue: 0 })}
         defaultValue={singleFieldProps.defaultValue}
         buttonLabel="Add"
         inputProps={{
