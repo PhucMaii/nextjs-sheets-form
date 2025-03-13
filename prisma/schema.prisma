@@ -45,6 +45,7 @@ model User {
   unavailableDayRange DayRange[]
   printStatements     ClientStatement[]
   cart                Cart[]
+  cheques             Cheque[]
 }
 
 model Category {
@@ -396,14 +397,19 @@ model Action {
   createdBy   String?
 }
 
-model ChequeImages {
+model Cheque {
   id      Int     @id @default(autoincrement())
-  fileKey  String
+  fileKeyFront  String
+  fileKeyBack   String
+  month        String
+  year         String
+  chequeNumber  String
+  amount        Int
   createdAt   String
   createdBy   String
-  statementId   Int
+  userId   Int
 
-  statement     ClientStatement @relation(fields: [statementId], references: [id])
+  user     User @relation(fields: [userId], references: [id])
 }
 
 model ClientStatement {
@@ -416,7 +422,6 @@ model ClientStatement {
   createdAt String
 
   user User @relation(fields: [userId], references: [id])
-  chequeImages ChequeImages[]
 }
 
 model CartItem {

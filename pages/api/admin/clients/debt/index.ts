@@ -19,7 +19,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prisma = new PrismaClient();
 
     const { userId, endMonth, endYear }: IQuery = req.query;
-    console.log(endMonth, 'end month');
 
     if (!userId || !endMonth || !endYear) {
       return res.status(404).json({
@@ -49,9 +48,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       endMonth,
       endYear,
     );
-    console.log(debtOrdersByMonth, 'debtOrdersByMonth');
 
-    console.log(debtOrdersByMonth, 'debtOrdersByMonth');
     return res.status(200).json({
       data: debtOrdersByMonth,
       message: 'Fetch Debt Data Successfully',
@@ -108,11 +105,9 @@ export const groupOrderByMMYYYY = (
       acc[key] = 0;
     }
 
-    console.log(order.deliveryDate, 'order.deliveryDate');
     acc[key] = acc[key] + order.totalPrice;
     return acc;
   }, {});
 
-  console.log(debtOrdersByMonth, 'debtOrdersByMonth');
   return debtOrdersByMonth;
 };
