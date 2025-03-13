@@ -112,7 +112,6 @@ describe('Create Order', () => {
       testClient,
       testOrderData.body.items,
       '01/01/2024',
-      testOrderData.body.createdAt,
       'Client - 00030',
       testOrderData.body.note,
     );
@@ -128,7 +127,6 @@ describe('Create Order', () => {
       { ...testClient, type: USER_CATEGORIZED.INACTIVE }, // mod user to inactive
       testOrderData.body.items,
       '01/01/3000',
-      testOrderData.body.createdAt,
       'Client - 00030',
       testOrderData.body.note,
     );
@@ -141,7 +139,6 @@ describe('Create Order', () => {
       testClient,
       testOrderData.body.items,
       '01/01/3000',
-      testOrderData.body.createdAt,
       'Client - 00030',
       testOrderData.body.note,
     );

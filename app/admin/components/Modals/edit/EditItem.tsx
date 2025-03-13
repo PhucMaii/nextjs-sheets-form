@@ -20,15 +20,17 @@ import { IItem } from '@/app/utils/type';
 import UnitRadio from '../../Radio/UnitRadio';
 import { getUniqueUnitRatios } from '@/app/utils/array';
 import ErrorComponent from '../../ErrorComponent';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
+import { TrashIcon } from 'lucide-react';
+import DeleteModal from '../delete/DeleteModal';
 
 interface IProps {
+  open: boolean;
+  onClose: () => void;
   targetItem: IItem;
-  handleUpdateItem: (
-    updatedItem: IItem,
-    updateOption: UPDATE_OPTION,
-    updatedFields: string[],
-  ) => Promise<void>;
   showNotification: (type: AlertColor, message: string) => void;
+  includedButton?: boolean;
 }
 
 export enum UPDATE_OPTION {
@@ -36,12 +38,8 @@ export enum UPDATE_OPTION {
   ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-const EditItem = ({
-  targetItem,
-  handleUpdateItem,
-  showNotification,
-}: IProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedField, setUpdatedField] = useState<string[]>([]);
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
@@ -60,6 +58,24 @@ const EditItem = ({
     }
   }, [targetItem]);
 
+  const handleDeleteItem = async (targetItem: IItem) => {
+    try {
+      const response = await axios.delete(API_URL.ITEM, {
+        data: { removedId: targetItem.id },
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  };
+
   const updateItem = async () => {
     const newUpdatedItem = {
       ...updatedItem,
@@ -75,7 +91,23 @@ const EditItem = ({
     }
 
     setIsUpdating(true);
-    await handleUpdateItem(newUpdatedItem, updateOption, updatedField);
+    try {
+      const response = await axios.put(API_URL.ITEM, {
+        updatedItem: newUpdatedItem,
+        updateOption,
+        updatedFields: updatedField,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
     setIsUpdating(false);
   };
 
@@ -100,8 +132,15 @@ const EditItem = ({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>Edit</Button>
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+      <DeleteModal
+        open={isOpenDeleteModal}
+        handleCloseModal={() => setIsOpenDeleteModal(false)}
+        handleDelete={() => handleDeleteItem(targetItem)}
+        targetObj={targetItem}
+        showTargetObj={targetItem.name}
+      />
+      {/* { <Button onClick={() => setIsOpen(true)}>Edit</Button>} */}
+      <Modal open={open} onClose={onClose}>
         <BoxModal
           display="flex"
           flexDirection="column"
@@ -114,7 +153,7 @@ const EditItem = ({
             buttonLabel="EDIT"
             onClick={updateItem}
             buttonProps={{ loading: isUpdating }}
-            onClose={() => setIsOpen(false)}
+            onClose={onClose}
           />
           <RadioGroup
             row
@@ -272,6 +311,22 @@ const EditItem = ({
                 </Box>
               </Grid>
             )}
+
+            <Grid item xs={12}>
+              <Button
+                fullWidth
+                color="error"
+                onClick={() => setIsOpenDeleteModal(true)}
+                variant="outlined"
+              >
+                <Box display="flex" gap={1} alignItems="center">
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    Delete Item
+                  </Typography>
+                  <TrashIcon />
+                </Box>
+              </Button>
+            </Grid>
           </Grid>
         </BoxModal>
       </Modal>
@@ -280,5 +335,5 @@ const EditItem = ({
 };
 
 export default memo(EditItem, (prev, next) => {
-  return prev.targetItem === next.targetItem;
+  return prev.targetItem === next.targetItem && prev.open === next.open;
 });

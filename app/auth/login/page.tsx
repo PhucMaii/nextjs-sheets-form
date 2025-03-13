@@ -72,7 +72,7 @@ export default function LoginPage() {
           } else {
             router.push('/admin/orders');
           }
-        }, 1000);
+        }, 500);
       } catch (error: any) {
         console.log('Fail to sign in: ', error?.response?.data?.error);
         showNotification('error', error?.response?.data?.error);

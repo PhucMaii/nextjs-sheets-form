@@ -5,7 +5,6 @@ import { AlertColor, Box, Modal, TextField, Typography } from '@mui/material';
 import { BoxModal } from './styled';
 import useDebounce from '@/hooks/useDebounce';
 import OrderAccordion from '../OrderAccordion';
-import { OrderedItems } from '@/app/utils/type';
 import ErrorComponent from '../ErrorComponent';
 import { blueGrey } from '@mui/material/colors';
 
@@ -15,11 +14,11 @@ interface IProps extends ModalProps {
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
   // subcategories: SubCategory[];
-  handleUpdateItem: (
-    orderTotalPrice: number,
-    order: Order,
-    updatedItem: OrderedItems,
-  ) => Promise<void>;
+  // handleUpdateItem: (
+  //   orderTotalPrice: number,
+  //   order: Order,
+  //   updatedItem: OrderedItems,
+  // ) => Promise<void>;
   mutateOrders: any;
 }
 
@@ -31,7 +30,7 @@ export default function SearchModal({
   selectedOrders,
   handleSelectOrder,
   // subcategories,
-  handleUpdateItem,
+  // handleUpdateItem,
   mutateOrders,
 }: IProps) {
   //   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -103,7 +102,7 @@ export default function SearchModal({
                   showNotification={showNotification}
                   selectedOrders={selectedOrders}
                   handleSelectOrder={handleSelectOrder}
-                  handleUpdateItem={handleUpdateItem}
+                  // handleUpdateItem={handleUpdateItem}
                   mutateOrders={mutateOrders}
                 />
               );

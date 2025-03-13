@@ -2,8 +2,8 @@ import { Card } from '@mui/material';
 import styled from 'styled-components';
 
 export const CardStyled = styled(Card)`
-    border-radius: 15px !important; 
-    max-width: 100% !important; 
+  border-radius: 15px !important;
+  max-width: 100% !important;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 `;
 

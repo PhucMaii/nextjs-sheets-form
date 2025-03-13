@@ -5,8 +5,18 @@ import { authOptions } from '../auth/[...nextauth]';
 import { pusherServer } from '@/app/pusher';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../utils/email';
-import { updateSingleInventoryItem } from '../admin/orderedItems/single';
-import { gstRate, pstRate } from '@/app/lib/constant';
+import {
+  generateCostAndProfit,
+  restockInventoryItem,
+  updateSingleInventoryItem,
+} from '../admin/orderedItems/single';
+import {
+  categorizeUpdatedItems,
+  generateOrderTotalPrice,
+  ITEM_CATEGORIZED,
+} from '../admin/orderedItems/PUT';
+import { createOrderedItems, formatItemsWithTotalPrice } from '../utils/order';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface BodyProps {
   deliveryDate: string;
@@ -38,6 +48,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       where: {
         id: body.orderId,
       },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          },
+        },
+      },
     });
 
     if (!userLastOrder) {
@@ -46,85 +65,156 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    let subTotal = 0;
-    let PST = 0;
-    let GST = 0;
-    let discount = 0;
-    const itemList: any = [];
-    const orderDetails: any = {};
+    const newItems = categorizeUpdatedItems(userLastOrder.items, body.items);
 
-    for (const item of body.items) {
-      const existingItem = await prisma.orderedItems.findUnique({
-        where: {
-          id: item.id,
-        },
-        include: {
-          fifo: true,
-          inventoryUnit: true,
-        },
-      });
+    console.log(newItems, 'acutalUpdatedItems');
 
-      if (!existingItem) {
-        return res.status(404).json({
-          error: 'Item Not Found',
+    for (const item of newItems) {
+      // Check item categorize to create, update or delete
+
+      // CREATE
+      if (item.type === ITEM_CATEGORIZED.CREATE) {
+        await createOrderedItems(userLastOrder, [item]);
+        continue;
+      } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
+        // REMAIN
+        continue;
+      } else if (item.type === ITEM_CATEGORIZED.DELETE) {
+        // DELETE
+        await prisma.orderedItems.delete({
+          where: {
+            id: item.id,
+          },
         });
-      }
 
-      // Update each item
-      const newItem = await prisma.orderedItems.update({
-        where: {
-          id: item.id,
-        },
-        data: {
-          quantity: item.quantity,
-        },
-        include: {
-          fifo: true,
-          inventoryItem: true,
-        },
-      });
-
-      // Update new total price
-      // total += newItem.quantity * newItem.price;
-      if (newItem.isShowDiscount && newItem.prevPrice) {
-        discount += newItem.quantity * (newItem.prevPrice - newItem.price);
-      }
-      subTotal += newItem.quantity * newItem.price;
-      // (newItem?.isShowDiscount && newItem?.prevPrice
-      //   ? newItem.prevPrice
-      //   : newItem.price);
-      if (newItem.inventoryItem) {
-        if (newItem.inventoryItem.hasPST) {
-          PST += newItem.quantity * newItem.price * pstRate;
+        if (item?.fifo && item?.inventoryUnit) {
+          await restockInventoryItem(
+            item.orderId,
+            item.fifo,
+            item.inventoryUnit,
+            item.quantity,
+          );
         }
 
-        if (newItem.inventoryItem.hasGST) {
-          GST += newItem.quantity * newItem.price * gstRate;
+        continue;
+      } else {
+        // UPDATE
+        const { cost } = await generateCostAndProfit(item.id);
+
+        await prisma.orderedItems.update({
+          where: {
+            id: item.id,
+          },
+          data: {
+            price: item.price,
+            quantity: item.quantity,
+            cost,
+            profit: item.price - cost,
+          },
+        });
+
+        // Inventory Update
+        if (
+          item?.fifo &&
+          item.inventoryUnit &&
+          item?.Orders?.status !== ORDER_STATUS.VOID
+        ) {
+          await updateSingleInventoryItem(
+            item.orderId,
+            item.fifo,
+            item.inventoryUnit,
+            item.quantity,
+            item.quantity,
+          );
         }
       }
-      itemList.push({
-        ...newItem,
-        totalPrice: newItem.quantity * newItem.price,
-      });
-
-      // Update Inventory Item
-      if (existingItem?.fifo && existingItem?.inventoryUnit) {
-        await updateSingleInventoryItem(
-          body.orderId,
-          existingItem.fifo,
-          existingItem.inventoryUnit,
-          newItem.quantity,
-          existingItem.quantity,
-        );
-      }
-
-      // Format order to send email
-      orderDetails[item.name] = {
-        quantity: item.quantity,
-        price: item.price,
-        totalPrice: item.quantity * item.price,
-      };
     }
+
+    // for (const item of body.items) {
+    //   const existingItem = await prisma.orderedItems.findUnique({
+    //     where: {
+    //       id: item.id,
+    //     },
+    //     include: {
+    //       fifo: true,
+    //       inventoryUnit: true,
+    //     },
+    //   });
+
+    //   if (!existingItem) {
+    //     return res.status(404).json({
+    //       error: 'Item Not Found',
+    //     });
+    //   }
+
+    //   // Update each item
+    //   const newItem = await prisma.orderedItems.update({
+    //     where: {
+    //       id: item.id,
+    //     },
+    //     data: {
+    //       quantity: item.quantity,
+    //     },
+    //     include: {
+    //       fifo: true,
+    //       inventoryItem: true,
+    //     },
+    //   });
+
+    //   // Update new total price
+    //   // total += newItem.quantity * newItem.price;
+    //   if (newItem.isShowDiscount && newItem.prevPrice) {
+    //     discount += newItem.quantity * (newItem.prevPrice - newItem.price);
+    //   }
+    //   subTotal += newItem.quantity * newItem.price;
+    //   // (newItem?.isShowDiscount && newItem?.prevPrice
+    //   //   ? newItem.prevPrice
+    //   //   : newItem.price);
+    //   if (newItem.inventoryItem) {
+    //     if (newItem.inventoryItem.hasPST) {
+    //       PST += newItem.quantity * newItem.price * pstRate;
+    //     }
+
+    //     if (newItem.inventoryItem.hasGST) {
+    //       GST += newItem.quantity * newItem.price * gstRate;
+    //     }
+    //   }
+    //   itemList.push({
+    //     ...newItem,
+    //     totalPrice: newItem.quantity * newItem.price,
+    //   });
+
+    //   // Update Inventory Item
+    //   if (existingItem?.fifo && existingItem?.inventoryUnit) {
+    //     await updateSingleInventoryItem(
+    //       body.orderId,
+    //       existingItem.fifo,
+    //       existingItem.inventoryUnit,
+    //       newItem.quantity,
+    //       existingItem.quantity,
+    //     );
+    //   }
+
+    //   // Format order to send email
+    //   orderDetails[item.name] = {
+    //     quantity: item.quantity,
+    //     price: item.price,
+    //     totalPrice: item.quantity * item.price,
+    //   };
+    // }
+
+    const updatedOrderedItems = await prisma.orderedItems.findMany({
+      where: {
+        orderId: userLastOrder.id,
+      },
+      include: {
+        inventoryItem: true,
+        fifo: true,
+        inventoryUnit: true,
+      },
+    });
+
+    const total = generateOrderTotalPrice(updatedOrderedItems);
 
     // Apply new total price on order and update note
     const newOrder = await prisma.orders.update({
@@ -132,11 +222,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: userLastOrder.id,
       },
       data: {
-        subTotal,
-        PST,
-        GST,
-        totalPrice: subTotal + PST + GST,
-        discount,
+        subTotal: total.subTotal,
+        PST: total.PST,
+        GST: total.GST,
+        totalPrice: total.totalPrice,
+        discount: total.discount,
         note: body.note,
         isReplacement: true,
         updateTime: new Date(),
@@ -179,10 +269,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       htmlTemplate,
     );
 
+    const itemsWithTotalPrice = formatItemsWithTotalPrice(updatedOrderedItems);
+
     await pusherServer?.trigger('override-order', 'incoming-order', {
       ...existingUser,
       ...newOrder,
-      items: itemList,
+      items: itemsWithTotalPrice,
       totalPrice: newOrder.totalPrice,
       category: userCategory,
       isReplacement: true,
@@ -193,7 +285,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       data: {
         ...existingUser,
         ...newOrder,
-        items: itemList,
+        items: itemsWithTotalPrice,
         totalPrice: newOrder.totalPrice,
         category: userCategory,
       },

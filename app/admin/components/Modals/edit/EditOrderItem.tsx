@@ -43,7 +43,7 @@ export default function EditItemModal({
 }: PropTypes) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isConvertToCustom, setIsConvertToCustom] = useState<boolean>(false);
-  const [updatedItem, setUpdatedItem] = useState<OrderedItems  | any>({
+  const [updatedItem, setUpdatedItem] = useState<OrderedItems | any>({
     ...item,
   });
   const [unitList, setUnitList] = useState<any[]>([]);
@@ -112,7 +112,7 @@ export default function EditItemModal({
         units: newUnits,
       },
       isConvertToCustom,
-      (item?.itemId || null),
+      item?.itemId || null,
     );
     setIsLoading(false);
     setIsConvertToCustom(false);
@@ -238,7 +238,8 @@ export default function EditItemModal({
             <Typography variant="h6">Total Price</Typography>
             <Typography variant="h6">
               {updatedItem?.totalPrice?.toFixed(2) ||
-                item?.totalPrice?.toFixed(2) || (item?.price * item?.quantity)?.toFixed(2)}
+                item?.totalPrice?.toFixed(2) ||
+                (item?.price * item?.quantity)?.toFixed(2)}
             </Typography>
           </Box>
         </BoxModal>

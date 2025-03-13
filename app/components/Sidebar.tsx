@@ -142,7 +142,12 @@ export default function Sidebar({ children }: PropTypes) {
   if (smDown) {
     return (
       <>
-        <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 8, p: 1 }}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          sx={{ pb: 10, p: 1 }}
+        >
           {/* <HolidayText /> */}
           {children}
         </Box>
@@ -277,7 +282,7 @@ export default function Sidebar({ children }: PropTypes) {
         >
           {content}
         </Drawer>
-        <Box width="100%">
+        <Box sx={{ flexGrow: 1, maxWidth: `calc(100% - ${drawerWidth}px)` }}>
           {isOpenSnackbar && (
             <EmailAlert
               setIsOpenSnackbar={setIsOpenSnackbar}

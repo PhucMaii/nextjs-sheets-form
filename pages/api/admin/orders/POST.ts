@@ -41,7 +41,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log('Content-Length Header:', contentLength);
     const requestBodySize = Buffer.byteLength(JSON.stringify(req.body));
     console.log('Request Body Size:', requestBodySize, 'bytes');
-    const { deliveryDate, scheduleOrderIds, createdAt } = req.body as BodyTypes;
+    const { deliveryDate, scheduleOrderIds } = req.body as BodyTypes;
 
     // Get person create info
     const adminCreate: any = await getUserInfo(req, res);
@@ -210,8 +210,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           scheduleOrder.user,
           scheduleOrder.items,
           deliveryDate,
-          createdAt,
           `Admin - ${adminCreate.clientName}`,
+          '',
         );
 
         await sendEmail(
@@ -262,7 +262,6 @@ export const createOrder = async (
   user: User | UserType,
   items: OrderedItems[],
   deliveryDate: string,
-  orderTime: string,
   createdBy: string,
   note: string = '',
 ) => {
@@ -400,7 +399,6 @@ export const createOrderedItems = async (
     }
 
     let unitId = item.inventoryUnitId;
-    
     // If item is custom amount and is assigned to a new unit
     if (item.inventoryUnitId < 1) {
       const dbUnits = await prisma.inventoryUnit.findMany({

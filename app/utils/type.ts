@@ -8,6 +8,8 @@ import {
   Fifo,
   InventoryItem,
   InventoryUnit,
+  ItemType,
+  ItemType_Category,
   PaymentMethod,
   PositionIndex,
   Route,
@@ -107,12 +109,15 @@ export interface UserType {
 export interface ICategory extends Category {
   users?: User[];
   items?: IItem[];
+
+  itemType_category?: ItemType_Category[];
 }
 
 export interface IItem {
   id: number;
   name: string;
   categoryId: number;
+  category?: ICategory;
   // subCategoryId?: number | null;
   price: number;
   quantity?: number;
@@ -130,6 +135,8 @@ export interface IItem {
   prevPrice?: number;
   isShowDiscount?: boolean;
   order?: any;
+  typeId?: number;
+  type?: any;
 }
 
 export interface OrderedItems {
@@ -155,7 +162,7 @@ export interface ScheduledOrder {
   id: number;
   userId: number;
   totalPrice: number;
-  items: OrderedItems[];
+  items: OrderedItems[] | any[];
   user: UserType;
   day: string;
   alreadyOrder?: boolean;
@@ -213,6 +220,11 @@ export interface IInventoryItem extends InventoryItem {
   fifo: IFifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
+  type?: ItemType;
+}
+
+export interface IItemType extends ItemType {
+  inventoryItems: IInventoryItem[];
 }
 
 export interface IVendorItem extends VendorItem {

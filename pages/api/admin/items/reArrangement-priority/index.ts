@@ -6,6 +6,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IBody {
   removedItemIdList: number[];
   updatedItemList: IItem[];
+  typeId?: number;
+  categoryId?: number;
+  priority?: number;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -18,16 +21,59 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    const { removedItemIdList, updatedItemList }: IBody = req.body;
+    const {
+      removedItemIdList,
+      updatedItemList,
+      priority,
+      typeId,
+      categoryId,
+    }: IBody = req.body;
 
-    // Remove all the item related in that category
-    // for (const id of removedItemIdList) {
-    //   await prisma.item.delete({
-    //     where: {
-    //       id,
-    //     },
-    //   });
-    // }
+    // Update itemType_category priority
+    console.log({
+      priority,
+      typeId,
+      categoryId,
+    });
+    if (priority && typeId && categoryId) {
+      // Find if the itemType_category exist
+      const existingItemTypeCategory =
+        await prisma.itemType_Category.findUnique({
+          where: {
+            itemTypeId_categoryId: {
+              itemTypeId: typeId,
+              categoryId,
+            },
+          },
+        });
+
+      if (!existingItemTypeCategory) {
+        // Create itemType_category
+        await prisma.itemType_Category.create({
+          data: {
+            itemTypeId: typeId,
+            categoryId,
+            priority,
+          },
+        });
+      } else {
+        if (existingItemTypeCategory.priority !== priority) {
+          // Update itemType_category
+          await prisma.itemType_Category.update({
+            where: {
+              itemTypeId_categoryId: {
+                itemTypeId: typeId,
+                categoryId,
+              },
+            },
+            data: {
+              priority,
+            },
+          });
+        }
+      }
+    }
+
     await prisma.item.deleteMany({
       where: {
         id: {

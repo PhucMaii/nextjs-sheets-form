@@ -1,10 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '../utils/date';
+import { getOverdueOrders } from '../utils/order';
 
 interface IQuery {
   startDate?: string;
@@ -54,8 +55,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedEndDate,
     );
 
-    console.log({dateList, formattedStartDate, formattedEndDate, startDate, endDate});
-
     const userOrders: any = await prisma.orders.findMany({
       where: {
         userId: existingUser.id,
@@ -77,30 +76,30 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
+        user: true,
       },
       orderBy: {
         id: 'desc',
       },
     });
 
-    const newOrders = userOrders.map((order: any) => {
-      const items = order.items.map((item: any) => {
-        const totalPrice = item.quantity * item.price;
-        return { ...item, totalPrice };
-      });
+    const newOrders = formatReturnOrders(userOrders);
+    const totalAmount = userOrders.reduce((acc: number, order: Orders) => {
+      return acc + order.totalPrice;
+    }, 0);
 
-      return {
-        ...order,
-        items,
-        ...existingUser,
-        category: existingUser.category,
-        id: order.id,
-      };
-    });
+    // Get debt data
+    const { orders: incompletedOrders, overDue: dueAmount } =
+      await getOverdueOrders(existingUser.id);
+
+    const dueOrders = formatReturnOrders(incompletedOrders);
 
     return res.status(200).json({
       data: {
         user: existingUser,
+        currentMonthBill: totalAmount,
+        dueAmount,
+        dueOrders,
         userOrders: newOrders,
       },
       message: 'Fetch User Orders Successfully',
@@ -112,3 +111,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+const formatReturnOrders = (orders: any) => {
+  const newOrders = orders.map((order: any) => {
+    const items = order.items.map((item: any) => {
+      const totalPrice = item.quantity * item.price;
+      return { ...item, totalPrice };
+    });
+
+    return {
+      ...order,
+      items,
+      ...order.user,
+      id: order.id,
+    };
+  });
+
+  return newOrders;
+};

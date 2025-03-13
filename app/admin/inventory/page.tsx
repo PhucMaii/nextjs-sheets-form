@@ -16,6 +16,7 @@ import { LoadingButton } from '@mui/lab';
 import { FileClockIcon } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import ConfirmModal from '../components/Modals/ConfirmModal';
+// import Appearance from '../components/Inventory/Appearance';
 
 export default function InventoryPage() {
   const [isTrackingInventory, setIsTrackingInventory] =
@@ -51,7 +52,7 @@ export default function InventoryPage() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar overflow="auto">
       <AddStockPurchased
         open={isOpenAddStockPurchased}
         onClose={() => setIsOpenAddStockPurchased(false)}
@@ -106,7 +107,7 @@ export default function InventoryPage() {
         <Tab label="Order Stock" value={1} />
       </Tabs>
 
-      <ShadowSection>
+      <ShadowSection sx={{ overflow: 'scroll', width: '100%' }}>
         {tabIndex === 0 ? (
           <StockItems
             showNotification={showNotification}
@@ -117,6 +118,7 @@ export default function InventoryPage() {
             openAddStockPurchased={() => setIsOpenAddStockPurchased(true)}
             showNotification={showNotification}
           />
+          // <Appearance types={inventoryItems?.types || []}/>
         )}
       </ShadowSection>
     </Sidebar>

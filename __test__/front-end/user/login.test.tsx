@@ -6,7 +6,6 @@ jest.mock('axios', () => ({
   post: jest.fn(() => Promise.resolve({ data: { success: true } })),
 }));
 
-
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(), // Mock the router push function

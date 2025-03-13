@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { generateLatLng } from './POST';
+import { categorizeUpdatedItems, ITEM_CATEGORIZED } from '../orderedItems/PUT';
 
 interface BodyTypes {
   userId: number;
@@ -121,7 +122,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (updatedUser.scheduleOrders.length > 0) {
           for (const scheduleOrder of updatedUser.scheduleOrders) {
             // Replace all items to items in new category
-            await prisma.orderedItems.deleteMany({
+            const orderdItems = await prisma.orderedItems.findMany({
               where: {
                 scheduledOrderId: scheduleOrder.id,
               },
@@ -136,20 +137,58 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                   scheduledOrderId: scheduleOrder.id,
                   inventoryItemId: item.inventoryItemId,
                   inventoryUnitId: item.inventoryUnitId,
+                  prevPrice: item?.prevPrice,
+                  isShowDiscount: item?.isShowDiscount,
                 };
               },
             );
 
-            await prisma.orderedItems.createMany({
-              data: formatItemToOrderedItem,
+            // Compare by name
+            const categorizedItems = categorizeUpdatedItems(
+              formatItemToOrderedItem,
+              orderdItems,
+              'name',
+            );
+
+            const newItems = categorizedItems.filter((item: any) => {
+              return (
+                item.type !== ITEM_CATEGORIZED.DELETE &&
+                item.type !== ITEM_CATEGORIZED.CREATE
+              );
             });
+
+            await prisma.orderedItems.deleteMany({
+              where: {
+                scheduledOrderId: scheduleOrder.id,
+              },
+            });
+
+            await prisma.orderedItems.createMany({
+              data: newItems.map((item: any) => {
+                return {
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.price,
+                  scheduledOrderId: scheduleOrder.id,
+                  inventoryItemId: item.inventoryItemId,
+                  inventoryUnitId: item.inventoryUnitId,
+                  prevPrice: item?.prevPrice,
+                  isShowDiscount: item?.isShowDiscount,
+                };
+              }),
+            });
+
+            // generate total price
+            const totalPrice = newItems.reduce((acc: any, item: any) => {
+              return acc + item.price * item.quantity;
+            }, 0);
 
             await prisma.scheduleOrders.update({
               where: {
                 id: scheduleOrder.id,
               },
               data: {
-                totalPrice: 0,
+                totalPrice,
               },
             });
           }

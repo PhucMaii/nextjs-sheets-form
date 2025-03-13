@@ -97,15 +97,17 @@ export default function OverviewCard({
               {helperText}
             </Typography>
           )}
-          {icon && <Typography
-            marginTop={helperText ? '0px' : '8px'}
-            sx={{
-              color: textColor ? textColor : grey[600],
-              width: '90% !important',
-            }}
-          >
-            {text}
-          </Typography>}
+          {icon && (
+            <Typography
+              marginTop={helperText ? '0px' : '8px'}
+              sx={{
+                color: textColor ? textColor : grey[600],
+                width: '90% !important',
+              }}
+            >
+              {text}
+            </Typography>
+          )}
         </Grid>
       </Grid>
     </CardStyled>

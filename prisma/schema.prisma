@@ -323,6 +323,7 @@ model ItemType {
   name      String  @unique
   icon      String?
   priority  Int?
+  rows      Int?
   createdAt String?
   createdBy String?
 
