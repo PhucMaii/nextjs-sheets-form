@@ -1,3 +1,4 @@
+import { testItemId } from '@/app/lib/constant';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -20,6 +21,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         include: {
           inventoryUnit: true,
           inventoryItem: {
+            where: {
+              id: {
+                not: testItemId
+              }
+            },
             include: {
               vendorItem: {
                 include: {
@@ -74,6 +80,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         include: {
           inventoryUnit: true,
           inventoryItem: {
+            where: {
+              id: {
+                not: testItemId
+              }
+            },
             include: {
               vendorItem: {
                 include: {
