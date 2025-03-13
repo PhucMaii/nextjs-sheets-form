@@ -239,8 +239,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-
-
       // await prisma.inventoryItem.createMany({
       //   data: brandNewItems.map((item: any) => {
       //     return {

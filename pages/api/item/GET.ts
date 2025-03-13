@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { testItemId } from '@/app/lib/constant';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -25,6 +26,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         inventoryItem: {
+          where: {
+            id: {
+              not: testItemId,
+            },
+          },
           include: {
             type: {
               include: {
@@ -44,11 +50,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       },
-      orderBy: {
-        inventoryItem: {
-          indexPos: 'asc',
-        }
-      }
+      orderBy: [
+        {
+          inventoryItem: {
+            type: {
+              priority: 'asc',
+            },
+          },
+        },
+        {
+          inventoryItem: {
+            indexPos: 'asc',
+          },
+        },
+      ],
     });
 
     return res.status(200).json({

@@ -69,7 +69,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       };
     });
 
-    const displayItemTypes = itemTypes.reduce((acc: any, type: any) => {
+    const displayItemTypes = filledInItemTypes.reduce((acc: any, type: any) => {
       const key = type.name;
 
       if (!acc[key]) {

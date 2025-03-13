@@ -95,13 +95,13 @@ export default function SwitchTypeAndAppearanceModal({
             containerStyle={{ backgroundColor: color.hex }}
           />
         </Box>
-          <ColorPicker
-            height={100}
-            color={color}
-            onChange={(color: any) => setColor(color)}
-            // hideAlpha
-            hideInput={['hsv', 'rgb']}
-          />
+        <ColorPicker
+          height={100}
+          color={color}
+          onChange={(color: any) => setColor(color)}
+          // hideAlpha
+          hideInput={['hsv', 'rgb']}
+        />
 
         <FormControl sx={{ mt: 2 }}>
           <FormLabel>Type</FormLabel>

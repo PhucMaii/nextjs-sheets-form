@@ -63,8 +63,10 @@ export default function Appearance({ types, showNotification }: IProps) {
   }, [types]);
 
   const inventoryItems = useMemo(() => {
-    return itemTypes.flatMap((type) => type.inventoryItems).filter((item) => item.name !== 'Empty');
-  }, [itemTypes])
+    return itemTypes
+      .flatMap((type) => type.inventoryItems)
+      .filter((item) => item.name !== 'Empty');
+  }, [itemTypes]);
 
   const findContainerOfItems = (
     id: UniqueIdentifier | undefined,
@@ -387,7 +389,7 @@ export default function Appearance({ types, showNotification }: IProps) {
       return;
     }
 
-    console.log({item, emptyItem: moveItemProps.emptyItem});
+    console.log({ item, emptyItem: moveItemProps.emptyItem });
 
     const emptyItemContainer = findContainerOfItems(
       moveItemProps.emptyItem.id,
@@ -408,7 +410,8 @@ export default function Appearance({ types, showNotification }: IProps) {
 
     console.log({
       emptyContainerIndex,
-      itemContainerIndex,})
+      itemContainerIndex,
+    });
 
     const emptyItemIndex = emptyItemContainer.inventoryItems.findIndex(
       (i) => i.id === moveItemProps.emptyItem.id,
@@ -450,12 +453,14 @@ export default function Appearance({ types, showNotification }: IProps) {
 
   return (
     <>
-      {moveItemProps.open && moveItemProps.emptyItem &&<MoveItemToEmpty
-        open={moveItemProps.open}
-        onClose={() => setMoveItemProps({ open: false, emptyItem: null })}
-        inventoryItems={inventoryItems}
-        onMoveItemToEmpty={onMoveItemToEmpty}
-      />}
+      {moveItemProps.open && moveItemProps.emptyItem && (
+        <MoveItemToEmpty
+          open={moveItemProps.open}
+          onClose={() => setMoveItemProps({ open: false, emptyItem: null })}
+          inventoryItems={inventoryItems}
+          onMoveItemToEmpty={onMoveItemToEmpty}
+        />
+      )}
       <SingleFieldEdit
         open={addRowProps.open}
         onClose={() => setAddRowProps({ open: false, type: null })}

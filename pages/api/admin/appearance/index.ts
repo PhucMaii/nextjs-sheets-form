@@ -84,13 +84,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     for (const itemType of itemTypes) {
       const inventoryItemNames = fillInEmptyPosition(itemType.inventoryItems);
-      const dbItemNames = fillInEmptyPosition(dbItemArrangementMap[itemType.id]);
+      const dbItemNames = fillInEmptyPosition(
+        dbItemArrangementMap[itemType.id],
+      );
 
       // Check if any item has been re arranged and only update re arranged items
-      if (
-        JSON.stringify(inventoryItemNames) !==
-        JSON.stringify(dbItemNames)
-      ) {
+      if (JSON.stringify(inventoryItemNames) !== JSON.stringify(dbItemNames)) {
         // Re arrange
         let indexPos = 1;
         for (let i = 0; i < itemType.inventoryItems.length; i++) {
@@ -167,5 +166,5 @@ export const fillInEmptyPosition = (inventoryItems: IInventoryItem[]) => {
     }
   }
 
-  return itemNames
+  return itemNames;
 };

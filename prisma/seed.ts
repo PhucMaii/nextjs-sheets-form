@@ -118,8 +118,8 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 async function main() {
   const allTypes = await prisma.itemType.findMany({
     include: {
-      inventoryItems: true
-    }
+      inventoryItems: true,
+    },
   });
 
   for (const type of allTypes) {
@@ -131,12 +131,11 @@ async function main() {
           id: item.id,
         },
         data: {
-          indexPos
-        }
+          indexPos,
+        },
       });
       indexPos++;
     }
-
   }
 }
 

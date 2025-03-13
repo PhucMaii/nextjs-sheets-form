@@ -28,7 +28,7 @@ export default function MoveItemToEmpty({
           onClick={() => {
             onMoveItemToEmpty(selectedItem!);
             onClose();
-        }}
+          }}
           buttonProps={{}}
         />
 

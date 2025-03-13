@@ -39,7 +39,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       if (existingInventory.typeId === typeId) {
-        return res.status(200).json({ data: existingInventory, message: 'Update Item Successfully' });
+        return res
+          .status(200)
+          .json({
+            data: existingInventory,
+            message: 'Update Item Successfully',
+          });
       }
 
       const existingType = await prisma.itemType.findUnique({

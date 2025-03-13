@@ -51,6 +51,18 @@ import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
 import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
 import { SWRFetchData } from '../utils/db';
 
+export const WhiteSpace = () => {
+  return (
+    <Box
+      sx={{
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'transparent',
+      }}
+    />
+  );
+};
+
 export const ItemButton = ({
   item,
   onClick,
@@ -95,7 +107,9 @@ export const ItemButton = ({
           {item.name}
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography fontWeight="bold">${item.price?.toFixed(2) || 'N/A'}</Typography>
+          <Typography fontWeight="bold">
+            ${item.price?.toFixed(2) || 'N/A'}
+          </Typography>
           {item.isShowDiscount && item.prevPrice && (
             <Typography
               fontWeight="bold"
@@ -225,6 +239,8 @@ const OrderView = ({
     console.log(newTypes, 'new types');
     return newTypes;
   }, [items, appearance]);
+
+  const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('xs'));
 
   const orderDiscount = useMemo(() => {
     if (!orderedItems || orderedItems.length === 0) return 0;
@@ -486,6 +502,8 @@ const OrderView = ({
     );
   };
 
+  console.log(itemTypes, 'item types');
+
   const renderAllItems = () => {
     return (
       <>
@@ -502,29 +520,35 @@ const OrderView = ({
                     <Grid
                       data-tour={index === 0 ? 'third-step' : ''}
                       item
-                      xs={isModal ? 12 : 6}
-                      sm={isModal ? 6 : 4}
-                      md={isModal ? 6 : 3}
-                      xl={3}
+                      xs={6}
+                      sm={4}
+                      md={3}
+                      lg={3}
+                      sx={{width: xsDown ? '50px' : '100%'}}
                     >
-                      <ItemButton
-                        item={item}
-                        onClick={() =>
-                          setSingleFieldProps({
-                            open: true,
-                            item,
-                            defaultValue: 0,
-                          })
-                        }
-                        containerStyle={{
-                          backgroundColor: item?.disabled
-                            ? grey[100]
-                            : item?.inventoryItem?.color
-                              ? item?.inventoryItem?.color
-                              : infoBackground,
-                        }}
-                        disabled={item?.disabled}
-                      />
+                      {item.name === 'Empty' ? (
+                        <WhiteSpace />
+                      ) : (
+                        <ItemButton
+                          item={item}
+                          onClick={() =>
+                            setSingleFieldProps({
+                              open: true,
+                              item,
+                              defaultValue: 0,
+                            })
+                          }
+                          style={{width: xsDown ? '50px' : '100%'}}
+                          containerStyle={{
+                            backgroundColor: item?.disabled
+                              ? grey[100]
+                              : item?.inventoryItem?.color
+                                ? item?.inventoryItem?.color
+                                : infoBackground,
+                          }}
+                          disabled={item?.disabled}
+                        />
+                      )}
                     </Grid>
                   );
                 })}
@@ -606,20 +630,18 @@ const OrderView = ({
             mode="edit"
           />
           {Object.keys(itemTypes).length > 0 &&
-            Object.keys(itemTypes).map(
-              (itemType: string, index: number) => {
-                return (
-                  <ItemTypeButton
-                    key={index}
-                    type={itemType}
-                    isSelected={itemType === selectedItemType}
-                    onClick={() => setSelectedItemType(itemType)}
-                    style={{ minWidth: 'auto' }}
-                    mode="view"
-                  />
-                );
-              },
-            )}
+            Object.keys(itemTypes).map((itemType: string, index: number) => {
+              return (
+                <ItemTypeButton
+                  key={index}
+                  type={itemType}
+                  isSelected={itemType === selectedItemType}
+                  onClick={() => setSelectedItemType(itemType)}
+                  style={{ minWidth: 'auto' }}
+                  mode="view"
+                />
+              );
+            })}
         </Box>
 
         {/* Search bar */}
@@ -641,7 +663,7 @@ const OrderView = ({
         <Typography variant="h6" sx={{ mt: 2 }}>
           {selectedItemType} Items
         </Typography>
-        <Grid container mt={2}>
+        <Grid container mt={2} maxWidth="100%" overflow="auto">
           {selectedItemType === 'All' && !debouncedKeywords
             ? renderAllItems()
             : renderByItemType()}

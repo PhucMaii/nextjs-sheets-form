@@ -42,7 +42,9 @@ const SingleFieldEdit = ({
   inputProps,
 }: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [value, setValue] = useState<any>(defaultValue !== undefined ? defaultValue : null);
+  const [value, setValue] = useState<any>(
+    defaultValue !== undefined ? defaultValue : null,
+  );
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
