@@ -12,7 +12,11 @@ export const BoxModal = styled(Box)`
   box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
   width: ${(props: any) => props.width || '700px'};
 
-  @media screen and (min-width: 1250px) {
+  @media screen and (min-width: 1800px) {
+    width: 1400px;
+  }
+
+  @media screen and (max-width: 1250px) {
     width: 950px;
   }
 

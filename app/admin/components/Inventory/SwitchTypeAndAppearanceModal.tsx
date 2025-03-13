@@ -1,5 +1,6 @@
 import {
   AlertColor,
+  Box,
   Divider,
   FormControl,
   FormControlLabel,
@@ -7,6 +8,7 @@ import {
   Modal,
   Radio,
   RadioGroup,
+  Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../Modals/styled';
@@ -15,6 +17,9 @@ import { IInventoryItem, IItemType } from '@/app/utils/type';
 import { ModalProps } from '../Modals/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
+import { ColorPicker, useColor } from 'react-color-palette';
+import { infoBackground } from '@/theme/color';
+import { ItemButton } from '@/app/components/OrderView';
 
 interface IProps extends ModalProps {
   types: IItemType[];
@@ -22,7 +27,7 @@ interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-export default function SwitchTypeModal({
+export default function SwitchTypeAndAppearanceModal({
   open,
   onClose,
   item,
@@ -33,6 +38,7 @@ export default function SwitchTypeModal({
   const [selectedType, setSelectedType] = useState<number | null>(
     item?.typeId || null,
   );
+  const [color, setColor] = useColor(item?.color || infoBackground);
 
   useEffect(() => {
     if (item) {
@@ -48,6 +54,7 @@ export default function SwitchTypeModal({
         {
           id: item.id,
           typeId: selectedType,
+          color: color.hex,
         },
       );
 
@@ -55,6 +62,8 @@ export default function SwitchTypeModal({
         showNotification('error', response.data.error);
         return;
       }
+
+      console.log(response, 'response');
 
       showNotification('success', response.data.message);
     } catch (error: any) {
@@ -67,7 +76,7 @@ export default function SwitchTypeModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="scroll">
         <ModalHead
           heading={item?.name}
           buttonLabel="Save"
@@ -77,8 +86,24 @@ export default function SwitchTypeModal({
         />
 
         <Divider sx={{ my: 2 }} />
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography variant="h6">Appearance: </Typography>
+          <ItemButton
+            item={{ ...item, price: 15.5 } as any}
+            onClick={() => {}}
+            style={{ width: 'fit-content', maxWidth: 300 }}
+            containerStyle={{ backgroundColor: color.hex }}
+          />
+        </Box>
+          <ColorPicker
+            height={100}
+            color={color}
+            onChange={(color: any) => setColor(color)}
+            // hideAlpha
+            hideInput={['hsv', 'rgb']}
+          />
 
-        <FormControl>
+        <FormControl sx={{ mt: 2 }}>
           <FormLabel>Type</FormLabel>
           <RadioGroup
             value={selectedType}

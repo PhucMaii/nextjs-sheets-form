@@ -121,40 +121,37 @@ export default function EditDeliveryDate({
       //   return isQualified;
       // });
 
-      // if (scheduleOrderList) {
-      //   submittedData.scheduleOrderIds = scheduleOrderList.map((order) => {
-      //     return order.id;
-      //   });
-      // }
-      let orderIndex = 0;
-      const batchOrders = 5;
-      while (orderIndex < scheduleOrderList.length) {
-        const toCreateOrders = scheduleOrderList.slice(
-          orderIndex,
-          orderIndex + batchOrders,
-        );
-
-        submittedData.scheduleOrderIds = toCreateOrders.map((order: any) => {
+      if (scheduleOrderList) {
+        submittedData.scheduleOrderIds = scheduleOrderList.map((order) => {
           return order.id;
         });
+      }
+      // let orderIndex = 0;
+      // const batchOrders = 5;
+      // while (orderIndex < scheduleOrderList.length) {
+      //   const toCreateOrders = scheduleOrderList.slice(
+      //     orderIndex,
+      //     orderIndex + batchOrders,
+      //   );
 
-        // console.log(toCreateOrders, 'toCreateOrders');
+      //   submittedData.scheduleOrderIds = toCreateOrders.map((order: any) => {
+      //     return order.id;
+      //   });
 
-        const response = await axios.post(API_URL.ORDER, submittedData);
-        if (response.data.error) {
-          setIsLoading(false);
-          showNotification('error', response.data.error);
-          return;
-        }
+      //   // console.log(toCreateOrders, 'toCreateOrders');
 
-        showNotification(
-          'success',
-          `Place orders successfully for ${toCreateOrders.length + orderIndex} orders`,
-        );
-        orderIndex += batchOrders;
-        setProgress((orderIndex + 1 / scheduleOrderList.length) * 100);
+      //   orderIndex += batchOrders;
+      //   setProgress((orderIndex + 1 / scheduleOrderList.length) * 100);
+      // }
+
+      const response = await axios.post(API_URL.ORDER, submittedData);
+      if (response.data.error) {
+        setIsLoading(false);
+        showNotification('error', response.data.error);
+        return;
       }
 
+      showNotification('success', response.data.message);
       setIsLoading(false);
     } catch (error: any) {
       console.log('Fail to update date: ', error);

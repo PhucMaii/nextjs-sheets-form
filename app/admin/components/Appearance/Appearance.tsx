@@ -1,10 +1,11 @@
 import {
   AlertColor,
   Box,
+  Button,
   FormControlLabel,
   Switch,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { IInventoryItem, IItemType } from '@/app/utils/type';
 import {
   closestCorners,
@@ -18,106 +19,14 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
-import SwitchTypeModal from '../Inventory/SwitchTypeModal';
+import SwitchTypeAndAppearanceModal from '../Inventory/SwitchTypeAndAppearanceModal';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { LoadingButton } from '@mui/lab';
 import { SortableEmptyItem, SortableItem, SortableItemType } from './Sortable';
-
-// const SortableItemType = ({
-//   type,
-//   children,
-//   dndMode,
-// }: {
-//   type: IItemType;
-//   children: any;
-//   dndMode: boolean;
-// }) => {
-//   const {
-//     attributes,
-//     listeners,
-//     setNodeRef,
-//     transform,
-//     transition,
-//     isDragging,
-//   } = useSortable({ id: type.id, data: { type: 'container' } });
-
-//   const style = {
-//     transition,
-//     transform: CSS.Translate.toString(transform),
-//     boxShadow: isDragging ? 'rgba(0, 0, 0, 0.35) 0px 5px 15px' : '',
-//     backgroundColor: isDragging ? grey[50] : undefined,
-//     opacity: isDragging ? 0.5 : 1,
-//     padding: '10px',
-//     borderRadius: '15px',
-//   };
-//   return (
-//     <div ref={setNodeRef} {...attributes} style={style}>
-//       <Box
-//         display="flex"
-//         flexDirection="row"
-//         gap={1}
-//         alignItems="center"
-//         justifyContent="space-between"
-//       >
-//         <Typography variant="h6">{type.name}</Typography>
-//         {dndMode && (
-//           <IconButton {...(dndMode ? listeners : {})}>
-//             <DragIndicatorIcon />
-//           </IconButton>
-//         )}
-//       </Box>
-//       <Grid container mt={2}>
-//         {children}
-//       </Grid>
-//     </div>
-//   );
-// };
-
-// const SortableItem = ({
-//   item,
-//   dndMode,
-//   onOpenSwitchType,
-// }: {
-//   item: any;
-//   dndMode: boolean;
-//   onOpenSwitchType: any;
-// }) => {
-//   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
-//     id: item.id,
-//     data: { type: 'item' },
-//   });
-
-//   const style = {
-//     transition: 'none',
-//     // transform: CSS.Transform.toString(transform),
-//     opacity: isDragging ? 0.5 : 1,
-//   };
-
-//   return (
-//     <Grid
-//       ref={setNodeRef}
-//       {...attributes}
-//       {...(dndMode ? listeners : {})}
-//       style={style}
-//       item
-//       xs={6}
-//       md={4}
-//       lg={3}
-//     >
-//       <ItemButton
-//         item={{ ...item, price: 11 } as IItem}
-//         containerStyle={{
-//           backgroundColor: item?.color || infoBackground,
-//         }}
-//         onClick={() => {
-//           if (dndMode) return;
-//           onOpenSwitchType(item);
-//         }}
-//       />
-//     </Grid>
-//   );
-// };
+import SingleFieldEdit from '../Modals/edit/SingleFieldEdit';
+import { ROW_ACTION } from '@/pages/api/admin/appearance/rows';
+import MoveItemToEmpty from './MoveItemToEmpty';
 
 interface IProps {
   types: IItemType[];
@@ -128,8 +37,16 @@ export default function Appearance({ types, showNotification }: IProps) {
   const [activeItemId, setActiveItemId] = useState<UniqueIdentifier | null>(
     null,
   );
+  const [addRowProps, setAddRowProps] = useState<any>({
+    open: false,
+    type: null,
+  });
   const [dndMode, setDndMode] = useState<boolean>(false);
   const [itemTypes, setItemTypes] = useState<IItemType[]>([]);
+  const [moveItemProps, setMoveItemProps] = useState<any>({
+    open: false,
+    emptyItem: null,
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [switchTypeProps, setSwitchTypeProps] = useState<any>({
     open: false,
@@ -145,7 +62,14 @@ export default function Appearance({ types, showNotification }: IProps) {
     }
   }, [types]);
 
-  const findContainerOfItems = (id: UniqueIdentifier | undefined, type: string) => {
+  const inventoryItems = useMemo(() => {
+    return itemTypes.flatMap((type) => type.inventoryItems).filter((item) => item.name !== 'Empty');
+  }, [itemTypes])
+
+  const findContainerOfItems = (
+    id: UniqueIdentifier | undefined,
+    type: string,
+  ) => {
     if (type === 'container') {
       return itemTypes.find((type) => type.id === Number(id));
     }
@@ -255,10 +179,11 @@ export default function Appearance({ types, showNotification }: IProps) {
 
         setItemTypes(newItems);
       } else {
-        const newItems = [...itemTypes]
+        const newItems = [...itemTypes];
         // const activeItem = newItems[activeContainerIndex].inventoryItems[activeItemIndex];
-        const overItem = newItems[overContainerIndex].inventoryItems[overItemIndex];
-        
+        const overItem =
+          newItems[overContainerIndex].inventoryItems[overItemIndex];
+
         // Replace active item with over item in active container
         const [removeItem] = newItems[
           activeContainerIndex
@@ -335,7 +260,7 @@ export default function Appearance({ types, showNotification }: IProps) {
         newItems[overContainerIndex].inventoryItems.splice(
           overItemIndex,
           1,
-          removeItem
+          removeItem,
         );
         setItemTypes(newItems);
       }
@@ -372,7 +297,7 @@ export default function Appearance({ types, showNotification }: IProps) {
         (item) => item.id === active.id,
       );
 
-      // Replace the active item from the active container with empty item and ad it to the over container
+      // Replace the active item from the active container with empty item and add it to the over container
       const newItems = [...itemTypes];
       const [removedItem] = newItems[
         activeContainerIndex
@@ -412,6 +337,30 @@ export default function Appearance({ types, showNotification }: IProps) {
     setSwitchTypeProps({ open: true, item });
   };
 
+  const handleAddRows = async (extraRows: number) => {
+    if (extraRows === 0) {
+      showNotification('error', 'Please enter a number greater than 0');
+      return;
+    }
+    try {
+      const response = await axios.put(`${API_URL.ADMIN}/appearance/rows`, {
+        typeId: addRowProps.type?.id,
+        quantity: Number(extraRows),
+        rowAction: ROW_ACTION.ADD,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', 'There was an error: ' + error);
+    }
+  };
+
   const handleSaveArrangement = async () => {
     setIsLoading(true);
     try {
@@ -433,9 +382,93 @@ export default function Appearance({ types, showNotification }: IProps) {
     }
   };
 
+  const onMoveItemToEmpty = (item: IInventoryItem) => {
+    if (!item || !moveItemProps.emptyItem) {
+      return;
+    }
+
+    console.log({item, emptyItem: moveItemProps.emptyItem});
+
+    const emptyItemContainer = findContainerOfItems(
+      moveItemProps.emptyItem.id,
+      'item',
+    );
+    const itemContainer = findContainerOfItems(item.id, 'item');
+
+    if (!emptyItemContainer || !itemContainer) {
+      return;
+    }
+
+    const emptyContainerIndex = itemTypes.findIndex(
+      (type) => type.id === emptyItemContainer.id,
+    );
+    const itemContainerIndex = itemTypes.findIndex(
+      (i) => i.id === itemContainer.id,
+    );
+
+    console.log({
+      emptyContainerIndex,
+      itemContainerIndex,})
+
+    const emptyItemIndex = emptyItemContainer.inventoryItems.findIndex(
+      (i) => i.id === moveItemProps.emptyItem.id,
+    );
+    const itemIndex = itemContainer.inventoryItems.findIndex(
+      (i) => i.id === item.id,
+    );
+
+    // Same container
+    if (emptyContainerIndex === itemContainerIndex) {
+      // Swap empty with item
+      const newItems = [...itemTypes];
+      newItems[emptyContainerIndex].inventoryItems = swapElements(
+        newItems[emptyContainerIndex].inventoryItems,
+        emptyItemIndex,
+        itemIndex,
+      );
+      setItemTypes(newItems);
+    } else {
+      // Different container
+
+      const newItems = [...itemTypes];
+      // Replace item with empty in the item container
+      newItems[itemContainerIndex].inventoryItems.splice(
+        itemIndex,
+        1,
+        moveItemProps.emptyItem,
+      );
+
+      // Replace the empty with item
+      newItems[emptyContainerIndex].inventoryItems.splice(
+        emptyItemIndex,
+        1,
+        item,
+      );
+      setItemTypes(newItems);
+    }
+  };
+
   return (
     <>
-      <SwitchTypeModal
+      {moveItemProps.open && moveItemProps.emptyItem &&<MoveItemToEmpty
+        open={moveItemProps.open}
+        onClose={() => setMoveItemProps({ open: false, emptyItem: null })}
+        inventoryItems={inventoryItems}
+        onMoveItemToEmpty={onMoveItemToEmpty}
+      />}
+      <SingleFieldEdit
+        open={addRowProps.open}
+        onClose={() => setAddRowProps({ open: false, type: null })}
+        defaultValue={1}
+        title="Add Row"
+        inputLabel="Rows"
+        handleUpdate={handleAddRows}
+        buttonLabel="Add Row"
+        inputProps={{
+          type: 'number',
+        }}
+      />
+      <SwitchTypeAndAppearanceModal
         open={switchTypeProps.open}
         onClose={() => setSwitchTypeProps({ open: false, type: null })}
         types={itemTypes}
@@ -485,7 +518,14 @@ export default function Appearance({ types, showNotification }: IProps) {
                   >
                     {type?.inventoryItems?.map((item: any) => {
                       if (item?.name === 'Empty') {
-                        return <SortableEmptyItem item={item} />;
+                        return (
+                          <SortableEmptyItem
+                            item={item}
+                            onClick={() =>
+                              setMoveItemProps({ open: true, emptyItem: item })
+                            }
+                          />
+                        );
                       }
 
                       return (
@@ -498,6 +538,18 @@ export default function Appearance({ types, showNotification }: IProps) {
                       );
                     })}
                   </SortableContext>
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    width={'100%'}
+                    mt={2}
+                  >
+                    <Button
+                      onClick={() => setAddRowProps({ open: true, type: type })}
+                    >
+                      + Insert More Rows
+                    </Button>
+                  </Box>
                 </SortableItemType>
               );
             })}

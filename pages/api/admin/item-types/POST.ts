@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { calculateNextPriority } from '../../utils/appearance';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -19,10 +20,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const priority = await calculateNextPriority();
+
     const newItemType = await prisma.itemType.create({
       data: {
         name,
         rows: 1,
+        priority,
       },
     });
 

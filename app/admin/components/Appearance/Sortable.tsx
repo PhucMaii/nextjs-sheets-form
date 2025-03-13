@@ -103,7 +103,7 @@ export const SortableItem = ({
   );
 };
 
-export const SortableEmptyItem = ({ item }: any) => {
+export const SortableEmptyItem = ({ item, onClick }: any) => {
   const { attributes, setNodeRef } = useSortable({
     id: item.id,
     data: { type: 'empty' },
@@ -123,7 +123,7 @@ export const SortableEmptyItem = ({ item }: any) => {
       md={4}
       lg={3}
     >
-      <Button sx={{ width: '100%', height: '100%' }}>
+      <Button sx={{ width: '100%', height: '100%' }} onClick={onClick}>
         <Box
           sx={{
             width: '100%',

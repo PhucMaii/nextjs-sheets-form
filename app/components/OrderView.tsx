@@ -49,7 +49,7 @@ import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
 import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
 import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
-import { convertItemArrayToMap } from '../utils/item';
+import { SWRFetchData } from '../utils/db';
 
 export const ItemButton = ({
   item,
@@ -57,12 +57,14 @@ export const ItemButton = ({
   style,
   containerStyle,
   ref,
+  disabled,
 }: {
   item: IItem;
   onClick?: any;
   style?: any;
   containerStyle?: any;
   ref?: any;
+  disabled?: boolean;
 }) => {
   return (
     <Button
@@ -70,6 +72,7 @@ export const ItemButton = ({
       sx={{ width: '100%', height: '100%', ...style }}
       onClick={onClick}
       ref={ref}
+      disabled={disabled}
     >
       <Box
         display="flex"
@@ -84,7 +87,7 @@ export const ItemButton = ({
           width: '100%',
           height: '100%',
           border: `1px solid ${grey[200]}`,
-          color: blueGrey[800],
+          color: disabled ? grey[400] : blueGrey[800],
           ...containerStyle,
         }}
       >
@@ -92,7 +95,7 @@ export const ItemButton = ({
           {item.name}
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography fontWeight="bold">${item.price?.toFixed(2)}</Typography>
+          <Typography fontWeight="bold">${item.price?.toFixed(2) || 'N/A'}</Typography>
           {item.isShowDiscount && item.prevPrice && (
             <Typography
               fontWeight="bold"
@@ -171,6 +174,8 @@ const OrderView = ({
   });
   const [tabIdx, setTabIdx] = useState<number>(0);
 
+  const [appearance] = SWRFetchData('/api/appearance');
+
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -183,10 +188,43 @@ const OrderView = ({
   const comparedField = purpose === ORDER_USAGE_PURPOSE.ITEM ? 'name' : 'id';
 
   const itemTypes = useMemo(() => {
-    const typesObj = convertItemArrayToMap(items);
+    // const typesObj = convertItemArrayToMap(items);
+    const newTypes = { ...(appearance?.itemTypes || {}) };
 
-    return typesObj;
-  }, [items]);
+    Object.keys(newTypes).forEach((key: string) => {
+      newTypes[key] = newTypes[key].map((item: any) => {
+        const existingItem = items.find((i) => i.inventoryItemId === item.id);
+        if (existingItem) {
+          return {
+            ...existingItem,
+            ...item,
+          };
+        }
+        return {
+          ...item,
+          disabled: true,
+        };
+      });
+    });
+    // const withPriceItems = Object.values((appearance?.itemTypes || {}) as any).map((itemList: any[]) => {
+    //   return itemList.map((item: IInventoryItem) => {
+    //     const existingClientItem = items.find((i) => i.inventoryItemId === item?.id);
+    //     if (existingClientItem) {
+    //       return {
+    //         ...existingClientItem,
+    //         ...item,
+    //       }
+    //     }
+    //     return {
+    //       ...item,
+    //       disabled: true,
+    //     }
+    //   })
+    // });
+
+    console.log(newTypes, 'new types');
+    return newTypes;
+  }, [items, appearance]);
 
   const orderDiscount = useMemo(() => {
     if (!orderedItems || orderedItems.length === 0) return 0;
@@ -410,17 +448,18 @@ const OrderView = ({
     setOrderedItems(newItems);
   };
 
-  const renderByItems = () => {
+  const renderByItemType = () => {
     return (
       <>
         {displayItems.length > 0 &&
-          displayItems.map((item: IItem) => {
+          displayItems.map((item: IItem | any) => {
             return (
               <Grid
                 item
                 xs={isModal ? 12 : 6}
                 sm={isModal ? 6 : 4}
                 md={isModal ? 6 : 3}
+                xl={3}
               >
                 <ItemButton
                   item={item}
@@ -432,9 +471,13 @@ const OrderView = ({
                     })
                   }
                   containerStyle={{
-                    backgroundColor:
-                      item?.inventoryItem?.color || infoBackground,
+                    backgroundColor: item?.disabled
+                      ? grey[100]
+                      : item?.inventoryItem?.color
+                        ? item?.inventoryItem?.color
+                        : infoBackground,
                   }}
+                  disabled={item?.disabled}
                 />
               </Grid>
             );
@@ -443,19 +486,18 @@ const OrderView = ({
     );
   };
 
-  const renderItemsByType = () => {
+  const renderAllItems = () => {
     return (
       <>
-        {itemTypes?.sortedKeysByPriority &&
-          itemTypes?.sortedKeysByPriority?.length > 0 &&
-          itemTypes?.sortedKeysByPriority?.map((type: string) => {
+        {Object.keys(itemTypes).length > 0 &&
+          Object.keys(itemTypes)?.map((typeName: string) => {
             return (
-              <Fragment key={type}>
+              <Fragment key={typeName}>
                 <Grid item xs={12} mt={2}>
-                  <Typography variant="h6">{type}</Typography>
+                  <Typography variant="h6">{typeName}</Typography>
                 </Grid>
 
-                {itemTypes.typesObj[type].map((item: IItem, index: number) => {
+                {itemTypes[typeName].map((item: IItem | any, index: number) => {
                   return (
                     <Grid
                       data-tour={index === 0 ? 'third-step' : ''}
@@ -463,6 +505,7 @@ const OrderView = ({
                       xs={isModal ? 12 : 6}
                       sm={isModal ? 6 : 4}
                       md={isModal ? 6 : 3}
+                      xl={3}
                     >
                       <ItemButton
                         item={item}
@@ -474,9 +517,13 @@ const OrderView = ({
                           })
                         }
                         containerStyle={{
-                          backgroundColor:
-                            item?.inventoryItem?.color || infoBackground,
+                          backgroundColor: item?.disabled
+                            ? grey[100]
+                            : item?.inventoryItem?.color
+                              ? item?.inventoryItem?.color
+                              : infoBackground,
                         }}
+                        disabled={item?.disabled}
                       />
                     </Grid>
                   );
@@ -558,8 +605,8 @@ const OrderView = ({
             onClick={() => setSelectedItemType('All')}
             mode="edit"
           />
-          {itemTypes?.sortedKeysByPriority &&
-            itemTypes.sortedKeysByPriority.map(
+          {Object.keys(itemTypes).length > 0 &&
+            Object.keys(itemTypes).map(
               (itemType: string, index: number) => {
                 return (
                   <ItemTypeButton
@@ -596,8 +643,8 @@ const OrderView = ({
         </Typography>
         <Grid container mt={2}>
           {selectedItemType === 'All' && !debouncedKeywords
-            ? renderItemsByType()
-            : renderByItems()}
+            ? renderAllItems()
+            : renderByItemType()}
 
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
           {role === USER_ROLE.ADMIN &&
@@ -997,11 +1044,11 @@ const OrderView = ({
       />
       {NotificationComp}
       <Grid container spacing={2} width="100%">
-        <Grid item xs={12} sm={isModal ? 7 : 8}>
+        <Grid item xs={12} sm={8.5}>
           {renderDisplayItems()}
         </Grid>
 
-        <Grid item xs={12} sm={isModal ? 5 : 4}>
+        <Grid item xs={12} sm={3.5}>
           {renderMyOrder()}
         </Grid>
       </Grid>

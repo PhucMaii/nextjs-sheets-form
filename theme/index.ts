@@ -15,7 +15,7 @@ export function createTheme() {
         sm: 600,
         md: 900,
         lg: 1200,
-        xl: 1440,
+        xl: 1800,
       },
     },
     palette,

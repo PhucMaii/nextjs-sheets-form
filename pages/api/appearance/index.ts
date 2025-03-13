@@ -31,7 +31,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // If there is no item, then add empty items to fill up space
         if (!item) {
           newItems.push({
-            id: type.id * arrayIndex + 80000000, // Create random id that will not be same as either type id or any items id
+            id: type.id * arrayIndex + 80000000 * arrayIndex, // Create random id that will not be same as either type id or any items id
             indexPos: arrayIndex + 1,
             name: 'Empty',
             dataType: 'Empty',
@@ -69,8 +69,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       };
     });
 
+    const displayItemTypes = itemTypes.reduce((acc: any, type: any) => {
+      const key = type.name;
+
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+
+      acc[key].push(...type.inventoryItems);
+
+      return acc;
+    }, {});
+
     return res.status(200).json({
       data: filledInItemTypes,
+      itemTypes: displayItemTypes,
       message: 'Fetch Appearance Successfully',
     });
   } catch (error: any) {

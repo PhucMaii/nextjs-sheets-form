@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
 import { infoBackground } from '@/theme/color';
 import { otherTypeId } from '@/app/lib/constant';
+import { calculateNextIndexPosAndRows } from '../../utils/appearance';
 
 interface IBody {
   name: string;
@@ -52,6 +53,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const { nextPos, newRows } = await calculateNextIndexPosAndRows(typeId, 1);
     // Create Main Inventory Item
     const newInventory = await prisma.inventoryItem.create({
       data: {
@@ -62,7 +64,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdBy,
         color: infoBackground,
         typeId: typeId > 0 ? typeId : otherTypeId,
-        indexPos: 1,
+        indexPos: nextPos[0],
+      },
+    });
+
+    // Update Rows in Item Type
+    await prisma.itemType.update({
+      where: {
+        id: typeId,
+      },
+      data: {
+        rows: newRows,
       },
     });
 

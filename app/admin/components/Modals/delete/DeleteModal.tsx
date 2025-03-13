@@ -32,7 +32,9 @@ export default function DeleteModal({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  const handleDeleteOrder = async () => {
+  const handleDeleteOrder = async (e: any) => {
+    e.stopPropagation();
+    e.preventDefault();
     try {
       setIsDeleting(true);
       await handleDelete(targetObj);

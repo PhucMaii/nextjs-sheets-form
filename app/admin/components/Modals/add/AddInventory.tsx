@@ -369,9 +369,9 @@ export default function AddInventory({
               <Typography variant="h6">Type</Typography>
               <Select
                 onChange={(e) =>
-                  setNewItem({ ...newItem, type: e.target.value })
+                  setNewItem({ ...newItem, typeId: +e.target.value })
                 }
-                value={newItem.type}
+                value={newItem.typeId}
               >
                 <MenuItem value={-1} disabled>
                   -- Choose type --
