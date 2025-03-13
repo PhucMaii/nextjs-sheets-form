@@ -23,8 +23,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           inventoryItem: {
             where: {
               id: {
-                not: testItemId
-              }
+                not: testItemId,
+              },
             },
             include: {
               vendorItem: {
@@ -82,8 +82,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           inventoryItem: {
             where: {
               id: {
-                not: testItemId
-              }
+                not: testItemId,
+              },
             },
             include: {
               vendorItem: {

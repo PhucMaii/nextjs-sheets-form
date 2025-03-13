@@ -210,8 +210,8 @@ const OrderView = ({
         const existingItem = items.find((i) => i.inventoryItemId === item.id);
         if (existingItem) {
           return {
-            ...existingItem,
             ...item,
+            ...existingItem,
           };
         }
         return {
@@ -220,23 +220,7 @@ const OrderView = ({
         };
       });
     });
-    // const withPriceItems = Object.values((appearance?.itemTypes || {}) as any).map((itemList: any[]) => {
-    //   return itemList.map((item: IInventoryItem) => {
-    //     const existingClientItem = items.find((i) => i.inventoryItemId === item?.id);
-    //     if (existingClientItem) {
-    //       return {
-    //         ...existingClientItem,
-    //         ...item,
-    //       }
-    //     }
-    //     return {
-    //       ...item,
-    //       disabled: true,
-    //     }
-    //   })
-    // });
 
-    console.log(newTypes, 'new types');
     return newTypes;
   }, [items, appearance]);
 
@@ -524,7 +508,7 @@ const OrderView = ({
                       sm={4}
                       md={3}
                       lg={3}
-                      sx={{width: xsDown ? '50px' : '100%'}}
+                      sx={{ width: xsDown ? '50px' : '100%' }}
                     >
                       {item.name === 'Empty' ? (
                         <WhiteSpace />
@@ -538,7 +522,7 @@ const OrderView = ({
                               defaultValue: 0,
                             })
                           }
-                          style={{width: xsDown ? '50px' : '100%'}}
+                          style={{ width: xsDown ? '50px' : '100%' }}
                           containerStyle={{
                             backgroundColor: item?.disabled
                               ? grey[100]
