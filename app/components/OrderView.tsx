@@ -968,11 +968,11 @@ const OrderView = ({
             </Tabs>
           </Box>
 
-          <Box overflow="auto" height="100vh">
+          {/* <Box overflow="auto" height="100vh"> */}
             {tabIdx === 0 && renderDisplayItems()}
             {tabIdx === 1 && renderMyOrder()}
 
-          </Box>
+          {/* </Box> */}
 
         </Box>
         {renderPlaceOrdeButton()}

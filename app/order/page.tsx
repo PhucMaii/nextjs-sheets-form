@@ -103,11 +103,6 @@ export default function OrderForm() {
       if (item.quantity % 1 !== 0) {
         showNotification('error', 'Item quantity must be a whole number');
         return;
-      } 
-
-      if (item.quantity < 1) {
-        showNotification('error', 'Item quantity must be greater than 0');
-        return;
       }
     }
 
@@ -126,12 +121,19 @@ export default function OrderForm() {
       const dateString = moment(currentDate).format('YYYY-MM-DD');
       const timeString = moment(currentDate).format('HH:mm:ss');
 
+      const itemsNo0 = order.items.filter((item: any) => item.quantity > 0);
+
+      if (itemsNo0.length === 0) {
+        showNotification('error', 'Please select at least one item');
+        return;
+      }
+
       // Format data to have the same structure as backend
       const submittedData: any = {
         deliveryDate: order.deliveryDate,
         note: order.note,
         createdAt: `${timeString} ${dateString}`,
-        items: order.items,
+        items: itemsNo0,
         createdBy: USER_ROLE.CLIENT,
       };
 
