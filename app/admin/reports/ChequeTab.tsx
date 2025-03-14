@@ -19,10 +19,11 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { Cheque } from '@prisma/client';
 import useDebounce from '@/hooks/useDebounce';
-import { generateImgUrl } from '@/app/lib/s3';
 import ViewImg from '../components/ViewImg';
 import EditCheque from '../components/Modals/edit/EditCheque';
 import { grey } from '@mui/material/colors';
+import DisplayFile from '../components/Modals/DisplayFile';
+import ErrorComponent from '../components/ErrorComponent';
 
 interface IProps {
   client: UserType | null;
@@ -59,7 +60,7 @@ export default function ChequeTab({ client, showNotification }: IProps) {
   useEffect(() => {
     if (debouncedKeywords) {
       const filteredCheques = cheque?.data?.filter((cheque: Cheque) =>
-        cheque.chequeNumber.includes(debouncedKeywords),
+        cheque?.chequeNumber?.includes(debouncedKeywords),
       );
 
       setDisplayCheques(filteredCheques);
@@ -119,7 +120,7 @@ export default function ChequeTab({ client, showNotification }: IProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {displayCheques?.map((cheque: Cheque) => {
+          {displayCheques?.length > 0 ? displayCheques?.map((cheque: Cheque) => {
             return (
               <TableRow
                 key={cheque.id}
@@ -147,7 +148,7 @@ export default function ChequeTab({ client, showNotification }: IProps) {
                       overflow: 'hidden',
                     }}
                   >
-                    <img
+                    {/* <img
                       src={generateImgUrl(
                         hoveredChequeId === cheque.id && cheque?.fileKeyBack
                           ? cheque?.fileKeyBack
@@ -159,6 +160,13 @@ export default function ChequeTab({ client, showNotification }: IProps) {
                         transition: '0.3s ease-in-out',
                       }}
                       alt="cheque"
+                    /> */}
+                    <DisplayFile
+                      fileKey={
+                        hoveredChequeId === cheque.id && cheque?.fileKeyBack
+                          ? cheque?.fileKeyBack
+                          : cheque.fileKeyFront
+                      }
                     />
                   </Box>
                 </TableCell>
@@ -170,7 +178,14 @@ export default function ChequeTab({ client, showNotification }: IProps) {
                 <TableCell>{cheque.createdAt.toLocaleString()}</TableCell>
               </TableRow>
             );
-          })}
+          }) : (
+            <TableRow>
+              <TableCell colSpan={5}>
+                <ErrorComponent errorText="No cheque found" />
+              </TableCell>
+
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </>

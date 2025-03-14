@@ -13,7 +13,12 @@ import {
 } from '@mui/material';
 import { ShadowSection } from './styled';
 import { UserType } from '@/app/utils/type';
-import { API_URL, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import {
+  API_URL,
+  ORDER_STATUS,
+  PAYMENT_TYPE,
+  USER_CATEGORIZED,
+} from '@/app/utils/enum';
 import { Order } from '../orders/page';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
@@ -158,6 +163,15 @@ export default function ReportPage() {
       setBaseClientOrders([]);
     }
   }, [clientValue, dateRange, datePicker, orders?.data]);
+
+  useEffect(() => {
+    if (
+      clientValue?.clientName === 'All Clients' ||
+      clientValue?.preference?.paymentType !== PAYMENT_TYPE.MONTHLY
+    ) {
+      setTabIndex(0);
+    }
+  }, [clientValue]);
 
   // useEffect(() => {
   //   if (datePicker) {
@@ -637,13 +651,16 @@ export default function ReportPage() {
             value={tabIndex}
             onChange={(e: any, value: number) => setTabIndex(value)}
             variant="fullWidth"
-            sx={{mb: 2}}
+            sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
           >
             <Tab label="Orders" value={0} />
             <Tab
               label="Cheques"
               value={1}
-              disabled={clientValue?.clientName === 'All Clients'}
+              disabled={
+                clientValue?.clientName === 'All Clients' ||
+                clientValue?.preference.paymentType !== PAYMENT_TYPE.MONTHLY
+              }
             />
           </Tabs>
 
@@ -662,7 +679,10 @@ export default function ReportPage() {
               setBaseClientOrders={setBaseClientOrders}
             />
           ) : (
-            <ChequeTab client={clientValue} showNotification={showNotification} />
+            <ChequeTab
+              client={clientValue}
+              showNotification={showNotification}
+            />
           )}
 
           {/* <Grid container spacing={1} alignItems="center">

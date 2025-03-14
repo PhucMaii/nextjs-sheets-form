@@ -16,7 +16,6 @@ import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { Cheque } from '@prisma/client';
-import { generateImgUrl } from '@/app/lib/s3';
 import FileUpload from '../../FileUpload';
 import { days, months } from '@/app/lib/constant';
 import { UserType } from '@/app/utils/type';
@@ -25,6 +24,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import DeleteModal from '../delete/DeleteModal';
+import DisplayFile from '../DisplayFile';
 
 interface IProps extends ModalProps {
   cheque: Cheque;
@@ -39,14 +39,14 @@ export default function EditCheque({
   showNotification,
   client,
 }: IProps) {
-    const [deleteModalProps, setDeleteModalProps] = useState<any>({
-      open: false,
-      cheque: null,
-    });
-    const [isSaving, setIsSaving] = useState<boolean>(false);
-    const [updatedCheque, setUpdatedCheque] = useState<Cheque>({
-      ...cheque,
-    });
+  const [deleteModalProps, setDeleteModalProps] = useState<any>({
+    open: false,
+    cheque: null,
+  });
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [updatedCheque, setUpdatedCheque] = useState<Cheque>({
+    ...cheque,
+  });
 
   const month = days[new Date().getMonth()];
   const year = new Date().getFullYear();
@@ -99,13 +99,15 @@ export default function EditCheque({
 
   return (
     <>
-        <DeleteModal 
-          open={deleteModalProps.open}
-          handleCloseModal={() => setDeleteModalProps({ open: false, cheque: null })}
-          targetObj={deleteModalProps.cheque}
-          handleDelete={handleDeleteCheque} 
-          showTargetObj={updatedCheque?.chequeNumber || ''}
-        />
+      <DeleteModal
+        open={deleteModalProps.open}
+        handleCloseModal={() =>
+          setDeleteModalProps({ open: false, cheque: null })
+        }
+        targetObj={deleteModalProps.cheque}
+        handleDelete={handleDeleteCheque}
+        showTargetObj={updatedCheque?.chequeNumber || ''}
+      />
       <Modal open={open} onClose={onClose}>
         <BoxModal>
           <ModalHead
@@ -121,13 +123,7 @@ export default function EditCheque({
           <Box display="flex" flexDirection="column" gap={2} mb={2}>
             <Typography>Front of cheque</Typography>
             {updatedCheque?.fileKeyFront && (
-              <Box>
-                <img
-                  src={generateImgUrl(updatedCheque.fileKeyFront)}
-                  alt="cheque"
-                  style={{ width: '100px', height: '100px' }}
-                />
-              </Box>
+              <DisplayFile fileKey={updatedCheque.fileKeyFront} />
             )}
             <FileUpload
               showNotification={showNotification}
@@ -143,13 +139,7 @@ export default function EditCheque({
 
             <Typography>Back of cheque</Typography>
             {updatedCheque?.fileKeyBack && (
-              <Box>
-                <img
-                  src={generateImgUrl(updatedCheque.fileKeyBack)}
-                  alt="cheque"
-                  style={{ width: '100px', height: '100px' }}
-                />
-              </Box>
+              <DisplayFile fileKey={updatedCheque.fileKeyBack} />
             )}
             <FileUpload
               showNotification={showNotification}

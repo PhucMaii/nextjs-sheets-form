@@ -16,7 +16,7 @@ export default function ViewImg({fileKeyFront, fileKeyBack, open, onClose}: IPro
         <Box sx={{width: '100vw', height: '100vh'}}>
             <Box display="flex" width="100%" justifyContent="flex-end">
                 <IconButton onClick={onClose} color="inherit">
-                    <XIcon style={{width: '50px', height: '50px', color: grey[800]}} />
+                    <XIcon style={{width: '50px', height: '50px', color: grey[300]}} />
                 </IconButton>
             </Box>
             <Box display="flex" flexDirection="column">
