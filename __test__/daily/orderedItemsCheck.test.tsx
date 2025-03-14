@@ -50,4 +50,25 @@ describe('Check Ordered Items', () => {
     expect(sellingItemsUnitCheck.length).toBe(0);
     expect(sellingItemsInventoryCheck.length).toBe(0);
   });
+
+  test('Check Ordered Items in pre order has quantity <= 0', async () => {
+    const prisma = new PrismaClient();
+
+    const orderedItemsCheck = await prisma.orderedItems.findMany({
+      where: {
+        scheduledOrderId: {
+          not: null,
+        },
+        quantity: {
+          lte: 0,
+        },
+      },
+    });
+    
+
+    expect(orderedItemsCheck.length).toBe(0);
+    if (orderedItemsCheck.length > 0) {
+      console.log(orderedItemsCheck);
+    }
+  })
 });

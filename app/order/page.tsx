@@ -82,9 +82,11 @@ export default function OrderForm() {
 
   // Get list of items to render input field
   const initializeItems = () => {
-    const formatItems = items.data.items.map((item: any) => {
-      return { ...item, quantity: 0 };
-    });
+    const formatItems = items?.data?.items
+      .map((item: any) => {
+        return { ...item, quantity: 0 };
+      })
+      .filter((item: any) => item.inventoryItem.typeId !== null);
 
     setItemList(formatItems);
   };
@@ -94,6 +96,14 @@ export default function OrderForm() {
     if (order.items.length === 0) {
       showNotification('error', 'Please select at least one item');
       return;
+    }
+
+    // Check if any item quantity is decimal number or less than 1
+    for (const item of order.items) {
+      if (item.quantity % 1 !== 0) {
+        showNotification('error', 'Item quantity must be a whole number');
+        return;
+      }
     }
 
     // Check is delivery date valid
@@ -111,12 +121,19 @@ export default function OrderForm() {
       const dateString = moment(currentDate).format('YYYY-MM-DD');
       const timeString = moment(currentDate).format('HH:mm:ss');
 
+      const itemsNo0 = order.items.filter((item: any) => item.quantity > 0);
+
+      if (itemsNo0.length === 0) {
+        showNotification('error', 'Please select at least one item');
+        return;
+      }
+
       // Format data to have the same structure as backend
       const submittedData: any = {
         deliveryDate: order.deliveryDate,
         note: order.note,
         createdAt: `${timeString} ${dateString}`,
-        items: order.items,
+        items: itemsNo0,
         createdBy: USER_ROLE.CLIENT,
       };
 
@@ -188,11 +205,19 @@ export default function OrderForm() {
             minDate={minDate}
           />
         ) : (
-          <>
+          <Box display="flex" flexDirection="column" gap={2} height="100vh" width="100%">
             <Box display="flex" justifyContent="flex-end">
               <TourStartButton />
             </Box>
-            <Box pb={6} width="100%">
+            <Box
+              sx={{
+                height: '80vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflowY: 'auto',
+                pb: 3
+              }}
+            >
               <OrderView
                 onSubmit={onSubmit}
                 items={itemList}
@@ -200,7 +225,7 @@ export default function OrderForm() {
                 role={USER_ROLE.CLIENT}
               />
             </Box>
-          </>
+          </Box>
         )}
       </Sidebar>
     </TourProvider>

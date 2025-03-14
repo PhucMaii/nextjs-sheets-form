@@ -61,6 +61,16 @@ export const overrideOrder = async (
   try {
     const prisma = new PrismaClient();
 
+    for (const item of newItems) {
+      if (item.quantity % 1 !== 0) {
+        throw new Error('Invalid Quantity');
+      }
+
+      if (item.quantity < 1) {
+        throw new Error('Invalid Quantity');
+      }
+    }
+
     // Check if user account is inactive
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
       throw new Error('Client Account Is INACTIVE');
