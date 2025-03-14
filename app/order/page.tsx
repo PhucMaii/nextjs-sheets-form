@@ -82,9 +82,11 @@ export default function OrderForm() {
 
   // Get list of items to render input field
   const initializeItems = () => {
-    const formatItems = items.data.items.map((item: any) => {
-      return { ...item, quantity: 0 };
-    }).filter((item: any) => item.inventoryItem.typeId !== null);
+    const formatItems = items?.data?.items
+      .map((item: any) => {
+        return { ...item, quantity: 0 };
+      })
+      .filter((item: any) => item.inventoryItem.typeId !== null);
 
     setItemList(formatItems);
   };
@@ -188,11 +190,19 @@ export default function OrderForm() {
             minDate={minDate}
           />
         ) : (
-          <>
+          <Box display="flex" flexDirection="column" gap={2} height="100vh" width="100%">
             <Box display="flex" justifyContent="flex-end">
               <TourStartButton />
             </Box>
-            <Box pb={6} width="100%">
+            <Box
+              sx={{
+                height: '80vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflowY: 'auto',
+                pb: 3
+              }}
+            >
               <OrderView
                 onSubmit={onSubmit}
                 items={itemList}
@@ -200,7 +210,7 @@ export default function OrderForm() {
                 role={USER_ROLE.CLIENT}
               />
             </Box>
-          </>
+          </Box>
         )}
       </Sidebar>
     </TourProvider>

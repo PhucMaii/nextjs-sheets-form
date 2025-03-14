@@ -952,7 +952,6 @@ const OrderView = ({
           flexDirection="column"
           gap={2}
           width="100%"
-          overflow="auto"
         >
           <Box sx={{ borderColor: 'divider', borderBottom: 1 }}>
             <Tabs
@@ -969,11 +968,15 @@ const OrderView = ({
             </Tabs>
           </Box>
 
-          {tabIdx === 0 && renderDisplayItems()}
-          {tabIdx === 1 && renderMyOrder()}
-        </Box>
+          <Box overflow="auto" height="100vh">
+            {tabIdx === 0 && renderDisplayItems()}
+            {tabIdx === 1 && renderMyOrder()}
 
+          </Box>
+
+        </Box>
         {renderPlaceOrdeButton()}
+
       </>
     );
   }
