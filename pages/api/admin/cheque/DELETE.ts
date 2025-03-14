@@ -2,45 +2,46 @@ import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
 interface IQuery {
-    userId?: string
+    id?: string
 }
 
-export default async function GET(req: NextApiRequest, res: NextApiResponse) {
+const DELETE = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         const prisma = new PrismaClient();
 
-        const { userId }: IQuery  = req.query;
+        const { id }: IQuery = req.query;
 
-        if (!userId) {
+        if (!id) {
             return res.status(404).json({
-                error: 'You are missing body data',
+                error: 'Cheque Id Not Provided',
             });
         }
 
-        const existingUser = await prisma.user.findUnique({
+        const existingCheque = await prisma.cheque.findUnique({
             where: {
-                id: Number(userId),
+                id: Number(id),
             },
         });
-
-        if (!existingUser) {
+        
+        if (!existingCheque) {
             return res.status(404).json({
-                error: 'User Not Found',
+                error: 'Cheque Not Found',
             });
         }
 
-        const cheques = await prisma.cheque.findMany({
+        await prisma.cheque.delete({
             where: {
-                userId: Number(userId),
+                id: Number(id),
             },
         });
 
         return res.status(200).json({
-            data: cheques,
-            message: 'Fetch User Cheques Successfully',
+            message: 'Cheque Deleted Successfully',
         });
     } catch (error: any) {
         console.log('Internal Server Error: ', error);
         return res.status(500).json({ error: 'Internal Server Error: ' + error });
     }
 }
+
+export default DELETE;

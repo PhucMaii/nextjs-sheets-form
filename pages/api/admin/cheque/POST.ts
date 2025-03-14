@@ -40,7 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const admin: any = await getUserInfo(req, res);
-    const createdAt = getTodayDate();
+    const { dateAndTime } = getTodayDate();
 
     const newCheque = await prisma.cheque.create({
       data: {
@@ -52,8 +52,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         amount,
         userId,
         createdBy: `Admin - ${admin?.clientName || ''}`,
-
+        createdAt: dateAndTime,
       },
+    });
+
+    return res.status(200).json({
+      data: newCheque,
+      message: 'New Cheque Uploaded Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

@@ -18,12 +18,15 @@ import ModalHead from '@/app/lib/ModalHead';
 import FileUpload from '../FileUpload';
 import { generateImgUrl } from '@/app/lib/s3';
 import { months } from '@/app/lib/constant';
+import axios from 'axios';
+import { API_URL } from '@/app/utils/enum';
+import { UserType } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
   year: string;
   month: string;
-  clientId: string;
+  client: UserType | null;
 }
 
 export default function UploadChequeModal({
@@ -32,19 +35,53 @@ export default function UploadChequeModal({
   showNotification,
   year,
   month,
-  clientId,
+  client,
 }: IProps) {
   const [cheque, setCheque] = useState<{ front: string; back: string }>({
     front: '',
     back: '',
   });
-
   const [chequeData, setChequeData] = useState<any>({
     chequeNumber: '',
     amount: 0,
     month,
     year,
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleUpload = async () => {
+    console.log(client, 'client')
+    if (!client) {
+      showNotification('error', 'Please select a client');
+      return;
+    };
+    if (!cheque.front || chequeData.amount === 0 || !chequeData.month || !chequeData.year) {
+      showNotification('error', 'Please fill all required the fields');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${API_URL.ADMIN}/cheque`, {
+        ...chequeData,
+        userId: client.id,
+        fileKeyFront: cheque.front,
+        fileKeyBack: cheque.back
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error?.response?.data?.error || error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -52,8 +89,8 @@ export default function UploadChequeModal({
         <ModalHead
           heading="Upload Cheque"
           buttonLabel="UPLOAD"
-          onClick={() => {}}
-          buttonProps={{}}
+          onClick={handleUpload}
+          buttonProps={{loading: isLoading}}
           onClose={onClose}
         />
 
@@ -72,7 +109,7 @@ export default function UploadChequeModal({
           )}
           <FileUpload
             showNotification={showNotification}
-            fileName={`${month}-${year}-${clientId}_front`}
+            fileName={`${month}-${year}-${client?.clientId}_front`}
             uploadLocation={`cheques/${year}/${month}`}
             onUploadImageUI={(fileKey: string) => {
               setCheque({
@@ -94,7 +131,7 @@ export default function UploadChequeModal({
           )}
           <FileUpload
             showNotification={showNotification}
-            fileName={`${month}-${year}-${clientId}_back`}
+            fileName={`${month}-${year}-${client?.clientId}_back`}
             uploadLocation={`cheques/${year}/${month}`}
             onUploadImageUI={(fileKey: string) => {
               setCheque({

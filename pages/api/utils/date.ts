@@ -109,7 +109,10 @@ export const getTodayDate = (
   const day = dateSplitted[1].padStart(2, '0');
   const year = dateSplitted[2];
 
-  return { date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1] };
+  const dateRes = `${month}/${day}/20${year}`;
+  const time = pstDate.split(',')[1];
+
+  return { date: dateRes, time, dateAndTime: `${dateRes} ${time}` };
 };
 
 export const checkOrderDeliveryDateValid = (deliveryDate: string) => {

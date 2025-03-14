@@ -21,7 +21,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import PendingIcon from '@mui/icons-material/Pending';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { blue, blueGrey } from '@mui/material/colors';
-import { convertToMonthText, generateMonthRange } from '@/app/utils/time';
+import { generateMonthRange } from '@/app/utils/time';
 import MoneyOffCsredIcon from '@mui/icons-material/MoneyOffCsred';
 import { pusherClient } from '@/app/pusher';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
@@ -30,7 +30,6 @@ import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import { renderType } from '@/app/lib/render';
 import { PriceChange } from '@mui/icons-material';
-import UploadChequeModal from '../components/Modals/UploadChequeModal';
 import OrderInReportPage from './OrderInReportPage';
 import ChequeTab from './ChequeTab';
 // import { handleSearch } from '@/app/utils/search';
@@ -52,8 +51,6 @@ export default function ReportPage() {
   //   useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [isOpenUploadChequeModal, setIsOpenUploadChequeModal] =
-    useState<boolean>(false);
   // const [isOpenEditEmail, setIsOpenEditEmail] = useState<boolean>(false);
   // // const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
@@ -529,14 +526,6 @@ export default function ReportPage() {
         userId={clientValue?.id || -1}
       /> */}
       {NotificationComp}
-      <UploadChequeModal
-        open={isOpenUploadChequeModal}
-        onClose={() => setIsOpenUploadChequeModal(false)}
-        showNotification={showNotification}
-        year={dateRange[1].getFullYear()}
-        month={convertToMonthText(dateRange[1].getMonth())}
-        clientId={clientValue?.clientId || ''}
-      />
 
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5" color={blueGrey[800]}>
@@ -673,7 +662,7 @@ export default function ReportPage() {
               setBaseClientOrders={setBaseClientOrders}
             />
           ) : (
-            <ChequeTab client={clientValue} />
+            <ChequeTab client={clientValue} showNotification={showNotification} />
           )}
 
           {/* <Grid container spacing={1} alignItems="center">

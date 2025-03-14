@@ -400,10 +400,10 @@ model Action {
 model Cheque {
   id      Int     @id @default(autoincrement())
   fileKeyFront  String
-  fileKeyBack   String
+  fileKeyBack   String?
   month        String
   year         String
-  chequeNumber  String
+  chequeNumber  String?
   amount        Int
   createdAt   String
   createdBy   String
