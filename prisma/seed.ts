@@ -117,8 +117,8 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 
 async function main() {
   const listOfDateString = generateListOfDateString(
-    new Date('2025-02-15'),
-    new Date('2025-02-28'),
+    new Date('2025-03-01'),
+    new Date('2025-03-31'),
   );
 
   console.log(listOfDateString, 'list of date string');
@@ -126,10 +126,8 @@ async function main() {
   await prisma.orderedItems.deleteMany({
     where: {
       quantity: 0,
-      Orders: {
-        deliveryDate: {
-          in: listOfDateString
-        }
+      scheduledOrderId: {
+        not: null,
       }
     }
   })

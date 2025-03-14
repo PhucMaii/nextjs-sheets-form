@@ -273,6 +273,10 @@ export const createOrder = async (
       if (item.quantity % 1 !== 0) {
         throw new Error('Invalid Quantity');
       }
+
+      if (item.quantity < 1) {
+        throw new Error('Invalid Quantity');
+      }
     }
 
     // Check if user is inactive

@@ -84,7 +84,7 @@ export const ItemButton = ({
       sx={{ width: '100%', height: '100%', ...style }}
       onClick={onClick}
       ref={ref}
-      disabled={disabled}
+      disabled={disabled || item?.availability === false}
     >
       <Box
         display="flex"
@@ -99,7 +99,10 @@ export const ItemButton = ({
           width: '100%',
           height: '100%',
           border: `1px solid ${grey[200]}`,
-          color: disabled ? grey[400] : blueGrey[800],
+          color:
+            disabled || item?.availability === false
+              ? grey[400]
+              : blueGrey[800],
           ...containerStyle,
         }}
       >
@@ -486,8 +489,6 @@ const OrderView = ({
     );
   };
 
-  console.log(itemTypes, 'item types');
-
   const renderAllItems = () => {
     return (
       <>
@@ -539,36 +540,6 @@ const OrderView = ({
               </Fragment>
             );
           })}
-
-        {/* <Fragment>
-          <Grid item xs={12} mt={2}>
-            <Typography variant="h6">Others</Typography>
-          </Grid>
-
-          {itemTypes?.sortedKeysByPriority?.includes('Others') &&
-            itemTypes?.typesObj['Others'] &&
-            itemTypes?.typesObj['Others']?.length > 0 &&
-            itemTypes?.typesObj['Others'].map((item: IItem) => {
-              return (
-                <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-                  <ItemButton
-                    item={item}
-                    onClick={() =>
-                      setSingleFieldProps({
-                        open: true,
-                        item,
-                        defaultValue: 1,
-                      })
-                    }
-                    containerStyle={{
-                      backgroundColor:
-                        item?.inventoryItem?.color || infoBackground,
-                    }}
-                  />
-                </Grid>
-              );
-            })}
-        </Fragment> */}
       </>
     );
   };
@@ -681,7 +652,7 @@ const OrderView = ({
               </Grid>
             )}
         </Grid>
-        {smDown && renderPlaceOrdeButton()}
+        {/* {smDown && renderPlaceOrdeButton()} */}
       </ShadowSection>
     );
   };
@@ -799,25 +770,6 @@ const OrderView = ({
                       -
                     </Fab>
                     <Typography fontWeight="bold">{item.quantity}</Typography>
-                    {/* <OutlinedInput
-                      size="small"
-                      type="number"
-                      value={item.quantity}
-                      inputProps={{ min: 1 }}
-                      onChange={(e) =>
-                        onEditItemQuantity(item, +e.target.value)
-                      }
-                      slotProps={{
-                        input: {
-                          sx: { textAlign: 'center' },
-                        },
-                      }}
-                      sx={{
-                        width: 'auto',
-                        maxWidth: 100,
-                        textAlign: 'center',
-                      }}
-                    /> */}
                     <Fab
                       size="small"
                       sx={{
@@ -842,7 +794,7 @@ const OrderView = ({
 
         {!isPreOrder && renderDateAndNoteInput()}
         {renderTotal()}
-        {renderPlaceOrdeButton()}
+        {!smDown && renderPlaceOrdeButton()}
       </ShadowSection>
     );
   };
@@ -1020,6 +972,8 @@ const OrderView = ({
           {tabIdx === 0 && renderDisplayItems()}
           {tabIdx === 1 && renderMyOrder()}
         </Box>
+
+        {renderPlaceOrdeButton()}
       </>
     );
   }

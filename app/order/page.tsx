@@ -84,7 +84,7 @@ export default function OrderForm() {
   const initializeItems = () => {
     const formatItems = items.data.items.map((item: any) => {
       return { ...item, quantity: 0 };
-    });
+    }).filter((item: any) => item.inventoryItem.typeId !== null);
 
     setItemList(formatItems);
   };
