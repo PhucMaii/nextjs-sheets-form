@@ -61,6 +61,10 @@ export default async function handler(
         const isSubtotalMatch =
           actualSubtotal.toFixed(2) === order.subTotal?.toFixed(2);
 
+        const orderHas0Quantity = order.items.every(
+          (item) => item.quantity < 1,
+        )
+
         // return !hasItems || !isSubtotalMatch;
         if (!hasItems) {
           return { ...order, errorType: 'No Items' };
@@ -68,6 +72,10 @@ export default async function handler(
 
         if (!isSubtotalMatch) {
           return { ...order, errorType: 'Subtotal Mismatch' };
+        }
+
+        if (orderHas0Quantity) {
+          return { ...order, errorType: 'No Quantity' };
         }
 
         return null;

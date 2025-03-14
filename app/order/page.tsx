@@ -98,6 +98,19 @@ export default function OrderForm() {
       return;
     }
 
+    // Check if any item quantity is decimal number or less than 1
+    for (const item of order.items) {
+      if (item.quantity % 1 !== 0) {
+        showNotification('error', 'Item quantity must be a whole number');
+        return;
+      } 
+
+      if (item.quantity < 1) {
+        showNotification('error', 'Item quantity must be greater than 0');
+        return;
+      }
+    }
+
     // Check is delivery date valid
     const deliveryDateObj = dayjs(order.deliveryDate);
     if (
