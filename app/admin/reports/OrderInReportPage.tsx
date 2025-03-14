@@ -22,7 +22,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { API_URL, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import axios from 'axios';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useReactToPrint } from 'react-to-print';
@@ -44,6 +44,7 @@ import { convertDeliveryDateStringToDate } from '@/pages/api/utils/date';
 import { InvoicePrint } from '../components/Printing/InvoicePrint';
 import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 import { MemoizedAllPrint } from '../components/Printing/AllPrint';
+import UploadChequeModal from '../components/Modals/UploadChequeModal';
 
 export default function OrderInReportPage({
   clientOrders,
@@ -74,6 +75,7 @@ export default function OrderInReportPage({
     useState<boolean>(false);
   const [isOpenRouteStatement, setIsOpenRouteStatement] =
     useState<boolean>(false);
+  const [isOpenUploadCheque, setIsOpenUploadCheque] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
 
@@ -207,6 +209,13 @@ export default function OrderInReportPage({
 
       showNotification('success', response.data.message);
       setIsLoading(false);
+
+      if (
+        status === ORDER_STATUS.COMPLETED &&
+        clientValue.preference.paymentType === PAYMENT_TYPE.MONTHLY
+      ) {
+        setIsOpenUploadCheque(true);
+      }
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
       showNotification(
@@ -413,6 +422,14 @@ export default function OrderInReportPage({
   );
   return (
     <>
+      <UploadChequeModal
+        open={isOpenUploadCheque}
+        onClose={() => setIsOpenUploadCheque(false)}
+        showNotification={showNotification}
+        year={dateRange[0].getFullYear().toString()}
+        month={dateRange[0].getMonth() + 1}
+        client={clientValue}
+      />
       <LoadingModal open={isLoading} />
       <EditEmail
         open={isOpenEditEmail}

@@ -27,6 +27,7 @@ export default function FileUpload({
     accept: {
       'applications/jpeg': ['.jpg', '.jpeg'],
       'applications/png': ['.png'],
+      'applications/pdf': ['.pdf'],
     },
     maxFiles: 4,
     onDrop: async (acceptedFiles) => {

@@ -16,11 +16,11 @@ import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
 import FileUpload from '../FileUpload';
-import { generateImgUrl } from '@/app/lib/s3';
 import { months } from '@/app/lib/constant';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { UserType } from '@/app/utils/type';
+import DisplayFile from './DisplayFile';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -99,13 +99,7 @@ export default function UploadChequeModal({
         <Box display="flex" flexDirection="column" gap={2} mb={2}>
           <Typography>Front of cheque</Typography>
           {cheque?.front && (
-            <Box>
-              <img
-                src={generateImgUrl(cheque.front)}
-                alt="cheque"
-                style={{ width: '100px', height: '100px' }}
-              />
-            </Box>
+            <DisplayFile fileKey={cheque.front} />
           )}
           <FileUpload
             showNotification={showNotification}
@@ -121,13 +115,7 @@ export default function UploadChequeModal({
 
           <Typography>Back of cheque</Typography>
           {cheque?.back && (
-            <Box>
-              <img
-                src={generateImgUrl(cheque.back)}
-                alt="cheque"
-                style={{ width: '100px', height: '100px' }}
-              />
-            </Box>
+            <DisplayFile fileKey={cheque.back} />
           )}
           <FileUpload
             showNotification={showNotification}
