@@ -193,19 +193,18 @@ export default function OrderForm() {
           value={tabIdx}
           onChange={(e, value) => setTabIdx(value)}
         >
-          <Tab value={0} label="Old Version" />
-          <Tab value={1} label="New Version ✨" />
+          <Tab value={0} label="New Version ✨" />
+          <Tab value={1} label="Old Version 👴🏼" />
         </Tabs>
 
         {tabIdx === 0 ? (
-          <OldOrderVersion
-            onSubmit={onSubmit}
-            itemList={itemList}
-            setItemList={setItemList}
-            minDate={minDate}
-          />
-        ) : (
-          <Box display="flex" flexDirection="column" gap={2} height="100vh" width="100%">
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={2}
+            height="100vh"
+            width="100%"
+          >
             <Box display="flex" justifyContent="flex-end">
               <TourStartButton />
             </Box>
@@ -215,7 +214,7 @@ export default function OrderForm() {
                 display: 'flex',
                 flexDirection: 'column',
                 overflowY: 'auto',
-                pb: 3
+                pb: 3,
               }}
             >
               <OrderView
@@ -226,6 +225,13 @@ export default function OrderForm() {
               />
             </Box>
           </Box>
+        ) : (
+          <OldOrderVersion
+            onSubmit={onSubmit}
+            itemList={itemList}
+            setItemList={setItemList}
+            minDate={minDate}
+          />
         )}
       </Sidebar>
     </TourProvider>
