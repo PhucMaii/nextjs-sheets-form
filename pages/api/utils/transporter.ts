@@ -31,3 +31,11 @@ export const yahooTransporter = nodemailer.createTransport({
     pass: 'maithienphuc0102',
   },
 });
+
+export const hotmailTransporter = nodemailer.createTransport({
+  service: 'hotmail',
+  auth: {
+    user: process.env.NODEMAILER_HOTMAIL,
+    pass: process.env.NODEMAILER_HOTMAIL_PASS,
+  },
+});
