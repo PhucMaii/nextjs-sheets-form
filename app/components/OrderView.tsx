@@ -50,6 +50,8 @@ import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
 import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
 import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
 import { SWRFetchData } from '../utils/db';
+import EditIcon from '@mui/icons-material/Edit';
+import EditOffIcon from '@mui/icons-material/EditOff';
 
 export const WhiteSpace = () => {
   return (
@@ -163,6 +165,7 @@ const OrderView = ({
   const [orderedItems, setOrderedItems] = useState<IItem[]>(
     defaultOrderedItems || [],
   );
+  const [editItemQuantity, setEditItemQuantity] = useState<IItem | null>(null);
   const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
     useState<boolean>(false);
   const [isUpdatingAvoidInventory, setIsUpdatingAvoidInventory] =
@@ -265,10 +268,7 @@ const OrderView = ({
 
   useEffect(() => {
     if (selectedItemType !== 'All') {
-      const newItems = items.filter(
-        (i) => i?.inventoryItem?.type?.name === selectedItemType,
-      );
-      setDisplayItems(newItems);
+      setDisplayItems(itemTypes[selectedItemType]);
     } else {
       setDisplayItems(items);
     }
@@ -420,11 +420,18 @@ const OrderView = ({
   };
 
   const onSubmitOrder = async () => {
-    const isItemsValid = orderedItems.every((i: any) => i.quantity > 0);
-
-    if (!isItemsValid) {
-      showNotification('error', 'Items quantity must be greater than 0');
+    if (!orderedItems.length && !isPreOrder) {
+      showNotification('error', 'Order must have at least one item');
       return;
+    }
+
+    if (orderedItems.length > 0) {
+      const isItemsValid = orderedItems.every((i: any) => i.quantity > 0);
+  
+      if (!isItemsValid) {
+        showNotification('error', 'Items quantity must be greater than 0');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -459,29 +466,35 @@ const OrderView = ({
             return (
               <Grid
                 item
-                xs={isModal ? 12 : 6}
-                sm={isModal ? 6 : 4}
-                md={isModal ? 6 : 3}
-                xl={3}
+                xs={6}
+                sm={4}
+                md={3}
+                lg={3}
+                sx={{ width: xsDown ? '50px' : '100%' }}
               >
-                <ItemButton
-                  item={item}
-                  onClick={() =>
-                    setSingleFieldProps({
-                      open: true,
-                      item,
-                      defaultValue: 0,
-                    })
-                  }
-                  containerStyle={{
-                    backgroundColor: item?.disabled
-                      ? grey[100]
-                      : item?.inventoryItem?.color
-                        ? item?.inventoryItem?.color
-                        : infoBackground,
-                  }}
-                  disabled={item?.disabled}
-                />
+                {item.name === 'Empty' ? (
+                  <WhiteSpace />
+                ) : (
+                  <ItemButton
+                    item={item}
+                    onClick={() =>
+                      setSingleFieldProps({
+                        open: true,
+                        item,
+                        defaultValue: 0,
+                      })
+                    }
+                    style={{ width: xsDown ? '50px' : '100%' }}
+                    containerStyle={{
+                      backgroundColor: item?.disabled
+                        ? grey[100]
+                        : item?.inventoryItem?.color
+                          ? item?.inventoryItem?.color
+                          : infoBackground,
+                    }}
+                    disabled={item?.disabled}
+                  />
+                )}
               </Grid>
             );
           })}
@@ -556,7 +569,7 @@ const OrderView = ({
           fullWidth
           variant="contained"
           sx={{ mt: 2 }}
-          disabled={orderedItems.length === 0}
+          disabled={orderedItems.length === 0 && !isPreOrder}
         >
           {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
         </LoadingButton>
@@ -755,35 +768,55 @@ const OrderView = ({
                     )}
                   </Box>
 
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Fab
-                      size="small"
-                      sx={{
-                        width: 30,
-                        minHeight: 30,
-                        height: 30,
-                        boxShadow: 'none',
-                      }}
-                      color="primary"
-                      onClick={() => onDecrementQuantity(item)}
-                    >
-                      -
-                    </Fab>
-                    <Typography fontWeight="bold">{item.quantity}</Typography>
-                    <Fab
-                      size="small"
-                      sx={{
-                        width: 30,
-                        minHeight: 30,
-                        height: 30,
-                        boxShadow: 'none',
-                      }}
-                      color="primary"
-                      onClick={() => onIncrementQuantity(item)}
-                    >
-                      +
-                    </Fab>
-                  </Box>
+                  {!smDown || editItemQuantity?.id === item.id ? (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Fab
+                        size="small"
+                        sx={{
+                          width: 30,
+                          minHeight: 30,
+                          height: 30,
+                          boxShadow: 'none',
+                        }}
+                        color="primary"
+                        onClick={() => onDecrementQuantity(item)}
+                      >
+                        -
+                      </Fab>
+                      <Typography fontWeight="bold">{item.quantity}</Typography>
+                      <Fab
+                        size="small"
+                        sx={{
+                          width: 30,
+                          minHeight: 30,
+                          height: 30,
+                          boxShadow: 'none',
+                        }}
+                        color="primary"
+                        onClick={() => onIncrementQuantity(item)}
+                      >
+                        +
+                      </Fab>
+
+                      {smDown && (
+                        <IconButton
+                          color="primary"
+                          onClick={() => setEditItemQuantity(null)}
+                        >
+                          <EditOffIcon />
+                        </IconButton>
+                      )}
+                    </Box>
+                  ) : (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography fontWeight="bold">
+                        Qty: {item.quantity}
+                      </Typography>
+                      <IconButton color="primary">
+                        <EditIcon onClick={() => setEditItemQuantity(item)} />
+                      </IconButton>
+                    </Box>
+                  )}
                 </Box>
               </Box>
             );
@@ -947,12 +980,7 @@ const OrderView = ({
           }}
         />
         {NotificationComp}
-        <Box
-          display="flex"
-          flexDirection="column"
-          gap={2}
-          width="100%"
-        >
+        <Box display="flex" flexDirection="column" gap={2} width="100%">
           <Box sx={{ borderColor: 'divider', borderBottom: 1 }}>
             <Tabs
               value={tabIdx}
@@ -969,14 +997,12 @@ const OrderView = ({
           </Box>
 
           {/* <Box overflow="auto" height="100vh"> */}
-            {tabIdx === 0 && renderDisplayItems()}
-            {tabIdx === 1 && renderMyOrder()}
+          {tabIdx === 0 && renderDisplayItems()}
+          {tabIdx === 1 && renderMyOrder()}
 
           {/* </Box> */}
-
         </Box>
         {renderPlaceOrdeButton()}
-
       </>
     );
   }
