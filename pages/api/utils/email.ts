@@ -1,4 +1,9 @@
-import { emailTransporter, hotmailTransporter, yahooTransporter } from './transporter';
+import {
+  emailTransporter,
+  hotmailTransporter,
+  sendOutlookEmail,
+  yahooTransporter,
+} from './transporter';
 import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
 import { UserType } from '@/app/utils/type';
@@ -29,25 +34,28 @@ const emailHandler = async (
         html: template,
       });
       return;
-    }
-
-    if (email.includes('@hotmail.com') || email.includes('@hotmail.com') || email.includes('@outlook.com')) {
+    } else if (
+      email.includes('@hotmail.com') ||
+      email.includes('@Hotmail.com') ||
+      email.includes('@outlook.com')
+    ) {
+      console.log('Outlook');
       await hotmailTransporter.sendMail({
-        from: process.env.NODEMAILER_EMAIL,
+        from: 'maithienphuc0102@outlook.com',
         to: email,
         subject: subject,
         text: title,
         html: template,
       })
+    } else {
+      await emailTransporter.sendMail({
+        from: process.env.NODEMAILER_EMAIL,
+        to: email,
+        subject: subject,
+        text: title,
+        html: template,
+      });
     }
-
-    await emailTransporter.sendMail({
-      from: process.env.NODEMAILER_EMAIL,
-      to: email,
-      subject: subject,
-      text: title,
-      html: template,
-    });
   } catch (error) {
     console.log('Fail to send email, ', error);
   }
