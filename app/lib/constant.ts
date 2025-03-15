@@ -143,7 +143,7 @@ with company name or memo with client number to:
 Unit 1 - 6420 Beresford Street
 Burnaby, British Columbia V5E 1B6, Canada
 
-Or e-transfer at info@supremesprouts.com
+Or e-transfer at info@supremesprout.com
 Thank you for your cooperation. *
 `;
 

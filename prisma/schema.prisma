@@ -284,6 +284,7 @@ model InventoryItem {
   hasGST    Boolean?
   typeId    Int?
   color     String?
+  image     String?
   indexPos  Int?
   createdAt String
   createdBy String
@@ -404,7 +405,7 @@ model Cheque {
   month        String
   year         String
   chequeNumber  String?
-  amount        Int
+  amount        Float
   createdAt   String
   createdBy   String
   userId   Int
