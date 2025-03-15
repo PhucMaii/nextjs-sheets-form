@@ -143,6 +143,7 @@ export default function OrderInReportPage({
   });
 
   const handleSelectOrder = (e: any, targetOrder: Order) => {
+    e.stopPropagation();
     e.preventDefault();
     onSelectOrders(targetOrder, selectedOrders, setSelectedOrders);
   };
