@@ -1,6 +1,7 @@
 import {
   AlertColor,
   Box,
+  Button,
   Divider,
   FormControl,
   FormControlLabel,
@@ -18,8 +19,11 @@ import { ModalProps } from '../Modals/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { ColorPicker, useColor } from 'react-color-palette';
-import { infoBackground } from '@/theme/color';
+import { infoBackground, primaryColor } from '@/theme/color';
 import { ItemButton } from '@/app/components/OrderView';
+import FileUpload from '../FileUpload';
+import { generateImgUrl, getAllS3Images } from '@/app/lib/s3';
+import { grey } from '@mui/material/colors';
 
 interface IProps extends ModalProps {
   types: IItemType[];
@@ -38,11 +42,29 @@ export default function SwitchTypeAndAppearanceModal({
   const [selectedType, setSelectedType] = useState<number | null>(
     item?.typeId || null,
   );
+  const [itemImage, setItemImage] = useState<string>(item?.image || '');
+  const [imageGallery, setImageGallery] = useState<string[]>([]);
+  const [isUploadFile, setIsUploadFile] = useState<boolean>(false);
+
   const [color, setColor] = useColor(item?.color || infoBackground);
 
   useEffect(() => {
     if (item) {
       setSelectedType(item.typeId);
+      setItemImage(item?.image || '');
+
+      const getImageGallery = async () => {
+        console.log('running');
+        try {
+          const images = await getAllS3Images(`products/${item?.name}`);
+          setImageGallery(images || []);
+        } catch (error: any) {
+          console.log('There was an error: ', error);
+          showNotification('error', 'There was an error: ' + error);
+        }
+      };
+
+      getImageGallery();
     }
   }, [item]);
 
@@ -55,6 +77,7 @@ export default function SwitchTypeAndAppearanceModal({
           id: item.id,
           typeId: selectedType,
           color: color.hex,
+          image: itemImage,
         },
       );
 
@@ -62,8 +85,6 @@ export default function SwitchTypeAndAppearanceModal({
         showNotification('error', response.data.error);
         return;
       }
-
-      console.log(response, 'response');
 
       showNotification('success', response.data.message);
     } catch (error: any) {
@@ -89,12 +110,77 @@ export default function SwitchTypeAndAppearanceModal({
         <Box display="flex" alignItems="center" gap={1}>
           <Typography variant="h6">Appearance: </Typography>
           <ItemButton
-            item={{ ...item, price: 15.5 } as any}
+            item={{ ...item, price: 15.5, image: itemImage } as any}
             onClick={() => {}}
             style={{ width: 'fit-content', maxWidth: 300 }}
             containerStyle={{ backgroundColor: color.hex }}
           />
         </Box>
+
+        <Typography>Select an image</Typography>
+        <Box
+          display={'flex'}
+          gap={1}
+          alignItems="center"
+          maxWidth="100%"
+          overflow="auto"
+        >
+          <img
+            src={'/images/not-found.png'}
+            alt={'not-found image'}
+            width={100}
+            height={100}
+            style={{
+              cursor: 'pointer',
+              border:
+                itemImage === ''
+                  ? `3px solid ${primaryColor} `
+                  : `1px solid ${grey[100]}`,
+              borderRadius: '10px',
+            }}
+            onClick={() => setItemImage('')}
+          />
+          {imageGallery?.map((image: string, index: number) => (
+            <img
+              key={index}
+              src={generateImgUrl(image)}
+              alt={item?.name}
+              width={100}
+              height={100}
+              style={{
+                cursor: 'pointer',
+                border:
+                  itemImage === image
+                    ? `3px solid ${primaryColor} `
+                    : `1px solid ${grey[100]}`,
+                borderRadius: '10px',
+              }}
+              onClick={() => setItemImage(image)}
+            />
+          ))}
+        </Box>
+
+        <Button
+          variant="outlined"
+          onClick={() => setIsUploadFile(true)}
+          sx={{ my: 2 }}
+        >
+          Upload File
+        </Button>
+
+        {isUploadFile && (
+          <FileUpload
+            showNotification={showNotification}
+            fileName={`${item?.name + Date.now()}`}
+            uploadLocation={`/products/${item?.name}`}
+            onUploadImageUI={(fileKey: string) => {
+              setItemImage(fileKey);
+            }}
+          />
+        )}
+
+        <Divider sx={{ my: 2 }} />
+
         <ColorPicker
           height={100}
           color={color}

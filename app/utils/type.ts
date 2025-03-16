@@ -137,6 +137,8 @@ export interface IItem {
   order?: any;
   typeId?: number;
   type?: any;
+
+  image?: string;
 }
 
 export interface OrderedItems {
@@ -221,6 +223,7 @@ export interface IInventoryItem extends InventoryItem {
   totalValue: number;
   stockStatus: STOCK_STATUS;
   type?: ItemType;
+  image?: string;
 }
 
 export interface IItemType extends ItemType {

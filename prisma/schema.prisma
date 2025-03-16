@@ -284,6 +284,7 @@ model InventoryItem {
   hasGST    Boolean?
   typeId    Int?
   color     String?
+  image     String?
   indexPos  Int?
   createdAt String
   createdBy String

@@ -8,13 +8,14 @@ interface IBody {
   color?: string;
   idList?: number[];
   typeId: number;
+  image?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
 
-    const { id, color, idList, typeId }: IBody = req.body;
+    const { id, color, idList, typeId, image }: IBody = req.body;
 
     if (id) {
       const existingInventory = await prisma.inventoryItem.findUnique({
@@ -34,6 +35,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           data: {
             color,
+          },
+        });
+      }
+
+      if (existingInventory.image !== image) {
+        await prisma.inventoryItem.update({
+          where: {
+            id,
+          },
+          data: {
+            image,
           },
         });
       }

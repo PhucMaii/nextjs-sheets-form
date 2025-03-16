@@ -24,7 +24,7 @@ import React, {
 } from 'react';
 import { IItem } from '../utils/type';
 import { infoBackground, primary } from '@/theme/color';
-import { blue, blueGrey, grey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import { ShadowSection } from '../admin/reports/styled';
 import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
 import { SearchIcon, Trash2 } from 'lucide-react';
@@ -52,6 +52,8 @@ import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
 import { SWRFetchData } from '../utils/db';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
+import { blackColor } from '@/theme/create-palette';
+import { generateImgUrl } from '../lib/s3';
 
 export const WhiteSpace = () => {
   return (
@@ -95,23 +97,41 @@ export const ItemButton = ({
         gap={2}
         alignItems="flex-start"
         sx={{
+          position: 'relative',
           p: 1,
-          backgroundColor: blue[50],
+          // backgroundColor: blue[50],
+          color: disabled || item?.availability === false ? grey[400] : blackColor,
           borderRadius: 1,
           width: '100%',
           height: '100%',
           border: `1px solid ${grey[200]}`,
-          color:
-            disabled || item?.availability === false
-              ? grey[400]
-              : blueGrey[800],
-          ...containerStyle,
+          // color:
+          //   disabled || item?.availability === false
+          //     ? grey[400]
+          //     : blueGrey[800],
+          ...(!item?.image && containerStyle),
         }}
       >
-        <Typography fontWeight="bold" textAlign="left">
+        {item?.image && (
+          <img
+            src={generateImgUrl(item?.image)}
+            alt="img"
+            style={{
+              position: 'absolute',
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+              borderRadius: 'inherit',
+              inset: 0, // Make the image stretch to fill the container
+              zIndex: 0,
+              opacity: 0.4,
+            }}
+          />
+        )}
+        <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
           {item.name}
         </Typography>
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="center" gap={1} sx={{ zIndex: 1 }}>
           <Typography fontWeight="bold">
             ${item.price?.toFixed(2) || 'N/A'}
           </Typography>
@@ -427,7 +447,7 @@ const OrderView = ({
 
     if (orderedItems.length > 0) {
       const isItemsValid = orderedItems.every((i: any) => i.quantity > 0);
-  
+
       if (!isItemsValid) {
         showNotification('error', 'Items quantity must be greater than 0');
         return;

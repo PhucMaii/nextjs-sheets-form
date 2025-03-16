@@ -44,7 +44,7 @@ export const generateImgUrl = (fileKey: string) => {
   return `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com/${fileKey}`;
 };
 
-export const getAllS3Images = async () => {
+export const getAllS3Images = async (folder: string = '') => {
   const allImages = [];
   let continuationToken;
   try {
@@ -52,7 +52,10 @@ export const getAllS3Images = async () => {
       const command: any = new ListObjectsV2Command({
         Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
         ContinuationToken: continuationToken,
+        Prefix: folder,
       });
+
+      console.log(command, 'command');
 
       const response: any = await s3.send(command);
       const objects = response.Contents || [];
@@ -60,6 +63,8 @@ export const getAllS3Images = async () => {
       const imageFiles = objects
         .map((obj: any) => obj.Key)
         .filter((key: string) => key.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i));
+
+      console.log(imageFiles, 'imageFiles');
 
       allImages.push(...imageFiles);
       continuationToken = response.NextContinuationToken;

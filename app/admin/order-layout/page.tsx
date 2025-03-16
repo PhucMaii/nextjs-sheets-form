@@ -20,10 +20,13 @@ export default function OrderLayoutPage() {
       </Box>
 
       <ShadowSection>
-        <Appearance
-          types={itemTypes?.data || []}
-          showNotification={showNotification}
-        />
+
+        <Box sx={{maxWidth: '1200px', mx: 'auto'}}>
+          <Appearance
+            types={itemTypes?.data || []}
+            showNotification={showNotification}
+          />
+        </Box>
       </ShadowSection>
     </Sidebar>
   );
