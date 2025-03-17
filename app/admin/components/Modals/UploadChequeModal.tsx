@@ -85,7 +85,7 @@ export default function UploadChequeModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="auto">
         <ModalHead
           heading="Upload Cheque"
           buttonLabel="UPLOAD"
