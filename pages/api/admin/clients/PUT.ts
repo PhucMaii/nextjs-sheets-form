@@ -44,6 +44,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    if (!existingUser) {
+      return res.status(404).json({
+        error: 'User Not Found',
+      });
+    }
+
     const updateFields: any = {};
 
     if (clientId !== existingUser?.clientId) {
@@ -58,12 +64,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateFields.email = email;
     }
 
-    if (deliveryAddress && deliveryAddress !== existingUser?.deliveryAddress) {
-      updateFields.deliveryAddress = deliveryAddress;
-      const addresss = await generateLatLng(deliveryAddress);
+    // if (deliveryAddress && deliveryAddress !== existingUser?.deliveryAddress) {
+      updateFields.deliveryAddress = deliveryAddress || existingUser?.deliveryAddress;
+      const addresss = await generateLatLng(deliveryAddress || existingUser.deliveryAddress);
       updateFields.deliveryAddressLat = addresss.latitude;
       updateFields.deliveryAddressLng = addresss.longitude;
-    }
+    // }
 
     if (contactNumber !== existingUser?.contactNumber) {
       updateFields.contactNumber = contactNumber;

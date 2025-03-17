@@ -1,4 +1,6 @@
+import { generateLatLng } from '@/pages/api/admin/clients/POST';
 import { PrismaClient } from '@prisma/client';
+import axios from 'axios';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -116,21 +118,46 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const listOfDateString = generateListOfDateString(
-    new Date('2025-03-01'),
-    new Date('2025-03-31'),
-  );
-
-  console.log(listOfDateString, 'list of date string');
-
-  await prisma.orderedItems.deleteMany({
-    where: {
-      quantity: 0,
-      scheduledOrderId: {
-        not: null,
-      }
+  const generateLatLng = async (deliveryAddress: string) => {
+    if (deliveryAddress === 'N/A') {
+      return { latitude: null, longitude: null };
     }
-  })
+  
+    const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+    const response = await axios.get(GEOCODING_API_URL, {
+      params: {
+        address: deliveryAddress,
+        key: process.env.NEXT_PUBLIC_MAPS_KEY,
+      },
+    });
+  
+    if (response.data.status === 'OK') {
+      const location = response.data.results[0].geometry.location;
+      return { latitude: location.lat, longitude: location.lng };
+    }
+  
+    return { latitude: null, longitude: null };
+  };
+  
+  const users = await prisma.user.findMany();
+
+  for (const user of users) {
+    if (!user?.deliveryAddress) {
+      continue;
+    }
+    const latAndLng = await generateLatLng(user?.deliveryAddress);
+
+    console.log({user: {name: user.clientName, clientId: user.clientId, deliveryAddress: user.deliveryAddress}, latAndLng});
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        deliveryAddressLat: latAndLng.latitude,
+        deliveryAddressLng: latAndLng.longitude,
+      },
+    });
+  }
 }
 
 main()
