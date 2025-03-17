@@ -223,7 +223,6 @@ export interface IInventoryItem extends InventoryItem {
   totalValue: number;
   stockStatus: STOCK_STATUS;
   type?: ItemType;
-  image?: string;
 }
 
 export interface IItemType extends ItemType {

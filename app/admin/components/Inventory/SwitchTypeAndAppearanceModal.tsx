@@ -24,6 +24,7 @@ import { ItemButton } from '@/app/components/OrderView';
 import FileUpload from '../FileUpload';
 import { generateImgUrl, getAllS3Images } from '@/app/lib/s3';
 import { grey } from '@mui/material/colors';
+import { Image } from 'lucide-react';
 
 interface IProps extends ModalProps {
   types: IItemType[];
@@ -56,7 +57,7 @@ export default function SwitchTypeAndAppearanceModal({
       const getImageGallery = async () => {
         console.log('running');
         try {
-          const images = await getAllS3Images(`products/${item?.name}`);
+          const images = await getAllS3Images(`products`);
           setImageGallery(images || []);
         } catch (error: any) {
           console.log('There was an error: ', error);
@@ -125,21 +126,23 @@ export default function SwitchTypeAndAppearanceModal({
           maxWidth="100%"
           overflow="auto"
         >
-          <img
-            src={'/images/not-found.png'}
-            alt={'not-found image'}
-            width={100}
-            height={100}
-            style={{
-              cursor: 'pointer',
+          <Box
+            sx={{
+              width: 100,
+              height: 100,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
               border:
-                itemImage === ''
+                !itemImage
                   ? `3px solid ${primaryColor} `
                   : `1px solid ${grey[100]}`,
               borderRadius: '10px',
             }}
             onClick={() => setItemImage('')}
-          />
+          >
+            <Image width={50} height={50} />
+          </Box>
           {imageGallery?.map((image: string, index: number) => (
             <img
               key={index}

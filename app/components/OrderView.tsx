@@ -24,7 +24,7 @@ import React, {
 } from 'react';
 import { IItem } from '../utils/type';
 import { infoBackground, primary } from '@/theme/color';
-import { blueGrey, grey } from '@mui/material/colors';
+import { blueGrey, grey, red } from '@mui/material/colors';
 import { ShadowSection } from '../admin/reports/styled';
 import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
 import { SearchIcon, Trash2 } from 'lucide-react';
@@ -67,6 +67,54 @@ export const WhiteSpace = () => {
   );
 };
 
+const OnSaleBadge = () => {
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 20,
+        height: 20,
+        borderRadius: '50%',
+        backgroundColor: red[500],
+        zIndex: 50,
+        boxShadow: '0 0 8px rgba(228, 13, 13, 0.92)',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          borderRadius: '50%',
+          backgroundColor: red[500],
+          opacity: 0.5,
+          animation: 'ping 1.5s infinite',
+          zIndex: -1,
+        },
+        '@keyframes ping': {
+          '0%': {
+            transform: 'scale(1)',
+            opacity: 0.3,
+            backgroundColor: red[500],
+          },
+          '50%': {
+            transform: 'scale(1.3)',
+            opacity: 1,
+            // backgroundColor: red[300],
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: 0.3,
+            backgroundColor: red[500],
+          },
+        },
+      }}
+    ></Box>
+  );
+};
+
 export const ItemButton = ({
   item,
   onClick,
@@ -74,6 +122,7 @@ export const ItemButton = ({
   containerStyle,
   ref,
   disabled,
+  flexColOnDiscount
 }: {
   item: IItem;
   onClick?: any;
@@ -81,11 +130,12 @@ export const ItemButton = ({
   containerStyle?: any;
   ref?: any;
   disabled?: boolean;
+  flexColOnDiscount?: boolean;
 }) => {
   return (
     <Button
       key={item.id}
-      sx={{ width: '100%', height: '100%', ...style }}
+      sx={{ posiion: 'relative', width: '100%', height: '100%', ...style }}
       onClick={onClick}
       ref={ref}
       disabled={disabled || item?.availability === false}
@@ -100,7 +150,8 @@ export const ItemButton = ({
           position: 'relative',
           p: 1,
           // backgroundColor: blue[50],
-          color: disabled || item?.availability === false ? grey[400] : blackColor,
+          color:
+            disabled || item?.availability === false ? grey[400] : blackColor,
           borderRadius: 1,
           width: '100%',
           height: '100%',
@@ -124,14 +175,22 @@ export const ItemButton = ({
               borderRadius: 'inherit',
               inset: 0, // Make the image stretch to fill the container
               zIndex: 0,
-              opacity: 0.4,
+              opacity: 0.5,
+              // brightness
+              // filter: 'brightness(80%)',
             }}
           />
         )}
         <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
           {item.name}
         </Typography>
-        <Box display="flex" alignItems="center" gap={1} sx={{ zIndex: 1 }}>
+        <Box
+          display="flex"
+          alignItems="center"
+          flexDirection={flexColOnDiscount ? 'column' : 'row'}
+          gap={1}
+          sx={{ zIndex: 1 }}
+        >
           <Typography fontWeight="bold">
             ${item.price?.toFixed(2) || 'N/A'}
           </Typography>
@@ -146,6 +205,7 @@ export const ItemButton = ({
           )}
         </Box>
       </Box>
+      {item?.isShowDiscount && item?.prevPrice && <OnSaleBadge />}
     </Button>
   );
 };
@@ -513,6 +573,7 @@ const OrderView = ({
                           : infoBackground,
                     }}
                     disabled={item?.disabled}
+                    flexColOnDiscount={isModal && smDown}
                   />
                 )}
               </Grid>
@@ -565,6 +626,7 @@ const OrderView = ({
                                 : infoBackground,
                           }}
                           disabled={item?.disabled}
+                          flexColOnDiscount={isModal && smDown}
                         />
                       )}
                     </Grid>
