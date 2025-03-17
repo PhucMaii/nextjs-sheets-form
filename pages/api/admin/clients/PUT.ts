@@ -64,12 +64,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateFields.email = email;
     }
 
-    // if (deliveryAddress && deliveryAddress !== existingUser?.deliveryAddress) {
-      updateFields.deliveryAddress = deliveryAddress || existingUser?.deliveryAddress;
-      const addresss = await generateLatLng(deliveryAddress || existingUser.deliveryAddress);
+    if (deliveryAddress && deliveryAddress !== existingUser?.deliveryAddress) {
+      updateFields.deliveryAddress = deliveryAddress ? deliveryAddress : existingUser.deliveryAddress;
+      const addresss = await generateLatLng(deliveryAddress ? deliveryAddress : existingUser.deliveryAddress);
       updateFields.deliveryAddressLat = addresss.latitude;
       updateFields.deliveryAddressLng = addresss.longitude;
-    // }
+    }
 
     if (contactNumber !== existingUser?.contactNumber) {
       updateFields.contactNumber = contactNumber;

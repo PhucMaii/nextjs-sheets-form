@@ -202,7 +202,6 @@ export default function OrderForm() {
             display="flex"
             flexDirection="column"
             gap={2}
-            height="100vh"
             width="100%"
           >
             <Box display="flex" justifyContent="flex-end">
@@ -213,7 +212,7 @@ export default function OrderForm() {
                 height: '80vh',
                 display: 'flex',
                 flexDirection: 'column',
-                overflowY: 'auto',
+                // overflowY: 'auto',
                 pb: 3,
               }}
             >

@@ -78,7 +78,7 @@ const OnSaleBadge = () => {
         height: 20,
         borderRadius: '50%',
         backgroundColor: red[500],
-        zIndex: 50,
+        // zIndex: 50,
         boxShadow: '0 0 8px rgba(228, 13, 13, 0.92)',
         '&::after': {
           content: '""',
@@ -122,7 +122,7 @@ export const ItemButton = ({
   containerStyle,
   ref,
   disabled,
-  flexColOnDiscount
+  flexColOnDiscount,
 }: {
   item: IItem;
   onClick?: any;
@@ -642,7 +642,7 @@ const OrderView = ({
   const renderPlaceOrdeButton = useCallback(() => {
     return (
       <Box
-        sx={{ position: 'sticky', bottom: 0, width: '100%' }}
+        // sx={{ position: 'sticky', bottom: 0, width: '100%' }}
         data-tour="fifth-step"
       >
         <LoadingButton
@@ -667,7 +667,7 @@ const OrderView = ({
           display="flex"
           alignItems="center"
           width="100%"
-          overflow="auto"
+          sx={{ overflowY: 'auto' }}
           gap={0.5}
           whiteSpace="nowrap"
         >
@@ -713,7 +713,13 @@ const OrderView = ({
         <Typography variant="h6" sx={{ mt: 2 }}>
           {selectedItemType} Items
         </Typography>
-        <Grid container mt={2} maxWidth="100%" overflow="auto">
+        <Grid
+          container
+          mt={2}
+          maxWidth="100%"
+          maxHeight="100vh"
+          overflow="auto"
+        >
           {selectedItemType === 'All' && !debouncedKeywords
             ? renderAllItems()
             : renderByItemType()}
@@ -758,7 +764,12 @@ const OrderView = ({
         display="flex"
         flexDirection="column"
         gap={1}
-        sx={{ position: 'sticky', top: 0, width: '100%' }}
+        sx={{
+          position: 'sticky',
+          top: 0,
+          width: '100%',
+          mb: isModal && smDown ? 4 : 0,
+        }}
         data-tour="fourth-step"
       >
         {/* Only admin can affect inventory for an order in edit mode */}
@@ -1078,13 +1089,18 @@ const OrderView = ({
             </Tabs>
           </Box>
 
-          {/* <Box overflow="auto" height="100vh"> */}
+          {/* <Box maxHeight="100vh" overflow="scroll"> */}
           {tabIdx === 0 && renderDisplayItems()}
           {tabIdx === 1 && renderMyOrder()}
 
+          <Box
+            pb={isModal ? 0 : 8}
+            sx={{ position: 'sticky', bottom: 0, zIndex: 50 }}
+          >
+            {renderPlaceOrdeButton()}
+          </Box>
           {/* </Box> */}
         </Box>
-        {renderPlaceOrdeButton()}
       </>
     );
   }
