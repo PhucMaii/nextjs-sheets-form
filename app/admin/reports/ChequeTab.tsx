@@ -171,7 +171,7 @@ export default function ChequeTab({ client, showNotification }: IProps) {
                   </Box>
                 </TableCell>
                 <TableCell>{cheque.chequeNumber}</TableCell>
-                <TableCell>{cheque.amount}</TableCell>
+                <TableCell>${cheque.amount}</TableCell>
                 <TableCell>
                   {cheque.month} {cheque.year}
                 </TableCell>

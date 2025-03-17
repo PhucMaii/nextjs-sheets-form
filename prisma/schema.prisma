@@ -405,7 +405,7 @@ model Cheque {
   month        String
   year         String
   chequeNumber  String?
-  amount        Int
+  amount        Float
   createdAt   String
   createdBy   String
   userId   Int
