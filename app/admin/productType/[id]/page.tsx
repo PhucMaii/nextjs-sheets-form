@@ -73,7 +73,7 @@ export default function page() {
       />
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Box display="flex" alignItems="center" gap={2}>
-          <IconButton onClick={() => router.push(`/admin/settings?tab=1`)}>
+          <IconButton onClick={() => router.push(`/admin/website`)}>
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h5" fontWeight="bold">

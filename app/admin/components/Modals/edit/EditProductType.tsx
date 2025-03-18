@@ -6,7 +6,7 @@ import ModalHead from '@/app/lib/ModalHead';
 import { IProductType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import SelectIcons from '../../Select/SelectIcons';
+// import SelectIcons from '../../Select/SelectIcons';
 
 interface IProps extends ModalProps {
   type: IProductType | null;
@@ -83,7 +83,7 @@ export default function EditProductType({
 
         <Divider sx={{ my: 2 }} />
 
-        <SelectIcons
+        {/* <SelectIcons
           selectedIcon={updatedType?.icon}
           setSelectedIcon={(newValue: string) =>
             setUpdatedType((prevState: any) => ({
@@ -91,7 +91,7 @@ export default function EditProductType({
               icon: newValue,
             }))
           }
-        />
+        /> */}
 
         <TextField
           label="Product Type Name"

@@ -46,6 +46,7 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
   });
 
   const { selectedImage, renderImageGallery } = useImageGallery(
+    'products',
     itemPreference?.image,
     '100%',
   );
@@ -358,9 +359,14 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
               </Box>
             )} */}
             <FileUpload
-              item={promptedItem}
+              // item={promptedItem}
               showNotification={showNotification}
-              setPromptedItem={setPromptedItem}
+              onUploadImageUI={(fileKey: string) => setPromptedItem({
+                ...promptedItem,
+                image: fileKey,
+              })}
+              fileName={promptedItem.name + Date.now()}
+              uploadLocation={`products/${promptedItem?.name}/`}
             />
           </Box>
         </BoxModal>

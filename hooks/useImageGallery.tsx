@@ -4,8 +4,10 @@ import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 const useImageGallery = (
+  from: string = '',
   initialSelectedImage: string = '',
   width: string | number,
+
 ) => {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] =
@@ -13,7 +15,7 @@ const useImageGallery = (
 
   useEffect(() => {
     const getImages = async () => {
-      const images = await getAllS3Images();
+      const images = await getAllS3Images(from);
       console.log(images, 'images');
       setGalleryImages(images || []);
     };

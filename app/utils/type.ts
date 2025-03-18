@@ -232,6 +232,7 @@ export interface IInventoryItem extends InventoryItem {
 
 export interface IItemType extends ItemType {
   inventoryItems: IInventoryItem[];
+  itemPreferences: IItemPreference[];
 }
 
 export interface IVendorItem extends VendorItem {

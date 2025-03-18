@@ -1,9 +1,5 @@
 'use client';
 import uploadToS3 from '@/app/lib/s3';
-<<<<<<< HEAD
-import { IInventoryItem } from '@/app/utils/type';
-=======
->>>>>>> c609e18b7ec18128eeb80dc7226de5d6605fabe7
 import { AlertColor, Box, LinearProgress, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { Inbox } from 'lucide-react';
@@ -12,16 +8,6 @@ import { useDropzone } from 'react-dropzone';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
-<<<<<<< HEAD
-  item: IInventoryItem;
-  setPromptedItem: (item: any) => void;
-}
-
-export default function FileUpload({
-  showNotification,
-  item,
-  setPromptedItem,
-=======
   fileName: string;
   onUploadImageUI: (fileKey: string) => void;
   uploadLocation: string;
@@ -32,7 +18,6 @@ export default function FileUpload({
   showNotification,
   onUploadImageUI,
   uploadLocation,
->>>>>>> c609e18b7ec18128eeb80dc7226de5d6605fabe7
 }: IProps) {
   const [uploadingProgress] = useState<number>(0);
 
@@ -42,14 +27,9 @@ export default function FileUpload({
     accept: {
       'applications/jpeg': ['.jpg', '.jpeg'],
       'applications/png': ['.png'],
-<<<<<<< HEAD
-    },
-    maxFiles: 1,
-=======
       'applications/pdf': ['.pdf'],
     },
     maxFiles: 4,
->>>>>>> c609e18b7ec18128eeb80dc7226de5d6605fabe7
     onDrop: async (acceptedFiles) => {
       const files = acceptedFiles[0];
       if (files.size > 10 * 1024 * 1024) {
@@ -60,26 +40,14 @@ export default function FileUpload({
 
       try {
         setIsUploading(true);
-<<<<<<< HEAD
-        console.log('BEFORE ON DROP');
-        const data = await uploadToS3(files, item.name);
-=======
         const data = await uploadToS3(files, fileName, uploadLocation);
->>>>>>> c609e18b7ec18128eeb80dc7226de5d6605fabe7
         if (!data?.fileKey) {
           showNotification('error', 'Something went wrong');
           return;
         }
 
         console.log(data, 'data');
-<<<<<<< HEAD
-        setPromptedItem((prevState: any) => ({
-          ...prevState,
-          image: data.fileKey,
-        }));
-=======
         onUploadImageUI(data.fileKey);
->>>>>>> c609e18b7ec18128eeb80dc7226de5d6605fabe7
         setIsUploading(false);
         showNotification('success', 'Image uploaded successfully');
       } catch (error) {
@@ -123,8 +91,4 @@ export default function FileUpload({
       )}
     </Box>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> c609e18b7ec18128eeb80dc7226de5d6605fabe7

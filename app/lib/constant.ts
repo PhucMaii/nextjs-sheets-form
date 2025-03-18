@@ -9,6 +9,7 @@ import PeopleIcon from '@mui/icons-material/People';
 // import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
+import LanguageIcon from '@mui/icons-material/Language';
 import {
   ORDER_STATUS,
   ORDER_TYPE,
@@ -255,6 +256,11 @@ export const adminTabs = {
       name: 'Order Layout',
       icon: WysiwygIcon,
       path: '/admin/order-layout',
+    },
+    {
+      name: 'Website',
+      icon: LanguageIcon,
+      path: '/admin/website',
     },
     {
       name: 'Blocking',
