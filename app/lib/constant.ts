@@ -37,6 +37,7 @@ import {
   warningColor,
 } from '../../theme/color';
 import { amber, brown, grey, orange } from '@mui/material/colors';
+import { Discount } from '@mui/icons-material';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -260,6 +261,11 @@ export const adminTabs = {
       name: 'Blocking',
       icon: AppBlockingIcon,
       path: '/admin/blocking',
+    },
+    {
+      name: 'Promotions',
+      icon: Discount,
+      path: '/admin/promotions',
     },
   ],
 };
