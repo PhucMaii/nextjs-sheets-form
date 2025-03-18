@@ -116,21 +116,32 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const listOfDateString = generateListOfDateString(
-    new Date('2025-03-01'),
-    new Date('2025-03-31'),
-  );
+  const types = await prisma.itemType.findMany({
+    include: {
+      inventoryItems: true,
+    },
+  });
 
-  console.log(listOfDateString, 'list of date string');
+  for (const type of types) {
+    const numberOfRows = Math.ceil(type.inventoryItems[type.inventoryItems.length - 1]?.indexPos || 0 / 2);
 
-  await prisma.orderedItems.deleteMany({
-    where: {
-      quantity: 0,
-      scheduledOrderId: {
-        not: null,
-      }
+    console.log({type, numberOfRows});
+    if (numberOfRows === 0) {
+      continue;
     }
-  })
+
+    if (numberOfRows !== type.rows) {
+      await prisma.itemType.update({
+        where: {
+          id: type.id,
+        },
+        data: {
+          rows: numberOfRows,
+        },
+      });
+    }
+
+  }
 }
 
 main()
