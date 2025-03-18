@@ -1,9 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
+import { infoBackground } from '@/theme/color';
+import { otherTypeId } from '@/app/lib/constant';
+import { calculateNextIndexPosAndRows } from '../../utils/appearance';
 
 interface IBody {
   name: string;
+  typeId: number;
   hasPST: boolean;
   hasGST: boolean;
   vendorItems: any[];
@@ -14,7 +18,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, hasPST, hasGST, vendorItems, createdAt }: IBody = req.body;
+    const { name, typeId, hasPST, hasGST, vendorItems, createdAt }: IBody =
+      req.body;
 
     const vendorIds = vendorItems.map((vendorItem: any) => {
       return vendorItem.vendorId;
@@ -48,6 +53,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const { nextPos, newRows } = await calculateNextIndexPosAndRows(typeId, 1);
     // Create Main Inventory Item
     const newInventory = await prisma.inventoryItem.create({
       data: {
@@ -56,6 +62,19 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         hasGST,
         createdAt,
         createdBy,
+        color: infoBackground,
+        typeId: typeId > 0 ? typeId : otherTypeId,
+        indexPos: nextPos[0],
+      },
+    });
+
+    // Update Rows in Item Type
+    await prisma.itemType.update({
+      where: {
+        id: typeId,
+      },
+      data: {
+        rows: newRows,
       },
     });
 

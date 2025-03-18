@@ -80,9 +80,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         items: {
           where: {
             quantity: {
-              gt: 0
-            }
-          }
+              gt: 0,
+            },
+          },
         },
         user: true,
       },
@@ -206,9 +206,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           items: {
             where: {
               quantity: {
-                gt: 0
-              }
-            }
+                gt: 0,
+              },
+            },
           },
           user: true,
         },

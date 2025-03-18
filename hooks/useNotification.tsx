@@ -4,9 +4,7 @@ import { Notification } from '@/app/utils/type';
 import { AlertColor } from '@mui/material';
 import { useState } from 'react';
 
-export type ShowNotificationType = (type: AlertColor, message: string) => void;
-
-const useNotification = () => {
+const useNotification = (anchorOrigin: any = null) => {
   const [notification, setNotification] = useState<Notification>({
     on: false,
     type: 'info',
@@ -33,6 +31,7 @@ const useNotification = () => {
     <NotificationPopup
       notification={notification}
       onClose={closeNotification}
+      anchorOrigin={anchorOrigin || { vertical: 'bottom', horizontal: 'left' }}
     />
   );
 

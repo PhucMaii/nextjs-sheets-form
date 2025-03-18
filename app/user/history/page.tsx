@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SplashScreen } from '../../../HOC/AuthenGuard';
 import Sidebar from '../../components/Sidebar';
 import {
@@ -8,13 +8,13 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Tab,
+  Tabs,
   TextField,
   Typography,
-  useMediaQuery,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PendingIcon from '@mui/icons-material/Pending';
 import { generateMonthRange } from '../../utils/time';
 import { Order } from '../../admin/orders/page';
@@ -24,6 +24,7 @@ import OrderAccordion from '../../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
 import { DropdownItemContainer } from '../../admin/orders/styled';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import {
   errorColor,
   infoColor,
@@ -37,6 +38,8 @@ import ErrorComponent from '../../admin/components/ErrorComponent';
 import SelectDateRange from '@/app/admin/components/Select/SelectDateRange';
 import { SWRFetchData } from '../../utils/db';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
+import OverviewCard from '../../admin/components/OverviewCard/OverviewCard';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -45,21 +48,31 @@ export default function HistoryPage() {
   const openDropdown = Boolean(actionButtonAnchor);
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
-  const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  // const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [filterOptions, setFilterOptions] = useState<ORDER_STATUS | string>(
     'All',
   );
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
+  const [tabIdx, setTabIdx] = useState<number>(0);
   const debouncedKeywords = useDebounce(searchKeywords, 800);
-  const totalPositionRef: any = useRef(null);
 
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  const monthRange = useMemo(() => {
+    return generateMonthRange();
+  }, []);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderData, _mutateOrders, isValidating] = SWRFetchData(
-    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    `${API_URL.CLIENT_ORDER}?startDate=${monthRange[0]}&endDate=${monthRange[1]}`,
   );
+
+  // const currentMonthBill = useMemo(() => {
+  //   return baseClientOrders.reduce((total: number, order: Order) => {
+  //     return total + order.totalPrice;
+  //   }, 0);
+  // }, [baseClientOrders]);
 
   useEffect(() => {
     const windowDimensions = getWindowDimensions();
@@ -67,17 +80,18 @@ export default function HistoryPage() {
   }, []);
 
   useEffect(() => {
-    if (dateRange && orderData) {
+    if (orderData) {
       initializeOrders();
     }
-  }, [dateRange, orderData]);
+  }, [orderData, tabIdx]);
 
   useEffect(() => {
     if (debouncedKeywords) {
       const newOrderData = baseClientOrders.filter((order: Order) => {
         if (
           order.id.toString().includes(debouncedKeywords) ||
-          order.status.toLowerCase() === debouncedKeywords.toLowerCase()
+          order.status.toLowerCase() === debouncedKeywords.toLowerCase() ||
+          order.deliveryDate.includes(debouncedKeywords)
         ) {
           return true;
         }
@@ -103,13 +117,16 @@ export default function HistoryPage() {
   };
 
   const initializeOrders = () => {
+    const orders =
+      tabIdx === 0 ? orderData.data.userOrders : orderData.data.dueOrders;
     const filteredOrders = filterDateRangeOrders(
-      orderData.data.userOrders,
-      dateRange[0],
-      dateRange[1],
+      orders,
+      monthRange[0],
+      monthRange[1],
     );
-    setClientOrders(filteredOrders);
-    setBaseClientOrders(filteredOrders);
+
+    setClientOrders(tabIdx === 0 ? filteredOrders : orders);
+    setBaseClientOrders(tabIdx === 0 ? filteredOrders : orders);
   };
 
   const resetOrders = () => {
@@ -228,35 +245,58 @@ export default function HistoryPage() {
         <Grid item xs={12} md={6}>
           <Typography variant="h4">History</Typography>
         </Grid>
-        <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
+        {/* <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+        </Grid> */}
+        <Grid item xs={12}>
+          <OverviewCard
+            text="Over Due"
+            value={orderData?.data?.dueAmount?.toFixed(2) || 0}
+            icon={
+              <AttachMoneyIcon
+                sx={{ fontSize: 50 }}
+                fontSize="large"
+                color="primary"
+              />
+            }
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <OverviewCard
+            text="Current Month ($)"
+            value={orderData?.data?.currentMonthBill?.toFixed(2) || 0}
+            // icon={<MonetizationOnIcon fontSize="large" color="primary" />}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <OverviewCard
+            text="Total Orders"
+            value={baseClientOrders.length}
+            // icon={<ReceiptLongIcon sx={{fontSize: 50}} fontSize="large" color="primary" />}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Tabs
+            value={tabIdx}
+            variant="fullWidth"
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            onChange={(e: any, value) => setTabIdx(value)}
+          >
+            <Tab value={0} label="Current Month" />
+            <Tab value={1} label="Over Due" />
+          </Tabs>
         </Grid>
         <Grid item xs={11}>
           <TextField
             fullWidth
             variant="filled"
-            placeholder="Search by invoice id or status"
+            placeholder="Search by invoice id, date or status"
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}
           />
         </Grid>
         <Grid item xs={1} textAlign="right">
           {filterDropdown}
-        </Grid>
-        <Grid item xs={12} ref={totalPositionRef}>
-          <Box
-            sx={{
-              backgroundColor: blueGrey[800],
-              color: 'white',
-              width: 'fit-content',
-              padding: 1,
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="h6">
-              Total: {clientOrders.length} orders
-            </Typography>
-          </Box>
         </Grid>
         <Grid item xs={12}>
           {isValidating && !clientOrders ? (

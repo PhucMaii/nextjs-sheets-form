@@ -68,31 +68,46 @@ export default async function handler(
     });
 
     // Set up new schedule order items
+    // Get all existing schedule orders
     const oldScheduledOrders = existingCategory.users.flatMap((user) => {
       return user.scheduleOrders;
     });
-    const newScheduledOrderItems = [];
+
+    const newOrderedItems: any = [];
+    // Loop through each order
     for (const oldScheduledOrder of oldScheduledOrders) {
-      const newCategoryItems = formattedNewItems.map((item) => {
-        const existingItem = oldScheduledOrder.items.find(
-          (oldItem) => oldItem.name === item.name,
-        );
+      // Map through each of old items and apply new items information if it exists, otherwise flag item as deleted
+      const newScheduledOrderItems = oldScheduledOrder.items
+        .map((oldItem) => {
+          const newItem = formattedNewItems.find(
+            (item) => item.inventoryItemId === oldItem.inventoryItemId,
+          );
 
-        return {
-          name: item.name,
-          price: item.price,
-          quantity: existingItem?.quantity || 0,
-          inventoryItemId: item?.inventoryItemId || null,
-          inventoryUnitId: item?.inventoryUnitId || null,
-          isShowDiscount:
-            existingItem?.isShowDiscount || item?.isShowDiscount || false,
-          prevPrice: existingItem?.prevPrice || item?.prevPrice || null,
-          scheduledOrderId: oldScheduledOrder.id,
-        };
-      });
-      newScheduledOrderItems.push(...newCategoryItems);
+          if (newItem) {
+            return {
+              name: newItem.name,
+              price: newItem.price,
+              quantity: oldItem.quantity,
+              inventoryItemId: newItem?.inventoryItemId || null,
+              inventoryUnitId: newItem?.inventoryUnitId || null,
+              isShowDiscount: newItem?.isShowDiscount,
+              prevPrice: newItem?.prevPrice,
+              scheduledOrderId: oldScheduledOrder.id,
+            };
+          } else {
+            return {
+              ...oldItem,
+              isDeleted: true,
+            };
+          }
+        })
+        .filter((item: any) => !item.isDeleted);
 
-      const newTotalPrice = newCategoryItems.reduce(
+      // Add new items into new ordered items
+      newOrderedItems.push(...newScheduledOrderItems);
+
+      // Update total price of schedule order before delete old items and create new items
+      const newTotalPrice = newScheduledOrderItems.reduce(
         (acc: number, newItem: any) => {
           const itemTotalPrice = newItem.price * newItem.quantity;
           return acc + itemTotalPrice;
@@ -100,37 +115,90 @@ export default async function handler(
         0,
       );
 
-      if (newTotalPrice !== oldScheduledOrder.totalPrice) {
-        await prisma.scheduleOrders.update({
-          where: {
-            id: oldScheduledOrder.id,
-          },
-          data: {
-            totalPrice: newTotalPrice,
-          },
-        });
-      }
+      await prisma.scheduleOrders.update({
+        where: {
+          id: oldScheduledOrder.id,
+        },
+        data: {
+          totalPrice: newTotalPrice,
+        },
+      });
     }
 
-    // Delete old items from schedule orders
-    const scheduleOrderIds = existingCategory.users.flatMap((user) => {
-      return user.scheduleOrders.map((scheduleOrder) => {
-        return scheduleOrder.id;
-      });
-    });
-
+    // Delete all old schedule order items
     await prisma.orderedItems.deleteMany({
       where: {
         scheduledOrderId: {
-          in: scheduleOrderIds,
+          in: oldScheduledOrders.map((order) => order.id),
         },
       },
     });
 
     // Create new schedule order items
     await prisma.orderedItems.createMany({
-      data: newScheduledOrderItems,
+      data: newOrderedItems,
     });
+
+    // const newScheduledOrderItems = [];
+    // for (const oldScheduledOrder of oldScheduledOrders) {
+    //   const newCategoryItems = formattedNewItems.map((item) => {
+    //     const existingItem = oldScheduledOrder.items.find(
+    //       (oldItem) => oldItem.name === item.name,
+    //     );
+
+    //     return {
+    //       name: item.name,
+    //       price: item.price,
+    //       quantity: existingItem?.quantity || 0,
+    //       inventoryItemId: item?.inventoryItemId || null,
+    //       inventoryUnitId: item?.inventoryUnitId || null,
+    //       isShowDiscount:
+    //         existingItem?.isShowDiscount || item?.isShowDiscount || false,
+    //       prevPrice: existingItem?.prevPrice || item?.prevPrice || null,
+    //       scheduledOrderId: oldScheduledOrder.id,
+    //     };
+    //   });
+    //   newScheduledOrderItems.push(...newCategoryItems);
+
+    //   const newTotalPrice = newCategoryItems.reduce(
+    //     (acc: number, newItem: any) => {
+    //       const itemTotalPrice = newItem.price * newItem.quantity;
+    //       return acc + itemTotalPrice;
+    //     },
+    //     0,
+    //   );
+
+    //   if (newTotalPrice !== oldScheduledOrder.totalPrice) {
+    //     await prisma.scheduleOrders.update({
+    //       where: {
+    //         id: oldScheduledOrder.id,
+    //       },
+    //       data: {
+    //         totalPrice: newTotalPrice,
+    //       },
+    //     });
+    //   }
+    // }
+
+    // // Delete old items from schedule orders
+    // const scheduleOrderIds = existingCategory.users.flatMap((user) => {
+    //   return user.scheduleOrders.map((scheduleOrder) => {
+    //     return scheduleOrder.id;
+    //   });
+    // });
+
+    // await prisma.orderedItems.deleteMany({
+    //   where: {
+    //     scheduledOrderId: {
+    //       in: scheduleOrderIds,
+    //     },
+    //   },
+    // });
+
+    // // Create new schedule order items
+    // await prisma.orderedItems.createMany({
+    //   data: newScheduledOrderItems,
+    // });
 
     return res.status(200).json({
       message: 'Items Pasted Succesfully',

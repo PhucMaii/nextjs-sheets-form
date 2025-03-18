@@ -80,6 +80,7 @@ export default function CustomAmount({
 
       if (setItemList) {
         setItemList((prevState: any) => [
+          ...prevState,
           {
             id: 0,
             name: customAmount.name,
@@ -90,7 +91,6 @@ export default function CustomAmount({
             availability: true,
             isCustomAmount: true,
           },
-          ...prevState,
         ]);
         onClose();
         return;

@@ -16,8 +16,30 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         categoryId: Number(categoryId),
       },
       include: {
-        inventoryItem: true,
+        inventoryItem: {
+          include: {
+            type: {
+              include: {
+                itemType_category: true,
+              },
+            },
+          },
+        },
         inventoryUnit: true,
+        category: {
+          include: {
+            itemType_category: {
+              include: {
+                itemType: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        inventoryItem: {
+          indexPos: 'asc',
+        },
       },
     });
 

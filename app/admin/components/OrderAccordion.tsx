@@ -28,7 +28,6 @@ import {
   USER_CATEGORIZED,
   USER_ROLE,
 } from '@/app/utils/enum';
-import { OrderedItems } from '@/app/utils/type';
 import EditIcon from '@mui/icons-material/Edit';
 import EditDeliveryDate from './Modals/edit/EditDeliveryDate';
 import EditPrice from './Modals/edit/EditPrice';
@@ -55,12 +54,12 @@ interface PropTypes {
   showNotification: (type: AlertColor, message: string) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
-  handleUpdateItem?: (
-    orderTotalPrice: number,
-    order: Order,
-    updatedItem: OrderedItems,
-    isConvertToCustom?: boolean,
-  ) => Promise<void>;
+  // handleUpdateItem?: (
+  //   orderTotalPrice: number,
+  //   order: Order,
+  //   updatedItem: OrderedItems,
+  //   isConvertToCustom?: boolean,
+  // ) => Promise<void>;
   mutateOrders: any;
   handleOpenDetails?: any;
   isMarkDateDifference?: boolean;
@@ -73,7 +72,6 @@ const OrderAccordion = ({
   showNotification,
   handleSelectOrder,
   selectedOrders,
-  handleUpdateItem,
   mutateOrders,
   handleOpenDetails,
   isMarkDateDifference,
@@ -369,7 +367,6 @@ const OrderAccordion = ({
       <EditPrice
         open={isOpenEditPrice}
         onClose={() => setIsOpenEditPrice(false)}
-        items={order.items}
         showNotification={showNotification}
         order={order}
         mutateOrders={mutateOrders}
@@ -383,15 +380,17 @@ const OrderAccordion = ({
         showNotification={showNotification}
         color="error"
       />
-      {handleUpdateItem && (
+
+      {isOpenDetails && (
         <OrderDetails
           open={isOpenDetails}
           onClose={() => setIsOpenDetails(false)}
           order={order}
-          handleUpdateItem={handleUpdateItem}
+          // handleUpdateItem={handleUpdateItem}
           showNotification={showNotification}
         />
       )}
+
       <ShadowSection my={2}>
         <Grid container alignItems="center" columnSpacing={1} rowGap={1}>
           <Grid item sm={0.5} xs={2}>

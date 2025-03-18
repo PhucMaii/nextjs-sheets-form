@@ -9,6 +9,8 @@ import '../styles/animation.css';
 import UserContextAPI from './context/UserContextAPI';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { theme } from '@/theme';
+import 'react-color-palette/css';
+
 // import { CacheProvider } from '@emotion/react';
 
 // Create cache for SSR

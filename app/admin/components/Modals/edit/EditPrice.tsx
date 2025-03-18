@@ -1,26 +1,15 @@
-import { OrderedItems } from '@/app/utils/type';
-import {
-  AlertColor,
-  Box,
-  Button,
-  Divider,
-  Grid,
-  Modal,
-  TextField,
-  Typography,
-} from '@mui/material';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { AlertColor, Divider, Modal } from '@mui/material';
+import React from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
-import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import { Order } from '../../../orders/page';
-import UpdateChoiceSelection from '../../UpdateChoiceSelection';
-import { LoadingButton } from '@mui/lab';
+import ModalHead from '@/app/lib/ModalHead';
+import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
+import { SWRFetchData } from '@/app/utils/db';
 
 interface PropTypes extends ModalProps {
-  items: OrderedItems[];
   showNotification: (type: AlertColor, message: string) => void;
   order: Order;
   mutateOrders: any;
@@ -29,60 +18,46 @@ interface PropTypes extends ModalProps {
 export default function EditPrice({
   open,
   onClose,
-  items,
   showNotification,
   order,
   mutateOrders,
 }: PropTypes) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [itemList, setItemList] = useState<OrderedItems[]>([]);
-  const [updateOption, setUpdateOption] = useState<UpdateOption>(
-    UpdateOption.NONE,
-  );
-  const [newCategoryName, setNewCategoryName] = useState<string>('');
+  // const [updateOption, setUpdateOption] = useState<UpdateOption>(
+  //   UpdateOption.NONE,
+  // );
 
-  const hasCustomAmount = useMemo(() => {
-    if (itemList.length === 0) {
-      return false;
-    }
+  const [sellingItems] = SWRFetchData(`${API_URL.ITEM}?userId=${order.userId}`);
 
-    return itemList.some((item: OrderedItems) => !item?.inventoryItemId);
-  }, [itemList]);
+  // const hasCustomAmount = useMemo(() => {
+  //   if (itemList.length === 0) {
+  //     return false;
+  //   }
 
-  useEffect(() => {
-    if (items) {
-      setItemList(items);
-    }
-  }, [items]);
+  //   return itemList.some((item: any) => !item?.inventoryItemId);
+  // }, [itemList]);
 
-  const calculateNewTotalPrice = () => {
-    const totalPrice = itemList.reduce((acc: number, cV: any) => {
-      return acc + cV.totalPrice;
-    }, 0);
+  // const calculateNewTotalPrice = () => {
+  //   const totalPrice = itemList.reduce((acc: number, cV: any) => {
+  //     return acc + cV.totalPrice;
+  //   }, 0);
 
-    return totalPrice;
-  };
+  //   return totalPrice;
+  // };
 
   // const handleNewItemOnChange = (key: string, value: any) => {
   //   setNewItem({ ...newItem, [key]: value });
   // };
 
-  const handleUpdatePrice = async () => {
+  const onUpdateOrder = async (orderParam: Order) => {
     try {
-      setIsLoading(true);
-      const totalPrice = calculateNewTotalPrice();
       const response = await axios.put(API_URL.ORDERED_ITEMS, {
-        updatedItems: [...itemList],
-        orderTotalPrice: totalPrice,
+        updatedItems: orderParam.items,
         orderId: order.id,
-        updateOption,
-        categoryName: newCategoryName,
-        userId: order.userId,
-        userCategoryId: order.category.id,
+        note: orderParam.note,
+        deliveryDate: orderParam.deliveryDate,
       });
 
       if (response.data.error) {
-        setIsLoading(false);
         showNotification('error', response.data.error);
         return;
       }
@@ -91,28 +66,26 @@ export default function EditPrice({
       mutateOrders();
 
       showNotification('success', response.data.message);
-      setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification(
         'error',
         'Fail to update price: ' + error.response.data.error,
       );
-      setIsLoading(false);
     }
   };
 
-  const handleItemOnChange = (e: any, targetItem: OrderedItems) => {
-    const newItemList = itemList.map((item: OrderedItems) => {
-      if (item.id === targetItem.id) {
-        const newPrice = Number(e.target.value);
-        const newTotal = newPrice * item.quantity;
-        return { ...item, price: newPrice, totalPrice: newTotal };
-      }
-      return item;
-    });
-    setItemList(newItemList);
-  };
+  // const handleItemOnChange = (e: any, targetItem: any) => {
+  //   const newItemList = itemList.map((item: any) => {
+  //     if (item.id === targetItem.id) {
+  //       const newPrice = Number(e.target.value);
+  //       const newTotal = newPrice * item.quantity;
+  //       return { ...item, price: newPrice, totalPrice: newTotal };
+  //     }
+  //     return item;
+  //   });
+  //   setItemList(newItemList);
+  // };
 
   // const removeItem = (itemName: string) => {
   //   const newItemList = itemList.filter((item: OrderedItems) => {
@@ -124,80 +97,34 @@ export default function EditPrice({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h4">Edit Price</Typography>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Button variant="outlined" onClick={onClose}>
-              Cancel
-            </Button>
-            <LoadingButton
-              variant="contained"
-              loadingIndicator="Saving..."
-              loading={isLoading}
-              onClick={handleUpdatePrice}
-            >
-              Save
-            </LoadingButton>
-          </Box>
-        </Box>
-        {!hasCustomAmount && (
-          <UpdateChoiceSelection
-            updateOption={updateOption}
-            setUpdateOption={setUpdateOption}
-          />
-        )}
-        <Box overflow="auto" maxHeight="70vh" mt={1}>
-          <Divider>Items</Divider>
-          <Grid
-            container
-            alignItems="center"
-            columnSpacing={2}
-            rowGap={4}
-            mt={2}
-          >
-            {updateOption === UpdateOption.CREATE && (
-              <>
-                <Grid item xs={6}>
-                  New Category Name
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    fullWidth
-                    label="New category name"
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                  />
-                </Grid>
-              </>
-            )}
-            {itemList.length > 0 &&
-              itemList.map((item: any, index: number) => {
-                return (
-                  <Fragment key={index}>
-                    <Grid item xs={6}>
-                      {item.name}:
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        fullWidth
-                        label="Unit Price ($)"
-                        value={item.price}
-                        onChange={(e) => handleItemOnChange(e, item)}
-                        type="number"
-                        inputProps={{ min: 0 }}
-                      />
-                    </Grid>
-                    {/* <Grid item xs={1}>
-                      <IconButton onClick={() => removeItem(item.name)}>
-                        <RemoveCircleIcon sx={{ color: errorColor }} />
-                      </IconButton>
-                    </Grid> */}
-                  </Fragment>
-                );
-              })}
-          </Grid>
-        </Box>
+      <BoxModal
+        display="flex"
+        flexDirection="column"
+        gap={2}
+        maxHeight="80vh"
+        overflow="auto"
+      >
+        <ModalHead
+          heading="Edit Items"
+          onClose={onClose}
+          onlyHeading
+          buttonLabel="Edit"
+          onClick={() => {}}
+          buttonProps={{}}
+        />
+
+        <Divider />
+
+        <OrderView
+          items={sellingItems?.data || []}
+          defaultOrderedItems={order.items}
+          defaultOrder={order}
+          purpose={ORDER_USAGE_PURPOSE.ITEM}
+          onSubmit={onUpdateOrder}
+          clientName={order?.user?.clientName}
+          isModal
+          role={USER_ROLE.ADMIN}
+        />
       </BoxModal>
     </Modal>
   );

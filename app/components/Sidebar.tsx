@@ -20,7 +20,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
-import { clientTabs } from '@/app/lib/constant';
+import { clientMaxWidth, clientTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
@@ -142,7 +142,12 @@ export default function Sidebar({ children }: PropTypes) {
   if (smDown) {
     return (
       <>
-        <Box display="flex" flexDirection="column" gap={2} sx={{ pb: 8, p: 1 }}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          gap={2}
+          sx={{ pb: 10, p: 1 }}
+        >
           {/* <HolidayText /> */}
           {children}
         </Box>
@@ -277,14 +282,21 @@ export default function Sidebar({ children }: PropTypes) {
         >
           {content}
         </Drawer>
-        <Box width="100%">
+        <Box sx={{ flexGrow: 1, maxWidth: `calc(100% - ${drawerWidth}px)` }}>
           {isOpenSnackbar && (
             <EmailAlert
               setIsOpenSnackbar={setIsOpenSnackbar}
               showNotification={showNotification}
             />
           )}
-          <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
+          <Box
+            display="flex"
+            width="100%"
+            flexDirection="column"
+            m={1}
+            gap={2}
+            sx={{ maxWidth: clientMaxWidth, mx: 'auto' }}
+          >
             {/* <HolidayText /> */}
             {children}
           </Box>

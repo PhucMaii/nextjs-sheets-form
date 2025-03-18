@@ -1,107 +1,83 @@
 'use client';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Autocomplete,
   Box,
-  Button,
-  CircularProgress,
   Grid,
-  Menu,
-  MenuItem,
   Paper,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from '@mui/material';
 import { ShadowSection } from './styled';
 import { UserType } from '@/app/utils/type';
-import { API_URL, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
-import axios from 'axios';
+import {
+  API_URL,
+  ORDER_STATUS,
+  PAYMENT_TYPE,
+  USER_CATEGORIZED,
+} from '@/app/utils/enum';
 import { Order } from '../orders/page';
-import ErrorComponent from '../components/ErrorComponent';
-import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
-import BlockIcon from '@mui/icons-material/Block';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { blue, blueGrey } from '@mui/material/colors';
-import useDebounce from '@/hooks/useDebounce';
-import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
-import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import { generateMonthRange } from '@/app/utils/time';
-import { useReactToPrint } from 'react-to-print';
-import { InvoicePrint } from '../components/Printing/InvoicePrint';
-import { DropdownItemContainer } from '../orders/styled';
-import {
-  errorColor,
-  infoColor,
-  successColor,
-  warningColor,
-} from '@/theme/color';
-import { days } from '@/app/lib/constant';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { MemoizedAllPrint } from '../components/Printing/AllPrint';
+import MoneyOffCsredIcon from '@mui/icons-material/MoneyOffCsred';
 import { pusherClient } from '@/app/pusher';
-import {
-  convertDeliveryDateStringToDate,
-  filterDateRangeOrders,
-} from '@/pages/api/utils/date';
-import BillPrintModal from '../components/Modals/BillPrintModal';
+import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import { SWRFetchData } from '@/app/utils/db';
-import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
-import RouteStatement from '../components/Modals/RouteStatement';
-import LoadingModal from '../components/Modals/LoadingModal';
-import EditEmail from '../components/Modals/edit/EditEmail';
-import { onSelectAllOrders, onSelectOrders } from '@/app/utils/orders';
 import { renderType } from '@/app/lib/render';
 import { PriceChange } from '@mui/icons-material';
+import OrderInReportPage from './OrderInReportPage';
+import ChequeTab from './ChequeTab';
 // import { handleSearch } from '@/app/utils/search';
 
 export default function ReportPage() {
-  const [actionButtonAnchor, setActionButtonAnchor] =
-    useState<null | HTMLElement>(null);
-  const openActionsDropdown = Boolean(actionButtonAnchor);
-  const [statementAnchor, setStatementAnchor] = useState<null | HTMLElement>(
-    null,
-  );
-  const openStatementDropdown = Boolean(statementAnchor);
+  // const [actionButtonAnchor, setActionButtonAnchor] =
+  //   useState<null | HTMLElement>(null);
+  // const openActionsDropdown = Boolean(actionButtonAnchor);
+  // const [statementAnchor, setStatementAnchor] = useState<null | HTMLElement>(
+  //   null,
+  // );
+  // const openStatementDropdown = Boolean(statementAnchor);
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
-  const [isSendAndPrintLoading, setIsSendAndPrintLoading] =
-    useState<boolean>(false);
+  // const [isSendAndPrintLoading, setIsSendAndPrintLoading] =
+  //   useState<boolean>(false);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [isOpenEditEmail, setIsOpenEditEmail] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
-    useState<boolean>(false);
-  const [isOpenRouteStatement, setIsOpenRouteStatement] =
-    useState<boolean>(false);
-  const [searchKeywords, setSearchKeywords] = useState<string>('');
+  // const [isOpenEditEmail, setIsOpenEditEmail] = useState<boolean>(false);
+  // // const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const [isOpenBillPrintModal, setIsOpenBillPrintModal] =
+  //   useState<boolean>(false);
+  // const [isOpenRouteStatement, setIsOpenRouteStatement] =
+  //   useState<boolean>(false);
+  // const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+  const [tabIndex, setTabIndex] = useState<number>(0);
 
-  const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  // const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const { showNotification, NotificationComp } = useNotification();
 
   // Printing Refs
-  const invoicePrint: any = useRef();
-  const billPrint: any = useRef();
-  const weeklyPrint: any = useRef();
+  // const invoicePrint: any = useRef();
+  // const billPrint: any = useRef();
+  // const weeklyPrint: any = useRef();
 
   const { date: datePicker, SelectDate } = useSelectDate();
 
   // Data Fetching
-  const currentDate = convertDeliveryDateStringToDate(datePicker);
+  // const currentDate = convertDeliveryDateStringToDate(datePicker);
   const [orders, mutateOrders] = SWRFetchData(
     !clientValue
       ? ''
@@ -109,9 +85,9 @@ export default function ReportPage() {
         ? `${API_URL.ADMIN}/clients/orders?deliveryDate=${datePicker}`
         : `${API_URL.ADMIN}/clients/orders?userId=${clientValue?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
-  const [routes, mutateRoutes] = SWRFetchData(
-    `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
-  );
+  // const [routes, mutateRoutes] = SWRFetchData(
+  //   `${API_URL.ROUTES}?day=${days[currentDate.getDay()]}`,
+  // );
   const [clients] = SWRFetchData(API_URL.CLIENTS);
 
   const totalBill = useMemo(() => {
@@ -189,52 +165,40 @@ export default function ReportPage() {
   }, [clientValue, dateRange, datePicker, orders?.data]);
 
   useEffect(() => {
-    if (datePicker) {
-      mutateRoutes();
+    if (
+      clientValue?.clientName === 'All Clients' ||
+      clientValue?.preference?.paymentType !== PAYMENT_TYPE.MONTHLY
+    ) {
+      setTabIndex(0);
     }
-  }, [datePicker]);
+  }, [clientValue]);
 
-  useEffect(() => {
-    if (debouncedKeywords) {
-      const newOrderData = baseClientOrders.filter((order: Order) => {
-        if (
-          order.id.toString().includes(debouncedKeywords) ||
-          order.user.clientId === debouncedKeywords ||
-          order.user.clientName
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase()) ||
-          order.status.toLowerCase() === debouncedKeywords.toLowerCase()
-        ) {
-          return true;
-        }
-        return false;
-      });
-      // const newOrderData = handleSearch(debouncedKeywords, baseClientOrders, [
-      //   'id',
-      //   'user.clientId',
-      //   'user.clientName',
-      //   'status',
-      // ]);
-      setClientOrders(newOrderData);
-    } else {
-      setClientOrders(baseClientOrders);
-    }
-  }, [debouncedKeywords, baseClientOrders]);
+  // useEffect(() => {
+  //   if (datePicker) {
+  //     mutateRoutes();
+  //   }
+  // }, [datePicker]);
 
-  // const calculateTotalBill = () => {
-  //   const bill = clientOrders.reduce((acc: number, cV: Order) => {
-  //     // Only calculate total incompleted and completed orders
-  //     if (
-  //       cV.status === ORDER_STATUS.DELIVERED ||
-  //       cV.status === ORDER_STATUS.INCOMPLETED
-  //     ) {
-  //       return acc + cV.totalPrice;
-  //     }
-  //     return acc + 0;
-  //   }, 0);
-
-  //   setTotalBill(bill);
-  // };
+  // useEffect(() => {
+  //   if (debouncedKeywords) {
+  //     const newOrderData = baseClientOrders.filter((order: Order) => {
+  //       if (
+  //         order.id.toString().includes(debouncedKeywords) ||
+  //         order.user.clientId === debouncedKeywords ||
+  //         order.user.clientName
+  //           .toLowerCase()
+  //           .includes(debouncedKeywords.toLowerCase()) ||
+  //         order.status.toLowerCase() === debouncedKeywords.toLowerCase()
+  //       ) {
+  //         return true;
+  //       }
+  //       return false;
+  //     });
+  //     setClientOrders(newOrderData);
+  //   } else {
+  //     setClientOrders(baseClientOrders);
+  //   }
+  // }, [debouncedKeywords, baseClientOrders]);
 
   const initializeOrders = () => {
     let orderData = orders.data;
@@ -270,388 +234,313 @@ export default function ReportPage() {
     setIsFetching(false);
   };
 
-  const handleCloseActionsAnchor = () => {
-    setActionButtonAnchor(null);
-  };
+  // const handleCloseActionsAnchor = () => {
+  //   setActionButtonAnchor(null);
+  // };
 
-  const handleCloseStatementAnchor = () => {
-    setStatementAnchor(null);
-  };
+  // const handleCloseStatementAnchor = () => {
+  //   setStatementAnchor(null);
+  // };
 
-  // const handleDeleteOrderUI = (deletedOrder: Order) => {
+  // const handleInvoicePrint = useReactToPrint({
+  //   content: () => invoicePrint.current,
+  // });
+
+  // const handleBillPrint = useReactToPrint({
+  //   content: () => billPrint.current,
+  // });
+
+  // const handleWeeklyPrint = useReactToPrint({
+  //   content: () => weeklyPrint.current,
+  // });
+
+  // const handleSelectOrder = (e: any, targetOrder: Order) => {
+  //   e.preventDefault();
+  //   onSelectOrders(targetOrder, selectedOrders, setSelectedOrders);
+  // };
+
+  // const handleSelectAll = () => {
+  //   onSelectAllOrders(selectedOrders, clientOrders, setSelectedOrders);
+  // };
+
+  // const onUpdateOrderUI = (updatedOrder: Order) => {
   //   // update base order list
-  //   const newBaseOrderList = baseClientOrders.filter((order: Order) => {
-  //     return order.id !== deletedOrder.id;
+  //   const newBaseOrderList = baseClientOrders.map((order: Order) => {
+  //     if (order.id === updatedOrder.id) {
+  //       return updatedOrder;
+  //     }
+  //     return order;
   //   });
 
-  //   // update current displaying list
-  //   const newOrderList = clientOrders.filter((order: Order) => {
-  //     return order.id !== deletedOrder.id;
+  //   // update current displaying order list
+  //   const newOrderList = clientOrders.map((order: Order) => {
+  //     if (order.id === updatedOrder.id) {
+  //       return updatedOrder;
+  //     }
+  //     return order;
   //   });
 
-  //   // update unpaid order list
-  //   if (
-  //     deletedOrder.status === ORDER_STATUS.INCOMPLETED ||
-  //     deletedOrder.status === ORDER_STATUS.DELIVERED
-  //   ) {
-  //     const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-  //       return (
-  //         order.status === ORDER_STATUS.INCOMPLETED ||
-  //         order.status === ORDER_STATUS.DELIVERED
-  //       );
-  //     });
-  //     setUnpaidOrders(newUnpaidOrders);
-  //   }
+  //   // update completed order list
+  //   const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
+  //     return order.status === ORDER_STATUS.COMPLETED;
+  //   });
 
   //   setBaseClientOrders(newBaseOrderList);
   //   setClientOrders(newOrderList);
+  //   setUnpaidOrders(newUnpaidOrders);
   // };
 
-  const handleInvoicePrint = useReactToPrint({
-    content: () => invoicePrint.current,
-  });
+  // const handleDeleteSelectedOrders = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
+  //       data: { orderList: selectedOrders },
+  //     });
 
-  const handleBillPrint = useReactToPrint({
-    content: () => billPrint.current,
-  });
+  //     showNotification('success', response.data.message);
+  //     setIsLoading(false);
+  //     setSelectedOrders([]);
+  //   } catch (error: any) {
+  //     console.log('Fail to delete orders: ', error);
+  //     showNotification('error', 'Fail to delete orders: ' + error);
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  const handleWeeklyPrint = useReactToPrint({
-    content: () => weeklyPrint.current,
-  });
+  // const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+  //   setIsLoading(true);
 
-  const handleSelectOrder = (e: any, targetOrder: Order) => {
-    e.preventDefault();
-    onSelectOrders(targetOrder, selectedOrders, setSelectedOrders);
-  };
+  //   const updatedOrderIds = selectedOrders.map((order: Order) => {
+  //     return order.id;
+  //   });
+  //   try {
+  //     const response = await axios.put(API_URL.ORDER_STATUS, {
+  //       status,
+  //       updatedOrderIds,
+  //     });
 
-  const handleSelectAll = () => {
-    onSelectAllOrders(selectedOrders, clientOrders, setSelectedOrders);
-  };
+  //     mutateOrders();
 
-  const onUpdateOrderUI = (updatedOrder: Order) => {
-    console.log(updatedOrder, 'updated order');
-    // update base order list
-    const newBaseOrderList = baseClientOrders.map((order: Order) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  //     showNotification('success', response.data.message);
+  //     setIsLoading(false);
+  //   } catch (error: any) {
+  //     console.log('Fail to mark all as completed: ', error);
+  //     showNotification(
+  //       'error',
+  //       'Something went wrong. Please try again later - ERROR: ' +
+  //         (error?.response?.data?.error || error),
+  //     );
+  //     setIsLoading(false);
+  //   }
+  // };
 
-    // update current displaying order list
-    const newOrderList = clientOrders.map((order: Order) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  // const handleSendInvoice = async (
+  //   email: string = clientValue?.email || '',
+  // ) => {
+  //   try {
+  //     const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
+  //       client: { ...clientValue, email },
+  //       orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
+  //       endDate: dateRange[1],
+  //     });
 
-    // update completed order list
-    const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-      return order.status === ORDER_STATUS.COMPLETED;
-    });
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
 
-    setBaseClientOrders(newBaseOrderList);
-    setClientOrders(newOrderList);
-    setUnpaidOrders(newUnpaidOrders);
-  };
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //     showNotification(
+  //       'error',
+  //       'There was an error: ' + error.response.data.error,
+  //     );
+  //   }
+  // };
 
-  const handleDeleteSelectedOrders = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.delete(`${API_URL.CLIENTS}/orders`, {
-        data: { orderList: selectedOrders },
-      });
+  // const statementDropdown = (
+  //   <Box
+  //     display="flex"
+  //     justifyContent="flex-end"
+  //     alignItems="center"
+  //     gap={2}
+  //     width="100%"
+  //   >
+  //     <Button
+  //       disabled={clientOrders.length === 0 || isFetching}
+  //       variant="outlined"
+  //       onClick={(e) => {
+  //         if (clientValue?.clientName === 'All Clients') {
+  //           setIsOpenRouteStatement(true);
+  //         } else {
+  //           setStatementAnchor(e.currentTarget);
+  //         }
+  //       }}
+  //       fullWidth
+  //     >
+  //       <Box display="flex" gap={2}>
+  //         <Typography>Statement</Typography>
+  //         <ArrowDownwardIcon />
+  //       </Box>
+  //     </Button>
+  //     <Menu
+  //       id="basic-menu"
+  //       anchorEl={statementAnchor}
+  //       open={openStatementDropdown}
+  //       onClose={handleCloseStatementAnchor}
+  //       MenuListProps={{
+  //         'aria-labelledby': 'basic-button',
+  //       }}
+  //     >
+  //       <MenuItem onClick={() => setIsOpenUploadChequeModal(true)}>
+  //         Upload Cheque
+  //       </MenuItem>
+  //       <Divider />
+  //       <MenuItem
+  //         onClick={() => {
+  //           handleWeeklyPrint();
+  //           handleCloseStatementAnchor();
+  //         }}
+  //       >
+  //         Weekly
+  //       </MenuItem>
+  //       <MenuItem
+  //         onClick={() => {
+  //           handleInvoicePrint();
+  //           handleCloseStatementAnchor();
+  //         }}
+  //       >
+  //         Print
+  //       </MenuItem>
+  //       <MenuItem
+  //         disabled={!clientValue?.email || false}
+  //         onClick={async () => {
+  //           setIsOpenEditEmail(true);
+  //         }}
+  //       >
+  //         {'Send to client'}
+  //       </MenuItem>
+  //       <MenuItem
+  //         disabled={!clientValue?.email || false}
+  //         onClick={async () => {
+  //           setIsSendAndPrintLoading(true);
+  //           handleInvoicePrint();
+  //           await handleSendInvoice();
+  //           setIsSendAndPrintLoading(false);
+  //           // handleCloseStatementAnchor();
+  //         }}
+  //       >
+  //         {isSendAndPrintLoading ? (
+  //           <CircularProgress size={20} />
+  //         ) : (
+  //           'Print and Send'
+  //         )}
+  //       </MenuItem>
+  //     </Menu>
+  //   </Box>
+  // );
 
-      showNotification('success', response.data.message);
-      setIsLoading(false);
-      setSelectedOrders([]);
-    } catch (error: any) {
-      console.log('Fail to delete orders: ', error);
-      showNotification('error', 'Fail to delete orders: ' + error);
-      setIsLoading(false);
-    }
-  };
-
-  const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
-    setIsLoading(true);
-
-    const updatedOrderIds = selectedOrders.map((order: Order) => {
-      return order.id;
-    });
-    try {
-      const response = await axios.put(API_URL.ORDER_STATUS, {
-        status,
-        updatedOrderIds,
-      });
-
-      mutateOrders();
-
-      showNotification('success', response.data.message);
-      setIsLoading(false);
-    } catch (error: any) {
-      console.log('Fail to mark all as completed: ', error);
-      showNotification(
-        'error',
-        'Something went wrong. Please try again later - ERROR: ' +
-          (error?.response?.data?.error || error),
-      );
-      setIsLoading(false);
-    }
-  };
-
-  const handleSendInvoice = async (
-    email: string = clientValue?.email || '',
-  ) => {
-    try {
-      const response = await axios.post(`${API_URL.ADMIN}/sendInvoicePdf`, {
-        client: { ...clientValue, email },
-        orders: selectedOrders.length > 0 ? selectedOrders : clientOrders,
-        endDate: dateRange[1],
-      });
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('There was an error: ', error);
-      showNotification(
-        'error',
-        'There was an error: ' + error.response.data.error,
-      );
-    }
-  };
-
-  const statementDropdown = (
-    <Box
-      display="flex"
-      justifyContent="flex-end"
-      alignItems="center"
-      gap={2}
-      width="100%"
-    >
-      <Button
-        disabled={clientOrders.length === 0 || isFetching}
-        variant="outlined"
-        onClick={(e) => {
-          if (clientValue?.clientName === 'All Clients') {
-            setIsOpenRouteStatement(true);
-          } else {
-            setStatementAnchor(e.currentTarget);
-          }
-        }}
-        fullWidth
-      >
-        <Box display="flex" gap={2}>
-          <Typography>Statement</Typography>
-          <ArrowDownwardIcon />
-        </Box>
-      </Button>
-      <Menu
-        id="basic-menu"
-        anchorEl={statementAnchor}
-        open={openStatementDropdown}
-        onClose={handleCloseStatementAnchor}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            handleWeeklyPrint();
-            handleCloseStatementAnchor();
-          }}
-        >
-          Weekly
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleInvoicePrint();
-            handleCloseStatementAnchor();
-          }}
-        >
-          Print
-        </MenuItem>
-        <MenuItem
-          disabled={!clientValue?.email || false}
-          onClick={async () => {
-            setIsOpenEditEmail(true);
-            // setIsSendLoading(true);
-            // await handleSendInvoice();
-            // setIsSendLoading(false);
-            // handleCloseStatementAnchor();
-          }}
-        >
-          {'Send to client'}
-        </MenuItem>
-        <MenuItem
-          disabled={!clientValue?.email || false}
-          onClick={async () => {
-            setIsSendAndPrintLoading(true);
-            handleInvoicePrint();
-            await handleSendInvoice();
-            setIsSendAndPrintLoading(false);
-            // handleCloseStatementAnchor();
-          }}
-        >
-          {isSendAndPrintLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            'Print and Send'
-          )}
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
-
-  const statusDropdown = (
-    <Box
-      display="flex"
-      justifyContent="flex-end"
-      alignItems="center"
-      gap={2}
-      width="100%"
-    >
-      <Button
-        aria-controls={openActionsDropdown ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={openActionsDropdown ? 'true' : undefined}
-        disabled={selectedOrders.length === 0}
-        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-        endIcon={<ArrowDownwardIcon />}
-        variant="outlined"
-        fullWidth
-      >
-        Actions
-      </Button>
-      <Menu
-        id="basic-menu"
-        anchorEl={actionButtonAnchor}
-        open={openActionsDropdown}
-        onClose={handleCloseActionsAnchor}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            handleUpdateStatus(ORDER_STATUS.COMPLETED);
-            handleCloseActionsAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Mark as completed</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleUpdateStatus(ORDER_STATUS.DELIVERED);
-            handleCloseActionsAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <LocalShippingIcon sx={{ color: infoColor }} />
-            <Typography>Mark as delivered</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleUpdateStatus(ORDER_STATUS.INCOMPLETED);
-            handleCloseActionsAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <PendingIcon sx={{ color: warningColor }} />
-            <Typography>Mark as incompleted</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleUpdateStatus(ORDER_STATUS.VOID);
-            handleCloseActionsAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <BlockIcon sx={{ color: errorColor }} />
-            <Typography>Mark as void</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleDeleteSelectedOrders();
-            handleCloseActionsAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <DeleteIcon sx={{ color: errorColor }} />
-            <Typography>Delete</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
+  // const statusDropdown = (
+  //   <Box
+  //     display="flex"
+  //     justifyContent="flex-end"
+  //     alignItems="center"
+  //     gap={2}
+  //     width="100%"
+  //   >
+  //     <Button
+  //       aria-controls={openActionsDropdown ? 'basic-menu' : undefined}
+  //       aria-haspopup="true"
+  //       aria-expanded={openActionsDropdown ? 'true' : undefined}
+  //       disabled={selectedOrders.length === 0}
+  //       onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+  //       endIcon={<ArrowDownwardIcon />}
+  //       variant="outlined"
+  //       fullWidth
+  //     >
+  //       Actions
+  //     </Button>
+  //     <Menu
+  //       id="basic-menu"
+  //       anchorEl={actionButtonAnchor}
+  //       open={openActionsDropdown}
+  //       onClose={handleCloseActionsAnchor}
+  //       MenuListProps={{
+  //         'aria-labelledby': 'basic-button',
+  //       }}
+  //     >
+  //       <MenuItem
+  //         onClick={() => {
+  //           handleUpdateStatus(ORDER_STATUS.COMPLETED);
+  //           handleCloseActionsAnchor();
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <CheckCircleIcon sx={{ color: successColor }} />
+  //           <Typography>Mark as completed</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
+  //       <MenuItem
+  //         onClick={() => {
+  //           handleUpdateStatus(ORDER_STATUS.DELIVERED);
+  //           handleCloseActionsAnchor();
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <LocalShippingIcon sx={{ color: infoColor }} />
+  //           <Typography>Mark as delivered</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
+  //       <MenuItem
+  //         onClick={() => {
+  //           handleUpdateStatus(ORDER_STATUS.INCOMPLETED);
+  //           handleCloseActionsAnchor();
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <PendingIcon sx={{ color: warningColor }} />
+  //           <Typography>Mark as incompleted</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
+  //       <MenuItem
+  //         onClick={() => {
+  //           handleUpdateStatus(ORDER_STATUS.VOID);
+  //           handleCloseActionsAnchor();
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <BlockIcon sx={{ color: errorColor }} />
+  //           <Typography>Mark as void</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
+  //       <MenuItem
+  //         onClick={() => {
+  //           handleDeleteSelectedOrders();
+  //           handleCloseActionsAnchor();
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <DeleteIcon sx={{ color: errorColor }} />
+  //           <Typography>Delete</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
+  //     </Menu>
+  //   </Box>
+  // );
 
   return (
     <Sidebar>
-      <EditEmail
+      {/* <EditEmail
         open={isOpenEditEmail}
         onClose={() => setIsOpenEditEmail(false)}
         sendInvoice={handleSendInvoice}
         email={clientValue?.email || ''}
         showNotification={showNotification}
         userId={clientValue?.id || -1}
-      />
-      <LoadingModal open={isLoading} />
+      /> */}
       {NotificationComp}
 
-      {/* PRINT SLOWS DOWN THE PAGE */}
-      {clientValue?.clientName !== 'All Clients' && (
-        <div style={{ display: 'none' }}>
-          <InvoicePrint
-            client={clientValue}
-            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-            endDate={dateRange[1]}
-            ref={invoicePrint}
-          />
-          <WeeklyStatement
-            client={clientValue}
-            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-            endDate={dateRange[1]}
-            ref={weeklyPrint}
-          />
-        </div>
-      )}
-      {/* {clientValue?.clientName === 'All Clients' && ( */}
-      <div style={{ display: 'none' }}>
-        <MemoizedAllPrint
-          orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
-          ref={billPrint}
-        />
-      </div>
-      {/* )} */}
-      {clientValue?.clientName === 'All Clients' && (
-        <>
-          <BillPrintModal
-            open={isOpenBillPrintModal}
-            onClose={() => setIsOpenBillPrintModal(false)}
-            routes={routes?.data || []}
-            orderList={
-              selectedOrders.length > 0 ? selectedOrders : clientOrders
-            }
-            showNotification={showNotification}
-            day={datePicker}
-          />
-          <RouteStatement
-            open={isOpenRouteStatement}
-            onClose={() => setIsOpenRouteStatement(false)}
-            currentDateRange={dateRange}
-          />
-        </>
-      )}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5" color={blueGrey[800]}>
           Reports
@@ -731,14 +620,72 @@ export default function ReportPage() {
               />
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
+              {orders?.overDueOrders ? (
+                <OverviewCard
+                  icon={
+                    <MoneyOffCsredIcon
+                      sx={{ color: blue[700], fontSize: 50 }}
+                    />
+                  }
+                  text="Over Due"
+                  value={orders?.overDueAmount?.toFixed(2)}
+                />
+              ) : (
+                <OverviewCard
+                  icon={<PendingIcon sx={{ color: blue[700], fontSize: 50 }} />}
+                  text="Unpaid orders"
+                  value={unpaidOrders.length}
+                />
+              )}
+            </Grid>
+            {/* <Grid item xs={12} md={4} lg={3}>
               <OverviewCard
                 icon={<PendingIcon sx={{ color: blue[700], fontSize: 50 }} />}
                 text="Unpaid orders"
                 value={unpaidOrders.length}
               />
-            </Grid>
+            </Grid> */}
           </Grid>
-          <Grid container spacing={1} alignItems="center">
+
+          <Tabs
+            value={tabIndex}
+            onChange={(e: any, value: number) => setTabIndex(value)}
+            variant="fullWidth"
+            sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Tab label="Orders" value={0} />
+            <Tab
+              label="Cheques"
+              value={1}
+              disabled={
+                clientValue?.clientName === 'All Clients' ||
+                clientValue?.preference.paymentType !== PAYMENT_TYPE.MONTHLY
+              }
+            />
+          </Tabs>
+
+          {tabIndex === 0 ? (
+            <OrderInReportPage
+              clientOrders={clientOrders}
+              setClientOrders={setClientOrders}
+              showNotification={showNotification}
+              isFetching={isFetching}
+              clientValue={clientValue}
+              dateRange={dateRange}
+              setUnpaidOrders={setUnpaidOrders}
+              mutateOrders={mutateOrders}
+              datePicker={datePicker}
+              baseClientOrders={baseClientOrders}
+              setBaseClientOrders={setBaseClientOrders}
+            />
+          ) : (
+            <ChequeTab
+              client={clientValue}
+              showNotification={showNotification}
+            />
+          )}
+
+          {/* <Grid container spacing={1} alignItems="center">
             <Grid item md={2} xs={12}>
               {statusDropdown}
             </Grid>
@@ -799,7 +746,7 @@ export default function ReportPage() {
             />
           ) : (
             <ErrorComponent errorText="No Order Available" />
-          )}
+          )} */}
         </Paper>
       </ShadowSection>
       {/* </AuthenGuard> */}

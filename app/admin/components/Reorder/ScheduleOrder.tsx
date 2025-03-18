@@ -26,7 +26,6 @@ interface PropTypes {
   handleDeleteOrderUI: (deletedOrder: ScheduledOrder) => void;
   routeId: number;
   routes: IRoutes[];
-  handleUpdateOrderUI: (updatedOrder: ScheduledOrder) => void;
   mutateOrders: any;
 }
 
@@ -38,7 +37,6 @@ const PreOrderColor = {
 export default function ScheduleOrder({
   scheduleOrder,
   handleDeleteOrderUI,
-  handleUpdateOrderUI,
   showNotification,
   handleSelectOrder,
   selectedOrders,
@@ -100,7 +98,6 @@ export default function ScheduleOrder({
         routes={routes}
         order={scheduleOrder}
         showNotification={showNotification}
-        handleUpdateOrderUI={handleUpdateOrderUI}
         mutateOrders={mutateOrders}
         handleDeleteOrderUI={handleDeleteOrderUI}
       />

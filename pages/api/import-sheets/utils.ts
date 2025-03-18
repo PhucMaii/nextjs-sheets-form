@@ -1,6 +1,9 @@
 import { ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
-import { updateSingleInventoryItem } from '../admin/orderedItems/single';
+import {
+  restockInventoryItem,
+  updateSingleInventoryItem,
+} from '../admin/orderedItems/single';
 import { sendEmail } from '../utils/email';
 import { pusherServer } from '@/app/pusher';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -8,6 +11,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { generateOrderTotalPrice } from '../admin/orderedItems/PUT';
 import { checkOrderDeliveryDateValid } from '../utils/date';
+import { createOrderedItems } from '../utils/order';
+import { OrderedItems } from '@/app/utils/type';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -56,6 +61,16 @@ export const overrideOrder = async (
   try {
     const prisma = new PrismaClient();
 
+    for (const item of newItems) {
+      if (item.quantity % 1 !== 0) {
+        throw new Error('Invalid Quantity');
+      }
+
+      if (item.quantity < 1) {
+        throw new Error('Invalid Quantity');
+      }
+    }
+
     // Check if user account is inactive
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
       throw new Error('Client Account Is INACTIVE');
@@ -69,6 +84,12 @@ export const overrideOrder = async (
         items: true,
       },
     });
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    let trackDeletedItems: OrderedItems[] | any[] = order.items;
 
     // Check if user override order within correct date
     if (order && updatedBy.split(' - ')[0] === 'Client') {
@@ -91,35 +112,61 @@ export const overrideOrder = async (
       });
 
       if (!existingItem) {
-        continue;
-      }
-      // Update each item
-      const newItem = await prisma.orderedItems.update({
-        where: {
-          id: existingItem.id,
-        },
-        data: {
-          quantity: item.quantity,
-        },
-        include: {
-          inventoryItem: true,
-        },
-      });
+        // If item not exists -> create new item
+        await createOrderedItems(order, [item], updatedBy);
+      } else {
+        // Else, Update each item
+        const newItem = await prisma.orderedItems.update({
+          where: {
+            id: existingItem.id,
+          },
+          data: {
+            quantity: item.quantity,
+          },
+          include: {
+            inventoryItem: true,
+          },
+        });
 
-      itemList.push({
-        ...newItem,
-        totalPrice: newItem.quantity * newItem.price,
-      });
+        itemList.push({
+          ...newItem,
+          totalPrice: newItem.quantity * newItem.price,
+        });
 
-      // Update inventory item
-      if (existingItem?.fifo && existingItem.inventoryUnit) {
-        await updateSingleInventoryItem(
-          orderId,
-          existingItem.fifo,
-          existingItem.inventoryUnit,
-          newItem.quantity,
-          existingItem.quantity,
+        // Update inventory item
+        if (existingItem?.fifo && existingItem.inventoryUnit) {
+          await updateSingleInventoryItem(
+            orderId,
+            existingItem.fifo,
+            existingItem.inventoryUnit,
+            newItem.quantity,
+            existingItem.quantity,
+          );
+        }
+
+        trackDeletedItems = trackDeletedItems.filter(
+          (i: any) => i.id !== newItem.id,
         );
+      }
+    }
+
+    // Delete and restock old items
+    if (trackDeletedItems.length > 0) {
+      for (const item of trackDeletedItems) {
+        if (item?.fifo && item?.inventoryUnit) {
+          await restockInventoryItem(
+            orderId,
+            item.fifo,
+            item.inventoryUnit,
+            item.quantity,
+          );
+        }
+
+        await prisma.orderedItems.delete({
+          where: {
+            id: item.id,
+          },
+        });
       }
     }
 

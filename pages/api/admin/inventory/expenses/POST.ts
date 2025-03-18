@@ -1,7 +1,10 @@
+import { otherTypeId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IInventoryUnit, IVendorItem } from '@/app/utils/type';
+import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
 import { getUserInfo } from '@/pages/api/utils/auth';
 import { deleteInventoryUnit } from '@/pages/api/utils/inventoryUnit';
+import { infoBackground } from '@/theme/color';
 import { InventoryUnit, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -206,15 +209,48 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const brandNewItems = newItems.brandNewItems;
 
       // STEP 1: Create Inventory Items
-      await prisma.inventoryItem.createMany({
-        data: brandNewItems.map((item: any) => {
-          return {
-            name: item.name,
+      const { nextPos, newRows } = await calculateNextIndexPosAndRows(
+        otherTypeId,
+        brandNewItems.length,
+      );
+
+      for (let i = 0; i < brandNewItems.length; i++) {
+        const newItem = brandNewItems[i];
+
+        await prisma.inventoryItem.create({
+          data: {
+            name: newItem.name,
             createdAt,
             createdBy,
-          };
-        }),
+            color: infoBackground,
+            typeId: otherTypeId,
+            indexPos: nextPos[i],
+          },
+        });
+      }
+
+      // Update item type rows
+      await prisma.itemType.update({
+        where: {
+          id: otherTypeId,
+        },
+        data: {
+          rows: newRows,
+        },
       });
+
+      // await prisma.inventoryItem.createMany({
+      //   data: brandNewItems.map((item: any) => {
+      //     return {
+      //       name: item.name,
+      //       createdAt,
+      //       createdBy,
+      //       color: infoBackground,
+      //       typeId: otherTypeId,
+      //       indexPos: 1,
+      //     };
+      //   }),
+      // });
 
       const newInventoryItems = await prisma.inventoryItem.findMany({
         where: {

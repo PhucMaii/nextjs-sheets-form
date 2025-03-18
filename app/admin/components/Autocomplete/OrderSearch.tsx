@@ -6,7 +6,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React from 'react';
+import React, { memo, useEffect } from 'react';
 import { Order } from '../../orders/page';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -19,34 +19,45 @@ interface IProps {
   onChangeSelectOrders: any;
 }
 
-export default function OrderSearch({
+const OrderSearch = ({
   orders,
   selectedOrders,
   onChangeSelectOrders,
-}: IProps) {
+}: IProps) => {
+  const [cacheOrders, setCacheOrders] = React.useState<Order[]>([]);
+
+  useEffect(() => {
+    setCacheOrders(orders || orders?.deliveryOrders || []);
+    console.log(orders, 'orders in search orders');
+  }, [orders]);
   // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const filterOptions = (
     options: Order[],
     { inputValue }: { inputValue: string },
   ) => {
+    if (!inputValue.trim()) return options;
     const keywords = inputValue.toLowerCase();
-    return options.filter((option: Order) => {
+
+    const res = options.filter((option: Order) => {
       return (
         option.clientName.toLowerCase().includes(keywords) ||
         option.clientId.toLowerCase().includes(keywords) ||
         option.deliveryDate.toLowerCase().includes(keywords)
       );
     });
+    return res;
   };
+
+  console.log(orders, ' orders in order search');
   return (
     <Autocomplete
       multiple
-      disabled={!orders.length || orders.length === 0}
-      aria-disabled={!orders.length || orders.length === 0}
-      options={orders || orders?.deliveryOrders || []}
+      disabled={!cacheOrders.length || cacheOrders.length === 0}
+      aria-disabled={!cacheOrders.length || cacheOrders.length === 0}
+      options={cacheOrders || []}
       getOptionLabel={(option: Order) =>
-        `${option.clientName} - ${option.clientId}`
+        `${option.id} - ${option.clientName} - ${option.clientId}`
       }
       filterOptions={filterOptions}
       // PopperComponent={(props: any) => (
@@ -104,12 +115,19 @@ export default function OrderSearch({
           {...params}
           label="Orders"
           placeholder="-- Choose orders --"
-          disabled={!orders.length || orders.length === 0}
-          aria-disabled={!orders.length || orders.length === 0}
+          disabled={!cacheOrders.length || cacheOrders.length === 0}
+          aria-disabled={!cacheOrders.length || cacheOrders.length === 0}
         />
       )}
       value={selectedOrders}
       onChange={onChangeSelectOrders}
     />
   );
-}
+};
+
+export default memo(OrderSearch, (prev, next) => {
+  return (
+    Object.is(prev.orders, next.orders) &&
+    Object.is(prev.selectedOrders, next.selectedOrders)
+  );
+});

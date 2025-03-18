@@ -7,6 +7,7 @@ import AuthenGuard from '../HOC/AuthenGuard';
 import MaintenanceProvider from './context/MaintenanceProvider';
 import { Provider } from 'react-redux';
 import { store } from '@/state/store';
+import { DragDropProvider } from '@dnd-kit/react';
 
 type Props = {
   children?: React.ReactNode;
@@ -16,6 +17,7 @@ export const Providers = ({ children }: Props) => {
   return (
     <SessionProvider>
       <AuthenGuard>
+        <DragDropProvider>
         <Provider store={store}>
           <SWRConfig
             value={{
@@ -25,6 +27,7 @@ export const Providers = ({ children }: Props) => {
             <MaintenanceProvider>{children}</MaintenanceProvider>
           </SWRConfig>
         </Provider>
+        </DragDropProvider>
       </AuthenGuard>
     </SessionProvider>
   );

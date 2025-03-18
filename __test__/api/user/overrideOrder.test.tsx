@@ -69,8 +69,8 @@ describe('Client Manipulating Order', () => {
       testClient,
       testOrderData.body.items,
       recommendedOrderDate,
-      testOrderData.body.createdAt,
       'Client - 00030',
+      'testOrderData.body.note',
     );
 
     expect(newOrder.deliveryDate).toBe(recommendedOrderDate);

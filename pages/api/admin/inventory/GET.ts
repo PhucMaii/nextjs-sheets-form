@@ -31,6 +31,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   unit: true,
                 },
               },
+              type: true,
             },
           },
         },
@@ -81,6 +82,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               unit: true,
             },
           },
+          type: true,
         },
       });
 
@@ -124,6 +126,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             unit: true,
           },
         },
+        type: true,
+      },
+      orderBy: {
+        indexPos: 'asc',
       },
     });
 
@@ -144,8 +150,29 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
+    const types = await prisma.itemType.findMany({
+      include: {
+        inventoryItems: {
+          include: {
+            vendorItem: {
+              include: {
+                vendor: true,
+              },
+            },
+          },
+          orderBy: {
+            indexPos: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        priority: 'asc',
+      },
+    });
+
     return res.status(200).json({
       data: sortedInventoryItem,
+      types,
       message: 'Fetch Inventory Successfully',
     });
   } catch (error: any) {

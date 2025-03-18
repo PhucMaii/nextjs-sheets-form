@@ -28,6 +28,7 @@ import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import WysiwygIcon from '@mui/icons-material/Wysiwyg';
 import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import {
   errorColor,
@@ -134,6 +135,7 @@ export const productColors = [
 ];
 export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (0 = January)
 export const testAccountId = 223;
+export const clientMaxWidth = '1250px';
 
 export const sendChequeMsg = `
 * Please either send your payment by cheque 
@@ -141,7 +143,7 @@ with company name or memo with client number to:
 Unit 1 - 6420 Beresford Street
 Burnaby, British Columbia V5E 1B6, Canada
 
-Or e-transfer at info@supremesprouts.com
+Or e-transfer at info@supremesprout.com
 Thank you for your cooperation. *
 `;
 
@@ -248,6 +250,11 @@ export const adminTabs = {
       name: 'Statements',
       icon: DocumentScannerIcon,
       path: '/admin/statements',
+    },
+    {
+      name: 'Order Layout',
+      icon: WysiwygIcon,
+      path: '/admin/order-layout',
     },
     {
       name: 'Blocking',
@@ -461,3 +468,6 @@ export const maxDistance = 100; // in km
 export const maxWidth = '1500px'; // max width of the landing page
 
 export const guestCategoryId = 334;
+export const otherTypeId = 19;
+export const itemsEachRow = 2;
+export const testItemId = 10107;

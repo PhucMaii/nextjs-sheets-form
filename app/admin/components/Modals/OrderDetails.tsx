@@ -1,69 +1,27 @@
-import {
-  AlertColor,
-  Box,
-  Button,
-  Divider,
-  Grid,
-  IconButton,
-  Modal,
-  TextField,
-  Typography,
-} from '@mui/material';
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { AlertColor, Modal } from '@mui/material';
+import React, { memo, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
-import CloseIcon from '@mui/icons-material/Close';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PrintIcon from '@mui/icons-material/Print';
-import SellIcon from '@mui/icons-material/Sell';
 import { Order } from '../../orders/page';
-import { OrderedItems } from '@/app/utils/type';
-import { ComponentToPrint } from '../Printing/ComponentToPrint';
-import { useReactToPrint } from 'react-to-print';
-import OrderDetailsTable from '../Tables/OrderDetailsTable';
-import AddCustomAmount from './add/AddCustomAmount';
-import EditIcon from '@mui/icons-material/Edit';
-import { API_URL, TYPE, USER_ROLE } from '@/app/utils/enum';
+import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import SingleFieldEdit from './edit/SingleFieldEdit';
 import axios from 'axios';
-import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteModal from './delete/DeleteModal';
-import useDebounce from '@/hooks/useDebounce';
 import { SWRFetchData } from '@/app/utils/db';
-import { Item } from '@prisma/client';
+import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
+import { onUpdateOrder } from '@/app/utils/orders';
 
 interface IProps extends ModalProps {
   order: Order;
-  handleUpdateItem: (
-    orderTotalPrice: number,
-    order: Order,
-    updatedItem: OrderedItems,
-    isConvertToCustom?: boolean,
-  ) => Promise<void>;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-const OrderDetails = ({
-  open,
-  onClose,
-  order,
-  handleUpdateItem,
-  showNotification,
-}: IProps) => {
-  const [baseItems, setBaseItems] = useState<any[]>([]);
-  const [items, setItems] = useState<OrderedItems[] | any[]>(order.items);
+const OrderDetails = ({ open, onClose, order, showNotification }: IProps) => {
   const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
-  const [isOpenAddCustomAmount, setIsOpenAddCustomAmount] =
-    useState<boolean>(false);
-  const billPrintRef: any = useRef();
-  const [searchKeywords, setSearchKeywords] = useState<string>('');
-
   const [clientItems] = SWRFetchData(
     `${API_URL.ITEM}?categoryId=${order?.user?.categoryId}`,
   );
-
-  const debounceKeywords = useDebounce(searchKeywords, 1000);
 
   // useEffect(() => {
   //   if (order.items) {
@@ -72,53 +30,53 @@ const OrderDetails = ({
 
   //   // setUpdatedNote(order?.note || '');
   // }, [order]);
-  useEffect(() => {
-    if (clientItems?.data && order.items) {
-      const newBaseItems = clientItems?.data.map((item: Item) => {
-        const isExistedInOrder = order.items.find(
-          (orderItem: OrderedItems) => orderItem.name === item.name,
-        );
+  // useEffect(() => {
+  //   if (clientItems?.data && order.items) {
+  //     const newBaseItems = clientItems?.data.map((item: Item) => {
+  //       const isExistedInOrder = order.items.find(
+  //         (orderItem: OrderedItems) => orderItem.name === item.name,
+  //       );
 
-        if (isExistedInOrder) {
-          return isExistedInOrder
-        }
+  //       if (isExistedInOrder) {
+  //         return isExistedInOrder;
+  //       }
 
-        return {
-          ...item,
-          id: 0,
-          quantity: 0,
-          itemId: item.id,
-          orderId: order.id
-        }
-      });
+  //       return {
+  //         ...item,
+  //         id: 0,
+  //         quantity: 0,
+  //         itemId: item.id,
+  //         orderId: order.id,
+  //       };
+  //     });
 
-      setBaseItems(newBaseItems);
-    }
-  }, [order, clientItems]);
+  //     setBaseItems(newBaseItems);
+  //   }
+  // }, [order, clientItems]);
 
-  useEffect(() => {
-    if (debounceKeywords) {
-      const newBaseItems = baseItems.filter((item: Item) => {
-        return item.name.toLowerCase().includes(debounceKeywords.toLowerCase());
-      });
+  // useEffect(() => {
+  //   if (debounceKeywords) {
+  //     const newBaseItems = baseItems.filter((item: Item) => {
+  //       return item.name.toLowerCase().includes(debounceKeywords.toLowerCase());
+  //     });
 
-      setItems(newBaseItems);
-    } else {
-      setItems(order?.items || []);
-    }  
-  }, [debounceKeywords, baseItems]);
+  //     setItems(newBaseItems);
+  //   } else {
+  //     setItems(order?.items || []);
+  //   }
+  // }, [debounceKeywords, baseItems]);
 
-  const handlePrinting = useReactToPrint({
-    content: () => billPrintRef.current,
-  });
+  // const handlePrinting = useReactToPrint({
+  //   content: () => billPrintRef.current,
+  // });
 
-  const totalQuantity = useMemo(() => {
-    const quantity = order.items.reduce((acc: number, cV: any) => {
-      return acc + cV.quantity;
-    }, 0);
+  // const totalQuantity = useMemo(() => {
+  //   const quantity = order.items.reduce((acc: number, cV: any) => {
+  //     return acc + cV.quantity;
+  //   }, 0);
 
-    return quantity;
-  }, [order]);
+  //   return quantity;
+  // }, [order]);
 
   const onClearNote = async (selectedOrder: Order) => {
     try {
@@ -183,9 +141,25 @@ const OrderDetails = ({
   //   }
   // };
 
+  const handleUpdateOrder = async (orderParam: any) => {
+    try {
+      const response = await onUpdateOrder(order.id, orderParam);
+
+      if (response?.data?.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to update order: ', error);
+      showNotification('error', error?.response?.data?.error || error);
+    }
+  };
+
   return (
     <>
-      <AddCustomAmount
+      {/* <AddCustomAmount
         open={isOpenAddCustomAmount}
         onClose={() => setIsOpenAddCustomAmount(false)}
         // addCustomAmount={handleAddCustomAmount}
@@ -194,7 +168,7 @@ const OrderDetails = ({
         }
         orderId={order.id}
         showNotification={showNotification}
-      />
+      /> */}
       <DeleteModal
         open={isOpenClearNote}
         handleCloseModal={() => setIsOpenClearNote(false)}
@@ -202,9 +176,9 @@ const OrderDetails = ({
         targetObj={order}
         message="Are you sure to clear note ?"
       />
-      <div style={{ display: 'none' }}>
+      {/* <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />
-      </div>
+      </div> */}
       <SingleFieldEdit
         open={isOpenEditNote}
         onClose={() => setIsOpenEditNote(false)}
@@ -222,7 +196,18 @@ const OrderDetails = ({
           maxHeight="80vh"
           overflow="auto"
         >
-          <Grid container alignItems="center">
+          <OrderView
+            defaultDeliveryDate={order?.deliveryDate}
+            defaultOrder={order}
+            defaultOrderedItems={order?.items}
+            items={clientItems?.data || []}
+            isModal
+            onSubmit={handleUpdateOrder}
+            role={USER_ROLE.ADMIN}
+            clientName={order?.user?.clientName || ''}
+            purpose={ORDER_USAGE_PURPOSE.ITEM}
+          />
+          {/* <Grid container alignItems="center">
             <Grid item xs={4}>
               <Typography variant="h6">#{order.id}</Typography>
             </Grid>
@@ -277,7 +262,7 @@ const OrderDetails = ({
               <Divider>Category Items</Divider>
             </Grid>
             <Grid item xs={12}>
-              <TextField 
+              <TextField
                 fullWidth
                 variant="filled"
                 label="Search"
@@ -285,21 +270,6 @@ const OrderDetails = ({
                 onChange={(e) => setSearchKeywords(e.target.value)}
               />
             </Grid>
-            {/* {
-              categoryItems.length > 0 && (
-                <Grid item xs={12}>
-                  <OrderDetailsTable 
-                    order={order}
-                    items={categoryItems}
-                    setItems={setCategoryItems}
-                    handleUpdateItem={handleUpdateItem}
-                    abilityToEdit
-                    role={USER_ROLE.ADMIN}
-                    showNotification={showNotification}
-                  />
-                </Grid>
-              )
-            } */}
             <Grid item textAlign="center" xs={12}>
               <OrderDetailsTable
                 order={order}
@@ -421,7 +391,7 @@ const OrderDetails = ({
                 </Typography>
               </Grid>
             </Grid>
-          </Grid>
+          </Grid> */}
         </BoxModal>
       </Modal>
     </>

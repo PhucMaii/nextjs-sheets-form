@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Order } from '../admin/orders/page';
-import { API_URL } from './enum';
+import { API_URL, USER_CATEGORIZED } from './enum';
 import { OrderedItems, ScheduledOrder } from './type';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -39,7 +39,7 @@ export const updateOrderedItems = async (
   updatedItem: OrderedItems,
   showNotification: any,
   isConvertToCustom: boolean = false,
-  itemId = null
+  itemId = null,
 ) => {
   try {
     let response: any;
@@ -114,7 +114,24 @@ export const checkIsPreOrderQualified = (scheduledOrder: ScheduledOrder) => {
   const totalPriceGt0 = scheduledOrder.totalPrice > 0;
   const hasItems = scheduledOrder.items.length > 0;
   const hasOrdered = scheduledOrder?.alreadyOrder;
-  const isInactive = scheduledOrder?.blocked;
+  const isBlocked = scheduledOrder?.blocked;
+  const isInactive = scheduledOrder?.user?.type === USER_CATEGORIZED.INACTIVE;
 
-  return totalPriceGt0 && hasItems && !hasOrdered && !isInactive;
+  return totalPriceGt0 && hasItems && !hasOrdered && !isInactive && !isBlocked;
+};
+
+export const onUpdateOrder = async (orderId: number, orderParam: Order) => {
+  try {
+    const response = await axios.put(API_URL.ORDERED_ITEMS, {
+      updatedItems: orderParam.items,
+      orderId,
+      note: orderParam.note,
+      deliveryDate: orderParam.deliveryDate,
+    });
+
+    return response;
+  } catch (error: any) {
+    console.log('There was an error: ', error);
+    throw new Error('There was an error: ' + error?.response?.data?.error);
+  }
 };

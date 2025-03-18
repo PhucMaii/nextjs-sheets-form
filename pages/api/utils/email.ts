@@ -1,4 +1,4 @@
-import { emailTransporter, yahooTransporter } from './transporter';
+import { emailTransporter, hotmailTransporter, yahooTransporter } from './transporter';
 import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
 import { UserType } from '@/app/utils/type';
@@ -29,6 +29,16 @@ const emailHandler = async (
         html: template,
       });
       return;
+    }
+
+    if (email.includes('@hotmail.com') || email.includes('@hotmail.com') || email.includes('@outlook.com')) {
+      await hotmailTransporter.sendMail({
+        from: process.env.NODEMAILER_EMAIL,
+        to: email,
+        subject: subject,
+        text: title,
+        html: template,
+      })
     }
 
     await emailTransporter.sendMail({
@@ -78,7 +88,12 @@ export const sendEmail = async (
     invoiceId,
   );
 
-  if (sendToAdmin) {
+  const isToAdmin =
+    process.env.NEXT_PUBLIC_CURRENT_STATE === 'development'
+      ? false
+      : sendToAdmin;
+
+  if (isToAdmin) {
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;
     await emailHandler(
       emailSendTo,

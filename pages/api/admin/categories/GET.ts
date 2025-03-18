@@ -9,7 +9,33 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const categories = await prisma.category.findMany({
       include: {
         users: true,
-        items: true,
+        items: {
+          include: {
+            inventoryItem: {
+              include: {
+                type: {
+                  include: {
+                    itemType_category: true,
+                  },
+                },
+              },
+            },
+            category: {
+              include: {
+                itemType_category: {
+                  include: {
+                    itemType: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        itemType_category: {
+          include: {
+            itemType: true,
+          },
+        },
       },
     });
 

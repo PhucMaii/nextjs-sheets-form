@@ -188,7 +188,7 @@ const ClientOrdersTable = ({
             onChange={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              updateStatus(order, e.target.value as ORDER_STATUS)
+              updateStatus(order, e.target.value as ORDER_STATUS);
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -219,7 +219,11 @@ const ClientOrdersTable = ({
             /> */}
             <Button
               color="error"
-              onClick={() => setOpenDelete(() => ({ order, open: true }))}
+              onClick={(e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setOpenDelete(() => ({ order, open: true }));
+              }}
             >
               Delete
             </Button>

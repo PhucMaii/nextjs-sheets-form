@@ -3,7 +3,6 @@ import { days } from '@/app/lib/constant';
 import { generateRecommendDate } from '@/app/utils/time';
 import { createOrder } from '@/pages/api/admin/orders/POST';
 import { getRouteScheduledOrders } from '@/pages/api/admin/scheduledOrders/POST';
-import { getTodayDate } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 
 describe('Pre Order', () => {
@@ -34,8 +33,6 @@ describe('Pre Order', () => {
 
     const scheduledOrders = await getRouteScheduledOrders(selectedRoute.id);
 
-    const { date, time } = getTodayDate();
-
     const newOrders = [];
 
     const minimizeOrders = scheduledOrders.slice(0, 2);
@@ -49,7 +46,6 @@ describe('Pre Order', () => {
         scheduledOrder.user,
         scheduledOrder.items,
         '01/01/3000',
-        `${date} ${time}`,
         'Admin - Admin Test',
         'Automated Test Order',
       );

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { ICategory, IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
@@ -24,9 +24,7 @@ import axios from 'axios';
 import AddItem from '../components/Modals/add/AddItem';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import EditCategory from '../components/Modals/edit/EditCategory';
-import { Reorder } from 'framer-motion';
 import Item from '../components/Reorder/Item';
-import { LoadingButton } from '@mui/lab';
 import { UPDATE_OPTION } from '../components/Modals/edit/EditItem';
 import { blueGrey } from '@mui/material/colors';
 import useNotification from '@/hooks/useNotification';
@@ -42,8 +40,8 @@ export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [items, setItems] = useState<IItem[]>([]);
-  const [isSavingArrangement, setIsSavingArrangement] =
-    useState<boolean>(false);
+  // const [isSavingArrangement, setIsSavingArrangement] =
+  //   useState<boolean>(false);
   const [isOpenAddCategory, setIsOpenAddCategory] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
@@ -267,42 +265,42 @@ export default function ItemPage() {
     }
   };
 
-  const saveItemArrangement = async () => {
-    try {
-      setIsSavingArrangement(true);
-      const newListWithId = items.map((item: IItem, index: number) => {
-        const newOrderId = baseItems[index].id;
-        return { ...item, id: newOrderId };
-      });
+  // const saveItemArrangement = async () => {
+  //   try {
+  //     setIsSavingArrangement(true);
+  //     const newListWithId = items.map((item: IItem, index: number) => {
+  //       const newOrderId = baseItems[index].id;
+  //       return { ...item, id: newOrderId };
+  //     });
 
-      const updatedIdList = newListWithId.map((item: IItem) => item.id);
+  //     const updatedIdList = newListWithId.map((item: IItem) => item.id);
 
-      const response = await axios.put(`${API_URL.ITEM}/reArrangement`, {
-        removedItemIdList: updatedIdList,
-        updatedItemList: newListWithId,
-      });
+  //     const response = await axios.put(`${API_URL.ITEM}/reArrangement`, {
+  //       removedItemIdList: updatedIdList,
+  //       updatedItemList: newListWithId,
+  //     });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
 
-        setIsSavingArrangement(false);
+  //       setIsSavingArrangement(false);
 
-        return;
-      }
+  //       return;
+  //     }
 
-      mutateItems();
+  //     mutateItems();
 
-      setIsSavingArrangement(false);
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('There was an error in rearrangement: ', error);
-      showNotification(
-        'error',
-        'There was an error in rearrangement: ' + error,
-      );
-      setIsSavingArrangement(false);
-    }
-  };
+  //     setIsSavingArrangement(false);
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('There was an error in rearrangement: ', error);
+  //     showNotification(
+  //       'error',
+  //       'There was an error in rearrangement: ' + error,
+  //     );
+  //     setIsSavingArrangement(false);
+  //   }
+  // };
 
   const switchCurrentCategory = (newCategory: Category) => {
     setCurrentCategory(newCategory);
@@ -418,7 +416,7 @@ export default function ItemPage() {
                 </IconButton>
               </Box>
             </Grid>
-            <Grid item xs={12} textAlign="right">
+            {/* <Grid item xs={12} textAlign="right">
               <LoadingButton
                 loading={isSavingArrangement}
                 onClick={saveItemArrangement}
@@ -428,29 +426,31 @@ export default function ItemPage() {
               >
                 Save Arrangement
               </LoadingButton>
-            </Grid>
+            </Grid> */}
           </Grid>
           {isFetching ? (
             <SplashScreen />
           ) : (
-            <Reorder.Group
-              values={items}
-              onReorder={setItems}
-              style={{ padding: 0 }}
-            >
+            // <Reorder.Group
+            //   values={items}
+            //   onReorder={setItems}
+            //   style={{ padding: 0 }}
+            // >
+            <Box mt={2}>
               {items.map((item: IItem) => {
                 return (
-                  <Reorder.Item
-                    key={item.id}
-                    value={item}
-                    style={{ listStyle: 'none' }}
-                    transition={{
-                      type: 'spring',
-                      damping: 10,
-                      stiffness: 300,
-                      mass: 0.5,
-                    }}
-                  >
+                  // <Reorder.Item
+                  //   key={item.id}
+                  //   value={item}
+                  //   style={{ listStyle: 'none' }}
+                  //   transition={{
+                  //     type: 'spring',
+                  //     damping: 10,
+                  //     stiffness: 300,
+                  //     mass: 0.5,
+                  //   }}
+                  // >
+                  <Fragment key={item.id}>
                     <Item
                       item={item}
                       handleUpdateItem={handleUpdateItem}
@@ -458,10 +458,11 @@ export default function ItemPage() {
                       showNotification={showNotification}
                     />
                     <Divider />
-                  </Reorder.Item>
+                  </Fragment>
+                  // </Reorder.Item>
                 );
               })}
-            </Reorder.Group>
+            </Box>
           )}
         </ShadowSection>
       </CategorySidebar>

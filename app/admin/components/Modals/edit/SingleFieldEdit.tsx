@@ -1,15 +1,20 @@
 import {
+  Box,
+  Button,
   Divider,
   FormControl,
   InputLabel,
   MenuItem,
   Modal,
+  OutlinedInput,
   Select,
-  TextField,
+  Typography,
+  useMediaQuery,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
+import { LoadingButton } from '@mui/lab';
 
 interface IProps {
   open: boolean;
@@ -20,6 +25,8 @@ interface IProps {
   menuList?: any[];
   renderField?: string;
   defaultValue?: any;
+  buttonLabel?: string;
+  inputProps?: any;
 }
 
 const SingleFieldEdit = ({
@@ -31,11 +38,21 @@ const SingleFieldEdit = ({
   renderField,
   menuList,
   defaultValue,
+  buttonLabel,
+  inputProps,
 }: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [value, setValue] = useState<any>(defaultValue ? defaultValue : null);
+  const [value, setValue] = useState<any>(
+    defaultValue !== undefined ? defaultValue : null,
+  );
 
-  console.log('re render');
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
+  useEffect(() => {
+    if (defaultValue) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue, open]);
 
   const handleSubmit = async () => {
     try {
@@ -43,6 +60,7 @@ const SingleFieldEdit = ({
       await handleUpdate(value);
 
       setIsLoading(false);
+      setValue(0);
     } catch (error: any) {
       console.log('Internal Server Error: ', error.response.data.error);
       setIsLoading(false);
@@ -52,13 +70,21 @@ const SingleFieldEdit = ({
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal>
-        <ModalHead
-          heading={title}
-          buttonLabel="UPDATE"
-          onClick={handleSubmit}
-          buttonProps={{ loading: isLoading }}
-          onClose={onClose}
-        />
+        {!smDown && (
+          <ModalHead
+            heading={title}
+            buttonLabel={buttonLabel ? buttonLabel : 'UPDATE'}
+            onClick={handleSubmit}
+            buttonProps={{ loading: isLoading }}
+            onClose={onClose}
+          />
+        )}
+
+        {smDown && (
+          <Typography variant="h4" fontWeight={500}>
+            {title}
+          </Typography>
+        )}
 
         <Divider sx={{ my: 2 }} />
 
@@ -84,16 +110,32 @@ const SingleFieldEdit = ({
           </FormControl>
         ) : (
           <FormControl fullWidth>
-            {/* <InputLabel htmlFor="text-field">{inputLabel}</InputLabel> */}
-            <TextField
+            <OutlinedInput
               fullWidth
               id="text-field"
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e: any) => setValue(e.target.value)}
               variant="outlined"
-              label={inputLabel}
+              // label={inputLabel}
+              {...inputProps}
             />
           </FormControl>
+        )}
+
+        {smDown && (
+          <Box display="flex" gap={1} alignItems="center" mt={2}>
+            <Button onClick={onClose} fullWidth variant="outlined">
+              Cancel
+            </Button>
+            <LoadingButton
+              fullWidth
+              loading={isLoading}
+              variant="contained"
+              onClick={handleSubmit}
+            >
+              {buttonLabel ? buttonLabel : 'UPDATE'}
+            </LoadingButton>
+          </Box>
         )}
       </BoxModal>
     </Modal>

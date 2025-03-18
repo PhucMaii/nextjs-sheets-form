@@ -16,6 +16,7 @@ import { LoadingButton } from '@mui/lab';
 import { FileClockIcon } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import ConfirmModal from '../components/Modals/ConfirmModal';
+// import Appearance from '../components/Inventory/Appearance';
 
 export default function InventoryPage() {
   const [isTrackingInventory, setIsTrackingInventory] =
@@ -23,24 +24,12 @@ export default function InventoryPage() {
   const [isOpenAddStockPurchased, setIsOpenAddStockPurchased] =
     useState<boolean>(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
-  // const [isOpenOrderPrompt, setIsOpenOrderPrompt] = useState<boolean>(false);
   const [isOpenTrackInventoryRecord, setIsOpenTrackInventoryRecord] =
     useState<boolean>(false);
   const [tabIndex, setTabIndex] = useState<number>(0);
 
-  // const currentDate = getTodayDate();
-  // const [hasPrompted, setHasPrompted] = useLocalStorage('hasPrompted', {hasPrompted: false, date: currentDate.date});
   const { showNotification, NotificationComp } = useNotification();
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
-
-  // useEffect(() => {
-  //   console.log({hasPrompted: hasPrompted.hasPrompted, date: hasPrompted.date});
-  //   if (!hasPrompted.hasPrompted || hasPrompted.date !== currentDate.date) {
-  //     setIsOpenOrderPrompt(true);
-  //   } else {
-  //     setIsOpenOrderPrompt(false);
-  //   }
-  // }, [hasPrompted]);
 
   const handleTrackInventory = async () => {
     try {
@@ -62,21 +51,8 @@ export default function InventoryPage() {
     }
   };
 
-  // const handlePreOrderForBSKing = (preOrderForm: any) => {
-  //   // Pre order form format {name: quantity}
-  //   for (const item of Object.keys(preOrderForm)) {
-  //     const quantity = preOrderForm[item];
-
-  //     const currentTime = getTodayDate();
-  //     localStorage.setItem(item, JSON.stringify({preOrderQuantity: quantity, ...currentTime}));
-  //   }
-  //   setHasPrompted({hasPrompted: true, date: currentDate.date});
-  //   setIsOpenOrderPrompt(false);
-  // }
-
   return (
-    <Sidebar>
-      {/* <BSOrderPrompt open={isOpenOrderPrompt} onClose={() => setIsOpenOrderPrompt(false)} handlePreOrderForBSKing={handlePreOrderForBSKing}/> */}
+    <Sidebar overflow="auto">
       <AddStockPurchased
         open={isOpenAddStockPurchased}
         onClose={() => setIsOpenAddStockPurchased(false)}
@@ -131,7 +107,7 @@ export default function InventoryPage() {
         <Tab label="Order Stock" value={1} />
       </Tabs>
 
-      <ShadowSection>
+      <ShadowSection sx={{ overflow: 'scroll', width: '100%' }}>
         {tabIndex === 0 ? (
           <StockItems
             showNotification={showNotification}
@@ -142,6 +118,7 @@ export default function InventoryPage() {
             openAddStockPurchased={() => setIsOpenAddStockPurchased(true)}
             showNotification={showNotification}
           />
+          // <Appearance types={inventoryItems?.types || []}/>
         )}
       </ShadowSection>
     </Sidebar>

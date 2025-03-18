@@ -8,7 +8,6 @@ import { Order } from '../../orders/page';
 import { BoxModal } from './styled';
 import { primary } from '@/theme/color';
 import OrderAccordion from '../OrderAccordion';
-import { OrderedItems } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
   orders: Order[];
@@ -16,11 +15,6 @@ interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
   selectedOrders: Order[];
   handleSelectOrder: (e: any, targetOrder: Order) => void;
-  handleUpdateItem: (
-    orderTotalPrice: number,
-    order: Order,
-    updatedItem: OrderedItems,
-  ) => Promise<void>;
   mutateOrders: any;
 }
 export default function UnsettledOrders({
@@ -31,7 +25,6 @@ export default function UnsettledOrders({
   showNotification,
   handleSelectOrder,
   selectedOrders,
-  handleUpdateItem,
   mutateOrders,
 }: IProps) {
   return (
@@ -75,7 +68,6 @@ export default function UnsettledOrders({
               showNotification={showNotification}
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
-              handleUpdateItem={handleUpdateItem}
               mutateOrders={mutateOrders}
             />
           ))}

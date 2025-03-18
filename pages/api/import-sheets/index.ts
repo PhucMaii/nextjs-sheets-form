@@ -27,7 +27,6 @@ interface IBody {
   items: any[];
   createdBy: USER_ROLE;
   isForceOrder?: boolean;
-  createdAt: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -45,12 +44,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       items,
       createdBy,
       isForceOrder,
-      createdAt,
     }: IBody = req.body;
 
     console.log('body', req.body);
 
-    if (!deliveryDate || !items || !createdAt) {
+    if (!deliveryDate || !items) {
       return res.status(400).json({
         error: 'Missing required fields. Please refresh and try again',
       });
@@ -98,7 +96,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-
     // Check if any item quantity is decimal number
     for (const item of items) {
       if (item.quantity % 1 !== 0) {
@@ -107,7 +104,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       }
     }
-
 
     const formattedCreatedBy = await getCreatedBy(req, res, createdBy);
 
@@ -151,11 +147,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           createdBy === USER_ROLE.SUPER_ADMIN) &&
         isForceOrder
       ) {
+        const itemsWithNo0 = items.filter(
+          (item: any) => item.quantity > 0,
+        )
         const newOrder: any = await createOrder(
           existingUser,
-          items,
+          itemsWithNo0,
           deliveryDate,
-          createdAt,
           formattedCreatedBy,
           note,
         );
@@ -193,10 +191,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       }
 
+      const itemsWithNo0 = items.filter((item: any) => item.quantity > 0)
       await overrideOrder(
         existingUser,
         userOrder.id,
-        items,
+        itemsWithNo0,
         note,
         formattedCreatedBy,
       );
@@ -208,11 +207,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // await createOrder(existingUser, items, deliveryDate,
     //   formattedCreatedBy, note
     // )
+    const itemsWithNo0 = items.filter(
+      (item: any) => item.quantity > 0,
+    )
     const newOrder: any = await createOrder(
       existingUser,
-      items,
+      itemsWithNo0,
       deliveryDate,
-      createdAt,
       formattedCreatedBy,
       note,
     );

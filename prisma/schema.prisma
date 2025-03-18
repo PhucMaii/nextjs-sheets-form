@@ -45,13 +45,15 @@ model User {
   unavailableDayRange DayRange[]
   printStatements     ClientStatement[]
   cart                Cart[]
+  cheques             Cheque[]
 }
 
 model Category {
-  id    Int    @id @default(autoincrement())
-  name  String @unique @db.VarChar(255)
-  users User[]
-  items Item[]
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique @db.VarChar(255)
+  users             User[]
+  items             Item[]
+  itemType_category ItemType_Category[]
 }
 
 model SubCategory {
@@ -96,7 +98,7 @@ model OrderedItems {
   inventoryItemId  Int?
   isCustomAmount   Boolean?
   cost             Float?
-  profit            Float?
+  profit           Float?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -280,6 +282,10 @@ model InventoryItem {
   name      String
   hasPST    Boolean?
   hasGST    Boolean?
+  typeId    Int?
+  color     String?
+  image     String?
+  indexPos  Int?
   createdAt String
   createdBy String
 
@@ -288,6 +294,7 @@ model InventoryItem {
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
+  type         ItemType?        @relation(fields: [typeId], references: [id])
 }
 
 model ItemPreference {
@@ -317,10 +324,25 @@ model ItemType {
   id        Int     @id @default(autoincrement())
   name      String  @unique
   icon      String?
+  priority  Int?
+  rows      Int?
   createdAt String?
   createdBy String?
 
-  itemPreferences ItemPreference[]
+  itemPreferences   ItemPreference[]
+  inventoryItems    InventoryItem[]
+  itemType_category ItemType_Category[]
+}
+
+model ItemType_Category {
+  itemTypeId Int
+  categoryId Int
+  priority   Int
+
+  itemType ItemType @relation(fields: [itemTypeId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([itemTypeId, categoryId])
 }
 
 model VendorItem {
@@ -374,6 +396,21 @@ model Action {
   date        String
   createdAt   String
   createdBy   String?
+}
+
+model Cheque {
+  id      Int     @id @default(autoincrement())
+  fileKeyFront  String
+  fileKeyBack   String?
+  month        String
+  year         String
+  chequeNumber  String?
+  amount        Float
+  createdAt   String
+  createdBy   String
+  userId   Int
+
+  user     User @relation(fields: [userId], references: [id])
 }
 
 model ClientStatement {

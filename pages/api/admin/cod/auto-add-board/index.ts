@@ -366,7 +366,7 @@ export const insertOrdersToSelectedBoards = async (
             in: clientIds,
           },
           deliveryDate: {
-            in: dayList,
+            in: [...dayList, date],
           },
           status: {
             in: [

@@ -1,5 +1,6 @@
 import { blue, blueGrey, green, red, yellow } from '@mui/material/colors';
 import { alpha } from '@mui/material/styles';
+import { ColorService } from 'react-color-palette';
 
 const withAlphas = (color: any) => {
   return {
@@ -98,3 +99,7 @@ export const infoBackground = blue[50];
 export const greyBackground = blueGrey[700];
 
 export const primaryColor = blue[800];
+
+export const handleResetColor = (color: string) => {
+  return ColorService.convert('hex', color);
+};
