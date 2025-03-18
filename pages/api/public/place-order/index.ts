@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createOrder } from '../../admin/orders/POST';
-import { checkOrderDeliveryDateValid, getTodayDate } from '../../utils/date';
+import { checkOrderDeliveryDateValid } from '../../utils/date';
 import { createGuest } from '../create-guest';
 import { sendEmail } from '../../utils/email';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
@@ -40,12 +40,10 @@ export default async function handler(
 
     let user;
     if (!userId && !guestSessionId) {
-      user = await createGuest(
-        {
-          ...req.body.client,
-          type: USER_CATEGORIZED.GUEST
-        }
-      );
+      user = await createGuest({
+        ...req.body.client,
+        type: USER_CATEGORIZED.GUEST,
+      });
     } else {
       // Verify User
       const queryUser = userId
@@ -58,7 +56,7 @@ export default async function handler(
       if (!user) {
         user = await createGuest({
           ...req.body.client,
-          type: USER_CATEGORIZED.GUEST
+          type: USER_CATEGORIZED.GUEST,
         });
       }
     }
@@ -114,12 +112,12 @@ export default async function handler(
     const formattedItems = convertCartItemsToOrderItems(cartItems);
 
     // Create order
-    const { date, time } = getTodayDate();
+    // const { date, time } = getTodayDate();
     const newOrder = await createOrder(
       user,
       formattedItems,
       deliveryDate,
-      `${date} ${time}`,
+      // `${date} ${time}`,
       `Guest - ${user.clientId}`,
       note,
     );
@@ -167,4 +165,4 @@ export const convertCartItemsToOrderItems = (cartItems: any) => {
   });
 
   return formattedItems;
-}
+};

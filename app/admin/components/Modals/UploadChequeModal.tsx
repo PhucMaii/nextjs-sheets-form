@@ -50,12 +50,17 @@ export default function UploadChequeModal({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleUpload = async () => {
-    console.log(client, 'client')
+    console.log(client, 'client');
     if (!client) {
       showNotification('error', 'Please select a client');
       return;
-    };
-    if (!cheque.front || chequeData.amount === 0 || !chequeData.month || !chequeData.year) {
+    }
+    if (
+      !cheque.front ||
+      chequeData.amount === 0 ||
+      !chequeData.month ||
+      !chequeData.year
+    ) {
       showNotification('error', 'Please fill all required the fields');
       return;
     }
@@ -66,7 +71,7 @@ export default function UploadChequeModal({
         ...chequeData,
         userId: client.id,
         fileKeyFront: cheque.front,
-        fileKeyBack: cheque.back
+        fileKeyBack: cheque.back,
       });
 
       if (response.data.error) {
@@ -81,7 +86,7 @@ export default function UploadChequeModal({
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -90,7 +95,7 @@ export default function UploadChequeModal({
           heading="Upload Cheque"
           buttonLabel="UPLOAD"
           onClick={handleUpload}
-          buttonProps={{loading: isLoading}}
+          buttonProps={{ loading: isLoading }}
           onClose={onClose}
         />
 
@@ -98,9 +103,7 @@ export default function UploadChequeModal({
 
         <Box display="flex" flexDirection="column" gap={2} mb={2}>
           <Typography>Front of cheque</Typography>
-          {cheque?.front && (
-            <DisplayFile fileKey={cheque.front} />
-          )}
+          {cheque?.front && <DisplayFile fileKey={cheque.front} />}
           <FileUpload
             showNotification={showNotification}
             fileName={`${month}-${year}-${client?.clientId}_front`}
@@ -114,9 +117,7 @@ export default function UploadChequeModal({
           />
 
           <Typography>Back of cheque</Typography>
-          {cheque?.back && (
-            <DisplayFile fileKey={cheque.back} />
-          )}
+          {cheque?.back && <DisplayFile fileKey={cheque.back} />}
           <FileUpload
             showNotification={showNotification}
             fileName={`${month}-${year}-${client?.clientId}_back`}

@@ -136,4 +136,4 @@ export const disableChristmasAndNewYear = (date: Dayjs) => {
 
 export const convertToMonthText = (month: number) => {
   return months[month];
-}
+};

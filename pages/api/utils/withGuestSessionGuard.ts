@@ -19,7 +19,12 @@ export const withGuestSessionGuard =
       );
 
       if (!isGuestSessionValid) {
-        return res.status(401).json({ error: 'Your session is not valid currently. Please try again later' });
+        return res
+          .status(401)
+          .json({
+            error:
+              'Your session is not valid currently. Please try again later',
+          });
       }
 
       return await handler(req, res);

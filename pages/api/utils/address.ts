@@ -12,5 +12,5 @@ export const verifyDeliveryAddress = (lat: number, lng: number) => {
     return false;
   }
 
-  return {ok: true, distance: distanceToHome};
+  return { ok: true, distance: distanceToHome };
 };

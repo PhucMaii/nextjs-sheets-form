@@ -49,7 +49,11 @@ export default function AddItemIntoType({
     typeId,
   });
 
-  const { selectedImage, renderImageGallery } = useImageGallery('products', '', '100%');
+  const { selectedImage, renderImageGallery } = useImageGallery(
+    'products',
+    '',
+    '100%',
+  );
 
   const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
     useEditUnit(
@@ -306,10 +310,12 @@ export default function AddItemIntoType({
           )}
           <FileUpload
             showNotification={showNotification}
-            onUploadImageUI={(fileKey: string) => setPromptedItem({
-              ...promptedItem,
-              image: fileKey,
-            })}
+            onUploadImageUI={(fileKey: string) =>
+              setPromptedItem({
+                ...promptedItem,
+                image: fileKey,
+              })
+            }
             fileName={promptedItem.name + Date.now()}
             uploadLocation={`products/${promptedItem.name}`}
           />

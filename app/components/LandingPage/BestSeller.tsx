@@ -18,7 +18,7 @@ import useNotification from '@/hooks/useNotification';
 
 export default function BestSeller() {
   const [bestSeller, setBestSeller] = useState<IItemPreference[]>([]);
-  const [weeklySpecials, setWeeklySpecials] = useState<IItemPreference[]>([]);
+  // const [weeklySpecials, setWeeklySpecials] = useState<IItemPreference[]>([]);
 
   const { showNotification, NotificationComp } = useNotification();
 
@@ -34,7 +34,7 @@ export default function BestSeller() {
         }
 
         setBestSeller(response.data.bestSellerItems);
-        setWeeklySpecials(response.data.weeklySpecials);
+        // setWeeklySpecials(response.data.weeklySpecials);
       } catch (error: any) {
         console.log('Internal Server Error: ', error);
       }
@@ -66,8 +66,8 @@ export default function BestSeller() {
           }}
         >
           <Grid item xs={12}>
-            <Typography variant="h3" fontWeight="regular">
-              Shop our Best Sellers
+            <Typography variant="h3" fontWeight="medium">
+              Shop our Best Sellers 📈
             </Typography>
             <Swiper
               modules={[Navigation, Pagination, Scrollbar, A11y]}
@@ -101,8 +101,8 @@ export default function BestSeller() {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h3" fontWeight="regular">
-              Weekly Specials
+            <Typography variant="h3" fontWeight="medium">
+              Weekly Specials 💸
             </Typography>
             <Swiper
               modules={[Navigation, Pagination, Scrollbar, A11y]}
@@ -112,8 +112,7 @@ export default function BestSeller() {
               slidesPerView={5}
               style={{ padding: '20px' }}
             >
-              {weeklySpecials &&
-                weeklySpecials?.map((item: any, index: number) => {
+              {bestSeller && bestSeller?.map((item: any, index: number) => {
                   return (
                     <SwiperSlide>
                       <ProductListing

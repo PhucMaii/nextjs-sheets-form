@@ -249,7 +249,11 @@ export default function ItemPage() {
             }}
           >
             <img
-              src={itemData?.image ? generateImgUrl(itemData?.image) : '/images/landing/image_not_found.jpeg'}
+              src={
+                itemData?.image
+                  ? generateImgUrl(itemData?.image)
+                  : '/images/landing/image_not_found.jpeg'
+              }
               alt={itemData?.inventoryItem.name}
               style={{
                 maxWidth: '100%',

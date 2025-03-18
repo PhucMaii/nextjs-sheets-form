@@ -18,15 +18,15 @@ export const Providers = ({ children }: Props) => {
     <SessionProvider>
       <AuthenGuard>
         <DragDropProvider>
-        <Provider store={store}>
-          <SWRConfig
-            value={{
-              fetcher: (url: string) => axios.get(url).then((r) => r.data),
-            }}
-          >
-            <MaintenanceProvider>{children}</MaintenanceProvider>
-          </SWRConfig>
-        </Provider>
+          <Provider store={store}>
+            <SWRConfig
+              value={{
+                fetcher: (url: string) => axios.get(url).then((r) => r.data),
+              }}
+            >
+              <MaintenanceProvider>{children}</MaintenanceProvider>
+            </SWRConfig>
+          </Provider>
         </DragDropProvider>
       </AuthenGuard>
     </SessionProvider>

@@ -123,9 +123,11 @@ async function main() {
   });
 
   for (const type of types) {
-    const numberOfRows = Math.ceil(type.inventoryItems[type.inventoryItems.length - 1]?.indexPos || 0 / 2);
+    const numberOfRows = Math.ceil(
+      type.inventoryItems[type.inventoryItems.length - 1]?.indexPos || 0 / 2,
+    );
 
-    console.log({type, numberOfRows});
+    console.log({ type, numberOfRows });
     if (numberOfRows === 0) {
       continue;
     }
@@ -140,7 +142,6 @@ async function main() {
         },
       });
     }
-
   }
 }
 

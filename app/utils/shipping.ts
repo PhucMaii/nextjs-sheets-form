@@ -9,7 +9,12 @@ export const calculateShippingFee = (distance: number, profit: number) => {
 
   const costToSalesRatio = shippingCost / profit;
 
-  console.log({shippingCost, costToSalesRatio, shippingFee: profit * costToSalesRatio, profit})
+  console.log({
+    shippingCost,
+    costToSalesRatio,
+    shippingFee: profit * costToSalesRatio,
+    profit,
+  });
 
   return profit * costToSalesRatio;
 };

@@ -17,11 +17,11 @@ export default function TrustedCard({ trusted }: Props) {
         borderColor: 'lightgrey',
         borderRadius: 2,
         padding: 2,
-        width: 500,
+        // width: 500,
         minHeight: 200,
       }}
     >
-      <Grid item xs={3}>
+      <Grid item xs={2}>
         <Box
           display="flex"
           justifyContent="center"
@@ -36,7 +36,7 @@ export default function TrustedCard({ trusted }: Props) {
           <trusted.icon style={{ width: 40, height: 40 }} />
         </Box>
       </Grid>
-      <Grid item xs={8}>
+      <Grid item xs={9}>
         <Box display="flex" flexDirection="column" gap={3}>
           <Typography variant="h4" fontWeight="bold">
             {trusted.title}

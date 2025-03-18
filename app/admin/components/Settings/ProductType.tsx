@@ -1,8 +1,4 @@
-import {
-  Box,
-  Button,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import React from 'react';
 import AddProductType from '../Modals/add/AddProductType';
 import useNotification from '@/hooks/useNotification';
@@ -55,7 +51,11 @@ export default function ProductType() {
       {/* Category Listing */}
       <Box display="flex" gap={3} flexWrap="wrap" alignItems="center" mt={3}>
         {types ? (
-          <ProductTypeTable types={types.data} showNotification={showNotification} />
+          <ProductTypeTable
+            types={types.data}
+            showNotification={showNotification}
+          />
+        ) : (
           // types.data.map((type: any, index: number) => {
           //   const IconComponent: any = type?.icon
           //     ? LucideIcons[type.icon as keyof typeof LucideIcons]
@@ -166,7 +166,6 @@ export default function ProductType() {
           //     </Box>
           //   );
           // })
-        ) : (
           <ErrorComponent errorText="No categories found" />
         )}
       </Box>

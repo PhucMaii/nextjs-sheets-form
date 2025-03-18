@@ -1,4 +1,8 @@
-import { emailTransporter, hotmailTransporter, yahooTransporter } from './transporter';
+import {
+  emailTransporter,
+  hotmailTransporter,
+  yahooTransporter,
+} from './transporter';
 import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
 import { UserType } from '@/app/utils/type';
@@ -31,14 +35,18 @@ const emailHandler = async (
       return;
     }
 
-    if (email.includes('@hotmail.com') || email.includes('@hotmail.com') || email.includes('@outlook.com')) {
+    if (
+      email.includes('@hotmail.com') ||
+      email.includes('@hotmail.com') ||
+      email.includes('@outlook.com')
+    ) {
       await hotmailTransporter.sendMail({
         from: process.env.NODEMAILER_EMAIL,
         to: email,
         subject: subject,
         text: title,
         html: template,
-      })
+      });
     }
 
     await emailTransporter.sendMail({
@@ -199,7 +207,7 @@ export const sendWelcomeEmail = async (guest: User) => {
     'Welcome to Supreme Sprouts',
     generateWelcomeEmail(guest.clientName),
   );
-}
+};
 
 export const generateWelcomeEmail = (clientName: string) => {
   return `

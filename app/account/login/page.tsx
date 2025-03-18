@@ -184,7 +184,9 @@ export default function LoginPage() {
               </form>
             </Paper>
             <Box display="flex" justifyContent="flex-start">
-              <Link href="/account/application-form">New Customer? Apply here</Link>
+              <Link href="/account/application-form">
+                New Customer? Apply here
+              </Link>
             </Box>
           </Box>
         </FadeIn>

@@ -63,7 +63,7 @@ export default async function handler(
 
         const orderHas0Quantity = order.items.every(
           (item) => item.quantity < 1,
-        )
+        );
 
         // return !hasItems || !isSubtotalMatch;
         if (!hasItems) {

@@ -361,10 +361,12 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
             <FileUpload
               // item={promptedItem}
               showNotification={showNotification}
-              onUploadImageUI={(fileKey: string) => setPromptedItem({
-                ...promptedItem,
-                image: fileKey,
-              })}
+              onUploadImageUI={(fileKey: string) =>
+                setPromptedItem({
+                  ...promptedItem,
+                  image: fileKey,
+                })
+              }
               fileName={promptedItem.name + Date.now()}
               uploadLocation={`products/${promptedItem?.name}/`}
             />

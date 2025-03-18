@@ -7,7 +7,6 @@ const useImageGallery = (
   from: string = '',
   initialSelectedImage: string = '',
   width: string | number,
-
 ) => {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] =

@@ -72,7 +72,10 @@ const drawerWidth = 250;
 
 export default function Navbar() {
   // const [cId, setCId] = useLocalStorage('cartId', cartId || '');
-  const [guestSession, setGuestSession, isInitialized] = useLocalStorage('guest-session', {});
+  const [guestSession, setGuestSession, isInitialized] = useLocalStorage(
+    'guest-session',
+    {},
+  );
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
 
@@ -361,7 +364,7 @@ export default function Navbar() {
             }}
           >
             <UserIcon style={{ width: 30, height: 30 }} />
-            <Box sx={{ display: "flex", alignItems: "center", height: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', height: 0 }}>
               <Typography
                 variant="body1"
                 sx={{

@@ -68,7 +68,7 @@ const ProductPage = () => {
       }
       const newDisplayItems = onSearchItems(displayItems || [], queryParams, [
         'inventoryItem.name',
-        'inventoryItem.type.name'
+        'inventoryItem.type.name',
       ]);
       setDisplayItems(newDisplayItems);
     } else {
@@ -195,7 +195,7 @@ const ProductPage = () => {
         display="flex"
         alignItems={smDown ? 'flex-end' : 'flex-start'}
         gap={2}
-        sx={{ overflowX: 'auto', whiteSpace: 'nowrap', }}
+        sx={{ overflowX: 'auto', whiteSpace: 'nowrap' }}
       >
         <Button
           onClick={() => setSelectedType({ id: 0, name: 'All' })}
@@ -379,7 +379,7 @@ const ProductPage = () => {
           sx={{
             maxWidth: maxWidth,
             mx: 'auto',
-            pt: 4
+            pt: 4,
           }}
         >
           {renderProductTypes()}

@@ -10,10 +10,9 @@ import {
 import React from 'react';
 import { useSelector } from 'react-redux';
 import CheckoutItemRow from './CheckoutItemRow';
-import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps {
-  showNotification: ShowNotificationType;
+  showNotification: any;
 }
 
 export default function CartItemTable({ showNotification }: IProps) {

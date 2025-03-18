@@ -492,7 +492,7 @@ export default function ClientsPage() {
         ) : selectedTab === 1 ? (
           <AdminTable admins={userList} showNotification={showNotification} />
         ) : selectedTab === 2 ? (
-          <GuestTable guests={userList} showNotification={showNotification}/>
+          <GuestTable guests={userList} showNotification={showNotification} />
         ) : null}
       </ShadowSection>
       {/* </AuthenGuard> */}

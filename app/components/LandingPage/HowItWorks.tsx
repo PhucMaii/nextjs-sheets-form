@@ -18,9 +18,10 @@ export default function HowItWorks() {
         </Typography>
 
         <Grid container columnGap={4} rowGap={4} mt={4}>
-          {howItWorksList.map((hiw: HowItWorksType) => {
+          {howItWorksList.map((hiw: HowItWorksType, index: number) => {
             return (
               <Grid
+                key={index}
                 item
                 xs={12}
                 md={5.6}

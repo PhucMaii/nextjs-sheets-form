@@ -128,5 +128,4 @@ export const reasonList = [
   },
 ];
 
-
-export const bestSellerItemIds = [10, 24, 11, 21, 13]
+export const bestSellerItemIds = [10, 24, 11, 21, 13];

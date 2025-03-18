@@ -30,15 +30,15 @@ export default function AboutPage() {
             Supreme Sprouts LTD.
           </Typography>
           <Typography
-            sx={{fontWeight: 'normal' }}
+            sx={{ fontWeight: 'normal' }}
             textAlign="center"
             variant="h5"
           >
             Freshness, Quality, and Variety
           </Typography>
           <Typography sx={{ mt: 2, opacity: 0.8 }} textAlign="center">
-            We are serving Greater of Vancouver, Burnaby, Richmond, Coquitiam, Langley,
-            Surrey, and surrounding areas every day of the week.
+            We are serving Greater of Vancouver, Burnaby, Richmond, Coquitiam,
+            Langley, Surrey, and surrounding areas every day of the week.
           </Typography>
         </Box>
       </Box>

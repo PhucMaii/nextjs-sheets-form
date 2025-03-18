@@ -15,7 +15,7 @@ export default async function handler(req: any, res: any) {
         inventoryItem: {
           include: {
             type: true,
-          }
+          },
         },
       },
       orderBy: {

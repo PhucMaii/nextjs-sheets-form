@@ -260,7 +260,9 @@ export default function ApplicatinForm() {
             </LoadingButton>
 
             <Link href="/account/login">
-              <Typography textAlign="center">Already have an account? Login here</Typography>
+              <Typography textAlign="center">
+                Already have an account? Login here
+              </Typography>
             </Link>
           </Box>
         </ShadowSection>

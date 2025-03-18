@@ -106,7 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const shippingFee = calculateShippingFee(
       isAddressValid.distance,
-      totalProfit
+      totalProfit,
     );
     console.log(shippingFee, 'shipping fee');
 
@@ -154,7 +154,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         cartId: String(cartId),
         deliveryDate: String(deliveryDate),
         guestSessionId: String(cart?.guestSessionId) || '',
-        clientData: JSON.stringify({...clientData, deliveryAddress: addressLatAndLng.fullName}),
+        clientData: JSON.stringify({
+          ...clientData,
+          deliveryAddress: addressLatAndLng.fullName,
+        }),
       },
     });
 
@@ -170,7 +173,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withGuestSessionGuard(handler);
 
-
 const calculateCartProfit = (items: any[]) => {
   // const orderItems = convertCartItemsToOrderItems(items);
   // console.log({orderItems, items}, 'order items');
@@ -180,7 +182,7 @@ const calculateCartProfit = (items: any[]) => {
     profit += (item.price - item.inventoryUnit.unitPrice) * item.quantity;
   }
 
-  console.log(profit)
+  console.log(profit);
 
   return profit;
-}
+};

@@ -1,6 +1,6 @@
 import { UserType } from '@/app/utils/type';
 import {
-    AlertColor,
+  AlertColor,
   Button,
   Paper,
   Table,
@@ -94,7 +94,5 @@ const GuestTable = ({ guests, showNotification }: IProps) => {
 };
 
 export default memo(GuestTable, (prev, next) => {
-    return (
-        Object.is(prev.guests, next.guests)
-    )
+  return Object.is(prev.guests, next.guests);
 });

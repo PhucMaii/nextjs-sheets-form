@@ -23,7 +23,7 @@ export default function ProductListing({
   product,
   onClick,
   showNotification,
-  containerStyle
+  containerStyle,
 }: IProps) {
   // const [cartId, setCartId] = useLocalStorage('cartId', '');
 

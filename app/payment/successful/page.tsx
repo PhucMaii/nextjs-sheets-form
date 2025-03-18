@@ -5,16 +5,19 @@ import React from 'react';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { successBackground, successColor } from '@/theme/color';
 import { grey } from '@mui/material/colors';
-import { landingPagePrimaryColor, landingPageSecondaryColor } from '@/constant/landingPage';
+import {
+  landingPagePrimaryColor,
+  landingPageSecondaryColor,
+} from '@/constant/landingPage';
 import { useRouter } from 'next/navigation';
 
 export default function PaymentSuccessful() {
-    const router = useRouter();
+  const router = useRouter();
 
-    const proceedToHome = () => {
-        router.push('/');
-    }
-    
+  const proceedToHome = () => {
+    router.push('/');
+  };
+
   return (
     <NavbarWrapper>
       <Box

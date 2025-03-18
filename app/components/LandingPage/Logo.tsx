@@ -1,7 +1,13 @@
 import Image from 'next/image';
 import React from 'react';
 
-export default function Logo({width, height}: {width?: number; height?: number}) {
+export default function Logo({
+  width,
+  height,
+}: {
+  width?: number;
+  height?: number;
+}) {
   return (
     <Image
       src={'/supremesproutsIcon.png'}

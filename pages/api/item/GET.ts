@@ -58,7 +58,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       orderBy: [
         {
-          inventoryItem: { 
+          inventoryItem: {
             type: {
               priority: 'asc',
             },

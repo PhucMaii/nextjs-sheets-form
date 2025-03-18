@@ -21,7 +21,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
       include: {
         Orders: true,
-      }
+      },
     });
 
     console.log(guest, 'guest');

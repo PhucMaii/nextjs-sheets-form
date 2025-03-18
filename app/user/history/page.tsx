@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SplashScreen } from '../../../HOC/AuthenGuard';
 import Sidebar from '../../components/Sidebar';
 import {
@@ -31,11 +31,10 @@ import {
   successColor,
   warningColor,
 } from '../../../theme/color';
-import { blue, blueGrey } from '@mui/material/colors';
+import { blue } from '@mui/material/colors';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ErrorComponent from '../../admin/components/ErrorComponent';
-import SelectDateRange from '@/app/admin/components/Select/SelectDateRange';
 import { SWRFetchData } from '../../utils/db';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import OverviewCard from '../../admin/components/OverviewCard/OverviewCard';

@@ -147,9 +147,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           createdBy === USER_ROLE.SUPER_ADMIN) &&
         isForceOrder
       ) {
-        const itemsWithNo0 = items.filter(
-          (item: any) => item.quantity > 0,
-        )
+        const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
         const newOrder: any = await createOrder(
           existingUser,
           itemsWithNo0,
@@ -191,7 +189,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       }
 
-      const itemsWithNo0 = items.filter((item: any) => item.quantity > 0)
+      const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
       await overrideOrder(
         existingUser,
         userOrder.id,
@@ -207,9 +205,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // await createOrder(existingUser, items, deliveryDate,
     //   formattedCreatedBy, note
     // )
-    const itemsWithNo0 = items.filter(
-      (item: any) => item.quantity > 0,
-    )
+    const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
     const newOrder: any = await createOrder(
       existingUser,
       itemsWithNo0,

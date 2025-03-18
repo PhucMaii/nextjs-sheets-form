@@ -198,12 +198,7 @@ export default function OrderForm() {
         </Tabs>
 
         {tabIdx === 0 ? (
-          <Box
-            display="flex"
-            flexDirection="column"
-            gap={2}
-            width="100%"
-          >
+          <Box display="flex" flexDirection="column" gap={2} width="100%">
             <Box display="flex" justifyContent="flex-end">
               <TourStartButton />
             </Box>
