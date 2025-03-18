@@ -285,6 +285,7 @@ model InventoryItem {
   typeId    Int?
   color     String?
   image     String?
+  isPromotion Boolean?
   indexPos  Int?
   createdAt String
   createdBy String

@@ -16,12 +16,14 @@ interface IProps {
   product: IItemPreference;
   showNotification: (type: AlertColor, message: string) => void;
   onClick?: () => void;
+  containerStyle?: any;
 }
 
 export default function ProductListing({
   product,
   onClick,
   showNotification,
+  containerStyle
 }: IProps) {
   // const [cartId, setCartId] = useLocalStorage('cartId', '');
 
@@ -75,8 +77,8 @@ export default function ProductListing({
       gap={1}
       sx={{
         height: '100%',
-        maxWidth: '400px',
-        minWidth: '120px',
+        maxWidth: '300px',
+        minWidth: '250px',
         cursor: 'pointer',
         p: 2,
         borderRadius: 1,
@@ -86,6 +88,7 @@ export default function ProductListing({
       }}
       position="relative"
       onClick={onClick}
+      style={containerStyle}
     >
       <img
         src={

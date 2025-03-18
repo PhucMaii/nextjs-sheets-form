@@ -195,7 +195,7 @@ const ProductPage = () => {
         display="flex"
         alignItems={smDown ? 'flex-end' : 'flex-start'}
         gap={2}
-        sx={{ overflowX: 'auto', whiteSpace: 'nowrap' }}
+        sx={{ overflowX: 'auto', whiteSpace: 'nowrap', }}
       >
         <Button
           onClick={() => setSelectedType({ id: 0, name: 'All' })}
@@ -256,7 +256,7 @@ const ProductPage = () => {
                 backgroundColor: 'white',
                 color: selectedType?.id === type.id ? green[800] : 'black',
                 boxShadow: 'none',
-                minWidth: 150,
+                minWidth: 200,
                 '&:hover': {
                   color: green[500],
                   backgroundColor: 'white',
@@ -379,6 +379,7 @@ const ProductPage = () => {
           sx={{
             maxWidth: maxWidth,
             mx: 'auto',
+            pt: 4
           }}
         >
           {renderProductTypes()}

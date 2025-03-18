@@ -1,4 +1,3 @@
-import { bestSellerItemIds } from "@/constant/landingPage";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -12,14 +11,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const bestSellerItems = await prisma.itemPreference.findMany({
             where: {
-                id: {
-                    in: bestSellerItemIds
+                isBestSeller: true,
+            }
+        });
+
+        const weeklySpecials = await prisma.itemPreference.findMany({
+            where: {
+                inventoryItem: {
+                    isPromotion: true
                 }
             }
         });
 
         return res.status(200).json({
-            data: bestSellerItems,
+            bestSellerItems,
+            weeklySpecials,
             message: 'Fetch Best Seller Items Successfully'
         })
     } catch (error: any) {

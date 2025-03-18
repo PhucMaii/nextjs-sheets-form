@@ -1,19 +1,29 @@
-import { generateImgUrl } from '@/app/lib/s3';
 import { API_URL } from '@/app/utils/enum';
-import {
-  landingPageSecondaryColor,
-} from '@/constant/landingPage';
-import { Box, Typography } from '@mui/material';
+import { maxWidth } from '@/constant/landingPage';
+import { Box, Divider, Grid, Typography } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import ProductListing from '../ProductListingPage/ProductListing';
+
+import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
+import '../../../styles/swiper.css';
+import { IItemPreference } from '@/app/utils/type';
+import useNotification from '@/hooks/useNotification';
 
 export default function BestSeller() {
-  const [bestSellerItems, setBestSellerItems] = useState<any[]>([]);
-  const router = useRouter();
+  const [bestSeller, setBestSeller] = useState<IItemPreference[]>([]);
+  const [weeklySpecials, setWeeklySpecials] = useState<IItemPreference[]>([]);
+
+  const { showNotification, NotificationComp } = useNotification();
 
   useEffect(() => {
-    const fetchBestSellers = async () => {
+    const fetchBestSellersAndSpecials = async () => {
       try {
         const response = await axios.get(
           `${API_URL.PUBLIC}/products/best-seller`,
@@ -23,68 +33,106 @@ export default function BestSeller() {
           return;
         }
 
-        setBestSellerItems(response.data.data);
+        setBestSeller(response.data.bestSellerItems);
+        setWeeklySpecials(response.data.weeklySpecials);
       } catch (error: any) {
         console.log('Internal Server Error: ', error);
       }
     };
 
-    fetchBestSellers();
+    fetchBestSellersAndSpecials();
   }, []);
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      gap={4}
-      p={4}
-      sx={{ backgroundColor: landingPageSecondaryColor }}
-    >
-      <Typography
-        variant="h3"
-        fontWeight="bold"
-        textAlign="center"
-        sx={{ color: 'white' }}
-      >
-        Our Best Sellers
-      </Typography>
-
+    <>
+      {NotificationComp}
       <Box
         display="flex"
-        alignItems="center"
-        justifyContent="center"
-        flexWrap="wrap"
-        gap={3}
+        flexDirection="column"
+        gap={4}
+        p={4}
+        pt={8}
+        sx={{ backgroundColor: 'white' }}
       >
-        {bestSellerItems.map((bestSellerItem: any, index: number) => {
-          return (
-            <Box
-              key={index}
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              gap={2}
-              onClick={() => router.push(`/products/${bestSellerItem.id}`)}
+        <Grid
+          container
+          spacing={4}
+          // display="flex"
+          justifyContent="center"
+          // flexWrap="wrap"
+          sx={{
+            maxWidth: maxWidth,
+            mx: 'auto',
+          }}
+        >
+          <Grid item xs={12}>
+            <Typography variant="h3" fontWeight="regular">
+              Shop our Best Sellers
+            </Typography>
+            <Swiper
+              modules={[Navigation, Pagination, Scrollbar, A11y]}
+              navigation
+              pagination={{ clickable: true }}
+              spaceBetween={50}
+              slidesPerView={5}
+              style={{ padding: '20px' }}
             >
-              <img
-                src={
-                  bestSellerItem?.image
-                    ? generateImgUrl(bestSellerItem.image)
-                    : '/image/landing/image_not_found.jpeg'
-                }
-                alt={bestSellerItem.name}
-                width={250}
-                height={150}
-                style={{ borderRadius: 20 }}
-              />
-              <Typography variant="h5" sx={{ color: 'white' }}>
-                {bestSellerItem.name}
-              </Typography>
-            </Box>
-          );
-        })}
+              {bestSeller &&
+                bestSeller?.map((item: any, index: number) => {
+                  return (
+                    <SwiperSlide>
+                      <ProductListing
+                        key={index}
+                        product={item}
+                        containerStyle={{
+                          backgroundColor: 'white',
+                          height: '100%',
+                        }}
+                        showNotification={showNotification}
+                      />
+                    </SwiperSlide>
+                  );
+                })}
+            </Swiper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h3" fontWeight="regular">
+              Weekly Specials
+            </Typography>
+            <Swiper
+              modules={[Navigation, Pagination, Scrollbar, A11y]}
+              navigation
+              pagination={{ clickable: true }}
+              spaceBetween={50}
+              slidesPerView={5}
+              style={{ padding: '20px' }}
+            >
+              {weeklySpecials &&
+                weeklySpecials?.map((item: any, index: number) => {
+                  return (
+                    <SwiperSlide>
+                      <ProductListing
+                        key={index}
+                        product={item}
+                        containerStyle={{
+                          backgroundColor: 'white',
+                          height: '100%',
+                        }}
+                        showNotification={showNotification}
+                      />
+                    </SwiperSlide>
+                  );
+                })}
+            </Swiper>
+            {/* </Box */}
+          </Grid>
+        </Grid>
       </Box>
-    </Box>
+    </>
   );
 }

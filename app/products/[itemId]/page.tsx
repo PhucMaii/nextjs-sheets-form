@@ -132,7 +132,7 @@ export default function ItemPage() {
             sx={{ color: landingPageSecondaryColor }}
           >
             Want a better prices? Unlock wholesale savings -{' '}
-            <a href="/partner-application-form">Apply now</a>
+            <a href="/application-form">Apply now</a>
           </Typography>
         </Box>
 
