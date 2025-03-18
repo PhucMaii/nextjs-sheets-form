@@ -289,12 +289,15 @@ model InventoryItem {
   indexPos  Int?
   createdAt String
   createdBy String
+  promotionId     Int?
 
   item         Item[]
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
+  
+  promotion    Promotion?     @relation(fields: [promotionId], references: [id])
   type         ItemType?        @relation(fields: [typeId], references: [id])
 }
 
@@ -456,4 +459,12 @@ model Cart {
 
   items CartItem[]
   user  User?      @relation(fields: [userId], references: [id])
+}
+
+model Promotion {
+  id      Int    @id @default(autoincrement())
+  title   String 
+  isShow  Boolean
+
+  items  InventoryItem[]
 }
