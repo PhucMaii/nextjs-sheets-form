@@ -57,7 +57,8 @@ export default function Appearance({ types, showNotification }: IProps) {
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
-    if (types) {
+    if (types && !dndMode) {
+      console.log('run type')
       setItemTypes(types);
     }
   }, [types]);
@@ -185,9 +186,11 @@ export default function Appearance({ types, showNotification }: IProps) {
         // const activeItem = newItems[activeContainerIndex].inventoryItems[activeItemIndex];
         const overItem =
           newItems[overContainerIndex].inventoryItems[overItemIndex];
+        
+        const activeItem = newItems[activeContainerIndex].inventoryItems[activeItemIndex];
 
         // Replace active item with over item in active container
-        const [removeItem] = newItems[
+        newItems[
           activeContainerIndex
         ].inventoryItems.splice(activeItemIndex, 1, overItem);
 
@@ -195,7 +198,7 @@ export default function Appearance({ types, showNotification }: IProps) {
         newItems[overContainerIndex].inventoryItems.splice(
           overItemIndex,
           1,
-          removeItem,
+          activeItem,
         );
         setItemTypes(newItems);
       }
@@ -248,15 +251,13 @@ export default function Appearance({ types, showNotification }: IProps) {
         setItemTypes(newItems);
       } else {
         const newItems = [...itemTypes];
+        const overItem = newItems[overContainerIndex].inventoryItems[
+          overItemIndex
+        ]
         // Replace item with empty in the active
         const [removeItem] = newItems[
           activeContainerIndex
-        ].inventoryItems.splice(activeItemIndex, 1, {
-          id: activeItemIndex * activeContainer.id + 1000000,
-          name: 'Empty',
-          dataType: 'Empty',
-          typeId: activeContainer.id,
-        } as any);
+        ].inventoryItems.splice(activeItemIndex, 1, overItem);
 
         // Replace the empty with item
         newItems[overContainerIndex].inventoryItems.splice(
@@ -299,15 +300,18 @@ export default function Appearance({ types, showNotification }: IProps) {
         (item) => item.id === active.id,
       );
 
+      const overItemIndex = overContainer.inventoryItems.findIndex(
+        (item) => item.id === over.id,
+      )
+
       // Replace the active item from the active container with empty item and add it to the over container
       const newItems = [...itemTypes];
+
+      const overItem = newItems[overContainerIndex].inventoryItems[overItemIndex];
+
       const [removedItem] = newItems[
         activeContainerIndex
-      ].inventoryItems.splice(activeItemIndex, 1, {
-        id: activeItemIndex * activeContainer.id + 1000000,
-        name: 'Empty',
-        dataType: 'Empty',
-      } as any);
+      ].inventoryItems.splice(activeItemIndex, 1, overItem);
       newItems[overContainerIndex].inventoryItems.push(removedItem);
       setItemTypes(newItems);
     }
@@ -389,8 +393,6 @@ export default function Appearance({ types, showNotification }: IProps) {
       return;
     }
 
-    console.log({ item, emptyItem: moveItemProps.emptyItem });
-
     const emptyItemContainer = findContainerOfItems(
       moveItemProps.emptyItem.id,
       'item',
@@ -407,12 +409,7 @@ export default function Appearance({ types, showNotification }: IProps) {
     const itemContainerIndex = itemTypes.findIndex(
       (i) => i.id === itemContainer.id,
     );
-
-    console.log({
-      emptyContainerIndex,
-      itemContainerIndex,
-    });
-
+    
     const emptyItemIndex = emptyItemContainer.inventoryItems.findIndex(
       (i) => i.id === moveItemProps.emptyItem.id,
     );

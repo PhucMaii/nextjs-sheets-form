@@ -285,15 +285,19 @@ model InventoryItem {
   typeId    Int?
   color     String?
   image     String?
+  isPromotion Boolean?
   indexPos  Int?
   createdAt String
   createdBy String
+  promotionId     Int?
 
   item         Item[]
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
+  
+  promotion    Promotion?     @relation(fields: [promotionId], references: [id])
   type         ItemType?        @relation(fields: [typeId], references: [id])
 }
 
@@ -435,7 +439,7 @@ model CartItem {
   createdBy        String
 
   inventoryUnit  InventoryUnit  @relation(fields: [inventoryUnitId], references: [id])
-  itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id])
+  itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id], onDelete: Cascade)
   cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
 }
 
@@ -455,4 +459,12 @@ model Cart {
 
   items CartItem[]
   user  User?      @relation(fields: [userId], references: [id])
+}
+
+model Promotion {
+  id      Int    @id @default(autoincrement())
+  title   String 
+  isShow  Boolean
+
+  items  InventoryItem[]
 }

@@ -452,5 +452,5 @@ export const userCategorizedColor: any = {
 };
 
 export const otherTypeId = 19;
-export const itemsEachRow = 4;
+export const itemsEachRow = 2;
 export const testItemId = 10107;

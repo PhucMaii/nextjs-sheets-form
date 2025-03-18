@@ -86,8 +86,8 @@ export const SortableItem = ({
       style={style}
       item
       xs={6}
-      md={4}
-      lg={3}
+      // md={4}
+      // lg={3}
     >
       <ItemButton
         item={{ ...item, price: 11 } as IItem}
@@ -120,8 +120,8 @@ export const SortableEmptyItem = ({ item, onClick }: any) => {
       style={style}
       item
       xs={6}
-      md={4}
-      lg={3}
+      // md={4}
+      // lg={3}
     >
       <Button sx={{ width: '100%', height: '100%' }} onClick={onClick}>
         <Box

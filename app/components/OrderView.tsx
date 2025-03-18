@@ -78,7 +78,7 @@ const OnSaleBadge = () => {
         height: 20,
         borderRadius: '50%',
         backgroundColor: red[500],
-        // zIndex: 50,
+        zIndex: 50,
         boxShadow: '0 0 8px rgba(228, 13, 13, 0.92)',
         '&::after': {
           content: '""',
@@ -547,9 +547,9 @@ const OrderView = ({
               <Grid
                 item
                 xs={6}
-                sm={4}
-                md={3}
-                lg={3}
+                // sm={4}
+                // md={3}
+                // lg={3}
                 sx={{ width: xsDown ? '50px' : '100%' }}
               >
                 {item.name === 'Empty' ? (
@@ -600,9 +600,9 @@ const OrderView = ({
                       data-tour={index === 0 ? 'third-step' : ''}
                       item
                       xs={6}
-                      sm={4}
-                      md={3}
-                      lg={3}
+                      // sm={4}
+                      // md={3}
+                      // lg={3}
                       sx={{ width: xsDown ? '50px' : '100%' }}
                     >
                       {item.name === 'Empty' ? (
