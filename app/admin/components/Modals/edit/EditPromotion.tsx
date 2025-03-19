@@ -11,41 +11,53 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { ModalProps } from '../type';
-import { SWRFetchData } from '@/app/utils/db';
+import { IInventoryItem, IPromotion } from '@/app/utils/type';
 import { API_URL, PROMOTION_STATUS } from '@/app/utils/enum';
-import { IInventoryItem } from '@/app/utils/type';
+import { SWRFetchData } from '@/app/utils/db';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import StatusText from '../../StatusText';
 
 interface IProps extends ModalProps {
+  promotion: IPromotion;
   showNotification: ShowNotificationType;
 }
 
-export default function AddPromotion({
+export default function EditPromotion({
   open,
   onClose,
+  promotion,
   showNotification,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>('');
+
+  const [title, setTitle] = useState<string>(promotion?.title);
   const [status, setStatus] = useState<PROMOTION_STATUS | string>(
-    PROMOTION_STATUS.ACTIVE,
+    promotion?.status,
   );
   const [selectedItems, setSelectedItems] = useState<IInventoryItem[]>([]);
 
+  useEffect(() => {
+    if (promotion) {
+      setTitle(promotion.title);
+      setSelectedItems(promotion.items);
+      setStatus(promotion.status);
+    }
+  }, [promotion]);
+
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
 
-  const handleAddPromotion = async () => {
+  const handleSave = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API_URL.ADMIN}/promotions`, {
+      const response = await axios.put(`${API_URL.ADMIN}/promotions`, {
+        id: promotion.id,
         title,
-        status,
+        status: promotion.status,
         itemIds: selectedItems.map((item) => item.id),
       });
 
@@ -65,13 +77,13 @@ export default function AddPromotion({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal maxHeight={'80vh'} overflow={'scroll'}>
+      <BoxModal maxHeight="80vh" overflow="scroll">
         <ModalHead
-          heading="Add Promotion"
-          buttonLabel="ADD"
-          onClick={handleAddPromotion}
-          buttonProps={{ loading: isLoading }}
+          heading="Edit Promotion"
+          buttonLabel="Save"
           onClose={onClose}
+          buttonProps={{loading: isLoading}}
+          onClick={handleSave}
         />
 
         <Divider sx={{ my: 2 }} />
@@ -102,7 +114,7 @@ export default function AddPromotion({
           <Divider sx={{ my: 2 }}>Items</Divider>
 
           <FormControl fullWidth>
-            <Typography>Promoted items</Typography>
+            <Typography>Promoted Product</Typography>
             <Autocomplete
               multiple
               id="tags-standard"
@@ -128,6 +140,9 @@ export default function AddPromotion({
                   </li>
                 );
               }}
+              isOptionEqualToValue={(option, value) =>
+                option.id === value.id
+              }
             />
           </FormControl>
         </Box>

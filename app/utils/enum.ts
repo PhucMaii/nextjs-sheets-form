@@ -42,6 +42,11 @@ export enum ORDER_STATUS {
   VOID = 'Void',
 }
 
+export enum PROMOTION_STATUS {
+  ACTIVE = 'Active',
+  INACTIVE = 'Inactive',
+}
+
 export enum ORDER_TYPE {
   NA = 'N/A',
   FIXED = 'FIXED',

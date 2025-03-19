@@ -12,6 +12,7 @@ import {
   ItemType_Category,
   PaymentMethod,
   PositionIndex,
+  Promotion,
   Route,
   User,
   UserRoute,
@@ -247,4 +248,8 @@ export interface IFifo extends Fifo {
   inventoryItem: IInventoryItem;
   vendorItem: IVendorItem;
   orderedItems: OrderedItems[];
+}
+
+export interface IPromotion extends Promotion {
+  items: IInventoryItem[];
 }

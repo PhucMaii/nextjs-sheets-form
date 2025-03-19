@@ -5,15 +5,23 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { ShadowSection } from '../reports/styled';
 import PromotionTable from '../components/Tables/PromotionTable';
 import AddPromotion from '../components/Modals/add/AddPromotion';
+import { SWRFetchData } from '@/app/utils/db';
+import { API_URL } from '@/app/utils/enum';
+import useNotification from '@/hooks/useNotification';
 
 export default function Promotion() {
   const [isAddPromotionOpen, setIsAddPromotionOpen] = useState<boolean>(false);
+  const { showNotification, NotificationComp } = useNotification();
+
+  const [promotions] = SWRFetchData(`${API_URL.ADMIN}/promotions`);
 
   return (
     <Sidebar>
+      {NotificationComp}
       <AddPromotion
         open={isAddPromotionOpen}
         onClose={() => setIsAddPromotionOpen(false)}
+        showNotification={showNotification}
       />
       <Typography variant="h5">Promotions</Typography>
 
@@ -36,7 +44,7 @@ export default function Promotion() {
           </Button>
         </Box>
 
-        <PromotionTable />
+        <PromotionTable promotions={promotions?.data || []} showNotification={showNotification}/>
       </ShadowSection>
     </Sidebar>
   );

@@ -505,6 +505,8 @@ export default function Appearance({ types, showNotification }: IProps) {
           onDragEnd={onDragEnd}
           collisionDetection={closestCorners}
         >
+          {/* Promotion Section */}
+
           <SortableContext
             items={itemTypes?.map((type) => type.id) as UniqueIdentifier[]}
           >
