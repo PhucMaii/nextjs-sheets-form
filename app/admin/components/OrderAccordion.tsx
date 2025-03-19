@@ -323,7 +323,7 @@ const OrderAccordion = ({
           }
           onClick={(e) => handleChangeStatus(e, ORDER_STATUS.DELIVERED)}
         >
-          Mark as delivered
+          Mark as fulfilled
         </MenuItem>
         <MenuItem
           disabled={
@@ -331,7 +331,7 @@ const OrderAccordion = ({
           }
           onClick={(e) => handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)}
         >
-          Mark as incompleted
+          Mark as unfulfilled
         </MenuItem>
         <MenuItem
           disabled={isMarkButtonDisabled || order.status === ORDER_STATUS.VOID}

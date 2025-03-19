@@ -382,7 +382,7 @@ export default function OrderInReportPage({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <LocalShippingIcon sx={{ color: infoColor }} />
-            <Typography>Mark as delivered</Typography>
+            <Typography>Mark as fulfilled</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -393,7 +393,7 @@ export default function OrderInReportPage({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <PendingIcon sx={{ color: warningColor }} />
-            <Typography>Mark as incompleted</Typography>
+            <Typography>Mark as unfulfilled</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem

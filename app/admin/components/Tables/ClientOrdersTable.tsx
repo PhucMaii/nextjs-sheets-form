@@ -199,16 +199,16 @@ const ClientOrdersTable = ({
             size="small"
           >
             <MenuItem value={ORDER_STATUS.COMPLETED}>
-              <StatusText text="Completed" type="success" />
+              <StatusText text={ORDER_STATUS.COMPLETED} type="success" />
             </MenuItem>
             <MenuItem value={ORDER_STATUS.DELIVERED}>
-              <StatusText text="Delivered" type="info" />
+              <StatusText text={ORDER_STATUS.DELIVERED} type="info" />
             </MenuItem>
             <MenuItem value={ORDER_STATUS.INCOMPLETED}>
-              <StatusText text="Incompleted" type="warning" />
+              <StatusText text={ORDER_STATUS.INCOMPLETED} type="warning" />
             </MenuItem>
             <MenuItem value={ORDER_STATUS.VOID}>
-              <StatusText text="Void" type="error" />
+              <StatusText text={ORDER_STATUS.VOID} type="error" />
             </MenuItem>
           </Select>
         </TableCell>

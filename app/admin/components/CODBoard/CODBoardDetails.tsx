@@ -342,7 +342,7 @@ export default function CODBoardDetails({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <LocalShippingIcon sx={{ color: infoColor }} />
-            <Typography>Mark as delivered</Typography>
+            <Typography>Mark as fulfilled</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -353,7 +353,7 @@ export default function CODBoardDetails({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <PendingIcon sx={{ color: warningColor }} />
-            <Typography>Mark as incompleted</Typography>
+            <Typography>Mark as unfulfilled</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -406,7 +406,7 @@ export default function CODBoardDetails({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Completed</Typography>
+            <Typography>{ORDER_STATUS.COMPLETED}</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -416,7 +416,7 @@ export default function CODBoardDetails({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <LocalShippingIcon sx={{ color: infoColor }} />
-            <Typography>Delivered</Typography>
+            <Typography>{ORDER_STATUS.DELIVERED}</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -426,7 +426,7 @@ export default function CODBoardDetails({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <PendingIcon sx={{ color: warningColor }} />
-            <Typography>Incompleted</Typography>
+            <Typography>{ORDER_STATUS.INCOMPLETED}</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -436,7 +436,7 @@ export default function CODBoardDetails({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <BlockIcon sx={{ color: errorColor }} />
-            <Typography>Void</Typography>
+            <Typography>{ORDER_STATUS.VOID}</Typography>
           </DropdownItemContainer>
         </MenuItem>
       </Menu>
