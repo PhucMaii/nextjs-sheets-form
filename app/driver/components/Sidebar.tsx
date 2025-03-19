@@ -106,7 +106,7 @@ export default function Sidebar({ children }: IProps) {
     return (
       <>
         <Box sx={{ pb: 8, m: 1 }}>{children}</Box>
-        <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
+        <Paper sx={{ position: 'fixed', bottom: '0 !important', zIndex: 100 }} elevation={3}>
           <BottomNavigation
             sx={{ width: '100vw !important' }}
             value={currentTab}

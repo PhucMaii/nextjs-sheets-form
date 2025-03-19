@@ -24,22 +24,22 @@ export default function ClientOrderSummary({ orders }: IProps) {
   const orderSummaryData = [
     {
       color: warningColor,
-      text: 'Incompleted',
+      text: ORDER_STATUS.INCOMPLETED,
       value: incompletedOrders.length,
     },
     {
       color: infoColor,
-      text: 'Delivered',
+      text: ORDER_STATUS.DELIVERED,
       value: deliveredOrders.length,
     },
     {
       color: successColor,
-      text: 'Completed',
+      text: ORDER_STATUS.COMPLETED,
       value: completedOrders.length,
     },
     {
       color: errorColor,
-      text: 'Voided',
+      text: ORDER_STATUS.VOID,
       value: voidedOrders.length,
     },
   ];

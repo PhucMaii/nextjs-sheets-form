@@ -54,6 +54,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { blackColor } from '@/theme/create-palette';
 import { generateImgUrl } from '../lib/s3';
+import { Discount } from '@mui/icons-material';
 
 export const WhiteSpace = () => {
   return (
@@ -67,51 +68,72 @@ export const WhiteSpace = () => {
   );
 };
 
-const OnSaleBadge = () => {
+const OnSaleBadge = ({
+  discountPrice,
+  prevPrice,
+}: {
+  discountPrice: number;
+  prevPrice: number;
+}) => {
+  const discountRate = useMemo(() => {
+    return (1 - discountPrice / prevPrice) * 100;
+  }, [discountPrice, prevPrice]);
+
   return (
     <Box
+      display="flex"
+      // justifyContent="center"
+      alignItems="center"
+      gap={0.5}
       sx={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 20,
-        height: 20,
-        borderRadius: '50%',
+        // position: 'absolute',
+        // top: 0,
+        // right: 0,
+        width: 'fit-content',
+        height: 25,
+        borderRadius: '5px',
         backgroundColor: red[500],
         zIndex: 50,
-        boxShadow: '0 0 8px rgba(228, 13, 13, 0.92)',
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          borderRadius: '50%',
-          backgroundColor: red[500],
-          opacity: 0.5,
-          animation: 'ping 1.5s infinite',
-          zIndex: -1,
-        },
-        '@keyframes ping': {
-          '0%': {
-            transform: 'scale(1)',
-            opacity: 0.3,
-            backgroundColor: red[500],
-          },
-          '50%': {
-            transform: 'scale(1.3)',
-            opacity: 1,
-            // backgroundColor: red[300],
-          },
-          '100%': {
-            transform: 'scale(1)',
-            opacity: 0.3,
-            backgroundColor: red[500],
-          },
-        },
+        padding: '5px 6px',
+        flexShrink: 0,
+        // boxShadow: '0 0 8px rgba(228, 13, 13, 0.92)',
+        // '&::after': {
+        //   content: '""',
+        //   position: 'absolute',
+        //   top: 0,
+        //   left: 0,
+        //   width: '100%',
+        //   height: '100%',
+        //   borderRadius: '50%',
+        //   backgroundColor: red[500],
+        //   opacity: 0.5,
+        //   animation: 'ping 1.5s infinite',
+        //   zIndex: -1,
+        // },
+        // '@keyframes ping': {
+        //   '0%': {
+        //     transform: 'scale(1)',
+        //     opacity: 0.3,
+        //     backgroundColor: red[500],
+        //   },
+        //   '50%': {
+        //     transform: 'scale(1.3)',
+        //     opacity: 1,
+        //     // backgroundColor: red[300],
+        //   },
+        //   '100%': {
+        //     transform: 'scale(1)',
+        //     opacity: 0.3,
+        //     backgroundColor: red[500],
+        //   },
+        // },
       }}
-    ></Box>
+    >
+      <Discount sx={{ fontSize: 13, color: 'white' }} />
+      <Typography sx={{ fontSize: 10, fontWeight: 'medium', color: 'white' }}>
+        {discountRate.toFixed(0)}% off
+      </Typography>
+    </Box>
   );
 };
 
@@ -181,9 +203,27 @@ export const ItemButton = ({
             }}
           />
         )}
-        <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
-          {item.name}
-        </Typography>
+        <Box
+          display="flex"
+          // alignItems="flex-start"
+          flexDirection={'column'}
+          // justifyContent={flexColOnDiscount ? '' : 'space-between'}
+          gap={1}
+          width="100%"
+        >
+          <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
+            {item.name}
+          </Typography>
+          {item?.isShowDiscount && item?.prevPrice && (
+            // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
+              <OnSaleBadge
+                discountPrice={item.price}
+                prevPrice={item.prevPrice}
+              />
+            
+            // </Box>
+          )}
+        </Box>
         <Box
           display="flex"
           alignItems="center"
@@ -205,7 +245,6 @@ export const ItemButton = ({
           )}
         </Box>
       </Box>
-      {item?.isShowDiscount && item?.prevPrice && <OnSaleBadge />}
     </Button>
   );
 };
