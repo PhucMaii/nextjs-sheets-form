@@ -36,7 +36,7 @@ export enum COD_STATUS {
 
 export enum ORDER_STATUS {
   NONE = 'none',
-  COMPLETED = 'Completed',
+  COMPLETED = 'Paid',
   DELIVERED = 'Fulfilled',
   INCOMPLETED = 'Unfulfilled',
   VOID = 'Void',

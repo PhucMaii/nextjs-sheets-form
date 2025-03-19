@@ -180,7 +180,7 @@ export default function HistoryPage() {
             isSelected={filterOptions === ORDER_STATUS.COMPLETED}
           >
             <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Completed orders</Typography>
+            <Typography>Paid orders</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -195,7 +195,7 @@ export default function HistoryPage() {
             isSelected={filterOptions === ORDER_STATUS.DELIVERED}
           >
             <LocalShippingIcon sx={{ color: infoColor }} />
-            <Typography>Delivered orders</Typography>
+            <Typography>Fulfilled orders</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
@@ -210,7 +210,7 @@ export default function HistoryPage() {
             isSelected={filterOptions === ORDER_STATUS.INCOMPLETED}
           >
             <PendingIcon sx={{ color: warningColor }} />
-            <Typography>Incompleted orders</Typography>
+            <Typography>Unfulfilled orders</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem

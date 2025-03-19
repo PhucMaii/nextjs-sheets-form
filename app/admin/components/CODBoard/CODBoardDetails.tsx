@@ -331,7 +331,7 @@ export default function CODBoardDetails({
         >
           <DropdownItemContainer display="flex" gap={2}>
             <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Mark as completed</Typography>
+            <Typography>Mark as paid</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem

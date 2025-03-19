@@ -81,15 +81,15 @@ export default function ClientStatementRow({
         <TableCell>
           <Box display="flex" flexDirection="column" gap={1}>
             <StatusText
-              text={`Incompleted: ${client?.incompletedOrders?.length}`}
+              text={`Unfulfilled: ${client?.incompletedOrders?.length}`}
               type="warning"
             />
             <StatusText
-              text={`Delivered: ${client?.deliveredOrders?.length}`}
+              text={`Fulfilled: ${client?.deliveredOrders?.length}`}
               type="info"
             />
             <StatusText
-              text={`Completed: ${client?.completedOrders?.length}`}
+              text={`Paid: ${client?.completedOrders?.length}`}
               type="success"
             />
             <StatusText
