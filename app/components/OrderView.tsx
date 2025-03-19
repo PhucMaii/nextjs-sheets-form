@@ -211,18 +211,18 @@ export const ItemButton = ({
           gap={1}
           width="100%"
         >
+          <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
+            {item.name}
+          </Typography>
           {item?.isShowDiscount && item?.prevPrice && (
-            <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
+            // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
               <OnSaleBadge
                 discountPrice={item.price}
                 prevPrice={item.prevPrice}
               />
             
-            </Box>
+            // </Box>
           )}
-          <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
-            {item.name}
-          </Typography>
         </Box>
         <Box
           display="flex"
