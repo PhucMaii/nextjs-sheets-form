@@ -464,7 +464,8 @@ model Cart {
 model Promotion {
   id      Int    @id @default(autoincrement())
   title   String 
-  isShow  Boolean
+  status  String
+  createdAt  String
 
   items  InventoryItem[]
 }

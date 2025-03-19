@@ -37,7 +37,7 @@ import {
   warningColor,
 } from '../../theme/color';
 import { amber, brown, grey, orange } from '@mui/material/colors';
-import { Discount } from '@mui/icons-material';
+import CampaignIcon from '@mui/icons-material/Campaign';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -248,24 +248,24 @@ export const adminTabs = {
       path: '/admin/pre-orders',
     },
     {
-      name: 'Statements',
-      icon: DocumentScannerIcon,
-      path: '/admin/statements',
-    },
-    {
       name: 'Order Layout',
       icon: WysiwygIcon,
       path: '/admin/order-layout',
     },
     {
+      name: 'Promotions',
+      icon: CampaignIcon,
+      path: '/admin/promotions',
+    },
+    {
+      name: 'Statements',
+      icon: DocumentScannerIcon,
+      path: '/admin/statements',
+    },
+    {
       name: 'Blocking',
       icon: AppBlockingIcon,
       path: '/admin/blocking',
-    },
-    {
-      name: 'Promotions',
-      icon: Discount,
-      path: '/admin/promotions',
     },
   ],
 };
