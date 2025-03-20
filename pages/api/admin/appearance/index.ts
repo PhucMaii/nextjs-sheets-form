@@ -280,6 +280,30 @@ const checkAndUpdateItemsArrangement = async (
     //   compare:
     //     JSON.stringify(inventoryItemNames) === JSON.stringify(dbItemNames),
     // });
+
+    // Get the removed items from promotion (if in promotion mode currently)
+    if (keyField === 'promotionId') {
+      const removedItems = dbItemArrangementMap[container.id].filter(
+        (item: any) => !inventoryItemNames.includes(item.name),
+      ).map((item: any) => item.id);
+
+      if (removedItems.length > 0) {
+        await prisma.inventoryItem.updateMany({
+          where: {
+            id: {
+              in: removedItems,
+            },
+          },
+          data: {
+            [posField]: null,
+            [keyField]: null,
+          },
+        })
+      }
+
+      
+    } 
+    
     // Check if any item has been re arranged and only update re arranged items
     if (JSON.stringify(inventoryItemNames) !== JSON.stringify(dbItemNames)) {
       // Re arrange
