@@ -17,17 +17,37 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { typeId, rowAction, quantity } = req.body;
 
-    const existingType = await prisma.itemType.findUnique({
-      where: {
-        id: typeId,
-      },
-    });
+    const actualId = Number(typeId?.split(' - ')[1]);
+    const isPromotion = typeId.includes('promotion');
+    
+    let container;
+    // Handle Promotion
+    if (isPromotion) {
+      container = await prisma.promotion.findUnique({
+        where: {
+          id: actualId,
+        },
+        include: {
+          items: {
+            orderBy: {
+          
+        }}}
+      })
+    } else {
+      container = await prisma.itemType.findUnique({
+        where: {
+          id: actualId,
+        },
+      });
 
-    if (!existingType) {
-      return res.status(404).json({ error: 'Item Type Not Found' });
     }
 
-    let newRows: number = existingType?.rows || 1;
+
+    if (!container) {
+      return res.status(404).json({ error: 'Container To Update Not Found' });
+    }
+
+    let newRows: number = container?.rows || 1;
 
     if (rowAction === ROW_ACTION.ADD) {
       newRows += quantity;
@@ -37,14 +57,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Invalid Row Action' });
     }
 
-    await prisma.itemType.update({
-      where: {
-        id: typeId,
-      },
-      data: {
-        rows: newRows,
-      },
-    });
+    if (isPromotion) {
+      await prisma.promotion.update({
+        where: {
+          id: actualId,
+        },
+        data: {
+          rows: newRows,
+        },
+      });
+    } else {
+      await prisma.itemType.update({
+        where: {
+          id: actualId,
+        },
+        data: {
+          rows: newRows,
+        },
+      });
+    }
 
     return res
       .status(200)

@@ -69,10 +69,12 @@ export const SortableItem = ({
   item,
   dndMode,
   onOpenSwitchType,
+  onRemove,
 }: {
   item: any;
   dndMode: boolean;
   onOpenSwitchType: any;
+  onRemove?: any;
 }) => {
   if (!item) {
     return;
@@ -109,6 +111,7 @@ export const SortableItem = ({
           if (dndMode) return;
           onOpenSwitchType(item);
         }}
+        onRemove={onRemove}
       />
     </Grid>
   );

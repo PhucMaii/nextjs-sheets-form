@@ -27,7 +27,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       'items',
       'promotion_',
       'title',
+      'promoIndexPos',
     );
+
+    // console.log(filledInPromotions[0].inventoryItems, 'filledInPromotions');
 
     // Handle Item Types
     const itemTypes = await prisma.itemType.findMany({
@@ -46,7 +49,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       'inventoryItems',
       '',
       'name',
-    )
+    );
 
     const displayItemTypes = filledInItemTypes.reduce((acc: any, type: any) => {
       const key = type.name;
@@ -79,7 +82,8 @@ const fillEmptyPosInArrayOfContainers = (
   containers: any,
   itemField: string,
   idPrefix: string,
-  fieldName: string
+  fieldName: string,
+  indexPosField: string = 'indexPos',
 ) => {
   return containers.map((container: any) => {
     const numberOfEl = (container?.rows || 1) * itemsEachRow;
@@ -88,6 +92,9 @@ const fillEmptyPosInArrayOfContainers = (
     let numberOfEmpty = 0;
 
     let arrayIndex = 0;
+    if (idPrefix === 'promotion_') {
+      console.log(container[itemField], 'container');
+    }
     while (arrayIndex < numberOfEl && newItems.length < numberOfEl) {
       const item = container[itemField][arrayIndex];
 
@@ -109,10 +116,10 @@ const fillEmptyPosInArrayOfContainers = (
         numberOfEmpty++;
       } else {
         // If indexPos not equal to its position
-        if (item.indexPos !== arrayIndex + 1) {
+        if (item[indexPosField] !== arrayIndex + 1) {
           // Hold that item and have another loop to keep creating empty items until the current item has the correct position
           let pos = arrayIndex + 1 + numberOfEmpty;
-          while (pos < item.indexPos) {
+          while (pos < item[indexPosField]) {
             newItems.push({
               // id: Math.round(Math.random() * 1000000 + 20000000 + type.id / pos), // Create random id that will not be same as either type id or any items id
               id:
@@ -132,7 +139,11 @@ const fillEmptyPosInArrayOfContainers = (
           }
         }
         // Add that item to return array when the nested loop is executed
-        newItems.push({ ...item, id: idPrefix + 'item - ' + item.id });
+        newItems.push({
+          ...item,
+          id: idPrefix + 'item - ' + item.id,
+          indexPos: item[indexPosField],
+        });
       }
 
       arrayIndex++;

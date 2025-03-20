@@ -55,6 +55,7 @@ import EditOffIcon from '@mui/icons-material/EditOff';
 import { blackColor } from '@/theme/create-palette';
 import { generateImgUrl } from '../lib/s3';
 import { Discount } from '@mui/icons-material';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 export const WhiteSpace = () => {
   return (
@@ -145,6 +146,7 @@ export const ItemButton = ({
   ref,
   disabled,
   flexColOnDiscount,
+  onRemove,
 }: {
   item: IItem;
   onClick?: any;
@@ -153,6 +155,7 @@ export const ItemButton = ({
   ref?: any;
   disabled?: boolean;
   flexColOnDiscount?: boolean;
+  onRemove?: any;
 }) => {
   return (
     <Button
@@ -211,9 +214,27 @@ export const ItemButton = ({
           gap={1}
           width="100%"
         >
-          <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
-            {item.name}
-          </Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
+              {item.name}
+            </Typography>
+            {onRemove && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(item);
+                }}
+                color="error"
+              >
+                <RemoveCircleIcon />  
+              </IconButton>
+            )}
+          </Box>
           {item?.isShowDiscount && item?.prevPrice && (
             // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
             <OnSaleBadge
@@ -888,9 +909,7 @@ const OrderView = ({
                         }
                       />
                     ) : (
-                      <Typography>
-                        ${item.price.toFixed(2)}
-                      </Typography>
+                      <Typography>${item.price.toFixed(2)}</Typography>
                     )}
                     {item.isShowDiscount && item.prevPrice && (
                       <Typography
