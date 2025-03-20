@@ -216,11 +216,11 @@ export const ItemButton = ({
           </Typography>
           {item?.isShowDiscount && item?.prevPrice && (
             // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
-              <OnSaleBadge
-                discountPrice={item.price}
-                prevPrice={item.prevPrice}
-              />
-            
+            <OnSaleBadge
+              discountPrice={item.price}
+              prevPrice={item.prevPrice}
+            />
+
             // </Box>
           )}
         </Box>
@@ -803,12 +803,14 @@ const OrderView = ({
         display="flex"
         flexDirection="column"
         gap={1}
-        sx={{
-          position: 'sticky',
-          top: 0,
-          width: '100%',
-          mb: isModal && smDown ? 4 : 0,
-        }}
+        // sx={{
+        //   position: 'sticky',
+        //   top: 0,
+        //   width: '100%',
+        //   // mb: isModal && smDown ? 4 : 0,
+        //   overflowY: 'auto',
+        //   maxHeight: '100vh',
+        // }}
         data-tour="fourth-step"
       >
         {/* Only admin can affect inventory for an order in edit mode */}
@@ -839,7 +841,8 @@ const OrderView = ({
                 key={item.id}
                 display="flex"
                 flexDirection="column"
-                justifyContent="space-between"
+                // justifyContent="space-between"
+                gap={1}
                 sx={{
                   p: 1,
                   backgroundColor: primary.lightest,
@@ -865,7 +868,7 @@ const OrderView = ({
                 <Box
                   display="flex"
                   alignItems={smDown || isModal ? 'flex-start' : 'center'}
-                  justifyContent="space-between"
+                  // justifyContent="space-between"
                   flexDirection={smDown || isModal ? 'column' : 'row'}
                   gap={2}
                 >
@@ -885,13 +888,13 @@ const OrderView = ({
                         }
                       />
                     ) : (
-                      <Typography fontWeight="bold">
+                      <Typography>
                         ${item.price.toFixed(2)}
                       </Typography>
                     )}
                     {item.isShowDiscount && item.prevPrice && (
                       <Typography
-                        fontWeight="bold"
+                        // fontWeight="bold"
                         sx={{ textDecoration: 'line-through' }}
                         color="error"
                       >
@@ -899,56 +902,69 @@ const OrderView = ({
                       </Typography>
                     )}
                   </Box>
-
-                  {!smDown || editItemQuantity?.id === item.id ? (
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Fab
-                        size="small"
-                        sx={{
-                          width: 30,
-                          minHeight: 30,
-                          height: 30,
-                          boxShadow: 'none',
-                        }}
-                        color="primary"
-                        onClick={() => onDecrementQuantity(item)}
-                      >
-                        -
-                      </Fab>
-                      <Typography fontWeight="bold">{item.quantity}</Typography>
-                      <Fab
-                        size="small"
-                        sx={{
-                          width: 30,
-                          minHeight: 30,
-                          height: 30,
-                          boxShadow: 'none',
-                        }}
-                        color="primary"
-                        onClick={() => onIncrementQuantity(item)}
-                      >
-                        +
-                      </Fab>
-
-                      {smDown && (
-                        <IconButton
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    width="100%"
+                  >
+                    {!smDown || editItemQuantity?.id === item.id ? (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Fab
+                          size="small"
+                          sx={{
+                            width: 30,
+                            minHeight: 30,
+                            height: 30,
+                            boxShadow: 'none',
+                          }}
                           color="primary"
-                          onClick={() => setEditItemQuantity(null)}
+                          onClick={() => onDecrementQuantity(item)}
                         >
-                          <EditOffIcon />
+                          -
+                        </Fab>
+                        <Typography fontWeight="bold">
+                          {item.quantity}
+                        </Typography>
+                        <Fab
+                          size="small"
+                          sx={{
+                            width: 30,
+                            minHeight: 30,
+                            height: 30,
+                            boxShadow: 'none',
+                          }}
+                          color="primary"
+                          onClick={() => onIncrementQuantity(item)}
+                        >
+                          +
+                        </Fab>
+
+                        {smDown && (
+                          <IconButton
+                            color="primary"
+                            onClick={() => setEditItemQuantity(null)}
+                          >
+                            <EditOffIcon />
+                          </IconButton>
+                        )}
+                      </Box>
+                    ) : (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="h6">
+                          Qty: <strong>{item.quantity}</strong>
+                        </Typography>
+                        <IconButton color="primary">
+                          <EditIcon onClick={() => setEditItemQuantity(item)} />
                         </IconButton>
-                      )}
-                    </Box>
-                  ) : (
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography fontWeight="bold">
-                        Qty: {item.quantity}
-                      </Typography>
-                      <IconButton color="primary">
-                        <EditIcon onClick={() => setEditItemQuantity(item)} />
-                      </IconButton>
-                    </Box>
-                  )}
+                      </Box>
+                    )}
+
+                    <Typography variant="h6">
+                      Total: $
+                      {((item?.quantity || 1) * item?.price)?.toFixed(2)}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             );

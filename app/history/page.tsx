@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SplashScreen } from '../../HOC/AuthenGuard';
 import Sidebar from '../components/Sidebar';
 import {
@@ -12,6 +12,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -39,6 +40,7 @@ import { SWRFetchData } from '../utils/db';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import SelectDateRange from '../admin/components/Select/SelectDateRange';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -47,7 +49,7 @@ export default function HistoryPage() {
   const openDropdown = Boolean(actionButtonAnchor);
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
-  // const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [filterOptions, setFilterOptions] = useState<ORDER_STATUS | string>(
     'All',
   );
@@ -57,14 +59,14 @@ export default function HistoryPage() {
   const [tabIdx, setTabIdx] = useState<number>(0);
   const debouncedKeywords = useDebounce(searchKeywords, 800);
 
-  // const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
-  const monthRange = useMemo(() => {
-    return generateMonthRange();
-  }, []);
+  // const monthRange = useMemo(() => {
+  //   return generateMonthRange();
+  // }, []);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderData, _mutateOrders, isValidating] = SWRFetchData(
-    `${API_URL.CLIENT_ORDER}?startDate=${monthRange[0]}&endDate=${monthRange[1]}`,
+    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   // const currentMonthBill = useMemo(() => {
@@ -120,8 +122,8 @@ export default function HistoryPage() {
       tabIdx === 0 ? orderData.data.userOrders : orderData.data.dueOrders;
     const filteredOrders = filterDateRangeOrders(
       orders,
-      monthRange[0],
-      monthRange[1],
+      dateRange[0],
+      dateRange[1],
     );
 
     setClientOrders(tabIdx === 0 ? filteredOrders : orders);
@@ -244,9 +246,9 @@ export default function HistoryPage() {
         <Grid item xs={12} md={6}>
           <Typography variant="h4">History</Typography>
         </Grid>
-        {/* <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
+        <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
           <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
-        </Grid> */}
+        </Grid>
         <Grid item xs={12}>
           <OverviewCard
             text="Over Due"
