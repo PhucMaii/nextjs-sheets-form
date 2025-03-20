@@ -34,7 +34,7 @@ export default function AddPromotion({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
   const [status, setStatus] = useState<PROMOTION_STATUS | string>(
-    PROMOTION_STATUS.ACTIVE,
+    PROMOTION_STATUS.INACTIVE,
   );
   const [selectedItems, setSelectedItems] = useState<IInventoryItem[]>([]);
 

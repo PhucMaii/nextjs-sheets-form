@@ -54,6 +54,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       'name',
     );
 
+    // Convert to a map of typeName -> inventoryItems
     const displayItemTypes = filledInItemTypes.reduce((acc: any, type: any) => {
       const key = type.name;
 
@@ -66,9 +67,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return acc;
     }, {});
 
+    // Convert to a map of promotionName -> inventoryItems
+    const displayPromotions = filledInPromotions.reduce(
+      (acc: any, promotion: any) => {
+        const key = promotion.title;
+
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+
+        acc[key].push(...promotion.inventoryItems);
+
+        return acc;
+      },
+      {},
+    );
+
     return res.status(200).json({
       data: [...filledInPromotions, ...filledInItemTypes],
       itemTypes: displayItemTypes,
+      promotions: displayPromotions,
       message: 'Fetch Appearance Successfully',
     });
   } catch (error: any) {

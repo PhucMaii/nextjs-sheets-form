@@ -231,7 +231,7 @@ export const ItemButton = ({
                 }}
                 color="error"
               >
-                <RemoveCircleIcon />  
+                <RemoveCircleIcon />
               </IconButton>
             )}
           </Box>
@@ -351,9 +351,11 @@ const OrderView = ({
     // const typesObj = convertItemArrayToMap(items);
     const newTypes = { ...(appearance?.itemTypes || {}) };
 
+    // Check if user allowed to view that item or not by comparing with provided items
     Object.keys(newTypes).forEach((key: string) => {
       newTypes[key] = newTypes[key].map((item: any) => {
-        const existingItem = items.find((i) => i.inventoryItemId === item.id);
+        const actualId = Number(item.id?.toString().split(' - ')[1]);
+        const existingItem = items.find((i) => i.inventoryItemId === actualId);
         if (existingItem) {
           return {
             ...item,
@@ -369,6 +371,33 @@ const OrderView = ({
 
     return newTypes;
   }, [items, appearance]);
+
+  const promotions = useMemo(() => {
+    const newPromotions = { ...(appearance?.promotions || {}) };
+
+    if (Object.keys(newPromotions).length === 0) {
+      return {};
+    }
+
+    Object.keys(newPromotions).forEach((key: string) => {
+      newPromotions[key] = newPromotions[key].map((item: any) => {
+        const actualId = Number(item.id?.toString().split(' - ')[1]);
+        const existingItem = items.find((i) => i.inventoryItemId === actualId);
+        if (existingItem) {
+          return {
+            ...item,
+            ...existingItem,
+          };
+        }
+        return {
+          ...item,
+          disabled: true,
+        };
+      });
+    });
+
+    return newPromotions;
+  }, [appearance]);
 
   const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('xs'));
 
@@ -643,55 +672,77 @@ const OrderView = ({
     );
   };
 
-  const renderAllItems = () => {
+  const renderAllItems = (containers: any, type: string = 'itemTypes') => {
     return (
       <>
-        {Object.keys(itemTypes).length > 0 &&
-          Object.keys(itemTypes)?.map((typeName: string) => {
+        {Object.keys(containers).length > 0 &&
+          Object.keys(containers)?.map((typeName: string) => {
             return (
               <Fragment key={typeName}>
                 <Grid item xs={12} mt={2}>
-                  <Typography variant="h6">{typeName}</Typography>
+                  <Typography
+                    variant="h6"
+                    sx={
+                      type === 'promotion' ? {
+                        // px: 2,
+                        py: 2,
+                        color: '#ff4081',
+                        animation: 'flash 1s infinite ease-in-out',
+                        '@keyframes flash': {
+                          '0%, 100%': {
+                            opacity: 1,
+                          },
+                          '50%': {
+                            opacity: 0.8,
+                          },
+                        },
+                      } : {}
+                    }
+                  >
+                    {typeName} {type === 'promotion' && '🎉'}
+                  </Typography>
                 </Grid>
 
-                {itemTypes[typeName].map((item: IItem | any, index: number) => {
-                  return (
-                    <Grid
-                      data-tour={index === 0 ? 'third-step' : ''}
-                      item
-                      xs={6}
-                      // sm={4}
-                      // md={3}
-                      // lg={3}
-                      sx={{ width: xsDown ? '50px' : '100%' }}
-                    >
-                      {item.name === 'Empty' ? (
-                        <WhiteSpace />
-                      ) : (
-                        <ItemButton
-                          item={item}
-                          onClick={() =>
-                            setSingleFieldProps({
-                              open: true,
-                              item,
-                              defaultValue: 0,
-                            })
-                          }
-                          style={{ width: xsDown ? '50px' : '100%' }}
-                          containerStyle={{
-                            backgroundColor: item?.disabled
-                              ? grey[100]
-                              : item?.inventoryItem?.color
-                                ? item?.inventoryItem?.color
-                                : infoBackground,
-                          }}
-                          disabled={item?.disabled}
-                          flexColOnDiscount={isModal && smDown}
-                        />
-                      )}
-                    </Grid>
-                  );
-                })}
+                {containers[typeName].map(
+                  (item: IItem | any, index: number) => {
+                    return (
+                      <Grid
+                        data-tour={index === 0 ? 'third-step' : ''}
+                        item
+                        xs={6}
+                        // sm={4}
+                        // md={3}
+                        // lg={3}
+                        sx={{ width: xsDown ? '50px' : '100%' }}
+                      >
+                        {item.name === 'Empty' ? (
+                          <WhiteSpace />
+                        ) : (
+                          <ItemButton
+                            item={item}
+                            onClick={() =>
+                              setSingleFieldProps({
+                                open: true,
+                                item,
+                                defaultValue: 0,
+                              })
+                            }
+                            style={{ width: xsDown ? '50px' : '100%' }}
+                            containerStyle={{
+                              backgroundColor: item?.disabled
+                                ? grey[100]
+                                : item?.inventoryItem?.color
+                                  ? item?.inventoryItem?.color
+                                  : infoBackground,
+                            }}
+                            disabled={item?.disabled}
+                            flexColOnDiscount={isModal && smDown}
+                          />
+                        )}
+                      </Grid>
+                    );
+                  },
+                )}
               </Fragment>
             );
           })}
@@ -780,8 +831,12 @@ const OrderView = ({
           maxHeight="100vh"
           overflow="auto"
         >
+          {selectedItemType === 'All' &&
+            !debouncedKeywords &&
+            renderAllItems(promotions, 'promotion')}
+
           {selectedItemType === 'All' && !debouncedKeywords
-            ? renderAllItems()
+            ? renderAllItems(itemTypes)
             : renderByItemType()}
 
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
