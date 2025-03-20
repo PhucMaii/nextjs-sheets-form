@@ -2,11 +2,17 @@ import {
   AlertColor,
   Box,
   Button,
+  Divider,
   FormControlLabel,
   Switch,
+  Typography,
 } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
-import { IInventoryItem, IItemType } from '@/app/utils/type';
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { IInventoryItem, IItemType, IPromotion } from '@/app/utils/type';
 import {
   closestCorners,
   DndContext,
@@ -27,6 +33,12 @@ import { SortableEmptyItem, SortableItem, SortableItemType } from './Sortable';
 import SingleFieldEdit from '../Modals/edit/SingleFieldEdit';
 import { ROW_ACTION } from '@/pages/api/admin/appearance/rows';
 import MoveItemToEmpty from './MoveItemToEmpty';
+import { SWRFetchData } from '@/app/utils/db';
+
+enum SORT_CATEGORY {
+  TYPE = 'type',
+  PROMOTION = 'promotion',
+}
 
 interface IProps {
   types: IItemType[];
@@ -43,6 +55,7 @@ export default function Appearance({ types, showNotification }: IProps) {
   });
   const [dndMode, setDndMode] = useState<boolean>(false);
   const [itemTypes, setItemTypes] = useState<IItemType[]>([]);
+  const [promotionList, setPromotionList] = useState<IPromotion[]>([]);
   const [moveItemProps, setMoveItemProps] = useState<any>({
     open: false,
     emptyItem: null,
@@ -53,15 +66,24 @@ export default function Appearance({ types, showNotification }: IProps) {
     item: null,
   });
 
+  const [promotions] = SWRFetchData(`${API_URL.ADMIN}/promotions`);
+
   // DND Handlers
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
     if (types && !dndMode) {
-      console.log('run type')
+      console.log('run type');
       setItemTypes(types);
     }
   }, [types]);
+
+  useEffect(() => {
+    if (promotions && !dndMode) {
+      console.log('run type');
+      setPromotionList(promotions?.data);
+    }
+  }, [promotions]);
 
   const inventoryItems = useMemo(() => {
     return itemTypes
@@ -72,55 +94,77 @@ export default function Appearance({ types, showNotification }: IProps) {
   const findContainerOfItems = (
     id: UniqueIdentifier | undefined,
     type: string,
+    category: SORT_CATEGORY,
   ) => {
+    const container =
+      category === SORT_CATEGORY.TYPE ? itemTypes : promotionList;
+    const itemFields =
+      category === SORT_CATEGORY.TYPE ? 'inventoryItems' : 'items';
+
     if (type === 'container') {
-      return itemTypes.find((type) => type.id === Number(id));
+      return container.find((type) => type.id === id);
     }
 
+    // console.log(container, 'container');
+
     if (type === 'item') {
-      return itemTypes.find((type) =>
-        type.inventoryItems?.find((item) => item.id === Number(id)),
-      );
+      return container.find((cont: any) => {
+        // console.log(cont[itemFields], 'cont[itemFields]');
+        return cont[itemFields]?.find((item: any) => item.id === id);
+      });
     }
   };
 
-  const findItem = (id: UniqueIdentifier | undefined): any => {
-    const actualId = id?.toString().split(' - ')[1];
+  const findItem = (
+    id: UniqueIdentifier | undefined,
+    category: SORT_CATEGORY = SORT_CATEGORY.TYPE,
+  ): any => {
+    const itemFields =
+      category === SORT_CATEGORY.TYPE ? 'inventoryItems' : 'items';
 
-    const type = findContainerOfItems(actualId, 'item');
+    // const actualId = id?.toString().split(' - ')[1];
+
+    const type: any = findContainerOfItems(id, 'item', category);
     if (!type) return;
-    const item = type.inventoryItems.find(
-      (item) => item.id === Number(actualId),
+    const item = type[itemFields].find(
+      (item: any) => item.id === id,
     );
     if (!item) return;
 
     return item;
   };
 
-  const findType = (id: UniqueIdentifier | undefined) => {
-    const actualId = id?.toString().split(' - ')[1];
+  const findType = (
+    id: UniqueIdentifier | undefined,
+    category: SORT_CATEGORY = SORT_CATEGORY.TYPE,
+  ) => {
+    // const actualId = id?.toString().split(' - ')[1];
 
-    const type = findContainerOfItems(actualId, 'container');
+    const type = findContainerOfItems(id, 'container', category);
     if (!type) return '';
     return type;
   };
 
   const findTypeItems = (
     id: UniqueIdentifier | undefined,
+    category: SORT_CATEGORY = SORT_CATEGORY.TYPE,
   ): IInventoryItem[] => {
-    const actualId = id?.toString().split(' - ')[1];
+    const itemFields =
+      category === SORT_CATEGORY.TYPE ? 'inventoryItems' : 'items';
 
-    const type = findContainerOfItems(actualId, 'container');
+    // const actualId = id?.toString().split(' - ')[1];
+
+    const type: any = findContainerOfItems(id, 'container', category);
     if (!type) return [];
-    return type.inventoryItems;
+    return type[itemFields];
   };
 
   const onDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const { id } = active;
-    const activeType = active.data.current?.type;
+    // const activeType = active.data.current?.type;
 
-    setActiveItemId(`${activeType} - ${id}`);
+    setActiveItemId(id);
   };
 
   const swapElements = (array: any[], indexA: number, indexB: number) => {
@@ -133,10 +177,20 @@ export default function Appearance({ types, showNotification }: IProps) {
 
   // )
 
-  const onDragEnd = (event: DragEndEvent) => {
+  const onDragEnd = (
+    event: DragEndEvent,
+    category: SORT_CATEGORY = SORT_CATEGORY.TYPE,
+  ) => {
     const { active, over } = event;
     const activeType = active.data.current?.type;
     const overType = over?.data.current?.type;
+
+    const container =
+      category === SORT_CATEGORY.TYPE ? itemTypes : promotionList;
+    const itemFields =
+      category === SORT_CATEGORY.TYPE ? 'inventoryItems' : 'items';
+    const updateFn =
+      category === SORT_CATEGORY.TYPE ? setItemTypes : setPromotionList;
 
     if (
       activeType === 'item' &&
@@ -146,9 +200,12 @@ export default function Appearance({ types, showNotification }: IProps) {
       over &&
       active.id !== over.id
     ) {
+      console.log({ active, over });
       // Find the active container and over container
-      const activeContainer = findContainerOfItems(active.id, 'item');
-      const overContainer = findContainerOfItems(over.id, 'item');
+      const activeContainer: any = findContainerOfItems(active.id, 'item', category);
+      const overContainer: any = findContainerOfItems(over.id, 'item', category);
+
+      console.log({ activeContainer, overContainer });
 
       // If the active or over container is undefined, return
       if (!activeContainer || !overContainer) {
@@ -156,51 +213,54 @@ export default function Appearance({ types, showNotification }: IProps) {
       }
 
       // Find the active and over container index
-      const activeContainerIndex = itemTypes.findIndex(
+      const activeContainerIndex = container.findIndex(
         (type) => type.id === activeContainer.id,
       );
-      const overContainerIndex = itemTypes.findIndex(
+      const overContainerIndex = container.findIndex(
         (type) => type.id === overContainer.id,
       );
 
       // Find the index of the active item and over item
-      const activeItemIndex = activeContainer.inventoryItems.findIndex(
-        (item) => item.id === active.id,
+      const activeItemIndex = activeContainer[itemFields].findIndex(
+        (item: any) => item.id === active.id,
       );
-      const overItemIndex = overContainer.inventoryItems.findIndex(
-        (item) => item.id === over.id,
+      const overItemIndex = overContainer[itemFields].findIndex(
+        (item: any) => item.id === over.id,
       );
 
       // In the same container
       if (activeContainerIndex === overContainerIndex) {
-        const newItems = [...itemTypes];
-        newItems[activeContainerIndex].inventoryItems = swapElements(
-          newItems[activeContainerIndex].inventoryItems,
+        const newItems: any = [...container];
+        newItems[activeContainerIndex][itemFields] = swapElements(
+          newItems[activeContainerIndex][itemFields],
           activeItemIndex,
           overItemIndex,
         );
 
-        setItemTypes(newItems);
+        updateFn(newItems);
       } else {
-        const newItems = [...itemTypes];
+        const newItems: any = [...container];
         // const activeItem = newItems[activeContainerIndex].inventoryItems[activeItemIndex];
         const overItem =
-          newItems[overContainerIndex].inventoryItems[overItemIndex];
-        
-        const activeItem = newItems[activeContainerIndex].inventoryItems[activeItemIndex];
+          newItems[overContainerIndex][itemFields][overItemIndex];
+
+        const activeItem =
+          newItems[activeContainerIndex][itemFields][activeItemIndex];
 
         // Replace active item with over item in active container
-        newItems[
-          activeContainerIndex
-        ].inventoryItems.splice(activeItemIndex, 1, overItem);
+        newItems[activeContainerIndex][itemFields].splice(
+          activeItemIndex,
+          1,
+          overItem,
+        );
 
         // Replace over item with active item in over container
-        newItems[overContainerIndex].inventoryItems.splice(
+        newItems[overContainerIndex][itemFields].splice(
           overItemIndex,
           1,
           activeItem,
         );
-        setItemTypes(newItems);
+        updateFn(newItems);
       }
     }
 
@@ -214,8 +274,8 @@ export default function Appearance({ types, showNotification }: IProps) {
       active.id !== over.id
     ) {
       // Find the active container and over container
-      const activeContainer = findContainerOfItems(active.id, 'item');
-      const overContainer = findContainerOfItems(over.id, 'item');
+      const activeContainer: any = findContainerOfItems(active.id, 'item', category);
+      const overContainer: any = findContainerOfItems(over.id, 'item', category);
 
       // If the active or over container is undefined, return
       if (!activeContainer || !overContainer) {
@@ -223,49 +283,50 @@ export default function Appearance({ types, showNotification }: IProps) {
       }
 
       // Find the active and over container index
-      const activeContainerIndex = itemTypes.findIndex(
+      const activeContainerIndex = container.findIndex(
         (type) => type.id === activeContainer.id,
       );
-      const overContainerIndex = itemTypes.findIndex(
+      const overContainerIndex = container.findIndex(
         (type) => type.id === overContainer.id,
       );
 
       // Find the index of the active item and over item
-      const activeItemIndex = activeContainer.inventoryItems.findIndex(
-        (item) => item.id === active.id,
+      const activeItemIndex = activeContainer[itemFields].findIndex(
+        (item: any) => item.id === active.id,
       );
-      const overItemIndex = overContainer.inventoryItems.findIndex(
-        (item) => item.id === over.id,
+      const overItemIndex = overContainer[itemFields].findIndex(
+        (item: any) => item.id === over.id,
       );
 
       // If in the same container
       if (activeContainerIndex === overContainerIndex) {
         // Swap item and empty
-        const newItems = [...itemTypes];
-        newItems[activeContainerIndex].inventoryItems = swapElements(
-          newItems[activeContainerIndex].inventoryItems,
+        const newItems: any = [...container];
+        newItems[activeContainerIndex][itemFields] = swapElements(
+          newItems[activeContainerIndex][itemFields],
           activeItemIndex,
           overItemIndex,
         );
 
-        setItemTypes(newItems);
+        updateFn(newItems);
       } else {
-        const newItems = [...itemTypes];
-        const overItem = newItems[overContainerIndex].inventoryItems[
-          overItemIndex
-        ]
+        const newItems: any = [...container];
+        const overItem =
+          newItems[overContainerIndex][itemFields][overItemIndex];
         // Replace item with empty in the active
-        const [removeItem] = newItems[
-          activeContainerIndex
-        ].inventoryItems.splice(activeItemIndex, 1, overItem);
+        const [removeItem] = newItems[activeContainerIndex][itemFields].splice(
+          activeItemIndex,
+          1,
+          overItem,
+        );
 
         // Replace the empty with item
-        newItems[overContainerIndex].inventoryItems.splice(
+        newItems[overContainerIndex][itemFields].splice(
           overItemIndex,
           1,
           removeItem,
         );
-        setItemTypes(newItems);
+        updateFn(newItems);
       }
     }
 
@@ -279,8 +340,12 @@ export default function Appearance({ types, showNotification }: IProps) {
       active.id !== over.id
     ) {
       // find the active and over container
-      const activeContainer = findContainerOfItems(active.id, 'item');
-      const overContainer = findContainerOfItems(over.id, 'container');
+      const activeContainer: any = findContainerOfItems(active.id, 'item', category);
+      const overContainer: any = findContainerOfItems(
+        over.id,
+        'container',
+        category,
+      );
 
       // If the active or over container is undefined, return
       if (!activeContainer || !overContainer) {
@@ -288,32 +353,34 @@ export default function Appearance({ types, showNotification }: IProps) {
       }
 
       // Find the index of the active and over container
-      const activeContainerIndex = itemTypes.findIndex(
+      const activeContainerIndex = container.findIndex(
         (type) => type.id === activeContainer.id,
       );
-      const overContainerIndex = itemTypes.findIndex(
+      const overContainerIndex = container.findIndex(
         (type) => type.id === overContainer.id,
       );
 
       // Find the index of the active item in the active container
-      const activeItemIndex = activeContainer.inventoryItems.findIndex(
-        (item) => item.id === active.id,
+      const activeItemIndex = activeContainer[itemFields].findIndex(
+        (item: any) => item.id === active.id,
       );
 
-      const overItemIndex = overContainer.inventoryItems.findIndex(
-        (item) => item.id === over.id,
-      )
+      const overItemIndex = overContainer[itemFields].findIndex(
+        (item: any) => item.id === over.id,
+      );
 
       // Replace the active item from the active container with empty item and add it to the over container
-      const newItems = [...itemTypes];
+      const newItems: any = [...container];
 
-      const overItem = newItems[overContainerIndex].inventoryItems[overItemIndex];
+      const overItem = newItems[overContainerIndex][itemFields][overItemIndex];
 
-      const [removedItem] = newItems[
-        activeContainerIndex
-      ].inventoryItems.splice(activeItemIndex, 1, overItem);
-      newItems[overContainerIndex].inventoryItems.push(removedItem);
-      setItemTypes(newItems);
+      const [removedItem] = newItems[activeContainerIndex][itemFields].splice(
+        activeItemIndex,
+        1,
+        overItem,
+      );
+      newItems[overContainerIndex][itemFields].push(removedItem);
+      updateFn(newItems);
     }
 
     if (
@@ -324,17 +391,17 @@ export default function Appearance({ types, showNotification }: IProps) {
       over &&
       active.id !== over.id
     ) {
-      const activeContainerIndex = itemTypes.findIndex(
+      const activeContainerIndex = container.findIndex(
         (type) => type.id === active.id,
       );
-      const overContainerIndex = itemTypes.findIndex(
+      const overContainerIndex = container.findIndex(
         (type) => type.id === over.id,
       );
 
       // Swap the active and over container
-      let newItems = [...itemTypes];
+      let newItems: any = [...container];
       newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
-      setItemTypes(newItems);
+      updateFn(newItems);
     }
     setActiveItemId(null);
   };
@@ -388,6 +455,8 @@ export default function Appearance({ types, showNotification }: IProps) {
     }
   };
 
+  console.log(promotionList, 'list');
+
   const onMoveItemToEmpty = (item: IInventoryItem) => {
     if (!item || !moveItemProps.emptyItem) {
       return;
@@ -409,7 +478,7 @@ export default function Appearance({ types, showNotification }: IProps) {
     const itemContainerIndex = itemTypes.findIndex(
       (i) => i.id === itemContainer.id,
     );
-    
+
     const emptyItemIndex = emptyItemContainer.inventoryItems.findIndex(
       (i) => i.id === moveItemProps.emptyItem.id,
     );
@@ -498,6 +567,50 @@ export default function Appearance({ types, showNotification }: IProps) {
             </LoadingButton>
           )}
         </Box>
+
+        <Typography>Promotion Section</Typography>
+        {/* {promotionList.length > 0 && (
+          <DndContext
+            sensors={sensors}
+            onDragStart={onDragStart}
+            // onDragMove={onDragMove}
+            onDragEnd={(e: any) => onDragEnd(e, SORT_CATEGORY.PROMOTION, setPromotionList)}
+            collisionDetection={closestCorners}
+          >
+            <SortableContext
+              items={promotionList?.map((promo: IPromotion) => promo.id)}
+            >
+              {promotionList?.map((promo: IPromotion, index: number) => {
+                return (
+                  <SortableItemType
+                    key={index}
+                    type={promo}
+                    dndMode={dndMode}
+                    renderField="title"
+                  >
+                    <SortableContext
+                      items={promo?.items?.map((item) => item.id)}
+                    >
+                      {promo?.items?.map((item: any) => {
+                        return (
+                          <SortableItem
+                            key={item.id}
+                            item={item}
+                            dndMode={dndMode}
+                            onOpenSwitchType={() => {}}
+                          />
+                        );
+                      })}
+                    </SortableContext>
+                  </SortableItemType>
+                );
+              })}
+            </SortableContext>
+          </DndContext>
+        )} */}
+
+        <Divider />
+
         <DndContext
           sensors={sensors}
           onDragStart={onDragStart}
@@ -505,8 +618,6 @@ export default function Appearance({ types, showNotification }: IProps) {
           onDragEnd={onDragEnd}
           collisionDetection={closestCorners}
         >
-          {/* Promotion Section */}
-
           <SortableContext
             items={itemTypes?.map((type) => type.id) as UniqueIdentifier[]}
           >

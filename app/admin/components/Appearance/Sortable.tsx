@@ -1,4 +1,4 @@
-import { IItem, IItemType } from '@/app/utils/type';
+import { IItem } from '@/app/utils/type';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Box, Button, Grid, IconButton, Typography } from '@mui/material';
@@ -12,11 +12,18 @@ export const SortableItemType = ({
   type,
   children,
   dndMode,
+  renderField
 }: {
-  type: IItemType;
+  type: any;
   children: any;
   dndMode: boolean;
+  renderField?: string
 }) => {
+  
+  if (!type) {
+    return;
+  }
+  // const id = type?.id?.split(' - ')[1];
   const {
     attributes,
     listeners,
@@ -44,7 +51,7 @@ export const SortableItemType = ({
         alignItems="center"
         justifyContent="space-between"
       >
-        <Typography variant="h6">{type.name}</Typography>
+        <Typography variant="h6">{renderField ? type[renderField] : type.name}</Typography>
         {dndMode && (
           <IconButton {...(dndMode ? listeners : {})}>
             <DragIndicatorIcon />
@@ -67,6 +74,10 @@ export const SortableItem = ({
   dndMode: boolean;
   onOpenSwitchType: any;
 }) => {
+  if (!item) {
+    return;
+  }
+  // const id = item?.id?.split(' - ')[1];
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: item.id,
     data: { type: 'item' },

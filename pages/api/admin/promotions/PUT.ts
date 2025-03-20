@@ -20,7 +20,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: id,
       },
       include: {
-        items: true,
+        items: {
+          orderBy: {
+            promoIndexPos: 'asc',
+          }
+        },
       },
     });
 
@@ -50,26 +54,39 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const existingItemIds = existingPromotion.items.map((item: any) => item.id);
+    const existingItems = existingPromotion.items;
     if (itemIds && JSON.stringify(itemIds) !== JSON.stringify(existingItemIds)) {
       // Get new items
-      const newItemIds = itemIds.filter(
-        (id: number) => !existingItemIds.includes(id),
-      );
+      // const newItemIds = itemIds.filter(
+      //   (id: number) => !existingItemIds.includes(id),
+      // );
       const removedItemIds = existingItemIds.filter(
         (id: number) => !itemIds.includes(id),
       );
 
-      // Attach items to promotion
-      await prisma.inventoryItem.updateMany({
-        where: {
-          id: {
-            in: newItemIds,
-          },
-        },
-        data: {
-          promotionId: id,
-        },
-      });
+      // Loop through each item id and update - attach and promoIndexPos
+      let lastIndexPos = 0;
+      for (let i = 0; i < itemIds.length; i++) {
+        // Find in existing item
+        const existingItem = existingItems.find(
+          (item: any) => item.id === itemIds[i],
+        );
+
+        // Handle non-existing item | existing item with lower index
+        if (!existingItem || !existingItem.promoIndexPos || existingItem.promoIndexPos < lastIndexPos) {
+          // Create new item
+          await prisma.inventoryItem.update({
+            where: {
+              id: itemIds[i],
+            },
+            data: {
+              promotionId: id,
+              promoIndexPos: lastIndexPos + 1,
+            },
+          });
+          lastIndexPos++;
+        }
+      } 
 
       // Remove items from promotion
       await prisma.inventoryItem.updateMany({

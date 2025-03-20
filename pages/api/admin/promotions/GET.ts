@@ -1,15 +1,17 @@
+import { PROMOTION_STATUS } from "@/app/utils/enum";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
 interface IQuery {
-    id?: string
+    id?: string;
+    status?: PROMOTION_STATUS;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     try {
         const prisma = new PrismaClient();
 
-        const { id }: IQuery = req.query;
+        const { id, status }: IQuery = req.query;
 
         if (id) {
             const promotion = await prisma.promotion.findUnique({
@@ -17,7 +19,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                     id: Number(id),
                 },
                 include: {
-                    items: true
+                    items: {
+                        orderBy: {
+                            promoIndexPos: 'asc'
+                        }
+                    }
                 }
             });
     
@@ -33,13 +39,38 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             });
         }
 
+        if (status) {
+            const promotions = await prisma.promotion.findMany({
+                where: {
+                    status: status,
+                },
+                include: {
+                    items: true
+                },
+                orderBy: {
+                    priority: 'asc'
+                }
+            });
+    
+            return res.status(200).json({
+                data: promotions,
+                message: 'Fetch Promotions Successfully',
+            });
+        }
+
         const allPromotions = await prisma.promotion.findMany({
             include: {
-                items: true
+                items: {
+                    orderBy: {
+                        promoIndexPos: 'asc'
+                    }
+                }
+            },
+            orderBy: {
+                priority: 'asc'
             }
         });
 
-        console.log(allPromotions, 'allPromotions');
 
         return res.status(200).json({
             data: allPromotions,
