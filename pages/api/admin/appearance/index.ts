@@ -1,10 +1,11 @@
+import { PROMOTION_STATUS } from '@/app/utils/enum';
 import { IInventoryItem, IItemType } from '@/app/utils/type';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
-  itemTypes: IItemType[];
+  itemTypes: IItemType[] | any;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -20,6 +21,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!itemTypes) {
       return res.status(404).json({ error: 'You are missing body data' });
     }
+
+    // Get types and promotions into 2 arrays
+    const updatedTypes = itemTypes
+      .filter((itemType: any) => {
+        return !itemType.id.includes('promotion');
+      })
+      .map((itemType: any) => {
+        const items = itemType.inventoryItems.map((item: any) => {
+          return {
+            ...item,
+            id: Number(item.id.split(' - ')[1]),
+          };
+        });
+        return {
+          ...itemType,
+          id: Number(itemType.id.split(' - ')[1]),
+          inventoryItems: items,
+        };
+      });
 
     const dbTypes = await prisma.itemType.findMany({
       include: {
@@ -45,30 +65,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'No data found' });
     }
 
-    // Get 2 array of type names for easy compare from itemTypes and dbTypes
-    const updatedTypeNames = itemTypes.map((itemType) => {
-      return itemType.name;
-    });
+    // Check and update types
+    await checkAndUpdateContainers(updatedTypes, dbTypes, 'itemType', 'name');
 
-    const dbTypeNames = dbTypes.map((itemType) => {
-      return itemType.name;
-    });
-
-    // Compare if types has any re arrangement
-    if (JSON.stringify(updatedTypeNames) !== JSON.stringify(dbTypeNames)) {
-      // Re arrange types
-      let priority = 1;
-      for (let i = 0; i < itemTypes.length; i++) {
-        const itemType = itemTypes[i];
-        await prisma.itemType.update({
-          where: { id: itemType.id },
-          data: { priority },
-        });
-        priority++;
-      }
-    }
-
-    // Check if any item has been re arranged
     const dbInventoryItems: any = await prisma.inventoryItem.findMany({
       include: {
         type: true,
@@ -78,34 +77,66 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    // Convert to a map of arrays of item names, for fast and easily extract the items belong to each type
-    const dbItemArrangementMap =
-      convertInventoryItemsToTypeMap(dbInventoryItems);
+    // Check if any item has been re arranged
+    await checkAndUpdateItemsArrangement(
+      dbInventoryItems,
+      updatedTypes,
+      'indexPos',
+      'typeId',
+    );
 
-    for (const itemType of itemTypes) {
-      const inventoryItemNames = fillInEmptyPosition(itemType.inventoryItems);
-      const dbItemNames = fillInEmptyPosition(
-        dbItemArrangementMap[itemType.id],
-      );
+    // Handle Promotion
+    const updatedPromotions = itemTypes
+      .filter((promotion: any) => {
+        return promotion.id.includes('promotion');
+      })
+      .map((itemType: any) => {
+        const items = itemType.inventoryItems.map((item: any) => {
+          return {
+            ...item,
+            id: Number(item.id.split(' - ')[1]),
+          };
+        });
+        return {
+          ...itemType,
+          id: Number(itemType.id.split(' - ')[1]),
+          inventoryItems: items,
+        };
+      });
 
-      // Check if any item has been re arranged and only update re arranged items
-      if (JSON.stringify(inventoryItemNames) !== JSON.stringify(dbItemNames)) {
-        // Re arrange
-        let indexPos = 1;
-        for (let i = 0; i < itemType.inventoryItems.length; i++) {
-          const inventoryItem = itemType.inventoryItems[i];
+    const dbPromotions = await prisma.promotion.findMany({
+      where: {
+        status: PROMOTION_STATUS.ACTIVE,
+      },
+      orderBy: {
+        priority: 'asc',
+      },
+    });
 
-          if (inventoryItem.name !== 'Empty') {
-            await prisma.inventoryItem.update({
-              where: { id: inventoryItem.id },
-              data: { indexPos, typeId: itemType.id },
-            });
-          }
+    // Check promotion priority
+    await checkAndUpdateContainers(
+      updatedPromotions,
+      dbPromotions,
+      'promotion',
+      'title',
+    );
 
-          indexPos++;
-        }
-      }
-    }
+    const dbPromoItems: any = await prisma.inventoryItem.findMany({
+      include: {
+        type: true,
+      },
+      orderBy: {
+        promoIndexPos: 'asc',
+      },
+    });
+
+    // Check if any promotion item has been re arranged
+    await checkAndUpdateItemsArrangement(
+      dbPromoItems,
+      updatedPromotions,
+      'promoIndexPos',
+      'promotionId',
+    );
 
     return res.status(200).json({ message: 'Update Successfully' });
   } catch (error: any) {
@@ -116,32 +147,37 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-const convertInventoryItemsToTypeMap = (inventoryItems: IInventoryItem[]) => {
-  const itemTypeMap = inventoryItems.reduce(
-    (map: any, item: IInventoryItem) => {
-      const key = item?.typeId;
+const convertInventoryItemsToTypeMap = (
+  inventoryItems: IInventoryItem[],
+  keyField: string = 'typeId',
+) => {
+  const itemTypeMap = inventoryItems.reduce((map: any, item: any) => {
+    const key = item[keyField];
 
-      // If reach to empty element, then skip
-      if (!key) {
-        return map;
-      }
-
-      if (!map[key]) {
-        map[key] = [];
-      }
-
-      map[key].push(item);
-
+    // If reach to empty element, then skip
+    if (!key) {
       return map;
-    },
-    {},
-  );
+    }
+
+    if (!map[key]) {
+      map[key] = [];
+    }
+
+    map[key].push(item);
+
+    return map;
+  }, {});
 
   return itemTypeMap;
 };
 
-export const fillInEmptyPosition = (inventoryItems: IInventoryItem[]) => {
+export const fillInEmptyPosition = (
+  inventoryItems: IInventoryItem[],
+  rows: number,
+) => {
   const itemNames: string[] = [];
+
+  const maxNumberOfEl = rows * 2;
 
   if (!inventoryItems || inventoryItems.length === 0) {
     return [];
@@ -153,18 +189,113 @@ export const fillInEmptyPosition = (inventoryItems: IInventoryItem[]) => {
     if (!item) {
       itemNames.push('Empty');
     } else {
-      if (item.indexPos !== i + 1) {
-        let pos = i + 1;
+      // if (item.indexPos !== i + 1) {
+      let pos = itemNames.length + 1; // indicate the next pos
 
-        while (pos < (item?.indexPos || 1)) {
-          itemNames.push('Empty');
-          pos++;
+      while (pos < (item?.indexPos || 1)) {
+        if (item.typeId === 8) {
+          console.log({
+            item: { name: item.name, indexPos: item.indexPos },
+            pos,
+            itemNames,
+          });
         }
+        itemNames.push('Empty');
+        pos++;
       }
+      // }
 
       itemNames.push(item.name);
     }
   }
 
+  while (itemNames.length < maxNumberOfEl) {
+    itemNames.push('Empty');
+  }
+
   return itemNames;
+};
+
+const checkAndUpdateContainers = async (
+  updatedContainers: any[],
+  dbContainers: any[],
+  tableName: 'itemType' | 'promotion',
+  compareField: string,
+) => {
+  const prisma: any = new PrismaClient();
+
+  const updatedContainerNames = updatedContainers.map((container: any) => {
+    return container[compareField];
+  });
+
+  const dbContainerNames = dbContainers.map((container) => {
+    return container[compareField];
+  });
+
+  // Compare if types has any re arrangement
+  if (
+    JSON.stringify(updatedContainerNames) !== JSON.stringify(dbContainerNames)
+  ) {
+    // Re arrange types
+    let priority = 1;
+    for (let i = 0; i < updatedContainers.length; i++) {
+      const container = updatedContainers[i];
+      await prisma[tableName].update({
+        where: { id: container.id },
+        data: { priority },
+      });
+      priority++;
+    }
+  }
+};
+
+const checkAndUpdateItemsArrangement = async (
+  dbInventoryItems: any[],
+  updatedContainers: any[],
+  posField: string,
+  keyField: string,
+) => {
+  const prisma: any = new PrismaClient();
+
+  // Convert inventory items to type map for easy retrieve
+  const dbItemArrangementMap = convertInventoryItemsToTypeMap(
+    dbInventoryItems,
+    keyField,
+  );
+
+  for (const container of updatedContainers) {
+    // Get 2 arrays of item names for easy compare
+    const inventoryItemNames = fillInEmptyPosition(
+      container.inventoryItems,
+      container.rows,
+    );
+    const dbItemNames = fillInEmptyPosition(
+      dbItemArrangementMap[container.id],
+      container.rows,
+    );
+
+    // console.log({
+    //   inventoryItemNames,
+    //   dbItemNames,
+    //   compare:
+    //     JSON.stringify(inventoryItemNames) === JSON.stringify(dbItemNames),
+    // });
+    // Check if any item has been re arranged and only update re arranged items
+    if (JSON.stringify(inventoryItemNames) !== JSON.stringify(dbItemNames)) {
+      // Re arrange
+      let indexPos = 1;
+      for (let i = 0; i < container.inventoryItems.length; i++) {
+        const inventoryItem = container.inventoryItems[i];
+
+        if (inventoryItem.name !== 'Empty') {
+          await prisma.inventoryItem.update({
+            where: { id: inventoryItem.id },
+            data: { [posField]: indexPos, [keyField]: container.id },
+          });
+        }
+
+        indexPos++;
+      }
+    }
+  }
 };

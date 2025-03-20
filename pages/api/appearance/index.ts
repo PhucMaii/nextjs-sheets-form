@@ -20,6 +20,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         },
       },
+      orderBy: {
+        priority: 'asc',
+      },
     });
 
     const filledInPromotions = fillEmptyPosInArrayOfContainers(
@@ -92,9 +95,6 @@ const fillEmptyPosInArrayOfContainers = (
     let numberOfEmpty = 0;
 
     let arrayIndex = 0;
-    if (idPrefix === 'promotion_') {
-      console.log(container[itemField], 'container');
-    }
     while (arrayIndex < numberOfEl && newItems.length < numberOfEl) {
       const item = container[itemField][arrayIndex];
 
