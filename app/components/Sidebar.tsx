@@ -31,6 +31,7 @@ import useNotification from '@/hooks/useNotification';
 import { MaintenanceContext } from '../context/MaintenanceProvider';
 import Maintenance from './Maintenance';
 import { USER_CATEGORIZED } from '../utils/enum';
+import HolidayText from './HolidayText';
 
 interface PropTypes {
   children: ReactNode;
@@ -148,7 +149,7 @@ export default function Sidebar({ children }: PropTypes) {
           gap={2}
           sx={{ pb: 10, p: 1 }}
         >
-          {/* <HolidayText /> */}
+          <HolidayText />
           {children}
         </Box>
         {isOpenSnackbar && (
@@ -174,7 +175,7 @@ export default function Sidebar({ children }: PropTypes) {
             </div>
           </Snackbar>
         )}
-        <Paper sx={{ position: 'fixed', bottom: '0 !important' }} elevation={3}>
+        <Paper sx={{ position: 'fixed', bottom: '0 !important', zIndex: 50 }} elevation={3}>
           <BottomNavigation
             sx={{ width: '100vw !important' }}
             value={currentTab}
@@ -247,6 +248,7 @@ export default function Sidebar({ children }: PropTypes) {
                 showNotification={showNotification}
               />
             )}
+            <HolidayText />
             <Box
               display="flex"
               width="100%"
@@ -254,7 +256,6 @@ export default function Sidebar({ children }: PropTypes) {
               m={2}
               gap={2}
             >
-              {/* <HolidayText /> */}
               {children}
             </Box>
           </Box>
@@ -289,13 +290,15 @@ export default function Sidebar({ children }: PropTypes) {
               showNotification={showNotification}
             />
           )}
+          <HolidayText />
+
           <Box
             display="flex"
             width="100%"
             flexDirection="column"
             m={1}
             gap={2}
-            sx={{ maxWidth: clientMaxWidth, mx: 'auto' }}
+            sx={{ maxWidth: clientMaxWidth, mx: 'auto', zIndex: 50 }}
           >
             {/* <HolidayText /> */}
             {children}

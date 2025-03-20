@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { red } from '@mui/material/colors';
-import Image from 'next/image';
+import { red, yellow } from '@mui/material/colors';
 import React from 'react';
 
 export default function HolidayText() {
@@ -8,24 +7,45 @@ export default function HolidayText() {
     <Box
       display="flex"
       alignItems="center"
-      justifyContent="space-between"
-      sx={{ backgroundColor: red[700], p: 1.5, borderRadius: 2 }}
+      justifyContent="center"
+      sx={{ backgroundColor: red[800], p: 1.5, borderRadius: 2 }}
     >
-      <Box display="flex" flexDirection="column" gap={1}>
-        <Typography variant="h6" sx={{ color: 'white' }} fontWeight="bold">
-          Wishing you a joyous holiday season!🎄🎄🎄
+      <Box
+        display="flex"
+        justifyContent={'center'}
+        alignItems="center"
+        flexDirection="column"
+        gap={1}
+      >
+        <Typography
+          variant="h6"
+          textAlign={'center'}
+          sx={{ color: 'white', lineHeight: 1.5 }}
+          fontWeight="bold"
+        >
+          📢 Due to recent tariff changes from America,{' '}
+          <strong
+            style={{
+              backgroundColor: yellow[800],
+              padding: 1,
+              borderRadius: 5,
+            }}
+          >
+            Banh Pho Sincere
+          </strong>{' '}
+          price will be affected.
         </Typography>
-        <Typography sx={{ color: 'white' }}>
-          Our office will be closed on Dec 25th and Jan 1st
+        <Typography sx={{ color: 'white', textAlign: 'center' }}>
+          Thank you for your understanding and continued support!
         </Typography>
       </Box>
-      <Image
+      {/* <Image
         src="/images/holiday/christmas.jpeg"
         alt="holiday"
         width={100}
         height={100}
         style={{ borderRadius: 20 }}
-      />
+      /> */}
     </Box>
   );
 }
