@@ -3,6 +3,7 @@ import {
   Button,
   MenuItem,
   Select,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -83,6 +84,32 @@ export default function PromotionTable({
     }
   };
 
+  const handleToggleVisible = async (e: any, id: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    setIsLoading(true);
+    try {
+      const response = await axios.put(
+        `${API_URL.ADMIN}/promotions/toggle-visibility`,
+        {
+          id,
+          visibility: e.target.checked,
+        },
+      );
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error?.response?.data?.error || error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <LoadingModal open={isLoading} />
@@ -106,6 +133,7 @@ export default function PromotionTable({
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell>Visible</TableCell>
             <TableCell>Promotion</TableCell>
             <TableCell>Status</TableCell>
             <TableCell>Items</TableCell>
@@ -130,6 +158,16 @@ export default function PromotionTable({
                     });
                   }}
                 >
+                  <TableCell>
+                    <Switch
+                      checked={promotion.visibility}
+                      onClick={(e: any) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleToggleVisible(e, promotion.id)
+                      }}
+                    />
+                  </TableCell>
                   <TableCell>{promotion.title}</TableCell>
                   <TableCell>
                     <Select

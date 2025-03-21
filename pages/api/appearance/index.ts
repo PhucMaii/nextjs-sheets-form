@@ -70,6 +70,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Convert to a map of promotionName -> inventoryItems
     const displayPromotions = filledInPromotions.reduce(
       (acc: any, promotion: any) => {
+        if (!promotion?.visibility) {
+          return acc; // Skip if visibility is false for client side
+        }
+        
         const key = promotion.title;
 
         if (!acc[key]) {

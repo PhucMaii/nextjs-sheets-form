@@ -51,6 +51,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           data: {
             status: PROMOTION_STATUS.INACTIVE,
+            visibility: false
+          },
+        });
+
+        // Unattach all items related to inactive promotion
+        await prisma.inventoryItem.updateMany({
+          where: {
+            promotionId: {
+              in: updatedInactivePromotionIds,
+            },
+          },
+          data: {
+            promotionId: null,
           },
         });
       }

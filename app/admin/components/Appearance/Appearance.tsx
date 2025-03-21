@@ -30,6 +30,7 @@ import { ROW_ACTION } from '@/pages/api/admin/appearance/rows';
 import MoveItemToEmpty from './MoveItemToEmpty';
 import { SWRFetchData } from '@/app/utils/db';
 import InsertPromotion from '../Modals/add/InsertPromotion';
+import { itemsEachRow } from '@/app/lib/constant';
 
 enum SORT_CATEGORY {
   TYPE = 'type',
@@ -85,7 +86,9 @@ export default function Appearance({ types, showNotification }: IProps) {
   const inventoryItems = useMemo(() => {
     return itemTypes
       .flatMap((type) => type.inventoryItems)
-      .filter((item) => item.name !== 'Empty');
+      .filter(
+        (item) => item.name !== 'Empty' && !item.id.includes('promotion'),
+      );
   }, [itemTypes]);
 
   const findContainerOfItems = (
@@ -164,6 +167,7 @@ export default function Appearance({ types, showNotification }: IProps) {
 
   const swapElements = (array: any[], indexA: number, indexB: number) => {
     [array[indexA], array[indexB]] = [array[indexB], array[indexA]];
+    console.log(array, 'array');
 
     return array;
   };
@@ -363,11 +367,18 @@ export default function Appearance({ types, showNotification }: IProps) {
         ) {
           const activeItem =
             container[activeContainerIndex][itemFields][activeItemIndex];
-          const isExistingInOverContainer = overContainer[itemFields].find(
-            (item: any) => item.name === activeItem.name,
+          const promotionsContainer = itemTypes.filter((type) =>
+            type.id.includes('promotion'),
           );
 
-          if (!isExistingInOverContainer) {
+          const existingItemIndex = promotionsContainer.findIndex(
+            (type) =>
+              type.inventoryItems.findIndex(
+                (i: any) => i.name === activeItem.name,
+              ) !== -1,
+          );
+
+          if (existingItemIndex === -1) {
             const newItems: any = [...container];
             const newItem = {
               ...activeItem,
@@ -437,6 +448,36 @@ export default function Appearance({ types, showNotification }: IProps) {
         return;
       }
 
+      // Update Real Data
+      const newElToAdd = extraRows * itemsEachRow;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const idPrefix = addRowProps.type?.id.includes('promotion')
+        ? 'promotion_'
+        : '';
+      const newEmptyItems = Array.from(
+        { length: newElToAdd },
+        (_, index: number) => ({
+          id:
+            idPrefix +
+            'add_new_item - ' +
+            Math.round(Math.random() * 1000000) +
+            index +
+            addRowProps.type?.id,
+          name: 'Empty',
+          dataType: 'Empty',
+        }),
+      );
+
+      const newTypes = [...itemTypes];
+      const index = newTypes.findIndex(
+        (type) => type.id === addRowProps.type?.id,
+      );
+      newTypes[index].rows += newElToAdd;
+      newTypes[index].inventoryItems = [
+        ...newTypes[index].inventoryItems,
+        ...newEmptyItems,
+      ];
+
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -465,7 +506,7 @@ export default function Appearance({ types, showNotification }: IProps) {
     }
   };
 
-  const onMoveItemToEmpty = (item: IInventoryItem) => {
+  const onMoveItemToEmpty = (item: IInventoryItem | any) => {
     if (!item || !moveItemProps.emptyItem) {
       return;
     }
@@ -480,6 +521,8 @@ export default function Appearance({ types, showNotification }: IProps) {
       'item',
       SORT_CATEGORY.TYPE,
     );
+
+    console.log({ emptyItemContainer, itemContainer });
 
     if (!emptyItemContainer || !itemContainer) {
       return;
@@ -499,34 +542,75 @@ export default function Appearance({ types, showNotification }: IProps) {
       (i: any) => i.id === item.id,
     );
 
-    // Same container
-    if (emptyContainerIndex === itemContainerIndex) {
-      // Swap empty with item
-      const newItems = [...itemTypes];
-      newItems[emptyContainerIndex].inventoryItems = swapElements(
-        newItems[emptyContainerIndex].inventoryItems,
-        emptyItemIndex,
-        itemIndex,
+    // Handle Promotion
+    if (emptyItemContainer.id.includes('promotion')) {
+      const newTypes = [...itemTypes];
+      const newItem = {
+        ...item,
+        id: 'promotion_' + item.id,
+      };
+
+      console.log({ newItem, emptyItemContainer });
+
+      // Check if the item already exists in that every promotion containers
+      const promotionsContainer = itemTypes.filter((type) =>
+        type.id.includes('promotion'),
       );
-      setItemTypes(newItems);
+
+      const existingItemIndex = promotionsContainer.findIndex(
+        (type) =>
+          type.inventoryItems.findIndex((i: any) => i.name === newItem.name) !==
+          -1,
+      );
+
+      // const existingItemIndex = newTypes[
+      //   emptyContainerIndex
+      // ].inventoryItems.findIndex((i: any) => i.name === newItem.name);
+
+      console.log({ existingItemIndex });
+
+      if (existingItemIndex === -1) {
+        newTypes[emptyContainerIndex].inventoryItems.splice(
+          emptyItemIndex,
+          1,
+          newItem,
+        );
+
+        setItemTypes(newTypes);
+      }
     } else {
-      // Different container
+      // Same container
+      if (emptyContainerIndex === itemContainerIndex) {
+        // Swap empty with item
+        const newTypes = [...itemTypes];
+        console.log(
+          { emptyContainerIndex, itemIndex, emptyItemIndex },
+          'emptyContainerIndex',
+        );
+        newTypes[emptyContainerIndex].inventoryItems = swapElements(
+          newTypes[emptyContainerIndex].inventoryItems,
+          emptyItemIndex,
+          itemIndex,
+        );
+        setItemTypes(newTypes);
+      } else {
+        // Different container
+        const newItems = [...itemTypes];
+        // Replace item with empty in the item container
+        newItems[itemContainerIndex].inventoryItems.splice(
+          itemIndex,
+          1,
+          moveItemProps.emptyItem,
+        );
 
-      const newItems = [...itemTypes];
-      // Replace item with empty in the item container
-      newItems[itemContainerIndex].inventoryItems.splice(
-        itemIndex,
-        1,
-        moveItemProps.emptyItem,
-      );
-
-      // Replace the empty with item
-      newItems[emptyContainerIndex].inventoryItems.splice(
-        emptyItemIndex,
-        1,
-        item,
-      );
-      setItemTypes(newItems);
+        // Replace the empty with item
+        newItems[emptyContainerIndex].inventoryItems.splice(
+          emptyItemIndex,
+          1,
+          item,
+        );
+        setItemTypes(newItems);
+      }
     }
   };
 
@@ -653,16 +737,23 @@ export default function Appearance({ types, showNotification }: IProps) {
                   {
                     // If the previous type is promotion and this type is not promotion
                     // Add a divider
-                    (typeIndex > 0 &&
+                    ((typeIndex > 0 &&
                       itemTypes[typeIndex - 1].id.includes('promotion') &&
-                      !type.id.includes('promotion') || (typeIndex === 0 && !type.id.includes('promotion'))) && (
-                        <>
-                          <Button variant="contained" fullWidth onClick={() => setIsOpenAddPromotion(true)}>
+                      !type.id.includes('promotion')) ||
+                      (typeIndex === 0 && !type.id.includes('promotion'))) && (
+                      <>
+                        {!dndMode && (
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            onClick={() => setIsOpenAddPromotion(true)}
+                          >
                             Edit Promotion Section
                           </Button>
-                          <Divider />
-                        </>
-                      )
+                        )}
+                        <Divider />
+                      </>
+                    )
                   }
                   <SortableItemType
                     key={typeIndex}
@@ -681,12 +772,12 @@ export default function Appearance({ types, showNotification }: IProps) {
                           return (
                             <SortableEmptyItem
                               item={item}
-                              onClick={() =>
+                              onClick={() => {
                                 setMoveItemProps({
                                   open: true,
                                   emptyItem: item,
-                                })
-                              }
+                                });
+                              }}
                             />
                           );
                         }
