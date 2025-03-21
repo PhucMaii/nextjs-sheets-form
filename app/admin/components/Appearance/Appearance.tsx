@@ -29,6 +29,7 @@ import SingleFieldEdit from '../Modals/edit/SingleFieldEdit';
 import { ROW_ACTION } from '@/pages/api/admin/appearance/rows';
 import MoveItemToEmpty from './MoveItemToEmpty';
 import { SWRFetchData } from '@/app/utils/db';
+import InsertPromotion from '../Modals/add/InsertPromotion';
 
 enum SORT_CATEGORY {
   TYPE = 'type',
@@ -50,6 +51,7 @@ export default function Appearance({ types, showNotification }: IProps) {
   });
   const [dndMode, setDndMode] = useState<boolean>(false);
   const [itemTypes, setItemTypes] = useState<IItemType[] | any[]>([]);
+  const [isOpenAddPromotion, setIsOpenAddPromotion] = useState<boolean>(false);
   const [promotionList, setPromotionList] = useState<IPromotion[]>([]);
   const [moveItemProps, setMoveItemProps] = useState<any>({
     open: false,
@@ -382,63 +384,6 @@ export default function Appearance({ types, showNotification }: IProps) {
       }
     }
 
-    // Handling Item Drop into a container
-    // if (
-    //   activeType === 'item' &&
-    //   overType &&
-    //   overType === 'container' &&
-    //   active &&
-    //   over &&
-    //   active.id !== over.id
-    // ) {
-    //   // find the active and over container
-    //   const activeContainer: any = findContainerOfItems(
-    //     active.id,
-    //     'item',
-    //     category,
-    //   );
-    //   const overContainer: any = findContainerOfItems(
-    //     over.id,
-    //     'container',
-    //     category,
-    //   );
-
-    //   // If the active or over container is undefined, return
-    //   if (!activeContainer || !overContainer) {
-    //     return;
-    //   }
-
-    //   // Find the index of the active and over container
-    //   const activeContainerIndex = container.findIndex(
-    //     (type) => type.id === activeContainer.id,
-    //   );
-    //   const overContainerIndex = container.findIndex(
-    //     (type) => type.id === overContainer.id,
-    //   );
-
-    //   // Find the index of the active item in the active container
-    //   const activeItemIndex = activeContainer[itemFields].findIndex(
-    //     (item: any) => item.id === active.id,
-    //   );
-
-    //   const overItemIndex = overContainer[itemFields].findIndex(
-    //     (item: any) => item.id === over.id,
-    //   );
-
-    //   // Replace the active item from the active container with empty item and add it to the over container
-    //   const newItems: any = [...container];
-
-    //   const overItem = newItems[overContainerIndex][itemFields][overItemIndex];
-
-    //   const [removedItem] = newItems[activeContainerIndex][itemFields].splice(
-    //     activeItemIndex,
-    //     1,
-    //     overItem,
-    //   );
-    //   newItems[overContainerIndex][itemFields].push(removedItem);
-    //   updateFn(newItems);
-    // }
-
     if (
       activeType === 'container' &&
       overType &&
@@ -602,33 +547,43 @@ export default function Appearance({ types, showNotification }: IProps) {
 
     const newItemTypes = [...itemTypes];
 
-
-
     const itemContainerIndex = itemTypes.findIndex(
       (i) => i.id === itemContainer.id,
     );
 
     const itemIndex = itemContainer.inventoryItems.findIndex(
       (i: any) => i.id === itemId,
-    )
-
+    );
 
     const emptyItem = {
-      id: 'promotion_' +
-      'item - ' +
-      Math.round(
-        (Math.random() * 1000000 + 80000000) + (itemContainer.id / itemIndex * itemId / itemContainerIndex),
-      ) + itemId,
+      id:
+        'promotion_' +
+        'item - ' +
+        Math.round(
+          Math.random() * 1000000 +
+            80000000 +
+            ((itemContainer.id / itemIndex) * itemId) / itemContainerIndex,
+        ) +
+        itemId,
       name: 'Empty',
     };
 
-    newItemTypes[itemContainerIndex].inventoryItems.splice(itemIndex, 1, emptyItem);
+    newItemTypes[itemContainerIndex].inventoryItems.splice(
+      itemIndex,
+      1,
+      emptyItem,
+    );
 
     setItemTypes(newItemTypes);
   };
 
   return (
     <>
+      <InsertPromotion
+        open={isOpenAddPromotion}
+        onClose={() => setIsOpenAddPromotion(false)}
+        showNotification={showNotification}
+      />
       {moveItemProps.open && moveItemProps.emptyItem && (
         <MoveItemToEmpty
           open={moveItemProps.open}
@@ -681,45 +636,6 @@ export default function Appearance({ types, showNotification }: IProps) {
         </Box>
 
         <Typography>Promotion Section</Typography>
-        {/* {promotionList.length > 0 && (
-          <DndContext
-            sensors={sensors}
-            onDragStart={onDragStart}
-            // onDragMove={onDragMove}
-            onDragEnd={(e: any) => onDragEnd(e, SORT_CATEGORY.PROMOTION, setPromotionList)}
-            collisionDetection={closestCorners}
-          >
-            <SortableContext
-              items={promotionList?.map((promo: IPromotion) => promo.id)}
-            >
-              {promotionList?.map((promo: IPromotion, index: number) => {
-                return (
-                  <SortableItemType
-                    key={index}
-                    type={promo}
-                    dndMode={dndMode}
-                    renderField="title"
-                  >
-                    <SortableContext
-                      items={promo?.items?.map((item) => item.id)}
-                    >
-                      {promo?.items?.map((item: any) => {
-                        return (
-                          <SortableItem
-                            key={item.id}
-                            item={item}
-                            dndMode={dndMode}
-                            onOpenSwitchType={() => {}}
-                          />
-                        );
-                      })}
-                    </SortableContext>
-                  </SortableItemType>
-                );
-              })}
-            </SortableContext>
-          </DndContext>
-        )} */}
 
         <DndContext
           sensors={sensors}
@@ -737,9 +653,16 @@ export default function Appearance({ types, showNotification }: IProps) {
                   {
                     // If the previous type is promotion and this type is not promotion
                     // Add a divider
-                    typeIndex > 0 &&
+                    (typeIndex > 0 &&
                       itemTypes[typeIndex - 1].id.includes('promotion') &&
-                      !type.id.includes('promotion') && <Divider />
+                      !type.id.includes('promotion') || (typeIndex === 0 && !type.id.includes('promotion'))) && (
+                        <>
+                          <Button variant="contained" fullWidth onClick={() => setIsOpenAddPromotion(true)}>
+                            Edit Promotion Section
+                          </Button>
+                          <Divider />
+                        </>
+                      )
                   }
                   <SortableItemType
                     key={typeIndex}
