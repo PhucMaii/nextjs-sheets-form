@@ -9,7 +9,7 @@ import {
   normalizeDate,
 } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
-import { checkHasClientOrder, getCreatedBy, overrideOrder } from './utils';
+import { checkHasClientOrder, getCreatedBy } from './utils';
 import { createOrder } from '../admin/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
@@ -181,25 +181,72 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       }
 
-      if (createdBy !== USER_ROLE.CLIENT) {
-        return res.status(200).json({
-          warning: `Client ${existingUser.clientName} has ordered for ${deliveryDate}`,
-          data: userOrder,
-          flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
-        });
-      }
+      const lastOrderItems = userOrder.items.map((item: any) => {
+        const isInNewItems = items.find(
+          (newItem: any) => newItem.name === item.name,
+        );
 
-      const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
-      await overrideOrder(
-        existingUser,
-        userOrder.id,
-        itemsWithNo0,
-        note,
-        formattedCreatedBy,
-      );
-      return res.status(201).json({
-        message: 'Order Submitted Successfully',
+        if (isInNewItems) {
+          return { ...item, quantity: isInNewItems.quantity };
+        }
+
+        return item;
       });
+
+      const newItems = items.filter((item: any) => {
+        const isInLastOrder = lastOrderItems.find(
+          (lastItem: any) => lastItem.name === item.name,
+        );
+
+        return !isInLastOrder;
+      });
+
+      const lastOrderFinalItems = [...lastOrderItems, ...newItems];
+
+      const lastOrderTotalPrice = lastOrderFinalItems.reduce(
+        (total: number, item: any) => {
+          return total + item.quantity * item.price;
+        },
+        0,
+      );
+
+      const currentOrderTotalPrice = items.reduce(
+        (total: number, item: any) => {
+          return total + item.quantity * item.price;
+        },
+        0,
+      );
+      // else if (createdBy !== USER_ROLE.CLIENT) {
+      return res.status(200).json({
+        warning: `Client ${existingUser.clientName} has ordered for ${deliveryDate}`,
+        lastOrder: {
+          ...userOrder,
+          items: [...lastOrderItems, ...newItems],
+          totalPrice: lastOrderTotalPrice,
+          note,
+        },
+        currentOrder: {
+          ...userOrder,
+          totalPrice: currentOrderTotalPrice,
+          items,
+          note,
+          // createdBy: userOrder.createdBy,
+        },
+        flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
+      });
+      // }
+
+      // const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
+      // await overrideOrder(
+      //   existingUser,
+      //   userOrder.id,
+      //   itemsWithNo0,
+      //   note,
+      //   formattedCreatedBy,
+      // );
+      // return res.status(201).json({
+      //   message: 'Order Submitted Successfully',
+      // });
     }
 
     // await createOrder(existingUser, items, deliveryDate,

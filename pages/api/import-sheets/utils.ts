@@ -45,6 +45,7 @@ export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
     },
     include: {
       items: true,
+      user: true,
     },
   });
 
