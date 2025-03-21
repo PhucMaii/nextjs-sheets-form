@@ -121,6 +121,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       'title',
     );
 
+    // Turn visibility for all updated promotions
+    await prisma.promotion.updateMany({
+      where: {
+        id: {
+          in: updatedPromotions.map((promotion: any) => promotion.id),
+        },
+      },
+      data: {
+        visibility: true,
+      },
+    });
+
     const dbPromoItems: any = await prisma.inventoryItem.findMany({
       include: {
         type: true,

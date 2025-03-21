@@ -4,13 +4,13 @@ import { getUserInfo } from '../../utils/auth';
 import { getTodayDate } from '../../utils/date';
 
 interface IBody {
-    fileKeyFront: string;
-    fileKeyBack: string;
-    month: string;
-    year: string;
-    chequeNumber: string;
-    amount: number;
-    userId: number;
+  fileKeyFront: string;
+  fileKeyBack: string;
+  month: string;
+  year: string;
+  chequeNumber: string;
+  amount: number;
+  userId: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {

@@ -45,6 +45,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt: createdAt.dateAndTime,
         rows: 1,
         priority: nextPriority,
+        visibility: false,
       },
     });
 

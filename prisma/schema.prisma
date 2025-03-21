@@ -469,6 +469,7 @@ model Promotion {
   createdAt  String
   rows    Int
   priority  Int
+  visibility  Boolean?
 
   items  InventoryItem[]
 }

@@ -175,7 +175,10 @@ export default function Sidebar({ children }: PropTypes) {
             </div>
           </Snackbar>
         )}
-        <Paper sx={{ position: 'fixed', bottom: '0 !important', zIndex: 50 }} elevation={3}>
+        <Paper
+          sx={{ position: 'fixed', bottom: '0 !important', zIndex: 50 }}
+          elevation={3}
+        >
           <BottomNavigation
             sx={{ width: '100vw !important' }}
             value={currentTab}

@@ -64,11 +64,10 @@ describe('Check Ordered Items', () => {
         },
       },
     });
-    
 
     expect(orderedItemsCheck.length).toBe(0);
     if (orderedItemsCheck.length > 0) {
       console.log(orderedItemsCheck);
     }
-  })
+  });
 });
