@@ -25,13 +25,7 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
-import {
-  CircleUserIcon,
-  HomeIcon,
-  ShoppingBagIcon,
-  ShoppingCartIcon,
-  UserIcon,
-} from 'lucide-react';
+import { HomeIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';
 import useLocalStorage from '@/hooks/useLocalStorage';
@@ -43,6 +37,9 @@ import { updateCart } from '@/state/cart/cartSlice';
 import axios from 'axios';
 import { RootState } from '@/state/store';
 import { updateUser } from '@/state/user/userSlice';
+import { IItemType } from '@/app/utils/type';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import ItemTypePopover from './ItemTypePopover';
 
 const CartBadge = styled(Badge)`
   & .${badgeClasses.badge} {
@@ -57,27 +54,40 @@ const tabs = [
     href: '/',
     icon: HomeIcon,
   },
-  {
-    label: 'About',
-    href: '/about',
-    icon: CircleUserIcon,
-  },
-  {
-    label: 'Products',
-    href: '/products',
-    icon: ShoppingBagIcon,
-  },
+  // {
+  //   label: 'About',
+  //   href: '/about',
+  //   icon: CircleUserIcon,
+  // },
+  // {
+  //   label: 'Products',
+  //   href: '/products',
+  //   icon: ShoppingBagIcon,
+  // },
 ];
 const drawerWidth = 250;
 
 export default function Navbar() {
   // const [cId, setCId] = useLocalStorage('cartId', cartId || '');
+  const [itemTypes, setItemTypes] = useState<IItemType[]>([]);
   const [guestSession, setGuestSession, isInitialized] = useLocalStorage(
     'guest-session',
     {},
   );
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>('');
+  const [itemTypePopoverProps, setItemTypePopoverProps] = useState<any>({
+    open: false,
+    anchorEl: null,
+    itemType: {} as IItemType,
+    setOpen: (props: any) =>
+      setItemTypePopoverProps({
+        open: props.open,
+        anchorEl: props.anchorEl,
+        itemType: props.itemType,
+        setOpen: props.setOpen,
+      }),
+  });
 
   const router = useRouter();
 
@@ -90,6 +100,8 @@ export default function Navbar() {
       ? `${API_URL.PUBLIC}/cart?cartId=${cartState.id}`
       : `${API_URL.PUBLIC}/cart?guestSessionId=${guestSession.sessionId}&guestSessionSignature=${guestSession.signature}`,
   );
+
+  // const {showNotification, NotificationComp} = useNotification();
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -113,6 +125,19 @@ export default function Navbar() {
 
     return qty;
   }, [cart]);
+
+  useEffect(() => {
+    const fetchItemTypes = async () => {
+      try {
+        const response = await axios.get(`${API_URL.PUBLIC}/types`);
+        setItemTypes(response.data.data.slice(0, 5));
+      } catch (error: any) {
+        console.log('Internal Server Error: ', error);
+      }
+    };
+
+    fetchItemTypes();
+  }, []);
 
   useEffect(() => {
     if (isInitialized) {
@@ -283,6 +308,20 @@ export default function Navbar() {
                   </ListItemButtonStyled>
                 );
               })}
+
+              {itemTypes?.map((itemType: any, index: any) => {
+                return (
+                  <ListItemButtonStyled
+                    $textColor={landingPagePrimaryColor}
+                    $bgColor={green[50]}
+                    $currentTab={selectedTab === itemType.href}
+                    key={index}
+                    onClick={() => handleChangeTab(itemType.href)}
+                  >
+                    <ListItemText primary={itemType.name} />
+                  </ListItemButtonStyled>
+                );
+              })}
             </List>
 
             <Box
@@ -330,104 +369,175 @@ export default function Navbar() {
     );
   }
 
-  return (
-    <Box
-      px={4}
-      position="fixed"
-      width="100%"
-      // height="120px"
-      py={1}
-      top={0}
-      sx={{
-        backgroundColor: 'white',
-        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
-        zIndex: 100,
-      }}
-    >
-      <Box
-        display="flex"
-        alignItems="center"
-        px={4}
-        justifyContent="space-between"
-      >
-        <Logo />
-        <Searchbar width="50%" />
-        <Box display="flex" alignItems="center" gap={1}>
-          <IconButton
-            onClick={proceedToApplicationForm}
-            size="large"
-            sx={{
-              color: landingPagePrimaryColor,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <UserIcon style={{ width: 30, height: 30 }} />
-            <Box sx={{ display: 'flex', alignItems: 'center', height: 0 }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: landingPagePrimaryColor,
-                  fontWeight: 'bold',
-                  mt: 2,
-                }}
-              >
-                Log in
-              </Typography>
-            </Box>
-          </IconButton>
-          <Divider orientation="vertical" flexItem />
-          <IconButton
-            sx={{ color: landingPagePrimaryColor }}
-            onClick={() => router.push('/cart')}
-          >
-            <ShoppingCartIcon style={{ width: 30, height: 30 }} />
-            <CartBadge
-              badgeContent={cartItemsQty}
-              color="error"
-              overlap="circular"
-            />
-          </IconButton>
-        </Box>
-      </Box>
+  // const handleMouseLeave = () => {
+  //   const timeout = setTimeout(() => {
+  //     setItemTypePopoverProps({ open: false, anchorEl: null, itemType: null });
+  //   }, 300); // Adjust delay if necessary
+  //   setPopoverTimeout(timeout);
+  // };
+  
 
+  return (
+    <>
+      <ItemTypePopover
+        open={itemTypePopoverProps.open}
+        // set Open={itemTypePopoverProps.setOpen}
+        anchorEl={itemTypePopoverProps.anchorEl}
+        itemType={itemTypePopoverProps.itemType}
+        onClose={() =>
+          setItemTypePopoverProps({
+            open: false,
+            anchorEl: null,
+            itemType: null,
+          })
+        }
+      />
       <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        gap={4}
+        px={4}
+        position="fixed"
         width="100%"
+        // height="120px"
+        py={1}
+        top={0}
+        sx={{
+          backgroundColor: 'white',
+          boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
+          zIndex: 100,
+        }}
       >
-        {/* The links to the other pages */}
-        {tabs.map((tab: any) => {
-          return (
-            <Typography
-              variant="h6"
-              key={tab.label}
-              onClick={() => {
-                window.location.href = tab.href;
-                // setSelectedTab(tab.href);
-              }}
+        <Box
+          display="flex"
+          alignItems="center"
+          px={4}
+          justifyContent="space-between"
+        >
+          <Logo />
+          <Searchbar width="50%" />
+          <Box display="flex" alignItems="center" gap={1}>
+            <IconButton
+              onClick={proceedToApplicationForm}
+              size="large"
               sx={{
-                backgroundColor:
-                  selectedTab === tab.href ? green[50] : 'transparent',
-                color:
-                  selectedTab === tab.href ? green[700] : landingPageGreyColor,
-                px: 3,
-                py: 1,
-                borderRadius: 2,
-                ':hover': {
-                  cursor: 'pointer',
-                  backgroundColor: blueGrey[50],
-                },
+                color: landingPagePrimaryColor,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
-              {tab.label}
-            </Typography>
-          );
-        })}
+              <UserIcon style={{ width: 30, height: 30 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', height: 0 }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: landingPagePrimaryColor,
+                    fontWeight: 'bold',
+                    mt: 2,
+                  }}
+                >
+                  Log in
+                </Typography>
+              </Box>
+            </IconButton>
+            <Divider orientation="vertical" flexItem />
+            <IconButton
+              sx={{ color: landingPagePrimaryColor }}
+              onClick={() => router.push('/cart')}
+            >
+              <ShoppingCartIcon style={{ width: 30, height: 30 }} />
+              <CartBadge
+                badgeContent={cartItemsQty}
+                color="error"
+                overlap="circular"
+              />
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={4}
+          width="100%"
+        >
+          {/* The links to the other pages */}
+          {tabs.map((tab: any) => {
+            return (
+              <Typography
+                variant="h6"
+                key={tab.label}
+                onClick={() => {
+                  window.location.href = tab.href;
+                  // setSelectedTab(tab.href);
+                }}
+                sx={{
+                  backgroundColor:
+                    selectedTab === tab.href ? green[50] : 'transparent',
+                  color:
+                    selectedTab === tab.href
+                      ? green[700]
+                      : landingPageGreyColor,
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  ':hover': {
+                    cursor: 'pointer',
+                    backgroundColor: blueGrey[50],
+                  },
+                }}
+              >
+                {tab.label}
+              </Typography>
+            );
+          })}
+
+          {itemTypes?.map((itemType: any, index: any) => {
+            return (
+              <Box
+                display="flex"
+                alignItems="center"
+                sx={{
+                  px: 3,
+                  py: 1,
+                  backgroundColor:
+                    selectedTab === itemType.href ? green[50] : 'transparent',
+                  ':hover': {
+                    cursor: 'pointer',
+                    backgroundColor: blueGrey[50],
+                  },
+                  borderRadius: 2,
+                }}
+                onMouseOver={(e: any) => {
+                  setItemTypePopoverProps({
+                    open: true,
+                    anchorEl: e.currentTarget,
+                    itemType,
+                  });
+                }}
+                // onMouseLeave={handleMouseLeave}
+              >
+                <Typography
+                  variant="h6"
+                  key={index}
+                  onClick={() => {
+                    window.location.href = itemType.href;
+                    // setSelectedTab(itemType.href);
+                  }}
+                  sx={{
+                    color:
+                      selectedTab === itemType.href
+                        ? green[700]
+                        : landingPageGreyColor,
+                  }}
+                >
+                  {itemType.name}
+                </Typography>
+                <KeyboardArrowDownIcon />
+              </Box>
+            );
+          })}
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }
