@@ -120,35 +120,36 @@ export default function ChequeTab({ client, showNotification }: IProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {displayCheques?.length > 0 ? displayCheques?.map((cheque: Cheque) => {
-            return (
-              <TableRow
-                key={cheque.id}
-                onClick={() =>
-                  setEditChequeProps({ open: true, cheque: cheque })
-                }
-                sx={{ '&:hover': { backgroundColor: grey[50] } }}
-              >
-                <TableCell>
-                  <Box
-                    onClick={(e: any) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setViewImgProps({
-                        open: true,
-                        fileKeyFront: cheque.fileKeyFront,
-                        fileKeyBack: cheque.fileKeyBack,
-                      });
-                    }}
-                    onMouseEnter={() => setHoveredChequeId(cheque.id)}
-                    onMouseLeave={() => setHoveredChequeId(null)}
-                    style={{
-                      width: '100px',
-                      height: '100px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {/* <img
+          {displayCheques?.length > 0 ? (
+            displayCheques?.map((cheque: Cheque) => {
+              return (
+                <TableRow
+                  key={cheque.id}
+                  onClick={() =>
+                    setEditChequeProps({ open: true, cheque: cheque })
+                  }
+                  sx={{ '&:hover': { backgroundColor: grey[50] } }}
+                >
+                  <TableCell>
+                    <Box
+                      onClick={(e: any) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setViewImgProps({
+                          open: true,
+                          fileKeyFront: cheque.fileKeyFront,
+                          fileKeyBack: cheque.fileKeyBack,
+                        });
+                      }}
+                      onMouseEnter={() => setHoveredChequeId(cheque.id)}
+                      onMouseLeave={() => setHoveredChequeId(null)}
+                      style={{
+                        width: '100px',
+                        height: '100px',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {/* <img
                       src={generateImgUrl(
                         hoveredChequeId === cheque.id && cheque?.fileKeyBack
                           ? cheque?.fileKeyBack
@@ -161,29 +162,29 @@ export default function ChequeTab({ client, showNotification }: IProps) {
                       }}
                       alt="cheque"
                     /> */}
-                    <DisplayFile
-                      fileKey={
-                        hoveredChequeId === cheque.id && cheque?.fileKeyBack
-                          ? cheque?.fileKeyBack
-                          : cheque.fileKeyFront
-                      }
-                    />
-                  </Box>
-                </TableCell>
-                <TableCell>{cheque.chequeNumber}</TableCell>
-                <TableCell>${cheque.amount}</TableCell>
-                <TableCell>
-                  {cheque.month} {cheque.year}
-                </TableCell>
-                <TableCell>{cheque.createdAt.toLocaleString()}</TableCell>
-              </TableRow>
-            );
-          }) : (
+                      <DisplayFile
+                        fileKey={
+                          hoveredChequeId === cheque.id && cheque?.fileKeyBack
+                            ? cheque?.fileKeyBack
+                            : cheque.fileKeyFront
+                        }
+                      />
+                    </Box>
+                  </TableCell>
+                  <TableCell>{cheque.chequeNumber}</TableCell>
+                  <TableCell>${cheque.amount}</TableCell>
+                  <TableCell>
+                    {cheque.month} {cheque.year}
+                  </TableCell>
+                  <TableCell>{cheque.createdAt.toLocaleString()}</TableCell>
+                </TableRow>
+              );
+            })
+          ) : (
             <TableRow>
               <TableCell colSpan={5}>
                 <ErrorComponent errorText="No cheque found" />
               </TableCell>
-
             </TableRow>
           )}
         </TableBody>

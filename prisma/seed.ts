@@ -115,9 +115,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-async function main() {
-
-}
+async function main() {}
 
 main()
   .then(() => prisma.$disconnect())

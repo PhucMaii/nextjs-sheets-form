@@ -65,8 +65,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (deliveryAddress && deliveryAddress !== existingUser?.deliveryAddress) {
-      updateFields.deliveryAddress = deliveryAddress ? deliveryAddress : existingUser.deliveryAddress;
-      const addresss = await generateLatLng(deliveryAddress ? deliveryAddress : existingUser.deliveryAddress);
+      updateFields.deliveryAddress = deliveryAddress
+        ? deliveryAddress
+        : existingUser.deliveryAddress;
+      const addresss = await generateLatLng(
+        deliveryAddress ? deliveryAddress : existingUser.deliveryAddress,
+      );
       updateFields.deliveryAddressLat = addresss.latitude;
       updateFields.deliveryAddressLng = addresss.longitude;
     }

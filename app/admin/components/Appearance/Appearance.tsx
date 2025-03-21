@@ -58,7 +58,7 @@ export default function Appearance({ types, showNotification }: IProps) {
 
   useEffect(() => {
     if (types && !dndMode) {
-      console.log('run type')
+      console.log('run type');
       setItemTypes(types);
     }
   }, [types]);
@@ -186,13 +186,16 @@ export default function Appearance({ types, showNotification }: IProps) {
         // const activeItem = newItems[activeContainerIndex].inventoryItems[activeItemIndex];
         const overItem =
           newItems[overContainerIndex].inventoryItems[overItemIndex];
-        
-        const activeItem = newItems[activeContainerIndex].inventoryItems[activeItemIndex];
+
+        const activeItem =
+          newItems[activeContainerIndex].inventoryItems[activeItemIndex];
 
         // Replace active item with over item in active container
-        newItems[
-          activeContainerIndex
-        ].inventoryItems.splice(activeItemIndex, 1, overItem);
+        newItems[activeContainerIndex].inventoryItems.splice(
+          activeItemIndex,
+          1,
+          overItem,
+        );
 
         // Replace over item with active item in over container
         newItems[overContainerIndex].inventoryItems.splice(
@@ -251,9 +254,8 @@ export default function Appearance({ types, showNotification }: IProps) {
         setItemTypes(newItems);
       } else {
         const newItems = [...itemTypes];
-        const overItem = newItems[overContainerIndex].inventoryItems[
-          overItemIndex
-        ]
+        const overItem =
+          newItems[overContainerIndex].inventoryItems[overItemIndex];
         // Replace item with empty in the active
         const [removeItem] = newItems[
           activeContainerIndex
@@ -302,12 +304,13 @@ export default function Appearance({ types, showNotification }: IProps) {
 
       const overItemIndex = overContainer.inventoryItems.findIndex(
         (item) => item.id === over.id,
-      )
+      );
 
       // Replace the active item from the active container with empty item and add it to the over container
       const newItems = [...itemTypes];
 
-      const overItem = newItems[overContainerIndex].inventoryItems[overItemIndex];
+      const overItem =
+        newItems[overContainerIndex].inventoryItems[overItemIndex];
 
       const [removedItem] = newItems[
         activeContainerIndex
@@ -409,7 +412,7 @@ export default function Appearance({ types, showNotification }: IProps) {
     const itemContainerIndex = itemTypes.findIndex(
       (i) => i.id === itemContainer.id,
     );
-    
+
     const emptyItemIndex = emptyItemContainer.inventoryItems.findIndex(
       (i) => i.id === moveItemProps.emptyItem.id,
     );

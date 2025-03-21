@@ -888,9 +888,7 @@ const OrderView = ({
                         }
                       />
                     ) : (
-                      <Typography>
-                        ${item.price.toFixed(2)}
-                      </Typography>
+                      <Typography>${item.price.toFixed(2)}</Typography>
                     )}
                     {item.isShowDiscount && item.prevPrice && (
                       <Typography

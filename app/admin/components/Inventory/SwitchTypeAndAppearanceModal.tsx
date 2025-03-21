@@ -133,10 +133,9 @@ export default function SwitchTypeAndAppearanceModal({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              border:
-                !itemImage
-                  ? `3px solid ${primaryColor} `
-                  : `1px solid ${grey[100]}`,
+              border: !itemImage
+                ? `3px solid ${primaryColor} `
+                : `1px solid ${grey[100]}`,
               borderRadius: '10px',
             }}
             onClick={() => setItemImage('')}

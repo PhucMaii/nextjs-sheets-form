@@ -12,7 +12,11 @@ const s3 = new S3Client({
   },
 });
 
-export default async function uploadToS3(file: File, name: string, location: string) {
+export default async function uploadToS3(
+  file: File,
+  name: string,
+  location: string,
+) {
   try {
     if (!process.env.NEXT_PUBLIC_S3_BUCKET_NAME) {
       throw new Error(

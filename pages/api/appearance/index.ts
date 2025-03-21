@@ -31,7 +31,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // If there is no item, then add empty items to fill up space
         if (!item) {
           newItems.push({
-            id: Math.round(Math.random() * 1000000 + 80000000 + type.id / arrayIndex), // Create random id that will not be same as either type id or any items id
+            id: Math.round(
+              Math.random() * 1000000 + 80000000 + type.id / arrayIndex,
+            ), // Create random id that will not be same as either type id or any items id
             indexPos: arrayIndex + 1,
             name: 'Empty',
             dataType: 'Empty',
@@ -45,7 +47,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             let pos = arrayIndex + 1 + numberOfEmpty;
             while (pos < item.indexPos) {
               newItems.push({
-                id: Math.round(Math.random() * 1000000 + 20000000 + type.id / pos), // Create random id that will not be same as either type id or any items id
+                id: Math.round(
+                  Math.random() * 1000000 + 20000000 + type.id / pos,
+                ), // Create random id that will not be same as either type id or any items id
                 indexPos: pos,
                 name: 'Empty',
                 dataType: 'Empty',
