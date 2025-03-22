@@ -34,6 +34,7 @@ interface PropTypes {
   order: Order;
   showNotification?: (type: AlertColor, message: string) => void;
   isEdit?: boolean;
+  defaultExpanded?: boolean;
 }
 
 export default function OrderAccordion({
@@ -42,6 +43,7 @@ export default function OrderAccordion({
   handleDeleteOrder,
   handleUpdateOrderUI,
   isEdit,
+  defaultExpanded,
 }: PropTypes) {
   const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
   const [isDeleteOrderOpen, setIsDeleteOrderOpen] = useState<boolean>(false);
@@ -83,7 +85,7 @@ export default function OrderAccordion({
             />
           </>
         )}
-      <Accordion>
+      <Accordion defaultExpanded={defaultExpanded}>
         <AccordionSummary>
           <Grid container alignItems="center">
             <Grid item xs={12}>
@@ -130,7 +132,9 @@ export default function OrderAccordion({
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Button variant="contained">{order.clientName}</Button>
+              <Button variant="contained">
+                {order?.clientName || order?.user?.clientName}
+              </Button>
             </Grid>
             <Grid item xs={12} md={3} textAlign="left">
               <Typography fontWeight="bold" variant="subtitle1">
@@ -193,7 +197,8 @@ export default function OrderAccordion({
                             {item?.isShowDiscount &&
                               item?.prevPrice &&
                               (item.prevPrice * item.quantity).toFixed(2) !==
-                                item.totalPrice.toFixed(2) && (
+                                (item?.totalPrice?.toFixed(2) ||
+                                  (item.quantity * item.price).toFixed(2)) && (
                                 <Typography
                                   sx={{ textDecoration: 'line-through' }}
                                   color="error"
@@ -202,7 +207,9 @@ export default function OrderAccordion({
                                 </Typography>
                               )}
                             <Typography>
-                              ${item.totalPrice.toFixed(2)}
+                              $
+                              {item?.totalPrice?.toFixed(2) ||
+                                (item.quantity * item.price).toFixed(2)}
                             </Typography>
                           </Box>
                         </TableCell>

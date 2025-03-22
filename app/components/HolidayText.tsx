@@ -33,7 +33,7 @@ export default function HolidayText() {
           >
             Banh Pho Sincere
           </strong>{' '}
-          price will be affected.
+          price will be affected by March 25th.
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
           Thank you for your understanding and continued support!
