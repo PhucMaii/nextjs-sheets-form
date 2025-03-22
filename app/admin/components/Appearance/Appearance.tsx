@@ -498,6 +498,7 @@ export default function Appearance({ types, showNotification }: IProps) {
       }
 
       showNotification('success', response.data.message);
+      setDndMode(false);
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification('error', 'There was an error: ' + error);

@@ -39,6 +39,7 @@ export default async function DELETE(
       },
       data: {
         promotionId: null,
+        promoIndexPos: null,
       },
     });
 
