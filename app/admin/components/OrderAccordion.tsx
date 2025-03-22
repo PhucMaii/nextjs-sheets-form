@@ -181,7 +181,7 @@ const OrderAccordion = ({
       showNotification('success', response.data.message);
       setIsMarkButtonDisabled(false);
     } catch (error) {
-      console.log('Fail to mark as completed: ', error);
+      console.log('Fail to update status: ', error);
     }
   };
 
@@ -316,7 +316,7 @@ const OrderAccordion = ({
           }
           onClick={(e) => handleChangeStatus(e, ORDER_STATUS.COMPLETED)}
         >
-          Mark as completed
+          Mark as paid
         </MenuItem>
         <MenuItem
           disabled={
@@ -324,7 +324,7 @@ const OrderAccordion = ({
           }
           onClick={(e) => handleChangeStatus(e, ORDER_STATUS.DELIVERED)}
         >
-          Mark as delivered
+          Mark as fulfilled
         </MenuItem>
         <MenuItem
           disabled={
@@ -332,7 +332,7 @@ const OrderAccordion = ({
           }
           onClick={(e) => handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)}
         >
-          Mark as incompleted
+          Mark as unfulfilled
         </MenuItem>
         <MenuItem
           disabled={isMarkButtonDisabled || order.status === ORDER_STATUS.VOID}

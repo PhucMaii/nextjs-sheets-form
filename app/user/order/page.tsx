@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import dayjs from 'dayjs';
 import { Box, Tab, Tabs } from '@mui/material';
 import moment from 'moment';
@@ -18,6 +18,7 @@ import { TourProvider } from '@reactour/tour';
 import TourStartButton from './TourStartButton';
 import { grey } from '@mui/material/colors';
 import OldOrderVersion from './OldOrderVersion';
+import OverrideOrder from '../components/Modals/OverrideOrder';
 
 const steps = [
   {
@@ -47,6 +48,11 @@ export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tabIdx, setTabIdx] = useState<number>(0);
+  const [overrideOrderProps, setOverrideOrderProps] = useState<any>({
+    open: false,
+    lastOrder: null,
+    newOrder: null,
+  });
 
   const router = useRouter();
   const { showNotification, notification, closeNotification } = useNotification(
@@ -150,6 +156,14 @@ export default function OrderForm() {
 
       if (response.data.warning) {
         showNotification('warning', response.data.warning);
+
+        if (response.data.flag === FLAG_ORDER_TYPE.ALREADY_ORDER) {
+          setOverrideOrderProps({
+            open: true,
+            lastOrder: response.data.lastOrder,
+            newOrder: response.data.currentOrder,
+          });
+        }
         return response;
       }
       showNotification('success', response.data.message);
@@ -176,6 +190,21 @@ export default function OrderForm() {
 
   return (
     <TourProvider steps={steps}>
+      {overrideOrderProps.newOrder && overrideOrderProps.lastOrder && (
+        <OverrideOrder
+          showNotification={showNotification}
+          lastOrder={overrideOrderProps.lastOrder}
+          open={overrideOrderProps.open}
+          onClose={() => {
+            setOverrideOrderProps({
+              open: false,
+              lastOrder: null,
+              newOrder: null,
+            });
+          }}
+          newOrder={overrideOrderProps.newOrder}
+        />
+      )}
       <Sidebar>
         <NotificationPopup
           notification={notification}

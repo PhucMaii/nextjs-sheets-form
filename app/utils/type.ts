@@ -15,6 +15,7 @@ import {
   ItemType_Category,
   PaymentMethod,
   PositionIndex,
+  Promotion,
   Route,
   User,
   UserRoute,
@@ -285,3 +286,6 @@ export type OrderSummary = {
   GST: number;
   shippingFee: number;
 };
+export interface IPromotion extends Promotion {
+  items: IInventoryItem[];
+}

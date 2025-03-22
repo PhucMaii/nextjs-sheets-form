@@ -37,10 +37,15 @@ export enum COD_STATUS {
 
 export enum ORDER_STATUS {
   NONE = 'none',
-  COMPLETED = 'Completed',
+  COMPLETED = 'Paid',
   DELIVERED = 'Fulfilled',
   INCOMPLETED = 'Unfulfilled',
   VOID = 'Void',
+}
+
+export enum PROMOTION_STATUS {
+  ACTIVE = 'Active',
+  INACTIVE = 'Inactive',
 }
 
 export enum ORDER_TYPE {

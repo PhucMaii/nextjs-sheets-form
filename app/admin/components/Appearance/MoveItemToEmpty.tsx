@@ -16,7 +16,7 @@ export default function MoveItemToEmpty({
   inventoryItems,
   onMoveItemToEmpty,
 }: IBody) {
-  const [selectedItem, setSelectedItem] = useState<IInventoryItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<IInventoryItem | any>(null);
 
   return (
     <Modal open={open} onClose={onClose}>

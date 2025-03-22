@@ -1,4 +1,4 @@
-import { IItem, IItemType } from '@/app/utils/type';
+import { IItem } from '@/app/utils/type';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Box, Button, Grid, IconButton, Typography } from '@mui/material';
@@ -6,17 +6,24 @@ import { grey } from '@mui/material/colors';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { ItemButton } from '@/app/components/OrderView';
 import { infoBackground } from '@/theme/color';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { PlusIcon } from 'lucide-react';
 
 export const SortableItemType = ({
   type,
   children,
   dndMode,
+  renderField,
 }: {
-  type: IItemType;
+  type: any;
   children: any;
   dndMode: boolean;
+  renderField?: string;
 }) => {
+  if (!type) {
+    return;
+  }
+  // const id = type?.id?.split(' - ')[1];
   const {
     attributes,
     listeners,
@@ -44,7 +51,41 @@ export const SortableItemType = ({
         alignItems="center"
         justifyContent="space-between"
       >
-        <Typography variant="h6">{type.name}</Typography>
+        <Box display="flex" flexDirection="column">
+          <Typography
+            variant="h6"
+            sx={
+              type.id.includes('promotion')
+                ? {
+                    // px: 2,
+                    py: 2,
+                    color: '#ff4081',
+                    animation: 'flash 1s infinite ease-in-out',
+                    '@keyframes flash': {
+                      '0%, 100%': {
+                        opacity: 1,
+                      },
+                      '50%': {
+                        opacity: 0.8,
+                      },
+                    },
+                  }
+                : {}
+            }
+          >
+            {renderField ? type[renderField] : type.name}{' '}
+            {type.id.includes('promotion') && '🎉'}
+          </Typography>
+          {type.id.includes('promotion') && !type?.visibility && (
+            <Box display="flex" flexDirection="row" gap={1} alignItems={'center'}>
+              <VisibilityOffIcon fontSize="small" sx={{ color: grey[600] }} />
+              <Typography variant="body2" sx={{color: grey[600], fontWeight: 'medium'}}>
+                Hidden from customers. Will show when the layout is saved
+              </Typography>
+            </Box>
+          )}
+        </Box>
+        {/* <Typography variant="h6">{renderField ? type[renderField] : type.name}</Typography> */}
         {dndMode && (
           <IconButton {...(dndMode ? listeners : {})}>
             <DragIndicatorIcon />
@@ -62,11 +103,17 @@ export const SortableItem = ({
   item,
   dndMode,
   onOpenSwitchType,
+  onRemove,
 }: {
   item: any;
   dndMode: boolean;
   onOpenSwitchType: any;
+  onRemove?: any;
 }) => {
+  if (!item) {
+    return;
+  }
+  // const id = item?.id?.split(' - ')[1];
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: item.id,
     data: { type: 'item' },
@@ -98,6 +145,7 @@ export const SortableItem = ({
           if (dndMode) return;
           onOpenSwitchType(item);
         }}
+        onRemove={onRemove}
       />
     </Grid>
   );

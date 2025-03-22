@@ -38,6 +38,7 @@ import {
   warningColor,
 } from '../../theme/color';
 import { amber, brown, grey, orange } from '@mui/material/colors';
+import CampaignIcon from '@mui/icons-material/Campaign';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -248,11 +249,6 @@ export const adminTabs = {
       path: '/admin/pre-orders',
     },
     {
-      name: 'Statements',
-      icon: DocumentScannerIcon,
-      path: '/admin/statements',
-    },
-    {
       name: 'Order Layout',
       icon: WysiwygIcon,
       path: '/admin/order-layout',
@@ -261,6 +257,12 @@ export const adminTabs = {
       name: 'Website',
       icon: LanguageIcon,
       path: '/admin/website',
+    },
+    { name: 'Promotions', icon: CampaignIcon, path: '/admin/promotions' },
+    {
+      name: 'Statements',
+      icon: DocumentScannerIcon,
+      path: '/admin/statements',
     },
     {
       name: 'Blocking',
@@ -376,25 +378,25 @@ export const statusTabs = [
   {
     color: warningColor,
     icon: PendingIcon,
-    name: 'Incompleted',
+    name: ORDER_STATUS.INCOMPLETED,
     value: ORDER_STATUS.INCOMPLETED,
   },
   {
     color: infoColor,
     icon: LocalShippingIcon,
-    name: 'Delivered',
+    name: ORDER_STATUS.DELIVERED,
     value: ORDER_STATUS.DELIVERED,
   },
   {
     color: successColor,
     icon: DoneAllIcon,
-    name: 'Completed',
+    name: ORDER_STATUS.COMPLETED,
     value: ORDER_STATUS.COMPLETED,
   },
   {
     color: errorColor,
     icon: BlockIcon,
-    name: 'Void',
+    name: ORDER_STATUS.VOID,
     value: ORDER_STATUS.VOID,
   },
 ];

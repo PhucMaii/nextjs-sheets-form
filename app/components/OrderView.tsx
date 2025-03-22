@@ -54,6 +54,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { blackColor } from '@/theme/create-palette';
 import { generateImgUrl } from '../lib/s3';
+import { Discount } from '@mui/icons-material';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 export const WhiteSpace = () => {
   return (
@@ -67,51 +69,72 @@ export const WhiteSpace = () => {
   );
 };
 
-const OnSaleBadge = () => {
+const OnSaleBadge = ({
+  discountPrice,
+  prevPrice,
+}: {
+  discountPrice: number;
+  prevPrice: number;
+}) => {
+  const discountRate = useMemo(() => {
+    return (1 - discountPrice / prevPrice) * 100;
+  }, [discountPrice, prevPrice]);
+
   return (
     <Box
+      display="flex"
+      // justifyContent="center"
+      alignItems="center"
+      gap={0.5}
       sx={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 20,
-        height: 20,
-        borderRadius: '50%',
+        // position: 'absolute',
+        // top: 0,
+        // right: 0,
+        width: 'fit-content',
+        height: 25,
+        borderRadius: '5px',
         backgroundColor: red[500],
         zIndex: 50,
-        boxShadow: '0 0 8px rgba(228, 13, 13, 0.92)',
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          borderRadius: '50%',
-          backgroundColor: red[500],
-          opacity: 0.5,
-          animation: 'ping 1.5s infinite',
-          zIndex: -1,
-        },
-        '@keyframes ping': {
-          '0%': {
-            transform: 'scale(1)',
-            opacity: 0.3,
-            backgroundColor: red[500],
-          },
-          '50%': {
-            transform: 'scale(1.3)',
-            opacity: 1,
-            // backgroundColor: red[300],
-          },
-          '100%': {
-            transform: 'scale(1)',
-            opacity: 0.3,
-            backgroundColor: red[500],
-          },
-        },
+        padding: '5px 6px',
+        flexShrink: 0,
+        // boxShadow: '0 0 8px rgba(228, 13, 13, 0.92)',
+        // '&::after': {
+        //   content: '""',
+        //   position: 'absolute',
+        //   top: 0,
+        //   left: 0,
+        //   width: '100%',
+        //   height: '100%',
+        //   borderRadius: '50%',
+        //   backgroundColor: red[500],
+        //   opacity: 0.5,
+        //   animation: 'ping 1.5s infinite',
+        //   zIndex: -1,
+        // },
+        // '@keyframes ping': {
+        //   '0%': {
+        //     transform: 'scale(1)',
+        //     opacity: 0.3,
+        //     backgroundColor: red[500],
+        //   },
+        //   '50%': {
+        //     transform: 'scale(1.3)',
+        //     opacity: 1,
+        //     // backgroundColor: red[300],
+        //   },
+        //   '100%': {
+        //     transform: 'scale(1)',
+        //     opacity: 0.3,
+        //     backgroundColor: red[500],
+        //   },
+        // },
       }}
-    ></Box>
+    >
+      <Discount sx={{ fontSize: 13, color: 'white' }} />
+      <Typography sx={{ fontSize: 10, fontWeight: 'medium', color: 'white' }}>
+        {discountRate.toFixed(0)}% off
+      </Typography>
+    </Box>
   );
 };
 
@@ -123,6 +146,7 @@ export const ItemButton = ({
   ref,
   disabled,
   flexColOnDiscount,
+  onRemove,
 }: {
   item: IItem;
   onClick?: any;
@@ -131,6 +155,7 @@ export const ItemButton = ({
   ref?: any;
   disabled?: boolean;
   flexColOnDiscount?: boolean;
+  onRemove?: any;
 }) => {
   return (
     <Button
@@ -181,9 +206,45 @@ export const ItemButton = ({
             }}
           />
         )}
-        <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
-          {item.name}
-        </Typography>
+        <Box
+          display="flex"
+          // alignItems="flex-start"
+          flexDirection={'column'}
+          // justifyContent={flexColOnDiscount ? '' : 'space-between'}
+          gap={1}
+          width="100%"
+        >
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
+              {item.name}
+            </Typography>
+            {onRemove && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(item);
+                }}
+                color="error"
+              >
+                <RemoveCircleIcon />
+              </IconButton>
+            )}
+          </Box>
+          {item?.isShowDiscount && item?.prevPrice && (
+            // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
+            <OnSaleBadge
+              discountPrice={item.price}
+              prevPrice={item.prevPrice}
+            />
+
+            // </Box>
+          )}
+        </Box>
         <Box
           display="flex"
           alignItems="center"
@@ -205,7 +266,6 @@ export const ItemButton = ({
           )}
         </Box>
       </Box>
-      {item?.isShowDiscount && item?.prevPrice && <OnSaleBadge />}
     </Button>
   );
 };
@@ -291,9 +351,11 @@ const OrderView = ({
     // const typesObj = convertItemArrayToMap(items);
     const newTypes = { ...(appearance?.itemTypes || {}) };
 
+    // Check if user allowed to view that item or not by comparing with provided items
     Object.keys(newTypes).forEach((key: string) => {
       newTypes[key] = newTypes[key].map((item: any) => {
-        const existingItem = items.find((i) => i.inventoryItemId === item.id);
+        const actualId = Number(item.id?.toString().split(' - ')[1]);
+        const existingItem = items.find((i) => i.inventoryItemId === actualId);
         if (existingItem) {
           return {
             ...item,
@@ -309,6 +371,33 @@ const OrderView = ({
 
     return newTypes;
   }, [items, appearance]);
+
+  const promotions = useMemo(() => {
+    const newPromotions = { ...(appearance?.promotions || {}) };
+
+    if (Object.keys(newPromotions).length === 0) {
+      return {};
+    }
+
+    Object.keys(newPromotions).forEach((key: string) => {
+      newPromotions[key] = newPromotions[key].map((item: any) => {
+        const actualId = Number(item.id?.toString().split(' - ')[1]);
+        const existingItem = items.find((i) => i.inventoryItemId === actualId);
+        if (existingItem) {
+          return {
+            ...item,
+            ...existingItem,
+          };
+        }
+        return {
+          ...item,
+          disabled: true,
+        };
+      });
+    });
+
+    return newPromotions;
+  }, [appearance]);
 
   const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('xs'));
 
@@ -583,55 +672,77 @@ const OrderView = ({
     );
   };
 
-  const renderAllItems = () => {
+  const renderAllItems = (containers: any, type: string = 'itemTypes') => {
     return (
       <>
-        {Object.keys(itemTypes).length > 0 &&
-          Object.keys(itemTypes)?.map((typeName: string) => {
+        {Object.keys(containers).length > 0 &&
+          Object.keys(containers)?.map((typeName: string) => {
             return (
               <Fragment key={typeName}>
                 <Grid item xs={12} mt={2}>
-                  <Typography variant="h6">{typeName}</Typography>
+                  <Typography
+                    variant="h6"
+                    sx={
+                      type === 'promotion' ? {
+                        // px: 2,
+                        py: 2,
+                        color: '#ff4081',
+                        animation: 'flash 1s infinite ease-in-out',
+                        '@keyframes flash': {
+                          '0%, 100%': {
+                            opacity: 1,
+                          },
+                          '50%': {
+                            opacity: 0.8,
+                          },
+                        },
+                      } : {}
+                    }
+                  >
+                    {typeName} {type === 'promotion' && '🎉'}
+                  </Typography>
                 </Grid>
 
-                {itemTypes[typeName].map((item: IItem | any, index: number) => {
-                  return (
-                    <Grid
-                      data-tour={index === 0 ? 'third-step' : ''}
-                      item
-                      xs={6}
-                      // sm={4}
-                      // md={3}
-                      // lg={3}
-                      sx={{ width: xsDown ? '50px' : '100%' }}
-                    >
-                      {item.name === 'Empty' ? (
-                        <WhiteSpace />
-                      ) : (
-                        <ItemButton
-                          item={item}
-                          onClick={() =>
-                            setSingleFieldProps({
-                              open: true,
-                              item,
-                              defaultValue: 0,
-                            })
-                          }
-                          style={{ width: xsDown ? '50px' : '100%' }}
-                          containerStyle={{
-                            backgroundColor: item?.disabled
-                              ? grey[100]
-                              : item?.inventoryItem?.color
-                                ? item?.inventoryItem?.color
-                                : infoBackground,
-                          }}
-                          disabled={item?.disabled}
-                          flexColOnDiscount={isModal && smDown}
-                        />
-                      )}
-                    </Grid>
-                  );
-                })}
+                {containers[typeName].map(
+                  (item: IItem | any, index: number) => {
+                    return (
+                      <Grid
+                        data-tour={index === 0 ? 'third-step' : ''}
+                        item
+                        xs={6}
+                        // sm={4}
+                        // md={3}
+                        // lg={3}
+                        sx={{ width: xsDown ? '50px' : '100%' }}
+                      >
+                        {item.name === 'Empty' ? (
+                          <WhiteSpace />
+                        ) : (
+                          <ItemButton
+                            item={item}
+                            onClick={() =>
+                              setSingleFieldProps({
+                                open: true,
+                                item,
+                                defaultValue: 0,
+                              })
+                            }
+                            style={{ width: xsDown ? '50px' : '100%' }}
+                            containerStyle={{
+                              backgroundColor: item?.disabled
+                                ? grey[100]
+                                : item?.inventoryItem?.color
+                                  ? item?.inventoryItem?.color
+                                  : infoBackground,
+                            }}
+                            disabled={item?.disabled}
+                            flexColOnDiscount={isModal && smDown}
+                          />
+                        )}
+                      </Grid>
+                    );
+                  },
+                )}
               </Fragment>
             );
           })}
@@ -720,8 +831,12 @@ const OrderView = ({
           maxHeight="100vh"
           overflow="auto"
         >
+          {selectedItemType === 'All' &&
+            !debouncedKeywords &&
+            renderAllItems(promotions, 'promotion')}
+
           {selectedItemType === 'All' && !debouncedKeywords
-            ? renderAllItems()
+            ? renderAllItems(itemTypes)
             : renderByItemType()}
 
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
@@ -764,12 +879,14 @@ const OrderView = ({
         display="flex"
         flexDirection="column"
         gap={1}
-        sx={{
-          position: 'sticky',
-          top: 0,
-          width: '100%',
-          mb: isModal && smDown ? 4 : 0,
-        }}
+        // sx={{
+        //   position: 'sticky',
+        //   top: 0,
+        //   width: '100%',
+        //   // mb: isModal && smDown ? 4 : 0,
+        //   overflowY: 'auto',
+        //   maxHeight: '100vh',
+        // }}
         data-tour="fourth-step"
       >
         {/* Only admin can affect inventory for an order in edit mode */}
@@ -800,7 +917,8 @@ const OrderView = ({
                 key={item.id}
                 display="flex"
                 flexDirection="column"
-                justifyContent="space-between"
+                // justifyContent="space-between"
+                gap={1}
                 sx={{
                   p: 1,
                   backgroundColor: primary.lightest,
@@ -826,7 +944,7 @@ const OrderView = ({
                 <Box
                   display="flex"
                   alignItems={smDown || isModal ? 'flex-start' : 'center'}
-                  justifyContent="space-between"
+                  // justifyContent="space-between"
                   flexDirection={smDown || isModal ? 'column' : 'row'}
                   gap={2}
                 >
@@ -846,13 +964,11 @@ const OrderView = ({
                         }
                       />
                     ) : (
-                      <Typography fontWeight="bold">
-                        ${item.price.toFixed(2)}
-                      </Typography>
+                      <Typography>${item.price.toFixed(2)}</Typography>
                     )}
                     {item.isShowDiscount && item.prevPrice && (
                       <Typography
-                        fontWeight="bold"
+                        // fontWeight="bold"
                         sx={{ textDecoration: 'line-through' }}
                         color="error"
                       >
@@ -860,56 +976,69 @@ const OrderView = ({
                       </Typography>
                     )}
                   </Box>
-
-                  {!smDown || editItemQuantity?.id === item.id ? (
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Fab
-                        size="small"
-                        sx={{
-                          width: 30,
-                          minHeight: 30,
-                          height: 30,
-                          boxShadow: 'none',
-                        }}
-                        color="primary"
-                        onClick={() => onDecrementQuantity(item)}
-                      >
-                        -
-                      </Fab>
-                      <Typography fontWeight="bold">{item.quantity}</Typography>
-                      <Fab
-                        size="small"
-                        sx={{
-                          width: 30,
-                          minHeight: 30,
-                          height: 30,
-                          boxShadow: 'none',
-                        }}
-                        color="primary"
-                        onClick={() => onIncrementQuantity(item)}
-                      >
-                        +
-                      </Fab>
-
-                      {smDown && (
-                        <IconButton
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    width="100%"
+                  >
+                    {!smDown || editItemQuantity?.id === item.id ? (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Fab
+                          size="small"
+                          sx={{
+                            width: 30,
+                            minHeight: 30,
+                            height: 30,
+                            boxShadow: 'none',
+                          }}
                           color="primary"
-                          onClick={() => setEditItemQuantity(null)}
+                          onClick={() => onDecrementQuantity(item)}
                         >
-                          <EditOffIcon />
+                          -
+                        </Fab>
+                        <Typography fontWeight="bold">
+                          {item.quantity}
+                        </Typography>
+                        <Fab
+                          size="small"
+                          sx={{
+                            width: 30,
+                            minHeight: 30,
+                            height: 30,
+                            boxShadow: 'none',
+                          }}
+                          color="primary"
+                          onClick={() => onIncrementQuantity(item)}
+                        >
+                          +
+                        </Fab>
+
+                        {smDown && (
+                          <IconButton
+                            color="primary"
+                            onClick={() => setEditItemQuantity(null)}
+                          >
+                            <EditOffIcon />
+                          </IconButton>
+                        )}
+                      </Box>
+                    ) : (
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="h6">
+                          Qty: <strong>{item.quantity}</strong>
+                        </Typography>
+                        <IconButton color="primary">
+                          <EditIcon onClick={() => setEditItemQuantity(item)} />
                         </IconButton>
-                      )}
-                    </Box>
-                  ) : (
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography fontWeight="bold">
-                        Qty: {item.quantity}
-                      </Typography>
-                      <IconButton color="primary">
-                        <EditIcon onClick={() => setEditItemQuantity(item)} />
-                      </IconButton>
-                    </Box>
-                  )}
+                      </Box>
+                    )}
+
+                    <Typography variant="h6">
+                      Total: $
+                      {((item?.quantity || 1) * item?.price)?.toFixed(2)}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             );

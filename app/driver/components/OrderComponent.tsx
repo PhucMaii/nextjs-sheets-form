@@ -26,6 +26,7 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import { renderType } from '@/app/lib/render';
 import { grey } from '@mui/material/colors';
+import PendingIcon from '@mui/icons-material/Pending';
 
 interface IProps {
   order: Order;
@@ -175,7 +176,24 @@ export default function OrderComponent({
               >
                 <DeleteIcon />
               </Fab>
-              {order.status === ORDER_STATUS.INCOMPLETED && (
+              {order.status !== ORDER_STATUS.INCOMPLETED && (
+                <Fab
+                  sx={{ zIndex: 0 }}
+                  onClick={() =>
+                    setConfirmModalProps({
+                      on: true,
+                      heading: `Are you sure to mark order as unfulfilled for ${order.clientName}`,
+                      color: 'warning',
+                      updatedStatus: ORDER_STATUS.INCOMPLETED,
+                    })
+                  }
+                  color="warning"
+                  size="small"
+                >
+                  <PendingIcon />
+                </Fab>
+              )}
+              {order.status !== ORDER_STATUS.DELIVERED && (
                 <Fab
                   sx={{ zIndex: 0 }}
                   onClick={() =>

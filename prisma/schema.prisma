@@ -287,6 +287,7 @@ model InventoryItem {
   image     String?
   isPromotion Boolean?
   indexPos  Int?
+  promoIndexPos Int?
   createdAt String
   createdBy String
   promotionId     Int?
@@ -464,7 +465,11 @@ model Cart {
 model Promotion {
   id      Int    @id @default(autoincrement())
   title   String 
-  isShow  Boolean
+  status  String
+  createdAt  String
+  rows    Int
+  priority  Int
+  visibility  Boolean?
 
   items  InventoryItem[]
 }
