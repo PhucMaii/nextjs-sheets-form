@@ -323,6 +323,7 @@ model ItemPreference {
   type          ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
   cartItems     CartItem[]
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
+  collectionItems   CollectionItem[]
 }
 
 model ItemType {
@@ -473,3 +474,24 @@ model Promotion {
 
   items  InventoryItem[]
 }
+
+model Collection {
+  id    Int   @id @default(autoincrement())
+  name  String
+  image String
+  createdAt   String
+
+  items     CollectionItem[]
+}
+
+
+model CollectionItem {
+  id    Int @id  @default(autoincrement())
+
+  collectionId   Int
+  itemPreferenceId  Int
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  itemPreference ItemPreference @relation(fields: [itemPreferenceId], references: [id], onDelete: Cascade)
+}
+
