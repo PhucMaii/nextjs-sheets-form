@@ -375,8 +375,9 @@ export default function Navbar() {
   //   }, 300); // Adjust delay if necessary
   //   setPopoverTimeout(timeout);
   // };
-  
 
+  console.log(itemTypePopoverProps.itemType, 'itemTypePopoverProps.type');
+  // let popoverTimeout: any;
   return (
     <>
       <ItemTypePopover
@@ -391,6 +392,7 @@ export default function Navbar() {
             itemType: null,
           })
         }
+        
       />
       <Box
         px={4}
@@ -514,8 +516,43 @@ export default function Navbar() {
                     itemType,
                   });
                 }}
-                // onMouseLeave={handleMouseLeave}
+                // onMouseLeave={() => {
+                //   popoverTimeout = setTimeout(() => {
+                //     setItemTypePopoverProps({
+                //       open: false,
+                //       anchorEl: null,
+                //       itemType: null,
+                //     });
+                //   }, 300); // Adjust delay time if necessary
+                // }}
+              
               >
+                {/* <ItemTypePopover
+                  open={itemTypePopoverProps.open}
+                  // set Open={itemTypePopoverProps.setOpen}
+                  anchorEl={itemTypePopoverProps.anchorEl}
+                  itemType={itemTypePopoverProps.itemType}
+                  onClose={() =>
+                    setItemTypePopoverProps({
+                      open: false,
+                      anchorEl: null,
+                      itemType: null,
+                    })
+                  }
+                  onMouseEnter={() => {
+                    setItemTypePopoverProps((prev) => ({
+                      ...prev,
+                      open: true,
+                    }));
+                  }}
+                  onMouseLeave={() =>
+                    setItemTypePopoverProps({
+                      open: false,
+                      anchorEl: null,
+                      itemType: null,
+                    })
+                  }
+                /> */}
                 <Typography
                   variant="h6"
                   key={index}
@@ -529,6 +566,20 @@ export default function Navbar() {
                         ? green[700]
                         : landingPageGreyColor,
                   }}
+                  // onMouseOver={(e: any) => {
+                  //   setItemTypePopoverProps({
+                  //     open: true,
+                  //     anchorEl: e.currentTarget,
+                  //     itemType,
+                  //   });
+                  // }}
+                  // onMouseLeave={(e: any) => {
+                  //   setItemTypePopoverProps({
+                  //     open: false,
+                  //     anchorEl: null,
+                  //     itemType: null,
+                  //   });
+                  // }}
                 >
                   {itemType.name}
                 </Typography>

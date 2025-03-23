@@ -1,7 +1,7 @@
 import { IItemType } from '@/app/utils/type';
 import { landingPagePrimaryColor, maxWidth } from '@/constant/landingPage';
 import { Box, Grid, Popover, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import ProductListing from '../ProductListingPage/ProductListing';
 import useNotification from '@/hooks/useNotification';
 
@@ -11,6 +11,8 @@ interface IProps {
   anchorEl: any;
   itemType: IItemType;
   onClose: () => void;
+  // onMouseEnter: () => void;
+  // onMouseLeave: () => void;
 }
 
 export default function ItemTypePopover({
@@ -19,8 +21,11 @@ export default function ItemTypePopover({
   anchorEl,
   itemType,
   onClose,
+  // onMouseEnter,
+  // onMouseLeave
 }: IProps) {
-  const popoverWidth = anchorEl?.getBoundingClientRect().width || 0;
+  console.log(itemType, 'itemType');
+  // const popoverWidth = anchorEl?.getBoundingClientRect().width || 0;
 
   const { showNotification, NotificationComp } = useNotification();
 
@@ -31,22 +36,17 @@ export default function ItemTypePopover({
         anchorEl={anchorEl}
         open={open}
         onClose={onClose}
-        //   disableAutoFocus
-
-        // anchorOrigin={{
-        //   vertical: 'bottom',
-        //   horizontal: 'left',
-        // }}
-        transformOrigin={{
-          vertical: 'top',
+        anchorOrigin={{
+          vertical: 'bottom',
           horizontal: 'left',
         }}
         sx={{
+          pointerEvents: 'none',
           '& .MuiPopover-paper': {
             width: '100vw', // Set width dynamically
-            // maxHeight: '50vh',
-            height: '50vh',
-            marginTop: '52px',
+            maxHeight: '700px',
+            height: '700px',
+            marginTop: '10px',
             overflowY: 'auto',
             borderColor: landingPagePrimaryColor,
           },
@@ -54,14 +54,18 @@ export default function ItemTypePopover({
             borderColor: landingPagePrimaryColor,
           },
         }}
-        onMouseLeave={onClose}
+        // onMouseLeave={onClose}
+        // disableAutoFocus
+        // disableEnforceFocus
+        disableRestoreFocus
         // onMouseOut={onClose}
       >
         <Box
           display="flex"
           flexDirection="column"
           gap={2}
-          sx={{ maxWidth: maxWidth, mx: 'auto', py: 2, px: 2 }}
+          sx={{ maxWidth: maxWidth, mx: 'auto', py: 2, px: 2, pointerEvents: 'auto' }}
+          onMouseLeave={onClose}
         >
           <Typography variant="h6">{itemType?.name}</Typography>
 
