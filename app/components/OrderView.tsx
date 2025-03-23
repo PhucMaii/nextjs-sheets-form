@@ -841,7 +841,6 @@ const OrderView = ({
 
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
           {role === USER_ROLE.ADMIN &&
-            purpose === ORDER_USAGE_PURPOSE.ORDER &&
             !isPreOrder && (
               <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
                 <Button onClick={() => setIsOpenAddCustomAmount(true)}>
