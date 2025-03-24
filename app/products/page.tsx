@@ -34,7 +34,7 @@ import NavbarWrapper from '../lib/NavbarWrapper';
 //   typeName?: string;
 // }
 
-export const ProductPage = () => {
+const ProductPage = () => {
   const searchParams: any = useSearchParams();
   const queryParams = searchParams?.get('q');
   const queryType = searchParams?.get('type');

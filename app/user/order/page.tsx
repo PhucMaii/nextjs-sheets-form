@@ -18,7 +18,7 @@ import { TourProvider } from '@reactour/tour';
 import TourStartButton from './TourStartButton';
 import { grey } from '@mui/material/colors';
 import OldOrderVersion from './OldOrderVersion';
-import OverrideOrder from '../components/Modals/OverrideOrder';
+import OverrideOrder from '../../components/Modals/OverrideOrder';
 
 const steps = [
   {
