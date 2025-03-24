@@ -64,7 +64,7 @@ export default function InvitationSection() {
           py: 2,
           ':hover': { backgroundColor: orange[800] },
         }}
-        onClick={() => router.push('/application-form')}
+        onClick={() => router.push('/account/application-form')}
       >
         JOIN US TODAY
       </Button>

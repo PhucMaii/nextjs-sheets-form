@@ -84,7 +84,7 @@ export default function Header({ sx }: IProps) {
             gap={2}
           >
             <Button
-              onClick={() => router.push('/application-form')}
+              onClick={() => router.push('/account/application-form')}
               variant="contained"
               sx={{
                 width: 'fit-content',

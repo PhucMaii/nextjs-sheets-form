@@ -464,6 +464,7 @@ export const ProductPage = () => {
           </Grid>
         </Box>
       </Box>
+      {/* <Footer /> */}
     </NavbarWrapper>
   );
 };

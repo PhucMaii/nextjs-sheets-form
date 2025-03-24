@@ -101,7 +101,7 @@ export default function Footer() {
                 About us
               </Typography>
             </Link>
-            <Link href="/application-form" style={linkStyles}>
+            <Link href="/account/application-form" style={linkStyles}>
               <Typography variant="h6" fontWeight="normal">
                 Join us
               </Typography>

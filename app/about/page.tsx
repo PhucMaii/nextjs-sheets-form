@@ -9,7 +9,6 @@ import {
 } from '@/constant/landingPage';
 import Logo from '../components/LandingPage/Logo';
 import { green, grey } from '@mui/material/colors';
-import Footer from '../components/LandingPage/Footer';
 
 export default function AboutPage() {
   const renderHeader = () => {
@@ -132,7 +131,7 @@ export default function AboutPage() {
           {renderHeader()}
 
           <Box sx={{ backgroundColor: green[700] }}>{renderAboutUs()}</Box>
-          <Footer />
+          {/* <Footer /> */}
         </Box>
       </NavbarWrapper>
     </>

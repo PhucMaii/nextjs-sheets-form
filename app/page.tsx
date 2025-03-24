@@ -8,6 +8,8 @@ import InvitationSection from './components/LandingPage/InvitationSection';
 import Footer from './components/LandingPage/Footer';
 import RequestToJoinModal from './components/Modals/RequestToJoinModal';
 import NavbarWrapper from './lib/NavbarWrapper';
+import ProductCategories from './components/LandingPage/ProductCategories';
+import WhyUs from './components/LandingPage/WhyUs';
 
 export default function page() {
   const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
@@ -20,7 +22,9 @@ export default function page() {
       />
       <Header />
       <HowItWorks />
+      <ProductCategories />
       <BestSeller />
+      <WhyUs />
       <TrustedBrand />
       {/* <Box> */}
       <InvitationSection />
