@@ -25,7 +25,7 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
-import { HomeIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
+import { HomeIcon, ShoppingBagIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';
 import useLocalStorage from '@/hooks/useLocalStorage';
@@ -59,11 +59,11 @@ const tabs = [
   //   href: '/about',
   //   icon: CircleUserIcon,
   // },
-  // {
-  //   label: 'Products',
-  //   href: '/products',
-  //   icon: ShoppingBagIcon,
-  // },
+  {
+    label: 'Shop',
+    href: '/products',
+    icon: ShoppingBagIcon,
+  },
 ];
 const drawerWidth = 250;
 
@@ -130,7 +130,7 @@ export default function Navbar() {
     const fetchItemTypes = async () => {
       try {
         const response = await axios.get(`${API_URL.PUBLIC}/types`);
-        setItemTypes(response.data.data.slice(0, 5));
+        setItemTypes(response.data.data.slice(0, 7));
       } catch (error: any) {
         console.log('Internal Server Error: ', error);
       }
@@ -182,7 +182,6 @@ export default function Navbar() {
 
   const fetchGuestSessionId = async () => {
     try {
-      console.log('fetchGuestSessionId called', guestSession);
       // Check if a guest session ID already exists in local storage
       if (Object.keys(guestSession).length > 0) {
         // If yes -> Check if this session id already been a guest in db
@@ -193,8 +192,6 @@ export default function Navbar() {
         if (response.data.error) {
           throw new Error('Something went wrong. ', response.data.error);
         }
-
-        console.log(response.data.data);
 
         if (response.data.data) {
           dispatch(updateUser(response.data.data));
@@ -376,7 +373,6 @@ export default function Navbar() {
   //   setPopoverTimeout(timeout);
   // };
 
-  console.log(itemTypePopoverProps.itemType, 'itemTypePopoverProps.type');
   // let popoverTimeout: any;
   return (
     <>
@@ -557,7 +553,7 @@ export default function Navbar() {
                   variant="h6"
                   key={index}
                   onClick={() => {
-                    window.location.href = itemType.href;
+                    router.push(`/products?type=${encodeURIComponent(itemType.name)}`);
                     // setSelectedTab(itemType.href);
                   }}
                   sx={{

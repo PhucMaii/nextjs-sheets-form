@@ -1,6 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
 import Header from './components/LandingPage/Header';
 import HowItWorks from './components/LandingPage/HowItWorks';
 import TrustedBrand from './components/LandingPage/TrustedBrand';
@@ -21,11 +20,11 @@ export default function page() {
       />
       <Header />
       <HowItWorks />
+      <BestSeller />
       <TrustedBrand />
-      <Box>
-        <BestSeller />
-        <InvitationSection />
-      </Box>
+      {/* <Box> */}
+      <InvitationSection />
+      {/* </Box> */}
       <Footer />
     </NavbarWrapper>
   );

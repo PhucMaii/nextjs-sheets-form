@@ -24,7 +24,6 @@ export default function ItemTypePopover({
   // onMouseEnter,
   // onMouseLeave
 }: IProps) {
-  console.log(itemType, 'itemType');
   // const popoverWidth = anchorEl?.getBoundingClientRect().width || 0;
 
   const { showNotification, NotificationComp } = useNotification();

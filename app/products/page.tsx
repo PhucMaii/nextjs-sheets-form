@@ -30,16 +30,18 @@ import { maxWidth } from '../lib/constant';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import NavbarWrapper from '../lib/NavbarWrapper';
 
-const ProductPage = () => {
+// interface ProductPageProps {
+//   typeName?: string;
+// }
+
+export const ProductPage = () => {
   const searchParams: any = useSearchParams();
   const queryParams = searchParams?.get('q');
+  const queryType = searchParams?.get('type');
 
   const [displayItems, setDisplayItems] = useState<IItemPreference[]>([]);
   const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
-  const [selectedType, setSelectedType] = useState<IProductType | any>({
-    id: 0,
-    name: 'All',
-  });
+  const [selectedType, setSelectedType] = useState<IProductType | any>();
   const [sortedBy, setSortedBy] = useState<string>('featured');
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
@@ -52,6 +54,24 @@ const ProductPage = () => {
   const [types] = SWRFetchData(`${API_URL.PUBLIC}/types`);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
+  useEffect(() => {
+    if (queryType && types?.data) {
+      console.log(queryType,' queryType RUNNNNNNNNNNN');
+      const decodedTypeName = decodeURIComponent(queryType.replace(/\+/g, ' '));
+
+      if (decodedTypeName === 'All') {
+        setSelectedType({ id: 0, name: 'All' });
+        return;
+      }
+
+      setSelectedType(
+        types?.data?.find((type: any) => type.name === decodedTypeName),
+      );
+    } else if (!queryType && types?.data) {
+      setSelectedType({ id: 0, name: 'All' });
+    }
+  }, [queryType, types]);
 
   // Update query params when search keywords change
   useEffect(() => {
@@ -82,18 +102,23 @@ const ProductPage = () => {
 
   // On select type and render items from that type
   useEffect(() => {
-    if (selectedType?.id === 0) {
-      setDisplayItems(allItemPreferences?.data);
-    } else {
-      setDisplayItems(selectedType.itemPreferences);
+    // if (selectedType?.id === 0) {
+    //   setDisplayItems(allItemPreferences?.data);
+    // } else {
+    //   // setDisplayItems(selectedType?.itemPreferences);
+    //   onUpdateTypeParams();
+    // }
+
+    if (selectedType && selectedType?.name !== decodeURIComponent(queryType?.replace(/\+/g, ' '))) {
+      onUpdateTypeParams();
     }
-  }, [allItemPreferences, selectedType]);
+  }, [selectedType, types]);
 
   // On sort items
   useEffect(() => {
-    if (allItemPreferences) {
+    if (allItemPreferences && selectedType) {
       const items =
-        selectedType.name === 'All'
+        selectedType?.name === 'All'
           ? [...allItemPreferences.data]
           : [...selectedType.itemPreferences];
       if (sortedBy === 'best-sellers') {
@@ -135,6 +160,23 @@ const ProductPage = () => {
       current.delete('q');
     } else {
       current.set('q', value);
+    }
+
+    const search = current.toString();
+    const query = search ? `?${search}` : '';
+
+    router.push(`/products${query}`);
+  };
+
+  const onUpdateTypeParams = () => {
+    const current = new URLSearchParams(searchParams?.entries());
+    // const typeId = selectedType?.id;
+    const selectedTypeName = selectedType?.name;
+
+    if (!selectedTypeName) {
+      current.delete('type');
+    } else {
+      current.set('type', encodeURIComponent(selectedTypeName));
     }
 
     const search = current.toString();
