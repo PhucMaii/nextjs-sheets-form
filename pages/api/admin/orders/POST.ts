@@ -264,6 +264,7 @@ export const createOrder = async (
   deliveryDate: string,
   createdBy: string,
   note: string = '',
+  shippingFee: number = 0,
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -295,7 +296,7 @@ export const createOrder = async (
       }
     }
 
-    const total = generateOrderTotalPrice(items);
+    const total = generateOrderTotalPrice(items, shippingFee);
     const { date, time } = getTodayDate();
 
     // initialize order
@@ -308,8 +309,9 @@ export const createOrder = async (
         subTotal: total.subTotal,
         PST: total.PST,
         GST: total.GST,
+        shippingFee,
         discount: total.discount,
-        totalPrice: total.totalPrice,
+        totalPrice: total.totalPrice + shippingFee,
         isAffectInventory: true,
         orderTime: `${date} ${time}`,
         createdBy,

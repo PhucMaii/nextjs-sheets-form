@@ -37,6 +37,7 @@ export default function CartPage() {
         gap={2}
         sx={{
           paddingTop: '150px',
+          mb: 4,
         }}
       >
         <ShoppingBagIcon

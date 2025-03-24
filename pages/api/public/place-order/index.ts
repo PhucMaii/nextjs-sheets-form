@@ -4,7 +4,7 @@ import { createOrder } from '../../admin/orders/POST';
 import { checkOrderDeliveryDateValid } from '../../utils/date';
 import { createGuest } from '../create-guest';
 import { sendEmail } from '../../utils/email';
-import { USER_CATEGORIZED } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 
 interface IBody {
   cartId: number;
@@ -73,6 +73,23 @@ export default async function handler(
     if (!cartId) {
       return res.status(400).json({
         error: 'You have no items in your cart or you not provided cart id',
+      });
+    }
+
+    // Check has user order for selected date
+    const hasOrder = await prisma.orders.findFirst({
+      where: {
+        userId: user.id,
+        deliveryDate,
+        status: {
+          not: ORDER_STATUS.VOID,
+        },
+      },
+    });
+
+    if (hasOrder) {
+      return res.status(400).json({
+        error: 'You already have an order for ' + deliveryDate,
       });
     }
 

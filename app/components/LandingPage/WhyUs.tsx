@@ -15,7 +15,7 @@ export default function WhyUs() {
       gap={2}
       p={4}
       sx={{
-        minHeight: '500px',
+        minHeight: '700px',
         position: 'relative',
 
         ':before': {

@@ -8,6 +8,7 @@ import { withGuestSessionGuard } from '../utils/withGuestSessionGuard';
 import { calculateShippingFee } from '@/app/utils/shipping';
 import { generateLatLng } from '../admin/clients/POST';
 import { verifyDeliveryAddress } from '../utils/address';
+import { ORDER_STATUS } from '@/app/utils/enum';
 
 export type CheckoutClientData = {
   guestSessionId: string;
@@ -66,6 +67,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // If cart already had user -> place an order for user and send them to order successful page
     if (cart?.user) {
+      // Check if user already order for provided date
+      const existingOrder = await prisma.orders.findFirst({
+        where: {
+          userId: cart?.user?.id,
+          deliveryDate: deliveryDate,
+          status: {
+           not: ORDER_STATUS.VOID 
+          }
+        },
+      });
+
+      if (existingOrder) {
+        return res.status(400).json({
+          error: 'You already have an order for ' + deliveryDate,
+        });
+      }
+
       const formattedItems = convertCartItemsToOrderItems(cart.items);
 
       const { date, time } = getTodayDate();
@@ -94,6 +112,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    // Check if user already order for provided date - NOT NOW because user can only place order when they are a pending userx
+    // const existingOrder = await prisma.orders.findFirst({
+    //   where: {
+    //     guestSessionId: clientData?.guestSessionId,
+    //     deliveryDate: deliveryDate,
+    //   },
+    // });
+
+    // if (existingOrder) {
+    //   return res.status(400).json({
+    //     error: 'You already ordered for ' + deliveryDate,
+    //   });
+    // }
+
     // const distanceFromFactory = calculateDistance(
     //   homeLat,
     //   homeLng,
@@ -108,7 +140,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       isAddressValid.distance,
       totalProfit,
     );
-    console.log(shippingFee, 'shipping fee');
+    // console.log(shippingFee, 'shipping fee');
 
     const stripeSession = await stripe.checkout.sessions.create({
       success_url: `${process.env.NEXTAUTH_URL}/payment/successful`,
@@ -158,6 +190,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           ...clientData,
           deliveryAddress: addressLatAndLng.fullName,
         }),
+        shippingFee: String(shippingFee.toFixed(2)),
       },
     });
 

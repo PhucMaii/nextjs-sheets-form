@@ -120,6 +120,7 @@ model Orders {
   PST               Float?
   GST               Float?
   totalPrice        Float
+  shippingFee       Float?
   type              String?
   updateTime        DateTime?
   isReplacement     Boolean?

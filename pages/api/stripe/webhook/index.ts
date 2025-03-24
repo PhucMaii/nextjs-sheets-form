@@ -48,20 +48,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (event.type === 'checkout.session.completed') {
       // Create guest user
       const clientInfo = JSON.parse(session.metadata.clientData);
-      console.log(
-        { clientInfo, session: session.metadata.clientData },
-        'clientInfo',
-      );
+
       // Convert to pending client
       const newGuest = await createGuest({
         ...clientInfo,
         type: USER_CATEGORIZED.PENDING,
       });
-
-      console.log(
-        newGuest,
-        'created guest successfully and proceed to create order',
-      );
 
       // Attach to cart
       const cart = await prisma.cart.update({
@@ -86,11 +78,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      console.log(
-        cart.user,
-        'cart - created guest successfully and proceed to create order',
-      );
-
       if (!cart) {
         return res.status(404).json({ error: 'Cart not found' });
       }
@@ -108,6 +95,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         session.metadata.deliveryDate,
         `${date} ${time}`,
         `Client - ${session.metadata.clientId}`,
+        Number(session.metadata?.shippingFee) || 0,
       );
 
       console.log('create order successfully');

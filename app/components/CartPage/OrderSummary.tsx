@@ -30,17 +30,18 @@ type ClientInfo = {
   contactNumber: string;
   email: string;
   guestSessionId: string;
-  guestSessionSignature: string;
+  guestSessionSignature?: string;
 };
 
 export default function OrderSummary({ showNotification }: IProps) {
   const [isOpenJoinModal, setIsOpenJoinModal] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [note, setNote] = useState<string>('');
   const router = useRouter();
 
   // const cart = useSelector((state: RootState) => state.cart);
   const { cart, renderDisplayTotal } = useCart();
-  const user = useSelector((state: RootState) => state.user);
+  const user = useSelector((state: RootState) => state.user as any);
 
   console.log('user: ', user);
 
@@ -52,6 +53,7 @@ export default function OrderSummary({ showNotification }: IProps) {
       showNotification('error', 'Please select delivery date');
       return;
     }
+    setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL.PUBLIC}/place-order`, {
         cartId: cart?.id,
@@ -78,6 +80,8 @@ export default function OrderSummary({ showNotification }: IProps) {
         'error',
         'Fail to place order: ' + error?.response?.data?.error || error,
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,17 +154,26 @@ export default function OrderSummary({ showNotification }: IProps) {
           </>
         ) : (
           <>
-            <Button
+            <LoadingButton
               variant="contained"
-              onClick={() => setIsOpenJoinModal(true)}
+              onClick={() => {
+                if (user?.type === USER_CATEGORIZED.GUEST) {
+                  setIsOpenJoinModal(true);
+                } else {
+                  onPlaceOrder(user);
+                }
+              }}
+              loading={isLoading}
               disabled={
                 user?.type === USER_CATEGORIZED.PENDING &&
                 user?.Orders &&
                 user?.Orders?.length > 0
               }
             >
-              Place Order & Be Our Partner
-            </Button>
+              {user.type === USER_CATEGORIZED.GUEST
+                ? 'Place Order & Be Our Partner'
+                : 'Place Order'}
+            </LoadingButton>
             <Typography variant="subtitle2" sx={{ color: grey[500] }}>
               * Partner with us and no upfront payment required. Receive your
               products first and pay later.
