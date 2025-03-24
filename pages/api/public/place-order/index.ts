@@ -139,6 +139,16 @@ export default async function handler(
       note,
     );
 
+    // Set guest to pending
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        type: USER_CATEGORIZED.PENDING,
+      },
+    });
+
     // Send email
     const isSendToAdmin = true;
     await sendEmail(

@@ -44,7 +44,7 @@ export default function ItemTypePopover({
           '& .MuiPopover-paper': {
             width: '100vw', // Set width dynamically
             maxHeight: '700px',
-            height: '700px',
+            height: '50vh',
             marginTop: '10px',
             overflowY: 'auto',
             borderColor: landingPagePrimaryColor,

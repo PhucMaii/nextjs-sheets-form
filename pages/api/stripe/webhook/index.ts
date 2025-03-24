@@ -100,6 +100,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       console.log('create order successfully');
 
+      // Set guest to pending
+      await prisma.user.update({
+        where: {
+          id: newGuest.id,
+        },
+        data: {
+          type: USER_CATEGORIZED.PENDING,
+        },
+      });
+
       // Send confirmation email
       const isSendToAdmin = true;
       await sendEmail(

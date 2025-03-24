@@ -130,7 +130,7 @@ export default function Navbar() {
     const fetchItemTypes = async () => {
       try {
         const response = await axios.get(`${API_URL.PUBLIC}/types`);
-        setItemTypes(response.data.data.slice(0, 7));
+        setItemTypes(response.data.data.slice(0, 5));
       } catch (error: any) {
         console.log('Internal Server Error: ', error);
       }

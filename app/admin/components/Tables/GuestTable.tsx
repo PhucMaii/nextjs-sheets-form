@@ -1,6 +1,7 @@
 import { UserType } from '@/app/utils/type';
 import {
   AlertColor,
+  Box,
   Button,
   Paper,
   Table,
@@ -11,8 +12,10 @@ import {
 } from '@mui/material';
 import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
-import { USER_CATEGORIZED } from '@/app/utils/enum';
+import { API_URL, USER_CATEGORIZED } from '@/app/utils/enum';
 import ApproveGuest from '../Modals/ApproveGuest';
+import axios from 'axios';
+import { LoadingButton } from '@mui/lab';
 
 interface IProps {
   guests: UserType[];
@@ -20,10 +23,41 @@ interface IProps {
 }
 
 const GuestTable = ({ guests, showNotification }: IProps) => {
+  const [deleteProps, setDeleteProps] = useState<any>({
+    open: false,
+    userId: 0,
+  });
   const [approveProps, setApproveProps] = useState<any>({
     open: false,
     client: {},
   });
+
+  const handleDeleteClient = async (client: UserType) => {
+    setDeleteProps({
+      open: true,
+      userId: client.id,
+    });
+    try {
+      const response = await axios.delete(
+        `${API_URL.CLIENTS}?userId=${client.id}`,
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to delete order: ' + error);
+      showNotification('error', 'Fail to delete order: ' + error);
+    } finally {
+      setDeleteProps({
+        open: false,
+        userId: 0,
+      });
+    }
+  };
 
   return (
     <>
@@ -71,17 +105,30 @@ const GuestTable = ({ guests, showNotification }: IProps) => {
                     <TableCell>{guest.contactNumber}</TableCell>
                     <TableCell>{guest.deliveryAddress}</TableCell>
                     <TableCell>
-                      {guest?.type === USER_CATEGORIZED.PENDING && (
-                        <Button
-                          variant="contained"
-                          color="success"
-                          onClick={() =>
-                            setApproveProps({ open: true, client: guest })
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <LoadingButton
+                          loading={
+                            deleteProps.userId === guest.id && deleteProps.open
+                              ? true
+                              : false
                           }
+                          onClick={() => handleDeleteClient(guest)}
+                          color="error"
                         >
-                          Approve
-                        </Button>
-                      )}
+                          Delete
+                        </LoadingButton>
+                        {guest?.type === USER_CATEGORIZED.PENDING && (
+                          <Button
+                            variant="contained"
+                            color="success"
+                            onClick={() =>
+                              setApproveProps({ open: true, client: guest })
+                            }
+                          >
+                            Approve
+                          </Button>
+                        )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 );

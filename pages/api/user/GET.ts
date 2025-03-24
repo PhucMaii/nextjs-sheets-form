@@ -28,7 +28,7 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      error: 'Internal Server Occur in GET USER request',
+      error: 'Internal Server Occur in GET USER request' + error,
     });
   }
 };

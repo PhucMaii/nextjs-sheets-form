@@ -5,7 +5,6 @@ import HowItWorks from './components/LandingPage/HowItWorks';
 import TrustedBrand from './components/LandingPage/TrustedBrand';
 import BestSeller from './components/LandingPage/BestSeller';
 import InvitationSection from './components/LandingPage/InvitationSection';
-import Footer from './components/LandingPage/Footer';
 import RequestToJoinModal from './components/Modals/RequestToJoinModal';
 import NavbarWrapper from './lib/NavbarWrapper';
 import ProductCategories from './components/LandingPage/ProductCategories';
@@ -29,7 +28,7 @@ export default function page() {
       {/* <Box> */}
       <InvitationSection />
       {/* </Box> */}
-      <Footer />
+      {/* <Footer /> */}
     </NavbarWrapper>
   );
 }
