@@ -19,11 +19,11 @@ export const printFontSize = 28;
 
 const generateTaxNote = (item: Item) => {
   if (item?.inventoryItem?.hasPST && item?.inventoryItem?.hasGST) {
-    return '(P&G)';
+    return 'P&G';
   } else if (item?.inventoryItem?.hasPST) {
-    return '(P)';
+    return 'P';
   } else if (item?.inventoryItem?.hasGST) {
-    return '(G)';
+    return 'G';
   }
   return '';
 };
@@ -92,7 +92,9 @@ export const ComponentToPrint = forwardRef(
                   ${item.totalPrice?.toFixed(2)}
                 </Typography>
                 {/* <Typography>{generateTaxNote(item)}</Typography> */}
-                <Typography>{generateTaxNote(item)}</Typography>
+                <Typography sx={{ fontWeight: 'semibold' }}>
+                  {generateTaxNote(item)}
+                </Typography>
               </Box>
             </TableCell>
           </TableRow>,
