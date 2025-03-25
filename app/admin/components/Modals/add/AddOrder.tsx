@@ -201,7 +201,7 @@ export default function AddOrder({
       )}
       <Modal open={open} onClose={onClose}>
         <BoxModal
-          // sx={{ maxWidth: '800px' }}
+          style={{ padding: 0, margin: 0 }}
           display="flex"
           flexDirection="column"
           gap={2}
@@ -213,6 +213,7 @@ export default function AddOrder({
             onClick={() => {}}
             onlyHeading
             onClose={onClose}
+            containerStyle={{ margin: '20px' }}
           />
           <Divider />
           <Box overflow="auto" maxHeight="70vh">
@@ -222,6 +223,8 @@ export default function AddOrder({
               columnSpacing={2}
               rowGap={2}
               mt={2}
+              // style={{ margin: '20px' }}
+              sx={{p: '20px'}}
             >
               <Grid item xs={12}>
                 Client Name

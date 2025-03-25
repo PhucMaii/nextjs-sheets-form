@@ -683,20 +683,22 @@ const OrderView = ({
                   <Typography
                     variant="h6"
                     sx={
-                      type === 'promotion' ? {
-                        // px: 2,
-                        py: 2,
-                        color: '#ff4081',
-                        animation: 'flash 1s infinite ease-in-out',
-                        '@keyframes flash': {
-                          '0%, 100%': {
-                            opacity: 1,
-                          },
-                          '50%': {
-                            opacity: 0.8,
-                          },
-                        },
-                      } : {}
+                      type === 'promotion'
+                        ? {
+                            // px: 2,
+                            py: 2,
+                            color: '#ff4081',
+                            animation: 'flash 1s infinite ease-in-out',
+                            '@keyframes flash': {
+                              '0%, 100%': {
+                                opacity: 1,
+                              },
+                              '50%': {
+                                opacity: 0.8,
+                              },
+                            },
+                          }
+                        : {}
                     }
                   >
                     {typeName} {type === 'promotion' && '🎉'}
@@ -761,7 +763,7 @@ const OrderView = ({
           onClick={onSubmitOrder}
           fullWidth
           variant="contained"
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, py: 2 }}
           disabled={orderedItems.length === 0 && !isPreOrder}
         >
           {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
@@ -829,7 +831,7 @@ const OrderView = ({
           mt={2}
           maxWidth="100%"
           maxHeight="100vh"
-          overflow="auto"
+          sx={{ overflowY: 'auto' }}
         >
           {selectedItemType === 'All' &&
             !debouncedKeywords &&
@@ -840,32 +842,31 @@ const OrderView = ({
             : renderByItemType()}
 
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
-          {role === USER_ROLE.ADMIN &&
-            !isPreOrder && (
-              <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-                <Button onClick={() => setIsOpenAddCustomAmount(true)}>
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="flex-end"
-                    gap={2}
-                    alignItems="flex-start"
-                    sx={{
-                      p: 1,
-                      backgroundColor: blueGrey[50],
-                      borderRadius: 1,
-                      width: '100%',
-                      height: '100%',
-                      color: blueGrey[800],
-                    }}
-                  >
-                    <Typography fontWeight="bold" textAlign="left">
-                      + Add Custom Amount
-                    </Typography>
-                  </Box>
-                </Button>
-              </Grid>
-            )}
+          {role === USER_ROLE.ADMIN && !isPreOrder && (
+            <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
+              <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="flex-end"
+                  gap={2}
+                  alignItems="flex-start"
+                  sx={{
+                    p: 1,
+                    backgroundColor: blueGrey[50],
+                    borderRadius: 1,
+                    width: '100%',
+                    height: '100%',
+                    color: blueGrey[800],
+                  }}
+                >
+                  <Typography fontWeight="bold" textAlign="left">
+                    + Add Custom Amount
+                  </Typography>
+                </Box>
+              </Button>
+            </Grid>
+          )}
         </Grid>
         {/* {smDown && renderPlaceOrdeButton()} */}
       </ShadowSection>
