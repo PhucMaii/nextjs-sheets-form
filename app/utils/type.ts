@@ -10,6 +10,7 @@ import {
   InventoryUnit,
   ItemType,
   ItemType_Category,
+  Option,
   PaymentMethod,
   PositionIndex,
   Promotion,
@@ -138,6 +139,7 @@ export interface IItem {
   order?: any;
   typeId?: number;
   type?: any;
+  options?: IOption[];
 
   image?: string;
 }
@@ -252,4 +254,11 @@ export interface IFifo extends Fifo {
 
 export interface IPromotion extends Promotion {
   items: IInventoryItem[];
+}
+
+export interface IOption extends Option {
+  // prevPrice?: number;
+  // isShowDiscount?: boolean;
+  item: IItem;
+  unit: IInventoryUnit | any;
 }

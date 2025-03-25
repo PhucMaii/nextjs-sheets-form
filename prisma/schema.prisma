@@ -75,6 +75,8 @@ model Item {
   inventoryItemId Int?
   inventoryUnitId Int?
 
+  options   Option[]
+
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
@@ -388,6 +390,7 @@ model InventoryUnit {
   createdBy    String
   sellingItem  Item[]
 
+  itemOptions   Option[]
   vendorItem      VendorItem       @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems    OrderedItems[]
   cartItems       CartItem[]
@@ -472,4 +475,19 @@ model Promotion {
   visibility  Boolean?
 
   items  InventoryItem[]
+}
+
+model Option {
+  id    Int @id @default(autoincrement())
+  name  String
+  price  Float
+  prevPrice  Float?
+  isShowDiscount  Boolean?
+  availability Boolean
+
+  unitId Int
+  itemId Int
+
+  unit  InventoryUnit  @relation(fields: [unitId], references: [id])
+  item  Item  @relation(fields: [itemId], references: [id])
 }
