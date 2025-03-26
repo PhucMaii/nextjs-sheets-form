@@ -299,6 +299,7 @@ model InventoryItem {
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
+  options     Option[]
   
   promotion    Promotion?     @relation(fields: [promotionId], references: [id])
   type         ItemType?        @relation(fields: [typeId], references: [id])
@@ -484,10 +485,12 @@ model Option {
   prevPrice  Float?
   isShowDiscount  Boolean?
   availability Boolean
+  inventoryItemId Int
 
   unitId Int
   itemId Int
 
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
   item  Item  @relation(fields: [itemId], references: [id])
+  inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
 }

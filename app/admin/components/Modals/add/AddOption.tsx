@@ -1,6 +1,7 @@
 import {
   Autocomplete,
   Box,
+  Checkbox,
   Divider,
   FormControl,
   Modal,
@@ -17,6 +18,10 @@ import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
+import {
+  checkBoxOutlinedIcon,
+  checkedBoxOutlinedIcon,
+} from '../../Autocomplete/VendorSearch';
 
 interface IProps extends ModalProps {
   item: IItem;
@@ -39,26 +44,38 @@ export default function AddOption({
     unitId: -1,
     item: item,
     unit: item?.inventoryUnit || null,
+    inventoryItemId: item.inventoryItemId,
   });
-  const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([item?.category as any]);
+  const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([
+    item?.category as any,
+  ]);
+  const [unitList, setUnitList] = useState<any[]>([]);
 
   const [dbUnits] = SWRFetchData(
     item?.inventoryUnit?.vendorItemId
       ? `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`
       : '',
   );
-  const [categories] = SWRFetchData(`${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`);
+  const [categories] = SWRFetchData(
+    `${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`,
+  );
 
   const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
-    useEditUnit(dbUnits?.data, null, showNotification, false);
+    useEditUnit(unitList, null, showNotification, false);
+
+  //   useEffect(() => {
+  //     setOption((prevOption: any) => ({
+  //       ...prevOption,
+  //       unit: selectedUnit,
+  //       unitId: selectedUnit?.id || -1,
+  //     }));
+  //   }, [selectedUnit]);
 
   useEffect(() => {
-    setOption((prevOption: any) => ({
-      ...prevOption,
-      unit: selectedUnit,
-      unitId: selectedUnit?.id || -1,
-    }));
-  }, [selectedUnit]);
+    if (dbUnits) {
+      setUnitList(dbUnits?.data);
+    }
+  }, [dbUnits]);
 
   const handleAddOption = async () => {
     setIsLoading(true);
@@ -66,7 +83,12 @@ export default function AddOption({
       // console.log(option);
       // return;
       const response = await axios.post(`${API_URL.ADMIN}/options`, {
-        option,
+        name: option.name,
+        price: option.price,
+        availability: option.availability,
+        itemId: item.id,
+        unitId: selectedUnit?.id || -1,
+        inventoryItemId: item.inventoryItemId, // for finding items in selected category
         selectedCategoryIds: selectedCategories.map(
           (category: ICategory) => category.id,
         ),
@@ -110,6 +132,7 @@ export default function AddOption({
               <Typography>Add to other client categories</Typography>
               <Autocomplete
                 multiple
+                disableCloseOnSelect
                 options={categories?.data || []}
                 getOptionLabel={(option: ICategory) => option.name}
                 isOptionEqualToValue={(option: ICategory, value: ICategory) =>
@@ -126,6 +149,25 @@ export default function AddOption({
                 renderInput={(params) => (
                   <TextField {...params} placeholder="Enter categories..." />
                 )}
+                renderOption={(props, option, { selected }) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <li
+                      key={key}
+                      {...optionProps}
+                      aria-disabled={option.id === item.categoryId}
+                    >
+                      <Checkbox
+                        icon={checkBoxOutlinedIcon}
+                        checkedIcon={checkedBoxOutlinedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                        disabled={option.id === item.categoryId}
+                      />
+                      {option.name}
+                    </li>
+                  );
+                }}
               />
             </FormControl>
 

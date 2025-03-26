@@ -24,7 +24,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           users: true,
           items: {
             include: {
-              options: true,
+              options: {
+                include: {
+                  unit: true,
+                },
+              },
               inventoryItem: {
                 include: {
                   type: {
@@ -53,7 +57,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      return res.status(200).json(categories);
+      return res.status(200).json({
+        data: categories,
+        message: 'Fetch All Categories Successfully',
+      });
     }
 
     // Get all categories
@@ -62,7 +69,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         users: true,
         items: {
           include: {
-            options: true,
+            options: {
+              include: {
+                unit: true,
+              },
+            },
             inventoryItem: {
               include: {
                 type: {

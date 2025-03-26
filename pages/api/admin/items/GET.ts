@@ -19,7 +19,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           categoryId: Number(categoryId),
         },
         include: {
-          options: true,
+          options: {
+            include: {
+              unit: true,
+            },
+          },
           inventoryUnit: true,
           inventoryItem: {
             where: {
@@ -79,7 +83,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           categoryId: existingUser?.categoryId || 0,
         },
         include: {
-          options: true,
+          options: {
+            include: {
+              unit: true,
+            },
+          },
           inventoryUnit: true,
           inventoryItem: {
             where: {

@@ -279,7 +279,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                     + Add Options 
                   </Button>
                 </Box>
-                <OptionsTable options={updatedItem?.options || []} />
+                <OptionsTable options={updatedItem?.options || []} showNotification={showNotification} />
               </Grid>
             )}
           </Grid>
