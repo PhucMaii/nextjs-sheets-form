@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
-interface IBody {
+interface IQuery {
     id?: string;
 }
 
@@ -9,7 +9,7 @@ export default async function DELETE(req: NextApiRequest, res: NextApiResponse) 
     try {
         const prisma = new PrismaClient();
 
-        const { id }: IBody = req.body;
+        const { id }: IQuery = req.query;
 
         if (!id) {
             return res.status(404).json({

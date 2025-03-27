@@ -34,7 +34,7 @@ export default function OptionsTable({ options, showNotification }: IProps) {
   const handleDeleteOption = async (targetOption: IOption) => {
     try {
       const response = await axios.delete(
-        `${API_URL.ADMIN}/options?id=${targetOption.id}`,
+        `${API_URL.ADMIN}/options?id=${targetOption?.id}`,
       );
 
       if (response.data.error) {
