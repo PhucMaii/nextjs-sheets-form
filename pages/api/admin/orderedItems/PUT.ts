@@ -11,9 +11,9 @@ import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
 import {
-  createOrderedItems,
   formatItemsWithTotalPrice,
 } from '../../utils/order';
+import { createOrderedItems } from '../../utils/orderedItems';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',

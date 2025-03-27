@@ -6,8 +6,8 @@ import { getUserInfo } from '@/pages/api/utils/auth';
 import { generateOrderTotalPrice } from '../../PUT';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { createOrderedItems } from '../../../orders/POST';
 import { checkAndUpdateUnits } from '../../../inventory/expenses/POST';
+import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 
 interface IBody {
   id: number;

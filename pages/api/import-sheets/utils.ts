@@ -11,8 +11,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { generateOrderTotalPrice } from '../admin/orderedItems/PUT';
 import { checkOrderDeliveryDateValid } from '../utils/date';
-import { createOrderedItems } from '../utils/order';
 import { OrderedItems } from '@/app/utils/type';
+import { createOrderedItems } from '../utils/orderedItems';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

@@ -15,8 +15,9 @@ import {
   generateOrderTotalPrice,
   ITEM_CATEGORIZED,
 } from '../admin/orderedItems/PUT';
-import { createOrderedItems, formatItemsWithTotalPrice } from '../utils/order';
+import { formatItemsWithTotalPrice } from '../utils/order';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { createOrderedItems } from '../utils/orderedItems';
 
 interface BodyProps {
   deliveryDate: string;

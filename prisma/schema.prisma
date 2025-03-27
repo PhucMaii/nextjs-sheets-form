@@ -101,6 +101,7 @@ model OrderedItems {
   isCustomAmount   Boolean?
   cost             Float?
   profit           Float?
+  optionId        Int?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -108,6 +109,7 @@ model OrderedItems {
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
+  option    Option? @relation(fields: [optionId], references: [id])
 }
 
 model Orders {
@@ -493,4 +495,6 @@ model Option {
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
   item  Item  @relation(fields: [itemId], references: [id])
   inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+
+  orderedItems    OrderedItems[]
 }

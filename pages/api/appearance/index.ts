@@ -18,6 +18,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           orderBy: {
             promoIndexPos: 'asc',
           },
+          include: {
+            options: true,
+          }
         },
       },
       orderBy: {

@@ -45,6 +45,7 @@ export const createOrderedItems = async (
 
     // console.log(item, 'item');
 
+    // Custom Amount Not Link With Inventory
     if (!targetedItem && item.isCustomAmount) {
       newOrderedItems.push({
         orderId: order.id,
@@ -64,7 +65,7 @@ export const createOrderedItems = async (
     }
 
     // If item is custom amount and is assigned to a new unit
-    let unitId = item.inventoryUnitId;
+    let unitId = item?.option?.unitId || item.inventoryUnitId;
 
     if (item.inventoryUnitId < 1) {
       const dbUnits = await prisma.inventoryUnit.findMany({
@@ -101,7 +102,9 @@ export const createOrderedItems = async (
         data: {
           inventoryItemId: targetedItem.id,
           vendorItemId: targetedItem.vendorItem[0].id,
-          quantity: isValidToCheckInventory ? -item.quantity : 0,
+          quantity: isValidToCheckInventory
+            ? -(item.quantity * (itemUnit?.ratio || 1)) // quantity * ratio
+            : 0,
           createdAt: order.orderTime,
           createdBy: order?.createdBy || '',
         },
@@ -117,7 +120,7 @@ export const createOrderedItems = async (
             id: targetedItem.vendorItem[0].id,
           },
           data: {
-            quantity: -item.quantity,
+            quantity: -item.quantity * (itemUnit?.ratio || 1),
           },
         });
       }
@@ -126,9 +129,11 @@ export const createOrderedItems = async (
       //   return unit.ratio === 1;
       // });
 
+      // Because there is no batch, calculate profit based on unitPrice
       newOrderedItems.push({
         orderId: order.id,
         fifoId: newFifo.id,
+        optionId: item?.optionId || null,
         cost: itemUnit?.unitPrice || 0,
         profit: item.price - (itemUnit?.unitPrice || 0),
         name: item.name,
@@ -156,8 +161,11 @@ export const createOrderedItems = async (
         let fifoIndex = 0;
         const deletedFifoIds = [];
 
-        let itemQuantity = item.quantity * item.inventoryUnit.ratio;
-        // let fifoQuantityLeft = itemQuantity;
+        const itemRatio =
+          itemUnit?.ratio || item?.option?.ratio || item.inventoryUnit.ratio;
+
+        let itemQuantity = item.quantity * itemRatio; // Check from the unit ratio
+
         while (fifoIndex < sortedFifo.length - 1) {
           if (itemQuantity >= sortedFifo[fifoIndex].quantity) {
             deletedFifoIds.push(sortedFifo[fifoIndex].id);
@@ -197,12 +205,11 @@ export const createOrderedItems = async (
             id: sortedFifo[fifoIndex].vendorItemId,
           },
           data: {
-            quantity:
-              targetVendorItem.quantity -
-              item.quantity * item.inventoryUnit.ratio,
+            quantity: targetVendorItem.quantity - item.quantity * itemRatio,
           },
         });
 
+        // Move all old ordered items to the current fifo
         await prisma.orderedItems.updateMany({
           where: {
             fifoId: {
@@ -217,7 +224,7 @@ export const createOrderedItems = async (
         allDeletedFifoIds.push(...deletedFifoIds);
 
         const cost = sortedFifo[fifoIndex]?.price
-          ? sortedFifo[fifoIndex].price * itemUnit?.ratio
+          ? sortedFifo[fifoIndex].price
           : itemUnit?.unitPrice || 0;
 
         console.log(itemUnit, 'item unit');
@@ -227,6 +234,7 @@ export const createOrderedItems = async (
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[fifoIndex].id,
+          optionId: item?.optionId || null,
           name: item.name,
           cost: cost,
           profit: item.price - cost,
@@ -246,6 +254,7 @@ export const createOrderedItems = async (
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[0].id,
+          optionId: item?.optionId || null,
           name: item.name,
           cost: cost,
           profit: item.price - cost,

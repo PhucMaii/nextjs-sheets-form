@@ -12,9 +12,9 @@ import {
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import {
-  createOrderedItems,
   formatItemsWithTotalPrice,
 } from '@/pages/api/utils/order';
+import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

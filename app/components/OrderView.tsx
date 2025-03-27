@@ -22,7 +22,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { IItem } from '../utils/type';
+import { IItem, IOption } from '../utils/type';
 import { infoBackground, primary } from '@/theme/color';
 import { blueGrey, grey, red } from '@mui/material/colors';
 import { ShadowSection } from '../admin/reports/styled';
@@ -48,7 +48,6 @@ import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
 import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
-import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
 import { SWRFetchData } from '../utils/db';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
@@ -56,6 +55,7 @@ import { blackColor } from '@/theme/create-palette';
 import { generateImgUrl } from '../lib/s3';
 import { Discount } from '@mui/icons-material';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import SetItemQuantity from './SetItemQuantity';
 
 export const WhiteSpace = () => {
   return (
@@ -157,6 +157,18 @@ export const ItemButton = ({
   flexColOnDiscount?: boolean;
   onRemove?: any;
 }) => {
+  const options = useMemo(() => {
+    if (!item?.options) return null;
+    const lowestPriceOption = item?.options.sort(
+      (a, b) => a.price - b.price,
+    )[0];
+
+    return {
+      options: item?.options,
+      lowestPrice: lowestPriceOption?.price,
+    };
+  }, [item]);
+
   return (
     <Button
       key={item.id}
@@ -252,8 +264,10 @@ export const ItemButton = ({
           gap={1}
           sx={{ zIndex: 1 }}
         >
-          <Typography fontWeight="bold">
-            ${item.price?.toFixed(2) || 'N/A'}
+          <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
+            {options?.lowestPrice
+              ? `From $${options.lowestPrice.toFixed(2)}`
+              : `$${item.price?.toFixed(2) || 'N/A'}`}
           </Typography>
           {item.isShowDiscount && item.prevPrice && (
             <Typography
@@ -368,6 +382,8 @@ const OrderView = ({
         };
       });
     });
+
+    console.log(newTypes, 'new Types');
 
     return newTypes;
   }, [items, appearance]);
@@ -487,7 +503,7 @@ const OrderView = ({
     }
   };
 
-  const onAddItem = (quantity: number) => {
+  const onAddItem = (quantity: number, option: IOption | null = null) => {
     if (quantity % 1 !== 0) {
       showNotification('error', 'Quantity must be a whole number');
       return;
@@ -509,6 +525,11 @@ const OrderView = ({
         if (i[comparedField] === item[comparedField]) {
           return {
             ...i,
+            option: option,
+            optionId: option?.id || null,
+            price: option?.price || item.price,
+            inventoryUnit: item?.option?.unit || item.inventoryUnit,
+            inventoryUnitId: item?.option?.unitId || item.inventoryUnitId,
             quantity: Number(quantity),
           };
         }
@@ -520,7 +541,13 @@ const OrderView = ({
       // Add item to orderedItems
       setOrderedItems([
         ...orderedItems,
-        { ...item, quantity: Number(quantity) },
+        {
+          ...item,
+          option: option,
+          optionId: option?.id || null,
+          price: option?.price || item.price,
+          quantity: Number(quantity),
+        },
       ]);
     }
 
@@ -911,7 +938,7 @@ const OrderView = ({
         </Typography>
 
         {orderedItems.length > 0 ? (
-          orderedItems.map((item: IItem) => {
+          orderedItems.map((item: IItem | any) => {
             return (
               <Box
                 key={item.id}
@@ -940,6 +967,7 @@ const OrderView = ({
                     <Trash2 />
                   </IconButton>
                 </Box>
+                {item?.option && <Typography sx={{color: grey[700]}}>{item.option.name}</Typography>}
 
                 <Box
                   display="flex"
@@ -1186,7 +1214,7 @@ const OrderView = ({
           // addCustomAmount={addCustomAmount}
           showNotification={showNotification}
         />
-        <SingleFieldEdit
+        {/* <SingleFieldEdit
           title={`How many ${singleFieldProps?.item?.name}?`}
           inputLabel="Quantity"
           open={singleFieldProps.open}
@@ -1200,6 +1228,12 @@ const OrderView = ({
               min: 1,
             },
           }}
+        /> */}
+        <SetItemQuantity
+          open={singleFieldProps.open}
+          onClose={() => setSingleFieldProps({ open: false, defaultValue: 0 })}
+          item={singleFieldProps.item}
+          onSubmit={onAddItem}
         />
         {NotificationComp}
         <Box display="flex" flexDirection="column" gap={2} width="100%">
@@ -1243,7 +1277,9 @@ const OrderView = ({
         // addCustomAmount={addCustomAmount}
         showNotification={showNotification}
       />
-      <SingleFieldEdit
+
+      {/* Custom Quantity */}
+      {/* <SingleFieldEdit
         title={`How many ${singleFieldProps?.item?.name}?`}
         inputLabel="Quantity"
         open={singleFieldProps.open}
@@ -1257,6 +1293,12 @@ const OrderView = ({
             min: 1,
           },
         }}
+      /> */}
+      <SetItemQuantity
+        open={singleFieldProps.open}
+        onClose={() => setSingleFieldProps({ open: false, defaultValue: 0 })}
+        item={singleFieldProps.item}
+        onSubmit={onAddItem}
       />
       {NotificationComp}
       <Grid container spacing={2} width="100%">

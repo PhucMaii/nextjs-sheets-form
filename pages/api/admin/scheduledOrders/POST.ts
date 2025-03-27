@@ -109,8 +109,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             isShowDiscount: item?.isShowDiscount,
             prevPrice: item?.prevPrice,
             quantity: item.quantity,
+            optionId: item?.optionId,
             inventoryItemId: item.inventoryItemId,
-            inventoryUnitId: item.inventoryUnitId,
+            inventoryUnitId: item?.option?.unitId || item.inventoryUnitId,
             scheduledOrderId: newScheduleOrder.id,
           })),
         });
@@ -195,10 +196,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         price: item.price,
         quantity: item.quantity,
         isShowDiscount: item?.isShowDiscount,
+        optionId: item?.optionId,
         prevPrice: item?.prevPrice,
         scheduledOrderId: newScheduleOrder.id,
         inventoryItemId: item.inventoryItemId,
-        inventoryUnitId: item.inventoryUnitId,
+        inventoryUnitId: item?.option?.unitId || item.inventoryUnitId,
       };
     });
 
