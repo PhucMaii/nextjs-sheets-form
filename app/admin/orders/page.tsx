@@ -119,6 +119,7 @@ export interface Order {
   addedToCODBy?: string;
   cost?: number;
   profit?: number;
+  shippingFee?: number;
 }
 
 const orderPerPage = 10;

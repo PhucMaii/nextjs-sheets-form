@@ -220,6 +220,19 @@ export const ComponentToPrint = forwardRef(
                     0}
                 </Typography>
               </Grid>
+              {order?.shippingFee &&
+                (order?.shippingFee > 0 && (
+                  <>
+                    <Grid item xs={4} textAlign="left" ml={2}>
+                      <Typography>Shipping Fee</Typography>
+                    </Grid>
+                    <Grid item xs={6} textAlign="right">
+                      <Typography fontWeight="bold">
+                        ${order?.shippingFee?.toFixed(2) || 0}
+                      </Typography>
+                    </Grid>
+                  </>
+                ))}
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   GST (5%):

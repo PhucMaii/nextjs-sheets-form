@@ -89,6 +89,7 @@ export const generateOrderTemplate = (
             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
             <h4 style="text-align: right;font-weight: 300;">Discount: -$${order?.discount?.toFixed(2)}</h4>
             <h4 style="text-align: right;font-weight: 300;">Subtotal: $${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}</h4>
+            <h4 style="text-align: right;font-weight: 300;">Shipping Fee: $${order?.shippingFee?.toFixed(2) || 0}</h4>
             <h4 style="text-align: right;font-weight: 300;">GST: $${order?.GST?.toFixed(
               2,
             )}</h4>

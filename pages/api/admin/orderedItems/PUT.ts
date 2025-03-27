@@ -335,7 +335,7 @@ export const generateOrderTotalPrice = (listOfItems: any[], shippingFee: number 
 
     return {
       ...total,
-      totalPrice: total.subTotal + total.PST + total.GST,
+      totalPrice: total.subTotal + total.PST + total.GST + shippingFee,
       shippingFee,
     };
   } catch (error: any) {

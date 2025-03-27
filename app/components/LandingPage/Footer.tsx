@@ -18,7 +18,7 @@ export default function Footer() {
         sx={{ py: 8, px: 8, maxWidth: maxWidth, mx: 'auto' }}
       >
         <Grid item xs={12}>
-          <iframe
+          {/* <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2606.1584696113405!2d-122.97271562337944!3d49.216521675436766!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x548676366b9e4913%3A0xa476b0d9c6164ba3!2s6420%20Beresford%20St.%2C%20Burnaby%2C%20BC%20V5E%201B3!5e0!3m2!1sen!2sca!4v1741209009684!5m2!1sen!2sca"
             width="100%"
             height="450"
@@ -27,6 +27,15 @@ export default function Footer() {
             // allowfullscreen
             loading="lazy"
             // referrerpolicy="no-referrer-when-downgrade"
+          ></iframe> */}
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2606.158654368962!2d-122.97271562224114!3d49.21651817138299!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x548677d5f8c53639%3A0xbc8a14408e972b74!2sSupreme%20Sprouts%20LTD!5e0!3m2!1sen!2sca!4v1743105204160!5m2!1sen!2sca"
+            width="100%"
+            height="450"
+            style={{ border: 0 }}
+            allowFullScreen
+            // allowfullscreen
+            loading="lazy"
           ></iframe>
         </Grid>
         <Grid item xs={12} md={6} textAlign="center">
@@ -83,7 +92,7 @@ export default function Footer() {
               sx={{ color: textColor }}
             >
               <strong>Email:</strong> <br />
-              info@supremesprouts.com
+              info@supremesprout.com
             </Typography>
           </Box>
         </Grid>

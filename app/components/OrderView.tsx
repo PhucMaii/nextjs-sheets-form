@@ -1137,7 +1137,7 @@ const OrderView = ({
             ${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
           </Typography>
         </Grid>
-        {order?.shippingFee ||
+        {order?.shippingFee &&
           (order?.shippingFee > 0 && (
             <>
               <Grid item xs={4} textAlign="left" ml={2}>

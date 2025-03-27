@@ -311,7 +311,7 @@ export const createOrder = async (
         GST: total.GST,
         shippingFee,
         discount: total.discount,
-        totalPrice: total.totalPrice + shippingFee,
+        totalPrice: total.totalPrice,
         isAffectInventory: true,
         orderTime: `${date} ${time}`,
         createdBy,

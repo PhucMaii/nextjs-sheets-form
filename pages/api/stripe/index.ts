@@ -166,7 +166,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 item.itemPreference?.name ||
                 item.itemPreference.inventoryItem.name,
             },
-            unit_amount: Number(item.itemPreference.price.toFixed(2)) * 100,
+            unit_amount: item.itemPreference.price * 100,
           },
           quantity: item.quantity,
         })),
