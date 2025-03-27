@@ -77,11 +77,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           include: {
             inventoryItem: true,
             inventoryUnit: true,
-            option: {
-              include: {
-                unit: true,
-              },
-            },
           },
         },
         user: true,

@@ -141,6 +141,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return {
         ...user,
         ...restOfData,
+        type: order?.type,
         user,
         items: formatItems,
         profit: profit || 0,

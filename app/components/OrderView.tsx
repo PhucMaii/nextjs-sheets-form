@@ -43,7 +43,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { Order } from '../admin/orders/page';
-import { API_URL, USER_ROLE } from '../utils/enum';
+import { API_URL, TYPE, USER_ROLE } from '../utils/enum';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
@@ -503,6 +503,7 @@ const OrderView = ({
     }
   };
 
+  // Handle the input of order items
   const onAddItem = (quantity: number, option: IOption | null = null) => {
     if (quantity % 1 !== 0) {
       showNotification('error', 'Quantity must be a whole number');
@@ -546,6 +547,8 @@ const OrderView = ({
           option: option,
           optionId: option?.id || null,
           price: option?.price || item.price,
+          inventoryUnit: item?.option?.unit || item.inventoryUnit,
+          inventoryUnitId: item?.option?.unitId || item.inventoryUnitId,
           quantity: Number(quantity),
         },
       ]);
@@ -791,7 +794,10 @@ const OrderView = ({
           fullWidth
           variant="contained"
           sx={{ mt: 2, py: 2 }}
-          disabled={orderedItems.length === 0 && !isPreOrder}
+          disabled={
+            (orderedItems.length === 0 && !isPreOrder) ||
+            defaultOrder?.type === TYPE.LOCKED
+          }
         >
           {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
         </LoadingButton>
@@ -967,7 +973,11 @@ const OrderView = ({
                     <Trash2 />
                   </IconButton>
                 </Box>
-                {item?.option && <Typography sx={{color: grey[700]}}>{item.option.name}</Typography>}
+                {item?.option && (
+                  <Typography sx={{ color: grey[700] }}>
+                    {item.option.name}
+                  </Typography>
+                )}
 
                 <Box
                   display="flex"

@@ -10,9 +10,7 @@ import {
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
-import {
-  formatItemsWithTotalPrice,
-} from '../../utils/order';
+import { formatItemsWithTotalPrice } from '../../utils/order';
 import { createOrderedItems } from '../../utils/orderedItems';
 
 export enum ITEM_CATEGORIZED {
@@ -125,7 +123,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         continue;
       } else {
         // UPDATE
-        const { cost } = await generateCostAndProfit(item.id);
+        // const { cost } = await generateCostAndProfit(item.id);
+
+        // Calculate cost: prevCost / prevRatio to get cost for ratio of 1 -> then multiply to new ratio
+        const cost =
+          (item?.cost / item?.inventoryUnit?.ratio) * item.inventoryUnit.ratio;
 
         await prisma.orderedItems.update({
           where: {
@@ -136,6 +138,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             quantity: item.quantity,
             cost,
             profit: item.price - cost,
+            inventoryUnitId: item.inventoryUnitId,
+            option: item.option,
           },
         });
 
@@ -150,7 +154,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.fifo,
             item.inventoryUnit,
             item.quantity,
-            item.quantity,
+            item.prevQuantity,
+            item?.prevInventoryUnit
           );
         }
       }
@@ -251,13 +256,24 @@ export const categorizeUpdatedItems = (
 
       if (
         baseItem.quantity !== updatedItem.quantity ||
-        updatedItem.price !== baseItem.price
+        updatedItem.price !== baseItem.price ||
+        updatedItem.inventoryUnitId !== baseItem.inventoryUnitId ||
+        updatedItem?.option?.name !== baseItem?.option?.name
       ) {
         return {
           ...baseItem,
+          prevInventoryUnit: baseItem.inventoryUnit,
+          inventoryUnitId: updatedItem.inventoryUnitId,
+          inventoryUnit: updatedItem.inventoryUnit,
           quantity: updatedItem.quantity,
+          prevQuantity: baseItem.quantity,
           price: updatedItem.price,
           type: ITEM_CATEGORIZED.UPDATE,
+          option: {
+            name: updatedItem?.option?.name,
+            price: updatedItem?.option?.price,
+            ratio: updatedItem?.option?.unit?.ratio,
+          },
         };
       } else {
         return {

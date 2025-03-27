@@ -23,18 +23,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }: IBody = req.body;
 
     // Check is unitId existed in itemId
-    const sameUnitOption = await prisma.option.findFirst({
-      where: {
-        unitId,
-        itemId,
-      },
-    });
+    // const sameUnitOption = await prisma.option.findFirst({
+    //   where: {
+    //     unitId,
+    //     itemId,
+    //   },
+    // });
 
-    if (sameUnitOption) {
-      return res.status(500).json({
-        error: 'Option Name Existed',
-      });
-    }
+    // if (sameUnitOption) {
+    //   return res.status(500).json({
+    //     error: 'Option Name Existed',
+    //   });
+    // }
 
     const newOption = await prisma.option.create({
       data: {

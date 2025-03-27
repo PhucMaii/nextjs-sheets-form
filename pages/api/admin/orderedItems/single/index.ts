@@ -229,6 +229,7 @@ export const updateSingleInventoryItem = async (
   unit: InventoryUnit | any,
   newQuantity: number,
   previousQuantity: number,
+  previousUnit: InventoryUnit | any = null,
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -268,10 +269,15 @@ export const updateSingleInventoryItem = async (
       console.error('Comflict FIFO Not Found');
       return;
     }
-
+    
     const ratio = unit?.ratio || 1;
+
+    const prevFinalQuantity = previousUnit ? previousQuantity * previousUnit.ratio : previousQuantity * ratio;
+
+    const newFinalQuantity = newQuantity * ratio;
+
     const updatedQuantity =
-      lastUpdatedFifo.quantity - newQuantity * ratio + previousQuantity * ratio;
+      lastUpdatedFifo.quantity - newFinalQuantity + prevFinalQuantity;
 
     await prisma.fifo.update({
       where: {

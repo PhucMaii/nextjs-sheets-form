@@ -133,7 +133,12 @@ export const createOrderedItems = async (
       newOrderedItems.push({
         orderId: order.id,
         fifoId: newFifo.id,
-        optionId: item?.optionId || null,
+        // optionId: item?.optionId || null,
+        option: {
+          name: item?.option?.name || '',
+          price: item?.option?.price || 0,
+          ratio: itemUnit?.ratio || 1,
+        },
         cost: itemUnit?.unitPrice || 0,
         profit: item.price - (itemUnit?.unitPrice || 0),
         name: item.name,
@@ -234,7 +239,12 @@ export const createOrderedItems = async (
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[fifoIndex].id,
-          optionId: item?.optionId || null,
+          // optionId: item?.optionId || null,
+          option: {
+            name: item?.option?.name || '',
+            price: item?.option?.price || 0,
+            ratio: itemUnit?.ratio || 1,
+          },
           name: item.name,
           cost: cost,
           profit: item.price - cost,
@@ -254,7 +264,12 @@ export const createOrderedItems = async (
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[0].id,
-          optionId: item?.optionId || null,
+          // optionId: item?.optionId || null,
+          option: {
+            name: item?.option?.name || '',
+            price: item?.option?.price || 0,
+            ratio: itemUnit?.ratio || 1,
+          },
           name: item.name,
           cost: cost,
           profit: item.price - cost,

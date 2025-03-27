@@ -101,7 +101,7 @@ model OrderedItems {
   isCustomAmount   Boolean?
   cost             Float?
   profit           Float?
-  optionId        Int?
+  option          Json?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -109,36 +109,36 @@ model OrderedItems {
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
-  option    Option? @relation(fields: [optionId], references: [id])
 }
 
 model Orders {
-  id                Int       @id @default(autoincrement())
+  id                Int            @id @default(autoincrement())
   orderTime         String
   deliveryDate      String
   note              String
   status            String
   userId            Int
-  subTotal          Float?
-  discount          Float?
-  PST               Float?
-  GST               Float?
   totalPrice        Float
-  type              String?
-  updateTime        DateTime?
   isReplacement     Boolean?
   isVoid            Boolean?
-  isAffectInventory Boolean?
+  updateTime        DateTime?
   createdBy         String?
   updatedBy         String?
+  codBoardId        Int?
+  GST               Float?
+  PST               Float?
+  subTotal          Float?
+  discount          Float?
+  isAffectInventory Boolean?
+  shippingFee       Float?
+  type              String?
   deliveredBy       String?
   addedToCODBy      String?
-
-  user       User?          @relation(fields: [userId], references: [id])
-  items      OrderedItems[]
-  CodBoard   CodBoard?      @relation(fields: [codBoardId], references: [id])
-  codBoardId Int?
+  user              User?          @relation(fields: [userId], references: [id])
+  items             OrderedItems[]
+  CodBoard          CodBoard?      @relation(fields: [codBoardId], references: [id])
 }
+
 
 model UserPreference {
   id          Int     @id @default(autoincrement())
@@ -495,6 +495,4 @@ model Option {
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
   item  Item  @relation(fields: [itemId], references: [id])
   inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
-
-  orderedItems    OrderedItems[]
 }

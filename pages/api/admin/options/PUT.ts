@@ -43,23 +43,23 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         // const updatedOption = {...existingOption, ...updateFields};
 
         // Check if new unitId existed in itemId
-        if (unitId) {
-            const option = await prisma.option.findFirst({
-                where: {
-                    id: {
-                        not: id,
-                    },
-                    unitId,
-                    itemId: existingOption.itemId,
-                },
-            });
+        // if (unitId) {
+        //     const option = await prisma.option.findFirst({
+        //         where: {
+        //             id: {
+        //                 not: id,
+        //             },
+        //             unitId,
+        //             itemId: existingOption.itemId,
+        //         },
+        //     });
 
-            if (option) {
-                return res.status(500).json({
-                    error: 'Option With Selected Unit Existed',
-                });
-            }
-        }
+        //     if (option) {
+        //         return res.status(500).json({
+        //             error: 'Option With Selected Unit Existed',
+        //         });
+        //     }
+        // }
 
         if (Object.keys(updateFields).length === 0) {
             return res.status(200).json({
