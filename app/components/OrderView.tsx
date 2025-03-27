@@ -521,7 +521,9 @@ const OrderView = ({
       (i) => i[comparedField] === item[comparedField],
     );
 
+    console.log(option, "ITEM OPTION")
     if (existingItem) {
+      
       const newOrderedItems = orderedItems.map((i) => {
         if (i[comparedField] === item[comparedField]) {
           return {
@@ -529,8 +531,8 @@ const OrderView = ({
             option: option,
             optionId: option?.id || null,
             price: option?.price || item.price,
-            inventoryUnit: item?.option?.unit || item.inventoryUnit,
-            inventoryUnitId: item?.option?.unitId || item.inventoryUnitId,
+            inventoryUnit: option?.unit || item.inventoryUnit,
+            inventoryUnitId: option?.unitId || item.inventoryUnitId,
             quantity: Number(quantity),
           };
         }
@@ -547,8 +549,8 @@ const OrderView = ({
           option: option,
           optionId: option?.id || null,
           price: option?.price || item.price,
-          inventoryUnit: item?.option?.unit || item.inventoryUnit,
-          inventoryUnitId: item?.option?.unitId || item.inventoryUnitId,
+          inventoryUnit: option?.unit || item.inventoryUnit,
+          inventoryUnitId: option?.unitId || item.inventoryUnitId,
           quantity: Number(quantity),
         },
       ]);

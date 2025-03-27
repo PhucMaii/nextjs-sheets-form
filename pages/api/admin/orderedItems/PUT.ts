@@ -3,7 +3,6 @@ import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
 import {
-  generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
 } from './single';

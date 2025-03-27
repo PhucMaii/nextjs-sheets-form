@@ -5,7 +5,7 @@ import {
   ITEM_CATEGORIZED,
 } from '@/pages/api/admin/orderedItems/PUT';
 import {
-  generateCostAndProfit,
+  // generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
 } from '@/pages/api/admin/orderedItems/single';
@@ -105,7 +105,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         continue;
       } else {
         // UPDATE
-        const { cost } = await generateCostAndProfit(item.id);
+        // const { cost } = await generateCostAndProfit(item.id);
+
+
+        const cost =
+          (item?.cost / item?.inventoryUnit?.ratio) * item.inventoryUnit.ratio;
 
         await prisma.orderedItems.update({
           where: {
@@ -116,6 +120,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             quantity: item.quantity,
             cost,
             profit: item.price - cost,
+            inventoryUnitId: item.inventoryUnitId,
+            option: item.option,
           },
         });
 
@@ -130,7 +136,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             item.fifo,
             item.inventoryUnit,
             item.quantity,
-            item.quantity,
+            item.prevQuantity,
+            item?.prevInventoryUnit
           );
         }
       }

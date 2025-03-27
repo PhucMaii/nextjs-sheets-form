@@ -6,7 +6,7 @@ import { pusherServer } from '@/app/pusher';
 import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '../utils/email';
 import {
-  generateCostAndProfit,
+  // generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
 } from '../admin/orderedItems/single';
@@ -100,7 +100,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         continue;
       } else {
         // UPDATE
-        const { cost } = await generateCostAndProfit(item.id);
+        // const { cost } = await generateCostAndProfit(item.id);
+
+        const cost =
+          (item?.cost / item?.inventoryUnit?.ratio) * item.inventoryUnit.ratio;
 
         await prisma.orderedItems.update({
           where: {
@@ -111,6 +114,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             quantity: item.quantity,
             cost,
             profit: item.price - cost,
+            inventoryUnitId: item.inventoryUnitId,
+            option: item.option,
           },
         });
 
@@ -125,7 +130,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.fifo,
             item.inventoryUnit,
             item.quantity,
-            item.quantity,
+            item.prevQuantity,
+            item?.prevInventoryUnit,
           );
         }
       }
