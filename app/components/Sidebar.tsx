@@ -149,7 +149,7 @@ export default function Sidebar({ children }: PropTypes) {
           gap={2}
           sx={{ pb: 10, p: 1 }}
         >
-          {/*<HolidayText /> */}
+          <HolidayText />
           {children}
         </Box>
         {isOpenSnackbar && (
@@ -251,7 +251,7 @@ export default function Sidebar({ children }: PropTypes) {
                 showNotification={showNotification}
               />
             )}
-            {/*<HolidayText /> */}
+            <HolidayText />
             <Box
               display="flex"
               width="100%"
@@ -293,7 +293,7 @@ export default function Sidebar({ children }: PropTypes) {
               showNotification={showNotification}
             />
           )}
-          {/*<HolidayText /> */}
+          {/* <HolidayText /> */}
 
           <Box
             display="flex"
@@ -303,7 +303,7 @@ export default function Sidebar({ children }: PropTypes) {
             gap={2}
             sx={{ maxWidth: clientMaxWidth, mx: 'auto', zIndex: 50 }}
           >
-            {/* <HolidayText /> */}
+            <HolidayText />
             {children}
           </Box>
         </Box>
