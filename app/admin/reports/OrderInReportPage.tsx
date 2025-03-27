@@ -86,6 +86,7 @@ export default function OrderInReportPage({
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   // Printing Refs
   const invoicePrint: any = useRef();
+  const allOrdersInvoicePrint: any = useRef();
   const billPrint: any = useRef();
   const weeklyPrint: any = useRef();
   // Reset display data
@@ -132,6 +133,10 @@ export default function OrderInReportPage({
 
   const handleInvoicePrint = useReactToPrint({
     content: () => invoicePrint.current,
+  });
+
+  const handleAllOrdersInvoicePrint = useReactToPrint({
+    content: () => allOrdersInvoicePrint.current,
   });
 
   const handleBillPrint = useReactToPrint({
@@ -307,6 +312,14 @@ export default function OrderInReportPage({
           Print
         </MenuItem>
         <MenuItem
+          onClick={() => {
+            handleAllOrdersInvoicePrint();
+            handleCloseStatementAnchor();
+          }}
+        >
+          Print (All Orders)
+        </MenuItem>
+        <MenuItem
           disabled={!clientValue?.email || false}
           onClick={async () => {
             setIsOpenEditEmail(true);
@@ -447,6 +460,13 @@ export default function OrderInReportPage({
             orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
             endDate={dateRange[1]}
             ref={invoicePrint}
+          />
+          <InvoicePrint
+            client={clientValue}
+            orders={selectedOrders.length > 0 ? selectedOrders : clientOrders}
+            endDate={dateRange[1]}
+            ref={allOrdersInvoicePrint}
+            isPrintComplete
           />
           <WeeklyStatement
             client={clientValue}

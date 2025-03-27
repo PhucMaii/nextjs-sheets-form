@@ -611,6 +611,8 @@ const OrderView = ({
     } catch (error: any) {
       console.log('There was an error: ', error);
       setIsLoading(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
