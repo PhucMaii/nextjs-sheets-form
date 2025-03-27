@@ -11,6 +11,7 @@ interface IModalHead {
   onClose: any;
   onlyHeading?: boolean;
   closeButtonProps?: any;
+  containerStyle?: any;
 }
 
 export default function ModalHead({
@@ -21,9 +22,10 @@ export default function ModalHead({
   onClose,
   onlyHeading,
   closeButtonProps,
+  containerStyle,
 }: IModalHead) {
   return (
-    <Box display="flex" justifyContent="space-between" alignItems="center">
+    <Box display="flex" justifyContent="space-between" alignItems="center" style={containerStyle}>
       <Typography variant="h4" fontWeight={500}>
         {heading}
       </Typography>

@@ -226,6 +226,7 @@ const OrderAccordion = ({
           e.stopPropagation();
           setAnchorEl(e.currentTarget);
         }}
+        disabled={order?.type === TYPE.LOCKED}
       >
         <MoreHorizIcon />
       </IconButton>
@@ -390,7 +391,6 @@ const OrderAccordion = ({
           showNotification={showNotification}
         />
       )}
-
       <ShadowSection my={2}>
         <Grid container alignItems="center" columnSpacing={1} rowGap={1}>
           <Grid item sm={0.5} xs={2}>
@@ -491,6 +491,7 @@ const OrderAccordion = ({
                     setIsOpenDetails(true);
                   }
                 }}
+                disabled={order?.type === TYPE.LOCKED}
               >
                 <PreviewIcon color="primary" />
               </IconButton>
@@ -523,6 +524,7 @@ const OrderAccordion = ({
                     e.stopPropagation();
                     setIsEditDateOpen(true);
                   }}
+                  disabled={order?.type === TYPE.LOCKED}
                 >
                   <EditIcon sx={{ width: '20px', height: '20px' }} />
                 </IconButton>
@@ -570,6 +572,7 @@ const OrderAccordion = ({
                     e.stopPropagation();
                     setIsEditDateOpen(true);
                   }}
+                  disabled={order?.type === TYPE.LOCKED}
                 >
                   <EditIcon sx={{ width: '20px', height: '20px' }} />
                 </IconButton>

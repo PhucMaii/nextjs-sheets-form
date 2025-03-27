@@ -28,6 +28,8 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { renderType } from '@/app/lib/render';
+import LockIcon from '@mui/icons-material/Lock';
+
 import { grey } from '@mui/material/colors';
 
 interface PropTypes {
@@ -158,7 +160,13 @@ const ClientOrdersTable = ({
     return (
       <>
         <TableCell>
-          {order.isReplacement ? (
+          {order?.type === TYPE.LOCKED ? (
+            <StatusText
+              text={`Locked`}
+              type={'info'}
+              icon={<LockIcon color="info" fontSize="small" />}
+            />
+          ) : order.isReplacement ? (
             <StatusText text="Replaced" type="error" />
           ) : order.isVoid ? (
             <StatusText text="Voided" type="error" />
@@ -195,6 +203,7 @@ const ClientOrdersTable = ({
               e.preventDefault();
             }}
             size="small"
+            disabled={order?.type === TYPE.LOCKED}
           >
             <MenuItem value={ORDER_STATUS.COMPLETED}>
               <StatusText text={ORDER_STATUS.COMPLETED} type="success" />
@@ -265,8 +274,10 @@ const ClientOrdersTable = ({
           selected={isOrderSelected}
           sx={{ cursor: 'pointer', '&:hover': { backgroundColor: grey[50] } }}
           onClick={() => {
+            if (item?.type === TYPE.LOCKED) return;
             setOpenEdit(() => ({ order: item, open: true }));
           }}
+          // disabled={item?.type === TYPE.LOCKED}
           {...props}
         />
       );

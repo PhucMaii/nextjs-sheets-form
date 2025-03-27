@@ -27,6 +27,7 @@ import { LoadingButton } from '@mui/lab';
 import { renderType } from '@/app/lib/render';
 import { grey } from '@mui/material/colors';
 import PendingIcon from '@mui/icons-material/Pending';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface IProps {
   order: Order;
@@ -153,7 +154,7 @@ export default function OrderComponent({
           <StatusText text={statusText.text} type={statusText.type} />
         </Grid>
         <Grid item xs={6} textAlign="right">
-          {abilityToEdit && (
+          {abilityToEdit ? (
             <Box
               display="flex"
               justifyContent="flex-end"
@@ -227,6 +228,14 @@ export default function OrderComponent({
                   <CreditScoreIcon />
                 </Fab>
               )}
+            </Box>
+          ) : (
+            <Box display="flex" justifyContent="flex-end">
+              <StatusText
+                text="Date Difference"
+                type="info"
+                icon={<InfoIcon />}
+              />
             </Box>
           )}
         </Grid>

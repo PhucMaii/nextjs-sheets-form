@@ -1,7 +1,10 @@
 import { OrderedItems, PrismaClient, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
-import { convertDeliveryDateStringToDate } from '../../utils/date';
+import {
+  convertDeliveryDateStringToDate,
+  generate7DaysBefore,
+} from '../../utils/date';
 import { days } from '@/app/lib/constant';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
@@ -29,7 +32,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const formattedDate: Date = convertDeliveryDateStringToDate(date);
     const day = days[formattedDate.getDay()];
 
-    const cod: any = await prisma.codBoard.findFirst({
+    const codBoard: any = await prisma.codBoard.findFirst({
       where: {
         date,
         driverId: currentDriver.id,
@@ -52,7 +55,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     // Get cod orders on that day
 
-    if (!cod) {
+    if (!codBoard) {
       return res.status(404).json({
         error: 'COD not found',
       });
@@ -70,11 +73,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Get cod orders on that day from that route
-    const orderExistedInBoard = cod.orders.map((order: any) => {
+    const orderExistedInBoard = codBoard.orders.map((order: any) => {
       return order.id;
     });
 
     const wcodDay: any = getWCODDay(date);
+    const wcod7days = generate7DaysBefore(date);
     const codOrders = await prisma.orders.findMany({
       where: {
         id: {
@@ -93,9 +97,49 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         user: {
           preference: {
-            paymentType: {
-              in: [wcodDay, PAYMENT_TYPE.COD],
-            },
+            paymentType: PAYMENT_TYPE.COD,
+          },
+        },
+      },
+      include: {
+        user: {
+          include: {
+            preference: true,
+            category: true,
+            routes: true,
+          },
+        },
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: true,
+          },
+        },
+      },
+    });
+
+    const wcodOrders = await prisma.orders.findMany({
+      where: {
+        id: {
+          notIn: orderExistedInBoard,
+        },
+        deliveryDate: {
+          in: wcod7days,
+        },
+        status: {
+          in: [
+            ORDER_STATUS.INCOMPLETED,
+            ORDER_STATUS.DELIVERED,
+            ORDER_STATUS.COMPLETED,
+          ],
+        },
+        userId: {
+          in: userIds,
+        },
+        user: {
+          preference: {
+            paymentType: wcodDay,
           },
         },
       },
@@ -118,57 +162,57 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Merge both cod orders and board orders
-    const mergedOrders = [...codOrders, ...cod.orders];
+    const mergedOrders = [...codOrders, ...wcodOrders, ...codBoard.orders];
 
     // Arrange orders
-    const arrangedOrders = await prisma.scheduleOrders.findMany({
-      where: {
-        userId: {
-          in: userIds,
-        },
-        day,
-      },
-      include: {
-        user: true,
-        items: {
-          include: {
-            inventoryItem: true,
-            inventoryUnit: true,
-            fifo: true,
-          },
-        },
-        positionIndex: true,
-      },
-      orderBy: {
-        positionIndex: {
-          index: 'asc',
-        },
-      },
-    });
+    // const arrangedOrders = await prisma.scheduleOrders.findMany({
+    //   where: {
+    //     userId: {
+    //       in: userIds,
+    //     },
+    //     day,
+    //   },
+    //   include: {
+    //     user: true,
+    //     items: {
+    //       include: {
+    //         inventoryItem: true,
+    //         inventoryUnit: true,
+    //         fifo: true,
+    //       },
+    //     },
+    //     positionIndex: true,
+    //   },
+    //   orderBy: {
+    //     positionIndex: {
+    //       index: 'asc',
+    //     },
+    //   },
+    // });
 
     // Format the return orders
     const sortedDeliveryOrders = [];
-    for (const order of arrangedOrders) {
-      const deliveryOrder = mergedOrders.find(
-        (browsingOrder: any) => browsingOrder.userId === order.userId,
-      );
+    for (const order of mergedOrders) {
+      // const deliveryOrder = mergedOrders.find(
+      //   (browsingOrder: any) => browsingOrder.userId === order.userId,
+      // );
 
-      if (!deliveryOrder) {
-        continue;
-      }
+      // if (!deliveryOrder) {
+      //   continue;
+      // }
 
-      const newItems = deliveryOrder.items.map((item: OrderedItems) => {
+      const newItems = order.items.map((item: OrderedItems) => {
         const totalPrice = item.quantity * item.price;
         return { ...item, totalPrice };
       });
 
-      const isOrderIncludedInRoute = deliveryOrder.user.routes.some(
+      const isOrderIncludedInRoute = order.user.routes.some(
         (route: UserRoute) => route.routeId === targetRoute.id,
       );
       sortedDeliveryOrders.push({
-        ...deliveryOrder,
+        ...order,
         items: newItems,
-        notInBoard: !orderExistedInBoard.includes(deliveryOrder.id),
+        notInBoard: !orderExistedInBoard.includes(order.id),
         notInRoute: !isOrderIncludedInRoute,
       });
     }
@@ -185,7 +229,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     console.log(sortedDeliveryOrders, 'formattedOrders');
 
     return res.status(200).json({
-      data: { ...cod, orders: sortedDeliveryOrders },
+      data: { ...codBoard, orders: sortedDeliveryOrders },
       message: 'Fetch All Cod Successfully',
     });
   } catch (error: any) {

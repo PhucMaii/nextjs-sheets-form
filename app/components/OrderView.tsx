@@ -43,7 +43,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { Order } from '../admin/orders/page';
-import { API_URL, USER_ROLE } from '../utils/enum';
+import { API_URL, TYPE, USER_ROLE } from '../utils/enum';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
@@ -763,8 +763,8 @@ const OrderView = ({
           onClick={onSubmitOrder}
           fullWidth
           variant="contained"
-          sx={{ mt: 2 }}
-          disabled={orderedItems.length === 0 && !isPreOrder}
+          sx={{ mt: 2, py: 2 }}
+          disabled={orderedItems.length === 0 && !isPreOrder || defaultOrder?.type === TYPE.LOCKED}
         >
           {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
         </LoadingButton>
@@ -831,7 +831,7 @@ const OrderView = ({
           mt={2}
           maxWidth="100%"
           maxHeight="100vh"
-          overflow="auto"
+          sx={{ overflowY: 'auto' }}
         >
           {selectedItemType === 'All' &&
             !debouncedKeywords &&
