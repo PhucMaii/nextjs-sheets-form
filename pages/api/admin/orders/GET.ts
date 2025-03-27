@@ -151,6 +151,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         items: formattedItems,
         ...order.user,
         id: order.id,
+        type: order?.type,
         category: order.user.category,
         previousUnpaidOrders: previousUnpaidCodOrdersMap[order.user.clientId]
           ? previousUnpaidCodOrdersMap[order.user.clientId]
