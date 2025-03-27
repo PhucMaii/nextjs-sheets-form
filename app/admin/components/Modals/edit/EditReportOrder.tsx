@@ -9,11 +9,11 @@ import { BoxModal } from '../styled';
 import { Order } from '../../../orders/page';
 import {} from '@/app/utils/time';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
-import axios from 'axios';
 import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
 import { SWRFetchData } from '@/app/utils/db';
+import { onUpdateOrder } from '@/app/utils/orders';
 
 interface PropTypes extends ModalProps {
   order: Order;
@@ -144,12 +144,13 @@ const EditReportOrder = ({
 
   const onUpdateItem = async (orderParam: Order) => {
     try {
-      const response = await axios.put(API_URL.ORDERED_ITEMS, {
-        updatedItems: orderParam.items,
-        orderId: order.id,
-        note: orderParam.note,
-        deliveryDate: orderParam.deliveryDate,
-      });
+      // const response = await axios.put(API_URL.ORDERED_ITEMS, {
+      //   updatedItems: orderParam.items,
+      //   orderId: order.id,
+      //   note: orderParam.note,
+      //   deliveryDate: orderParam.deliveryDate,
+      // });
+      const response = await onUpdateOrder(order.id, orderParam);
 
       if (response.data.error) {
         showNotification('error', response.data.error);

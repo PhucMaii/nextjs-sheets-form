@@ -661,7 +661,7 @@ const OrderView = ({
                           ? item?.inventoryItem?.color
                           : infoBackground,
                     }}
-                    disabled={item?.disabled}
+                    disabled={item?.disabled || order?.type === TYPE.LOCKED}
                     flexColOnDiscount={isModal && smDown}
                   />
                 )}
@@ -764,7 +764,10 @@ const OrderView = ({
           fullWidth
           variant="contained"
           sx={{ mt: 2, py: 2 }}
-          disabled={orderedItems.length === 0 && !isPreOrder || defaultOrder?.type === TYPE.LOCKED}
+          disabled={
+            (orderedItems.length === 0 && !isPreOrder) ||
+            defaultOrder?.type === TYPE.LOCKED
+          }
         >
           {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
         </LoadingButton>
@@ -844,7 +847,10 @@ const OrderView = ({
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
           {role === USER_ROLE.ADMIN && !isPreOrder && (
             <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-              <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+              <Button
+                onClick={() => setIsOpenAddCustomAmount(true)}
+                disabled={defaultOrder?.type === TYPE.LOCKED}
+              >
                 <Box
                   display="flex"
                   flexDirection="column"
@@ -994,6 +1000,7 @@ const OrderView = ({
                           }}
                           color="primary"
                           onClick={() => onDecrementQuantity(item)}
+                          disabled={defaultOrder?.type === TYPE.LOCKED}
                         >
                           -
                         </Fab>
@@ -1010,6 +1017,7 @@ const OrderView = ({
                           }}
                           color="primary"
                           onClick={() => onIncrementQuantity(item)}
+                          disabled={defaultOrder?.type === TYPE.LOCKED}
                         >
                           +
                         </Fab>
@@ -1028,7 +1036,7 @@ const OrderView = ({
                         <Typography variant="h6">
                           Qty: <strong>{item.quantity}</strong>
                         </Typography>
-                        <IconButton color="primary">
+                        <IconButton color="primary" disabled={defaultOrder?.type === TYPE.LOCKED}>
                           <EditIcon onClick={() => setEditItemQuantity(item)} />
                         </IconButton>
                       </Box>

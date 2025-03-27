@@ -125,7 +125,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         continue;
       } else {
         // UPDATE
-        const { cost } = await generateCostAndProfit(item.id);
+        // const { cost } = await generateCostAndProfit(item.id);
 
         await prisma.orderedItems.update({
           where: {
@@ -134,8 +134,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           data: {
             price: item.price,
             quantity: item.quantity,
-            cost,
-            profit: item.price - cost,
+            // cost: item.cost,
+            profit: item.price - item.cost,
           },
         });
 
@@ -150,7 +150,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.fifo,
             item.inventoryUnit,
             item.quantity,
-            item.quantity,
+            item.prevQuantity,
           );
         }
       }
@@ -256,6 +256,7 @@ export const categorizeUpdatedItems = (
         return {
           ...baseItem,
           quantity: updatedItem.quantity,
+          prevQuantity: baseItem.quantity,
           price: updatedItem.price,
           type: ITEM_CATEGORIZED.UPDATE,
         };
