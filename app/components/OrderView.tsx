@@ -168,7 +168,7 @@ export const ItemButton = ({
       (a, b) => a.price - b.price,
     )[0];
 
-    const highestDiscountPercent = item?.options
+    const highestDiscountPercent: any = item?.options
       ?.map((option) => {
         if (option?.prevPrice && option?.isShowDiscount) {
           return (1 - option.price / option.prevPrice) * 100;
@@ -180,7 +180,7 @@ export const ItemButton = ({
 
     const highestDiscount =
       highestDiscountPercent.length > 0
-        ? Math.max(...highestDiscountPercent)
+        ? Math.max(highestDiscountPercent)
         : undefined;
 
     return {

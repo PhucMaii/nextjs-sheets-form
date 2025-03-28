@@ -488,6 +488,8 @@ model Option {
   isShowDiscount  Boolean?
   availability Boolean
   inventoryItemId Int
+  createdAt   String?
+  createdBy   String?
 
   unitId Int
   itemId Int

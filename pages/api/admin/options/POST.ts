@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getTodayDate } from '../../utils/date';
+import { getUserInfo } from '../../utils/auth';
 
 interface IBody {
   name: string;
@@ -36,6 +38,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     //   });
     // }
 
+    const today = getTodayDate();
+    const admin = await getUserInfo(req, res);
     const newOption = await prisma.option.create({
       data: {
         name,
@@ -43,7 +47,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         availability: true,
         unitId,
         itemId,
-        inventoryItemId
+        inventoryItemId,
+        createdAt: today.dateAndTime,
+        createdBy: `Admin - ${admin?.clientName}`,
       },
     });
 
@@ -87,13 +93,40 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         availability: true,
         unitId,
         itemId: item.id,
-        inventoryItemId
+        inventoryItemId,
+        createdAt: today.dateAndTime,
+        createdBy: `Admin - ${admin?.clientName}`,
       };
     });
+
+    console.log({ newOptions });
 
     await prisma.option.createMany({
       data: newOptions,
     });
+
+    const retrievedNewOptions = await prisma.option.findMany({
+      where: {
+        createdAt: today.dateAndTime,
+        createdBy: `Admin - ${admin?.clientName}`,
+      },
+      include: {
+        item: true,
+        unit: true,
+      },
+    });
+
+    // Handle update scheduled orders
+    const responseStatus =
+      await updateScheduledOrderedItemsOptions(retrievedNewOptions);
+
+    if (!responseStatus.ok) {
+      return res.status(500).json({
+        error:
+          'Fail to update scheduled orders item options + ' +
+          responseStatus.error,
+      });
+    }
 
     return res.status(201).json({
       data: newOption,
@@ -104,3 +137,131 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
+
+const updateScheduledOrderedItemsOptions = async (newOptions: any) => {
+  try {
+    const prisma = new PrismaClient();
+    const retrievedNewOptions = newOptions;
+
+    // // Save the order id of orders that need to be updated in total price
+    // const orderIdToChangeTotal: number[] = [];
+
+    // Handle update scheduled orders
+    for (const option of retrievedNewOptions) {
+      const targetedScheduleOrderedItems = await prisma.orderedItems.findMany({
+        where: {
+          ScheduleOrders: {
+            user: {
+              categoryId: option.item.categoryId,
+            },
+          },
+          name: option.item.name,
+        },
+        include: {
+          ScheduleOrders: true,
+        },
+      });
+
+      console.log(
+        'targetedScheduleOrderedItems: ',
+        targetedScheduleOrderedItems,
+      );
+
+      // Filter the items does not have option
+      const itemsDoesNotHaveOptions = targetedScheduleOrderedItems.filter(
+        (item: any) => {
+          return !item?.option?.name && item?.option?.price === 0;
+        },
+      );
+
+      console.log(itemsDoesNotHaveOptions, '  itemsDoesNotHaveOptions');
+
+      if (itemsDoesNotHaveOptions.length > 0) {
+        // Find the option has the ratio of 1
+        const optionWithRatioOne = await prisma.option.findFirst({
+          where: {
+            itemId: option.item.id,
+            unit: {
+              ratio: 1,
+            },
+          },
+          include: {
+            unit: true,
+          },
+        });
+
+        const toBeAssignedOption = optionWithRatioOne
+          ? optionWithRatioOne
+          : option;
+
+        console.log(toBeAssignedOption, 'toBeAssignedOption');
+
+        await prisma.orderedItems.updateMany({
+          where: {
+            id: {
+              in: itemsDoesNotHaveOptions.map((item: any) => item.id),
+            },
+          },
+          data: {
+            price: toBeAssignedOption.price,
+            prevPrice: toBeAssignedOption?.prevPrice,
+            isShowDiscount: toBeAssignedOption?.isShowDiscount,
+            inventoryUnitId: toBeAssignedOption?.unitId,
+            option: {
+              name: toBeAssignedOption.name,
+              price: toBeAssignedOption.price,
+              ratio: toBeAssignedOption?.unit?.ratio || 1,
+              prevPrice: toBeAssignedOption?.prevPrice,
+              isShowDiscount: toBeAssignedOption?.isShowDiscount,
+            },
+          },
+        });
+
+        // Update scheduledOrder total price
+        const responseStatus = await updateScheduledOrdersTotalPrice(
+          itemsDoesNotHaveOptions,
+          toBeAssignedOption.price
+        );
+
+        if (!responseStatus.ok) {
+          return { ok: false, error: responseStatus.error };
+        }
+      }
+    }
+
+    return { ok: true };
+  } catch (error: any) {
+    console.log('Fail to update scheduled orders item options: ', error);
+    return { ok: false, error };
+  }
+};
+
+export const updateScheduledOrdersTotalPrice = async (
+  scheduledOrderedItems: any[], // can be in different orders
+  newItemPrice: number,
+) => {
+  try {
+    const prisma = new PrismaClient();
+
+    for (const item of scheduledOrderedItems) {
+      if (item.scheduledOrderId && item.ScheduleOrders) {
+        const newTotalPrice =
+          item.ScheduleOrders?.totalPrice -
+          item.price * item.quantity +
+          newItemPrice * item.quantity;
+        await prisma.scheduleOrders.update({
+          where: {
+            id: item.scheduledOrderId,
+          },
+          data: {
+            totalPrice: newTotalPrice,
+          },
+        });
+      }
+    }
+
+    return { ok: true };
+  } catch (error: any) {
+    return { ok: false, error };
+  }
+};

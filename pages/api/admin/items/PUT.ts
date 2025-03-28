@@ -203,7 +203,7 @@ const updateAllScheduleOrderItems = async (
       });
 
       // Re calculate their new total price if the udpated data included price
-      if (updatedData.price) {
+      if (updatedData?.price) {
         for (const scheduleOrder of scheduleOrders) {
           const totalPrice = scheduleOrder.items.reduce(
             (acc: number, item: any) => {
@@ -262,25 +262,33 @@ const updateAllScheduleOrderItems = async (
     });
 
     // Update all orders total price
-    for (const scheduleOrder of scheduleOrders) {
-      const orderedItems = await prisma.orderedItems.findMany({
-        where: {
-          scheduledOrderId: scheduleOrder.id,
-        },
-      });
-      const totalPrice = orderedItems.reduce(
-        (total: number, item: any) => total + item.quantity * item.price,
-        0,
-      );
+    if (updatedData?.price) {
+      for (const scheduleOrder of scheduleOrders) {
+        // Fetch items again to get new data after update
+        // const orderedItems = await prisma.orderedItems.findMany({
+        //   where: {
+        //     scheduledOrderId: scheduleOrder.id,
+        //   },
+        // });
+        const orderedItems = scheduleOrder.items;
 
-      await prisma.scheduleOrders.update({
-        where: {
-          id: scheduleOrder.id,
-        },
-        data: {
-          totalPrice,
-        },
-      });
+        if (orderedItems.length > 0) {
+          const totalPrice = orderedItems.reduce(
+            (total: number, item: any) => total + item.quantity * updatedData.price,
+            0,
+          );
+    
+          await prisma.scheduleOrders.update({
+            where: {
+              id: scheduleOrder.id,
+            },
+            data: {
+              totalPrice,
+            },
+          });
+        }
+      }
+      
     }
 
     return { ok: true };
