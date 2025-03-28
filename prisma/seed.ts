@@ -116,14 +116,34 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.promotion.updateMany({
-    where: {
-      status: 'Active'
-    },
-    data: {
-      visibility: true,
+  const preOrders = await prisma.scheduleOrders.findMany({
+    include: {
+      items: true,
+      user: {
+        select: {
+          clientName: true,
+        }
+      }
     }
   });
+
+  for (const preOrder of preOrders) {
+    const totalPrice = preOrder.items.reduce((acc, item) => {
+      const itemPrice = item.price || 0;
+      return acc + itemPrice * item.quantity;
+    }
+    , 0); 
+
+    await prisma.scheduleOrders.update({
+      where: {
+        id: preOrder.id,
+      },
+      data: {
+        totalPrice: totalPrice,
+      },
+    });
+    console.log(`Updated total price for order ID ${preOrder.id} - ${preOrder?.user?.clientName}: ${totalPrice}`);
+  }
 }
 
 main()

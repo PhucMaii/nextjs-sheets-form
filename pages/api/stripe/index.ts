@@ -9,6 +9,7 @@ import { calculateShippingFee } from '@/app/utils/shipping';
 import { generateLatLng } from '../admin/clients/POST';
 import { verifyDeliveryAddress } from '../utils/address';
 import { ORDER_STATUS } from '@/app/utils/enum';
+// import { generateCostAndProfit } from '../admin/orderedItems/single';
 
 export type CheckoutClientData = {
   guestSessionId: string;
@@ -134,11 +135,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // );
 
     const cartItems = convertCartItemsToOrderItems(cart.items);
-    const totalProfit = calculateCartProfit(cartItems);
+    // const totalProfit = calculateCartProfit(cartItems);
+    const totalRevenue = cartItems.reduce((acc: number, item: any) => {
+      return acc + item.price * item.quantity;
+    }, 0);
 
     const shippingFee = calculateShippingFee(
       isAddressValid.distance,
-      totalProfit,
+      totalRevenue,
     );
     // console.log(shippingFee, 'shipping fee');
 
@@ -206,16 +210,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withGuestSessionGuard(handler);
 
-const calculateCartProfit = (items: any[]) => {
-  // const orderItems = convertCartItemsToOrderItems(items);
-  // console.log({orderItems, items}, 'order items');
+// const calculateCartProfit = async (items: any[]) => {
+//   // const orderItems = convertCartItemsToOrderItems(items);
+//   // console.log({orderItems, items}, 'order items');
 
-  let profit = 0;
-  for (const item of items) {
-    profit += (item.price - item.inventoryUnit.unitPrice) * item.quantity;
-  }
+//   let profit = 0;
+//   for (const item of items) {
+//     // const cost = await generateCostAndProfit(item.id);
+//     profit += (item.price - item.inventoryUnit.unitPrice) * item.quantity;
+//   }
 
-  console.log(profit);
+//   console.log(profit);
 
-  return profit;
-};
+//   return profit;
+// };

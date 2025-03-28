@@ -19,24 +19,26 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           categoryId: Number(categoryId),
         },
         include: {
+          options: {
+            include: {
+              unit: true,
+              // item: true,
+            },
+          },
           inventoryUnit: true,
           inventoryItem: {
-            where: {
-              id: {
-                not: testItemId,
-              },
-            },
             include: {
               vendorItem: {
                 include: {
                   unit: true,
                 },
               },
-              type: {
-                include: {
-                  itemType_category: true,
-                },
-              },
+              type: true,
+              // type: {
+              //   include: {
+              //     itemType_category: true,
+              //   },
+              // },
             },
           },
           category: {
@@ -49,13 +51,25 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
-        orderBy: [
-          { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
-          { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
-        ],
+        // orderBy: [
+        //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
+        //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
+        // ],
       });
+
+      const returnedItems = items.sort((a: any, b: any) => {
+        const typePriorityDiff =
+          a?.inventoryItem?.type?.priority - b?.inventoryItem?.type?.priority;
+
+        if (typePriorityDiff !== 0) {
+          return typePriorityDiff;
+        }
+
+        return a.inventoryItem.indexPos - b.inventoryItem.indexPos;
+      });
+
       return res.status(200).json({
-        data: items,
+        data: returnedItems,
         message: 'Fetch Items Successfully',
       });
     }
@@ -78,6 +92,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           categoryId: existingUser?.categoryId || 0,
         },
         include: {
+          options: {
+            include: {
+              unit: true,
+              item: true,
+            },
+          },
           inventoryUnit: true,
           inventoryItem: {
             where: {
