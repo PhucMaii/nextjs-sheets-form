@@ -18,6 +18,7 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import EditOption from '../Modals/edit/EditOption';
 import { Discount } from '@mui/icons-material';
+import DeleteOption from '../Modals/delete/DeleteOption';
 
 interface IProps {
   options: IOption[];
@@ -64,14 +65,19 @@ export default function OptionsTable({ options, showNotification }: IProps) {
         />
       )}
       {deleteProps.open && deleteProps.option && (
-        <DeleteModal
+        // <DeleteModal
+        //   open={deleteProps.open}
+        //   handleCloseModal={() =>
+        //     setDeleteProps({ open: false, option: options[0] })
+        //   }
+        //   handleDelete={handleDeleteOption}
+        //   targetObj={deleteProps.option}
+        //   showTargetObj={deleteProps?.option?.name}
+        // />
+        <DeleteOption 
           open={deleteProps.open}
-          handleCloseModal={() =>
-            setDeleteProps({ open: false, option: options[0] })
-          }
-          handleDelete={handleDeleteOption}
-          targetObj={deleteProps.option}
-          showTargetObj={deleteProps?.option?.name}
+          onClose={() => setDeleteProps({ open: false, option: options[0] })}
+          option={deleteProps.option}
         />
       )}
       <Paper elevation={0}>
@@ -90,27 +96,27 @@ export default function OptionsTable({ options, showNotification }: IProps) {
                   <TableCell>{option.name}</TableCell>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
+                      <Typography>${option.price.toFixed(2)}</Typography>
                       {option?.isShowDiscount && (
                         <IconButton>
                           <Discount color="error" />
                         </IconButton>
                       )}
 
-                      <Typography>${option.price.toFixed(2)}</Typography>
                     </Box>
                   </TableCell>
                   <TableCell>
                     <Box display="flex" gap={1} alignItems="center">
                       <Button
-                        onClick={() => setEditProps({ open: true, option })}
-                      >
-                        Edit
-                      </Button>
-                      <Button
                         color="error"
                         onClick={() => setDeleteProps({ open: true, option })}
                       >
                         Delete
+                      </Button>
+                      <Button
+                        onClick={() => setEditProps({ open: true, option })}
+                      >
+                        Edit
                       </Button>
                     </Box>
                   </TableCell>

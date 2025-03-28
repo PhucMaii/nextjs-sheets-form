@@ -239,9 +239,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             allManifestSummary[itemKey] = 0;
           }
 
+          const quantity = (item?.quantity || 1) * item?.inventoryUnit?.ratio;
+
           allManifestSummary[itemKey] =
-            allManifestSummary[itemKey] + item.quantity;
-          acc[itemKey] = acc[itemKey] + item.quantity;
+            allManifestSummary[itemKey] + quantity;
+          acc[itemKey] = acc[itemKey] + quantity;
           return acc;
         },
         {},
@@ -251,7 +253,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const manifestDetail = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem, index: number) => {
-          const { user, order, quantity } = item;
+          const { user, order } = item;
           if (!user) {
             return acc;
           }
@@ -265,6 +267,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               ? itemKey.split(' - ')[1]
               : itemKey;
           }
+
+          const actualQuantity = (item?.quantity || 1) * item?.inventoryUnit?.ratio;
 
           // Beginning of new customer
           if (
@@ -284,10 +288,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             ) {
               displayName = displayName.split(' - ')[0];
             }
+
             const newUserManifest = {
               user: { ...user, displayName },
               order,
-              [itemKey]: quantity,
+              [itemKey]: actualQuantity,
             };
 
             acc.push(newUserManifest);
@@ -298,7 +303,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           const updatedUserManifest = {
             ...currentUserManifest,
             order,
-            [itemKey]: quantity,
+            [itemKey]: actualQuantity,
           };
 
           // console.log(updatedUserManifest.user.clientName, 'updatedUserManifest');

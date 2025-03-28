@@ -79,10 +79,10 @@ const OnSaleBadge = ({
   percentage?: number;
 }) => {
   const discountRate = useMemo(() => {
-    if (percentage) {
-      return percentage;
-    }
-    return (1 - discountPrice / prevPrice) * 100;
+    // if (percentage) {
+    //   return percentage;
+    // }
+    return Math.ceil((1 - discountPrice / prevPrice) * 100);
   }, [discountPrice, prevPrice]);
 
   return (
@@ -136,8 +136,10 @@ const OnSaleBadge = ({
       }}
     >
       <Discount sx={{ fontSize: 13, color: 'white' }} />
-      <Typography sx={{ fontSize: 10, fontWeight: 'medium', color: 'white' }}>
-        {discountRate.toFixed(0)}% off
+      <Typography sx={{ fontSize: 10, fontWeight: 'medium', color: 'white', textTransform: 'none' }}>
+        {percentage
+          ? `Up to ${percentage?.toFixed(0)}% off`
+          : `${discountRate.toFixed(0)}% off`}
       </Typography>
     </Box>
   );
@@ -555,7 +557,8 @@ const OrderView = ({
             inventoryUnit: option?.unit || item.inventoryUnit,
             inventoryUnitId: option?.unitId || item.inventoryUnitId,
             prevPrice: option?.prevPrice || item?.prevPrice,
-            isShowDiscount: option?.isShowDiscount || item?.isShowDiscount || false,
+            isShowDiscount:
+              option?.isShowDiscount || item?.isShowDiscount || false,
             quantity: Number(quantity),
           };
         }
@@ -574,7 +577,8 @@ const OrderView = ({
           inventoryUnit: option?.unit || item.inventoryUnit,
           inventoryUnitId: option?.unitId || item.inventoryUnitId,
           prevPrice: option?.prevPrice || item?.prevPrice,
-          isShowDiscount: option?.isShowDiscount || item?.isShowDiscount || false,
+          isShowDiscount:
+            option?.isShowDiscount || item?.isShowDiscount || false,
           quantity: Number(quantity),
         },
       ]);

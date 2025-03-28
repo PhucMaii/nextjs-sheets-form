@@ -27,6 +27,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               options: {
                 include: {
                   unit: true,
+                  item: true,
                 },
               },
               inventoryItem: {
@@ -72,6 +73,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             options: {
               include: {
                 unit: true,
+                item: true,
               },
             },
             inventoryItem: {

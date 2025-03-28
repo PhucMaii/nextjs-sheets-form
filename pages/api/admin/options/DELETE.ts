@@ -93,7 +93,7 @@ export default async function DELETE(
           },
           name: item.name,
           option: {
-            path: 'name',
+            path: '$.name',
             equals: existingOption.name,
           },
         },

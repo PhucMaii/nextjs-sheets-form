@@ -77,6 +77,7 @@ export interface Item extends IItem {
   totalPrice: number;
   totalPrevPrice?: number;
   isCustomAmount?: boolean;
+  option?: any;
 }
 
 export interface Order {

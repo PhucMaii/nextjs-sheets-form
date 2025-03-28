@@ -128,6 +128,8 @@ const updateAllScheduleOrderItemsForOption = async (
       },
     );
 
+    console.log('itemsHaveUpdatedOption: ', itemsHaveUpdatedOption);
+
     if (itemsHaveUpdatedOption.length > 0) {
       await prisma.orderedItems.updateMany({
         where: {
@@ -166,7 +168,7 @@ const updateAllScheduleOrderItemsForOption = async (
     // Find the items still does not have option
     const itemsHaveNoOption = scheduleOrderItems.filter(
       (item: OrderedItems | any) => {
-        return !item?.option?.name;
+        return !item?.option?.name && item.name === oldOption.item.name;
       },
     );
 

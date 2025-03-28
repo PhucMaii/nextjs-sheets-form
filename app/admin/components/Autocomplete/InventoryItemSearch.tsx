@@ -32,8 +32,7 @@ export default function InventoryItemSearch({
       handleHomeEndKeys
       id="free-solo-with-text-demo"
       options={
-        [{ id: -1, name: '-- Choose an item --' }, ...(displayItems || [])] ||
-        []
+        [{ id: -1, name: '-- Choose an item --' }, ...(displayItems || [])]
       }
       getOptionLabel={(option) => {
         // Regular option
