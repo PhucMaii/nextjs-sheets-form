@@ -72,11 +72,16 @@ export const WhiteSpace = () => {
 const OnSaleBadge = ({
   discountPrice,
   prevPrice,
+  percentage, // if percentage is provided, no need to calculate percentage
 }: {
   discountPrice: number;
   prevPrice: number;
+  percentage?: number;
 }) => {
   const discountRate = useMemo(() => {
+    if (percentage) {
+      return percentage;
+    }
     return (1 - discountPrice / prevPrice) * 100;
   }, [discountPrice, prevPrice]);
 
@@ -158,14 +163,30 @@ export const ItemButton = ({
   onRemove?: any;
 }) => {
   const options = useMemo(() => {
-    if (!item?.options) return null;
+    if (!item?.options || item?.options.length === 0) return null;
     const lowestPriceOption = item?.options.sort(
       (a, b) => a.price - b.price,
     )[0];
 
+    const highestDiscountPercent = item?.options
+      ?.map((option) => {
+        if (option?.prevPrice && option?.isShowDiscount) {
+          return (1 - option.price / option.prevPrice) * 100;
+        } else {
+          return null;
+        }
+      })
+      .filter((percentage) => percentage !== null);
+
+    const highestDiscount =
+      highestDiscountPercent.length > 0
+        ? Math.max(...highestDiscountPercent)
+        : undefined;
+
     return {
       options: item?.options,
       lowestPrice: lowestPriceOption?.price,
+      highestDiscount,
     };
   }, [item]);
 
@@ -247,11 +268,13 @@ export const ItemButton = ({
               </IconButton>
             )}
           </Box>
-          {item?.isShowDiscount && item?.prevPrice && (
+          {((item?.isShowDiscount && item?.prevPrice) ||
+            options?.highestDiscount) && (
             // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
             <OnSaleBadge
               discountPrice={item.price}
-              prevPrice={item.prevPrice}
+              prevPrice={item?.prevPrice || 0}
+              percentage={options?.highestDiscount}
             />
 
             // </Box>
@@ -521,18 +544,18 @@ const OrderView = ({
       (i) => i[comparedField] === item[comparedField],
     );
 
-    console.log(option, "ITEM OPTION")
+    console.log(option, 'ITEM OPTION');
     if (existingItem) {
-      
       const newOrderedItems = orderedItems.map((i) => {
         if (i[comparedField] === item[comparedField]) {
           return {
             ...i,
             option: option,
-            optionId: option?.id || null,
             price: option?.price || item.price,
             inventoryUnit: option?.unit || item.inventoryUnit,
             inventoryUnitId: option?.unitId || item.inventoryUnitId,
+            prevPrice: option?.prevPrice || item?.prevPrice,
+            isShowDiscount: option?.isShowDiscount || item?.isShowDiscount || false,
             quantity: Number(quantity),
           };
         }
@@ -547,10 +570,11 @@ const OrderView = ({
         {
           ...item,
           option: option,
-          optionId: option?.id || null,
           price: option?.price || item.price,
           inventoryUnit: option?.unit || item.inventoryUnit,
           inventoryUnitId: option?.unitId || item.inventoryUnitId,
+          prevPrice: option?.prevPrice || item?.prevPrice,
+          isShowDiscount: option?.isShowDiscount || item?.isShowDiscount || false,
           quantity: Number(quantity),
         },
       ]);

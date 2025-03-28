@@ -2,10 +2,7 @@
 import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../utils/auth';
-import {
-  restockInventoryItem,
-  updateSingleInventoryItem,
-} from './single';
+import { restockInventoryItem, updateSingleInventoryItem } from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
@@ -154,7 +151,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.inventoryUnit,
             item.quantity,
             item.prevQuantity,
-            item?.prevInventoryUnit
+            item?.prevInventoryUnit,
           );
         }
       }
@@ -272,6 +269,8 @@ export const categorizeUpdatedItems = (
             name: updatedItem?.option?.name,
             price: updatedItem?.option?.price,
             ratio: updatedItem?.option?.unit?.ratio,
+            prevPrice: updatedItem?.option?.prevPrice,
+            isShowDiscount: updatedItem?.option?.isShowDiscount,
           },
         };
       } else {

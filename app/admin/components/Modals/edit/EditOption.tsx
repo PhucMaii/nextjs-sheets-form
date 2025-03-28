@@ -2,7 +2,10 @@ import {
   Box,
   Divider,
   FormControl,
+  FormControlLabel,
+  Grid,
   Modal,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -30,7 +33,11 @@ export default function EditOption({
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [units, setUnits] = useState<IInventoryUnit[]>([]);
-  const [updatedOption, setUpdatedOption] = useState<IOption>(option);
+  const [updatedOption, setUpdatedOption] = useState<IOption>({
+    ...option,
+    isShowDiscount: option?.isShowDiscount || false,
+    prevPrice: option?.prevPrice || 0,
+  });
 
   const [dbUnits] = SWRFetchData(
     option?.unit?.vendorItemId
@@ -49,7 +56,11 @@ export default function EditOption({
 
   useEffect(() => {
     if (option) {
-      setUpdatedOption(option);
+      setUpdatedOption({
+        ...option,
+        isShowDiscount: option?.isShowDiscount || false,
+        prevPrice: option?.prevPrice || 0,
+      });
     }
   }, [option]);
 
@@ -60,6 +71,8 @@ export default function EditOption({
         id: updatedOption.id,
         name: updatedOption.name,
         price: updatedOption.price,
+        prevPrice: updatedOption?.prevPrice || 0,
+        isShowDiscount: updatedOption?.isShowDiscount || false,
         unitId: selectedUnit?.id || updatedOption.unitId,
       });
 
@@ -87,28 +100,14 @@ export default function EditOption({
             heading="Edit Option"
             buttonLabel="EDIT"
             onClick={handleUpdateOption}
-            buttonProps={{loading: isLoading}}
+            buttonProps={{ loading: isLoading }}
             onClose={onClose}
           />
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2 }}>Price</Divider>
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <FormControl fullWidth>
-              <Typography>Name</Typography>
-              <TextField
-                placeholder="Enter option name..."
-                value={updatedOption.name}
-                onChange={(e) => {
-                  setUpdatedOption({
-                    ...option,
-                    name: e.target.value,
-                  });
-                }}
-              />
-            </FormControl>
-
-            <FormControl fullWidth>
+            {/* <FormControl fullWidth>
               <Typography>Price</Typography>
               <TextField
                 placeholder="Enter option price..."
@@ -118,6 +117,100 @@ export default function EditOption({
                   setUpdatedOption({
                     ...option,
                     price: Number(e.target.value),
+                  });
+                }}
+              />
+            </FormControl> */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" gap={2}>
+                {/* {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                      <>
+                        <Checkbox
+                          value={updatedField.some(
+                            (field) => field === 'price',
+                          )}
+                          onChange={() => addToUpdatedField('price')}
+                        />
+                      </>
+                    )} */}
+                <Typography>Price:</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Price"
+                type="number"
+                value={updatedOption.price}
+                onChange={(e) =>
+                  setUpdatedOption({ ...updatedOption, price: +e.target.value })
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                justifyContent="space-between"
+              >
+                <Box display="flex" alignItems="center" gap={1}>
+                  {/* {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                        <>
+                          <Checkbox
+                            value={updatedField.some(
+                              (field) => field === 'isShowDiscount',
+                            )}
+                            onChange={() => addToUpdatedField('isShowDiscount')}
+                          />
+                        </>
+                      )} */}
+                  <Typography>Discount</Typography>
+                </Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={updatedOption?.isShowDiscount || false}
+                      onChange={(e) =>
+                        setUpdatedOption({
+                          ...updatedOption,
+                          isShowDiscount: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Show Discount"
+                  labelPlacement="start"
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              {updatedOption?.isShowDiscount && (
+                <TextField
+                  fullWidth
+                  label="Previous Price - Price Will Be Crossed Out"
+                  type="number"
+                  value={updatedOption?.prevPrice || 0}
+                  onChange={(e) =>
+                    setUpdatedOption({
+                      ...updatedOption,
+                      prevPrice: +e.target.value,
+                    })
+                  }
+                />
+              )}
+            </Grid>
+
+            <Divider sx={{ my: 2 }}>Other Details</Divider>
+            <FormControl fullWidth>
+              <Typography>Name</Typography>
+              <TextField
+                placeholder="Enter option name..."
+                value={updatedOption.name}
+                onChange={(e) => {
+                  setUpdatedOption({
+                    ...option,
+                    name: e.target.value,
                   });
                 }}
               />

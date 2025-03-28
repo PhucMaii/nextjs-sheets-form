@@ -2,12 +2,14 @@ import { IOption } from '@/app/utils/type';
 import {
   Box,
   Button,
+  IconButton,
   Paper,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
 import DeleteModal from '../Modals/delete/DeleteModal';
@@ -15,6 +17,7 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import EditOption from '../Modals/edit/EditOption';
+import { Discount } from '@mui/icons-material';
 
 interface IProps {
   options: IOption[];
@@ -30,6 +33,7 @@ export default function OptionsTable({ options, showNotification }: IProps) {
     open: false,
     option: null,
   });
+  // const [isShowPrevPrice, setIsShowPrevPrice] = useState<boolean>(false);
 
   const handleDeleteOption = async (targetOption: IOption) => {
     try {
@@ -84,7 +88,17 @@ export default function OptionsTable({ options, showNotification }: IProps) {
               return (
                 <TableRow key={index}>
                   <TableCell>{option.name}</TableCell>
-                  <TableCell>${option.price.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      {option?.isShowDiscount && (
+                        <IconButton>
+                          <Discount color="error" />
+                        </IconButton>
+                      )}
+
+                      <Typography>${option.price.toFixed(2)}</Typography>
+                    </Box>
+                  </TableCell>
                   <TableCell>
                     <Box display="flex" gap={1} alignItems="center">
                       <Button
