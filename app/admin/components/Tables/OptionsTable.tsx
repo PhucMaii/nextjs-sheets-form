@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
-import DeleteModal from '../Modals/delete/DeleteModal';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
@@ -78,6 +77,7 @@ export default function OptionsTable({ options, showNotification }: IProps) {
           open={deleteProps.open}
           onClose={() => setDeleteProps({ open: false, option: options[0] })}
           option={deleteProps.option}
+          allOptions={options}
         />
       )}
       <Paper elevation={0}>

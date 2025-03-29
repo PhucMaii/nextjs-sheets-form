@@ -1,4 +1,5 @@
 import {
+  Box,
   Modal,
   Table,
   TableBody,
@@ -7,7 +8,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import { IOption } from '@/app/utils/type';
@@ -17,14 +18,31 @@ import { API_URL } from '@/app/utils/enum';
 
 interface IProps extends ModalProps {
   option: IOption;
+  allOptions: IOption[];
 }
 
-export default function DeleteOption({ open, onClose, option }: IProps) {
+export default function DeleteOption({
+  open,
+  onClose,
+  option,
+  allOptions,
+}: IProps) {
   const [relevantItemPreOrders, setRelevantItemPreOrders] = useState<any>([]);
+  const [selectedOption, setSelectedOption] = useState<IOption | null>(null);
+
+  const otherOptions = useMemo(() => {
+    return allOptions.filter((o) => o.id !== option.id);
+  }, [allOptions]);
 
   const [itemInPreOrders] = SWRFetchData(
     `${API_URL.ADMIN}/scheduledOrders/by-option?optionName=${option?.name}&categoryId=${option?.item?.categoryId}&itemName=${option?.item?.name}`,
   );
+
+  useEffect(() => {
+    if (otherOptions && otherOptions.length > 0) {
+      setSelectedOption(otherOptions[0]);
+    }
+  }, [otherOptions])
 
   useEffect(() => {
     if (itemInPreOrders) {
@@ -35,15 +53,47 @@ export default function DeleteOption({ open, onClose, option }: IProps) {
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal>
-        <Typography variant="h5">Delete {option?.name} Option</Typography>
-
-        <Typography variant="subtitle1" sx={{ color: grey[500] }}>
-          There are 10 pre orders has item included this `{option?.name}`
-          option. Please acknowledge that we will assign another option to those
-          pre orders or you can assign another option to them.
+        <Typography variant="h6" fontWeight="regular">
+          Delete <strong>{option?.name}</strong> Option
         </Typography>
 
-        <Typography variant="h6">Relevant Pre Orders</Typography>
+        <Typography variant="subtitle1" sx={{ color: grey[500] }}>
+          There are {relevantItemPreOrders?.length || 0} pre orders has item
+          included this `{option?.name}` option. <br /> Please acknowledge that
+          the selected option will be applied on those pre order items.
+        </Typography>
+
+        {/* Display list of other options to choose */}
+        {otherOptions.length > 0 && (
+          <Box display="flex" gap={2} alignItems="center">
+            {otherOptions.map((o) => (
+              <Box
+                key={o?.id}
+                // variant="body1"
+                display="flex"
+                sx={{
+                  cursor: 'pointer',
+                  height: 50,
+                  width: 'fit-content',
+                  px: 4,
+                  py: 2,
+                  backgroundColor: grey[200],
+                  borderRadius: 2,
+                  border: selectedOption?.id === o?.id ? '2px solid red' : '',
+                }}
+                onClick={() => setSelectedOption(o)}
+                // justifyContent="center"
+                // alignItems="center"
+              >
+                <Typography variant="body1" sx={{fontWeight: 'semibold'}}>{o?.name}</Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        <Typography variant="h6" mt={2} fontWeight="regular">
+          Relevant Pre Orders
+        </Typography>
 
         <Table>
           <TableHead>
