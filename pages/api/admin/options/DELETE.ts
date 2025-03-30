@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   id?: string;
+  newOptionId?: string;
 }
 
 export default async function DELETE(
@@ -12,7 +13,7 @@ export default async function DELETE(
   try {
     const prisma = new PrismaClient();
 
-    const { id }: IQuery = req.query;
+    const { id, newOptionId }: IQuery = req.query;
 
     if (!id) {
       return res.status(404).json({
@@ -40,9 +41,9 @@ export default async function DELETE(
       },
       include: {
         options: {
-            include: {
-                unit: true,
-            },
+          include: {
+            unit: true,
+          },
         },
       },
     });
@@ -78,11 +79,26 @@ export default async function DELETE(
       });
     } else {
       // Move item option to another option
-      const otherOptions = item.options.filter(
-        (option) => option.id !== existingOption.id,
-      );
+      // const otherOptions = item.options.filter(
+      //   (option) => option.id !== existingOption.id,
+      // );
 
-      const tmpOption = otherOptions[0];
+      // const tmpOption = otherOptions[0];
+      const tmpOption = await prisma.option.findUnique({
+        where: {
+          id: Number(newOptionId),
+        },
+        include: {
+          unit: true,
+          item: true,
+        }
+      });
+
+      if (!tmpOption) {
+        return res.status(400).json({
+          error: 'Conflict new option not found',
+        });
+      }
 
       await prisma.orderedItems.updateMany({
         where: {

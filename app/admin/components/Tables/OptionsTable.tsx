@@ -13,8 +13,6 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
 import EditOption from '../Modals/edit/EditOption';
 import { Discount } from '@mui/icons-material';
 import DeleteOption from '../Modals/delete/DeleteOption';
@@ -34,24 +32,6 @@ export default function OptionsTable({ options, showNotification }: IProps) {
     option: null,
   });
   // const [isShowPrevPrice, setIsShowPrevPrice] = useState<boolean>(false);
-
-  const handleDeleteOption = async (targetOption: IOption) => {
-    try {
-      const response = await axios.delete(
-        `${API_URL.ADMIN}/options?id=${targetOption?.id}`,
-      );
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('Fail to delete option: ' + error);
-      showNotification('error', 'Fail to delete option: ' + error);
-    }
-  };
 
   return (
     <>
@@ -78,6 +58,7 @@ export default function OptionsTable({ options, showNotification }: IProps) {
           onClose={() => setDeleteProps({ open: false, option: options[0] })}
           option={deleteProps.option}
           allOptions={options}
+          showNotification={showNotification}
         />
       )}
       <Paper elevation={0}>

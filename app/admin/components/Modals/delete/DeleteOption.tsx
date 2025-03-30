@@ -8,17 +8,22 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import { IOption } from '@/app/utils/type';
 import { grey } from '@mui/material/colors';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
+import { Trash2Icon } from 'lucide-react';
+import { ShowNotificationType } from '@/hooks/useNotification';
+import axios from 'axios';
+import { LoadingButton } from '@mui/lab';
 
 interface IProps extends ModalProps {
   option: IOption;
   allOptions: IOption[];
+  showNotification: ShowNotificationType;
 }
 
 export default function DeleteOption({
@@ -26,7 +31,9 @@ export default function DeleteOption({
   onClose,
   option,
   allOptions,
+  showNotification,
 }: IProps) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [relevantItemPreOrders, setRelevantItemPreOrders] = useState<any>([]);
   const [selectedOption, setSelectedOption] = useState<IOption | null>(null);
 
@@ -42,13 +49,53 @@ export default function DeleteOption({
     if (otherOptions && otherOptions.length > 0) {
       setSelectedOption(otherOptions[0]);
     }
-  }, [otherOptions])
+  }, [otherOptions]);
 
   useEffect(() => {
     if (itemInPreOrders) {
       setRelevantItemPreOrders(itemInPreOrders?.data);
     }
   }, [itemInPreOrders]);
+
+  const renderWarningText = useCallback(() => {
+    if (otherOptions.length === 0) {
+      return (
+        <Typography variant="subtitle1" sx={{ color: grey[500] }}>
+          WARNING: Please acknowledge that all pre order items price relevant to
+          this option will be reset to base item price.
+        </Typography>
+      );
+    }
+
+    return (
+      <Typography variant="subtitle1" sx={{ color: grey[500] }}>
+        WARNING: There are {relevantItemPreOrders?.length || 0} pre orders has
+        item included this `{option?.name}` option. <br /> Please acknowledge
+        that the selected option will be applied on those pre order items.
+      </Typography>
+    );
+  }, [otherOptions]);
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/options?id=${option?.id}&newOptionId=${selectedOption?.id}`,
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to delete option: ' + error);
+      showNotification('error', 'Fail to delete option: ' + error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -57,11 +104,7 @@ export default function DeleteOption({
           Delete <strong>{option?.name}</strong> Option
         </Typography>
 
-        <Typography variant="subtitle1" sx={{ color: grey[500] }}>
-          There are {relevantItemPreOrders?.length || 0} pre orders has item
-          included this `{option?.name}` option. <br /> Please acknowledge that
-          the selected option will be applied on those pre order items.
-        </Typography>
+       {renderWarningText()}
 
         {/* Display list of other options to choose */}
         {otherOptions.length > 0 && (
@@ -85,7 +128,9 @@ export default function DeleteOption({
                 // justifyContent="center"
                 // alignItems="center"
               >
-                <Typography variant="body1" sx={{fontWeight: 'semibold'}}>{o?.name}</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 'semibold' }}>
+                  {o?.name}
+                </Typography>
               </Box>
             ))}
           </Box>
@@ -100,6 +145,7 @@ export default function DeleteOption({
             <TableRow>
               <TableCell>Pre Order Id</TableCell>
               <TableCell>Client Id - Name</TableCell>
+              <TableCell>Day</TableCell>
               <TableCell>Item Name</TableCell>
               <TableCell>Item Quantity</TableCell>
               <TableCell>Item Price</TableCell>
@@ -114,6 +160,7 @@ export default function DeleteOption({
                     {item?.ScheduleOrders?.user?.clientId} -{' '}
                     {item?.ScheduleOrders?.user?.clientName}
                   </TableCell>
+                  <TableCell>{item?.ScheduleOrders?.day}</TableCell>
                   <TableCell>{item?.name}</TableCell>
                   <TableCell>{item?.quantity}</TableCell>
                   <TableCell>{item?.price}</TableCell>
@@ -121,6 +168,13 @@ export default function DeleteOption({
               ))}
           </TableBody>
         </Table>
+
+        <LoadingButton color="error" loading={isLoading} onClick={handleDelete}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Trash2Icon />
+            <Typography>Delete</Typography>
+          </Box>
+        </LoadingButton>
       </BoxModal>
     </Modal>
   );
