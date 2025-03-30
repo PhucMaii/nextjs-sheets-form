@@ -5,7 +5,7 @@ import { IItem } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import { Box, Modal, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import SellingItemName from '../SellingItemName';
+import SellingItemName, { ItemRow } from '../SellingItemName';
 
 interface IProps extends ModalProps {
   items: IItem[];
@@ -68,30 +68,13 @@ export default function SearchItem({ open, onClose, items, setItems }: IProps) {
         <Box mt={2} display="flex" flexDirection="column" gap={2}>
           {displayItems.length > 0 ? (
             displayItems.map((item: IItem, index: number) => (
-              <Box key={index} display="flex" gap={1} flexDirection="column">
-                {/* <Typography
-                  key={item.id}
-                  sx={{ color: item.availability ? 'black' : grey[500] }}
-                >
-                  {`${item.name} - ${
-                    !item.availability
-                      ? 'Out of stock'
-                      : item.price === 0
-                        ? ' Variable price'
-                        : `$${item.price.toFixed(2)}`
-                  }`}
-                </Typography> */}
-                <SellingItemName item={item} />
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={item.quantity}
-                  onChange={(e: any) =>
-                    handleOnChangeItem(item, Number(e.target.value))
-                  }
-                  disabled={!item.availability}
-                />
-              </Box>
+              <ItemRow 
+                key={index}
+                item={item}
+                onChangeItem={handleOnChangeItem}
+                itemList={items}
+                setItemList={setItems}
+              />
             ))
           ) : (
             <ErrorComponent errorText="No items found" />

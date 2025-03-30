@@ -22,6 +22,7 @@ import {
   checkBoxOutlinedIcon,
   checkedBoxOutlinedIcon,
 } from '../../Autocomplete/VendorSearch';
+import AddOptionWarning from '../AddOptionWarning';
 
 interface IProps extends ModalProps {
   item: IItem;
@@ -35,6 +36,10 @@ export default function AddOption({
   showNotification,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [checkWarning, setCheckWarning] = useState<any>({
+    open: false,
+    acknowledged: false,
+  });
   const [option, setOption] = useState<IOption | any>({
     id: -1,
     name: '',
@@ -77,7 +82,12 @@ export default function AddOption({
     }
   }, [dbUnits]);
 
+  console.log(checkWarning, 'checkWarning');
   const handleAddOption = async () => {
+    if (item?.options?.length === 0 && !checkWarning.acknowledged) {
+      setCheckWarning({ open: true, acknowledged: true });
+      return;
+    }
     setIsLoading(true);
     try {
       // console.log(option);
@@ -115,6 +125,17 @@ export default function AddOption({
     <>
       {AddUnitModal}
       {EditUnitModal}
+      {checkWarning.open && (
+        <AddOptionWarning
+          open={checkWarning.open}
+          onClose={() => setCheckWarning({ ...checkWarning, open: false })}
+          item={item}
+          onAcknowledge={handleAddOption}
+          selectedCategoryIds={selectedCategories.map(
+            (category: ICategory) => category.id,
+          )}
+        />
+      )}
       <Modal open={open} onClose={onClose}>
         <BoxModal>
           <ModalHead

@@ -201,7 +201,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return !isInLastOrder;
       });
 
-      const lastOrderFinalItems = [...lastOrderItems, ...newItems];
+      const lastOrderItemsWithNewValue = lastOrderItems.map((item: any) => {
+        const isInInputItems = items.find(
+          (newItem: any) => newItem.name === item.name,
+        );
+
+        if (isInInputItems) {
+          return isInInputItems;
+        }
+
+        return item;
+      });
+
+      const lastOrderFinalItems = [...lastOrderItemsWithNewValue, ...newItems];
 
       const lastOrderTotalPrice = lastOrderFinalItems.reduce(
         (total: number, item: any) => {

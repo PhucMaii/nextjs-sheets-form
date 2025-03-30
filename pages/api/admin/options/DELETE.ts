@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { updateScheduledOrdersTotalPrice } from './POST';
 
 interface IQuery {
   id?: string;
@@ -55,8 +56,7 @@ export default async function DELETE(
     }
 
     if (item?.options.length === 1) {
-      // Remove options in scheduledOrderedItems related
-      await prisma.orderedItems.updateMany({
+      const toBeUpdatedItems = await prisma.orderedItems.findMany({
         where: {
           ScheduleOrders: {
             user: {
@@ -65,18 +65,47 @@ export default async function DELETE(
           },
           name: item.name,
         },
-        data: {
-          price: item?.price,
-          inventoryUnitId: item?.inventoryUnitId,
-          prevPrice: item?.prevPrice,
-          isShowDiscount: item?.isShowDiscount,
-          option: {
-            name: '',
-            price: 0,
-            ratio: 1,
+        include: {
+          ScheduleOrders: {
+            include: {
+              items: true,
+            },
           },
         },
       });
+
+      // Remove options in scheduledOrderedItems related
+      if (toBeUpdatedItems.length > 0) {
+        await prisma.orderedItems.updateMany({
+          where: {
+            id: {
+              in: toBeUpdatedItems.map((item) => item.id),
+            },
+          },
+          data: {
+            price: item?.price,
+            inventoryUnitId: item?.inventoryUnitId,
+            prevPrice: item?.prevPrice,
+            isShowDiscount: item?.isShowDiscount,
+            option: {
+              name: '',
+              price: 0,
+              ratio: 1,
+            },
+          },
+        });
+      }
+
+      const responseStatus = await updateScheduledOrdersTotalPrice(
+        toBeUpdatedItems,
+        item.price,
+      );
+
+      if (!responseStatus.ok) {
+        return res.status(400).json({
+          error: 'Failed to update scheduled orders total price',
+        });
+      }
     } else {
       // Move item option to another option
       // const otherOptions = item.options.filter(
@@ -91,7 +120,7 @@ export default async function DELETE(
         include: {
           unit: true,
           item: true,
-        }
+        },
       });
 
       if (!tmpOption) {
@@ -100,7 +129,7 @@ export default async function DELETE(
         });
       }
 
-      await prisma.orderedItems.updateMany({
+      const toBeUpdatedItems = await prisma.orderedItems.findMany({
         where: {
           ScheduleOrders: {
             user: {
@@ -113,18 +142,64 @@ export default async function DELETE(
             equals: existingOption.name,
           },
         },
-        data: {
-          price: tmpOption.price,
-          inventoryUnitId: tmpOption.unitId,
-          prevPrice: tmpOption?.prevPrice,
-          isShowDiscount: tmpOption?.isShowDiscount,
-          option: {
-            name: tmpOption.name,
-            price: tmpOption.price,
-            ratio: tmpOption?.unit?.ratio || 1,
+        include: {
+          ScheduleOrders: {
+            include: {
+              items: true,
+            },
           },
         },
       });
+
+      if (toBeUpdatedItems.length > 0) {
+        await prisma.orderedItems.updateMany({
+          where: {
+            id: {
+              in: toBeUpdatedItems.map((item) => item.id),
+            },
+          },
+          data: {
+            price: tmpOption.price,
+            inventoryUnitId: tmpOption.unitId,
+            prevPrice: tmpOption?.prevPrice,
+            isShowDiscount: tmpOption?.isShowDiscount,
+            option: {
+              name: tmpOption.name,
+              price: tmpOption.price,
+              ratio: tmpOption?.unit?.ratio || 1,
+            },
+          },
+        });
+      }
+
+      // const updatedItems = await prisma.orderedItems.findMany({
+      //   where: {
+      //     ScheduleOrders: {
+      //       user: {
+      //         categoryId: item.categoryId,
+      //       },
+      //     },
+      //     name: item.name,
+      //     option: {
+      //       path: '$.name',
+      //       equals: existingOption.name,
+      //     },
+      //   },
+      //   include: {
+      //     ScheduleOrders: true,
+      //   },
+      // });
+
+      const responseStatus = await updateScheduledOrdersTotalPrice(
+        toBeUpdatedItems,
+        tmpOption.price,
+      );
+
+      if (!responseStatus.ok) {
+        return res.status(400).json({
+          error: 'Failed to update scheduled orders total price',
+        });
+      }
     }
 
     await prisma.option.delete({

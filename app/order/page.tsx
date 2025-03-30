@@ -95,6 +95,7 @@ export default function OrderForm() {
       .filter((item: any) => item.inventoryItem.typeId !== null);
 
     setItemList(formatItems);
+    console.log(formatItems, 'FORMAT ITEMS');
   };
 
   const onSubmit = async (order: Order): Promise<any> => {

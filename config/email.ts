@@ -17,17 +17,26 @@ export const generateOrderTemplate = (
 
   for (const item of order?.items as any[]) {
     if (item.quantity === 0) continue;
-    const optionText = item?.option?.name ? `
+    const optionText = item?.option?.name
+      ? `
     <p>${item?.option.name}</p>
-  ` : ''
+  `
+      : '';
+    console.log(optionText, 'OPTION TEXT');
     const totalPrice = item.price * item.quantity;
     if (item?.isShowDiscount && item?.prevPrice) {
       orderDetailsTemplate += `
       <tr>
-      <td style="padding: 8px; display: flex; flex-direction: column;">
-      ${item?.name}
-      ${optionText}
-      </td>
+      <td style="padding: 8px">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
+        <h4>${item?.name}</h4>
+        <br />
+        <h4 style="font-weight: regular">
+        ${optionText}
+        </h4>
+
+        </div>
+        </td>
       <td style="padding: 8px; text-align: center">${item?.quantity}</td>
       <td style="padding: 8px; text-align: center">
         <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
@@ -44,7 +53,16 @@ export const generateOrderTemplate = (
     } else {
       orderDetailsTemplate += `
         <tr>
-        <td style="padding: 8px">${item?.name}</td>
+        <td style="padding: 8px">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
+        <h4>${item?.name}</h4>
+        <br />
+        <h4 style="font-weight: regular">
+        ${optionText}
+        </h4>
+
+        </div>
+        </td>
         <td style="padding: 8px; text-align: center">${item?.quantity}</td>
         <td style="padding: 8px; text-align: center">
           $${item.price.toFixed(2)}

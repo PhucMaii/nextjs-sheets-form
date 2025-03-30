@@ -1011,9 +1011,9 @@ const OrderView = ({
 
                 <Box
                   display="flex"
-                  alignItems={smDown || isModal ? 'flex-start' : 'center'}
+                  alignItems="flex-start"
                   // justifyContent="space-between"
-                  flexDirection={smDown || isModal ? 'column' : 'row'}
+                  flexDirection="column"
                   gap={2}
                 >
                   <Box display="flex" alignItems="center" gap={1}>

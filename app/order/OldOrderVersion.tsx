@@ -12,7 +12,7 @@ import {
   formatDateChanged,
   generateRecommendDate,
 } from '../utils/time';
-import SellingItemName from '../components/SellingItemName';
+import { ItemRow } from '../components/SellingItemName';
 import { FLAG_ORDER_TYPE } from '../utils/enum';
 import { UserContext } from '../context/UserContextAPI';
 
@@ -32,6 +32,8 @@ export default function OldOrderVersion({
   const [deliveryDate, setDeliveryDate] = useState<string>(() =>
     generateRecommendDate(),
   );
+
+  console.log(itemList, 'itemList');
 
   const onChangeItem = (e: any, targetItem: any) => {
     const newItems = itemList.map((item: any) => {
@@ -126,22 +128,13 @@ export default function OldOrderVersion({
             {itemList.length > 0 &&
               itemList.map((item: any, index: number) => {
                 return (
-                  <Box
+                  <ItemRow 
                     key={index}
-                    display="flex"
-                    flexDirection="column"
-                    gap={1}
-                  >
-                    <SellingItemName item={item} />
-                    <TextField
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => onChangeItem(e, item)}
-                      placeholder={`Enter ${item.name} here...`}
-                      disabled={!item.availability}
-                      inputProps={{ min: 0 }}
-                    />
-                  </Box>
+                    item={item}
+                    onChangeItem={onChangeItem}
+                    itemList={itemList}
+                    setItemList={setItemList}
+                  />
                 );
               })}
             <Box display="flex" flexDirection="column" gap={1}>

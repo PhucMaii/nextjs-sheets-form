@@ -1,11 +1,6 @@
 import {
   Box,
   Modal,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Typography,
 } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,6 +14,7 @@ import { Trash2Icon } from 'lucide-react';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
+import RelevantPreOrdersTable from '../../Tables/RelevantPreOrdersTable';
 
 interface IProps extends ModalProps {
   option: IOption;
@@ -89,6 +85,7 @@ export default function DeleteOption({
       }
 
       showNotification('success', response.data.message);
+      onClose();
     } catch (error: any) {
       console.log('Fail to delete option: ' + error);
       showNotification('error', 'Fail to delete option: ' + error);
@@ -99,12 +96,12 @@ export default function DeleteOption({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6" fontWeight="regular">
           Delete <strong>{option?.name}</strong> Option
         </Typography>
 
-       {renderWarningText()}
+        {renderWarningText()}
 
         {/* Display list of other options to choose */}
         {otherOptions.length > 0 && (
@@ -140,36 +137,15 @@ export default function DeleteOption({
           Relevant Pre Orders
         </Typography>
 
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Pre Order Id</TableCell>
-              <TableCell>Client Id - Name</TableCell>
-              <TableCell>Day</TableCell>
-              <TableCell>Item Name</TableCell>
-              <TableCell>Item Quantity</TableCell>
-              <TableCell>Item Price</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {relevantItemPreOrders.length > 0 &&
-              relevantItemPreOrders.map((item: any) => (
-                <TableRow key={item?.id}>
-                  <TableCell>{item?.ScheduleOrders.id}</TableCell>
-                  <TableCell>
-                    {item?.ScheduleOrders?.user?.clientId} -{' '}
-                    {item?.ScheduleOrders?.user?.clientName}
-                  </TableCell>
-                  <TableCell>{item?.ScheduleOrders?.day}</TableCell>
-                  <TableCell>{item?.name}</TableCell>
-                  <TableCell>{item?.quantity}</TableCell>
-                  <TableCell>{item?.price}</TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
+        <RelevantPreOrdersTable relevantItemPreOrders={relevantItemPreOrders} />
 
-        <LoadingButton color="error" loading={isLoading} onClick={handleDelete}>
+        <LoadingButton
+          fullWidth
+          variant="contained"
+          color="error"
+          loading={isLoading}
+          onClick={handleDelete}
+        >
           <Box display="flex" alignItems="center" gap={1}>
             <Trash2Icon />
             <Typography>Delete</Typography>
