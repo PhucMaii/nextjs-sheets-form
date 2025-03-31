@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { SplashScreen } from '../../HOC/AuthenGuard';
 import {
   Box,
+  Button,
   IconButton,
   InputAdornment,
   OutlinedInput,
@@ -14,10 +15,11 @@ import {
 import { ShadowSection } from '../admin/reports/styled';
 import axios from 'axios';
 import { API_URL } from '../utils/enum';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import useNotification from '@/hooks/useNotification';
+import { LogOutIcon } from 'lucide-react';
 
 export default function AccountPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
@@ -259,6 +261,28 @@ export default function AccountPage() {
             Update
           </LoadingButton>
         </Box>
+      </ShadowSection>
+
+      <ShadowSection>
+        <Typography variant="h5" fontWeight="bold">
+          Sign out
+        </Typography>
+
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{ mt: 2 }}
+          onClick={() =>
+            signOut({
+              callbackUrl: `https://www.supremesprouts.com/auth/login`,
+            })
+          }
+        >
+          <Box display="flex" alignItems="center" gap={1}>
+            <LogOutIcon />
+            <Typography>Sign out</Typography>
+          </Box>
+        </Button>
       </ShadowSection>
       {/* </AuthenGuard> */}
     </Sidebar>

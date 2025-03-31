@@ -147,7 +147,7 @@ export default function Sidebar({ children }: PropTypes) {
           display="flex"
           flexDirection="column"
           gap={2}
-          sx={{ pb: 10, p: 1 }}
+          sx={{ mb: 10, p: 1 }}
         >
           <HolidayText />
           {children}
@@ -205,7 +205,7 @@ export default function Sidebar({ children }: PropTypes) {
                 />
               );
             })}
-            <BottomNavigationAction
+            {/* <BottomNavigationAction
               label="Sign out"
               onClick={() =>
                 signOut({
@@ -213,7 +213,7 @@ export default function Sidebar({ children }: PropTypes) {
                 })
               }
               icon={<LogoutIcon sx={{ color: blueGrey[800] }} />}
-            />
+            /> */}
           </BottomNavigation>
         </Paper>
       </>

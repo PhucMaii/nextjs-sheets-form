@@ -325,6 +325,11 @@ export const clientTabs = [
     path: '/order',
   },
   {
+    name: 'Statements',
+    icon: DocumentScannerIcon,
+    path: '/statements',
+  },
+  {
     name: 'Account',
     icon: AccountCircleIcon,
     path: '/account',

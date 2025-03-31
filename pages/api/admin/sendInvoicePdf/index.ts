@@ -102,7 +102,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-const calculateTotalPrice = (debtList: any) => {
+export const calculateTotalPrice = (debtList: any) => {
   const totalPrice = Object.keys(debtList).reduce(
     (acc: number, debtMonth: string) => {
       return acc + debtList[debtMonth];
@@ -113,7 +113,7 @@ const calculateTotalPrice = (debtList: any) => {
   return totalPrice;
 };
 
-const sortKeys = (debtList: any) => {
+export const sortKeys = (debtList: any) => {
   const sortedKeys = Object.keys(debtList).sort((key1, key2) => {
     const month1 = Number(key1.split('/')[0]);
     const month2 = Number(key2.split('/')[0]);
