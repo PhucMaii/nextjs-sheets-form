@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import SearchItem from '../components/Modals/SearchItem';
 import OrderOnVacationModal from '../admin/components/Modals/OrderOnVacationModal';
 import { Box, Grid, IconButton, TextField, Typography } from '@mui/material';
@@ -12,7 +12,7 @@ import {
   formatDateChanged,
   generateRecommendDate,
 } from '../utils/time';
-import { ItemRow } from '../components/SellingItemName';
+import ItemRow from '../components/SellingItemName';
 import { FLAG_ORDER_TYPE } from '../utils/enum';
 import { UserContext } from '../context/UserContextAPI';
 
@@ -33,19 +33,16 @@ export default function OldOrderVersion({
     generateRecommendDate(),
   );
 
-  console.log(itemList, 'itemList');
-
-  const onChangeItem = (e: any, targetItem: any) => {
-    const newItems = itemList.map((item: any) => {
-      if (item.id === targetItem.id) {
-        return { ...targetItem, quantity: +e.target.value };
-      }
-      return item;
-    });
-
-    setItemList(newItems);
-  };
-
+  const onChangeItem = useCallback((e: any, targetItem: any) => {
+    setItemList((prevList: any[]) =>
+      prevList.map((item: any) => {
+        if (item.id === targetItem.id) {
+          return { ...targetItem, quantity: +e.target.value };
+        }
+        return item;
+      })
+    );
+  }, []);
   const onDateChange = (e: any) => {
     const formattedDate = formatDateChanged(e);
     setDeliveryDate(formattedDate);
@@ -126,13 +123,12 @@ export default function OldOrderVersion({
           </Box>
           <Box display="flex" flexDirection="column" gap={4}>
             {itemList.length > 0 &&
-              itemList.map((item: any, index: number) => {
+              itemList.map((item: any) => {
                 return (
                   <ItemRow 
-                    key={index}
+                    key={item.id}
                     item={item}
                     onChangeItem={onChangeItem}
-                    itemList={itemList}
                     setItemList={setItemList}
                   />
                 );

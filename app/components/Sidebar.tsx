@@ -54,8 +54,6 @@ export default function Sidebar({ children }: PropTypes) {
     return <Maintenance />;
   }
 
-  console.log(user, 'user');
-
   useEffect(() => {
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
       signOut({
@@ -147,9 +145,9 @@ export default function Sidebar({ children }: PropTypes) {
           display="flex"
           flexDirection="column"
           gap={2}
-          sx={{ pb: 10, p: 1 }}
+          sx={{ mb: 10, p: 1 }}
         >
-          {/*<HolidayText /> */}
+          <HolidayText />
           {children}
         </Box>
         {isOpenSnackbar && (
@@ -205,7 +203,7 @@ export default function Sidebar({ children }: PropTypes) {
                 />
               );
             })}
-            <BottomNavigationAction
+            {/* <BottomNavigationAction
               label="Sign out"
               onClick={() =>
                 signOut({
@@ -213,7 +211,7 @@ export default function Sidebar({ children }: PropTypes) {
                 })
               }
               icon={<LogoutIcon sx={{ color: blueGrey[800] }} />}
-            />
+            /> */}
           </BottomNavigation>
         </Paper>
       </>
@@ -251,7 +249,7 @@ export default function Sidebar({ children }: PropTypes) {
                 showNotification={showNotification}
               />
             )}
-            {/*<HolidayText /> */}
+            <HolidayText />
             <Box
               display="flex"
               width="100%"
@@ -293,7 +291,7 @@ export default function Sidebar({ children }: PropTypes) {
               showNotification={showNotification}
             />
           )}
-          {/*<HolidayText /> */}
+          {/* <HolidayText /> */}
 
           <Box
             display="flex"
@@ -303,7 +301,7 @@ export default function Sidebar({ children }: PropTypes) {
             gap={2}
             sx={{ maxWidth: clientMaxWidth, mx: 'auto', zIndex: 50 }}
           >
-            {/* <HolidayText /> */}
+            <HolidayText />
             {children}
           </Box>
         </Box>

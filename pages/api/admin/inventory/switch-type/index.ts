@@ -17,7 +17,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { id, color, idList, typeId, image }: IBody = req.body;
 
+    
     if (id) {
+      // const actualId = id.toString().split(' - ')[1];
       const existingInventory = await prisma.inventoryItem.findUnique({
         where: {
           id,

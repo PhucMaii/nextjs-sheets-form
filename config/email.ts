@@ -28,10 +28,10 @@ export const generateOrderTemplate = (
       orderDetailsTemplate += `
       <tr>
       <td style="padding: 8px">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
+        <div style="display: flex; flex-direction: column; gap: 1px">
         <h4>${item?.name}</h4>
         <br />
-        <h4 style="font-weight: regular">
+        <h4 style="font-weight: 300">
         ${optionText}
         </h4>
 
