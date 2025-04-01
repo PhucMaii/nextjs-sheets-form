@@ -82,8 +82,12 @@ export default function AddOption({
     }
   }, [dbUnits]);
 
-  console.log(checkWarning, 'checkWarning');
   const handleAddOption = async () => {
+    if (!option.name) {
+      showNotification('error', 'Please fill out all the blank');
+      return;
+    }
+
     if (item?.options?.length === 0 && !checkWarning.acknowledged) {
       setCheckWarning({ open: true, acknowledged: true });
       return;

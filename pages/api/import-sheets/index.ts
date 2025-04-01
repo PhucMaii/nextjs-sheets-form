@@ -233,7 +233,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         warning: `Client ${existingUser.clientName} has ordered for ${deliveryDate}`,
         lastOrder: {
           ...userOrder,
-          items: [...lastOrderItems, ...newItems],
+          items: lastOrderFinalItems,
           totalPrice: lastOrderTotalPrice,
           note,
         },

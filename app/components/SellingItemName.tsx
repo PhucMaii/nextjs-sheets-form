@@ -9,21 +9,19 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React, { useEffect } from 'react';
-import { IItem, IOption } from '../utils/type';
+import React, { memo, useEffect } from 'react';
+import { IItem } from '../utils/type';
 
-export default function SellingItemName({
+function SellingItemName({
   item,
-  selectedOption,
+  // selectedOption,
   // setSelectedOption,
-  onSelectOption
+  onSelectOption,
 }: {
-  item: IItem;
-  selectedOption: number | null;
+  item: IItem | any;
+  // selectedOption: number | null;
   onSelectOption: any;
-
 }) {
-  // console.log(item, 'item');
   return (
     <Box display="flex" flexDirection="column" gap={1}>
       <Box display="flex" gap={1}>
@@ -65,7 +63,7 @@ export default function SellingItemName({
           <RadioGroup
             row
             aria-labelledby="option-label"
-            value={selectedOption}
+            value={item?.optionId || -1}
             onChange={(e) => onSelectOption(e)}
           >
             {item.options.map((option: any) => (
@@ -83,53 +81,121 @@ export default function SellingItemName({
   );
 }
 
-export const ItemRow = ({
+const ItemRow = ({
   item,
   onChangeItem,
-  itemList,
   setItemList,
 }: {
-  item: IItem;
+  item: IItem | any;
   onChangeItem: any;
-  itemList: any;
+  // itemList: any;
   setItemList: any;
 }) => {
-  const [selectedOption, setSelectedOption] = React.useState<number | null>(
-    null,
-  );
+  // const [selectedOption, setSelectedOption] = React.useState<number | null>(
+  //   null,
+  // );
 
+  console.log('re render item row');
   useEffect(() => {
     if (item?.options && item?.options.length > 0) {
-      setSelectedOption(item?.options[0]?.id || null);
+      // setSelectedOption(item?.options[0]?.id || null);
+
+      const itemOption = item?.options[0];
+      // Set the default option id is the first option
+      setItemList((prevList: any) => {
+        const newList = prevList.map((i: any) => {
+          if (i.id === item.id) {
+            return {
+              ...i,
+              price: itemOption?.price,
+              inventoryUnit: itemOption?.unit,
+              inventoryUnitId: itemOption?.unitId,
+              prevPrice: itemOption?.prevPrice || i?.prevPrice,
+              optionId: itemOption?.id,
+              isShowDiscount:
+                itemOption?.isShowDiscount || i?.isShowDiscount || false,
+              option: {
+                name: itemOption?.name,
+                price: itemOption?.price,
+                ratio: itemOption?.unit?.ratio,
+              },
+            };
+          }
+
+          return i;
+        });
+
+        return newList;
+      });
     }
-  }, [item]);
+  }, [item.name]);
+
+  // const onSelectOption = useCallback(
+  //   () => (e: any) => {
+
+  //     // setSelectedOption(+e.target.value);
+  //     setItemList((prevList: any) => {
+  //       const newItems = prevList.map((i: any) => {
+  //         const itemOption = i?.options?.find(
+  //           (option: any) => option.id === +e.target.value,
+  //         );
+  //         // console.log({options: i?.options, itemOption}, 'itemOption');
+  //         if (i.id === item.id && itemOption) {
+  //           return {
+  //             ...i,
+  //             price: itemOption?.price,
+  //             inventoryUnit: itemOption?.unit,
+  //             inventoryUnitId: itemOption?.unitId,
+  //             prevPrice: itemOption?.prevPrice || i?.prevPrice,
+  //             optionId: itemOption?.id,
+  //             isShowDiscount:
+  //               itemOption?.isShowDiscount || i?.isShowDiscount || false,
+  //             option: {
+  //               name: itemOption?.name,
+  //               price: itemOption?.price,
+  //               ratio: itemOption?.unit?.ratio,
+  //             },
+  //           };
+  //         }
+  //         return i;
+  //       });
+
+  //       return newItems;
+  //     });
+  //   },
+
+  //   [],
+  // );
 
   const onSelectOption = (e: any) => {
-    const newItems = itemList.map((i: any) => {
-      const itemOption = i?.options?.find(
-        (option: any) => option.id === +e.target.value,
-      )
-      if (i.id === item.id) {
+    setItemList((prevList: any) => {
+      const newItems = prevList.map((i: any) => {
+        const itemOption = i?.options?.find(
+          (option: any) => option.id === +e.target.value,
+        );
+        // console.log({options: i?.options, itemOption}, 'itemOption');
+        if (i.id === item.id && itemOption) {
           return {
             ...i,
             price: itemOption?.price,
             inventoryUnit: itemOption?.unit,
             inventoryUnitId: itemOption?.unitId,
-            prevPrice: itemOption?.prevPrice || i?.prevPrice,
+            prevPrice: itemOption?.prevPrice,
+            optionId: itemOption?.id,
             isShowDiscount:
-              itemOption?.isShowDiscount || i?.isShowDiscount || false,
+              itemOption?.isShowDiscount || false,
             option: {
               name: itemOption?.name,
               price: itemOption?.price,
               ratio: itemOption?.unit?.ratio,
             },
           };
-      }
-      return i;
-    });
+        }
+        return i;
+      });
 
-    setSelectedOption(+e.target.value);
-    setItemList(newItems);
+      return newItems;
+    });
   };
 
   // useEffect(() => {
@@ -166,7 +232,7 @@ export const ItemRow = ({
     <Box display="flex" flexDirection="column" gap={1}>
       <SellingItemName
         item={item}
-        selectedOption={selectedOption}
+        // selectedOption={selectedOption}
         // setSelectedOption={setSelectedOption}
         onSelectOption={onSelectOption}
       />
@@ -181,3 +247,11 @@ export const ItemRow = ({
     </Box>
   );
 };
+
+export default memo(ItemRow, (prev, next) => {
+  return (
+    Object.is(prev.item, next.item) &&
+    Object.is(prev.setItemList, next.setItemList) &&
+    Object.is(prev.onChangeItem, next.onChangeItem)
+  );
+});

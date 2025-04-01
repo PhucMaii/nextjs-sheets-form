@@ -19,7 +19,7 @@ export const generateOrderTemplate = (
     if (item.quantity === 0) continue;
     const optionText = item?.option?.name
       ? `
-    <p>${item?.option.name}</p>
+    <p> - ${item?.option.name}</p>
   `
       : '';
     console.log(optionText, 'OPTION TEXT');
@@ -28,14 +28,7 @@ export const generateOrderTemplate = (
       orderDetailsTemplate += `
       <tr>
       <td style="padding: 8px">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
-        <h4>${item?.name}</h4>
-        <br />
-        <h4 style="font-weight: regular">
-        ${optionText}
-        </h4>
-
-        </div>
+      <h4>${item?.name} ${item?.option?.name ? `- ${item.option.name}` : ''}</h4>
         </td>
       <td style="padding: 8px; text-align: center">${item?.quantity}</td>
       <td style="padding: 8px; text-align: center">

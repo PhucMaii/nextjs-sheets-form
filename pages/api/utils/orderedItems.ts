@@ -230,8 +230,9 @@ export const createOrderedItems = async (
 
         allDeletedFifoIds.push(...deletedFifoIds);
 
+        // If calculate by fifo, need to multiply with ratio since fifo is ratio of 1
         const cost = sortedFifo[fifoIndex]?.price
-          ? sortedFifo[fifoIndex].price
+          ? sortedFifo[fifoIndex].price * itemUnit.ratio
           : itemUnit?.unitPrice || 0;
 
         console.log(itemUnit, 'item unit');
@@ -262,7 +263,7 @@ export const createOrderedItems = async (
         });
       } else {
         const cost = sortedFifo[0]?.price
-          ? sortedFifo[0].price
+          ? sortedFifo[0].price * itemUnit?.ratio
           : itemUnit?.unitPrice || 0;
 
         newOrderedItems.push({

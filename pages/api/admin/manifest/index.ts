@@ -218,7 +218,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       const manifestItem = groupItemRoutes[itemRoute].reduce(
-        (acc: any, item: IItem) => {
+        (acc: any, item: IItem | any) => {
           const { name } = item;
 
           let itemKey = name;
@@ -239,11 +239,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             allManifestSummary[itemKey] = 0;
           }
 
-          const quantity = (item?.quantity || 1) * item?.inventoryUnit?.ratio;
+          let actualQuantity = (item?.quantity || 1);
+          if (item?.option?.name) {
+            actualQuantity = actualQuantity * item?.option?.ratio;
+          }
 
           allManifestSummary[itemKey] =
-            allManifestSummary[itemKey] + quantity;
-          acc[itemKey] = acc[itemKey] + quantity;
+            allManifestSummary[itemKey] + actualQuantity;
+          acc[itemKey] = acc[itemKey] + actualQuantity;
           return acc;
         },
         {},
@@ -252,7 +255,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // console.log({manifestItem, itemRoute}, 'manifestItem');
 
       const manifestDetail = groupItemRoutes[itemRoute].reduce(
-        (acc: any, item: IItem, index: number) => {
+        (acc: any, item: IItem | any, index: number) => {
           const { user, order } = item;
           if (!user) {
             return acc;
@@ -268,7 +271,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               : itemKey;
           }
 
-          const actualQuantity = (item?.quantity || 1) * item?.inventoryUnit?.ratio;
+          
+          let actualQuantity = (item?.quantity || 1);
+          if (item?.option?.name) {
+            actualQuantity = actualQuantity * item?.option?.ratio;
+          }
 
           // Beginning of new customer
           if (

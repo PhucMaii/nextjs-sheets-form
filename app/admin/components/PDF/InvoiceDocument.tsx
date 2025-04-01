@@ -11,18 +11,23 @@ import { styles } from './styles';
 interface IProps {
   client: UserType | null;
   orders: Order[];
-  debtData: any;
-  sortDebtKeys: any;
+  debtData?: any;
+  sortDebtKeys?: any;
+  isOldInvoice?: boolean;
 }
 const InvoiceDocument: React.FC<IProps> = ({
   client,
   orders,
   debtData,
   sortDebtKeys,
+  isOldInvoice = false,
 }: IProps) => {
   if (!client) return null;
 
   const filteredOrders = orders.filter((order: Order) => {
+    if (isOldInvoice) {
+      return order.status !== ORDER_STATUS.VOID;
+    }
     return (
       order.status !== ORDER_STATUS.VOID &&
       order.status !== ORDER_STATUS.COMPLETED
@@ -44,6 +49,11 @@ const InvoiceDocument: React.FC<IProps> = ({
   const totalGST = filteredOrders.reduce((acc, order) => {
     return acc + (order?.GST || 0);
   }, 0);
+
+  console.log({
+    orders,
+    filteredOrders
+  })
 
   return (
     <Document>
@@ -157,7 +167,7 @@ const InvoiceDocument: React.FC<IProps> = ({
               </View>
             </View>
           </View>
-          <View style={styles.flex_between}>
+          {!isOldInvoice && debtData && sortDebtKeys && <View style={styles.flex_between}>
             {sortDebtKeys &&
               sortDebtKeys.map((month: string, index: number) => (
                 <Text style={styles.font_10} key={index}>
@@ -167,7 +177,7 @@ const InvoiceDocument: React.FC<IProps> = ({
                   : ${debtData[month]?.toFixed(2)}
                 </Text>
               ))}
-          </View>
+          </View>}
           <View style={styles.bottomSubtitle}>
             <Text style={styles.h2}>{sendChequeMsg}</Text>
           </View>

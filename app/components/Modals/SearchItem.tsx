@@ -5,7 +5,7 @@ import { IItem } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import { Box, Modal, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import SellingItemName, { ItemRow } from '../SellingItemName';
+import ItemRow from '../SellingItemName';
 
 interface IProps extends ModalProps {
   items: IItem[];
@@ -72,7 +72,7 @@ export default function SearchItem({ open, onClose, items, setItems }: IProps) {
                 key={index}
                 item={item}
                 onChangeItem={handleOnChangeItem}
-                itemList={items}
+                // itemList={items}
                 setItemList={setItems}
               />
             ))

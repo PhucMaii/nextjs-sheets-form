@@ -72,10 +72,11 @@ export default function SwitchTypeAndAppearanceModal({
   const handleSave = async () => {
     setIsLoading(true);
     try {
+      const actualId = item?.id?.toString().split(' - ')[1];
       const response = await axios.put(
         `${API_URL.ADMIN}/inventory/switch-type`,
         {
-          id: item.id,
+          id: Number(actualId),
           typeId: selectedType,
           color: color.hex,
           image: itemImage,

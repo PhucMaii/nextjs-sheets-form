@@ -21,15 +21,19 @@ interface PropTypes {
   client: UserType | null;
   orders: Order[];
   endDate: Date;
+  isPrintComplete?: boolean;
 }
 
 export const InvoicePrint = forwardRef(
-  ({ client, orders, endDate }: PropTypes, ref: any) => {
+  ({ client, orders, endDate, isPrintComplete }: PropTypes, ref: any) => {
     if (!client) {
       return;
     }
 
     const filteredOrders = orders.filter((order: Order) => {
+      if (isPrintComplete) {
+        return order.status !== ORDER_STATUS.VOID;
+      }
       return (
         order.status !== ORDER_STATUS.VOID &&
         order.status !== ORDER_STATUS.COMPLETED

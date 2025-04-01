@@ -22,6 +22,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'You are missing body data' });
     }
 
+    // const formattedItemTypeIds = itemTypes.map((itemType: any) => {
+    //   const actualId = Number(itemType.id.split(' - ')[1]);
+    //   const itemsWithActualId = itemType.inventoryItems.map((item: any) => {
+    //     return {
+    //       ...item,
+    //       id: Number(item.id.split(' - ')[1]),
+    //     };
+    //   });
+
+    //   return {
+    //     ...itemType,
+    //     id: actualId,
+    //     inventoryItems: itemsWithActualId,
+    //   };
+    // });
+
     // Get types and promotions into 2 arrays
     const updatedTypes = itemTypes
       .filter((itemType: any) => {
@@ -29,6 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       })
       .map((itemType: any) => {
         const items = itemType.inventoryItems.map((item: any) => {
+
           return {
             ...item,
             id: Number(item.id.split(' - ')[1]),

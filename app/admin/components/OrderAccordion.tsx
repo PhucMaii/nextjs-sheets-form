@@ -490,7 +490,7 @@ const OrderAccordion = ({
                     setIsOpenDetails(true);
                   }
                 }}
-                disabled={order?.type === TYPE.LOCKED}
+                // disabled={order?.type === TYPE.LOCKED}
               >
                 <PreviewIcon color="primary" />
               </IconButton>
