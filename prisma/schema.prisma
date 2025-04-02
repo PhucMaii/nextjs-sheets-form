@@ -12,6 +12,9 @@ model Driver {
   id       Int        @id @default(autoincrement())
   name     String     @db.VarChar(255)
   password String     @db.VarChar(255)
+  payRate  Float?
+
+  shiftSessions   ShiftSession[]
   routes   Route[]
   CodBoard CodBoard[]
 }
@@ -497,4 +500,16 @@ model Option {
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
   item  Item  @relation(fields: [itemId], references: [id])
   inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+}
+
+model ShiftSession {
+  id     Int @id  @default(autoincrement())
+  driverId   Int
+  date      String
+  startedAt   String
+  endedAt     String?
+  hours       Int?
+  cost        Float?
+
+  driver     Driver  @relation(fields: [driverId], references: [id])
 }
