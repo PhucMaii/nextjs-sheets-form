@@ -82,8 +82,6 @@ export const generateListOfDateString = (startDate: Date, endDate: Date, isAddUp
   const formattedStartDate = startDate;
   const formattedEndDate = endDate;
 
-  console.log({startDate, endDate});
-
   // if (startDate.getTimezoneOffset() === 0 || endDate.getTimezoneOffset() === 0) {
   //   formattedStartDate = convertToPSTDate(startDate);
   //   formattedEndDate = convertToPSTDate(endDate);

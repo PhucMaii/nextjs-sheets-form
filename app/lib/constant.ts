@@ -38,6 +38,7 @@ import {
 } from '../../theme/color';
 import { amber, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
+import { AccessTime } from '@mui/icons-material';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -248,6 +249,11 @@ export const adminTabs = {
       path: '/admin/pre-orders',
     },
     {
+      name: 'Shifts',
+      icon: AccessTime,
+      path: '/admin/shifts',
+    },
+    {
       name: 'Order Layout',
       icon: WysiwygIcon,
       path: '/admin/order-layout',
@@ -351,6 +357,11 @@ export const driverTabs = [
     name: 'Add',
     icon: AddBoxIcon,
     path: '/driver/add',
+  },
+  {
+    name: 'Shifts',
+    icon: AccessTime,
+    path: '/driver/shifts',
   },
   {
     name: 'Blocking',

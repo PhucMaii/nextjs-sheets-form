@@ -12,7 +12,7 @@ model Driver {
   id       Int        @id @default(autoincrement())
   name     String     @db.VarChar(255)
   password String     @db.VarChar(255)
-  payRate  Float?
+  hourlyRate  Float?
 
   shiftSessions   ShiftSession[]
   routes   Route[]
@@ -177,6 +177,7 @@ model Route {
   day      String
   driverId Int
   clients  UserRoute[]
+  shiftSessions  ShiftSession[]
 
   driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
 }
@@ -505,12 +506,15 @@ model Option {
 model ShiftSession {
   id     Int @id  @default(autoincrement())
   driverId   Int
+  routeId   Int?
   date      String
   startedAt   String
   endedAt     String?
-  hours       Int?
+  hours       Float?
   isActive    Boolean?
   cost        Float?
 
   driver     Driver  @relation(fields: [driverId], references: [id])
+  route     Route? @relation(fields: [routeId], references: [id])
+
 }

@@ -178,6 +178,7 @@ export default function Sidebar({ children }: IProps) {
             {driverTabs.map((tab, index) => {
               return (
                 <BottomNavigationAction
+                  sx={{ minWidth: '30px' }}
                   key={index}
                   label={tab.name}
                   value={tab.path}
@@ -189,19 +190,24 @@ export default function Sidebar({ children }: IProps) {
                           currentTab === tab.path ? blue[700] : blueGrey[800]
                         }`,
                       }}
+                      fontSize="small"
                     />
                   }
                 />
               );
             })}
             <BottomNavigationAction
-              label="Sign out"
+              // label="Sign out"
               onClick={() =>
                 signOut({
                   callbackUrl: `https://www.supremesprouts.com/auth/login`,
                 })
               }
-              icon={<LogoutIcon sx={{ color: blueGrey[800] }} />}
+              value={'/auth/login'}
+              sx={{ minWidth: '30px' }}
+              icon={
+                <LogoutIcon sx={{ color: blueGrey[800] }} fontSize="small" />
+              }
             />
           </BottomNavigation>
         </Paper>
@@ -212,6 +218,29 @@ export default function Sidebar({ children }: IProps) {
   if (mdDown) {
     return (
       <>
+        {shiftSession ? (
+          <ShiftBanner
+            shift={shiftSession}
+            onOpenShiftModal={() =>
+              setShiftModalProps({ open: true, type: ShiftType.CLOCK_OUT })
+            }
+          />
+        ) : (
+          <Box display="flex" alignItems="center" justifyContent="flex-end">
+            <Button
+              onClick={() =>
+                setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN })
+              }
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <AccessTime fontSize="small" />
+                <Typography variant="body2" sx={{ textTransform: 'none' }}>
+                  Clock In
+                </Typography>
+              </Box>
+            </Button>
+          </Box>
+        )}
         <ShiftModal
           open={shiftModalProps.open}
           onClose={() => setShiftModalProps({ open: false, type: null })}
@@ -257,6 +286,29 @@ export default function Sidebar({ children }: IProps) {
 
   return (
     <>
+      {shiftSession ? (
+        <ShiftBanner
+          shift={shiftSession}
+          onOpenShiftModal={() =>
+            setShiftModalProps({ open: true, type: ShiftType.CLOCK_OUT })
+          }
+        />
+      ) : (
+        <Box display="flex" alignItems="center" justifyContent="flex-end">
+          <Button
+            onClick={() =>
+              setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN })
+            }
+          >
+            <Box display="flex" alignItems="center" gap={1}>
+              <AccessTime fontSize="small" />
+              <Typography variant="body2" sx={{ textTransform: 'none' }}>
+                Clock In
+              </Typography>
+            </Box>
+          </Button>
+        </Box>
+      )}
       <ShiftModal
         open={shiftModalProps.open}
         onClose={() => setShiftModalProps({ open: false, type: null })}

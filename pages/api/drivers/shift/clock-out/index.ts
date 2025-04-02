@@ -38,8 +38,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             },
             data: {
                 endedAt: today.dateAndTime,
-                hours,
-                cost: hours * (driver?.payRate || 1),
+                hours: hours * 1, // to get the float type
+                cost: hours * (driver?.hourlyRate || 1),
                 isActive: false,
             },
         });
