@@ -15,6 +15,7 @@ import {
   PositionIndex,
   Promotion,
   Route,
+  ShiftSession,
   User,
   UserRoute,
   Vendor,
@@ -262,4 +263,8 @@ export interface IOption extends Option {
   // isShowDiscount?: boolean;
   item: IItem;
   unit: IInventoryUnit | any;
+}
+
+export interface IShiftSession extends ShiftSession {
+  driver: IDriver;
 }

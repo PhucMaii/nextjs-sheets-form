@@ -64,6 +64,7 @@ export const getDriverInfo = async (
             clients: true,
           },
         },
+        shiftSessions: true,
       },
     });
 

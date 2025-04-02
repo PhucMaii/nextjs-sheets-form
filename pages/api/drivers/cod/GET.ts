@@ -164,32 +164,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Merge both cod orders and board orders
     const mergedOrders = [...codOrders, ...wcodOrders, ...codBoard.orders];
 
-    // Arrange orders
-    // const arrangedOrders = await prisma.scheduleOrders.findMany({
-    //   where: {
-    //     userId: {
-    //       in: userIds,
-    //     },
-    //     day,
-    //   },
-    //   include: {
-    //     user: true,
-    //     items: {
-    //       include: {
-    //         inventoryItem: true,
-    //         inventoryUnit: true,
-    //         fifo: true,
-    //       },
-    //     },
-    //     positionIndex: true,
-    //   },
-    //   orderBy: {
-    //     positionIndex: {
-    //       index: 'asc',
-    //     },
-    //   },
-    // });
-
     // Format the return orders
     const sortedDeliveryOrders = [];
     for (const order of mergedOrders) {
@@ -225,8 +199,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     //         notInRoute: !isOrderIncludedInRoute
     //     }
     // });
-
-    console.log(sortedDeliveryOrders, 'formattedOrders');
 
     return res.status(200).json({
       data: { ...codBoard, orders: sortedDeliveryOrders },

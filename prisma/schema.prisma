@@ -509,6 +509,7 @@ model ShiftSession {
   startedAt   String
   endedAt     String?
   hours       Int?
+  isActive    Boolean?
   cost        Float?
 
   driver     Driver  @relation(fields: [driverId], references: [id])

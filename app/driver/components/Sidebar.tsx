@@ -11,6 +11,7 @@ import {
   ListItemText,
   Paper,
   Toolbar,
+  Typography,
   useMediaQuery,
 } from '@mui/material';
 import React, { ReactNode, useEffect, useState } from 'react';
@@ -22,6 +23,12 @@ import { driverTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { primary } from '@/theme/color';
+import ShiftModal, { ShiftType } from './Modals/ShiftModal';
+import { IShiftSession } from '@/app/utils/type';
+import { SWRFetchData } from '@/app/utils/db';
+import { API_URL } from '@/app/utils/enum';
+import ShiftBanner from './ShiftBanner';
+import { AccessTime } from '@mui/icons-material';
 
 interface IProps {
   children: ReactNode;
@@ -31,6 +38,13 @@ const drawerWidth = 250;
 export default function Sidebar({ children }: IProps) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
+  const [shiftModalProps, setShiftModalProps] = useState<any>({
+    open: false,
+    type: null,
+  });
+  const [shiftSession, setShiftSession] = useState<IShiftSession | null>(null);
+
+  const [todaySession] = SWRFetchData(`${API_URL.DRIVER}/shift/today`);
 
   const router = useRouter();
   const pathname: any = usePathname();
@@ -38,6 +52,21 @@ export default function Sidebar({ children }: IProps) {
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
+
+  useEffect(() => {
+    if (todaySession) {
+      if (todaySession.data.length > 0) {
+        const currentShift = todaySession.data.find(
+          (shift: IShiftSession) => shift.isActive,
+        );
+        setShiftSession(currentShift);
+        setShiftModalProps({ open: false, type: null });
+      } else {
+        setShiftSession(null);
+        setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN });
+      }
+    }
+  }, [todaySession]);
 
   const handleChangeTab = (path: string) => {
     router.push(path);
@@ -105,6 +134,35 @@ export default function Sidebar({ children }: IProps) {
   if (smDown) {
     return (
       <>
+        {shiftSession ? (
+          <ShiftBanner
+            shift={shiftSession}
+            onOpenShiftModal={() =>
+              setShiftModalProps({ open: true, type: ShiftType.CLOCK_OUT })
+            }
+          />
+        ) : (
+          <Box display="flex" alignItems="center" justifyContent="flex-end">
+            <Button
+              onClick={() =>
+                setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN })
+              }
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <AccessTime fontSize="small" />
+                <Typography variant="body2" sx={{ textTransform: 'none' }}>
+                  Clock In
+                </Typography>
+              </Box>
+            </Button>
+          </Box>
+        )}
+        <ShiftModal
+          open={shiftModalProps.open}
+          onClose={() => setShiftModalProps({ open: false, type: null })}
+          type={shiftModalProps.type}
+          shift={shiftSession}
+        />
         <Box sx={{ pb: 8, m: 1 }}>{children}</Box>
         <Paper
           sx={{ position: 'fixed', bottom: '0 !important', zIndex: 100 }}
@@ -154,6 +212,12 @@ export default function Sidebar({ children }: IProps) {
   if (mdDown) {
     return (
       <>
+        <ShiftModal
+          open={shiftModalProps.open}
+          onClose={() => setShiftModalProps({ open: false, type: null })}
+          type={shiftModalProps.type}
+          shift={shiftSession}
+        />
         <IconButton onClick={() => setIsNavOpen(true)}>
           <MenuIcon />
         </IconButton>
@@ -193,6 +257,12 @@ export default function Sidebar({ children }: IProps) {
 
   return (
     <>
+      <ShiftModal
+        open={shiftModalProps.open}
+        onClose={() => setShiftModalProps({ open: false, type: null })}
+        type={shiftModalProps.type}
+        shift={shiftSession}
+      />
       <Box display="flex">
         <Drawer
           sx={{
