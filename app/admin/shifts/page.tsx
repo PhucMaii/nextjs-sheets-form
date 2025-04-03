@@ -1,5 +1,5 @@
 'use client';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -19,6 +19,8 @@ import { SWRFetchData } from '@/app/utils/db';
 import { IShiftSession } from '@/app/utils/type';
 import ShiftAdminDisplay from '../components/ShiftAdminDisplay';
 import { AddShift } from '../components/Modals/add/AddShift';
+import EditShift from '../components/Modals/edit/EditShift';
+import { grey } from '@mui/material/colors';
 
 export default function ShiftPage() {
   const [isOpenAddShift, setIsOpenAddShift] = useState<boolean>(false);
@@ -28,6 +30,10 @@ export default function ShiftPage() {
     generateMonthRange(),
   );
   const [drivers, setDrivers] = useState<any>([]);
+  const [editShiftProps, setEditShiftProps] = useState<any>({
+    open: false,
+    shift: null,
+  });
 
   const { showNotification, NotificationComp } = useNotification();
   const [shiftSessions] = SWRFetchData(
@@ -60,8 +66,20 @@ export default function ShiftPage() {
     setShifts(shiftSessions?.data);
   };
 
+  const onOpenEditShift = (shift: IShiftSession) => {
+    setEditShiftProps({ open: true, shift });
+  };
+
   return (
     <Sidebar>
+      {editShiftProps.shift && (
+        <EditShift
+          open={editShiftProps.open}
+          onClose={() => setEditShiftProps({ open: false, shift: null })}
+          shift={editShiftProps.shift}
+          showNotification={showNotification}
+        />
+      )}
       <AddShift
         open={isOpenAddShift}
         onClose={() => setIsOpenAddShift(false)}
@@ -100,13 +118,28 @@ export default function ShiftPage() {
           </Button>
         </Box>
 
-        {shifts.length > 0 &&
-          shifts.map((shift: IShiftSession) => (
-            <Fragment key={shift.id}>
-              <ShiftAdminDisplay shift={shift} />
-              <Divider sx={{ my: 2 }} />
-            </Fragment>
-          ))}
+        <Box display="flex" flexDirection="column" gap={2}>
+          {shifts.length > 0 &&
+            shifts.map((shift: IShiftSession) => (
+              <Box
+                sx={{
+                  '&:hover': {
+                    cursor: 'pointer',
+                    backgroundColor: grey[200],
+                  },
+                  borderRadius: '8px',
+                }}
+                mt={2}
+                onClick={() => onOpenEditShift(shift)}
+                key={shift.id}
+                display="flex"
+                flexDirection="column"
+              >
+                <ShiftAdminDisplay shift={shift} />
+                <Divider sx={{ mt: 2 }} />
+              </Box>
+            ))}
+        </Box>
       </ShadowSection>
     </Sidebar>
   );

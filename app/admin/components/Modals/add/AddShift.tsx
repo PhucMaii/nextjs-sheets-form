@@ -133,7 +133,7 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
             <Typography>Select Driver</Typography>
             <Select
               fullWidth
-              value={newShift.id}
+              value={newShift.driverId}
               onChange={(e) => setNewShift({...newShift, driverId: +e.target.value})}
               sx={{ mt: 1 }}
             >

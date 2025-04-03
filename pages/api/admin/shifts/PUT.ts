@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../../drivers/shift/clock-out';
+import { formatDateString } from '../../utils/date';
 
 const prisma = new PrismaClient();
 
@@ -30,19 +31,25 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updatedFields: any = {};
 
+    const startDateString = formatDateString(startedAt);
+    const endDateString = formatDateString(endedAt);
     if (
-      startedAt !== existingShift.startedAt ||
-      endedAt !== existingShift.endedAt
+      startDateString !== existingShift.startedAt ||
+      endDateString !== existingShift.endedAt
     ) {
-      updatedFields.startedAt = startedAt;
-      updatedFields.endedAt = endedAt;
+      updatedFields.startedAt = startDateString;
+      updatedFields.endedAt = endDateString;
 
       const hours = calculateHours(startedAt, endedAt);
       updatedFields.hours = hours;
     }
 
     if (routeId !== existingShift.routeId) {
-      updatedFields.routeId = routeId;
+      if (routeId === -1) {
+        updatedFields.routeId = null;
+      } else {
+        updatedFields.routeId = routeId;
+      }
     }
 
     if (driverId !== existingShift.driverId) {
@@ -66,7 +73,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         return res.status(404).json({ error: 'Conflict Driver not found' });
       }
 
-      const cost = (driver?.hourlyRate || 1) * updatedFields.hours;
+      const cost = (driver?.hourlyRate || 1) * (updatedFields?.hours || existingShift.hours);
       updatedFields.cost = cost;
     }
 

@@ -30,7 +30,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const hours = calculateHours(startedAt, endedAt);
 
     const startDateString = formatDateString(startedAt);
-
     const endDateString = formatDateString(endedAt);
 
     const newShift = await prisma.shiftSession.create({
