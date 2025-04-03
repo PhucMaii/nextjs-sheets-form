@@ -114,6 +114,7 @@ export default function AddOption({
       }
 
       showNotification('success', response.data.message);
+      onClose();
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification(
