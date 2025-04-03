@@ -116,9 +116,9 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.driver.updateMany({
+  await prisma.shiftSession.updateMany({
     data: {
-      hourlyRate: 20,
+      status: 'Unpaid',
     }
   })
 }

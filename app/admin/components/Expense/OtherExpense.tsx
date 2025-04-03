@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 
 interface IProps {
-  paymentMethods: any;
+  paymentMethods: any[];
   codBoardId?: number;
   adminsAndDrivers: string[];
   SelectDate: any;
@@ -133,7 +133,7 @@ export default function OtherExpense({
             size="small"
           >
             <MenuItem value={4} disabled>
-              {paymentMethods?.data[0]?.name}
+              {paymentMethods[0]?.name}
             </MenuItem>
           </Select>
         ) : (
@@ -148,8 +148,8 @@ export default function OtherExpense({
               -- Choose payment method --
             </MenuItem>
             {paymentMethods &&
-              paymentMethods?.data?.length > 0 &&
-              paymentMethods?.data.map(
+              paymentMethods?.length > 0 &&
+              paymentMethods.map(
                 (paymentMethod: IPaymentMethod, index: number) => {
                   return (
                     <MenuItem key={index} value={paymentMethod.id}>

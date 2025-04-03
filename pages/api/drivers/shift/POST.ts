@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import { convertDeliveryDateStringToDate, getTodayDate } from '../../utils/date';
 import { days } from '@/app/lib/constant';
+import { SHIFT_STATUS } from '@/app/utils/enum';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -38,6 +39,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         startedAt: today.dateAndTime,
         isActive: true,
         routeId: targetRoute?.id,
+        status: SHIFT_STATUS.UNPAID,
       },
     });
 

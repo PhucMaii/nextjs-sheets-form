@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../../drivers/shift/clock-out';
 import { formatDateString } from '../../utils/date';
+import { SHIFT_STATUS } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
 
@@ -41,6 +42,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         routeId,
         hours,
         cost: hours * (existingDriver?.hourlyRate || 1),
+        status: SHIFT_STATUS.UNPAID,
       },
     });
 

@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 
 interface IBody {
   id: number;
+  date: string;
   startedAt: string;
   endedAt: string;
   routeId: number;
@@ -15,8 +16,9 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { id, startedAt, endedAt, routeId, driverId }: IBody = req.body;
+    const { id, date, startedAt, endedAt, routeId, driverId }: IBody = req.body;
 
+    console.log(date, 'date')
     const existingShift = await prisma.shiftSession.findUnique({
       where: { id },
       include: {
@@ -54,6 +56,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     if (driverId !== existingShift.driverId) {
       updatedFields.driverId = driverId;
+    }
+
+    if (date !== existingShift.date) {
+      updatedFields.date = date;
     }
 
     if (Object.keys(updatedFields).length === 0) {

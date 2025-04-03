@@ -1,3 +1,4 @@
+import { SHIFT_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -24,6 +25,9 @@ export default async function DELETE(
       where: {
         id: Number(id),
       },
+      include: {
+        shifts: true,
+      },
     });
 
     if (!existingExpense) {
@@ -31,6 +35,19 @@ export default async function DELETE(
         error: 'Expense Not Found',
       });
     }
+
+    // If delete expenses with shifts
+    if (existingExpense.shifts.length > 0) {
+      await prisma.shiftSession.updateMany({
+        where: {
+          expenseId: existingExpense.id,
+        },
+        data: {
+          status: SHIFT_STATUS.UNPAID,
+          expenseId: null,
+        },
+      });
+    } 
 
     await prisma.expense.delete({
       where: {

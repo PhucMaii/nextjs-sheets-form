@@ -184,7 +184,7 @@ export default function AddExpense({
           <OtherExpense
             codBoardId={codBoardId}
             adminsAndDrivers={adminsAndDrivers}
-            paymentMethods={paymentMethods}
+            paymentMethods={paymentMethods?.data || []}
             SelectDate={SelectDate}
             onChangeNewExpense={onChangeNewExpense}
             newExpense={newExpense}

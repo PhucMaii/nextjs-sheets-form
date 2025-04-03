@@ -44,7 +44,6 @@ export default function EditShift({
   const todayIndex = new Date().getDay(); // 0 (Sun) to 6 (Sat)
   const sortedDays = [...days.slice(todayIndex), ...days.slice(0, todayIndex)];
 
-  console.log({ allDrivers, allRoutes });
   useEffect(() => {
     fetchAllRoutes();
     fetchDrivers();
@@ -87,6 +86,7 @@ export default function EditShift({
     try {
       const response = await axios.put(`${API_URL.ADMIN}/shifts`, {
         ...updatedShift,
+        date: updatedShift.startedAt.format('MM/DD/YYYY'),
         startedAt: updatedShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
         endedAt: updatedShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
       });

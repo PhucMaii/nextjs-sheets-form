@@ -258,6 +258,7 @@ model Expense {
   codBoard      CodBoard?       @relation(fields: [codBoardId], references: [id])
   orderedItems  OrderedItems[]
   vendors       VendorExpense[]
+  shifts        ShiftSession[]
 }
 
 model VendorExpense {
@@ -513,8 +514,11 @@ model ShiftSession {
   hours       Float?
   isActive    Boolean?
   cost        Float?
+  status      String?
+  expenseId   Int?
 
   driver     Driver  @relation(fields: [driverId], references: [id])
+  expense     Expense? @relation(fields: [expenseId], references: [id])
   route     Route? @relation(fields: [routeId], references: [id])
 
 }

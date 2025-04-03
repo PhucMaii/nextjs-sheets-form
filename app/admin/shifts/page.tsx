@@ -1,10 +1,13 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
   Button,
+  Checkbox,
   Divider,
+  FormControlLabel,
+  Grid,
   MenuItem,
   Select,
   Typography,
@@ -20,25 +23,86 @@ import { IShiftSession } from '@/app/utils/type';
 import ShiftAdminDisplay from '../components/ShiftAdminDisplay';
 import { AddShift } from '../components/Modals/add/AddShift';
 import EditShift from '../components/Modals/edit/EditShift';
-import { grey } from '@mui/material/colors';
+import { blue, grey } from '@mui/material/colors';
+import { groupBy } from '@/app/utils/array';
+import OverviewCard from '../components/OverviewCard/OverviewCard';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
+import ConfirmToPayShifts from '../components/Modals/ConfirmToPayShifts';
 
 export default function ShiftPage() {
-  const [isOpenAddShift, setIsOpenAddShift] = useState<boolean>(false);
-  const [shifts, setShifts] = useState<IShiftSession[]>([]);
-  const [selectedDriverId, setSelectedDriverId] = useState<number>(-1);
-  const [selectedDateRange, setSelectedDateRange] = useState<any>(() =>
-    generateMonthRange(),
-  );
   const [drivers, setDrivers] = useState<any>([]);
   const [editShiftProps, setEditShiftProps] = useState<any>({
     open: false,
     shift: null,
   });
+  const [confirmToPayProps, setConfirmToPayProps] = useState<any>({
+    open: false,
+  });
+  const [isOpenAddShift, setIsOpenAddShift] = useState<boolean>(false);
+  const [shifts, setShifts] = useState<Record<string, IShiftSession[]> | null>(
+    null,
+  );
+  const [selectedDriverId, setSelectedDriverId] = useState<number>(-1);
+  const [selectedDateRange, setSelectedDateRange] = useState<any>(() =>
+    generateMonthRange(),
+  );
+  const [selectedShifts, setSelectedShifts] = useState<IShiftSession[]>([]);
 
   const { showNotification, NotificationComp } = useNotification();
   const [shiftSessions] = SWRFetchData(
-    `${API_URL.ADMIN}/shifts?startDate=${selectedDateRange[0]}&endDate=${selectedDateRange[1]}`,
+    `${API_URL.ADMIN}/shifts?startDate=${selectedDateRange[0]}&endDate=${selectedDateRange[1]}&driverId=${selectedDriverId}`,
   );
+
+  const totalShifts = useMemo(() => {
+    if (!shiftSessions?.data) {
+      return 0;
+    }
+    return shiftSessions?.data?.length || 0;
+  }, [shiftSessions]);
+
+  const totalHours = useMemo(() => {
+    if (!shiftSessions?.data) {
+      return 0;
+    }
+    return shiftSessions?.data?.reduce((acc: number, shift: any) => {
+      return acc + shift.hours;
+    }, 0);
+  }, [shiftSessions]);
+
+  const totalCosts = useMemo(() => {
+    if (!shiftSessions?.data) {
+      return 0;
+    }
+    return shiftSessions?.data?.reduce((acc: number, shift: any) => {
+      return acc + shift.cost;
+    }, 0);
+  }, [shiftSessions]);
+
+  const totalDriverIds = useMemo(() => {
+    if (!shiftSessions?.data) {
+      return [];
+    }
+
+    return shiftSessions?.data?.reduce((acc: number[], shift: any) => {
+      if (!acc.includes(shift.driverId)) {
+        acc.push(shift.driverId);
+      }
+
+      return acc;
+    }, []);
+  }, [shiftSessions]);
+
+  const sortedDates = useMemo(() => {
+    if (!shifts) {
+      return [];
+    }
+    return Object.keys(shifts).sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+    );
+  }, [shifts]);
 
   useEffect(() => {
     if (shiftSessions?.data) {
@@ -63,7 +127,32 @@ export default function ShiftPage() {
   };
 
   const initializeShifts = () => {
-    setShifts(shiftSessions?.data);
+    const shiftsByDate = groupBy(
+      shiftSessions.data,
+      (shift: any) => shift.date,
+    );
+    setShifts(shiftsByDate);
+  };
+
+  const onSelectAll = () => {
+    if (shiftSessions?.data) {
+      if (selectedShifts.length === shiftSessions.data.length) {
+        setSelectedShifts([]);
+      } else {
+        setSelectedShifts(shiftSessions.data);
+      }
+    }
+  };
+
+  const onSelectShift = (shift: IShiftSession) => {
+    const isExists = selectedShifts.find((sShift: IShiftSession) => shift.id === sShift.id);
+    if (isExists) {
+      setSelectedShifts(
+        selectedShifts.filter((sShift: IShiftSession) => sShift.id !== shift.id),
+      );
+    } else {
+      setSelectedShifts([...selectedShifts, shift]);
+    }
   };
 
   const onOpenEditShift = (shift: IShiftSession) => {
@@ -72,6 +161,15 @@ export default function ShiftPage() {
 
   return (
     <Sidebar>
+      {confirmToPayProps.open && (
+        <ConfirmToPayShifts
+          showNotification={showNotification}
+          open={confirmToPayProps.open}
+          onClose={() => setConfirmToPayProps({ open: false })}
+          shifts={selectedShifts}
+          onClearSelectedShifts={() => setSelectedShifts([])}
+        />
+      )}
       {editShiftProps.shift && (
         <EditShift
           open={editShiftProps.open}
@@ -96,7 +194,61 @@ export default function ShiftPage() {
       </Box>
 
       <ShadowSection>
-        <Typography>Select Driver</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6} lg={3}>
+            <OverviewCard
+              text="Shifts"
+              value={totalShifts}
+              icon={
+                <CalendarMonthIcon
+                  color="primary"
+                  fontSize="large"
+                  sx={{ fontSize: '3rem' }}
+                />
+              }
+            />
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
+            <OverviewCard
+              text="Total Hours"
+              value={totalHours?.toFixed(2)}
+              icon={
+                <AccessTimeIcon
+                  color="primary"
+                  fontSize="large"
+                  sx={{ fontSize: '3rem' }}
+                />
+              }
+            />
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
+            <OverviewCard
+              text="Total Cost"
+              value={totalCosts?.toFixed(2)}
+              icon={
+                <AttachMoneyIcon
+                  color="primary"
+                  fontSize="large"
+                  sx={{ fontSize: '3rem' }}
+                />
+              }
+            />
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
+            <OverviewCard
+              text="Total Drivers"
+              value={totalDriverIds?.length}
+              icon={
+                <PermContactCalendarIcon
+                  color="primary"
+                  fontSize="large"
+                  sx={{ fontSize: '3rem' }}
+                />
+              }
+            />
+          </Grid>
+        </Grid>
+        <Typography sx={{ mt: 2 }}>Select Driver</Typography>
         <Select
           fullWidth
           value={selectedDriverId}
@@ -113,32 +265,70 @@ export default function ShiftPage() {
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography sx={{ my: 2 }}>All Shifts</Typography>
-          <Button onClick={() => setIsOpenAddShift(true)} variant="contained">
-            + Create Shift
-          </Button>
+
+          <Box display="flex" alignItems="center" gap={1}>
+            <Button
+              onClick={() => setConfirmToPayProps({ open: true })}
+              disabled={selectedShifts.length === 0}
+              variant="outlined"
+            >
+              Approve & Pay
+            </Button>
+            <Button onClick={() => setIsOpenAddShift(true)} variant="contained">
+              + Create Shift
+            </Button>
+          </Box>
         </Box>
 
         <Box display="flex" flexDirection="column" gap={2}>
-          {shifts.length > 0 &&
-            shifts.map((shift: IShiftSession) => (
-              <Box
-                sx={{
-                  '&:hover': {
-                    cursor: 'pointer',
-                    backgroundColor: grey[200],
-                  },
-                  borderRadius: '8px',
-                }}
-                mt={2}
-                onClick={() => onOpenEditShift(shift)}
-                key={shift.id}
-                display="flex"
-                flexDirection="column"
-              >
-                <ShiftAdminDisplay shift={shift} />
-                <Divider sx={{ mt: 2 }} />
-              </Box>
-            ))}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedShifts.length === shiftSessions?.data.length}
+                onChange={onSelectAll}
+              />
+            }
+            label="All"
+          />
+          {sortedDates.length > 0 &&
+            shifts &&
+            sortedDates.map((date: string) => {
+              return (
+                <Box key={date} display="flex" flexDirection="column">
+                  <Typography variant="subtitle1">{date}</Typography>
+                  {shifts[date].map((shift: IShiftSession) => {
+                    const isSelected = selectedShifts.some(
+                      (sShift: IShiftSession) => sShift.id === shift.id,
+                    );
+                    return (
+                      <Box
+                        sx={{
+                          '&:hover': {
+                            cursor: 'pointer',
+                            backgroundColor: grey[200],
+                          },
+                          borderRadius: '8px',
+                          backgroundColor: isSelected ? blue[50] : '',
+                          pt: 2,
+                        }}
+                        onClick={() => onOpenEditShift(shift)}
+                        key={shift.id}
+                        display="flex"
+                        flexDirection="column"
+                        gap={1}
+                      >
+                        <ShiftAdminDisplay
+                          shift={shift}
+                          isSelected={isSelected}
+                          onSelect={() => onSelectShift(shift)}
+                        />
+                        <Divider />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              );
+            })}
         </Box>
       </ShadowSection>
     </Sidebar>

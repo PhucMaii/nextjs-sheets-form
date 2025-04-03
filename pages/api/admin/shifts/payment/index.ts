@@ -1,0 +1,67 @@
+import { SHIFT_STATUS } from '@/app/utils/enum';
+import { getUserInfo } from '@/pages/api/utils/auth';
+import { getTodayDate } from '@/pages/api/utils/date';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
+import { PrismaClient } from '@prisma/client';
+import { NextApiRequest, NextApiResponse } from 'next';
+
+const prisma = new PrismaClient();
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  try {
+    if (req.method !== 'POST') {
+      return res.status(404).json({ error: 'Your method is not supported' });
+    }
+
+    const { newExpense, shifts } = req.body;
+    
+
+    if (!newExpense) {
+      return res.status(400).json({ error: 'Missing newExpense data' });
+    }
+
+    const today = getTodayDate();
+
+    const admin: any = await getUserInfo(req, res);
+
+    // First create the epxense
+    const expense = await prisma.expense.create({
+      data: {
+        amount: newExpense.amount,
+        date: newExpense.date,
+        description: newExpense.description,
+        paymentMethodId: newExpense.paymentMethodId,
+        status: newExpense.status,
+        PST: newExpense.PST,
+        GST: newExpense.GST,
+        subTotal: newExpense.subTotal,
+        spentBy: newExpense.spentBy,
+        createdAt: today.dateAndTime,
+        createdBy: `Admin - ${admin.clientName}`
+      },
+    });
+
+    // Convert the shifts to paid
+    await prisma.shiftSession.updateMany({
+      where: {
+        id: {
+          in: shifts.map((shift: any) => shift.id),
+        },
+      },
+      data: {
+        status: SHIFT_STATUS.PAID,
+        expenseId: expense.id,
+      },
+    });
+
+    return res.status(200).json({
+      message: 'Payment added successfully',
+    });
+
+  } catch (error: any) {
+    console.error('Error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export default withAdminAuthGuard(handler);

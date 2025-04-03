@@ -125,3 +125,8 @@ export enum USER_CATEGORIZED {
   INACTIVE = 'Inactive',
   NONE = 'None',
 }
+
+export enum SHIFT_STATUS {
+  PAID = 'Paid',
+  UNPAID = 'Unpaid',
+}

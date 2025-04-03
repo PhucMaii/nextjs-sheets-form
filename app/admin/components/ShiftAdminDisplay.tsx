@@ -1,14 +1,21 @@
 import { IShiftSession } from '@/app/utils/type';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Checkbox, Divider, Grid, Typography } from '@mui/material';
 import React, { useMemo } from 'react';
 import StatusText from './StatusText';
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
+import { SHIFT_STATUS } from '@/app/utils/enum';
 
 interface IProps {
   shift: IShiftSession;
+  isSelected: boolean;
+  onSelect: () => void;
 }
 
-export default function ShiftAdminDisplay({ shift }: IProps) {
+export default function ShiftAdminDisplay({
+  shift,
+  isSelected,
+  onSelect,
+}: IProps) {
   const time: any = useMemo(() => {
     if (!shift) {
       return 0;
@@ -33,11 +40,16 @@ export default function ShiftAdminDisplay({ shift }: IProps) {
   }, [shift]);
 
   return (
-    <Grid
-      container
-      alignItems="stretch"
-      spacing={2}
-    >
+    <Grid container alignItems="stretch" spacing={1}>
+      <Grid item xs={12}>
+        <Checkbox
+          checked={isSelected}
+          onChange={onSelect}
+          onClick={(e: any) => {
+            e.stopPropagation();
+          }}
+        />
+      </Grid>
       <Grid item xs={6} md={8} gap={1}>
         <Box
           display="flex"
@@ -46,6 +58,10 @@ export default function ShiftAdminDisplay({ shift }: IProps) {
           justifyContent="center"
           height="100%"
         >
+          <StatusText
+            text={shift?.status || ''}
+            type={shift?.status === SHIFT_STATUS.UNPAID ? 'error' : 'success'}
+          />
           <Typography variant="h6" fontWeight="semibold">
             {shift?.driver?.name}
           </Typography>
@@ -95,7 +111,6 @@ export default function ShiftAdminDisplay({ shift }: IProps) {
           </Typography>
         </Box>
       </Grid>
-
     </Grid>
   );
 }

@@ -49,7 +49,7 @@ export default function ShiftSummary({ shift }: IProps) {
         </Typography>
       </Box>
 
-      <Typography variant="h6">{shift?.hours !== null ? `${shift?.hours}h` : 'N/A'}</Typography>
+      <Typography variant="h6">{shift?.hours !== null ? `${shift?.hours?.toFixed(2)}h` : 'N/A'}</Typography>
     </Box>
   );
 }
