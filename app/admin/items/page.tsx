@@ -327,25 +327,25 @@ export default function ItemPage() {
         onClose={() => setOpen('isShowingClients', false)}
         clients={currentCategory?.users || []}
       />
-      <AddItem
+      {open.isAddItemOpen && <AddItem
         open={open.isAddItemOpen}
         onClose={() => setOpen('isAddItemOpen', false)}
         categoryId={currentCategory?.id}
         addItem={handleAddItem}
         showNotification={showNotification}
-      />
+      />}
       <DeleteModal
         targetObj={currentCategory}
         handleDelete={handleDeleteCategory}
         open={open.isDeleteModalOpen}
         handleCloseModal={() => setOpen('isDeleteModalOpen', false)}
       />
-      <EditCategory
+      {open.isEditCategory && <EditCategory
         open={open.isEditCategory}
         onClose={() => setOpen('isEditCategory', false)}
         updateCategory={handleUpdateCategoryName}
         currentName={currentCategory?.name}
-      />
+      />}
       {NotificationComp}
       <PasteItemsModal
         currentCategoryId={currentCategory?.id}

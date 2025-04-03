@@ -12,6 +12,9 @@ model Driver {
   id       Int        @id @default(autoincrement())
   name     String     @db.VarChar(255)
   password String     @db.VarChar(255)
+  hourlyRate  Float?
+
+  shiftSessions   ShiftSession[]
   routes   Route[]
   CodBoard CodBoard[]
 }
@@ -83,6 +86,8 @@ model Item {
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
 
   @@index([categoryId])
+  @@index([inventoryItemId])
+  @@index([inventoryUnitId])
 }
 
 model OrderedItems {
@@ -109,6 +114,10 @@ model OrderedItems {
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
+
+  @@index([orderId])
+  @@index([expenseId])
+  @@index([scheduledOrderId])
 }
 
 model Orders {
@@ -137,6 +146,9 @@ model Orders {
   user              User?          @relation(fields: [userId], references: [id])
   items             OrderedItems[]
   CodBoard          CodBoard?      @relation(fields: [codBoardId], references: [id])
+
+  @@index([deliveryDate, status])
+  @@index([userId])
 }
 
 
@@ -174,6 +186,7 @@ model Route {
   day      String
   driverId Int
   clients  UserRoute[]
+  shiftSessions  ShiftSession[]
 
   driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
 }
@@ -254,6 +267,7 @@ model Expense {
   codBoard      CodBoard?       @relation(fields: [codBoardId], references: [id])
   orderedItems  OrderedItems[]
   vendors       VendorExpense[]
+  shifts        ShiftSession[]
 }
 
 model VendorExpense {
@@ -305,6 +319,8 @@ model InventoryItem {
   
   promotion    Promotion?     @relation(fields: [promotionId], references: [id])
   type         ItemType?        @relation(fields: [typeId], references: [id])
+
+  @@index([typeId])
 }
 
 model ItemPreference {
@@ -367,6 +383,8 @@ model VendorItem {
   vendor        Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   fifo          Fifo[]
   unit          InventoryUnit[]
+
+  @@index([inventoryItemId])
 }
 
 model Fifo {
@@ -398,6 +416,8 @@ model InventoryUnit {
   orderedItems    OrderedItems[]
   cartItems       CartItem[]
   itemPreferences ItemPreference[]
+
+  @@index([vendorItemId])
 }
 
 model Action {
@@ -497,4 +517,23 @@ model Option {
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
   item  Item  @relation(fields: [itemId], references: [id])
   inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+}
+
+model ShiftSession {
+  id     Int @id  @default(autoincrement())
+  driverId   Int
+  routeId   Int?
+  date      String
+  startedAt   String
+  endedAt     String?
+  hours       Float?
+  isActive    Boolean?
+  cost        Float?
+  status      String?
+  expenseId   Int?
+
+  driver     Driver  @relation(fields: [driverId], references: [id])
+  expense     Expense? @relation(fields: [expenseId], references: [id])
+  route     Route? @relation(fields: [routeId], references: [id])
+
 }

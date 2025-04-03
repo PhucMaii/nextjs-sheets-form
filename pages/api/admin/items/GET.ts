@@ -19,46 +19,51 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           categoryId: Number(categoryId),
         },
         include: {
-          options: {
-            include: {
-              unit: true,
-              item: true,
-            },
-          },
+          // options: {
+          //   include: {
+          //     unit: true,
+          //     // item: true,
+          //   },
+          // },
           inventoryUnit: true,
           inventoryItem: {
-            where: {
-              id: {
-                not: testItemId,
-              },
-            },
-            include: {
+            select: {
+              id: true,
+              name: true,
+              typeId: true,
               vendorItem: {
-                include: {
-                  unit: true,
+                select: {
+                  unit: {
+                    select: {
+                      id: true,
+                      unit: true,
+                      ratio: true,
+                      unitPrice: true,
+                    },
+                  },
                 },
               },
-              type: {
-                include: {
-                  itemType_category: true,
-                },
-              },
+              // type: {
+              //   include: {
+              //     itemType_category: true,
+              //   },
+              // },
             },
           },
-          category: {
-            include: {
-              itemType_category: {
-                include: {
-                  itemType: true,
-                },
-              },
-            },
-          },
+          // category: {
+          //   include: {
+          //     itemType_category: {
+          //       include: {
+          //         itemType: true,
+          //       },
+          //     },
+          //   },
+          // },
         },
-        orderBy: [
-          { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
-          { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
-        ],
+        // orderBy: [
+        //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
+        //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
+        // ],
       });
       return res.status(200).json({
         data: items,

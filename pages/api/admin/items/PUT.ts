@@ -9,10 +9,10 @@ interface IBody {
   updatedFields: string[];
 }
 
+const prisma = new PrismaClient();
+
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       updatedItem,
       updateOption = UPDATE_OPTION.CURRENT_CATEGORY,
@@ -169,8 +169,6 @@ const updateAllScheduleOrderItems = async (
   updatedData: any,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // CASE 1: UPDATE ALL ITEM WITH SAME INVENTORY ITEM ID - if update all ordered item in scheduled orders same inventory id
     if (
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
@@ -181,8 +179,6 @@ const updateAllScheduleOrderItems = async (
           scheduledOrderId: {
             not: null,
           },
-          orderId: null,
-          expenseId: null,
           inventoryItemId: updatedItem.inventoryItemId,
         },
         data: updatedData,
@@ -197,32 +193,54 @@ const updateAllScheduleOrderItems = async (
             },
           },
         },
-        include: {
-          items: true,
+        select: {
+          id: true,
+          items: {
+            select: {
+              id: true,
+              quantity: true,
+              price: true,
+              inventoryItemId: true,
+            },
+          },
         },
       });
 
       // Re calculate their new total price if the udpated data included price
-      if (updatedData?.price) {
-        for (const scheduleOrder of scheduleOrders) {
-          const totalPrice = scheduleOrder.items.reduce(
-            (acc: number, item: any) => {
-              return acc + item.quantity * item.price;
-            },
-            0,
-          );
+      // if (updatedData?.price) {
+      //   for (const scheduleOrder of scheduleOrders) {
+      //     const totalPrice = scheduleOrder.items.reduce(
+      //       (acc: number, item: any) => {
+      //         return acc + item.quantity * item.price;
+      //       },
+      //       0,
+      //     );
 
-          await prisma.scheduleOrders.update({
-            where: {
-              id: scheduleOrder.id,
-            },
-            data: {
-              totalPrice: totalPrice,
-            },
-          });
-        }
-      }
+      //     await prisma.scheduleOrders.update({
+      //       where: {
+      //         id: scheduleOrder.id,
+      //       },
+      //       data: {
+      //         totalPrice: totalPrice,
+      //       },
+      //     });
+      //   }
+      // }
+      const orderUpdates = scheduleOrders.map((order: any) => {
+        const totalPrice = order.items.reduce((acc: number, item: any) => {
+          return acc + item.quantity * item.price;
+        });
+        return prisma.scheduleOrders.update({
+          where: {
+            id: order.id,
+          },
+          data: {
+            totalPrice: totalPrice,
+          },
+        });
+      });
 
+      await Promise.all(orderUpdates);
       return { ok: true };
     }
 
@@ -251,9 +269,6 @@ const updateAllScheduleOrderItems = async (
     // Update matched items
     await prisma.orderedItems.updateMany({
       where: {
-        scheduledOrderId: {
-          not: null,
-        },
         id: {
           in: matchedItems.map((item: any) => item.id),
         },
@@ -263,32 +278,51 @@ const updateAllScheduleOrderItems = async (
 
     // Update all orders total price
     if (updatedData?.price) {
-      for (const scheduleOrder of scheduleOrders) {
-        // Fetch items again to get new data after update
-        // const orderedItems = await prisma.orderedItems.findMany({
-        //   where: {
-        //     scheduledOrderId: scheduleOrder.id,
-        //   },
-        // });
-        const orderedItems = scheduleOrder.items;
+      // for (const scheduleOrder of scheduleOrders) {
+      //   // Fetch items again to get new data after update
+      //   // const orderedItems = await prisma.orderedItems.findMany({
+      //   //   where: {
+      //   //     scheduledOrderId: scheduleOrder.id,
+      //   //   },
+      //   // });
+      //   const orderedItems = scheduleOrder.items;
 
-        if (orderedItems.length > 0) {
-          const totalPrice = orderedItems.reduce(
-            (total: number, item: any) => total + item.quantity * updatedData.price,
-            0,
-          );
-    
-          await prisma.scheduleOrders.update({
-            where: {
-              id: scheduleOrder.id,
-            },
-            data: {
-              totalPrice,
-            },
-          });
-        }
-      }
-      
+      //   if (orderedItems.length > 0) {
+      //     const totalPrice = orderedItems.reduce(
+      //       (total: number, item: any) =>
+      //         total + item.quantity * updatedData.price,
+      //       0,
+      //     );
+
+      //     await prisma.scheduleOrders.update({
+      //       where: {
+      //         id: scheduleOrder.id,
+      //       },
+      //       data: {
+      //         totalPrice,
+      //       },
+      //     });
+      //   }
+      // }
+
+      const orderUpdates = scheduleOrders.map((scheduleOrder: any) => {
+        const totalPrice = scheduleOrder.items.reduce(
+          (acc: number, item: any) => {
+            return acc + item.quantity * updatedData.price;
+          },
+          0,
+        );
+        return prisma.scheduleOrders.update({
+          where: {
+            id: scheduleOrder.id,
+          },
+          data: {
+            totalPrice: totalPrice,
+          },
+        });
+      });
+
+      await Promise.all(orderUpdates);
     }
 
     return { ok: true };
