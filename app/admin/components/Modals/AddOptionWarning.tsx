@@ -39,6 +39,7 @@ export default function AddOptionWarning({
     setIsLoading(true);
     await onAcknowledge();
     setIsLoading(false);
+    onClose();
   };
 
   return (

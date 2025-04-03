@@ -115,16 +115,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-async function main() {
-  await prisma.promotion.updateMany({
-    where: {
-      status: 'Active'
-    },
-    data: {
-      visibility: true,
-    }
-  });
-}
+async function main() {}
 
 main()
   .then(() => prisma.$disconnect())
