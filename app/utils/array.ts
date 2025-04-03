@@ -6,6 +6,8 @@ import { getWCODDay } from './time';
 
 // Utility function to group items by a key
 export const groupBy = (array: any[], key: (item: any) => any) => {
+  console.log('ARRAY:', array);
+  console.log('KEY:', key);
   return array.reduce((result, item) => {
     const groupKey = key(item);
     if (!result[groupKey]) {

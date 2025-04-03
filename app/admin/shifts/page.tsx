@@ -62,10 +62,11 @@ export default function ShiftPage() {
 
   return (
     <Sidebar>
-      <AddShift 
+      <AddShift
         open={isOpenAddShift}
         onClose={() => setIsOpenAddShift(false)}
         drivers={drivers}
+        showNotification={showNotification}
       />
       {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -94,7 +95,9 @@ export default function ShiftPage() {
 
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography sx={{ my: 2 }}>All Shifts</Typography>
-          <Button onClick={() => setIsOpenAddShift(true)} variant="contained">+ Create Shift</Button>
+          <Button onClick={() => setIsOpenAddShift(true)} variant="contained">
+            + Create Shift
+          </Button>
         </Box>
 
         {shifts.length > 0 &&

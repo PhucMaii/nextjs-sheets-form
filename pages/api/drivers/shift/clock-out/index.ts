@@ -53,7 +53,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withDriverAuthGuard(handler);
 
-const calculateHours = (startedAt: string, endedAt: string) => {
+export const calculateHours = (startedAt: string, endedAt: string) => {
     const startDate = new Date(startedAt);
     const endDate = new Date(endedAt);
     const diff = endDate.getTime() - startDate.getTime();
