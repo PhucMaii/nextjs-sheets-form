@@ -57,8 +57,6 @@ model Category {
   users             User[]
   items             Item[]
   itemType_category ItemType_Category[]
-
-  @@index([id])
 }
 
 model SubCategory {
@@ -120,6 +118,8 @@ model OrderedItems {
   @@index([orderId])
   @@index([expenseId])
   @@index([scheduledOrderId])
+  @@index([inventoryItemId])
+  @@index([orderId, inventoryItemId])
 }
 
 model Orders {
@@ -172,6 +172,8 @@ model ScheduleOrders {
   positionIndex PositionIndex? @relation("ScheduledOrderIndex")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model PositionIndex {
@@ -322,7 +324,9 @@ model InventoryItem {
   promotion    Promotion?     @relation(fields: [promotionId], references: [id])
   type         ItemType?        @relation(fields: [typeId], references: [id])
 
-  @@index([typeId])
+  @@index([indexPos])
+  @@index([promoIndexPos])
+  @@index([typeId, indexPos]) // helpful if you order by type priority then indexPos
 }
 
 model ItemPreference {
@@ -386,7 +390,8 @@ model VendorItem {
   fifo          Fifo[]
   unit          InventoryUnit[]
 
-  @@index([inventoryItemId])
+  @@index([vendorId])
+  @@index([inventoryItemId, vendorId])
 }
 
 model Fifo {

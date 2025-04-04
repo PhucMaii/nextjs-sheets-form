@@ -135,12 +135,12 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
 
   return (
     <>
-      <AddOption
+      {isOpenAddOption && <AddOption
         open={isOpenAddOption}
         onClose={() => setIsOpenAddOption(false)}
         item={targetItem}
         showNotification={showNotification}
-      />
+      />}
       <DeleteModal
         open={isOpenDeleteModal}
         handleCloseModal={() => setIsOpenDeleteModal(false)}

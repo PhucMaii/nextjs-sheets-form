@@ -3,6 +3,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
 
+const prisma = new PrismaClient();
+
 interface IBody {
   name: string;
   price: number;
@@ -14,7 +16,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const {
       name,
       price,
@@ -241,24 +242,45 @@ export const updateScheduledOrdersTotalPrice = async (
   newItemPrice: number,
 ) => {
   try {
-    const prisma = new PrismaClient();
+    console.log( 'UPDATE TOTAL PRICE');
+    const updatedOrders = scheduledOrderedItems.map((item: any) => {
+      console.log({oldPrice: item.price, newItemPrice});
+      const newTotalPrice =
+        item.ScheduleOrders?.totalPrice -
+        item.price * item.quantity +
+        newItemPrice * item.quantity;
 
-    for (const item of scheduledOrderedItems) {
-      if (item.scheduledOrderId && item.ScheduleOrders) {
-        const newTotalPrice =
-          item.ScheduleOrders?.totalPrice -
-          item.price * item.quantity +
-          newItemPrice * item.quantity;
-        await prisma.scheduleOrders.update({
-          where: {
-            id: item.scheduledOrderId,
-          },
-          data: {
-            totalPrice: newTotalPrice,
-          },
-        });
-      }
-    }
+        console.log(newTotalPrice, 'newTotalPrice');
+      return prisma.scheduleOrders.update({
+        where: {
+          id: item.scheduledOrderId,
+        },
+        data: {
+          totalPrice: newTotalPrice,
+        },
+      });
+    });
+
+    console.log(updatedOrders, 'updatedOrders');
+
+    await Promise.all(updatedOrders);
+
+    // for (const item of scheduledOrderedItems) {
+    //   if (item.scheduledOrderId && item.ScheduleOrders) {
+    //     const newTotalPrice =
+    //       item.ScheduleOrders?.totalPrice -
+    //       item.price * item.quantity +
+    //       newItemPrice * item.quantity;
+    //     await prisma.scheduleOrders.update({
+    //       where: {
+    //         id: item.scheduledOrderId,
+    //       },
+    //       data: {
+    //         totalPrice: newTotalPrice,
+    //       },
+    //     });
+    //   }
+    // }
 
     return { ok: true };
   } catch (error: any) {
