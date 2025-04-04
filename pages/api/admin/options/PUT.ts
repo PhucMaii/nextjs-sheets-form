@@ -10,14 +10,24 @@ interface IBody {
   unitId: number;
   prevPrice: number;
   isShowDiscount: boolean;
+  isUpdateSameInventory?: boolean;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, name, price, prevPrice, isShowDiscount, unitId }: IBody =
-      req.body;
+    const {
+      id,
+      name,
+      price,
+      prevPrice,
+      isShowDiscount,
+      unitId,
+      isUpdateSameInventory,
+    }: IBody = req.body;
+
+    console.log(isUpdateSameInventory, '===isUpdateSameInventory');
 
     const existingOption = await prisma.option.findUnique({
       where: {
@@ -57,26 +67,75 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateFields.isShowDiscount = isShowDiscount;
     }
 
-    if (Object.keys(updateFields).length === 0) {
+    if (Object.keys(updateFields).length === 0 && !isUpdateSameInventory) {
       return res.status(200).json({
         message: 'Option Updated Successfully',
         // data: updatedOption,
       });
     }
 
-    const updatedOption = await prisma.option.update({
+    if (isUpdateSameInventory) {
+      console.log(
+        'Update all items with same inventory id',
+        existingOption.inventoryItemId,
+        existingOption.name,
+      );
+
+      console.log(
+        {
+          name,
+          price,
+          prevPrice,
+          isShowDiscount,
+          unitId,
+        },
+        '===update all items with same inventory id',
+      );
+      await prisma.option.updateMany({
+        where: {
+          name: existingOption.name,
+          inventoryItemId: existingOption.inventoryItemId,
+        },
+        data: {
+          name,
+          price,
+          prevPrice,
+          isShowDiscount,
+          unitId,
+        },
+      });
+    } else {
+      await prisma.option.update({
+        where: {
+          id,
+        },
+        data: {
+          ...updateFields,
+        },
+      });
+    }
+
+    const updatedOption = await prisma.option.findUnique({
       where: {
         id,
       },
-      data: {
-        ...updateFields,
+      include: {
+        item: true,
+        unit: true,
       },
     });
+
+    if (!updatedOption) {
+      return res.status(404).json({
+        error: 'Conflict Updated Option Not Found',
+      });
+    }
 
     await updateAllScheduleOrderItemsForOption(
       existingOption,
       updatedOption,
       existingOption.item.categoryId,
+      isUpdateSameInventory
     );
 
     return res.status(200).json({
@@ -93,30 +152,74 @@ const updateAllScheduleOrderItemsForOption = async (
   oldOption: any,
   updatedOption: any,
   categoryId: number,
+  isUpdateSameInventory: boolean = false,
 ) => {
   try {
     const prisma = new PrismaClient();
 
-    const scheduledOrders = await prisma.scheduleOrders.findMany({
-      where: {
-        user: {
-          categoryId,
+    let scheduledOrders: any[] = [];
+
+    if (isUpdateSameInventory) {
+      const optionsSameInventory = await prisma.option.findMany({
+        where: {
+          name: updatedOption.name,
+          inventoryItemId: updatedOption.inventoryItemId,
         },
-      },
-      include: {
-        items: {
-          include: {
-            inventoryUnit: true,
-            inventoryItem: true,
-            ScheduleOrders: true,
+        include: {
+          item: true,
+        },
+      });
+
+      console.log(optionsSameInventory, '===optionsSameInventory');
+
+      const categoryIdsRelated = optionsSameInventory.map((option: any) => {
+        return option.item.categoryId;
+      });
+
+      console.log(categoryIdsRelated, 'categoryIdsRelated');
+
+      scheduledOrders = await prisma.scheduleOrders.findMany({
+        where: {
+          user: {
+            categoryId: {
+              in: categoryIdsRelated,
+            },
           },
         },
-      },
-    });
+        include: {
+          items: {
+            include: {
+              inventoryUnit: true,
+              inventoryItem: true,
+              ScheduleOrders: true,
+            },
+          },
+        },
+      });
+
+      console.log(scheduledOrders, 'scheduledOrders');
+    } else {
+      scheduledOrders = await prisma.scheduleOrders.findMany({
+        where: {
+          user: {
+            categoryId,
+          },
+        },
+        include: {
+          items: {
+            include: {
+              inventoryUnit: true,
+              inventoryItem: true,
+              ScheduleOrders: true,
+            },
+          },
+        },
+      });
+    }
 
     // Flat items in schedule orders
     const scheduleOrderItems = scheduledOrders.flatMap((scheduledOrder) => {
-      return scheduledOrder.items.map((item) => item);
+      return scheduledOrder.items.map((item: any) => item);
     });
 
     const itemsHaveUpdatedOption = scheduleOrderItems.filter(
@@ -127,8 +230,6 @@ const updateAllScheduleOrderItemsForOption = async (
         );
       },
     );
-
-    console.log('itemsHaveUpdatedOption: ', itemsHaveUpdatedOption);
 
     if (itemsHaveUpdatedOption.length > 0) {
       await prisma.orderedItems.updateMany({

@@ -160,7 +160,7 @@ export default function AddOption({
                 multiple
                 disableCloseOnSelect
                 options={categories?.data || []}
-                getOptionLabel={(option: ICategory) => option.name}
+                getOptionLabel={(option: ICategory) => option?.name}
                 isOptionEqualToValue={(option: ICategory, value: ICategory) =>
                   option.id === value.id
                 }
