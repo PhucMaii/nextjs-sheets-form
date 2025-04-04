@@ -86,6 +86,8 @@ model Item {
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
 
   @@index([categoryId])
+  @@index([inventoryItemId])
+  @@index([inventoryUnitId])
 }
 
 model OrderedItems {
@@ -112,6 +114,12 @@ model OrderedItems {
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
+
+  @@index([orderId])
+  @@index([expenseId])
+  @@index([scheduledOrderId])
+  @@index([inventoryItemId])
+  @@index([orderId, inventoryItemId])
 }
 
 model Orders {
@@ -140,6 +148,9 @@ model Orders {
   user              User?          @relation(fields: [userId], references: [id])
   items             OrderedItems[]
   CodBoard          CodBoard?      @relation(fields: [codBoardId], references: [id])
+
+  @@index([deliveryDate, status])
+  @@index([userId])
 }
 
 
@@ -161,6 +172,8 @@ model ScheduleOrders {
   positionIndex PositionIndex? @relation("ScheduledOrderIndex")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model PositionIndex {
@@ -310,6 +323,10 @@ model InventoryItem {
   
   promotion    Promotion?     @relation(fields: [promotionId], references: [id])
   type         ItemType?        @relation(fields: [typeId], references: [id])
+
+  @@index([indexPos])
+  @@index([promoIndexPos])
+  @@index([typeId, indexPos]) // helpful if you order by type priority then indexPos
 }
 
 model ItemPreference {
@@ -372,6 +389,9 @@ model VendorItem {
   vendor        Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   fifo          Fifo[]
   unit          InventoryUnit[]
+
+  @@index([vendorId])
+  @@index([inventoryItemId, vendorId])
 }
 
 model Fifo {
@@ -403,6 +423,8 @@ model InventoryUnit {
   orderedItems    OrderedItems[]
   cartItems       CartItem[]
   itemPreferences ItemPreference[]
+
+  @@index([vendorItemId])
 }
 
 model Action {

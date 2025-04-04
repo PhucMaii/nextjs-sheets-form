@@ -5,6 +5,8 @@ import {
   FormControlLabel,
   Grid,
   Modal,
+  Radio,
+  RadioGroup,
   Switch,
   TextField,
   Typography,
@@ -19,6 +21,7 @@ import { API_URL } from '@/app/utils/enum';
 import useEditUnit from '@/hooks/unit/useEditUnit';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
+import { UPDATE_OPTION } from './EditItem';
 
 interface IProps extends ModalProps {
   option: IOption;
@@ -38,6 +41,7 @@ export default function EditOption({
     isShowDiscount: option?.isShowDiscount || false,
     prevPrice: option?.prevPrice || 0,
   });
+  const [updateChoice, setUpdateChoice] = useState<UPDATE_OPTION>(UPDATE_OPTION.CURRENT_CATEGORY);
 
   const [dbUnits] = SWRFetchData(
     option?.unit?.vendorItemId
@@ -74,6 +78,7 @@ export default function EditOption({
         prevPrice: updatedOption?.prevPrice || 0,
         isShowDiscount: updatedOption?.isShowDiscount || false,
         unitId: selectedUnit?.id || updatedOption.unitId,
+        isUpdateSameInventory: updateChoice === UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
       });
 
       if (response.data.error) {
@@ -103,6 +108,24 @@ export default function EditOption({
             buttonProps={{ loading: isLoading }}
             onClose={onClose}
           />
+
+          <RadioGroup
+            row
+            value={updateChoice}
+            onChange={(e) => setUpdateChoice(e.target.value as UPDATE_OPTION)}
+            // onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
+          >
+            <FormControlLabel
+              value={UPDATE_OPTION.CURRENT_CATEGORY}
+              control={<Radio />}
+              label="Only current category"
+            />
+            <FormControlLabel
+              value={UPDATE_OPTION.ALL_ITEMS_SAME_NAME}
+              control={<Radio />}
+              label="Same inventory item"
+            />
+          </RadioGroup>
 
           <Divider sx={{ my: 2 }}>Price</Divider>
 
