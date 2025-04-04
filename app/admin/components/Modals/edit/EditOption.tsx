@@ -15,13 +15,13 @@ import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { IInventoryUnit, IOption } from '@/app/utils/type';
+import { IOption } from '@/app/utils/type';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import useEditUnit from '@/hooks/unit/useEditUnit';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { UPDATE_OPTION } from './EditItem';
+import UnitRadio from '../../Radio/UnitRadio';
 
 interface IProps extends ModalProps {
   option: IOption;
@@ -35,13 +35,15 @@ export default function EditOption({
   showNotification,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [units, setUnits] = useState<IInventoryUnit[]>([]);
+  // const [units, setUnits] = useState<IInventoryUnit[]>([]);
   const [updatedOption, setUpdatedOption] = useState<IOption>({
     ...option,
     isShowDiscount: option?.isShowDiscount || false,
     prevPrice: option?.prevPrice || 0,
   });
-  const [updateChoice, setUpdateChoice] = useState<UPDATE_OPTION>(UPDATE_OPTION.CURRENT_CATEGORY);
+  const [updateChoice, setUpdateChoice] = useState<UPDATE_OPTION>(
+    UPDATE_OPTION.CURRENT_CATEGORY,
+  );
 
   const [dbUnits] = SWRFetchData(
     option?.unit?.vendorItemId
@@ -49,14 +51,14 @@ export default function EditOption({
       : '',
   );
 
-  const { selectedUnit, UnitDisplay, AddUnitModal, EditUnitModal } =
-    useEditUnit(units, updatedOption.unit, showNotification);
+  // const { selectedUnit, UnitDisplay, AddUnitModal, EditUnitModal } =
+  //   useEditUnit(units, updatedOption.unit, showNotification);
 
-  useEffect(() => {
-    if (dbUnits) {
-      setUnits(dbUnits?.data);
-    }
-  }, [dbUnits]);
+  // useEffect(() => {
+  //   if (dbUnits) {
+  //     setUnits(dbUnits?.data);
+  //   }
+  // }, [dbUnits]);
 
   useEffect(() => {
     if (option) {
@@ -77,8 +79,9 @@ export default function EditOption({
         price: updatedOption.price,
         prevPrice: updatedOption?.prevPrice || 0,
         isShowDiscount: updatedOption?.isShowDiscount || false,
-        unitId: selectedUnit?.id || updatedOption.unitId,
-        isUpdateSameInventory: updateChoice === UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
+        unitId: updatedOption?.unitId,
+        isUpdateSameInventory:
+          updateChoice === UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
       });
 
       if (response.data.error) {
@@ -97,8 +100,8 @@ export default function EditOption({
 
   return (
     <>
-      {AddUnitModal}
-      {EditUnitModal}
+      {/* {AddUnitModal}
+      {EditUnitModal} */}
       <Modal open={open} onClose={onClose}>
         <BoxModal>
           <ModalHead
@@ -239,7 +242,24 @@ export default function EditOption({
               />
             </FormControl>
 
-            {UnitDisplay}
+            {dbUnits?.data?.length > 0 && (
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <UnitRadio
+                    units={dbUnits?.data || []}
+                    value={JSON.stringify(updatedOption.unit)}
+                    onChange={(e: any) =>
+                      setUpdatedOption((prevState: any) => ({
+                        ...prevState,
+                        unit: JSON.parse(e.target.value),
+                        unitId: JSON.parse(e.target.value).id,
+                      }))
+                    }
+                    isShowPrice
+                  />
+                </Box>
+              </Grid>
+            )}
           </Box>
         </BoxModal>
       </Modal>

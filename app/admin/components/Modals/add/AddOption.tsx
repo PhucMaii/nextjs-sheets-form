@@ -4,15 +4,15 @@ import {
   Checkbox,
   Divider,
   FormControl,
+  Grid,
   Modal,
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
-import useEditUnit from '@/hooks/unit/useEditUnit';
 import { ICategory, IItem, IOption } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
@@ -23,6 +23,7 @@ import {
   checkedBoxOutlinedIcon,
 } from '../../Autocomplete/VendorSearch';
 import AddOptionWarning from '../AddOptionWarning';
+import UnitRadio from '../../Radio/UnitRadio';
 
 interface IProps extends ModalProps {
   item: IItem;
@@ -54,7 +55,6 @@ export default function AddOption({
   const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([
     item?.category as any,
   ]);
-  const [unitList, setUnitList] = useState<any[]>([]);
 
   const [dbUnits] = SWRFetchData(
     item?.inventoryUnit?.vendorItemId
@@ -65,8 +65,8 @@ export default function AddOption({
     `${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`,
   );
 
-  const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
-    useEditUnit(unitList, null, showNotification, false);
+  // const { selectedUnit, UnitDisplay } =
+  //   useEditUnit(unitList, null, showNotification, false);
 
   //   useEffect(() => {
   //     setOption((prevOption: any) => ({
@@ -76,11 +76,11 @@ export default function AddOption({
   //     }));
   //   }, [selectedUnit]);
 
-  useEffect(() => {
-    if (dbUnits) {
-      setUnitList(dbUnits?.data);
-    }
-  }, [dbUnits]);
+  // useEffect(() => {
+  //   if (dbUnits) {
+  //     setUnitList(dbUnits?.data);
+  //   }
+  // }, [dbUnits]);
 
   const handleAddOption = async () => {
     if (!option.name) {
@@ -101,7 +101,7 @@ export default function AddOption({
         price: option.price,
         availability: option.availability,
         itemId: item.id,
-        unitId: selectedUnit?.id || -1,
+        unitId: option.unitId || -1,
         inventoryItemId: item.inventoryItemId, // for finding items in selected category
         selectedCategoryIds: selectedCategories.map(
           (category: ICategory) => category.id,
@@ -128,8 +128,8 @@ export default function AddOption({
 
   return (
     <>
-      {AddUnitModal}
-      {EditUnitModal}
+      {/* {AddUnitModal} */}
+      {/* {EditUnitModal}  */}
       {checkWarning.open && (
         <AddOptionWarning
           open={checkWarning.open}
@@ -226,7 +226,25 @@ export default function AddOption({
               />
             </FormControl>
 
-            {UnitDisplay}
+            {dbUnits?.data?.length > 0 && (
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <UnitRadio
+                    units={dbUnits?.data || []}
+                    value={JSON.stringify(option.unit)}
+                    onChange={(e: any) =>
+                      setOption((prevState: any) => ({
+                        ...prevState,
+                        unit: JSON.parse(e.target.value),
+                        unitId: JSON.parse(e.target.value).id,
+                      }))
+                    }
+                    isShowPrice
+                  />
+                </Box>
+              </Grid>
+            )}
+
           </Box>
         </BoxModal>
       </Modal>
