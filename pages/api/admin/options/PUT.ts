@@ -135,7 +135,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       existingOption,
       updatedOption,
       existingOption.item.categoryId,
-      isUpdateSameInventory
+      isUpdateSameInventory,
     );
 
     return res.status(200).json({

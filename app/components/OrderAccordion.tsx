@@ -192,12 +192,12 @@ export default function OrderAccordion({
                       <TableRow key={index}>
                         <TableCell>
                           <Box display="flex" gap={1} flexDirection="column">
-                            <Typography>
-                              {item.name}
-                            </Typography>
-                            {item?.option && <Typography sx={{ color: grey[700]}}>
-                              {item?.option?.name}
-                            </Typography>}
+                            <Typography>{item.name}</Typography>
+                            {item?.option && (
+                              <Typography sx={{ color: grey[700] }}>
+                                {item?.option?.name}
+                              </Typography>
+                            )}
                           </Box>
                         </TableCell>
                         <TableCell>{item.quantity}</TableCell>

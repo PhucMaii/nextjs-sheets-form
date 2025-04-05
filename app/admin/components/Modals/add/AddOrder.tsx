@@ -224,7 +224,7 @@ export default function AddOrder({
               rowGap={2}
               mt={2}
               // style={{ margin: '20px' }}
-              sx={{p: '20px'}}
+              sx={{ p: '20px' }}
             >
               <Grid item xs={12}>
                 Client Name

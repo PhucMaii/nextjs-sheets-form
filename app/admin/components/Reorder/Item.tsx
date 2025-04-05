@@ -22,9 +22,9 @@ export default function Item({
   const smallestOption = useMemo(() => {
     if (item?.options && item?.options.length > 0) {
       return item.options.reduce((prev, curr) =>
-        prev.price < curr.price ? prev : curr
+        prev.price < curr.price ? prev : curr,
       );
-    };
+    }
 
     return null;
   }, [item.options]);
@@ -62,7 +62,9 @@ export default function Item({
           </Grid>
           <Grid item md={2}>
             <Typography variant="subtitle1">
-              {item?.options && item.options.length > 0 ? `From $${smallestOption?.price.toFixed(2)}` : `$${item.price.toFixed(2)}`}
+              {item?.options && item.options.length > 0
+                ? `From $${smallestOption?.price.toFixed(2)}`
+                : `$${item.price.toFixed(2)}`}
             </Typography>
           </Grid>
           <Grid item md={3} xs={12}>

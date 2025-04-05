@@ -239,7 +239,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             allManifestSummary[itemKey] = 0;
           }
 
-          let actualQuantity = (item?.quantity || 1);
+          let actualQuantity = item?.quantity || 1;
           if (item?.option?.name) {
             actualQuantity = actualQuantity * item?.option?.ratio;
           }
@@ -271,8 +271,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               : itemKey;
           }
 
-          
-          let actualQuantity = (item?.quantity || 1);
+          let actualQuantity = item?.quantity || 1;
           if (item?.option?.name) {
             actualQuantity = actualQuantity * item?.option?.ratio;
           }

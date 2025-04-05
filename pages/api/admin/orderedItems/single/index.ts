@@ -269,10 +269,12 @@ export const updateSingleInventoryItem = async (
       console.error('Comflict FIFO Not Found');
       return;
     }
-    
+
     const ratio = unit?.ratio || 1;
 
-    const prevFinalQuantity = previousUnit ? previousQuantity * previousUnit.ratio : previousQuantity * ratio;
+    const prevFinalQuantity = previousUnit
+      ? previousQuantity * previousUnit.ratio
+      : previousQuantity * ratio;
 
     const newFinalQuantity = newQuantity * ratio;
 

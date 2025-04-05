@@ -1,8 +1,4 @@
-import {
-  Box,
-  Modal,
-  Typography,
-} from '@mui/material';
+import { Box, Modal, Typography } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';

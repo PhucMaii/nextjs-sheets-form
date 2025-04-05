@@ -40,7 +40,7 @@ export default function OldOrderVersion({
           return { ...targetItem, quantity: +e.target.value };
         }
         return item;
-      })
+      }),
     );
   }, []);
   const onDateChange = (e: any) => {
@@ -125,7 +125,7 @@ export default function OldOrderVersion({
             {itemList.length > 0 &&
               itemList.map((item: any) => {
                 return (
-                  <ItemRow 
+                  <ItemRow
                     key={item.id}
                     item={item}
                     onChangeItem={onChangeItem}

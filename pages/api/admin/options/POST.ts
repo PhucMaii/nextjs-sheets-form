@@ -34,7 +34,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (selectedCategoryIds.length === 0) {
-      return res.status(500).json({ error: 'Please select at least one category' });
+      return res
+        .status(500)
+        .json({ error: 'Please select at least one category' });
     }
 
     // Check is unitId existed in itemId
@@ -130,8 +132,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Handle update scheduled orders
-    const responseStatus =
-      await updateScheduledOrderedItemsOptions(retrievedNewOptions, selectedCategoryIds);
+    const responseStatus = await updateScheduledOrderedItemsOptions(
+      retrievedNewOptions,
+      selectedCategoryIds,
+    );
 
     if (!responseStatus.ok) {
       return res.status(500).json({
@@ -151,7 +155,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const updateScheduledOrderedItemsOptions = async (newOptions: any, updatedCategoryIds: number[]) => {
+const updateScheduledOrderedItemsOptions = async (
+  newOptions: any,
+  updatedCategoryIds: number[],
+) => {
   try {
     const prisma = new PrismaClient();
     const retrievedNewOptions = newOptions;
@@ -236,7 +243,7 @@ const updateScheduledOrderedItemsOptions = async (newOptions: any, updatedCatego
         // Update scheduledOrder total price
         const responseStatus = await updateScheduledOrdersTotalPrice(
           itemsDoesNotHaveOptions,
-          toBeAssignedOption.price
+          toBeAssignedOption.price,
         );
 
         if (!responseStatus.ok) {
@@ -257,15 +264,15 @@ export const updateScheduledOrdersTotalPrice = async (
   newItemPrice: number,
 ) => {
   try {
-    console.log( 'UPDATE TOTAL PRICE');
+    console.log('UPDATE TOTAL PRICE');
     const updatedOrders = scheduledOrderedItems.map((item: any) => {
-      console.log({oldPrice: item.price, newItemPrice});
+      console.log({ oldPrice: item.price, newItemPrice });
       const newTotalPrice =
         item.ScheduleOrders?.totalPrice -
         item.price * item.quantity +
         newItemPrice * item.quantity;
 
-        console.log(newTotalPrice, 'newTotalPrice');
+      console.log(newTotalPrice, 'newTotalPrice');
       return prisma.scheduleOrders.update({
         where: {
           id: item.scheduledOrderId,

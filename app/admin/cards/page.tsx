@@ -305,7 +305,14 @@ export default function CardManagement() {
         handleDelete={handleDeleteMethod}
       />
 
-      <Box display="flex" flexDirection="column" gap={2} height="100vh" overflow="auto" pb={2}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        gap={2}
+        height="100vh"
+        overflow="auto"
+        pb={2}
+      >
         {/* Header */}
         <Box
           display="flex"

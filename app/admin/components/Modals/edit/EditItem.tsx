@@ -135,12 +135,14 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
 
   return (
     <>
-      {isOpenAddOption && <AddOption
-        open={isOpenAddOption}
-        onClose={() => setIsOpenAddOption(false)}
-        item={targetItem}
-        showNotification={showNotification}
-      />}
+      {isOpenAddOption && (
+        <AddOption
+          open={isOpenAddOption}
+          onClose={() => setIsOpenAddOption(false)}
+          item={targetItem}
+          showNotification={showNotification}
+        />
+      )}
       <DeleteModal
         open={isOpenDeleteModal}
         handleCloseModal={() => setIsOpenDeleteModal(false)}
@@ -273,13 +275,20 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
               </>
             ) : (
               <Grid item xs={12}>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
                   <Typography variant="h6">Options:</Typography>
                   <Button onClick={() => setIsOpenAddOption(true)}>
-                    + Add Options 
+                    + Add Options
                   </Button>
                 </Box>
-                <OptionsTable options={updatedItem?.options || []} showNotification={showNotification} />
+                <OptionsTable
+                  options={updatedItem?.options || []}
+                  showNotification={showNotification}
+                />
               </Grid>
             )}
           </Grid>

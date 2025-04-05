@@ -68,7 +68,7 @@ export default function SearchItem({ open, onClose, items, setItems }: IProps) {
         <Box mt={2} display="flex" flexDirection="column" gap={2}>
           {displayItems.length > 0 ? (
             displayItems.map((item: IItem, index: number) => (
-              <ItemRow 
+              <ItemRow
                 key={index}
                 item={item}
                 onChangeItem={handleOnChangeItem}

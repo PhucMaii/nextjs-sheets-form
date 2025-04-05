@@ -259,7 +259,7 @@ export default function AddOption({
                     onChange={(e: any) =>
                       setOption((prevState: any) => ({
                         ...prevState,
-                        unitId: e.target.value
+                        unitId: e.target.value,
                       }))
                     }
                     idValue

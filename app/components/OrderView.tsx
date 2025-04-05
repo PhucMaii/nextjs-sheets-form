@@ -136,7 +136,14 @@ const OnSaleBadge = ({
       }}
     >
       <Discount sx={{ fontSize: 13, color: 'white' }} />
-      <Typography sx={{ fontSize: 10, fontWeight: 'medium', color: 'white', textTransform: 'none' }}>
+      <Typography
+        sx={{
+          fontSize: 10,
+          fontWeight: 'medium',
+          color: 'white',
+          textTransform: 'none',
+        }}
+      >
         {percentage
           ? `Up to ${percentage?.toFixed(0)}% off`
           : `${discountRate.toFixed(0)}% off`}
@@ -1103,7 +1110,10 @@ const OrderView = ({
                         <Typography variant="h6">
                           Qty: <strong>{item.quantity}</strong>
                         </Typography>
-                        <IconButton color="primary" disabled={defaultOrder?.type === TYPE.LOCKED}>
+                        <IconButton
+                          color="primary"
+                          disabled={defaultOrder?.type === TYPE.LOCKED}
+                        >
                           <EditIcon onClick={() => setEditItemQuantity(item)} />
                         </IconButton>
                       </Box>

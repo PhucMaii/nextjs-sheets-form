@@ -20,7 +20,7 @@ export default function AddOptionWarning({
   onClose,
   item,
   onAcknowledge,
-  selectedCategoryIds
+  selectedCategoryIds,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [relevantItemPreOrders, setRelevantItemPreOrders] = useState<any>([]);

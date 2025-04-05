@@ -77,9 +77,17 @@ export const SortableItemType = ({
             {type.id.includes('promotion') && '🎉'}
           </Typography>
           {type.id.includes('promotion') && !type?.visibility && (
-            <Box display="flex" flexDirection="row" gap={1} alignItems={'center'}>
+            <Box
+              display="flex"
+              flexDirection="row"
+              gap={1}
+              alignItems={'center'}
+            >
               <VisibilityOffIcon fontSize="small" sx={{ color: grey[600] }} />
-              <Typography variant="body2" sx={{color: grey[600], fontWeight: 'medium'}}>
+              <Typography
+                variant="body2"
+                sx={{ color: grey[600], fontWeight: 'medium' }}
+              >
                 Hidden from customers. Will show when the layout is saved
               </Typography>
             </Box>

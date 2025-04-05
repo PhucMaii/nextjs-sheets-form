@@ -53,7 +53,7 @@ export default function OptionsTable({ options, showNotification }: IProps) {
         //   targetObj={deleteProps.option}
         //   showTargetObj={deleteProps?.option?.name}
         // />
-        <DeleteOption 
+        <DeleteOption
           open={deleteProps.open}
           onClose={() => setDeleteProps({ open: false, option: options[0] })}
           option={deleteProps.option}
@@ -83,7 +83,6 @@ export default function OptionsTable({ options, showNotification }: IProps) {
                           <Discount color="error" />
                         </IconButton>
                       )}
-
                     </Box>
                   </TableCell>
                   <TableCell>

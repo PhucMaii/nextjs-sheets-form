@@ -78,11 +78,15 @@ export const generateMonthRange = () => {
   return [firstDayOfThisMonth, lastDayOfThisMonth];
 };
 
-export const generateListOfDateString = (startDate: Date, endDate: Date, isAddUpEndDate = false) => {
+export const generateListOfDateString = (
+  startDate: Date,
+  endDate: Date,
+  isAddUpEndDate = false,
+) => {
   const formattedStartDate = startDate;
   const formattedEndDate = endDate;
 
-  console.log({startDate, endDate});
+  console.log({ startDate, endDate });
 
   // if (startDate.getTimezoneOffset() === 0 || endDate.getTimezoneOffset() === 0) {
   //   formattedStartDate = convertToPSTDate(startDate);

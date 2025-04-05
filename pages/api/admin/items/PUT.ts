@@ -274,10 +274,11 @@ const updateAllScheduleOrderItems = async (
 
         if (orderedItems.length > 0) {
           const totalPrice = orderedItems.reduce(
-            (total: number, item: any) => total + item.quantity * updatedData.price,
+            (total: number, item: any) =>
+              total + item.quantity * updatedData.price,
             0,
           );
-    
+
           await prisma.scheduleOrders.update({
             where: {
               id: scheduleOrder.id,
@@ -288,7 +289,6 @@ const updateAllScheduleOrderItems = async (
           });
         }
       }
-      
     }
 
     return { ok: true };

@@ -53,9 +53,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       }); // orderBy: [
-        //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
-        //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
-        // ], 
+      //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
+      //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
+      // ],
 
       return res.status(200).json({ data: item });
     }

@@ -62,13 +62,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       startDateMonth === endDateMonth &&
       startDateYear === endDateYear;
 
-    const isAddUpEndDate = !isOneDayOverview
+    const isAddUpEndDate = !isOneDayOverview;
 
     // Generate list of dates in range
     const datesInRange = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
-      isAddUpEndDate
+      isAddUpEndDate,
     );
 
     console.log({

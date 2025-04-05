@@ -30,7 +30,7 @@ export default function UnitRadio({
   setEditUnit,
   isShowPrice,
   role,
-  idValue
+  idValue,
 }: IProps) {
   return (
     <RadioGroup row name="unit" value={value} onChange={onChange}>

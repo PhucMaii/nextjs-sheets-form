@@ -84,7 +84,12 @@ export default function ItemPage() {
   }, [categories]);
 
   useEffect(() => {
-    if (itemsResponse && categories?.data.length > 0 && currentCategory && !isInitializing) {
+    if (
+      itemsResponse &&
+      categories?.data.length > 0 &&
+      currentCategory &&
+      !isInitializing
+    ) {
       initializeItems();
       setSearchKeywords('');
     } else if (!itemsResponse && isInitializing) {

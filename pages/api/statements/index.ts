@@ -93,7 +93,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }, {});
 
     const debtOrders = groupOrderByMMYYYY(
-        orders,
+      orders,
       thisMonth.split('/')[0],
       thisYear.split('/')[2],
     );
