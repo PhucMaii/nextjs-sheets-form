@@ -70,6 +70,16 @@ export default function EditOption({
     }
   }, [option]);
 
+  useEffect(() => {
+    if (dbUnits) {
+      setUpdatedOption((prevOption: any) => ({
+        ...prevOption,
+        unit: dbUnits?.data[0],
+        unitId: dbUnits?.data[0]?.id || -1,
+      }));
+    }
+  }, [dbUnits]);
+
   const handleUpdateOption = async () => {
     setIsLoading(true);
     try {

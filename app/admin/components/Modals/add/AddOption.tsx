@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
@@ -65,6 +65,15 @@ export default function AddOption({
     `${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`,
   );
 
+  useEffect(() => {
+    if (dbUnits) {
+      setOption((prevOption: any) => ({
+        ...prevOption,
+        unit: dbUnits?.data[0],
+        unitId: dbUnits?.data[0]?.id || -1,
+      }));
+    }
+  }, [dbUnits]);
   // const { selectedUnit, UnitDisplay } =
   //   useEditUnit(unitList, null, showNotification, false);
 

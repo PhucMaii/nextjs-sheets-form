@@ -25,6 +25,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       inventoryItemId,
     }: IBody = req.body;
 
+    if (unitId < 1) {
+      return res.status(500).json({ error: 'Please select a unit' });
+    }
+
+    if (!name || price === 0) {
+      return res.status(500).json({ error: 'Please fill out all the blank' });
+    }
+
+    if (selectedCategoryIds.length === 0) {
+      return res.status(500).json({ error: 'Please select at least one category' });
+    }
+
     // Check is unitId existed in itemId
     // const sameUnitOption = await prisma.option.findFirst({
     //   where: {
