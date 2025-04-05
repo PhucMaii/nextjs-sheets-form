@@ -24,6 +24,7 @@ import {
 } from '../../Autocomplete/VendorSearch';
 import AddOptionWarning from '../AddOptionWarning';
 import UnitRadio from '../../Radio/UnitRadio';
+import { getUniqueUnitRatios } from '@/app/utils/array';
 
 interface IProps extends ModalProps {
   item: IItem;
@@ -55,25 +56,39 @@ export default function AddOption({
   const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([
     item?.category as any,
   ]);
+  const [unitList, setUnitList] = useState<any[]>([]);
 
-  const [dbUnits] = SWRFetchData(
-    item?.inventoryUnit?.vendorItemId
-      ? `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`
-      : '',
-  );
+  // const [unitList] = SWRFetchData(
+  //   item?.inventoryUnit?.vendorItemId
+  //     ? `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`
+  //     : '',
+  // );
   const [categories] = SWRFetchData(
     `${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`,
   );
 
   useEffect(() => {
-    if (dbUnits) {
+    if (item && Object.keys(item).length > 0) {
+      const inventoryItemUnits = item.inventoryItem.vendorItem.flatMap(
+        (item: any) => item.unit,
+      );
+      const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
+
+      setUnitList(sellingUnits);
+    }
+  }, [item]);
+
+  console.log(unitList, 'unitList');
+
+  useEffect(() => {
+    if (unitList) {
       setOption((prevOption: any) => ({
         ...prevOption,
-        unit: dbUnits?.data[0],
-        unitId: dbUnits?.data[0]?.id || -1,
+        unit: unitList[0],
+        unitId: unitList[0]?.id || -1,
       }));
     }
-  }, [dbUnits]);
+  }, [unitList]);
   // const { selectedUnit, UnitDisplay } =
   //   useEditUnit(unitList, null, showNotification, false);
 
@@ -86,10 +101,10 @@ export default function AddOption({
   //   }, [selectedUnit]);
 
   // useEffect(() => {
-  //   if (dbUnits) {
-  //     setUnitList(dbUnits?.data);
+  //   if (unitList) {
+  //     setUnitList(unitList?.data);
   //   }
-  // }, [dbUnits]);
+  // }, [unitList]);
 
   const handleAddOption = async () => {
     if (!option.name) {
@@ -235,25 +250,23 @@ export default function AddOption({
               />
             </FormControl>
 
-            {dbUnits?.data?.length > 0 && (
+            {unitList?.length > 0 && (
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <UnitRadio
-                    units={dbUnits?.data || []}
-                    value={JSON.stringify(option.unit)}
+                    units={unitList || []}
+                    value={option.unitId}
                     onChange={(e: any) =>
                       setOption((prevState: any) => ({
                         ...prevState,
-                        unit: JSON.parse(e.target.value),
-                        unitId: JSON.parse(e.target.value).id,
+                        unitId: e.target.value
                       }))
                     }
-                    isShowPrice
+                    idValue
                   />
                 </Box>
               </Grid>
             )}
-
           </Box>
         </BoxModal>
       </Modal>

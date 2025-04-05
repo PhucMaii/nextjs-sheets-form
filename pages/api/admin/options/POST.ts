@@ -78,25 +78,25 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const allItemsInvolvedIds = allItemsInvolved.map((item: any) => item.id);
+    // const allItemsInvolvedIds = allItemsInvolved.map((item: any) => item.id);
 
-    // Find all options related to the items
-    const allOptionsInvolved = await prisma.option.findMany({
-      where: {
-        itemId: {
-          in: allItemsInvolvedIds,
-        },
-      },
-    });
+    // // Find all options related to the items
+    // const allOptionsInvolved = await prisma.option.findMany({
+    //   where: {
+    //     itemId: {
+    //       in: allItemsInvolvedIds,
+    //     },
+    //   },
+    // });
 
-    // Delete the old ones
-    await prisma.option.deleteMany({
-      where: {
-        id: {
-          in: allOptionsInvolved.map((option: any) => option.id),
-        },
-      },
-    });
+    // // Delete the old ones
+    // await prisma.option.deleteMany({
+    //   where: {
+    //     id: {
+    //       in: allOptionsInvolved.map((option: any) => option.id),
+    //     },
+    //   },
+    // });
 
     // Create new options
     const newOptions = allItemsInvolved.map((item: any) => {
@@ -131,7 +131,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     // Handle update scheduled orders
     const responseStatus =
-      await updateScheduledOrderedItemsOptions(retrievedNewOptions);
+      await updateScheduledOrderedItemsOptions(retrievedNewOptions, selectedCategoryIds);
 
     if (!responseStatus.ok) {
       return res.status(500).json({
@@ -151,7 +151,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const updateScheduledOrderedItemsOptions = async (newOptions: any) => {
+const updateScheduledOrderedItemsOptions = async (newOptions: any, updatedCategoryIds: number[]) => {
   try {
     const prisma = new PrismaClient();
     const retrievedNewOptions = newOptions;
@@ -165,7 +165,9 @@ const updateScheduledOrderedItemsOptions = async (newOptions: any) => {
         where: {
           ScheduleOrders: {
             user: {
-              categoryId: option.item.categoryId,
+              categoryId: {
+                in: updatedCategoryIds,
+              },
             },
           },
           name: option.item.name,
@@ -209,6 +211,7 @@ const updateScheduledOrderedItemsOptions = async (newOptions: any) => {
 
         console.log(toBeAssignedOption, 'toBeAssignedOption');
 
+        // Assign option ratio of 1 to the items have no option existed
         await prisma.orderedItems.updateMany({
           where: {
             id: {

@@ -336,7 +336,6 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                         inventoryUnitId: JSON.parse(e.target.value).id,
                       }))
                     }
-                    isShowPrice
                   />
                 </Box>
               </Grid>

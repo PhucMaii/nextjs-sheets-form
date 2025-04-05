@@ -19,6 +19,7 @@ interface IProps {
   setEditUnit?: any;
   isShowPrice?: boolean;
   role?: USER_ROLE;
+  idValue?: boolean;
 }
 
 export default function UnitRadio({
@@ -29,6 +30,7 @@ export default function UnitRadio({
   setEditUnit,
   isShowPrice,
   role,
+  idValue
 }: IProps) {
   return (
     <RadioGroup row name="unit" value={value} onChange={onChange}>
@@ -37,7 +39,7 @@ export default function UnitRadio({
           <Box display="flex" alignItems="center" mx={2}>
             <FormControlLabel
               key={index}
-              value={JSON.stringify(unit)}
+              value={idValue ? Number(unit.id) : JSON.stringify(unit)}
               control={<Radio />}
               label={`${isShowPrice ? `($${unit?.unitPrice})` : ''} 1:${unit.ratio} - ${unit.unit}`}
               disabled={!value}

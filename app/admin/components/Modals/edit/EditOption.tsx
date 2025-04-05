@@ -22,6 +22,7 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { UPDATE_OPTION } from './EditItem';
 import UnitRadio from '../../Radio/UnitRadio';
+import { getUniqueUnitRatios } from '@/app/utils/array';
 
 interface IProps extends ModalProps {
   option: IOption;
@@ -44,41 +45,51 @@ export default function EditOption({
   const [updateChoice, setUpdateChoice] = useState<UPDATE_OPTION>(
     UPDATE_OPTION.CURRENT_CATEGORY,
   );
+  const [unitList, setUnitList] = useState<any[]>([]);
 
-  const [dbUnits] = SWRFetchData(
-    option?.unit?.vendorItemId
-      ? `${API_URL.ADMIN}/units?vendorItemId=${option?.unit?.vendorItemId}`
-      : '',
+  const [item] = SWRFetchData(
+    option?.itemId ? `${API_URL.ADMIN}/items?itemId=${option?.itemId}` : '',
   );
+
+  useEffect(() => {
+    if (item && Object.keys(item?.data).length > 0) {
+      const inventoryItemUnits = item?.data?.inventoryItem?.vendorItem.flatMap(
+        (vItem: any) => vItem.unit,
+      );
+      const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
+
+      setUnitList(sellingUnits);
+    }
+  }, [item]);
 
   // const { selectedUnit, UnitDisplay, AddUnitModal, EditUnitModal } =
   //   useEditUnit(units, updatedOption.unit, showNotification);
 
   // useEffect(() => {
-  //   if (dbUnits) {
-  //     setUnits(dbUnits?.data);
+  //   if (unitList) {
+  //     setUnits(unitList?.data);
   //   }
-  // }, [dbUnits]);
+  // }, [unitList]);
 
-  useEffect(() => {
-    if (option) {
-      setUpdatedOption({
-        ...option,
-        isShowDiscount: option?.isShowDiscount || false,
-        prevPrice: option?.prevPrice || 0,
-      });
-    }
-  }, [option]);
+  // useEffect(() => {
+  //   if (option) {
+  //     setUpdatedOption({
+  //       ...option,
+  //       isShowDiscount: option?.isShowDiscount || false,
+  //       prevPrice: option?.prevPrice || 0,
+  //     });
+  //   }
+  // }, [option]);
 
-  useEffect(() => {
-    if (dbUnits) {
-      setUpdatedOption((prevOption: any) => ({
-        ...prevOption,
-        unit: dbUnits?.data[0],
-        unitId: dbUnits?.data[0]?.id || -1,
-      }));
-    }
-  }, [dbUnits]);
+  // useEffect(() => {
+  //   if (unitList) {
+  //     setUpdatedOption((prevOption: any) => ({
+  //       ...prevOption,
+  //       unit: unitList[0],
+  //       unitId: unitList[0]?.id || -1,
+  //     }));
+  //   }
+  // }, [unitList]);
 
   const handleUpdateOption = async () => {
     setIsLoading(true);
@@ -89,7 +100,7 @@ export default function EditOption({
         price: updatedOption.price,
         prevPrice: updatedOption?.prevPrice || 0,
         isShowDiscount: updatedOption?.isShowDiscount || false,
-        unitId: updatedOption?.unitId,
+        unitId: Number(updatedOption?.unitId),
         isUpdateSameInventory:
           updateChoice === UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
       });
@@ -243,29 +254,29 @@ export default function EditOption({
               <TextField
                 placeholder="Enter option name..."
                 value={updatedOption.name}
-                onChange={(e) => {
+                onChange={(e) =>
                   setUpdatedOption({
-                    ...option,
+                    ...updatedOption,
                     name: e.target.value,
-                  });
-                }}
+                  })
+                }
               />
             </FormControl>
 
-            {dbUnits?.data?.length > 0 && (
+            {unitList?.length > 0 && (
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <UnitRadio
-                    units={dbUnits?.data || []}
-                    value={JSON.stringify(updatedOption.unit)}
+                    units={unitList || []}
+                    value={updatedOption.unitId}
                     onChange={(e: any) =>
                       setUpdatedOption((prevState: any) => ({
                         ...prevState,
-                        unit: JSON.parse(e.target.value),
-                        unitId: JSON.parse(e.target.value).id,
+                        // unit: JSON.parse(e.target.value),
+                        unitId: +e.target.value,
                       }))
                     }
-                    isShowPrice
+                    idValue
                   />
                 </Box>
               </Grid>
