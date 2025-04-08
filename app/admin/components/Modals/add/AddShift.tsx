@@ -1,5 +1,6 @@
 // app/admin/components/Modals/add/AddShift.tsx
 import {
+  Box,
   Divider,
   Grid,
   ListSubheader,
@@ -17,10 +18,11 @@ import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, WORKING_ROLE } from '@/app/utils/enum';
 import { groupBy } from '@/app/utils/array';
 import { days } from '@/app/lib/constant';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { RoleOption, roles } from '@/app/driver/components/Modals/ShiftModal';
 
 interface IProps extends ModalProps {
   drivers: IDriver[];
@@ -40,6 +42,7 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
     cost: 0,
     routeId: -1,
   });
+  const [selectedRole, setSelectedRole] = useState<WORKING_ROLE>(WORKING_ROLE.DRIVER);
 
   const todayIndex = new Date().getDay(); // 0 (Sun) to 6 (Sat)
   const sortedDays = [...days.slice(todayIndex), ...days.slice(0, todayIndex)];
@@ -83,12 +86,18 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
       return;
     }
 
+    if (selectedRole === WORKING_ROLE.DRIVER && newShift.routeId === -1) {
+      showNotification('error', 'Please select a route for the driver');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_URL.ADMIN}/shifts`, {
         ...newShift,
         startedAt: newShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
         endedAt: newShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+        role: selectedRole,
       });
 
       if (response.data.error) {
@@ -149,6 +158,24 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
           </Grid>
 
           <Grid item xs={12}>
+            <Typography>Role</Typography>
+            <Box display="flex" gap={1} alignItems="center">
+              {
+                roles.map((role: any) => (
+                  <RoleOption 
+                    key={role.role}
+                    role={role.role}
+                    icon={role.icon}
+                    isSelected={selectedRole === role.role}
+                    onClick={() => setSelectedRole(role.role)}
+                  />
+                ))
+              }
+
+            </Box>
+          </Grid>
+
+          {selectedRole === WORKING_ROLE.DRIVER && <Grid item xs={12}>
             <Typography>Route Assign</Typography>
             <Select
               fullWidth
@@ -176,7 +203,7 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
                   )),
                 ])}
             </Select>
-          </Grid>
+          </Grid>}
 
           <Grid item xs={6}>
             <Typography>Start Time</Typography>

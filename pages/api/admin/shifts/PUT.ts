@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../../drivers/shift/clock-out';
 import { formatDateString } from '../../utils/date';
+import { WORKING_ROLE } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
 
@@ -12,11 +13,12 @@ interface IBody {
   endedAt: string;
   routeId: number;
   driverId: number;
+  role: WORKING_ROLE;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { id, date, startedAt, endedAt, routeId, driverId }: IBody = req.body;
+    const { id, date, startedAt, endedAt, routeId, driverId, role }: IBody = req.body;
 
     console.log(date, 'date')
     const existingShift = await prisma.shiftSession.findUnique({
@@ -60,6 +62,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     if (date !== existingShift.date) {
       updatedFields.date = date;
+    }
+
+    if (role !== existingShift.role) {
+      updatedFields.role = role;
     }
 
     if (Object.keys(updatedFields).length === 0) {

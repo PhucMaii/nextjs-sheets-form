@@ -41,6 +41,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Sort by startedAt
+    shiftSession.sort((a: any, b: any) => {
+      return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime();
+    });
+
     return res.status(200).json({
       data: shiftSession,
       message: 'Fetch Shift Session Successfully',

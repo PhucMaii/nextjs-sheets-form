@@ -1,10 +1,10 @@
 import { AlertColor, Modal } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
 import OtherExpense from '../Expense/OtherExpense';
-import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { SHIFT_STATUS, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import useSelectDate from '@/hooks/useSelectDate';
 import { API_URL } from '@/app/utils/enum';
@@ -39,26 +39,32 @@ export default function ConfirmToPayShifts({
     status: TRANSACTION_STATUS.PAID,
   });
 
+  const unpaidShifts = useMemo(() => {
+    return shifts.filter(
+      (shift: IShiftSession) => shift.status === SHIFT_STATUS.UNPAID,
+    );
+  }, [shifts]);
+
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
   const { date, SelectDate } = useSelectDate(todayString, true);
 
   useEffect(() => {
-    if (shifts) {
-        const month = shifts[0]?.date.split('/')[0];
-        const monthWord = months[+month - 1];
+    if (unpaidShifts) {
+      const month = unpaidShifts[0]?.date.split('/')[0];
+      const monthWord = months[+month - 1];
 
-        const totalCosts = shifts.reduce((acc, shift) => {
-            return acc + (shift?.cost || 0);
-        }, 0);
-        setNewExpense((prevExpense: any) => ({
-            ...prevExpense,
-            subTotal: Number(totalCosts.toFixed(2)),
-            description: `Payment for ${shifts.length} shifts in ${monthWord}`,
-            date: date,
-        }));
+      const totalCosts = unpaidShifts.reduce((acc, shift) => {
+        return acc + (shift?.cost || 0);
+      }, 0);
+      setNewExpense((prevExpense: any) => ({
+        ...prevExpense,
+        subTotal: Number(totalCosts.toFixed(2)),
+        description: `Payment for ${unpaidShifts.length} shifts in ${monthWord}`,
+        date: date,
+      }));
     }
-  }, [shifts]);
+  }, [unpaidShifts]);
 
   useEffect(() => {
     if (open) {
@@ -69,10 +75,10 @@ export default function ConfirmToPayShifts({
 
   useEffect(() => {
     if (newExpense.subTotal) {
-        setNewExpense((prevExpense: any) => ({
-          ...prevExpense,
-          amount: newExpense.subTotal + newExpense.GST + newExpense.PST,
-        }));
+      setNewExpense((prevExpense: any) => ({
+        ...prevExpense,
+        amount: newExpense.subTotal + newExpense.GST + newExpense.PST,
+      }));
     }
   }, [newExpense.PST, newExpense.GST, newExpense.subTotal]);
 
@@ -111,7 +117,7 @@ export default function ConfirmToPayShifts({
       setIsAdding(true);
       const response = await axios.post(`${API_URL.ADMIN}/shifts/payment`, {
         newExpense,
-        shifts,
+        shifts: unpaidShifts,
       });
 
       if (response.data.error) {

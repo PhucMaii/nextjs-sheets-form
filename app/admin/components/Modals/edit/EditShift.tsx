@@ -15,7 +15,7 @@ import ModalHead from '@/app/lib/ModalHead';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { IDriver, IShiftSession } from '@/app/utils/type';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, WORKING_ROLE } from '@/app/utils/enum';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { groupBy } from '@/app/utils/array';
@@ -23,6 +23,7 @@ import { days } from '@/app/lib/constant';
 import dayjs from 'dayjs';
 import { LoadingButton } from '@mui/lab';
 import { Trash2Icon } from 'lucide-react';
+import { RoleOption, roles } from '@/app/driver/components/Modals/ShiftModal';
 
 interface IProps extends ModalProps {
   shift: IShiftSession;
@@ -164,39 +165,58 @@ export default function EditShift({
           </Grid>
 
           <Grid item xs={12}>
-            <Typography>Route Assign</Typography>
-            <Select
-              fullWidth
-              value={updatedShift?.routeId}
-              onChange={(e) => {
-                setUpdatedShift({
-                  ...updatedShift,
-                  routeId: +e?.target?.value || -1,
-                });
-              }}
-              sx={{ mt: 1 }}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 400,
-                  },
-                },
-              }}
-            >
-              <MenuItem value={-1}>In Factory</MenuItem>
-              {sortedDays.length > 0 &&
-                allRoutes &&
-                sortedDays.map((day: string) => [
-                  <ListSubheader key={`subheader-${day}`}>{day}</ListSubheader>,
-                  ...(allRoutes[day] || []).map((route: any) => (
-                    <MenuItem key={route.id} value={route.id}>
-                      <Typography>{route.name}</Typography>
-                    </MenuItem>
-                  )),
-                ])}
-            </Select>
+            <Typography>Role</Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              {roles.map((role: any) => (
+                <RoleOption
+                  key={role.role}
+                  role={role.role}
+                  icon={role.icon}
+                  isSelected={updatedShift?.role === role.role}
+                  onClick={() =>
+                    setUpdatedShift({ ...updatedShift, role: role.role })
+                  }
+                />
+              ))}
+            </Box>
           </Grid>
-
+          {updatedShift.role === WORKING_ROLE.DRIVER && (
+            <Grid item xs={12}>
+              <Typography>Route Assign</Typography>
+              <Select
+                fullWidth
+                value={updatedShift?.routeId}
+                onChange={(e) => {
+                  setUpdatedShift({
+                    ...updatedShift,
+                    routeId: +e?.target?.value || -1,
+                  });
+                }}
+                sx={{ mt: 1 }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 400,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value={-1}>In Factory</MenuItem>
+                {sortedDays.length > 0 &&
+                  allRoutes &&
+                  sortedDays.map((day: string) => [
+                    <ListSubheader key={`subheader-${day}`}>
+                      {day}
+                    </ListSubheader>,
+                    ...(allRoutes[day] || []).map((route: any) => (
+                      <MenuItem key={route.id} value={route.id}>
+                        <Typography>{route.name}</Typography>
+                      </MenuItem>
+                    )),
+                  ])}
+              </Select>
+            </Grid>
+          )}
           <Grid item xs={6}>
             <Typography>Start Time</Typography>
             <LocalizationProvider dateAdapter={AdapterDayjs}>

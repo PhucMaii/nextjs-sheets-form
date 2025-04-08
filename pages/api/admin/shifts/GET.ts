@@ -49,9 +49,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Sort by startedAt
+    shiftSession.sort((a, b) => {
+      return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime();
+    });
+
     return res.status(200).json({
       data: shiftSession,
-      message: 'Fetch Shifts Successfully'
+      message: 'Fetch Shifts Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
