@@ -60,13 +60,11 @@ export default function InsertOrderToCodBoard({
     } else {
       return selectedClient && selectedClient?.id !== -1
         ? `${API_URL.DRIVER}/orders/clients?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
-        : `${API_URL.DRIVER}/orders?deliveryDate=${date}`;
+        : `${API_URL.DRIVER}/orders/all?deliveryDate=${date}`;
     }
   };
 
   const [orders] = SWRFetchData(fetchUrl());
-
-  console.log('orders: ', orders);
 
   const [clients] = SWRFetchData(
     `${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/clients`,
