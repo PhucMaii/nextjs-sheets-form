@@ -30,7 +30,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         const hours = calculateHours(shiftSession.startedAt, today.dateAndTime);
-        console.log(hours, 'HOURS');
 
         const updatedShiftSession = await prisma.shiftSession.update({
             where: {

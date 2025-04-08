@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../../drivers/shift/clock-out';
 import { formatDateString } from '../../utils/date';
-import { SHIFT_STATUS } from '@/app/utils/enum';
+import { SHIFT_STATUS, WORKING_ROLE } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
 
@@ -12,11 +12,12 @@ interface IBody {
   startedAt: string;
   endedAt: string;
   routeId: number;
+  role: WORKING_ROLE;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { driverId, date, startedAt, endedAt, routeId }: IBody = req.body;
+    const { driverId, date, startedAt, endedAt, routeId, role }: IBody = req.body;
 
     const existingDriver = await prisma.driver.findUnique({
       where: {
@@ -43,6 +44,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         hours,
         cost: hours * (existingDriver?.hourlyRate || 1),
         status: SHIFT_STATUS.UNPAID,
+        role,
       },
     });
 

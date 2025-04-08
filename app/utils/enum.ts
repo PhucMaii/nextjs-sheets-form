@@ -130,3 +130,8 @@ export enum SHIFT_STATUS {
   PAID = 'Paid',
   UNPAID = 'Unpaid',
 }
+
+export enum WORKING_ROLE {
+  DRIVER = 'Driver',
+  IN_FACTORY = 'In Factory',
+}

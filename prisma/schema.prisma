@@ -538,6 +538,7 @@ model ShiftSession {
   cost        Float?
   status      String?
   expenseId   Int?
+  role       String?
 
   driver     Driver  @relation(fields: [driverId], references: [id])
   expense     Expense? @relation(fields: [expenseId], references: [id])

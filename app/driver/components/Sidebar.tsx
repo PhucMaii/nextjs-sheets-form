@@ -29,6 +29,8 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import ShiftBanner from './ShiftBanner';
 import { AccessTime } from '@mui/icons-material';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import SwitchRole from './Modals/SwitchRole';
 
 interface IProps {
   children: ReactNode;
@@ -42,7 +44,12 @@ export default function Sidebar({ children }: IProps) {
     open: false,
     type: null,
   });
+  const [isOpenSwitchRole, setIsOpenSwitchRole] = useState<boolean>(false);
   const [shiftSession, setShiftSession] = useState<IShiftSession | null>(null);
+  const [isAsked, setIsAsked, isInitialized] = useLocalStorage(
+    'isAskedClockIn',
+    false,
+  );
 
   const [todaySession] = SWRFetchData(`${API_URL.DRIVER}/shift/today`);
 
@@ -53,6 +60,8 @@ export default function Sidebar({ children }: IProps) {
     setCurrentTab(pathname);
   }, [pathname]);
 
+  console.log(isAsked, 'isAsked');
+
   useEffect(() => {
     if (todaySession) {
       if (todaySession.data.length > 0) {
@@ -61,12 +70,13 @@ export default function Sidebar({ children }: IProps) {
         );
         setShiftSession(currentShift);
         setShiftModalProps({ open: false, type: null });
-      } else {
+      } else if (!isAsked && isInitialized && todaySession.data.length === 0) {
         setShiftSession(null);
         setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN });
+        setIsAsked(true);
       }
     }
-  }, [todaySession]);
+  }, [todaySession, isInitialized]);
 
   const handleChangeTab = (path: string) => {
     router.push(path);
@@ -140,6 +150,7 @@ export default function Sidebar({ children }: IProps) {
             onOpenShiftModal={() =>
               setShiftModalProps({ open: true, type: ShiftType.CLOCK_OUT })
             }
+            onOpenSwitchRole={() => setIsOpenSwitchRole(true)}
           />
         ) : (
           <Box display="flex" alignItems="center" justifyContent="flex-end">
@@ -162,6 +173,10 @@ export default function Sidebar({ children }: IProps) {
           onClose={() => setShiftModalProps({ open: false, type: null })}
           type={shiftModalProps.type}
           shift={shiftSession}
+        />
+        <SwitchRole
+          open={isOpenSwitchRole}
+          onClose={() => setIsOpenSwitchRole(false)}
         />
         <Box sx={{ pb: 8, m: 1 }}>{children}</Box>
         <Paper
@@ -224,6 +239,7 @@ export default function Sidebar({ children }: IProps) {
             onOpenShiftModal={() =>
               setShiftModalProps({ open: true, type: ShiftType.CLOCK_OUT })
             }
+            onOpenSwitchRole={() => setIsOpenSwitchRole(true)}
           />
         ) : (
           <Box display="flex" alignItems="center" justifyContent="flex-end">
@@ -246,6 +262,10 @@ export default function Sidebar({ children }: IProps) {
           onClose={() => setShiftModalProps({ open: false, type: null })}
           type={shiftModalProps.type}
           shift={shiftSession}
+        />
+        <SwitchRole
+          open={isOpenSwitchRole}
+          onClose={() => setIsOpenSwitchRole(false)}
         />
         <IconButton onClick={() => setIsNavOpen(true)}>
           <MenuIcon />
@@ -292,6 +312,7 @@ export default function Sidebar({ children }: IProps) {
           onOpenShiftModal={() =>
             setShiftModalProps({ open: true, type: ShiftType.CLOCK_OUT })
           }
+          onOpenSwitchRole={() => setIsOpenSwitchRole(true)}
         />
       ) : (
         <Box display="flex" alignItems="center" justifyContent="flex-end">
@@ -314,6 +335,10 @@ export default function Sidebar({ children }: IProps) {
         onClose={() => setShiftModalProps({ open: false, type: null })}
         type={shiftModalProps.type}
         shift={shiftSession}
+      />
+      <SwitchRole
+        open={isOpenSwitchRole}
+        onClose={() => setIsOpenSwitchRole(false)}
       />
       <Box display="flex">
         <Drawer

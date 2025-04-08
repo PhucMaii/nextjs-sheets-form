@@ -9,6 +9,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { role } = req.body;
+
     const driver: any = await getDriverInfo(req, res);
 
     // Check if driver clocked in
@@ -40,6 +42,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         isActive: true,
         routeId: targetRoute?.id,
         status: SHIFT_STATUS.UNPAID,
+        role,
       },
     });
 
