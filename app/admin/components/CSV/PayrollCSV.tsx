@@ -13,11 +13,27 @@ const PayrollCSV = ({ driverData, style }: IProps) => {
     { label: 'Driver', key: 'name' },
     { label: 'Shifts', key: 'shifts' },
     { label: 'Hours', key: 'hours' },
-    { label: 'Hourly Rate', key: 'hourlyRate' },
+    { label: 'Hourly Rate ($)', key: 'hourlyRate', type: 'money' },
+    { label: 'Total ($)', key: 'total', type: 'money' },
   ];
 
+  const formattedData = driverData.map((driver) => ({
+    name: driver.name,
+    shifts: driver.shifts,
+    hours: driver.hours?.toFixed(2),
+    hourlyRate: driver.hourlyRate,
+    total: driver.total?.toFixed(2),
+  }));
+
+  console.log(driverData, 'driverData');
+
   return (
-    <CSVLink data={driverData} headers={headers} aria-disabled={true}>
+    <CSVLink
+      filename="payroll-data.csv"
+      data={formattedData}
+      headers={headers}
+      aria-disabled={true}
+    >
       <Button variant="outlined" size="small" {...style}>
         <Box display="flex" alignItems="center" gap={1}>
           <DownloadIcon />

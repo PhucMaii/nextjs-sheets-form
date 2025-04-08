@@ -1349,11 +1349,11 @@ const OrderView = ({
       />
       {NotificationComp}
       <Grid container spacing={2} width="100%">
-        <Grid item xs={12} sm={8.5}>
+        <Grid item xs={12} sm={7}>
           {renderDisplayItems()}
         </Grid>
 
-        <Grid item xs={12} sm={3.5}>
+        <Grid item xs={12} sm={5}>
           {renderMyOrder()}
         </Grid>
       </Grid>

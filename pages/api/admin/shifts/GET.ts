@@ -38,7 +38,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     };
 
     if (driverId && driverId > 0) {
-      queryFields.driverId = Number(driverId)
+      queryFields.driverId = Number(driverId);
     }
 
     const shiftSession = await prisma.shiftSession.findMany({
@@ -46,11 +46,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         driver: true,
         route: true,
-      }
+      },
     });
 
     return res.status(200).json({
       data: shiftSession,
+      message: 'Fetch Shifts Successfully'
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
