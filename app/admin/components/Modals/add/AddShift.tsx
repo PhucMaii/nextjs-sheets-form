@@ -23,6 +23,7 @@ import { groupBy } from '@/app/utils/array';
 import { days } from '@/app/lib/constant';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { RoleOption, roles } from '@/app/driver/components/Modals/ShiftModal';
+import { formatDateString } from '@/pages/api/utils/date';
 
 interface IProps extends ModalProps {
   drivers: IDriver[];
@@ -95,8 +96,8 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
     try {
       const response = await axios.post(`${API_URL.ADMIN}/shifts`, {
         ...newShift,
-        startedAt: newShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
-        endedAt: newShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+        startedAt: formatDateString(newShift.startedAt.format('YYYY-MM-DD HH:mm:ss')),
+        endedAt: formatDateString(newShift.endedAt.format('YYYY-MM-DD HH:mm:ss')),
         role: selectedRole,
       });
 

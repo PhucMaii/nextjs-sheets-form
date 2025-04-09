@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../../drivers/shift/clock-out';
-import { formatDateString } from '../../utils/date';
 import { SHIFT_STATUS, WORKING_ROLE } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
@@ -31,14 +30,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const hours = calculateHours(startedAt, endedAt);
 
-    const startDateString = formatDateString(new Date(startedAt));
-    const endDateString = formatDateString(new Date(endedAt));
+    // const startDateString = formatDateString(new Date(startedAt));
+    // const endDateString = formatDateString(new Date(endedAt));
 
     console.log({
       startedAt,
       endedAt,
-      startDateString,
-      endDateString,
       hours,
     })
 
@@ -46,8 +43,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         driverId,
         date,
-        startedAt: startDateString,
-        endedAt: endDateString,
+        startedAt,
+        endedAt,
         routeId,
         hours,
         cost: hours * (existingDriver?.hourlyRate || 1),

@@ -39,6 +39,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         driverId: driver.id,
       },
+      include: {
+        driver: true,
+        route: true,
+      },
     });
 
     // Sort by startedAt

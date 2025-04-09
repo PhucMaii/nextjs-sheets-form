@@ -51,7 +51,7 @@ export default function ShiftSummary({ shift }: IProps) {
         />
         <Typography variant="h6">{displayDate}</Typography>
         <Typography variant="body2" sx={{ color: grey[700] }}>
-          {shift?.route?.name || 'In Factory' }
+          {shift?.route?.name ? shift?.route?.name : shift?.role }
         </Typography>
         <Typography variant="body2" sx={{ color: grey[700] }}>
           {time?.startTime} - {time?.endTime}

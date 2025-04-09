@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../../drivers/shift/clock-out';
-import { formatDateString } from '../../utils/date';
 import { WORKING_ROLE } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
@@ -35,14 +34,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updatedFields: any = {};
 
-    const startDateString = formatDateString(startedAt);
-    const endDateString = formatDateString(endedAt);
+    // const startDateString = formatDateString(startedAt);
+    // const endDateString = formatDateString(endedAt);
     if (
-      startDateString !== existingShift.startedAt ||
-      endDateString !== existingShift.endedAt
+      startedAt !== existingShift.startedAt ||
+      endedAt !== existingShift.endedAt
     ) {
-      updatedFields.startedAt = startDateString;
-      updatedFields.endedAt = endDateString;
+      updatedFields.startedAt = startedAt;
+      updatedFields.endedAt = endedAt;
 
       const hours = calculateHours(startedAt, endedAt);
       updatedFields.hours = hours;

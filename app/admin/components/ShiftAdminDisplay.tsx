@@ -66,7 +66,7 @@ export default function ShiftAdminDisplay({
             {shift?.driver?.name}
           </Typography>
           <Typography>
-            {shift?.route?.name ? `Driver - ${shift.route.name}` : 'In Factory'}
+            {shift?.route?.name ? shift?.route?.name : shift?.role}
           </Typography>
           <Typography>{time?.display}</Typography>
         </Box>
