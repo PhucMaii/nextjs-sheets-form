@@ -160,7 +160,7 @@ const ShiftModal = ({ open, onClose, type, shift }: IProps) => {
               <CloseIcon />
             </IconButton>
           </Box>
-          <Typography variant="h5">{today.time.slice(0, 11)}</Typography>
+          <Typography variant="h5">{today.time.slice(0, 12)}</Typography>
 
           {type === ShiftType.CLOCK_IN && <Box
             display="flex"

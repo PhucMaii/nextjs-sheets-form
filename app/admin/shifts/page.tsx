@@ -65,7 +65,7 @@ export default function ShiftPage() {
     const toCalculateShifts = selectedShifts.length > 0 ? selectedShifts : shiftSessions?.data;
 
     const unpaidShifts = toCalculateShifts?.filter(
-      (shift: any) => shift.status === SHIFT_STATUS.PAID,
+      (shift: any) => shift.status === SHIFT_STATUS.UNPAID,
     );
 
     return unpaidShifts.reduce((acc: any, shift: any) => {
