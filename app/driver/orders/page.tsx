@@ -20,7 +20,7 @@ import {
   PAYMENT_TYPE,
   USER_ROLE,
 } from '@/app/utils/enum';
-import { YYYYMMDDFormat } from '@/app/utils/time';
+import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
 import { Virtuoso } from 'react-virtuoso';
@@ -91,6 +91,7 @@ export default function OrdersPage() {
 
   const date = new Date();
   const today = YYYYMMDDFormat(date);
+  const wcodDay = getWCODDay(today);
 
   const { showNotification, NotificationComp } = useNotification();
   // const { date: datePicker, SelectDate } = useSelectDate(today);
@@ -107,20 +108,20 @@ export default function OrdersPage() {
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
   }, []);
 
-  useEffect(() => {
-    if (ordersResponse) {
-      const unfulfilledOrders = filterOrderByStatus(
-        ordersResponse?.data.deliveryOrders,
-        currentTab === 'Today'
-          ? ORDER_STATUS.INCOMPLETED
-          : ORDER_STATUS.COMPLETED,
-      );
+  // useEffect(() => {
+  //   if (ordersResponse) {
+  //     const unfulfilledOrders = filterOrderByStatus(
+  //       ordersResponse?.data.deliveryOrders,
+  //       currentTab === 'Today'
+  //         ? ORDER_STATUS.INCOMPLETED
+  //         : ORDER_STATUS.COMPLETED,
+  //     );
 
-      if (unfulfilledOrders.length === 0) {
-        setIsOpenSwitchRole(true);
-      }
-    }
-  }, [ordersResponse]);
+  //     // if (unfulfilledOrders.length === 0) {
+  //     //   setIsOpenSwitchRole(true);
+  //     // }
+  //   }
+  // }, [ordersResponse]);
 
   // Handle loading
   useEffect(() => {
@@ -178,7 +179,7 @@ export default function OrdersPage() {
     });
 
     const amount = nonVoidOrders.reduce((acc: number, order: Order) => {
-      if (order.user.preference.paymentType === PAYMENT_TYPE.COD) {
+      if (order.user.preference.paymentType === PAYMENT_TYPE.COD || order.user.preference.paymentType === wcodDay) {
         return acc + order.totalPrice;
       }
 

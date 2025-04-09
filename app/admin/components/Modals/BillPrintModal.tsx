@@ -26,6 +26,7 @@ import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import { ManifestPrint } from '../Printing/ManifestPrint';
 import useManifest from '@/hooks/useManifest';
+import { NewManifestPrint } from '../Printing/NewManifestPrint';
 import { SummaryManifest } from '../Printing/SummaryManifest';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DropdownItemContainer } from '../../orders/styled';
@@ -60,6 +61,7 @@ const BillPrintModal = ({
   const [selectedRoutes, setSelectedRoutes] = useState<IRoutes[]>([]);
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
+  const newManifestPrint: any = useRef();
   const summaryManifest: any = useRef();
   const {
     orderPrint,
@@ -117,6 +119,10 @@ const BillPrintModal = ({
 
   const handlePrintManifestSummary = useReactToPrint({
     content: () => summaryManifest.current,
+  });
+
+  const handleNewManifestPrint = useReactToPrint({
+    content: () => newManifestPrint.current,
   });
 
   const handleSelectAll = () => {
@@ -178,6 +184,11 @@ const BillPrintModal = ({
             <Typography>Details</Typography>
           </DropdownItemContainer>
         </MenuItem>
+        <MenuItem onClick={handleNewManifestPrint}>
+          <DropdownItemContainer display="flex" gap={2}>
+            <Typography>Details (New)</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
       </Menu>
     </Box>
   );
@@ -203,6 +214,16 @@ const BillPrintModal = ({
             ref={manifestPrint}
           />
         </div>
+
+        <div style={{ display: 'none' }}>
+          <NewManifestPrint
+            manifest={itemManifest}
+            routes={routes}
+            currentDate={day}
+            ref={newManifestPrint}
+          />
+        </div>
+
         <div style={{ display: 'none' }}>
           <SummaryManifest
             manifest={itemManifest}

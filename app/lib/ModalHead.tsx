@@ -25,7 +25,12 @@ export default function ModalHead({
   containerStyle,
 }: IModalHead) {
   return (
-    <Box display="flex" justifyContent="space-between" alignItems="center" style={containerStyle}>
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      alignItems="center"
+      style={containerStyle}
+    >
       <Typography variant="h4" fontWeight={500}>
         {heading}
       </Typography>

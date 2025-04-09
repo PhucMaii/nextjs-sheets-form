@@ -20,9 +20,16 @@ interface IProps extends ModalProps {
   onSubmit: (quantity: number, option?: IOption | null) => void;
 }
 
-export default function SetItemQuantity({ open, onClose, item, onSubmit }: IProps) {
+export default function SetItemQuantity({
+  open,
+  onClose,
+  item,
+  onSubmit,
+}: IProps) {
   const [quantity, setQuantity] = useState<number>(0);
-  const [selectedOption, setSelectedOption] = useState<IOption | null>(item?.options[0] || null);
+  const [selectedOption, setSelectedOption] = useState<IOption | null>(
+    item?.options[0] || null,
+  );
 
   useEffect(() => {
     if (item?.options) {
@@ -47,13 +54,7 @@ export default function SetItemQuantity({ open, onClose, item, onSubmit }: IProp
         {item?.options && (
           <Grid container>
             {item.options.map((option: any) => (
-              <Grid
-                item
-                xs={6}
-                md={4}
-                lg={3}
-                key={option.id}
-              >
+              <Grid item xs={6} md={4} lg={3} key={option.id}>
                 <ItemButton
                   item={option}
                   onClick={() => setSelectedOption(option)}
@@ -67,7 +68,7 @@ export default function SetItemQuantity({ open, onClose, item, onSubmit }: IProp
           </Grid>
         )}
 
-        <FormControl fullWidth sx={{mt: 3}}>
+        <FormControl fullWidth sx={{ mt: 3 }}>
           <InputLabel id="quantity-label">Quantity</InputLabel>
           <OutlinedInput
             label="Quantity"

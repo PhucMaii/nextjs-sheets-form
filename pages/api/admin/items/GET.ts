@@ -5,13 +5,69 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   categoryId?: string;
   userId?: string;
+  itemId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { categoryId, userId }: IQuery = req.query;
+    const { itemId, categoryId, userId }: IQuery = req.query;
+
+    if (itemId) {
+      const item = await prisma.item.findUnique({
+        where: {
+          id: Number(itemId),
+        },
+        include: {
+          options: {
+            include: {
+              unit: true,
+              // item: true,
+            },
+          },
+          inventoryUnit: true,
+          inventoryItem: {
+            include: {
+              vendorItem: {
+                include: {
+                  unit: true,
+                },
+              },
+              type: true,
+              // type: {
+              //   include: {
+              //     itemType_category: true,
+              //   },
+              // },
+            },
+          },
+          category: {
+            include: {
+              itemType_category: {
+                include: {
+                  itemType: true,
+                },
+              },
+            },
+          },
+          // category: {
+          //   include: {
+          //     itemType_category: {
+          //       include: {
+          //         itemType: true,
+          //       },
+          //     },
+          //   },
+          // },
+        },
+      }); // orderBy: [
+      //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
+      //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
+      // ],
+
+      return res.status(200).json({ data: item });
+    }
 
     if (categoryId) {
       const items = await prisma.item.findMany({
@@ -41,15 +97,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               // },
             },
           },
-          // category: {
-          //   include: {
-          //     itemType_category: {
-          //       include: {
-          //         itemType: true,
-          //       },
-          //     },
-          //   },
-          // },
+          category: {
+            include: {
+              itemType_category: {
+                include: {
+                  itemType: true,
+                },
+              },
+            },
+          },
         },
         // orderBy: [
         //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first

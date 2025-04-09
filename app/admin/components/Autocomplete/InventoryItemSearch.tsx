@@ -31,9 +31,10 @@ export default function InventoryItemSearch({
       clearOnBlur
       handleHomeEndKeys
       id="free-solo-with-text-demo"
-      options={
-        [{ id: -1, name: '-- Choose an item --' }, ...(displayItems || [])]
-      }
+      options={[
+        { id: -1, name: '-- Choose an item --' },
+        ...(displayItems || []),
+      ]}
       getOptionLabel={(option) => {
         // Regular option
         return option?.name || '';

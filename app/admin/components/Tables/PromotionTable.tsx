@@ -164,7 +164,7 @@ export default function PromotionTable({
                       onClick={(e: any) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        handleToggleVisible(e, promotion.id)
+                        handleToggleVisible(e, promotion.id);
                       }}
                     />
                   </TableCell>

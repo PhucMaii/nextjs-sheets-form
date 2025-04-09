@@ -4,6 +4,7 @@ import {
   Checkbox,
   Divider,
   FormControl,
+  Grid,
   Modal,
   TextField,
   Typography,
@@ -12,7 +13,6 @@ import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
-import useEditUnit from '@/hooks/unit/useEditUnit';
 import { ICategory, IItem, IOption } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
@@ -23,6 +23,8 @@ import {
   checkedBoxOutlinedIcon,
 } from '../../Autocomplete/VendorSearch';
 import AddOptionWarning from '../AddOptionWarning';
+import UnitRadio from '../../Radio/UnitRadio';
+import { getUniqueUnitRatios } from '@/app/utils/array';
 
 interface IProps extends ModalProps {
   item: IItem;
@@ -56,17 +58,39 @@ export default function AddOption({
   ]);
   const [unitList, setUnitList] = useState<any[]>([]);
 
-  const [dbUnits] = SWRFetchData(
-    item?.inventoryUnit?.vendorItemId
-      ? `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`
-      : '',
-  );
+  // const [unitList] = SWRFetchData(
+  //   item?.inventoryUnit?.vendorItemId
+  //     ? `${API_URL.ADMIN}/units?vendorItemId=${item?.inventoryUnit?.vendorItemId}`
+  //     : '',
+  // );
   const [categories] = SWRFetchData(
     `${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`,
   );
 
-  const { selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
-    useEditUnit(unitList, null, showNotification, false);
+  useEffect(() => {
+    if (item && Object.keys(item).length > 0) {
+      const inventoryItemUnits = item.inventoryItem.vendorItem.flatMap(
+        (item: any) => item.unit,
+      );
+      const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
+
+      setUnitList(sellingUnits);
+    }
+  }, [item]);
+
+  console.log(unitList, 'unitList');
+
+  useEffect(() => {
+    if (unitList) {
+      setOption((prevOption: any) => ({
+        ...prevOption,
+        unit: unitList[0],
+        unitId: unitList[0]?.id || -1,
+      }));
+    }
+  }, [unitList]);
+  // const { selectedUnit, UnitDisplay } =
+  //   useEditUnit(unitList, null, showNotification, false);
 
   //   useEffect(() => {
   //     setOption((prevOption: any) => ({
@@ -76,11 +100,11 @@ export default function AddOption({
   //     }));
   //   }, [selectedUnit]);
 
-  useEffect(() => {
-    if (dbUnits) {
-      setUnitList(dbUnits?.data);
-    }
-  }, [dbUnits]);
+  // useEffect(() => {
+  //   if (unitList) {
+  //     setUnitList(unitList?.data);
+  //   }
+  // }, [unitList]);
 
   const handleAddOption = async () => {
     if (!option.name) {
@@ -101,7 +125,7 @@ export default function AddOption({
         price: option.price,
         availability: option.availability,
         itemId: item.id,
-        unitId: selectedUnit?.id || -1,
+        unitId: option.unitId || -1,
         inventoryItemId: item.inventoryItemId, // for finding items in selected category
         selectedCategoryIds: selectedCategories.map(
           (category: ICategory) => category.id,
@@ -128,8 +152,8 @@ export default function AddOption({
 
   return (
     <>
-      {AddUnitModal}
-      {EditUnitModal}
+      {/* {AddUnitModal} */}
+      {/* {EditUnitModal}  */}
       {checkWarning.open && (
         <AddOptionWarning
           open={checkWarning.open}
@@ -160,7 +184,7 @@ export default function AddOption({
                 multiple
                 disableCloseOnSelect
                 options={categories?.data || []}
-                getOptionLabel={(option: ICategory) => option.name}
+                getOptionLabel={(option: ICategory) => option?.name}
                 isOptionEqualToValue={(option: ICategory, value: ICategory) =>
                   option.id === value.id
                 }
@@ -226,7 +250,23 @@ export default function AddOption({
               />
             </FormControl>
 
-            {UnitDisplay}
+            {unitList?.length > 0 && (
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <UnitRadio
+                    units={unitList || []}
+                    value={option.unitId}
+                    onChange={(e: any) =>
+                      setOption((prevState: any) => ({
+                        ...prevState,
+                        unitId: e.target.value,
+                      }))
+                    }
+                    idValue
+                  />
+                </Box>
+              </Grid>
+            )}
           </Box>
         </BoxModal>
       </Modal>

@@ -182,8 +182,7 @@ const ItemRow = ({
             inventoryUnitId: itemOption?.unitId,
             prevPrice: itemOption?.prevPrice,
             optionId: itemOption?.id,
-            isShowDiscount:
-              itemOption?.isShowDiscount || false,
+            isShowDiscount: itemOption?.isShowDiscount || false,
             option: {
               name: itemOption?.name,
               price: itemOption?.price,

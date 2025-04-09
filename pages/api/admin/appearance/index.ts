@@ -45,7 +45,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       })
       .map((itemType: any) => {
         const items = itemType.inventoryItems.map((item: any) => {
-
           return {
             ...item,
             id: Number(item.id.split(' - ')[1]),
@@ -312,9 +311,9 @@ const checkAndUpdateItemsArrangement = async (
 
     // Get the removed items from promotion (if in promotion mode currently)
     if (keyField === 'promotionId') {
-      const removedItems = dbItemArrangementMap[container.id].filter(
-        (item: any) => !inventoryItemNames.includes(item.name),
-      ).map((item: any) => item.id);
+      const removedItems = dbItemArrangementMap[container.id]
+        .filter((item: any) => !inventoryItemNames.includes(item.name))
+        .map((item: any) => item.id);
 
       if (removedItems.length > 0) {
         await prisma.inventoryItem.updateMany({
@@ -327,12 +326,10 @@ const checkAndUpdateItemsArrangement = async (
             [posField]: null,
             [keyField]: null,
           },
-        })
+        });
       }
+    }
 
-      
-    } 
-    
     // Check if any item has been re arranged and only update re arranged items
     if (JSON.stringify(inventoryItemNames) !== JSON.stringify(dbItemNames)) {
       // Re arrange

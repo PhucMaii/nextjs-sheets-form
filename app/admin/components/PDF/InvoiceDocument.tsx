@@ -52,8 +52,8 @@ const InvoiceDocument: React.FC<IProps> = ({
 
   console.log({
     orders,
-    filteredOrders
-  })
+    filteredOrders,
+  });
 
   return (
     <Document>
@@ -167,17 +167,19 @@ const InvoiceDocument: React.FC<IProps> = ({
               </View>
             </View>
           </View>
-          {!isOldInvoice && debtData && sortDebtKeys && <View style={styles.flex_between}>
-            {sortDebtKeys &&
-              sortDebtKeys.map((month: string, index: number) => (
-                <Text style={styles.font_10} key={index}>
-                  {index === sortDebtKeys.length - 2
-                    ? 'Current Statement'
-                    : month}
-                  : ${debtData[month]?.toFixed(2)}
-                </Text>
-              ))}
-          </View>}
+          {!isOldInvoice && debtData && sortDebtKeys && (
+            <View style={styles.flex_between}>
+              {sortDebtKeys &&
+                sortDebtKeys.map((month: string, index: number) => (
+                  <Text style={styles.font_10} key={index}>
+                    {index === sortDebtKeys.length - 2
+                      ? 'Current Statement'
+                      : month}
+                    : ${debtData[month]?.toFixed(2)}
+                  </Text>
+                ))}
+            </View>
+          )}
           <View style={styles.bottomSubtitle}>
             <Text style={styles.h2}>{sendChequeMsg}</Text>
           </View>

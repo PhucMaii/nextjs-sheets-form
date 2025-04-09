@@ -134,7 +134,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             price: item.price, // Price might be useless, since it is not able to update price at front end
             inventoryUnitId: item.inventoryUnitId,
             option: item.option,
-
           },
         });
       } else if (item.type === ITEM_CATEGORIZED.DELETE) {

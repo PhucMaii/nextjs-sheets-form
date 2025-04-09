@@ -42,23 +42,22 @@ export const ComponentToPrint = forwardRef(
       if (item.quantity > 0) {
         orderDetailsTemplate.push(
           <TableRow key={item.name}>
-            <TableCell sx={{  }}>
+            <TableCell sx={{}}>
               <Box display="flex" flexDirection="column">
                 <Typography sx={{ fontSize: 18, fontWeight: 'bold' }}>
                   {item.name}
                 </Typography>
-                {
-                  item?.option?.name &&
+                {item?.option?.name && (
                   <Typography sx={{ fontSize: 18 }}>
                     {item?.option?.name}
                   </Typography>
-                }
+                )}
               </Box>
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold', fontSize: 18,  }}>
+            <TableCell sx={{ fontWeight: 'bold', fontSize: 18 }}>
               {item.quantity}
             </TableCell>
-            <TableCell sx={{ fontSize: 18,  }}>
+            <TableCell sx={{ fontSize: 18 }}>
               <Box
                 display="flex"
                 alignItems="center"
@@ -78,7 +77,7 @@ export const ComponentToPrint = forwardRef(
                 <Typography fontWeight="bold">${item.price}</Typography>
               </Box>
             </TableCell>
-            <TableCell sx={{ fontSize: 18,  }}>
+            <TableCell sx={{ fontSize: 18 }}>
               <Box
                 display="flex"
                 alignItems="center"

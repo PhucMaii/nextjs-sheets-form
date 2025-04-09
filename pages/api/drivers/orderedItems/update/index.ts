@@ -11,9 +11,7 @@ import {
 } from '@/pages/api/admin/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
-import {
-  formatItemsWithTotalPrice,
-} from '@/pages/api/utils/order';
+import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';
@@ -107,7 +105,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // UPDATE
         // const { cost } = await generateCostAndProfit(item.id);
 
-
         const cost =
           (item?.cost / item?.inventoryUnit?.ratio) * item.inventoryUnit.ratio;
 
@@ -137,7 +134,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             item.inventoryUnit,
             item.quantity,
             item.prevQuantity,
-            item?.prevInventoryUnit
+            item?.prevInventoryUnit,
           );
         }
       }

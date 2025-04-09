@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
-    activePromotionIds: number[];
+  activePromotionIds: number[];
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -46,12 +46,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         await prisma.promotion.updateMany({
           where: {
             id: {
-              in: updatedInactivePromotionIds
+              in: updatedInactivePromotionIds,
             },
           },
           data: {
             status: PROMOTION_STATUS.INACTIVE,
-            visibility: false
+            visibility: false,
           },
         });
 
@@ -81,7 +81,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    return res.status(200).json({ message: 'Update Promotion Status Successfully' });
+    return res
+      .status(200)
+      .json({ message: 'Update Promotion Status Successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ' + error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

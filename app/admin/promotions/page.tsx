@@ -44,7 +44,10 @@ export default function Promotion() {
           </Button>
         </Box>
 
-        <PromotionTable promotions={promotions?.data || []} showNotification={showNotification}/>
+        <PromotionTable
+          promotions={promotions?.data || []}
+          showNotification={showNotification}
+        />
       </ShadowSection>
     </Sidebar>
   );

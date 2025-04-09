@@ -15,13 +15,14 @@ import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { IInventoryUnit, IOption } from '@/app/utils/type';
+import { IOption } from '@/app/utils/type';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
-import useEditUnit from '@/hooks/unit/useEditUnit';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { UPDATE_OPTION } from './EditItem';
+import UnitRadio from '../../Radio/UnitRadio';
+import { getUniqueUnitRatios } from '@/app/utils/array';
 
 interface IProps extends ModalProps {
   option: IOption;
@@ -35,38 +36,60 @@ export default function EditOption({
   showNotification,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [units, setUnits] = useState<IInventoryUnit[]>([]);
+  // const [units, setUnits] = useState<IInventoryUnit[]>([]);
   const [updatedOption, setUpdatedOption] = useState<IOption>({
     ...option,
     isShowDiscount: option?.isShowDiscount || false,
     prevPrice: option?.prevPrice || 0,
   });
-  const [updateChoice, setUpdateChoice] = useState<UPDATE_OPTION>(UPDATE_OPTION.CURRENT_CATEGORY);
+  const [updateChoice, setUpdateChoice] = useState<UPDATE_OPTION>(
+    UPDATE_OPTION.CURRENT_CATEGORY,
+  );
+  const [unitList, setUnitList] = useState<any[]>([]);
 
-  const [dbUnits] = SWRFetchData(
-    option?.unit?.vendorItemId
-      ? `${API_URL.ADMIN}/units?vendorItemId=${option?.unit?.vendorItemId}`
-      : '',
+  const [item] = SWRFetchData(
+    option?.itemId ? `${API_URL.ADMIN}/items?itemId=${option?.itemId}` : '',
   );
 
-  const { selectedUnit, UnitDisplay, AddUnitModal, EditUnitModal } =
-    useEditUnit(units, updatedOption.unit, showNotification);
-
   useEffect(() => {
-    if (dbUnits) {
-      setUnits(dbUnits?.data);
-    }
-  }, [dbUnits]);
+    if (item && Object.keys(item?.data).length > 0) {
+      const inventoryItemUnits = item?.data?.inventoryItem?.vendorItem.flatMap(
+        (vItem: any) => vItem.unit,
+      );
+      const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
 
-  useEffect(() => {
-    if (option) {
-      setUpdatedOption({
-        ...option,
-        isShowDiscount: option?.isShowDiscount || false,
-        prevPrice: option?.prevPrice || 0,
-      });
+      setUnitList(sellingUnits);
     }
-  }, [option]);
+  }, [item]);
+
+  // const { selectedUnit, UnitDisplay, AddUnitModal, EditUnitModal } =
+  //   useEditUnit(units, updatedOption.unit, showNotification);
+
+  // useEffect(() => {
+  //   if (unitList) {
+  //     setUnits(unitList?.data);
+  //   }
+  // }, [unitList]);
+
+  // useEffect(() => {
+  //   if (option) {
+  //     setUpdatedOption({
+  //       ...option,
+  //       isShowDiscount: option?.isShowDiscount || false,
+  //       prevPrice: option?.prevPrice || 0,
+  //     });
+  //   }
+  // }, [option]);
+
+  // useEffect(() => {
+  //   if (unitList) {
+  //     setUpdatedOption((prevOption: any) => ({
+  //       ...prevOption,
+  //       unit: unitList[0],
+  //       unitId: unitList[0]?.id || -1,
+  //     }));
+  //   }
+  // }, [unitList]);
 
   const handleUpdateOption = async () => {
     setIsLoading(true);
@@ -77,8 +100,9 @@ export default function EditOption({
         price: updatedOption.price,
         prevPrice: updatedOption?.prevPrice || 0,
         isShowDiscount: updatedOption?.isShowDiscount || false,
-        unitId: selectedUnit?.id || updatedOption.unitId,
-        isUpdateSameInventory: updateChoice === UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
+        unitId: Number(updatedOption?.unitId),
+        isUpdateSameInventory:
+          updateChoice === UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
       });
 
       if (response.data.error) {
@@ -97,8 +121,8 @@ export default function EditOption({
 
   return (
     <>
-      {AddUnitModal}
-      {EditUnitModal}
+      {/* {AddUnitModal}
+      {EditUnitModal} */}
       <Modal open={open} onClose={onClose}>
         <BoxModal>
           <ModalHead
@@ -230,16 +254,33 @@ export default function EditOption({
               <TextField
                 placeholder="Enter option name..."
                 value={updatedOption.name}
-                onChange={(e) => {
+                onChange={(e) =>
                   setUpdatedOption({
-                    ...option,
+                    ...updatedOption,
                     name: e.target.value,
-                  });
-                }}
+                  })
+                }
               />
             </FormControl>
 
-            {UnitDisplay}
+            {unitList?.length > 0 && (
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <UnitRadio
+                    units={unitList || []}
+                    value={updatedOption.unitId}
+                    onChange={(e: any) =>
+                      setUpdatedOption((prevState: any) => ({
+                        ...prevState,
+                        // unit: JSON.parse(e.target.value),
+                        unitId: +e.target.value,
+                      }))
+                    }
+                    idValue
+                  />
+                </Box>
+              </Grid>
+            )}
           </Box>
         </BoxModal>
       </Modal>
