@@ -135,7 +135,7 @@ export default function EditShift({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="scroll">
         <ModalHead
           heading={`Edit Shift`}
           buttonLabel="EDIT"

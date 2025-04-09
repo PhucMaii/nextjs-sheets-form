@@ -11,6 +11,7 @@ import {
   MenuItem,
   Select,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/Select/SelectDateRange';
@@ -62,7 +63,8 @@ export default function ShiftPage() {
       return [];
     }
 
-    const toCalculateShifts = selectedShifts.length > 0 ? selectedShifts : shiftSessions?.data;
+    const toCalculateShifts =
+      selectedShifts.length > 0 ? selectedShifts : shiftSessions?.data;
 
     const unpaidShifts = toCalculateShifts?.filter(
       (shift: any) => shift.status === SHIFT_STATUS.UNPAID,
@@ -149,6 +151,8 @@ export default function ShiftPage() {
   useEffect(() => {
     fetchDrivers();
   }, []);
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const fetchDrivers = async () => {
     try {
@@ -303,7 +307,12 @@ export default function ShiftPage() {
           ))}
         </Select>
 
-        <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Box
+          display="flex"
+          flexDirection={smDown ? 'column-reverse' : 'row'}
+          alignItems={smDown ? 'flex-start' : 'center'}
+          justifyContent={smDown ? 'flex-start' : 'space-between'}
+        >
           <Typography sx={{ my: 2 }}>All Shifts</Typography>
 
           <Box display="flex" alignItems="center" gap={1}>
@@ -315,7 +324,11 @@ export default function ShiftPage() {
               Approve & Pay
             </Button>
             <PayrollCSV driverData={driverDataReport} />
-            <Button onClick={() => setIsOpenAddShift(true)} variant="contained" size="small">
+            <Button
+              onClick={() => setIsOpenAddShift(true)}
+              variant="contained"
+              size="small"
+            >
               + Create Shift
             </Button>
           </Box>
@@ -329,7 +342,7 @@ export default function ShiftPage() {
                 onChange={onSelectAll}
               />
             }
-            sx={{width: 'fit-content'}}
+            sx={{ width: 'fit-content' }}
             label="All"
           />
           {sortedDates.length > 0 &&

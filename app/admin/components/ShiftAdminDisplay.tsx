@@ -76,7 +76,7 @@ export default function ShiftAdminDisplay({
         <Divider orientation="vertical" flexItem sx={{ height: '100%' }} />
       </Grid>
 
-      <Grid item xs={5.9} md={3.9}>
+      <Grid item xs={5} md={3.8}>
         <Box
           display="flex"
           flexDirection="column"
