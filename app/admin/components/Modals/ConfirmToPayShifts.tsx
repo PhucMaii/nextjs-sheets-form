@@ -153,7 +153,7 @@ export default function ConfirmToPayShifts({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="scroll">
         <ModalHead
           heading="Confirm to Pay Shifts"
           buttonLabel="CONFIRM"

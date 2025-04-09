@@ -127,7 +127,7 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight={'80vh'} overflow={'scroll'}>
         <ModalHead
           heading="Add Shift"
           buttonLabel="ADD"

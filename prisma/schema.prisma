@@ -13,6 +13,8 @@ model Driver {
   name     String     @db.VarChar(255)
   password String     @db.VarChar(255)
   hourlyRate  Float?
+  notification   Json?
+  role       String?
 
   shiftSessions   ShiftSession[]
   routes   Route[]

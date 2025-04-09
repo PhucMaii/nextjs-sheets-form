@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IBody {
   driverName: string;
@@ -31,6 +32,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name: driverName,
         password: hashPassword,
+        role: USER_ROLE.DRIVER,
       },
     });
 
