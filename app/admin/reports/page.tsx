@@ -10,6 +10,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { ShadowSection } from './styled';
 import { UserType } from '@/app/utils/type';
@@ -53,6 +54,8 @@ export default function ReportPage() {
   const { showNotification, NotificationComp } = useNotification();
 
   const { date: datePicker, SelectDate } = useSelectDate();
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   // Data Fetching
   const [orders, mutateOrders] = SWRFetchData(
@@ -356,7 +359,7 @@ export default function ReportPage() {
           <Tabs
             value={tabIndex}
             onChange={(e: any, value: number) => setTabIndex(value)}
-            variant="fullWidth"
+            variant={smDown ? 'fullWidth' : 'scrollable'}
             sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
           >
             <Tab label="Orders" value={0} />

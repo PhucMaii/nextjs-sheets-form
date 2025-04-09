@@ -24,6 +24,7 @@ import dayjs from 'dayjs';
 import { LoadingButton } from '@mui/lab';
 import { Trash2Icon } from 'lucide-react';
 import { RoleOption, roles } from '@/app/driver/components/Modals/ShiftModal';
+import { formatDateString } from '@/pages/api/utils/date';
 
 interface IProps extends ModalProps {
   shift: IShiftSession;
@@ -88,8 +89,12 @@ export default function EditShift({
       const response = await axios.put(`${API_URL.ADMIN}/shifts`, {
         ...updatedShift,
         date: updatedShift.startedAt.format('MM/DD/YYYY'),
-        startedAt: updatedShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
-        endedAt: updatedShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+        startedAt: formatDateString(
+          updatedShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
+        ),
+        endedAt: formatDateString(
+          updatedShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+        ),
       });
 
       if (response.data.error) {
