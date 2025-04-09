@@ -29,7 +29,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import ShiftBanner from './ShiftBanner';
 import { AccessTime } from '@mui/icons-material';
-import useLocalStorage from '@/hooks/useLocalStorage';
+// import useLocalStorage from '@/hooks/useLocalStorage';
 import SwitchRole from './Modals/SwitchRole';
 
 interface IProps {
@@ -46,10 +46,10 @@ export default function Sidebar({ children }: IProps) {
   });
   const [isOpenSwitchRole, setIsOpenSwitchRole] = useState<boolean>(false);
   const [shiftSession, setShiftSession] = useState<IShiftSession | null>(null);
-  const [isAsked, setIsAsked, isInitialized] = useLocalStorage(
-    'isAskedClockIn',
-    false,
-  );
+  // const [isAsked, setIsAsked, isInitialized] = useLocalStorage(
+  //   'isAskedClockIn',
+  //   false,
+  // );
 
   const [todaySession] = SWRFetchData(`${API_URL.DRIVER}/shift/today`);
 
@@ -60,8 +60,6 @@ export default function Sidebar({ children }: IProps) {
     setCurrentTab(pathname);
   }, [pathname]);
 
-  console.log(isAsked, 'isAsked');
-
   useEffect(() => {
     if (todaySession) {
       if (todaySession.data.length > 0) {
@@ -70,13 +68,13 @@ export default function Sidebar({ children }: IProps) {
         );
         setShiftSession(currentShift);
         setShiftModalProps({ open: false, type: null });
-      } else if (!isAsked && isInitialized && todaySession.data.length === 0) {
+      } else if (todaySession.data.length === 0) {
         setShiftSession(null);
         setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN });
-        setIsAsked(true);
+        // setIsAsked(true);
       }
     }
-  }, [todaySession, isInitialized]);
+  }, [todaySession]);
 
   const handleChangeTab = (path: string) => {
     router.push(path);
