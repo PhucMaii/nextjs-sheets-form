@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { ModalProps } from '../type';
-import { IItem } from '@/app/utils/type';
+// import { IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import useEditUnit from '@/hooks/unit/useEditUnit';
@@ -23,9 +23,10 @@ import {
 } from '../../Autocomplete/VendorSearch';
 
 interface IProps extends ModalProps {
-  categoryId: number;
-  addItem: (newItem: IItem, selectedCategoryIds: number[]) => Promise<void>;
+  categoryId?: number;
+  addItem: any;
   showNotification: (type: AlertColor, message: string) => void;
+  defaultItem?: any;
 }
 
 export default function AddItem({
@@ -34,6 +35,7 @@ export default function AddItem({
   categoryId,
   addItem,
   showNotification,
+  defaultItem,
 }: IProps) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<any>({
@@ -53,6 +55,16 @@ export default function AddItem({
 
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [categories] = SWRFetchData(API_URL.CATEGORIES);
+
+  useEffect(() => {
+    if (defaultItem) {
+      setNewItem((prevItem: any) => {
+        return { ...prevItem, ...defaultItem };
+      });
+    }
+  }, [defaultItem]);
+
+  console.log(newItem, 'newItem');
 
   useEffect(() => {
     if (categoryId) {
@@ -174,7 +186,7 @@ export default function AddItem({
                 renderInput={(params) => <TextField {...params} label="Item" />}
                 value={
                   inventoryItems?.data?.find(
-                    (item: any) => item.name === newItem.name,
+                    (item: any) => (item.id === newItem.inventoryItemId || item.name === newItem.name),
                   ) || null
                 }
                 onChange={(e, newValue: any) => {

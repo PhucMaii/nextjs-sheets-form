@@ -18,6 +18,7 @@ import { grey } from '@mui/material/colors';
 import { LoadingButton } from '@mui/lab';
 import { getUniqueUnitRatios } from '@/app/utils/array';
 import BulkEditOptions from '@/app/admin/components/Bulk/BulkEditOptions';
+import AddItem from '@/app/admin/components/Modals/add/AddItem';
 
 function OptionsEditCell(props: GridRenderEditCellParams) {
   const { id, field, value } = props;
@@ -59,6 +60,7 @@ export default function BulkEditItems() {
     open: false,
     item: null,
   });
+  const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
 
   const router = useRouter();
@@ -216,6 +218,17 @@ export default function BulkEditItems() {
 
   return (
     <Sidebar>
+      <AddItem
+        // categoryId={}
+        addItem={() => {}}
+        showNotification={showNotification}
+        open={isOpenAddItem}
+        onClose={() => setIsOpenAddItem(false)}
+        defaultItem={{
+          inventoryItemId: Number(inventoryItemId),
+          name: items[0]?.name,
+        }}
+      />
       {NotificationComp}
       {editOptionProps.open && editOptionProps.item && (
         <BulkEditOptions
@@ -238,7 +251,10 @@ export default function BulkEditItems() {
             </Box>
           </Button>
 
-          <Box>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Button variant="outlined" size="small" onClick={() => setIsOpenAddItem(true)}>
+              + Add Item
+            </Button>
             <LoadingButton
               onClick={handleSaveChanges}
               variant="contained"

@@ -29,6 +29,7 @@ import { getUniqueUnitRatios } from '@/app/utils/array';
 interface IProps extends ModalProps {
   item: IItem;
   showNotification: ShowNotificationType;
+  noIncludeBulkAdd?: boolean;
 }
 
 export default function AddOption({
@@ -36,6 +37,7 @@ export default function AddOption({
   onClose,
   item,
   showNotification,
+  noIncludeBulkAdd,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [checkWarning, setCheckWarning] = useState<any>({
@@ -178,7 +180,7 @@ export default function AddOption({
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <FormControl fullWidth>
+            {!noIncludeBulkAdd && <FormControl fullWidth>
               <Typography>Add to other client categories</Typography>
               <Autocomplete
                 multiple
@@ -220,7 +222,7 @@ export default function AddOption({
                 }}
               />
             </FormControl>
-
+}
             <FormControl fullWidth>
               <Typography>Name</Typography>
               <TextField

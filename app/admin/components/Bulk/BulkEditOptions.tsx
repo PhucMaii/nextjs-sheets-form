@@ -1,6 +1,7 @@
 import {
   Autocomplete,
   Box,
+  Button,
   Checkbox,
   Divider,
   Modal,
@@ -21,6 +22,7 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import OptionsTable from '../Tables/OptionsTable';
 import { SWRFetchData } from '@/app/utils/db';
+import AddOption from '../Modals/add/AddOption';
 
 interface IProps extends ModalProps {
   item: IItem;
@@ -34,12 +36,11 @@ export default function BulkEditOptions({
   showNotification,
 }: IProps) {
   const [categories, setCategories] = useState<any[]>([]);
+  const [isOpenAddOption, setIsOpenAddOption] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([]);
 
-  const [updatedItem] = SWRFetchData(
-    `${API_URL.ITEM}?itemId=${item.id}`,
-  );
+  const [updatedItem] = SWRFetchData(`${API_URL.ITEM}?itemId=${item.id}`);
 
   //   const [categories] = SWRFetchData(
   //     `${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`,
@@ -76,99 +77,114 @@ export default function BulkEditOptions({
 
     setIsLoading(true);
     try {
-        const response = await axios.put(`${API_URL.ADMIN}/bulk/options`, {
-            categories: selectedCategories,
-            updatedOptions: updatedItem?.data?.options,
-        });
+      const response = await axios.put(`${API_URL.ADMIN}/bulk/options`, {
+        inventoryItemId: item.inventoryItemId,
+        categories: selectedCategories,
+        updatedOptions: updatedItem?.data?.options,
+      });
 
-        if (response.data.error) {
-            showNotification('error', response.data.error);
-            return;
-        }
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
 
-        showNotification('success', response.data.message);
+      showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification('error', 'There was an error: ' + error);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <BoxModal>
-        <ModalHead
-          heading="Bulk Edit Options"
-          buttonLabel="Save"
-          onClose={onClose}
-          onClick={handleSave}
-          buttonProps={{
-            loading: isLoading,
-          }}
-        />
+    <>
+      <AddOption
+        item={item}
+        showNotification={showNotification}
+        open={isOpenAddOption}
+        onClose={() => setIsOpenAddOption(false)}
+        noIncludeBulkAdd
+      />
+      <Modal open={open} onClose={onClose}>
+        <BoxModal>
+          <ModalHead
+            heading="Bulk Edit Options"
+            buttonLabel="Save"
+            onClose={onClose}
+            onClick={handleSave}
+            buttonProps={{
+              loading: isLoading,
+            }}
+          />
 
-        <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2 }} />
 
-        <Box display="flex" flexDirection="column" gap={2}>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography>Assign Category</Typography>
-            <Autocomplete
-              multiple
-              disableCloseOnSelect
-              options={categories || []}
-              getOptionLabel={(option: ICategory) => option?.name}
-              isOptionEqualToValue={(option: ICategory, value: ICategory) =>
-                option.id === value.id
-              }
-              value={selectedCategories}
-              onChange={(e, newValue: ICategory[]) => {
-                const isIncludeItemCategory = newValue.some(
-                  (category) => category.id === item.categoryId,
-                );
-
-                if (isIncludeItemCategory) {
-                  setSelectedCategories(newValue);
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography>Assign Category</Typography>
+              <Autocomplete
+                multiple
+                disableCloseOnSelect
+                options={categories || []}
+                getOptionLabel={(option: ICategory) => option?.name}
+                isOptionEqualToValue={(option: ICategory, value: ICategory) =>
+                  option.id === value.id
                 }
-                //   setOption({
-                //     ...option,
-                //     categories: selectedCategories,
-                //   });
-              }}
-              renderInput={(params) => (
-                <TextField {...params} placeholder="Enter categories..." />
-              )}
-              renderOption={(props, option, { selected }) => {
-                const { key, ...optionProps } = props;
+                value={selectedCategories}
+                onChange={(e, newValue: ICategory[]) => {
+                  const isIncludeItemCategory = newValue.some(
+                    (category) => category.id === item.categoryId,
+                  );
 
-                // const isItemCategory = option.id === item.categoryId;
-                return (
-                  <li
-                    key={key}
-                    {...optionProps}
-                    aria-disabled={option.id === item.categoryId}
-                  >
-                    <Checkbox
-                      icon={checkBoxOutlinedIcon}
-                      checkedIcon={checkedBoxOutlinedIcon}
-                      style={{ marginRight: 8 }}
-                      checked={selected}
-                      disabled={option.id === item.categoryId}
-                    />
-                    {option.name}
-                  </li>
-                );
-              }}
+                  if (isIncludeItemCategory) {
+                    setSelectedCategories(newValue);
+                  }
+                  //   setOption({
+                  //     ...option,
+                  //     categories: selectedCategories,
+                  //   });
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} placeholder="Enter categories..." />
+                )}
+                renderOption={(props, option, { selected }) => {
+                  const { key, ...optionProps } = props;
+
+                  // const isItemCategory = option.id === item.categoryId;
+                  return (
+                    <li
+                      key={key}
+                      {...optionProps}
+                      aria-disabled={option.id === item.categoryId}
+                    >
+                      <Checkbox
+                        icon={checkBoxOutlinedIcon}
+                        checkedIcon={checkedBoxOutlinedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                        disabled={option.id === item.categoryId}
+                      />
+                      {option.name}
+                    </li>
+                  );
+                }}
+              />
+            </Box>
+
+            <Box display="flex" justifyContent="flex-end">
+              <Button onClick={() => setIsOpenAddOption(true)}>
+                + Add Options
+              </Button>
+            </Box>
+            <OptionsTable
+              options={updatedItem?.data?.options || []}
+              showNotification={showNotification}
+              noIncludeOption
             />
           </Box>
-
-          <OptionsTable
-            options={updatedItem?.data?.options || []}
-            showNotification={showNotification}
-            noIncludeOption
-          />
-        </Box>
-      </BoxModal>
-    </Modal>
+        </BoxModal>
+      </Modal>
+    </>
   );
 }
