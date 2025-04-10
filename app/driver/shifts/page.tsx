@@ -24,30 +24,32 @@ export default function ShiftPage() {
   }, []);
 
   const shiftOverview = useMemo(() => {
-      if (shifts.length === 0) {
-        return {
-          totalHours: 0,
-          estEarnings: 0
-        };
-      }
-
-      const totalHours = shifts?.reduce((acc: number, shift: any) => {
-        return acc + shift.hours;
-      }, 0)
-
-      const estEarnings = shifts?.reduce((acc: number, shift: any) => {
-        return acc + shift.cost;
-      }, 0);
-
+    if (shifts.length === 0) {
       return {
-        totalHours: totalHours.toFixed(2),
-        estEarnings: estEarnings.toFixed(2),
-      }
-    }, [shifts]);
+        totalHours: 0,
+        estEarnings: 0,
+      };
+    }
+
+    const totalHours = shifts?.reduce((acc: number, shift: any) => {
+      return acc + shift.hours;
+    }, 0);
+
+    const estEarnings = shifts?.reduce((acc: number, shift: any) => {
+      return acc + shift.cost;
+    }, 0);
+
+    return {
+      totalHours: totalHours.toFixed(2),
+      estEarnings: estEarnings.toFixed(2),
+    };
+  }, [shifts]);
 
   const fetchShifts = async () => {
     try {
-      const response = await axios.get(`${API_URL.DRIVER}/shift?startDate=${dateRange[0]}&endDate=${dateRange[1]}`);
+      const response = await axios.get(
+        `${API_URL.DRIVER}/shift?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -67,10 +69,7 @@ export default function ShiftPage() {
 
       <Box display="flex" flexDirection="column" gap={1}>
         <Typography variant="h5">Shifts</Typography>
-        <SelectDateRange
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-        />
+        <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
       </Box>
       <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid item xs={12}>
@@ -100,7 +99,7 @@ export default function ShiftPage() {
         {shifts.length > 0 &&
           shifts.map((shift: IShiftSession, index: number) => (
             <Fragment key={index}>
-              <ShiftSummary shift={shift}/>
+              <ShiftSummary shift={shift} />
               <Divider sx={{ my: 2 }} />
             </Fragment>
           ))}

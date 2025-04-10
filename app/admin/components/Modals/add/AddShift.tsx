@@ -30,7 +30,12 @@ interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
 }
 
-export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) => {
+export const AddShift = ({
+  open,
+  onClose,
+  drivers,
+  showNotification,
+}: IProps) => {
   const [allRoutes, setAllRoutes] = useState<any>(null);
   const [allDrivers, setAllDrivers] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -43,7 +48,9 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
     cost: 0,
     routeId: -1,
   });
-  const [selectedRole, setSelectedRole] = useState<WORKING_ROLE>(WORKING_ROLE.DRIVER);
+  const [selectedRole, setSelectedRole] = useState<WORKING_ROLE>(
+    WORKING_ROLE.DRIVER,
+  );
 
   const todayIndex = new Date().getDay(); // 0 (Sun) to 6 (Sat)
   const sortedDays = [...days.slice(todayIndex), ...days.slice(0, todayIndex)];
@@ -96,8 +103,12 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
     try {
       const response = await axios.post(`${API_URL.ADMIN}/shifts`, {
         ...newShift,
-        startedAt: formatDateString(newShift.startedAt.format('YYYY-MM-DD HH:mm:ss')),
-        endedAt: formatDateString(newShift.endedAt.format('YYYY-MM-DD HH:mm:ss')),
+        startedAt: formatDateString(
+          newShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
+        ),
+        endedAt: formatDateString(
+          newShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+        ),
         role: selectedRole,
       });
 
@@ -123,7 +134,7 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -133,7 +144,7 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
           buttonLabel="ADD"
           onClose={onClose}
           onClick={handleAddShift}
-          buttonProps={{loading: isLoading}}
+          buttonProps={{ loading: isLoading }}
         />
 
         <Divider sx={{ my: 2 }} />
@@ -144,7 +155,9 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
             <Select
               fullWidth
               value={newShift.driverId}
-              onChange={(e) => setNewShift({...newShift, driverId: +e.target.value})}
+              onChange={(e) =>
+                setNewShift({ ...newShift, driverId: +e.target.value })
+              }
               sx={{ mt: 1 }}
             >
               <MenuItem value={-1} disabled>
@@ -161,50 +174,52 @@ export const AddShift = ({ open, onClose, drivers, showNotification }: IProps) =
           <Grid item xs={12}>
             <Typography>Role</Typography>
             <Box display="flex" gap={1} alignItems="center">
-              {
-                roles.map((role: any) => (
-                  <RoleOption 
-                    key={role.role}
-                    role={role.role}
-                    icon={role.icon}
-                    isSelected={selectedRole === role.role}
-                    onClick={() => setSelectedRole(role.role)}
-                  />
-                ))
-              }
-
+              {roles.map((role: any) => (
+                <RoleOption
+                  key={role.role}
+                  role={role.role}
+                  icon={role.icon}
+                  isSelected={selectedRole === role.role}
+                  onClick={() => setSelectedRole(role.role)}
+                />
+              ))}
             </Box>
           </Grid>
 
-          {selectedRole === WORKING_ROLE.DRIVER && <Grid item xs={12}>
-            <Typography>Route Assign</Typography>
-            <Select
-              fullWidth
-              value={newShift.routeId}
-              onChange={(e) => {
-                console.log('Selected Route ID:', +e.target.value);
-                setNewShift({ ...newShift, routeId: +e.target.value });
-              }}
-              sx={{ mt: 1 }}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 400,
+          {selectedRole === WORKING_ROLE.DRIVER && (
+            <Grid item xs={12}>
+              <Typography>Route Assign</Typography>
+              <Select
+                fullWidth
+                value={newShift.routeId}
+                onChange={(e) => {
+                  console.log('Selected Route ID:', +e.target.value);
+                  setNewShift({ ...newShift, routeId: +e.target.value });
+                }}
+                sx={{ mt: 1 }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 400,
+                    },
                   },
-                },
-              }}
-            >
-              {sortedDays.length > 0 && allRoutes &&
-                sortedDays.map((day: string) => [
-                  <ListSubheader key={`subheader-${day}`}>{day}</ListSubheader>,
-                  ...allRoutes[day].map((route: any) => (
-                    <MenuItem key={route.id} value={route.id}>
-                      <Typography>{route.name}</Typography>
-                    </MenuItem>
-                  )),
-                ])}
-            </Select>
-          </Grid>}
+                }}
+              >
+                {sortedDays.length > 0 &&
+                  allRoutes &&
+                  sortedDays.map((day: string) => [
+                    <ListSubheader key={`subheader-${day}`}>
+                      {day}
+                    </ListSubheader>,
+                    ...allRoutes[day].map((route: any) => (
+                      <MenuItem key={route.id} value={route.id}>
+                        <Typography>{route.name}</Typography>
+                      </MenuItem>
+                    )),
+                  ])}
+              </Select>
+            </Grid>
+          )}
 
           <Grid item xs={6}>
             <Typography>Start Time</Typography>

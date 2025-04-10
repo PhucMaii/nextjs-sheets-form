@@ -26,8 +26,41 @@ export default function NotificationRequest() {
 
   const { showNotification, NotificationComp } = useNotification();
 
+  // useEffect(() => {
+  //   if (Notification.permission !== 'granted') {
+  //     trySubscribeToPush();
+  //   }
+  //   setNotiPermission(Notification.permission);
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log('Notification.permission', Notification.permission);
+  //   if (Notification.permission === 'granted') {
+  //     trySubscribeToPush();
+  //   }
+  // }, [Notification.permission]);
+
   useEffect(() => {
+    const autoSubscribe = async () => {
+      if (
+        Notification.permission === 'granted' &&
+        (await navigator.serviceWorker.ready).pushManager.getSubscription() ==
+          null
+      ) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+
+        if (!subscription) {
+          console.log('📦 No subscription found, subscribing...');
+          await subscribeUser(); // or trySubscribeToPush()
+        } else {
+          console.log('📦 Already subscribed:', subscription);
+        }
+      }
+    };
+
     setNotiPermission(Notification.permission);
+    autoSubscribe();
   }, []);
 
   useEffect(() => {
@@ -55,11 +88,7 @@ export default function NotificationRequest() {
     if ('Notification' in window) {
       Notification.requestPermission().then((permission) => {
         setNotiPermission(permission);
-        if (permission === 'granted') {
-          subscribeUser();
-        } else {
-          showNotification('error', 'Notification permission is not granted');
-        }
+        subscribeUser();
       });
     } else {
       showNotification(
@@ -75,6 +104,7 @@ export default function NotificationRequest() {
     if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.getRegistration();
+        console.log(registration, 'registration');
 
         if (registration) {
           generateSubscibeEndpoint(registration);
@@ -82,6 +112,7 @@ export default function NotificationRequest() {
           const newRegistration =
             await navigator.serviceWorker.register('/sw.js');
 
+          console.log(newRegistration, 'newRegistration');
           generateSubscibeEndpoint(newRegistration);
         }
       } catch (error) {
@@ -110,11 +141,43 @@ export default function NotificationRequest() {
       userVisibleOnly: true,
     };
 
+    console.log(options, 'options');
+    const existing = await newRegistration.pushManager.getSubscription();
+
+    if (existing) {
+      console.log('📦 Existing subscription found:', existing);
+      await updateDriverNoti(existing); // Optionally resync to backend
+      return;
+    }
+
     const subscription = await newRegistration.pushManager.subscribe(options);
 
+    console.log('✅ New subscription:', subscription);
     await updateDriverNoti(subscription);
   };
 
+  // async function trySubscribeToPush() {
+  //   const registration = await navigator.serviceWorker.ready;
+
+  //   const existingSub = await registration.pushManager.getSubscription();
+
+  //   if (existingSub) {
+  //     console.log('📦 Already subscribed:', existingSub);
+  //     return;
+  //   }
+
+  //   const newSub = await registration.pushManager.subscribe({
+  //     userVisibleOnly: true,
+  //     applicationServerKey: urlB64ToUint8Array(
+  //       process.env.NEXT_PUBLIC_VAPID_KEY!,
+  //     ),
+  //   });
+
+  //   console.log('✅ New subscription:', newSub);
+
+  //   // Save to backend
+  //   await updateDriverNoti(newSub);
+  // }
   return (
     <>
       {NotificationComp}

@@ -17,7 +17,6 @@ import { grey } from '@mui/material/colors';
 import { primaryColor } from '@/theme/color';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
-
 export enum ShiftType {
   CLOCK_IN = 'CLOCK_IN',
   CLOCK_OUT = 'CLOCK_OUT',
@@ -82,7 +81,6 @@ const ShiftModal = ({ open, onClose, type, shift }: IProps) => {
   const { showNotification, NotificationComp } = useNotification();
 
   const [isAsked, setIsAsked] = useLocalStorage('isAskedClockIn', false);
-
 
   const today = getTodayDate();
 
@@ -153,45 +151,49 @@ const ShiftModal = ({ open, onClose, type, shift }: IProps) => {
           alignItems="center"
         >
           <Box display="flex" width="100%" justifyContent="flex-end">
-            <IconButton onClick={() => {
-              setIsAsked(true);
-              onClose();
-            }}>
+            <IconButton
+              onClick={() => {
+                setIsAsked(true);
+                onClose();
+              }}
+            >
               <CloseIcon />
             </IconButton>
           </Box>
           <Typography variant="h5">{today.time.slice(0, 12)}</Typography>
 
-          {type === ShiftType.CLOCK_IN && <Box
-            display="flex"
-            flexDirection="column"
-            // alignItems="center"
-            sx={{ my: 2 }}
-            gap={1}
-          >
-            <Typography justifySelf={'start'} sx={{ justifyItems: 'start' }}>
-              Working as:
-            </Typography>
+          {type === ShiftType.CLOCK_IN && (
             <Box
-              display={'flex'}
-              alignItems="center"
-              justifyContent="center"
-              gap={2}
+              display="flex"
+              flexDirection="column"
+              // alignItems="center"
+              sx={{ my: 2 }}
+              gap={1}
             >
-              {roles.map((role, index) => {
-                const isSelected = selectedRole === role.role;
-                return (
-                  <RoleOption
-                    key={index}
-                    role={role.role}
-                    icon={role.icon}
-                    isSelected={isSelected}
-                    onClick={() => setSelectedRole(role.role)}
-                  />
-                );
-              })}
+              <Typography justifySelf={'start'} sx={{ justifyItems: 'start' }}>
+                Working as:
+              </Typography>
+              <Box
+                display={'flex'}
+                alignItems="center"
+                justifyContent="center"
+                gap={2}
+              >
+                {roles.map((role, index) => {
+                  const isSelected = selectedRole === role.role;
+                  return (
+                    <RoleOption
+                      key={index}
+                      role={role.role}
+                      icon={role.icon}
+                      isSelected={isSelected}
+                      onClick={() => setSelectedRole(role.role)}
+                    />
+                  );
+                })}
+              </Box>
             </Box>
-          </Box>}
+          )}
           <Typography
             variant="subtitle1"
             fontWeight="semibold"

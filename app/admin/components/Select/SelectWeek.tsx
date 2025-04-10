@@ -23,7 +23,10 @@ export default function SelectWeek({
   const handleDateClose = () => setShowDatePicker(false);
 
   const handleWeekSelect = (date: Date) => {
-    setSelectedWeek([startOfWeek(date, { weekStartsOn: 1 }), endOfWeek(date, { weekStartsOn: 1 })]);
+    setSelectedWeek([
+      startOfWeek(date, { weekStartsOn: 1 }),
+      endOfWeek(date, { weekStartsOn: 1 }),
+    ]);
     setShowDatePicker(false);
   };
 
@@ -53,10 +56,7 @@ export default function SelectWeek({
       {renderSelectedWeek()}
       <Dialog open={showDatePicker} onClose={handleDateClose}>
         <DialogContent>
-          <Calendar
-            onClickDay={handleWeekSelect}
-            value={selectedWeek}
-          />
+          <Calendar onClickDay={handleWeekSelect} value={selectedWeek} />
         </DialogContent>
       </Dialog>
     </>

@@ -33,6 +33,7 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import SwitchRole from './Modals/SwitchRole';
 import NotificationRequest from '@/app/components/NotificationRequest';
 import axios from 'axios';
+import PushReSubscriber from '@/app/components/PushResubscriber';
 
 interface IProps {
   children: ReactNode;
@@ -86,11 +87,16 @@ export default function Sidebar({ children }: IProps) {
 
   const sendNotification = async () => {
     try {
+      if (Notification.permission === 'granted') {
+        new Notification('Supreme Sprouts', {
+          body: 'You have been clocked in',
+        })
+      };
       await axios.post('/api/push-notification/alert-clock-in');
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -154,6 +160,7 @@ export default function Sidebar({ children }: IProps) {
   if (smDown) {
     return (
       <>
+        <PushReSubscriber />
         <NotificationRequest />
 
         {shiftSession ? (

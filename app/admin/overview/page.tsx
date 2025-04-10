@@ -153,8 +153,18 @@ export default function Overview() {
         </Grid>
         <Grid item xs={12} md={3}>
           {shiftOverview ? (
-            <Box display="flex" flexDirection="column" gap={1} sx={{height: '500px !important'}}>
-              <ShadowSection display="flex" flexDirection="column" gap={2} sx={{height: '150px !important'}}>
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              sx={{ height: '500px !important' }}
+            >
+              <ShadowSection
+                display="flex"
+                flexDirection="column"
+                gap={2}
+                sx={{ height: '150px !important' }}
+              >
                 <Box
                   display="flex"
                   justifyContent="space-between"
@@ -201,8 +211,16 @@ export default function Overview() {
                 </Box>
               </ShadowSection>
 
-              <ShadowSection display="flex" flexDirection="column" gap={2} sx={{height: '350px !important'}}>
-                <TopDrivers data={shiftOverview?.sortedDriverWithDriverHours} limit={5} />
+              <ShadowSection
+                display="flex"
+                flexDirection="column"
+                gap={2}
+                sx={{ height: '350px !important' }}
+              >
+                <TopDrivers
+                  data={shiftOverview?.sortedDriverWithDriverHours}
+                  limit={5}
+                />
               </ShadowSection>
             </Box>
           ) : (

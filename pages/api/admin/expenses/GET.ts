@@ -208,7 +208,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         vendors: {
           none: {},
-        }
+        },
       });
 
       expenses = [...stockPurchased];
