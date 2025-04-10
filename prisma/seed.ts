@@ -115,7 +115,24 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-async function main() {}
+async function main() {
+  const items = await prisma.item.findMany({
+    include: {
+      category: true
+    }
+  });
+  
+  const orphanedItems = items.filter(item => item.category === null);
+  const itemIds = orphanedItems.map(item => item.id);
+  
+  await prisma.item.deleteMany({
+    where: {
+      id: {
+        in: itemIds
+      }
+    }
+  })
+}
 
 main()
   .then(() => prisma.$disconnect())

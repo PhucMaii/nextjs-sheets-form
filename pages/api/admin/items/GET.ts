@@ -228,8 +228,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      // Sort by category name
+      const sortedItems = items.sort((a: any, b: any) => {
+        if (a?.category?.name < b?.category?.name) {
+          return -1;
+        }
+        if (a?.category?.name > b?.category?.name) {
+          return 1;
+        }
+        return 0;
+      });
+
       return res.status(200).json({
-        data: items,
+        data: sortedItems,
         message: 'Fetch Items Successfully',
       });
     }

@@ -10,8 +10,14 @@ import {
 import useNotification from '@/hooks/useNotification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import { Paper } from '@mui/material';
-import { useParams } from 'next/navigation';
+import { Box, Button, Paper } from '@mui/material';
+import { useParams, useRouter } from 'next/navigation';
+import { ShadowSection } from '@/app/admin/reports/styled';
+import { ArrowLeftIcon } from 'lucide-react';
+import { grey } from '@mui/material/colors';
+import { LoadingButton } from '@mui/lab';
+import { getUniqueUnitRatios } from '@/app/utils/array';
+import BulkEditOptions from '@/app/admin/components/Bulk/BulkEditOptions';
 
 function OptionsEditCell(props: GridRenderEditCellParams) {
   const { id, field, value } = props;
@@ -49,18 +55,48 @@ function OptionsEditCell(props: GridRenderEditCellParams) {
 export default function BulkEditItems() {
   const { inventoryItemId }: any = useParams();
 
+  const [editOptionProps, setEditOptionProps] = useState<any>({
+    open: false,
+    item: null,
+  });
+  const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
+
+  const router = useRouter();
+
   const [items, setItems] = useState<any>([]);
 
   const { showNotification, NotificationComp } = useNotification();
 
   const columns: GridColDef[] = [
-    { field: 'category.name', headerName: 'Category' },
-    { field: 'name', headerName: 'Name', editable: true },
+    {
+      field: 'category.name',
+      headerName: 'Category',
+      renderCell: (params) => <span>{params.row.category?.name || '—'}</span>,
+      width: 400,
+    },
+    {
+      field: 'name',
+      headerName: 'Name',
+      editable: true,
+    },
     {
       field: 'price',
       headerName: 'Price',
       editable: true,
       type: 'number',
+      renderCell: (params) => {
+        const isDisabled = params.row.options?.length > 0;
+        return (
+          <span
+            style={{
+              color: isDisabled ? 'gray' : 'inherit',
+              fontStyle: isDisabled ? 'italic' : 'normal',
+            }}
+          >
+            {params.value}
+          </span>
+        );
+      },
     },
     {
       field: 'options',
@@ -69,11 +105,18 @@ export default function BulkEditItems() {
       width: 400,
       renderCell: (params) => {
         const options = params.row.options;
-        console.log(options, 'OPTIONS');
+        // console.log(options, 'OPTIONS');
         const optionsRender = options?.map((opt: any) => opt.name).join(', ');
 
         if (Array.isArray(options) && options.length > 0) {
-          return <div>{optionsRender}</div>;
+          return (
+          <div
+            onClick={() => setEditOptionProps({ open: true, item: params.row })}
+            style={{ cursor: 'pointer' }}
+          >
+            {optionsRender}
+            </div>
+        );
         }
       },
       renderEditCell: (params) => <OptionsEditCell {...params} />,
@@ -84,7 +127,34 @@ export default function BulkEditItems() {
       editable: true,
       type: 'boolean',
     },
-    { field: 'prevPrice', headerName: 'Prev price', editable: true },
+    {
+      field: 'prevPrice',
+      headerName: 'Prev price',
+      editable: true,
+      type: 'number',
+    },
+    {
+      field: 'inventoryUnitId',
+      headerName: 'Unit',
+      editable: true,
+      type: 'singleSelect', // This tells the DataGrid to use dropdown
+      // valueGetter: (params) => params?.row?.inventoryUnit?.unit || '—',
+      valueOptions: (params) => {
+        // console.log(params, 'PARAMS');
+        const inventoryItemUnits =
+          params.row.inventoryItem?.vendorItem?.flatMap(
+            (item: any) => item.unit,
+          ) || [];
+
+        const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
+        // Assuming it returns array like [{value: 1, label: 'kg'}]
+
+        return sellingUnits.map((unit: any) => ({
+          value: unit.id,
+          label: unit.unit,
+        }));
+      },
+    },
   ];
 
   useEffect(() => {
@@ -106,12 +176,98 @@ export default function BulkEditItems() {
     }
   };
 
+  const handleRowUpdate = async (newRow: any) => {
+    const targetItem = items.map((item: any) => {
+      if (item.id === newRow.id) {
+        return newRow;
+      }
+      return item;
+    });
+
+    console.log({ targetItem, newRow }, 'targetItem');
+
+    setItems(targetItem);
+    return newRow; // This is required
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      const selectedItems = items.filter((item: any) => {
+        return selectedItemIds.includes(item.id);
+      });
+
+      const response = await axios.put(`${API_URL.ADMIN}/bulk/selling-items`, {
+        items: selectedItems,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+      }
+
+      if (response.data.data) {
+        showNotification('success', response.data.message);
+        // router.push('/admin/inventory');
+      }
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', 'There was an error: ' + error);
+    }
+  };
+
   return (
     <Sidebar>
       {NotificationComp}
-      <Paper>
-        <DataGrid rows={items} columns={columns} />
-      </Paper>
+      {editOptionProps.open && editOptionProps.item && (
+        <BulkEditOptions
+          open={editOptionProps.open}
+          onClose={() => setEditOptionProps({ open: false, item: null })}
+          item={editOptionProps.item}
+          showNotification={showNotification}
+        />
+      )}
+      <ShadowSection>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Button
+            size="small"
+            onClick={() => router.back()}
+            sx={{ color: grey[800] }}
+          >
+            <Box display="flex" alignItems="center" gap={1}>
+              <ArrowLeftIcon />
+              <span>Back</span>
+            </Box>
+          </Button>
+
+          <Box>
+            <LoadingButton
+              onClick={handleSaveChanges}
+              variant="contained"
+              size="small"
+            >
+              Save Changes
+            </LoadingButton>
+          </Box>
+        </Box>
+        <Paper elevation={0} sx={{ mt: 2 }}>
+          <DataGrid
+            rows={items}
+            columns={columns}
+            checkboxSelection
+            disableRowSelectionOnClick
+            processRowUpdate={handleRowUpdate}
+            experimentalFeatures={{ newEditingApi: true } as any}
+            onRowSelectionModelChange={(newSelection) => {
+              setSelectedItemIds(newSelection as number[]); // or string[] depending on your ID type
+            }}
+            isCellEditable={(params) => {
+              if (params.field === 'price') {
+                return !(params.row.options?.length > 0);
+              }
+              return true;
+            }}
+          />
+        </Paper>
+      </ShadowSection>
     </Sidebar>
   );
 }

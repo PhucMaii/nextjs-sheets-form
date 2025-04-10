@@ -23,7 +23,8 @@ import ErrorComponent from '../../ErrorComponent';
 import { generateCurrentTime } from '@/app/utils/time';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SellIcon from '@mui/icons-material/Sell';
-import DisplayListingCategory from '../DisplayListingCategory';
+import { useRouter } from 'next/navigation';
+// import DisplayListingCategory from '../DisplayListingCategory';
 
 interface IProps {
   open: boolean;
@@ -38,7 +39,7 @@ export default function EditInventory({
   inventoryItem,
   showNotification,
 }: IProps) {
-  const [anchorListingPopover, setAnchorListingPopover] = useState<any>(null);
+  // const [anchorListingPopover, setAnchorListingPopover] = useState<any>(null);
   const [addUnitProps, setAddUnitProps] = useState<any>({
     open: false,
     selectedVendorId: -1,
@@ -57,6 +58,7 @@ export default function EditInventory({
   const [selectedVendors, setSelectedVendors] = useState<IVendor[]>([]);
 
   const [vendors] = SWRFetchData(`${API_URL.ADMIN}/vendors`);
+  const router = useRouter();
 
   useEffect(() => {
     if (inventoryItem) {
@@ -337,10 +339,10 @@ export default function EditInventory({
           updateUnit(updatedUnit, editUnit.unitIndex)
         }
       />
-      <DisplayListingCategory
+      {/* <DisplayListingCategory
         anchorEl={anchorListingPopover}
         listing={inventoryItem?.listingCategories || []}
-      />
+      /> */}
       {/* <Button onClick={() => setOpen(true)}>Edit</Button> */}
       <Modal open={open} onClose={onClose}>
         <BoxModal maxHeight="80vh" overflow="scroll">
@@ -358,13 +360,19 @@ export default function EditInventory({
             <Box
               display="flex"
               justifyContent="space-between"
-              onMouseOver={() => setAnchorListingPopover(!anchorListingPopover)}
+              // onMouseOver={(event: any) => {
+              //   if (anchorListingPopover) {
+              //     setAnchorListingPopover(null);
+              //   } else {
+              //     setAnchorListingPopover(event.currentTarget)
+              //   }
+              // }}
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <SellIcon />
-                <Typography>10 listing items</Typography>
+                <Typography>{inventoryItem.listingCategories?.length} listing items</Typography>
               </Box>
-              <Button variant="contained" size="small">
+              <Button variant="contained" size="small" onClick={() => router.push(`/admin/bulk/selling-items/${inventoryItem.id}`)}>
                 <Box display="flex" alignItems="center">
                   Bulk Listing Item Edit
                   <ArrowForwardIosIcon />
