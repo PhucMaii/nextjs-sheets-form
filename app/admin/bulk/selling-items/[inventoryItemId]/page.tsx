@@ -18,7 +18,8 @@ import { grey } from '@mui/material/colors';
 import { LoadingButton } from '@mui/lab';
 import { getUniqueUnitRatios } from '@/app/utils/array';
 import BulkEditOptions from '@/app/admin/components/Bulk/BulkEditOptions';
-import AddItem from '@/app/admin/components/Modals/add/AddItem';
+import AddOption from '@/app/admin/components/Modals/add/AddOption';
+// import AddItem from '@/app/admin/components/Modals/add/AddItem';
 
 function OptionsEditCell(props: GridRenderEditCellParams) {
   const { id, field, value } = props;
@@ -56,11 +57,15 @@ function OptionsEditCell(props: GridRenderEditCellParams) {
 export default function BulkEditItems() {
   const { inventoryItemId }: any = useParams();
 
+  const [addOptionProps, setAddOptionProps] = useState<any>({
+    open: false,
+    item: null,
+  });
   const [editOptionProps, setEditOptionProps] = useState<any>({
     open: false,
     item: null,
   });
-  const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
+  // const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
 
   const router = useRouter();
@@ -110,15 +115,30 @@ export default function BulkEditItems() {
         // console.log(options, 'OPTIONS');
         const optionsRender = options?.map((opt: any) => opt.name).join(', ');
 
+        console.log(optionsRender, 'OPTIONS RENDER');
+
         if (Array.isArray(options) && options.length > 0) {
           return (
-          <div
-            onClick={() => setEditOptionProps({ open: true, item: params.row })}
-            style={{ cursor: 'pointer' }}
-          >
-            {optionsRender}
+            <div
+              onClick={() => {
+                setEditOptionProps({ open: true, item: params.row });
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              {optionsRender}
             </div>
-        );
+          );
+        } else {
+          return (
+            <div
+              onClick={() => {
+                setAddOptionProps({ open: true, item: params.row });
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              N/A
+            </div>
+          );
         }
       },
       renderEditCell: (params) => <OptionsEditCell {...params} />,
@@ -163,6 +183,26 @@ export default function BulkEditItems() {
     fetchItems();
   }, []);
 
+  // const onAddItem = (newItem: any, categories: any) => {
+  //   const newItemsWithCategory = categories.map((category: any) => {
+  //     const tempNewItem = {
+  //       ...newItem,
+  //       inventoryUnit: newItem.unit,
+  //       inventoryUnitId: Number(newItem.unit.id),
+  //       availability: true,
+  //       isShowDiscount: false,
+  //       prevPrice: 0,
+  //       category,
+  //     };
+
+  //     console.log(tempNewItem, 'TEMP NEW ITEM');
+
+  //     return tempNewItem;
+  //   });
+
+  //   setItems([...items, ...newItemsWithCategory]);
+  // };
+
   const fetchItems = async () => {
     try {
       const response = await axios.get(
@@ -186,7 +226,7 @@ export default function BulkEditItems() {
       return item;
     });
 
-    console.log({ targetItem, newRow }, 'targetItem');
+    // console.log({ targetItem, newRow }, 'targetItem');
 
     setItems(targetItem);
     return newRow; // This is required
@@ -218,7 +258,7 @@ export default function BulkEditItems() {
 
   return (
     <Sidebar>
-      <AddItem
+      {/* <AddItem
         // categoryId={}
         addItem={() => {}}
         showNotification={showNotification}
@@ -228,7 +268,8 @@ export default function BulkEditItems() {
           inventoryItemId: Number(inventoryItemId),
           name: items[0]?.name,
         }}
-      />
+        onAddTempItem={onAddItem}
+      /> */}
       {NotificationComp}
       {editOptionProps.open && editOptionProps.item && (
         <BulkEditOptions
@@ -236,6 +277,16 @@ export default function BulkEditItems() {
           onClose={() => setEditOptionProps({ open: false, item: null })}
           item={editOptionProps.item}
           showNotification={showNotification}
+        />
+      )}
+
+      {addOptionProps.open && addOptionProps.item && (
+        <AddOption
+          item={addOptionProps.item}
+          showNotification={showNotification}
+          open={addOptionProps.open}
+          onClose={() => setAddOptionProps({ open: false, item: null })}
+          // noIncludeBulkAdd
         />
       )}
       <ShadowSection>
@@ -252,9 +303,13 @@ export default function BulkEditItems() {
           </Button>
 
           <Box display="flex" alignItems="center" gap={1}>
-            <Button variant="outlined" size="small" onClick={() => setIsOpenAddItem(true)}>
+            {/* <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setIsOpenAddItem(true)}
+            >
               + Add Item
-            </Button>
+            </Button> */}
             <LoadingButton
               onClick={handleSaveChanges}
               variant="contained"

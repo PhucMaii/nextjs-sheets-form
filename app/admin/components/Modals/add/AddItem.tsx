@@ -16,17 +16,18 @@ import { ModalProps } from '../type';
 // import { IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
-import useEditUnit from '@/hooks/unit/useEditUnit';
 import {
   checkBoxOutlinedIcon,
   checkedBoxOutlinedIcon,
 } from '../../Autocomplete/VendorSearch';
+import UnitRadio from '../../Radio/UnitRadio';
 
 interface IProps extends ModalProps {
   categoryId?: number;
-  addItem: any;
+  addItem?: any;
   showNotification: (type: AlertColor, message: string) => void;
   defaultItem?: any;
+  onAddTempItem?: any;
 }
 
 export default function AddItem({
@@ -34,8 +35,10 @@ export default function AddItem({
   onClose,
   categoryId,
   addItem,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   showNotification,
   defaultItem,
+  onAddTempItem,
 }: IProps) {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<any>({
@@ -50,19 +53,36 @@ export default function AddItem({
   });
   const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
 
-  const { units, selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
-    useEditUnit(newItem.units, newItem.unit, showNotification, true);
+  // const { units, selectedUnit, AddUnitModal, EditUnitModal, UnitDisplay } =
+  //   useEditUnit(newItem.units, newItem.unit, showNotification, true);
 
   const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
   const [categories] = SWRFetchData(API_URL.CATEGORIES);
 
   useEffect(() => {
-    if (defaultItem) {
-      setNewItem((prevItem: any) => {
-        return { ...prevItem, ...defaultItem };
-      });
+    if (defaultItem && inventoryItems) {
+      if (defaultItem.inventoryItemId > 0) {
+        const newValue = inventoryItems.data.find(
+          (item: any) => item.id === defaultItem.inventoryItemId,
+        );
+
+        let newUnits = newValue.vendorItem.flatMap((item: any) => item.unit);
+
+        newUnits = Array.from(
+          new Map(newUnits.map((unit: any) => [unit.ratio, unit])).values(),
+        );
+
+        setNewItem((prevItem: any) => {
+          return {
+            ...prevItem,
+            ...defaultItem,
+            units: newUnits,
+            unit: newUnits[0],
+          };
+        });
+      }
     }
-  }, [defaultItem]);
+  }, [defaultItem, inventoryItems]);
 
   console.log(newItem, 'newItem');
 
@@ -97,21 +117,26 @@ export default function AddItem({
   const handleAddItem = async () => {
     const updatedNewItem = {
       ...newItem,
-      units,
-      unit: selectedUnit,
+      units: newItem.units,
+      unit: newItem.unit,
       name: newItem.name.toUpperCase(),
     };
     setIsAdding(true);
 
     const categoryIds = selectedCategories.map((cat: any) => cat.id);
-    await addItem(updatedNewItem, categoryIds);
+    if (addItem) {
+      await addItem(updatedNewItem, categoryIds);
+    }
+
+    if (onAddTempItem) {
+      onAddTempItem(updatedNewItem, selectedCategories);
+    }
     setIsAdding(false);
+    onClose();
   };
 
   return (
     <>
-      {AddUnitModal}
-      {EditUnitModal}
       <Modal open={open} onClose={onClose}>
         <BoxModal display="flex" flexDirection="column" gap={2}>
           <ModalHead
@@ -186,7 +211,9 @@ export default function AddItem({
                 renderInput={(params) => <TextField {...params} label="Item" />}
                 value={
                   inventoryItems?.data?.find(
-                    (item: any) => (item.id === newItem.inventoryItemId || item.name === newItem.name),
+                    (item: any) =>
+                      item.id === newItem.inventoryItemId ||
+                      item.name === newItem.name,
                   ) || null
                 }
                 onChange={(e, newValue: any) => {
@@ -229,7 +256,19 @@ export default function AddItem({
               />
             </Grid>
 
-            {newItem.units.length > 0 && UnitDisplay}
+            {newItem.units.length > 0 && (
+              <UnitRadio
+                units={newItem.units}
+                value={JSON.stringify(newItem.unit)}
+                onChange={(e: any) =>
+                  setNewItem((prevState: any) => ({
+                    ...prevState,
+                    unit: JSON.parse(e.target.value),
+                    unitId: JSON.parse(e.target.value).id,
+                  }))
+                }
+              />
+            )}
 
             <Grid item xs={12}>
               <Typography variant="h6">Price:</Typography>
