@@ -25,7 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       inventoryItemId,
     }: IBody = req.body;
 
-    if (unitId < 1) {
+    if (Number(unitId) < 1) {
       return res.status(500).json({ error: 'Please select a unit' });
     }
 
@@ -60,7 +60,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         name,
         price,
         availability: true,
-        unitId,
+        unitId: Number(unitId),
         itemId,
         inventoryItemId,
         createdAt: today.dateAndTime,
@@ -106,7 +106,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         name,
         price,
         availability: true,
-        unitId,
+        unitId: Number(unitId),
         itemId: item.id,
         inventoryItemId,
         createdAt: today.dateAndTime,
@@ -229,7 +229,7 @@ const updateScheduledOrderedItemsOptions = async (
             price: toBeAssignedOption.price,
             prevPrice: toBeAssignedOption?.prevPrice,
             isShowDiscount: toBeAssignedOption?.isShowDiscount,
-            inventoryUnitId: toBeAssignedOption?.unitId,
+            inventoryUnitId: Number(toBeAssignedOption?.unitId),
             option: {
               name: toBeAssignedOption.name,
               price: toBeAssignedOption.price,

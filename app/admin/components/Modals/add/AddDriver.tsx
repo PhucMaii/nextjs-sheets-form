@@ -27,6 +27,7 @@ export default function AddDriver({
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [hourlyRate, setHourlyRate] = useState<number>(0);
 
   const handleAddDriver = async () => {
     try {
@@ -35,6 +36,7 @@ export default function AddDriver({
       const response = await axios.post(`${API_URL.ADMIN}/drivers`, {
         driverName: name.toUpperCase(),
         driverPassword: password,
+        hourlyRate,
       });
 
       if (response.data.error) {
@@ -93,6 +95,16 @@ export default function AddDriver({
               label="Password"
               placeholder="Enter driver password..."
               fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              value={hourlyRate}
+              onChange={(e: any) => setHourlyRate(+e.target.value)}
+              label="Hourly Rate"
+              placeholder="Enter driver hourly rate..."
+              fullWidth
+              type="number"
             />
           </Grid>
         </Grid>
