@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Divider,
-  IconButton,
   Modal,
   Switch,
   TextField,
@@ -22,16 +21,14 @@ import EditUnit from './EditUnit';
 import UnitRadio from '../../Radio/UnitRadio';
 import ErrorComponent from '../../ErrorComponent';
 import { generateCurrentTime } from '@/app/utils/time';
-import { ColorPicker, useColor } from 'react-color-palette';
-import { ItemButton } from '@/app/components/OrderView';
-import EditIcon from '@mui/icons-material/Edit';
-import EditOffIcon from '@mui/icons-material/EditOff';
-import { handleResetColor, infoBackground } from '@/theme/color';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import SellIcon from '@mui/icons-material/Sell';
+import DisplayListingCategory from '../DisplayListingCategory';
 
 interface IProps {
   open: boolean;
   onClose: () => void;
-  inventoryItem: IInventoryItem;
+  inventoryItem: IInventoryItem | any;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
@@ -41,20 +38,18 @@ export default function EditInventory({
   inventoryItem,
   showNotification,
 }: IProps) {
+  const [anchorListingPopover, setAnchorListingPopover] = useState<any>(null);
   const [addUnitProps, setAddUnitProps] = useState<any>({
     open: false,
     selectedVendorId: -1,
   });
-  const [color, setColor] = useColor(inventoryItem?.color || infoBackground);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isEditColor, setIsEditColor] = useState<boolean>(false);
   const [editUnit, setEditUnit] = useState<any>({
     open: false,
     unit: null,
     unitIndex: -1,
     selectedVendorId: -1,
   });
-  // const [open, setOpen] = useState<boolean>(false);
   const [updatedItem, setUpdatedItem] = useState<any>(inventoryItem);
   const [updatedVendorItems, setUpdatedVendorItems] = useState<any[]>(
     inventoryItem.vendorItem,
@@ -142,7 +137,7 @@ export default function EditInventory({
       const response = await axios.put(`${API_URL.ADMIN}/inventory`, {
         id: inventoryItem.id,
         ...updatedItem,
-        color: color.hex,
+        // color: color.hex,
         // name: updatedItem.name,
         vendorItems: updatedVendorItems,
         updatedAt,
@@ -342,6 +337,10 @@ export default function EditInventory({
           updateUnit(updatedUnit, editUnit.unitIndex)
         }
       />
+      <DisplayListingCategory
+        anchorEl={anchorListingPopover}
+        listing={inventoryItem?.listingCategories || []}
+      />
       {/* <Button onClick={() => setOpen(true)}>Edit</Button> */}
       <Modal open={open} onClose={onClose}>
         <BoxModal maxHeight="80vh" overflow="scroll">
@@ -356,9 +355,24 @@ export default function EditInventory({
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" flexDirection="column" gap={3}>
-            {/* <Saturation height={300} color={color} onChange={setColor} />
-            <Hue color={color} onChange={setColor} /> */}
-            <Box>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              onMouseOver={() => setAnchorListingPopover(!anchorListingPopover)}
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <SellIcon />
+                <Typography>10 listing items</Typography>
+              </Box>
+              <Button variant="contained" size="small">
+                <Box display="flex" alignItems="center">
+                  Bulk Listing Item Edit
+                  <ArrowForwardIosIcon />
+                </Box>
+              </Button>
+            </Box>
+
+            {/* <Box>
               <Box display="flex" alignItems="center" gap={2}>
                 <Typography variant="h6">Appearance:</Typography>
                 <ItemButton
@@ -397,7 +411,7 @@ export default function EditInventory({
                   hideInput={['hsv', 'rgb']}
                 />
               )}
-            </Box>
+            </Box> */}
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Tax</Typography>
               <Divider />

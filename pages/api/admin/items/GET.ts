@@ -6,13 +6,14 @@ interface IQuery {
   categoryId?: string;
   userId?: string;
   itemId?: string;
+  inventoryItemId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { itemId, categoryId, userId }: IQuery = req.query;
+    const { itemId, categoryId, userId, inventoryItemId }: IQuery = req.query;
 
     if (itemId) {
       const item = await prisma.item.findUnique({
@@ -184,6 +185,47 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
           { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
         ],
+      });
+
+      return res.status(200).json({
+        data: items,
+        message: 'Fetch Items Successfully',
+      });
+    }
+
+    if (inventoryItemId) {
+      const items = await prisma.item.findMany({
+        where: {
+          inventoryItemId: Number(inventoryItemId),
+        },
+        include: {
+          options: {
+            include: {
+              unit: true,
+              item: true,
+            },
+          },
+          inventoryUnit: true,
+          inventoryItem: {
+            include: {
+              vendorItem: {
+                include: {
+                  unit: true,
+                },
+              },
+              type: true,
+            },
+          },
+          category: {
+            include: {
+              itemType_category: {
+                include: {
+                  itemType: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       return res.status(200).json({
