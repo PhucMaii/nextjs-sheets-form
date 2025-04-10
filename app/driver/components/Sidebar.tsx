@@ -31,6 +31,8 @@ import ShiftBanner from './ShiftBanner';
 import { AccessTime } from '@mui/icons-material';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import SwitchRole from './Modals/SwitchRole';
+import NotificationRequest from '@/app/components/NotificationRequest';
+import axios from 'axios';
 
 interface IProps {
   children: ReactNode;
@@ -81,6 +83,14 @@ export default function Sidebar({ children }: IProps) {
   const handleChangeTab = (path: string) => {
     router.push(path);
   };
+
+  const sendNotification = async () => {
+    try {
+      await axios.post('/api/push-notification/alert-clock-in');
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -144,6 +154,8 @@ export default function Sidebar({ children }: IProps) {
   if (smDown) {
     return (
       <>
+        <NotificationRequest />
+
         {shiftSession ? (
           <ShiftBanner
             shift={shiftSession}
@@ -178,7 +190,10 @@ export default function Sidebar({ children }: IProps) {
           open={isOpenSwitchRole}
           onClose={() => setIsOpenSwitchRole(false)}
         />
-        <Box sx={{ pb: 8, m: 1 }}>{children}</Box>
+        <Box sx={{ pb: 8, m: 1 }}>
+          <Button onClick={sendNotification}>Send notification</Button>
+          {children}
+        </Box>
         <Paper
           sx={{ position: 'fixed', bottom: '0 !important', zIndex: 100 }}
           elevation={3}
@@ -233,6 +248,8 @@ export default function Sidebar({ children }: IProps) {
   if (mdDown) {
     return (
       <>
+        <NotificationRequest />
+
         {shiftSession ? (
           <ShiftBanner
             shift={shiftSession}
@@ -306,6 +323,7 @@ export default function Sidebar({ children }: IProps) {
 
   return (
     <>
+      <NotificationRequest />
       {shiftSession ? (
         <ShiftBanner
           shift={shiftSession}

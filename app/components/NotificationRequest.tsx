@@ -1,9 +1,10 @@
-import { Box, Modal, Typography } from '@mui/material';
+import { Modal, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../admin/components/Modals/styled';
 import { LoadingButton } from '@mui/lab';
-import { ModalProps } from '../admin/components/Modals/type';
-import { ShowNotificationType } from '@/hooks/useNotification';
+import axios from 'axios';
+import useNotification from '@/hooks/useNotification';
+import { grey } from '@mui/material/colors';
 
 export function urlB64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -16,25 +17,39 @@ export function urlB64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
-interface IProps extends ModalProps {
-    showNotification: ShowNotificationType;
-}
-
-export default function NotificationRequest({
-  showNotification,
-  open,
-  onClose,
-}: IProps) {
+export default function NotificationRequest() {
+  const [open, setOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [notiPermission, setNotiPermission] = useState<
     'granted' | 'denied' | 'default'
   >('granted');
 
+  const { showNotification, NotificationComp } = useNotification();
+
   useEffect(() => {
     setNotiPermission(Notification.permission);
   }, []);
 
-  const updateDriverNoti = async (subscription) => {};
+  useEffect(() => {
+    if (notiPermission !== 'granted') {
+      setOpen(true);
+    }
+  }, [notiPermission]);
+
+  const updateDriverNoti = async (subscription: any) => {
+    try {
+      const response = await axios.post(`/api/drivers/save-noti`, {
+        notiJson: JSON.stringify(subscription),
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+      }
+    } catch (error) {
+      console.log('Fail to update driver noti: ', error);
+      showNotification('error', 'Fail to update driver noti: ' + error);
+    }
+  };
 
   const enableNotification = () => {
     if ('Notification' in window) {
@@ -53,7 +68,7 @@ export default function NotificationRequest({
       );
     }
 
-    onClose();
+    setOpen(false);
   };
 
   const subscribeUser = async () => {
@@ -101,11 +116,30 @@ export default function NotificationRequest({
   };
 
   return (
-    <Modal open={open}>
-      <BoxModal>
-        <Typography>Please Allow Notification</Typography>
-        <LoadingButton onClick={enableNotification}>Allow</LoadingButton>
-      </BoxModal>
-    </Modal>
+    <>
+      {NotificationComp}
+      <Modal open={open}>
+        <BoxModal>
+          <Typography variant="h6" textAlign="center">
+            Get Notification
+          </Typography>
+          <Typography
+            variant="body1"
+            textAlign="center"
+            sx={{ color: grey[700] }}
+          >
+            Allow Notification to receive notifications from admin
+          </Typography>
+          <LoadingButton
+            onClick={enableNotification}
+            sx={{ mt: 2 }}
+            variant="contained"
+            fullWidth
+          >
+            Allow
+          </LoadingButton>
+        </BoxModal>
+      </Modal>
+    </>
   );
 }
