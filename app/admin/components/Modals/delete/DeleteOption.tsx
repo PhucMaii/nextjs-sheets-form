@@ -11,11 +11,13 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import RelevantPreOrdersTable from '../../Tables/RelevantPreOrdersTable';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 interface IProps extends ModalProps {
   option: IOption;
   allOptions: IOption[];
   showNotification: ShowNotificationType;
+  setItems?: any;
 }
 
 export default function DeleteOption({
@@ -24,7 +26,9 @@ export default function DeleteOption({
   option,
   allOptions,
   showNotification,
+  setItems,
 }: IProps) {
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [relevantItemPreOrders, setRelevantItemPreOrders] = useState<any>([]);
   const [selectedOption, setSelectedOption] = useState<IOption | null>(null);
@@ -33,9 +37,12 @@ export default function DeleteOption({
     return allOptions.filter((o) => o.id !== option.id);
   }, [allOptions]);
 
-  const [itemInPreOrders] = SWRFetchData(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [itemInPreOrders, mutate, isValidating] = SWRFetchData(
     `${API_URL.ADMIN}/scheduledOrders/by-option?optionName=${option?.name}&categoryId=${option?.item?.categoryId}&itemName=${option?.item?.name}`,
   );
+
+  console.log(option, 'option');
 
   useEffect(() => {
     if (otherOptions && otherOptions.length > 0) {
@@ -45,6 +52,7 @@ export default function DeleteOption({
 
   useEffect(() => {
     if (itemInPreOrders) {
+      setIsInitializing(false);
       setRelevantItemPreOrders(itemInPreOrders?.data);
     }
   }, [itemInPreOrders]);
@@ -66,7 +74,7 @@ export default function DeleteOption({
         that the selected option will be applied on those pre order items.
       </Typography>
     );
-  }, [otherOptions]);
+  }, [otherOptions, relevantItemPreOrders]);
 
   const handleDelete = async () => {
     setIsLoading(true);
@@ -80,6 +88,18 @@ export default function DeleteOption({
         return;
       }
 
+      if (setItems) {
+        const deletedOptionItem = response.data.data;
+        setItems((prevItems: any) => {
+          return prevItems.map((item: any) => {
+            if (item.id === deletedOptionItem?.id) {
+              return deletedOptionItem;
+            } else {
+              return item;
+            }
+          });
+        });
+      }
       showNotification('success', response.data.message);
       onClose();
     } catch (error: any) {
@@ -93,47 +113,56 @@ export default function DeleteOption({
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal display="flex" flexDirection="column" gap={1}>
-        <Typography variant="h6" fontWeight="regular">
-          Delete <strong>{option?.name}</strong> Option
-        </Typography>
+        {isInitializing ? (
+          <LoadingComponent />
+        ) : (
+          <>
+            <Typography variant="h6" fontWeight="regular">
+              Delete <strong>{option?.name}</strong> Option
+            </Typography>
 
-        {renderWarningText()}
+            {renderWarningText()}
 
-        {/* Display list of other options to choose */}
-        {otherOptions.length > 0 && (
-          <Box display="flex" gap={2} alignItems="center">
-            {otherOptions.map((o) => (
-              <Box
-                key={o?.id}
-                // variant="body1"
-                display="flex"
-                sx={{
-                  cursor: 'pointer',
-                  height: 50,
-                  width: 'fit-content',
-                  px: 4,
-                  py: 2,
-                  backgroundColor: grey[200],
-                  borderRadius: 2,
-                  border: selectedOption?.id === o?.id ? '2px solid red' : '',
-                }}
-                onClick={() => setSelectedOption(o)}
-                // justifyContent="center"
-                // alignItems="center"
-              >
-                <Typography variant="body1" sx={{ fontWeight: 'semibold' }}>
-                  {o?.name}
-                </Typography>
+            {/* Display list of other options to choose */}
+            {otherOptions.length > 0 && (
+              <Box display="flex" gap={2} alignItems="center">
+                {otherOptions.map((o) => (
+                  <Box
+                    key={o?.id}
+                    // variant="body1"
+                    display="flex"
+                    sx={{
+                      cursor: 'pointer',
+                      height: 50,
+                      width: 'fit-content',
+                      px: 4,
+                      py: 2,
+                      backgroundColor: grey[200],
+                      borderRadius: 2,
+                      border:
+                        selectedOption?.id === o?.id ? '2px solid red' : '',
+                    }}
+                    onClick={() => setSelectedOption(o)}
+                    // justifyContent="center"
+                    // alignItems="center"
+                  >
+                    <Typography variant="body1" sx={{ fontWeight: 'semibold' }}>
+                      {o?.name}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
-            ))}
-          </Box>
+            )}
+
+            <Typography variant="h6" mt={2} fontWeight="regular">
+              Relevant Pre Orders
+            </Typography>
+
+            <RelevantPreOrdersTable
+              relevantItemPreOrders={relevantItemPreOrders}
+            />
+          </>
         )}
-
-        <Typography variant="h6" mt={2} fontWeight="regular">
-          Relevant Pre Orders
-        </Typography>
-
-        <RelevantPreOrdersTable relevantItemPreOrders={relevantItemPreOrders} />
 
         <LoadingButton
           fullWidth

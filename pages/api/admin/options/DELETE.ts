@@ -26,6 +26,10 @@ export default async function DELETE(
       where: {
         id: Number(id),
       },
+      include: {
+        item: true,
+        unit: true,
+      },
     });
 
     if (!existingOption) {
@@ -208,7 +212,42 @@ export default async function DELETE(
       },
     });
 
+    const updatedItem = await prisma.item.findUnique({
+      where: {
+        id: existingOption.itemId,
+      },
+      include: {
+        options: {
+          include: {
+            unit: true,
+            item: true,
+          },
+        },
+        inventoryUnit: true,
+        inventoryItem: {
+          include: {
+            vendorItem: {
+              include: {
+                unit: true,
+              },
+            },
+            type: true,
+          },
+        },
+        category: {
+          include: {
+            itemType_category: {
+              include: {
+                itemType: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
     return res.status(200).json({
+      data: updatedItem,
       message: `Option ${existingOption.name} Deleted Successfully`,
     });
   } catch (error: any) {

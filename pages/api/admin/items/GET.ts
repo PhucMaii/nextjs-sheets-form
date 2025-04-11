@@ -6,13 +6,14 @@ interface IQuery {
   categoryId?: string;
   userId?: string;
   itemId?: string;
+  inventoryItemId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { itemId, categoryId, userId }: IQuery = req.query;
+    const { itemId, categoryId, userId, inventoryItemId }: IQuery = req.query;
 
     if (itemId) {
       const item = await prisma.item.findUnique({
@@ -23,7 +24,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           options: {
             include: {
               unit: true,
-              // item: true,
+              item: true,
             },
           },
           inventoryUnit: true,
@@ -78,7 +79,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           options: {
             include: {
               unit: true,
-              // item: true,
+              item: true,
             },
           },
           inventoryUnit: true,
@@ -188,6 +189,58 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       return res.status(200).json({
         data: items,
+        message: 'Fetch Items Successfully',
+      });
+    }
+
+    if (inventoryItemId) {
+      const items = await prisma.item.findMany({
+        where: {
+          inventoryItemId: Number(inventoryItemId),
+        },
+        include: {
+          options: {
+            include: {
+              unit: true,
+              item: true,
+            },
+          },
+          inventoryUnit: true,
+          inventoryItem: {
+            include: {
+              vendorItem: {
+                include: {
+                  unit: true,
+                },
+              },
+              type: true,
+            },
+          },
+          category: {
+            include: {
+              itemType_category: {
+                include: {
+                  itemType: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Sort by category name
+      const sortedItems = items.sort((a: any, b: any) => {
+        if (a?.category?.name < b?.category?.name) {
+          return -1;
+        }
+        if (a?.category?.name > b?.category?.name) {
+          return 1;
+        }
+        return 0;
+      });
+
+      return res.status(200).json({
+        data: sortedItems,
         message: 'Fetch Items Successfully',
       });
     }
