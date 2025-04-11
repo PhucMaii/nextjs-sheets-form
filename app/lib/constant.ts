@@ -9,6 +9,7 @@ import PeopleIcon from '@mui/icons-material/People';
 // import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
+import LocalMallIcon from '@mui/icons-material/LocalMall';
 import {
   ORDER_STATUS,
   ORDER_TYPE,
@@ -238,6 +239,11 @@ export const adminTabs = {
       name: 'Transactions',
       icon: SyncAltIcon,
       path: '/admin/transactions',
+    },
+    {
+      name: 'Purchase Orders',
+      icon: LocalMallIcon,
+      path: '/admin/purchase-orders',
     },
     {
       name: 'C.O.D',

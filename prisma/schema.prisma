@@ -13,6 +13,8 @@ model Driver {
   name     String     @db.VarChar(255)
   password String     @db.VarChar(255)
   hourlyRate  Float?
+  notification Json?
+  role        String?
 
   shiftSessions   ShiftSession[]
   routes   Route[]
@@ -69,7 +71,7 @@ model SubCategory {
 model Item {
   id              Int      @id @default(autoincrement())
   name            String   @db.VarChar(255)
-  categoryId      Int
+  categoryId      Int?
   subCategoryId   Int?
   price           Float
   prevPrice       Float?
@@ -80,7 +82,7 @@ model Item {
 
   options   Option[]
 
-  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
@@ -145,6 +147,8 @@ model Orders {
   type              String?
   deliveredBy       String?
   addedToCODBy      String?
+  insertedAt        String?
+  insertedBy        String?
   user              User?          @relation(fields: [userId], references: [id])
   items             OrderedItems[]
   CodBoard          CodBoard?      @relation(fields: [codBoardId], references: [id])
@@ -297,6 +301,7 @@ model Vendor {
 
   expense    VendorExpense[]
   vendorItem VendorItem[]
+  purchaseOrders    PO[]
 }
 
 model InventoryItem {
@@ -320,6 +325,7 @@ model InventoryItem {
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
   options     Option[]
+  poItems      POItem[]
   
   promotion    Promotion?     @relation(fields: [promotionId], references: [id])
   type         ItemType?        @relation(fields: [typeId], references: [id])
@@ -522,7 +528,7 @@ model Option {
   itemId Int
 
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
-  item  Item  @relation(fields: [itemId], references: [id])
+  item  Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
   inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
 }
 
@@ -543,5 +549,40 @@ model ShiftSession {
   driver     Driver  @relation(fields: [driverId], references: [id])
   expense     Expense? @relation(fields: [expenseId], references: [id])
   route     Route? @relation(fields: [routeId], references: [id])
+}
 
+model PO {
+  id    Int @id @default(autoincrement())
+  vendorId   Int
+  status      String
+  discount    Float?
+  totalCost   Float
+  tax         Float
+  subtotal    Float
+  estArrival  String
+  createdAt  String
+  createdBy  String
+  receivedAt  String?
+  note        String?
+
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  poItems  POItem[]
+
+  @@index([vendorId])
+
+}
+
+model POItem {
+  id  Int @id @default(autoincrement())
+  inventoryItemId  Int
+  poId   Int
+  orderedQty  Int
+  receivedQty  Int
+  costPerItem      Float
+
+  inventoryItem InventoryItem   @relation(fields: [inventoryItemId], references: [id])
+  po   PO @relation(fields: [poId], references: [id], onDelete: Cascade)
+
+  @@index([poId])
+  @@index([inventoryItemId])
 }

@@ -127,6 +127,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         type: true,
+        item: {
+          include: {
+            category: true,
+          },
+        },
       },
       orderBy: {
         indexPos: 'asc',
@@ -142,11 +147,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const sortedInventoryItem = [];
     for (const item of sortedItems) {
-      const inventoryItem = formattedInventory.find(
+      const inventoryItem: any = formattedInventory.find(
         (i: any) => i.name === item,
       );
+
+      const listingCategories = inventoryItem?.item?.map((item: any) => item.category.name);
+
       if (inventoryItem) {
-        sortedInventoryItem.push(inventoryItem);
+        sortedInventoryItem.push({...inventoryItem, listingCategories});
       }
     }
 
@@ -170,9 +178,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // const listingCategories = listingItems.map((item: any) => item.category.name);
+
     return res.status(200).json({
       data: sortedInventoryItem,
       types,
+      // listingItems: listingCategories,
       message: 'Fetch Inventory Successfully',
     });
   } catch (error: any) {

@@ -218,6 +218,7 @@ export interface IPaymentMethod extends PaymentMethod {
 
 export interface IVendor extends Vendor {
   inventoryItems: any;
+  vendorItem: IVendorItem[];
 }
 
 export interface IInventoryItem extends InventoryItem {

@@ -135,3 +135,10 @@ export enum WORKING_ROLE {
   DRIVER = 'Driver',
   IN_FACTORY = 'In Factory',
 }
+
+export enum PO_STATUS {
+  ON_HOLD = 'On Hold',
+  ORDERED = 'Ordered',
+  DELIVERED = 'Delivered',
+  CANCELLED = 'Cancelled',
+}

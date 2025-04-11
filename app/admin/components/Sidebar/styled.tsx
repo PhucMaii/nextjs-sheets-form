@@ -16,4 +16,5 @@ export const ListItemButtonStyled = styled(ListItemButton)<ItemButtonStyled>`
   width: 80%;
   margin: auto !important;
   border-radius: 10px !important;
+  font-size: 12px !important;
 `;
