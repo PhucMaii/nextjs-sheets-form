@@ -145,8 +145,46 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const returnItems = await prisma.item.findMany({
+      where: {
+        inventoryItemId,
+        categoryId: {
+          in: selectedCategoryIds,
+        },
+      },
+      include: {
+        options: {
+          include: {
+            unit: true,
+            item: true,
+          },
+        },
+        inventoryUnit: true,
+        inventoryItem: {
+          include: {
+            vendorItem: {
+              include: {
+                unit: true,
+              },
+            },
+            type: true,
+          },
+        },
+        category: {
+          include: {
+            itemType_category: {
+              include: {
+                itemType: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
     return res.status(201).json({
       data: newOption,
+      updatedItems: returnItems,
       message: 'Create New Option Successfully',
     });
   } catch (error: any) {
@@ -192,7 +230,10 @@ const updateScheduledOrderedItemsOptions = async (
       // Filter the items does not have option
       const itemsDoesNotHaveOptions = targetedScheduleOrderedItems.filter(
         (item: any) => {
-          return !item?.option?.name && item?.option?.price === 0;
+          return (
+            !item?.option?.name &&
+            (!item?.option?.price || item?.option?.price === 0)
+          );
         },
       );
 

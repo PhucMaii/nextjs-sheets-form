@@ -8,6 +8,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import RelevantPreOrdersTable from '../Tables/RelevantPreOrdersTable';
 import { LoadingButton } from '@mui/lab';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 interface IProps extends ModalProps {
   item: IItem;
@@ -22,16 +23,23 @@ export default function AddOptionWarning({
   onAcknowledge,
   selectedCategoryIds,
 }: IProps) {
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [relevantItemPreOrders, setRelevantItemPreOrders] = useState<any>([]);
 
-  const [preOrderItems] = SWRFetchData(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [preOrderItems, mutate, isValidating] = SWRFetchData(
     `${API_URL.ADMIN}/scheduledOrders/by-item-name?itemName=${item?.name}&selectedCategoryIds=${selectedCategoryIds.join(',')}`,
   );
 
   useEffect(() => {
+    if (isValidating && !preOrderItems) {
+      setIsInitializing(true);
+    }
+
     if (preOrderItems) {
       setRelevantItemPreOrders(preOrderItems?.data);
+      setIsInitializing(false);
     }
   }, [preOrderItems]);
 
@@ -56,14 +64,24 @@ export default function AddOptionWarning({
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography fontWeight="semibold">
-          * Please note that {relevantItemPreOrders?.length || 0} pre-order
-          items will be changed to this option price and will be automatically
-          assigned to this option
-        </Typography>
+        {isInitializing ? (
+          <>
+            <LoadingComponent />
+          </>
+        ) : (
+          <>
+            <Typography fontWeight="semibold">
+              * Please note that {relevantItemPreOrders?.length || 0} pre-order
+              items will be changed to <strong>${item?.price}</strong> and will be
+              automatically assigned to this option
+            </Typography>
 
-        <Typography sx={{ mt: 2 }}>Relevant Pre Orders</Typography>
-        <RelevantPreOrdersTable relevantItemPreOrders={relevantItemPreOrders} />
+            <Typography sx={{ mt: 2 }}>Relevant Pre Orders</Typography>
+            <RelevantPreOrdersTable
+              relevantItemPreOrders={relevantItemPreOrders}
+            />
+          </>
+        )}
 
         <LoadingButton
           onClick={() => {
@@ -73,6 +91,7 @@ export default function AddOptionWarning({
           fullWidth
           sx={{ mt: 2 }}
           loading={isLoading}
+          disabled={isInitializing}
         >
           I acknowledge
         </LoadingButton>

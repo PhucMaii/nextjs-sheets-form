@@ -524,7 +524,7 @@ model Option {
   itemId Int
 
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
-  item  Item  @relation(fields: [itemId], references: [id])
+  item  Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
   inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
 }
 

@@ -21,9 +21,10 @@ interface IProps {
   options: IOption[];
   showNotification: ShowNotificationType;
   noIncludeOption?: boolean;
+  setItems?: any;
 }
 
-export default function OptionsTable({ options, showNotification, noIncludeOption }: IProps) {
+export default function OptionsTable({ options, showNotification, noIncludeOption, setItems }: IProps) {
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
     option: null,
@@ -61,6 +62,7 @@ export default function OptionsTable({ options, showNotification, noIncludeOptio
           option={deleteProps.option}
           allOptions={options}
           showNotification={showNotification}
+          setItems={setItems}
         />
       )}
       <Paper elevation={0}>

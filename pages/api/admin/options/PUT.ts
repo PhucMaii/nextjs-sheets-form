@@ -134,7 +134,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     await updateAllScheduleOrderItemsForOption(
       existingOption,
       updatedOption,
-      existingOption.item.categoryId,
+      existingOption?.item?.categoryId || 0,
       isUpdateSameInventory,
     );
 

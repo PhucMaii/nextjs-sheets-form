@@ -23,10 +23,12 @@ import axios from 'axios';
 import OptionsTable from '../Tables/OptionsTable';
 import { SWRFetchData } from '@/app/utils/db';
 import AddOption from '../Modals/add/AddOption';
+import ErrorComponent from '../ErrorComponent';
 
 interface IProps extends ModalProps {
   item: IItem;
   showNotification: ShowNotificationType;
+  setItems: any;
 }
 
 export default function BulkEditOptions({
@@ -34,6 +36,7 @@ export default function BulkEditOptions({
   onClose,
   item,
   showNotification,
+  setItems,
 }: IProps) {
   const [categories, setCategories] = useState<any[]>([]);
   const [isOpenAddOption, setIsOpenAddOption] = useState<boolean>(false);
@@ -87,6 +90,26 @@ export default function BulkEditOptions({
         showNotification('error', response.data.error);
         return;
       }
+
+      const resItems = response.data.data;
+
+      // Optimistic update
+      setItems((prevItems: any) => {
+        const updatedItems = prevItems.map((item: any) => {
+          // Check if exists in resItems - means updated
+          const existingItem = resItems.find(
+            (resItem: any) => resItem.id === item.id,
+          );
+
+          if (existingItem) {
+            return existingItem;
+          } else {
+            return item;
+          }
+        });
+
+        return updatedItems;
+      });
 
       showNotification('success', response.data.message);
     } catch (error: any) {
@@ -177,11 +200,17 @@ export default function BulkEditOptions({
                 + Add Options
               </Button>
             </Box>
-            <OptionsTable
-              options={updatedItem?.data?.options || []}
-              showNotification={showNotification}
-              noIncludeOption
-            />
+            {updatedItem?.data?.options &&
+              updatedItem?.data?.options.length > 0 ? (
+                <OptionsTable
+                  options={updatedItem?.data?.options || []}
+                  showNotification={showNotification}
+                  noIncludeOption
+                  setItems={setItems}
+                />
+              ): (
+                <ErrorComponent errorText="No options found" />
+              )}
           </Box>
         </BoxModal>
       </Modal>

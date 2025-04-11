@@ -30,6 +30,7 @@ interface IProps extends ModalProps {
   item: IItem;
   showNotification: ShowNotificationType;
   noIncludeBulkAdd?: boolean;
+  setItems?: any;
 }
 
 export default function AddOption({
@@ -38,6 +39,7 @@ export default function AddOption({
   item,
   showNotification,
   noIncludeBulkAdd,
+  setItems,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [checkWarning, setCheckWarning] = useState<any>({
@@ -137,6 +139,25 @@ export default function AddOption({
       if (response.data.error) {
         showNotification('error', response.data.error);
         return;
+      }
+
+      if (setItems) {
+        setItems((prevItems: any) => {
+          const updatedItems = prevItems.map((item: any) => {
+            // Check if exists in resItems - means updated
+            const existingItem = response.data.updatedItems.find(
+              (resItem: any) => resItem.id === item.id,
+            );
+
+            if (existingItem) {
+              return existingItem;
+            } else {
+              return item;
+            }
+          });
+
+          return updatedItems;
+        });
       }
 
       showNotification('success', response.data.message);

@@ -65,8 +65,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const updatedItems = await Promise.all(itemPromises);
 
-    await handleUpdatAllScheduleOrders(items);
+    const responseStatus = await handleUpdatAllScheduleOrders(items);
 
+    if (responseStatus.error) {
+      return res.status(500).json({ error: responseStatus.error });
+    }
     return res
       .status(200)
       .json({ data: updatedItems, message: 'Update Items Successfully' });
@@ -101,6 +104,7 @@ const handleUpdatAllScheduleOrders = async (items: any) => {
 
     const newItems: any[] = [];
     // Get all items related
+    // Each loop means with each category
     const promisesItem = items.map((item: any) => {
       const currentCategory = categoriesRelated.find(
         (category: any) => category.id === item.categoryId,
@@ -194,7 +198,9 @@ const handleUpdatAllScheduleOrders = async (items: any) => {
     });
 
     await Promise.all(promisesScheduleOrders);
+
+    return { ok: true };
   } catch (error: any) {
-    return { ok: true, error };
+    return { ok: false, error };
   }
 };

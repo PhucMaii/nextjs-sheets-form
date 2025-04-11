@@ -86,6 +86,7 @@ export default function BulkEditItems() {
       field: 'name',
       headerName: 'Name',
       editable: true,
+      width: 200,
     },
     {
       field: 'price',
@@ -110,7 +111,7 @@ export default function BulkEditItems() {
       field: 'options',
       headerName: 'Options',
       editable: true,
-      width: 400,
+      width: 300,
       renderCell: (params) => {
         const options = params.row.options;
         // console.log(options, 'OPTIONS');
@@ -234,6 +235,10 @@ export default function BulkEditItems() {
   };
 
   const handleSaveChanges = async () => {
+    if (selectedItemIds.length === 0) {
+      showNotification('error', 'Please select at least one item to update');
+      return;
+    }
     setIsLoading(true);
     try {
       const selectedItems = items.filter((item: any) => {
@@ -280,6 +285,7 @@ export default function BulkEditItems() {
           open={editOptionProps.open}
           onClose={() => setEditOptionProps({ open: false, item: null })}
           item={editOptionProps.item}
+          setItems={setItems}
           showNotification={showNotification}
         />
       )}
@@ -289,6 +295,7 @@ export default function BulkEditItems() {
           item={addOptionProps.item}
           showNotification={showNotification}
           open={addOptionProps.open}
+          setItems={setItems}
           onClose={() => setAddOptionProps({ open: false, item: null })}
           // noIncludeBulkAdd
         />
