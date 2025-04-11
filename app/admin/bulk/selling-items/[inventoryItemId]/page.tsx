@@ -65,6 +65,7 @@ export default function BulkEditItems() {
     open: false,
     item: null,
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
 
@@ -233,6 +234,7 @@ export default function BulkEditItems() {
   };
 
   const handleSaveChanges = async () => {
+    setIsLoading(true);
     try {
       const selectedItems = items.filter((item: any) => {
         return selectedItemIds.includes(item.id);
@@ -253,6 +255,8 @@ export default function BulkEditItems() {
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification('error', 'There was an error: ' + error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -314,6 +318,7 @@ export default function BulkEditItems() {
               onClick={handleSaveChanges}
               variant="contained"
               size="small"
+              loading={isLoading}
             >
               Save Changes
             </LoadingButton>
