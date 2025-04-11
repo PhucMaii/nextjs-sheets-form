@@ -123,6 +123,16 @@ export default function OrderForm() {
       return;
     }
 
+    // Check if the total price is greater than 20
+    const totalPrice = order.items.reduce((acc: number, item: any) => {
+      return acc + item.price * item.quantity;
+    }, 0);
+
+    if (totalPrice < 20) {
+      showNotification('error', 'Order total price must be greater than $20');
+      return;
+    }
+
     try {
       const currentDate = new Date();
       const dateString = moment(currentDate).format('YYYY-MM-DD');

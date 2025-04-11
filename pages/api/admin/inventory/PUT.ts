@@ -82,7 +82,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (existingInventoryItem.color !== color) {
+    if (color && existingInventoryItem.color !== color) {
       await prisma.inventoryItem.update({
         where: {
           id,

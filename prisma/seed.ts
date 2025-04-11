@@ -115,7 +115,29 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-async function main() {}
+async function main() {
+  const order = await prisma.orders.findUnique({
+    where: {
+      id: 40894
+    },
+    include: {
+      items: true
+    }
+  });
+
+  const newTotalPrice = order?.items.reduce((acc: number, item: any) => {
+    return acc + item.price * item.quantity;
+  }, 0);
+
+  await prisma.orders.update({
+    where: {
+      id: 40894
+    },
+    data: {
+      totalPrice: newTotalPrice
+    }
+  });
+}
 
 main()
   .then(() => prisma.$disconnect())

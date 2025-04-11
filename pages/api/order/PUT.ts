@@ -15,7 +15,7 @@ import {
   generateOrderTotalPrice,
   ITEM_CATEGORIZED,
 } from '../admin/orderedItems/PUT';
-import { formatItemsWithTotalPrice } from '../utils/order';
+import { formatItemsWithTotalPrice, minOrderGuard } from '../utils/order';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { createOrderedItems } from '../utils/orderedItems';
 
@@ -37,11 +37,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       where: {
         id: Number(session.user.id),
       },
-    });
+    }); 
 
     if (!existingUser) {
       return res.status(404).json({
         error: 'User Not Found',
+      });
+    }
+
+    // Min order guard
+    const isOrderValid = minOrderGuard(body.items);
+    if (!isOrderValid.ok) {
+      return res.status(400).json({
+        error: isOrderValid.message,
       });
     }
 

@@ -13,7 +13,7 @@ import { checkHasClientOrder, getCreatedBy } from './utils';
 import { createOrder } from '../admin/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
-import { formatItemsWithTotalPrice } from '../utils/order';
+import { formatItemsWithTotalPrice, minOrderGuard } from '../utils/order';
 
 interface RequestQuery {
   userId?: string;
@@ -65,11 +65,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       id = session.user.id;
     }
 
+    // Guard client
     if (createdBy === USER_ROLE.CLIENT) {
+      // Check is valid delivery date
       const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
       if (!isValidDate.ok) {
         return res.status(400).json({
           error: isValidDate.message,
+        });
+      }
+
+      // Check is valid total price
+      const isValidTotalPrice = minOrderGuard(items);
+      if (!isValidTotalPrice.ok) {
+        return res.status(400).json({
+          error: isValidTotalPrice.message,
         });
       }
     }

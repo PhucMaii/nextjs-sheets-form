@@ -29,6 +29,8 @@ import { getUniqueUnitRatios } from '@/app/utils/array';
 interface IProps extends ModalProps {
   item: IItem;
   showNotification: ShowNotificationType;
+  noIncludeBulkAdd?: boolean;
+  setItems?: any;
 }
 
 export default function AddOption({
@@ -36,6 +38,8 @@ export default function AddOption({
   onClose,
   item,
   showNotification,
+  noIncludeBulkAdd,
+  setItems,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [checkWarning, setCheckWarning] = useState<any>({
@@ -137,6 +141,25 @@ export default function AddOption({
         return;
       }
 
+      if (setItems) {
+        setItems((prevItems: any) => {
+          const updatedItems = prevItems.map((item: any) => {
+            // Check if exists in resItems - means updated
+            const existingItem = response.data.updatedItems.find(
+              (resItem: any) => resItem.id === item.id,
+            );
+
+            if (existingItem) {
+              return existingItem;
+            } else {
+              return item;
+            }
+          });
+
+          return updatedItems;
+        });
+      }
+
       showNotification('success', response.data.message);
       onClose();
     } catch (error: any) {
@@ -178,7 +201,7 @@ export default function AddOption({
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <FormControl fullWidth>
+            {!noIncludeBulkAdd && <FormControl fullWidth>
               <Typography>Add to other client categories</Typography>
               <Autocomplete
                 multiple
@@ -220,7 +243,7 @@ export default function AddOption({
                 }}
               />
             </FormControl>
-
+}
             <FormControl fullWidth>
               <Typography>Name</Typography>
               <TextField

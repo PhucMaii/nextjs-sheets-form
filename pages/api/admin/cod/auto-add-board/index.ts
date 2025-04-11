@@ -275,6 +275,8 @@ export const insertOrdersToSelectedBoards = async (
 
   const today = normalizeDate(new Date(date));
 
+  const pacificTime = getTodayDate();
+
   const dayIndex = today.getDay();
   const day = days[dayIndex];
 
@@ -331,6 +333,9 @@ export const insertOrdersToSelectedBoards = async (
       },
       data: {
         codBoardId: noRouteBoard.id,
+        insertedAt: pacificTime.dateAndTime,
+        insertedBy: user.clientName,
+
       },
     });
   }
@@ -398,6 +403,8 @@ export const insertOrdersToSelectedBoards = async (
       },
       data: {
         codBoardId: board.id,
+        insertedAt: pacificTime.dateAndTime,
+        insertedBy: user.clientName,
       },
     });
   }
