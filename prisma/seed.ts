@@ -116,27 +116,29 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const order = await prisma.orders.findUnique({
-    where: {
-      id: 40894
-    },
+  const scheduledOrders = await prisma.scheduleOrders.findMany({
     include: {
-      items: true
-    }
-  });
-
-  const newTotalPrice = order?.items.reduce((acc: number, item: any) => {
-    return acc + item.price * item.quantity;
-  }, 0);
-
-  await prisma.orders.update({
-    where: {
-      id: 40894
+      items: true,
     },
-    data: {
-      totalPrice: newTotalPrice
-    }
   });
+
+  for (const order of scheduledOrders) {
+    if (order.userId === 39) {
+      const totalPrice = order.items.reduce(
+        (acc: number, item: any) => acc + item.price * item.quantity,
+        0,
+      );
+      
+      await prisma.scheduleOrders.update({
+        where: {
+          id: order.id,
+        },
+        data: {
+          totalPrice,
+        },
+      });
+    }
+  }
 }
 
 main()

@@ -74,8 +74,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           error: isValidDate.message,
         });
       }
+    }
 
-      // Check is valid total price
+    if (createdBy === USER_ROLE.CLIENT || createdBy === USER_ROLE.DRIVER) {
       const isValidTotalPrice = minOrderGuard(items);
       if (!isValidTotalPrice.ok) {
         return res.status(400).json({
