@@ -100,14 +100,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         // REMAIN
         continue;
       } else if (item.type === ITEM_CATEGORIZED.DELETE) {
-        // DELETE
-        if (item?.fifo && item?.inventoryUnit) {
-          await prisma.orderedItems.delete({
-            where: {
-              id: item.id,
-            },
-          });
+        // DELETE - force to delete first -> then restock
+        await prisma.orderedItems.delete({
+          where: {
+            id: item.id,
+          },
+        });
 
+        if (item?.fifo && item?.inventoryUnit) {
           await restockInventoryItem(
             item.orderId,
             item.fifo,
