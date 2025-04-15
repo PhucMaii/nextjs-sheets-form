@@ -526,10 +526,10 @@ const OrderView = ({
       showNotification('success', response.data.message);
       setIsUpdatingAvoidInventory(false);
     } catch (error: any) {
-      console.log('Internal Server Error: ', error.response.data.error);
+      console.log('Internal Server Error: ', error?.response?.data?.error);
       showNotification(
         'error',
-        'Internal Server Error: ' + error.response.data.error,
+        'Internal Server Error: ' + error?.response?.data?.error,
       );
       setIsUpdatingAvoidInventory(false);
     }

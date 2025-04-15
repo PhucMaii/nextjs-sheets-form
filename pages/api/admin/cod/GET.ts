@@ -37,7 +37,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
-              items: true,
+              items: {
+                include: {
+                  inventoryItem: true,
+                  inventoryUnit: true,
+                },
+              },
               user: {
                 include: {
                   preference: true,
@@ -202,7 +207,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
-              items: true,
+              items: {
+                include: {
+                  inventoryItem: true,
+                  inventoryUnit: true,
+                },
+              },
               user: {
                 include: {
                   preference: true,
