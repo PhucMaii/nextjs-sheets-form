@@ -31,6 +31,8 @@ import ShiftBanner from './ShiftBanner';
 import { AccessTime } from '@mui/icons-material';
 // import useLocalStorage from '@/hooks/useLocalStorage';
 import SwitchRole from './Modals/SwitchRole';
+import axios from 'axios';
+import { LoadingButton } from '@mui/lab';
 
 interface IProps {
   children: ReactNode;
@@ -57,6 +59,10 @@ export default function Sidebar({ children }: IProps) {
   const pathname: any = usePathname();
 
   useEffect(() => {
+    subscribeDriver();
+  }, [])
+
+  useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
 
@@ -75,6 +81,28 @@ export default function Sidebar({ children }: IProps) {
       }
     }
   }, [todaySession]);
+
+  const subscribeDriver = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_KEY
+      });
+
+      const response = await axios.post('/api/subscribe', { subscription });
+
+      if (response.data.error) {
+        console.log('Something went wrong with subscribe driver: ', response.data.error);
+        return;
+      }
+
+      console.log('Successfully subscribed driver');
+    } catch (error: any) {
+      console.log('Something went wrong with subscribe driver: ', error);
+    }
+  }
 
   const handleChangeTab = (path: string) => {
     router.push(path);
@@ -139,6 +167,14 @@ export default function Sidebar({ children }: IProps) {
     </>
   );
 
+  const sendNoti = async () => {
+    const response = await axios.post('/api/push-noti');
+
+    if (response.data.error) {
+      console.log('There was an error: ', response.data.error);
+    }
+  }
+
   if (smDown) {
     return (
       <>
@@ -166,6 +202,10 @@ export default function Sidebar({ children }: IProps) {
             </Button>
           </Box>
         )}
+
+        <LoadingButton onClick={sendNoti} >
+         Noti 
+        </LoadingButton>
         <ShiftModal
           open={shiftModalProps.open}
           onClose={() => setShiftModalProps({ open: false, type: null })}
