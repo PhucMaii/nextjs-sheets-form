@@ -13,6 +13,7 @@ import {
   OutlinedInput,
   TextField,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
@@ -41,6 +42,10 @@ export default function CreatePO() {
   });
   const [selectedVendor, setSelectedVendor] = useState<IVendor | null>(null);
 
+  const mdUp = useMediaQuery((theme: any) => theme.breakpoints.up('md'));
+  const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
+  const xlUp = useMediaQuery((theme: any) => theme.breakpoints.up('xl'));
+
   const { date: estArrival, SelectDate } = useSelectDate(
     generateRecommendDate(),
   );
@@ -68,7 +73,7 @@ export default function CreatePO() {
       {NotificationComp}
       <Box
         sx={{
-          maxWidth: 1920,
+          width: xlUp ? 1200 : lgUp ? 800 : mdUp ? 600 : '100%',
           mx: 'auto',
         }}
       >
@@ -186,11 +191,11 @@ export default function CreatePO() {
                         </Typography>
                       </Grid>
                       <Grid item xs={3.8} lg={1.5}>
-                          <OutlinedInput
-                            size="small"
-                            placeholder="Quantity"
-                            sx={{ width: '100%' }}
-                          />
+                        <OutlinedInput
+                          size="small"
+                          placeholder="Quantity"
+                          sx={{ width: '100%' }}
+                        />
                       </Grid>
                       <Grid item xs={3.8} lg={1.5}>
                         <OutlinedInput

@@ -6,9 +6,12 @@ import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import { ShadowSection } from '../reports/styled';
 import POTable from '../components/Tables/POTable';
+import { useRouter } from 'next/navigation';
 
 export default function PurchaseOrders() {
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const router = useRouter();
+  
   return (
     <Sidebar>
       <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -30,7 +33,7 @@ export default function PurchaseOrders() {
             />
           </Grid>
           <Grid item xs={1.5}>
-            <Button variant="contained">+ Create</Button>
+            <Button onClick={() => router.push('/admin/purchase-orders/create')} variant="contained">+ Create</Button>
           </Grid>
         </Grid>
         <POTable />
