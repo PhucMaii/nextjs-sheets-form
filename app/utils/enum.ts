@@ -137,7 +137,7 @@ export enum WORKING_ROLE {
 }
 
 export enum PO_STATUS {
-  ON_HOLD = 'On Hold',
+  DRAFT = 'Draft',
   ORDERED = 'Ordered',
   DELIVERED = 'Delivered',
   CANCELLED = 'Cancelled',

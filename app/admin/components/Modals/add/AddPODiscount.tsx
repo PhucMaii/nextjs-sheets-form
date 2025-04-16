@@ -15,9 +15,12 @@ export default function AddPODiscount({open, onClose, addDiscount}: IProps) {
     <Modal open={open} onClose={onClose}>
         <BoxModal>
             <ModalHead 
-                heading="Add PO Discount"
+                heading="Add PO Discount ($)"
                 buttonLabel="ADD"
-                onClick={() => addDiscount(discount)}
+                onClick={() => {
+                    addDiscount(discount);
+                    onClose();
+                }}
                 onClose={onClose}
                 buttonProps={{}}
             />
@@ -25,7 +28,7 @@ export default function AddPODiscount({open, onClose, addDiscount}: IProps) {
             <Divider sx={{ my: 2 }} />
 
             <TextField
-                label="Discount"
+                label="Discount ($)"
                 type="number"
                 value={discount}
                 onChange={(e) => setDiscount(+e.target.value)}

@@ -429,6 +429,7 @@ model InventoryUnit {
   orderedItems    OrderedItems[]
   cartItems       CartItem[]
   itemPreferences ItemPreference[]
+  poItems         POItem[]
 
   @@index([vendorItemId])
 }
@@ -553,6 +554,7 @@ model ShiftSession {
 
 model PO {
   id    Int @id @default(autoincrement())
+  poNumber  String?
   vendorId   Int
   status      String
   discount    Float?
@@ -576,11 +578,13 @@ model POItem {
   id  Int @id @default(autoincrement())
   inventoryItemId  Int
   poId   Int
-  orderedQty  Int
-  receivedQty  Int
+  orderedQty  Float
+  receivedQty  Float?
   costPerItem      Float
+  inventoryUnitId      Int
 
   inventoryItem InventoryItem   @relation(fields: [inventoryItemId], references: [id])
+  inventoryUnit   InventoryUnit    @relation(fields: [inventoryUnitId], references: [id])
   po   PO @relation(fields: [poId], references: [id], onDelete: Cascade)
 
   @@index([poId])
