@@ -26,7 +26,13 @@ const withAuthGuard =
         },
       });
 
-      if (!existingUser) {
+      const driver = await prisma.driver.findUnique({
+        where: {
+          id: Number(session.user.id),
+        },
+      });
+
+      if (!existingUser && !driver) {
         return res.status(404).json({ error: 'User Not Found in DB' });
       }
 

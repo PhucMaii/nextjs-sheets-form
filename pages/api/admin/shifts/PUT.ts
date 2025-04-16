@@ -93,7 +93,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updatedShift = await prisma.shiftSession.update({
       where: { id },
-      data: updatedFields,
+      data: { ...updatedFields, isActive: false },
     });
 
     return res.status(200).json({

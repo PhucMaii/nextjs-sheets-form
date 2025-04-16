@@ -17,12 +17,14 @@ export default function PushReSubscriber() {
         if (!sub) {
           const newSub = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlB64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_KEY!),
+            applicationServerKey: urlB64ToUint8Array(
+              process.env.NEXT_PUBLIC_VAPID_KEY!,
+            ),
           });
 
-          await fetch('/api/save-subscription', {
+          await fetch('/api/drivers/save-noti', {
             method: 'POST',
-            body: JSON.stringify(newSub),
+            body: JSON.stringify({ notiJson: JSON.stringify(newSub) }),
             headers: {
               'Content-Type': 'application/json',
             },

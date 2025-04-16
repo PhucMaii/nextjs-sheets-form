@@ -32,6 +32,7 @@ export default function DriverTable({
             <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
             <TableCell>Total Routes</TableCell>
+            <TableCell>Hourly Rate</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableHead>
@@ -43,6 +44,7 @@ export default function DriverTable({
                   <TableCell>{driver.id}</TableCell>
                   <TableCell>{driver.name}</TableCell>
                   <TableCell>{driver.routes.length}</TableCell>
+                  <TableCell>${driver?.hourlyRate?.toFixed(2)}</TableCell>
                   <TableCell>
                     <Box display="flex" flexDirection="row" gap={1}>
                       <DeleteDriver

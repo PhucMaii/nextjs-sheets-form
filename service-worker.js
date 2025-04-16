@@ -1,42 +1,54 @@
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.3/workbox-sw.js');
-workbox.precaching.precacheAndRoute(self.__WB_MANIFEST || []);
-
+importScripts(
+  'https://storage.googleapis.com/workbox-cdn/releases/6.5.3/workbox-sw.js',
+);
+import { precacheAndRoute } from 'workbox-precaching';
+precacheAndRoute(self.__WB_MANIFEST);
 
 export function urlB64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const padding = '='.repeat((4 - (base64String?.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
+  const outputArray = new Uint8Array(rawData?.length);
+  for (let i = 0; i < rawData?.length; ++i) {
+    outputArray[i] = rawData?.charCodeAt(i);
   }
   return outputArray;
 }
 
-  const updateDriverNoti = async (subscription) => {
-    try {
-      const response = await axios.post(`/api/drivers/save-noti`, {
-        notiJson: JSON.stringify(subscription),
-      });
+const updateDriverNoti = async (subscription) => {
+  try {
+    const response = await axios.post(`/api/drivers/save-noti`, {
+      notiJson: JSON.stringify(subscription),
+    });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-      }
-    } catch (error) {
-      console.log('Fail to update driver noti: ', error);
-      showNotification('error', 'Fail to update driver noti: ' + error);
+    if (response.data.error) {
+      showNotification('error', response.data.error);
     }
-  };
+  } catch (error) {
+    console.log('Fail to update driver noti: ', error);
+    showNotification('error', 'Fail to update driver noti: ' + error);
+  }
+};
 
-self.addEventListener("activate", async (e) => {
-  const subscription = await self.registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlB64ToUint8Array()
-  })
+self.addEventListener('install', (event) => {
+  console.log('📦 Service Worker installing...');
+  self.skipWaiting(); // activate immediately
+});
 
-  const response = await updateDriverNoti(subscription)
-  console.log(response)
-})
+self.addEventListener('fetch', (event) => {
+  console.log('🔍 Fetch intercepted:', event.request.url);
+});
+
+self.addEventListener('activate', async (e) => {
+  console.log('🚀 Service Worker activating...');
+  // const subscription = await self.registration.pushManager.subscribe({
+  //   userVisibleOnly: true,
+  //   applicationServerKey: urlB64ToUint8Array(),
+  // });
+
+  // const response = await updateDriverNoti(subscription);
+  // console.log(response);
+});
 
 self.addEventListener('push', async (e) => {
   const data = JSON.parse(e.data.text());
@@ -44,7 +56,7 @@ self.addEventListener('push', async (e) => {
   const title = data?.message || 'Notification';
   const body = data?.body || '';
 
-  console.log(data, 'data in push event')
+  console.log(data, 'data in push event');
 
   e.waitUntil(
     self.registration.showNotification(title, {

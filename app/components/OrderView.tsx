@@ -526,10 +526,10 @@ const OrderView = ({
       showNotification('success', response.data.message);
       setIsUpdatingAvoidInventory(false);
     } catch (error: any) {
-      console.log('Internal Server Error: ', error.response.data.error);
+      console.log('Internal Server Error: ', error?.response?.data?.error);
       showNotification(
         'error',
-        'Internal Server Error: ' + error.response.data.error,
+        'Internal Server Error: ' + error?.response?.data?.error,
       );
       setIsUpdatingAvoidInventory(false);
     }
@@ -987,6 +987,7 @@ const OrderView = ({
 
         {orderedItems.length > 0 ? (
           orderedItems.map((item: IItem | any) => {
+            console.log('item', item);
             return (
               <Box
                 key={item.id}
@@ -1046,13 +1047,14 @@ const OrderView = ({
                     ) : (
                       <Typography>${item.price.toFixed(2)}</Typography>
                     )}
-                    {item.isShowDiscount && item.prevPrice && (
+
+                    {(item?.option?.isShowDiscount || item.isShowDiscount) && (
                       <Typography
                         // fontWeight="bold"
                         sx={{ textDecoration: 'line-through' }}
                         color="error"
                       >
-                        ${item.prevPrice.toFixed(2)}
+                        ${item?.option?.prevPrice?.toFixed(2) || item.prevPrice.toFixed(2)}
                       </Typography>
                     )}
                   </Box>

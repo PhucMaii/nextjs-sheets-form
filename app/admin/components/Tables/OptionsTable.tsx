@@ -20,9 +20,11 @@ import DeleteOption from '../Modals/delete/DeleteOption';
 interface IProps {
   options: IOption[];
   showNotification: ShowNotificationType;
+  noIncludeOption?: boolean;
+  setItems?: any;
 }
 
-export default function OptionsTable({ options, showNotification }: IProps) {
+export default function OptionsTable({ options, showNotification, noIncludeOption, setItems }: IProps) {
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
     option: null,
@@ -41,6 +43,7 @@ export default function OptionsTable({ options, showNotification }: IProps) {
           onClose={() => setEditProps({ open: false, option: null })}
           option={editProps.option}
           showNotification={showNotification}
+          noIncludeOption={noIncludeOption}
         />
       )}
       {deleteProps.open && deleteProps.option && (
@@ -59,6 +62,7 @@ export default function OptionsTable({ options, showNotification }: IProps) {
           option={deleteProps.option}
           allOptions={options}
           showNotification={showNotification}
+          setItems={setItems}
         />
       )}
       <Paper elevation={0}>

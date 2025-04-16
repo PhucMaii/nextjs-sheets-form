@@ -47,6 +47,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         },
       },
+      orderBy: {
+        priority: 'asc',
+      }
     });
 
     // Fill in all empty position

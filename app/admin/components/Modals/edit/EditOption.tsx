@@ -27,6 +27,7 @@ import { getUniqueUnitRatios } from '@/app/utils/array';
 interface IProps extends ModalProps {
   option: IOption;
   showNotification: ShowNotificationType;
+  noIncludeOption?: boolean;
 }
 
 export default function EditOption({
@@ -34,6 +35,7 @@ export default function EditOption({
   onClose,
   option,
   showNotification,
+  noIncludeOption
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [units, setUnits] = useState<IInventoryUnit[]>([]);
@@ -111,6 +113,7 @@ export default function EditOption({
       }
 
       showNotification('success', response.data.message);
+      onClose();
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'There was an error: ' + error);
@@ -133,7 +136,7 @@ export default function EditOption({
             onClose={onClose}
           />
 
-          <RadioGroup
+          {!noIncludeOption && <RadioGroup
             row
             value={updateChoice}
             onChange={(e) => setUpdateChoice(e.target.value as UPDATE_OPTION)}
@@ -149,7 +152,7 @@ export default function EditOption({
               control={<Radio />}
               label="Same inventory item"
             />
-          </RadioGroup>
+          </RadioGroup>}
 
           <Divider sx={{ my: 2 }}>Price</Divider>
 

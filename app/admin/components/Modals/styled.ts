@@ -17,7 +17,7 @@ export const BoxModal = styled(Box)`
   }
 
   @media screen and (max-width: 1450px) {
-    width: 100px;
+    width: 1000px;
   }
 
   @media screen and (max-width: 950px) {

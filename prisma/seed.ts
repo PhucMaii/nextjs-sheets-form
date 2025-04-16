@@ -116,11 +116,6 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.driver.updateMany({
-    data: {
-      role: 'driver',
-    },
-  });
 }
 
 main()

@@ -41,26 +41,36 @@ export default function NotificationRequest() {
   // }, [Notification.permission]);
 
   useEffect(() => {
-    const autoSubscribe = async () => {
-      if (
-        Notification.permission === 'granted' &&
-        (await navigator.serviceWorker.ready).pushManager.getSubscription() ==
-          null
-      ) {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
+    if (
+      typeof window === 'undefined' ||
+      typeof navigator === 'undefined' ||
+      !('serviceWorker' in navigator) ||
+      !('Notification' in window)
+    ) {
+      console.warn('❌ Push not supported on this device');
+      return;
+    } else {
+      const autoSubscribe = async () => {
+        if (
+          Notification.permission === 'granted' &&
+          (await navigator.serviceWorker.ready).pushManager.getSubscription() ==
+            null
+        ) {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
 
-        if (!subscription) {
-          console.log('📦 No subscription found, subscribing...');
-          await subscribeUser(); // or trySubscribeToPush()
-        } else {
-          console.log('📦 Already subscribed:', subscription);
+          if (!subscription) {
+            console.log('📦 No subscription found, subscribing...');
+            await subscribeUser(); // or trySubscribeToPush()
+          } else {
+            console.log('📦 Already subscribed:', subscription);
+          }
         }
-      }
-    };
+      };
 
-    setNotiPermission(Notification.permission);
-    autoSubscribe();
+      setNotiPermission(Notification.permission);
+      autoSubscribe();
+    }
   }, []);
 
   useEffect(() => {
@@ -141,8 +151,10 @@ export default function NotificationRequest() {
       userVisibleOnly: true,
     };
 
-    console.log(options, 'options');
+    console.log('Subscription options:', options);
+
     const existing = await newRegistration.pushManager.getSubscription();
+    console.log('Existing subscription:', existing);
 
     if (existing) {
       console.log('📦 Existing subscription found:', existing);
@@ -150,10 +162,14 @@ export default function NotificationRequest() {
       return;
     }
 
-    const subscription = await newRegistration.pushManager.subscribe(options);
-
-    console.log('✅ New subscription:', subscription);
-    await updateDriverNoti(subscription);
+    try {
+      const subscription = await newRegistration.pushManager.subscribe(options);
+      console.log('✅ New subscription:', subscription);
+      await updateDriverNoti(subscription);
+    } catch (error) {
+      console.error('Error during subscription:', error);
+      showNotification('error', 'Error during subscription');
+    }
   };
 
   // async function trySubscribeToPush() {

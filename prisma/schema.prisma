@@ -13,8 +13,8 @@ model Driver {
   name     String     @db.VarChar(255)
   password String     @db.VarChar(255)
   hourlyRate  Float?
-  notification   Json?
-  role       String?
+  notification Json?
+  role        String?
 
   shiftSessions   ShiftSession[]
   routes   Route[]
@@ -71,7 +71,7 @@ model SubCategory {
 model Item {
   id              Int      @id @default(autoincrement())
   name            String   @db.VarChar(255)
-  categoryId      Int
+  categoryId      Int?
   subCategoryId   Int?
   price           Float
   prevPrice       Float?
@@ -82,7 +82,7 @@ model Item {
 
   options   Option[]
 
-  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
@@ -147,6 +147,8 @@ model Orders {
   type              String?
   deliveredBy       String?
   addedToCODBy      String?
+  insertedAt        String?
+  insertedBy        String?
   user              User?          @relation(fields: [userId], references: [id])
   items             OrderedItems[]
   CodBoard          CodBoard?      @relation(fields: [codBoardId], references: [id])
@@ -524,7 +526,7 @@ model Option {
   itemId Int
 
   unit  InventoryUnit  @relation(fields: [unitId], references: [id])
-  item  Item  @relation(fields: [itemId], references: [id])
+  item  Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
   inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
 }
 
