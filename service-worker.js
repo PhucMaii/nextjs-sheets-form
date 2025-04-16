@@ -39,21 +39,21 @@ self.addEventListener("activate", async (e) => {
 })
 
 self.addEventListener('push', async (e) => {
-  // const data = JSON.parse(e.data.text());
+  const data = JSON.parse(e.data.text());
 
-  // const title = data?.message || 'Notification';
-  // const body = data?.body || '';
+  const title = data?.message || 'Notification';
+  const body = data?.body || '';
 
-  // console.log(data, 'data in push event')
+  console.log(data, 'data in push event')
 
-  // e.waitUntil(
-  //   self.registration.showNotification(title, {
-  //     body,
-  //     icon: '/logo-144.png',
-  //   }),
-  // );
-  console.log('Access to push event')
-  self.registration.showNotification('Wohooo!!!', {body: 'Hello world!'})
+  e.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: '/logo-144.png',
+    }),
+  );
+  // console.log('Access to push event')
+  // self.registration.showNotification('Wohooo!!!', {body: 'Hello world!'})
 });
 
 self.addEventListener('notificationclick', (event) => {

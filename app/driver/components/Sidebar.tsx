@@ -32,8 +32,9 @@ import { AccessTime } from '@mui/icons-material';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import SwitchRole from './Modals/SwitchRole';
 import NotificationRequest from '@/app/components/NotificationRequest';
-import axios from 'axios';
+// import axios from 'axios';
 import PushReSubscriber from '@/app/components/PushResubscriber';
+import axios from 'axios';
 
 interface IProps {
   children: ReactNode;
@@ -63,7 +64,6 @@ export default function Sidebar({ children }: IProps) {
     setCurrentTab(pathname);
   }, [pathname]);
 
-  console.log(isAsked, 'isAsked');
 
   useEffect(() => {
     if (todaySession) {
@@ -87,11 +87,11 @@ export default function Sidebar({ children }: IProps) {
 
   const sendNotification = async () => {
     try {
-      if (Notification.permission === 'granted') {
-        new Notification('Supreme Sprouts', {
-          body: 'You have been clocked in',
-        })
-      };
+      // if (Notification.permission === 'granted') {
+      //   new Notification('Supreme Sprouts', {
+      //     body: 'You have been clocked in',
+      //   })
+      // };
       await axios.post('/api/push-notification/alert-clock-in');
     } catch (error) {
       console.log(error);

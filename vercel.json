@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/init-cod-board",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/push-notification/alert-clock-in",
+      "schedule": "0 14 * * *"
     }
   ],
   "functions": {
