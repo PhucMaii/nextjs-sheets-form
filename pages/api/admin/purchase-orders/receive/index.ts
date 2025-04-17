@@ -13,10 +13,13 @@ interface IBody {
   expenseData: {
     invoice?: string;
     amount: number;
+    subTotal: number;
+    tax: number;
     description: string;
     paymentMethodId: number;
     spentBy: string;
     status: TRANSACTION_STATUS;
+    date: string;
   };
 }
 
@@ -62,11 +65,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const newTransaction = await prisma.expense.create({
       data: {
         amount: expenseData.amount,
+        subTotal: expenseData.subTotal,
+        GST: expenseData.tax,
         createdAt: today.dateAndTime,
         createdBy: createdBy,
         description: expenseData.description,
-        spentBy: adminUser.id,
-        date: today.date,
+        spentBy: expenseData.spentBy,
+        date: expenseData.date,
         paymentMethodId: expenseData.paymentMethodId,
         status: expenseData.status,
         invoice: expenseData.invoice,
@@ -86,7 +91,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         id: poId,
       },
-      data: { status: PO_STATUS.RECEIVED, expenseId: newTransaction.id },
+      data: {
+        status: PO_STATUS.RECEIVED,
+        expenseId: newTransaction.id,
+        receivedAt: today.dateAndTime,
+      },
     });
 
     const itemParamsFifo: any[] = [];
@@ -102,8 +111,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         itemParamsFifo.push({
           id: vendorItem.id,
           quantity: poItem.receivedQty,
+          price: poItem.costPerItem,
           vendorId: existingPo.vendorId,
-          unit: poItem.inventoryUnit,
+          unit: {
+            ...poItem.inventoryUnit,
+            unitPrice: poItem.costPerItem,
+          },
           inventoryItemId: poItem.inventoryItemId,
           inventoryItem: poItem.inventoryItem,
         });

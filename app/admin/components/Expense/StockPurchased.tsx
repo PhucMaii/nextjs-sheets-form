@@ -99,9 +99,6 @@ export default function StockPurchased({
     role,
   );
 
-  console.log(units, 'units');
-  console.log(purchasedItems, 'purchasedItems');
-
   // console.log(promptedItem?.units, 'promptedItem?.units');
 
   // const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);

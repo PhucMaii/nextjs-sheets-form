@@ -8,16 +8,19 @@ import Sidebar from '@/app/admin/components/Sidebar/Sidebar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, PO_STATUS } from '@/app/utils/enum';
 import useNotification from '@/hooks/useNotification';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import ReceiveInventoryTable from '@/app/admin/components/Tables/ReceiveInventoryTable';
-
+import { IPurchaseOrder } from '@/app/utils/type';
+import ConvertToTransaction from '@/app/admin/components/Modals/add/ConvertToTransaction';
+import { LoadingButton } from '@mui/lab';
 export const ReceivedProgress = ({
   receivedQty,
   rejectedQty,
   orderedQty,
 }: any) => {
+  console.log(receivedQty, rejectedQty, orderedQty);
   return (
     <Box
       sx={{
@@ -54,9 +57,11 @@ export default function ReceiveInventory() {
   const { id }: any = useParams();
   const router = useRouter();
 
-  const [poNumber, setPoNumber] = useState<string>('');
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [po, setPo] = useState<IPurchaseOrder>({} as IPurchaseOrder);
   const [poItems, setPoItems] = useState<any[]>([]);
-
+  const [openConvertToTransactionModal, setOpenConvertToTransactionModal] =
+    useState(false);
   const { showNotification, NotificationComp } = useNotification();
 
   const receivedSummary = useMemo(() => {
@@ -94,7 +99,7 @@ export default function ReceiveInventory() {
         return;
       }
 
-      setPoNumber(res.data.data.poNumber);
+      setPo(res.data.data);
       setPoItems(res.data.data.poItems);
     } catch (error) {
       console.error(error);
@@ -113,8 +118,43 @@ export default function ReceiveInventory() {
     );
   };
 
+  const handleSaveReceive = async () => {
+    setIsSaving(true);
+    try {
+      const response = await axios.post(
+        `${API_URL.ADMIN}/purchase-orders/save-receive`,
+        {
+          poId: po?.id,
+          poItems: poItems,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      router.push(`/admin/purchase-orders/${id}`);
+    } catch (error) {
+      console.error(error);
+      showNotification('error', 'Error saving receive');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Sidebar>
+      {po && (
+        <ConvertToTransaction
+          open={openConvertToTransactionModal}
+          onClose={() => setOpenConvertToTransactionModal(false)}
+          showNotification={showNotification}
+          po={po}
+          poItems={poItems}
+        />
+      )}
       {NotificationComp}
       <Box
         sx={{
@@ -125,20 +165,31 @@ export default function ReceiveInventory() {
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box display="flex" alignItems="center" gap={1} my={2}>
-            <IconButton onClick={() => router.push('/admin/purchase-orders')}>
+            <IconButton onClick={() => router.back()}>
               <ArrowBackIcon />
             </IconButton>
 
             <Box>
               <Typography variant="h5">Receive Inventory</Typography>
-              <Typography variant="body2">#{poNumber}</Typography>
+              <Typography variant="body2">#{po.poNumber}</Typography>
             </Box>
           </Box>
 
           <Box display="flex" alignItems="center" gap={1} my={2}>
-            <Button variant="contained" color="primary">
-              Receive
-            </Button>
+            <LoadingButton
+              loading={isSaving}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                if (po?.status === PO_STATUS.RECEIVED) {
+                  handleSaveReceive();
+                } else {
+                  setOpenConvertToTransactionModal(true);
+                }
+              }}
+            >
+              {po?.status === PO_STATUS.RECEIVED ? 'Save' : 'Receive'}
+            </LoadingButton>
           </Box>
         </Box>
 

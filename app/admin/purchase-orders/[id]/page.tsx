@@ -6,11 +6,12 @@ import {
   Button,
   Grid,
   TextField,
-  OutlinedInput,
-  FormControl,
-  InputLabel,
-  InputAdornment,
-  Divider,
+  TableHead,
+  TableBody,
+  TableContainer,
+  TableRow,
+  TableCell,
+  Table,
 } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
@@ -23,9 +24,7 @@ import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import useSelectDate from '@/hooks/useSelectDate';
-import UnitRadio from '../../components/Radio/UnitRadio';
 import { gstRate, pstRate } from '@/app/lib/constant';
-import { Trash2Icon } from 'lucide-react';
 import SellIcon from '@mui/icons-material/Sell';
 import { Autocomplete, Checkbox, FormControlLabel } from '@mui/material';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -33,11 +32,13 @@ import { LoadingButton } from '@mui/lab';
 import { useRouter } from 'next/navigation';
 import ConfirmModal from '@/app/admin/components/Modals/ConfirmModal';
 import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
+import { POItemRowDisplay, POItemRow } from '../../components/POItemRow';
 
 export default function PurchaseOrder() {
   const { id }: any = useParams();
   const router = useRouter();
 
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(true);
   const [isOpenPODiscount, setIsOpenPODiscount] = useState(false);
   const [isOpenRemovePODiscount, setIsOpenRemovePODiscount] = useState(false);
@@ -65,9 +66,17 @@ export default function PurchaseOrder() {
           tax: item?.tax || 0,
           total: item.total,
           inventoryUnit: item?.inventoryUnit,
+          receivedQty: item?.receivedQty || 0,
+          rejectedQty: item?.rejectedQty || 0,
         };
       });
       setSelectedItems(newSelectedItems);
+    }
+  }, [po]);
+
+  useEffect(() => {
+    if (po?.status === PO_STATUS.DRAFT || po?.status === PO_STATUS.CANCELLED) {
+      setIsEditMode(true);
     }
   }, [po]);
 
@@ -155,36 +164,6 @@ export default function PurchaseOrder() {
     // }));
   };
 
-  const calculateItemTotal = (item: any) => {
-    const total = (item.costPerItem + item.tax) * item.orderedQty;
-    return total;
-  };
-
-  const onDeleteItem = (item: any) => {
-    setSelectedItems(
-      selectedItems.filter(
-        (i: any) => i.inventoryItemId !== item.inventoryItemId,
-      ),
-    );
-  };
-
-  const onChangeItem = (item: any, field: string, value: any) => {
-    const newItems = selectedItems.map((i: any) => {
-      // Id here is equal to vendorItemId
-      if (i.id === item.id) {
-        return {
-          ...i,
-          [field]: value,
-          total: calculateItemTotal({ ...i, [field]: value }),
-        };
-      }
-
-      return i;
-    });
-
-    setSelectedItems(newItems || []);
-  };
-
   const handleSaveItems = async () => {
     setIsSaving(true);
     try {
@@ -204,6 +183,7 @@ export default function PurchaseOrder() {
       fetchPurchaseOrder();
 
       showNotification('success', response.data.message);
+      setIsEditMode(false);
     } catch (error: any) {
       console.log(error);
       showNotification('error', 'Error saving items');
@@ -273,7 +253,19 @@ export default function PurchaseOrder() {
           }}
         >
           <Box display="flex" alignItems="center" gap={1}>
-            <IconButton onClick={() => router.push('/admin/purchase-orders')}>
+            <IconButton
+              onClick={() => {
+                if (
+                  isEditMode &&
+                  po?.status !== PO_STATUS.DRAFT &&
+                  po?.status !== PO_STATUS.CANCELLED
+                ) {
+                  setIsEditMode(false);
+                } else {
+                  router.push('/admin/purchase-orders');
+                }
+              }}
+            >
               <ArrowBackIcon />
             </IconButton>
             <Box
@@ -283,35 +275,42 @@ export default function PurchaseOrder() {
               justifyContent="space-between"
             >
               <Typography variant="h5" fontWeight="semibold">
-                #{po?.poNumber}
+                {isEditMode ? `Edit #${po?.poNumber}` : `#${po?.poNumber}`}
               </Typography>
 
               <Box display="flex" alignItems="center" gap={1}>
-                {po?.status !== PO_STATUS.RECEIVED && (
-                  <LoadingButton
-                    loading={isUpdatingStatus}
-                    onClick={() => {
-                      if (po?.status === PO_STATUS.DRAFT || po?.status === PO_STATUS.CANCELLED) {
-                        markAsOrdered();
-                      } else if (po?.status === PO_STATUS.ORDERED) {
-                        directToReceive();
-                      }
-                    }}
-                    variant="outlined"
-                  >
-                    {po?.status === PO_STATUS.DRAFT || po?.status === PO_STATUS.CANCELLED
-                      ? 'Mark as ordered'
-                      : po?.status === PO_STATUS.ORDERED
-                        ? 'Receive inventory'
-                        : ''}
-                  </LoadingButton>
-                )}
+                {/* {po?.status !== PO_STATUS.RECEIVED && ( */}
                 <LoadingButton
                   loading={isSaving}
-                  onClick={handleSaveItems}
-                  variant="contained"
+                  onClick={() => {
+                    if (isEditMode) {
+                      handleSaveItems();
+                    } else {
+                      setIsEditMode(true);
+                    }
+                  }}
+                  variant="outlined"
                 >
-                  Save
+                  {isEditMode ? 'Save' : 'Edit'}
+                </LoadingButton>
+                <LoadingButton
+                  variant="contained"
+                  loading={isUpdatingStatus}
+                  onClick={() => {
+                    if (
+                      po?.status === PO_STATUS.DRAFT ||
+                      po?.status === PO_STATUS.CANCELLED
+                    ) {
+                      markAsOrdered();
+                    } else {
+                      directToReceive();
+                    }
+                  }}
+                >
+                  {po?.status === PO_STATUS.DRAFT ||
+                  po?.status === PO_STATUS.CANCELLED
+                    ? 'Mark as ordered'
+                    : 'Receive Inventory'}
                 </LoadingButton>
               </Box>
             </Box>
@@ -337,207 +336,77 @@ export default function PurchaseOrder() {
                   {SelectDate}
                 </Box>
                 {/* Items */}
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography>Search Items</Typography>
-                  <Autocomplete
-                    size="small"
-                    value={selectedItems}
-                    options={po?.vendor?.vendorItem || []}
-                    getOptionLabel={(option) =>
-                      option?.inventoryItem?.name || ''
-                    }
-                    renderOption={(props, option, { selected }) => {
-                      const { key, ...optionProps } = props;
-                      return (
-                        <li key={key} {...optionProps}>
-                          <FormControlLabel
-                            label={option?.inventoryItem?.name}
-                            control={<Checkbox checked={selected} />}
-                          />
-                        </li>
-                      );
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Search Items" />
-                    )}
-                    multiple
-                    isOptionEqualToValue={(option, value) =>
-                      option.id === value.id
-                    }
-                    onChange={(event, newValue) => {
-                      onSelectItem(newValue);
-                    }}
-                    disableCloseOnSelect
-                  />
-                </Box>
-
+                {isEditMode ? (
+                  <Box display="flex" flexDirection="column" gap={1}>
+                    <Typography>Search Items</Typography>
+                    <Autocomplete
+                      size="small"
+                      value={selectedItems}
+                      options={po?.vendor?.vendorItem || []}
+                      getOptionLabel={(option) =>
+                        option?.inventoryItem?.name || ''
+                      }
+                      renderOption={(props, option, { selected }) => {
+                        const { key, ...optionProps } = props;
+                        return (
+                          <li key={key} {...optionProps}>
+                            <FormControlLabel
+                              label={option?.inventoryItem?.name}
+                              control={<Checkbox checked={selected} />}
+                            />
+                          </li>
+                        );
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Search Items" />
+                      )}
+                      multiple
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      }
+                      onChange={(event, newValue) => {
+                        onSelectItem(newValue);
+                      }}
+                      disableCloseOnSelect
+                    />
+                  </Box>
+                ) : (
+                  <Typography>Ordered Items</Typography>
+                )}
                 {/* Display items */}
-                <Box display="flex" flexDirection="column" gap={2}>
-                  {selectedItems &&
-                    selectedItems.length > 0 &&
-                    selectedItems.map((item: any) => {
+                {isEditMode ? (
+                  <>
+                    {selectedItems.map((item: any) => {
                       return (
-                        <Box
-                          key={item.id}
-                          display="flex"
-                          flexDirection="column"
-                          gap={2}
-                        >
-                          <Grid
-                            container
-                            key={item.id}
-                            display="flex"
-                            alignItems="center"
-                            spacing={1}
-                          >
-                            <Grid item xs={12}>
-                              <Typography variant="h6">
-                                {item?.inventoryItem?.name}
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={12}>
-                              <UnitRadio
-                                units={item?.unit || []}
-                                value={JSON.stringify(
-                                  item?.inventoryUnit || {},
-                                )}
-                                onChange={(e: any) => {
-                                  const newItems = selectedItems.map(
-                                    (i: any) => {
-                                      if (
-                                        i.inventoryItemId ===
-                                        item.inventoryItemId
-                                      ) {
-                                        const tax =
-                                          JSON.parse(e.target.value).unitPrice *
-                                            (item?.inventoryItem?.hasGST
-                                              ? gstRate
-                                              : 0) +
-                                          JSON.parse(e.target.value).unitPrice *
-                                            (item?.inventoryItem?.hasPST
-                                              ? pstRate
-                                              : 0);
-
-                                        const costPerItem = JSON.parse(
-                                          e.target.value,
-                                        ).unitPrice;
-
-                                        const total = calculateItemTotal({
-                                          ...i,
-                                          costPerItem,
-                                          tax,
-                                        });
-                                        return {
-                                          ...i,
-                                          inventoryUnit: JSON.parse(
-                                            e.target.value,
-                                          ),
-                                          costPerItem,
-                                          tax,
-                                          total,
-                                        };
-                                      }
-                                      return i;
-                                    },
-                                  );
-
-                                  setSelectedItems(newItems);
-                                }}
-                              />
-                            </Grid>
-                            <Grid item xs={3.8} lg={3}>
-                              <FormControl fullWidth>
-                                <InputLabel htmlFor="item-quantity">
-                                  Quantity
-                                </InputLabel>
-                                <OutlinedInput
-                                  id="item-quantity"
-                                  size="small"
-                                  placeholder="Quantity"
-                                  label="Quantity"
-                                  sx={{ width: '100%' }}
-                                  value={item?.orderedQty || 0}
-                                  onChange={(e) =>
-                                    onChangeItem(
-                                      item,
-                                      'orderedQty',
-                                      Number(e.target.value),
-                                    )
-                                  }
-                                />
-                              </FormControl>
-                            </Grid>
-                            <Grid item xs={3.8} lg={3}>
-                              <FormControl fullWidth>
-                                <InputLabel htmlFor="item-cost">
-                                  Cost
-                                </InputLabel>
-                                <OutlinedInput
-                                  id="item-cost"
-                                  size="small"
-                                  placeholder="Cost"
-                                  sx={{ width: '100%' }}
-                                  value={item?.costPerItem || 0}
-                                  startAdornment={
-                                    <InputAdornment position="start">
-                                      <Typography>$</Typography>
-                                    </InputAdornment>
-                                  }
-                                  type="number"
-                                  onChange={(e) =>
-                                    onChangeItem(
-                                      item,
-                                      'costPerItem',
-                                      Number(e.target.value),
-                                    )
-                                  }
-                                  label="Cost"
-                                />
-                              </FormControl>
-                            </Grid>
-                            <Grid item xs={3.8} lg={3}>
-                              <FormControl fullWidth>
-                                <InputLabel htmlFor="item-tax">Tax</InputLabel>
-                                <OutlinedInput
-                                  id="item-tax"
-                                  size="small"
-                                  placeholder="Tax"
-                                  sx={{ width: '100%' }}
-                                  value={item?.tax || 0}
-                                  startAdornment={
-                                    <InputAdornment position="start">
-                                      <Typography>$</Typography>
-                                    </InputAdornment>
-                                  }
-                                  onChange={(e) =>
-                                    onChangeItem(
-                                      item,
-                                      'tax',
-                                      Number(e.target.value),
-                                    )
-                                  }
-                                  label="Tax"
-                                  type="number"
-                                />
-                              </FormControl>
-                            </Grid>
-                            <Grid item xs={10} lg={2} textAlign="right">
-                              <Typography>
-                                Total: ${item?.total?.toFixed(2) || 0}
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={1} lg={0.5} textAlign="right">
-                              <IconButton onClick={() => onDeleteItem(item)}>
-                                <Trash2Icon />
-                              </IconButton>
-                            </Grid>
-                          </Grid>
-
-                          <Divider />
-                        </Box>
+                        <POItemRow
+                          item={item}
+                          selectedItems={selectedItems}
+                          setSelectedItems={setSelectedItems}
+                          isEditMode={true}
+                        />
                       );
                     })}
-                </Box>
+                  </>
+                ) : (
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Item</TableCell>
+                          <TableCell>Quantity</TableCell>
+                          <TableCell>Cost</TableCell>
+                          <TableCell>Tax</TableCell>
+                          <TableCell>Total</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedItems.map((item: any) => {
+                          return <POItemRowDisplay item={item} />;
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
               </ShadowSection>
             </Grid>
 
