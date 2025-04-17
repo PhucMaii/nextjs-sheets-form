@@ -1,24 +1,50 @@
 import { IPurchaseOrder } from '@/app/utils/type';
 import {
-  Button,
+  Box,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import StatusText from '../StatusText';
 import { PO_STATUS } from '@/app/utils/enum';
 import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
+import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
+import { LoadingButton } from '@mui/lab';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 export default function POTable({
   poList,
+  showNotification,
 }: {
   poList: IPurchaseOrder[] | any;
+  showNotification: ShowNotificationType;
 }) {
+  const [loading, setLoading] = useState<any>({
+    id: null,
+    loading: false,
+    action: null,
+  });
+
   const router = useRouter();
+
+  const updateStatus = async (e: any, id: number, status: PO_STATUS) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setLoading({ id, loading: true, action: status === PO_STATUS.CANCELLED ? 'cancelPO' : 'markAsOrdered' });
+    const response = await handleUpdatePOStatus(id, status);
+    setLoading({ id, loading: false, action: null });
+
+    if (response) {
+      showNotification('success', 'Purchase order marked as ordered');
+    } else {
+      showNotification('error', 'Failed to mark purchase order as ordered');
+    }
+  };  
 
   return (
     <Table>
@@ -54,20 +80,40 @@ export default function POTable({
                     ? 'warning'
                     : po.status === PO_STATUS.ORDERED
                       ? 'info'
-                      : po.status === PO_STATUS.DELIVERED
+                      : po.status === PO_STATUS.RECEIVED
                         ? 'success'
                         : 'error'
                 }
               />
             </TableCell>
-            <TableCell>{po?.receivedItems || 0} of {po?.totalItems || 0}</TableCell>
+            <TableCell>
+              {po?.receivedItems || 0} of {po?.totalItems || 0}
+            </TableCell>
             <TableCell>${po?.totalCost?.toFixed(2) || 0}</TableCell>
             <TableCell>{po.estArrival}</TableCell>
-            <TableCell> 
-                <Button variant="outlined" color="primary">Mark as Ordered</Button>
-
+            <TableCell>
+              <Box display="flex" alignItems="center" gap={1}>
+                {po?.status !== PO_STATUS.CANCELLED && <LoadingButton
+                  variant="outlined"
+                  color="error"
+                  loading={loading.id === po.id && loading.action === 'cancelPO' && loading.loading}
+                  onClick={(e: any) => updateStatus(e, po.id, PO_STATUS.CANCELLED)}
+                >
+                  Cancel
+                </LoadingButton>}
+                {po?.status === PO_STATUS.DRAFT || po?.status === PO_STATUS.CANCELLED && <LoadingButton
+                  variant="outlined"
+                  color='primary'
+                  loading={loading.id === po.id && loading.action === 'markAsOrdered' && loading.loading}
+                  onClick={(e: any) => {
+                    updateStatus(e, po.id, PO_STATUS.ORDERED)
+                  }}
+                >
+                  {po.status === PO_STATUS.ORDERED ? 'Mark as Received' : 'Mark as Ordered'}
+                </LoadingButton>}
+              </Box>
             </TableCell>
-          </TableRow> 
+          </TableRow>
         ))}
       </TableBody>
     </Table>

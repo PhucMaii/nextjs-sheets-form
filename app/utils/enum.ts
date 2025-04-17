@@ -139,6 +139,6 @@ export enum WORKING_ROLE {
 export enum PO_STATUS {
   DRAFT = 'Draft',
   ORDERED = 'Ordered',
-  DELIVERED = 'Delivered',
+  RECEIVED = 'Received',
   CANCELLED = 'Cancelled',
 }

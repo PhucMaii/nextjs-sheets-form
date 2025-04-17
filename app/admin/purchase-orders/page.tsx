@@ -17,11 +17,14 @@ import { useRouter } from 'next/navigation';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { IPurchaseOrder } from '@/app/utils/type';
+import useNotification from '@/hooks/useNotification';
 
 export default function PurchaseOrders() {
   const [isInitialized, setIsInitialized] = useState<boolean>(true);
   const [poList, setPoList] = useState<IPurchaseOrder[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+
+  const { showNotification, NotificationComp } = useNotification();
 
   const router = useRouter();
 
@@ -41,6 +44,7 @@ export default function PurchaseOrders() {
 
   return (
     <Sidebar>
+      {NotificationComp}
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography variant="h5" fontWeight="semibold">
           Purchase Orders
@@ -71,7 +75,7 @@ export default function PurchaseOrders() {
         {isInitialized ? (
           <Skeleton variant="rectangular" height={500} />
         ) : (
-          <POTable poList={poList} />
+          <POTable poList={poList} showNotification={showNotification} />
         )}
       </ShadowSection>
     </Sidebar>

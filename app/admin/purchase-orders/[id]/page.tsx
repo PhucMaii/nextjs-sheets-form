@@ -18,7 +18,7 @@ import { ShadowSection } from '../../reports/styled';
 import AddPODiscount from '../../components/Modals/add/AddPODiscount';
 import { IPurchaseOrder } from '@/app/utils/type';
 import { useParams } from 'next/navigation';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, PO_STATUS } from '@/app/utils/enum';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -29,14 +29,24 @@ import { Trash2Icon } from 'lucide-react';
 import SellIcon from '@mui/icons-material/Sell';
 import { Autocomplete, Checkbox, FormControlLabel } from '@mui/material';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import { LoadingButton } from '@mui/lab';
+import { useRouter } from 'next/navigation';
+import ConfirmModal from '@/app/admin/components/Modals/ConfirmModal';
+import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
+
 export default function PurchaseOrder() {
   const { id }: any = useParams();
+  const router = useRouter();
 
   const [isInitialized, setIsInitialized] = useState<boolean>(true);
   const [isOpenPODiscount, setIsOpenPODiscount] = useState(false);
+  const [isOpenRemovePODiscount, setIsOpenRemovePODiscount] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
   const [po, setPO] = useState<IPurchaseOrder | null>(null);
   // const [vendorItemSelection, setVendorItemSelection] = useState<any[]>([]);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+
   const { showNotification, NotificationComp } = useNotification();
   const { SelectDate } = useSelectDate(po?.estArrival);
 
@@ -151,10 +161,6 @@ export default function PurchaseOrder() {
   };
 
   const onDeleteItem = (item: any) => {
-    // setPO((prevState: any) => ({
-    //   ...prevState,
-    //   poItems: prevState.poItems.filter((i: any) => i.id !== item.id),
-    // }));
     setSelectedItems(
       selectedItems.filter(
         (i: any) => i.inventoryItemId !== item.inventoryItemId,
@@ -177,11 +183,56 @@ export default function PurchaseOrder() {
     });
 
     setSelectedItems(newItems || []);
+  };
 
-    // setPO((prevState: any) => ({
-    //   ...prevState,
-    //   items: newItems,
-    // }));
+  const handleSaveItems = async () => {
+    setIsSaving(true);
+    try {
+      const response = await axios.put(`${API_URL.ADMIN}/purchase-orders`, {
+        id: po?.id,
+        items: selectedItems,
+        discount: po?.discount,
+        estArrival: po?.estArrival,
+        note: po?.note,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      fetchPurchaseOrder();
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log(error);
+      showNotification('error', 'Error saving items');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const markAsOrdered = async () => {
+    if (!po?.id) {
+      showNotification('error', 'Purchase order not found');
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+
+    const response = await handleUpdatePOStatus(po?.id, PO_STATUS.ORDERED);
+
+    if (response) {
+      showNotification('success', 'Purchase order updated');
+    } else {
+      showNotification('error', 'Failed to update purchase order');
+    }
+
+    setIsUpdatingStatus(false);
+  };
+
+  const directToReceive = () => {
+    router.push(`/admin/purchase-orders/${id}/receive`);
   };
 
   return (
@@ -193,6 +244,19 @@ export default function PurchaseOrder() {
           setPO((prevState: any) => ({
             ...prevState,
             discount,
+          }));
+        }}
+      />
+      <ConfirmModal
+        open={isOpenRemovePODiscount}
+        onClose={() => setIsOpenRemovePODiscount(false)}
+        title={`Are you sure you want to remove the $${po?.discount?.toFixed(2) || 0} discount?`}
+        buttonLabel="Remove"
+        showNotification={showNotification}
+        handleSubmit={() => {
+          setPO((prevState: any) => ({
+            ...prevState,
+            discount: null,
           }));
         }}
       />
@@ -209,7 +273,7 @@ export default function PurchaseOrder() {
           }}
         >
           <Box display="flex" alignItems="center" gap={1}>
-            <IconButton>
+            <IconButton onClick={() => router.push('/admin/purchase-orders')}>
               <ArrowBackIcon />
             </IconButton>
             <Box
@@ -219,11 +283,36 @@ export default function PurchaseOrder() {
               justifyContent="space-between"
             >
               <Typography variant="h5" fontWeight="semibold">
-                Create Purchase Order
+                #{po?.poNumber}
               </Typography>
 
               <Box display="flex" alignItems="center" gap={1}>
-                <Button variant="outlined">Mark as ordered</Button>
+                {po?.status !== PO_STATUS.RECEIVED && (
+                  <LoadingButton
+                    loading={isUpdatingStatus}
+                    onClick={() => {
+                      if (po?.status === PO_STATUS.DRAFT || po?.status === PO_STATUS.CANCELLED) {
+                        markAsOrdered();
+                      } else if (po?.status === PO_STATUS.ORDERED) {
+                        directToReceive();
+                      }
+                    }}
+                    variant="outlined"
+                  >
+                    {po?.status === PO_STATUS.DRAFT || po?.status === PO_STATUS.CANCELLED
+                      ? 'Mark as ordered'
+                      : po?.status === PO_STATUS.ORDERED
+                        ? 'Receive inventory'
+                        : ''}
+                  </LoadingButton>
+                )}
+                <LoadingButton
+                  loading={isSaving}
+                  onClick={handleSaveItems}
+                  variant="contained"
+                >
+                  Save
+                </LoadingButton>
               </Box>
             </Box>
           </Box>
@@ -489,7 +578,21 @@ export default function PurchaseOrder() {
                   {po?.discount ? (
                     <Box display="flex" justifyContent="space-between">
                       <Typography>Discount</Typography>
-                      <Typography>-${po?.discount?.toFixed(2) || 0}</Typography>
+
+                      {/* <Box display="flex" alignItems="center" gap={1}> */}
+                      <Typography
+                        onClick={() => setIsOpenRemovePODiscount(true)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        -${po?.discount?.toFixed(2) || 0}
+                      </Typography>
+                      {/* <IconButton onClick={() => setPO((prevState: any) => ({
+                          ...prevState,
+                          discount: null,
+                        }))}>
+                          <Trash2Icon />
+                        </IconButton> */}
+                      {/* </Box> */}
                     </Box>
                   ) : null}
                   <Box display="flex" justifyContent="space-between">

@@ -580,6 +580,8 @@ model POItem {
   poId   Int
   orderedQty  Float
   receivedQty  Float?
+  rejectedQty  Float?
+  tax          Float?
   costPerItem      Float
   inventoryUnitId      Int
 
