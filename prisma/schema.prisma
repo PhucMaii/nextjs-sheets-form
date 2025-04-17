@@ -263,6 +263,7 @@ model Expense {
   PST             Float?
   GST             Float?
   amount          Float
+  discount        Float?
   description     String
   spentBy         String
   date            String

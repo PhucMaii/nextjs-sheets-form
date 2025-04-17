@@ -50,6 +50,15 @@ export default function EditExpense({
     }
   }, [transaction]);
 
+  useEffect(() => {
+    if (updatedExpense) {
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        amount: prevState?.subTotal + prevState.GST + prevState.PST - (prevState?.discount || 0),
+      }));
+    }
+  }, [updatedExpense?.discount]);
+
   const onChangeExpense = (field: string, value: any) => {
     setUpdatedExpense({
       ...updatedExpense,
@@ -71,6 +80,7 @@ export default function EditExpense({
         date: date,
         amount: updatedExpense.amount,
         subTotal: updatedExpense.subTotal,
+        discount: updatedExpense?.discount || 0,
         GST: updatedExpense.GST,
         PST: updatedExpense.PST,
         description: updatedExpense.description,
@@ -129,6 +139,20 @@ export default function EditExpense({
               />
             </Box> */}
             <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Typography variant="h6">Discount</Typography>
+                  <TextField
+                    placeholder="Discount"
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.discount || 0}
+                    onChange={(e) =>
+                      onChangeExpense('discount', +e.target.value)
+                    }
+                  />
+                </Box>
+              </Grid>
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <Typography variant="h6">Subtotal</Typography>

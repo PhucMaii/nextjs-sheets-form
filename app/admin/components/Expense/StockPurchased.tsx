@@ -56,6 +56,7 @@ export default function StockPurchased({
     GST: 0,
     PST: 0,
     amount: 0,
+    discount: 0,
     description: '',
     paymentMethodId: -1,
     spentBy: '-- Choose who spent --',
@@ -121,6 +122,14 @@ export default function StockPurchased({
   }, [vendors]);
 
   useEffect(() => {
+    setNewExpense((prevState: any) => ({
+      ...prevState,
+      amount:
+        prevState.subTotal + prevState.GST + prevState.PST - prevState.discount,
+    }));
+  }, [newExpense.discount]);
+
+  useEffect(() => {
     if (purchasedItems.length > 0) {
       calculateNewAmount();
       // generateDescription();
@@ -131,6 +140,7 @@ export default function StockPurchased({
         subTotal: 0,
         GST: 0,
         PST: 0,
+        discount: 0,
         description: '',
       });
       // setTotalAmount(0);
@@ -321,10 +331,12 @@ export default function StockPurchased({
       amount:
         parseFloat(total.subTotal.toFixed(2)) +
         parseFloat(total.PST.toFixed(2)) +
-        parseFloat(total.GST.toFixed(2)),
+        parseFloat(total.GST.toFixed(2)) -
+        parseFloat(newExpense.discount.toFixed(2)),
       subTotal: parseFloat(total.subTotal.toFixed(2)),
       GST: parseFloat(total.GST.toFixed(2)),
       PST: parseFloat(total.PST.toFixed(2)),
+      discount: parseFloat(newExpense.discount.toFixed(2)),
     }));
   };
 
@@ -442,6 +454,7 @@ export default function StockPurchased({
           createdAt,
           codBoardId: codBoardId,
           items: purchasedItems,
+          discount: newExpense.discount,
         },
       );
 
@@ -630,6 +643,22 @@ export default function StockPurchased({
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Discount</Typography>
+              <TextField
+                fullWidth
+                type="number"
+                value={newExpense.discount}
+                onChange={(e) =>
+                  setNewExpense((prevState: any) => ({
+                    ...prevState,
+                    discount: +e.target.value,
+                  }))
+                }
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Subtotal</Typography>
               <TextField
                 disabled
@@ -648,24 +677,6 @@ export default function StockPurchased({
           </Grid>
           <Grid item xs={6}>
             <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">PST (7%)</Typography>
-              <TextField
-                disabled
-                placeholder="Enter epxense PST..."
-                fullWidth
-                type="number"
-                value={newExpense.PST}
-                onChange={(e) =>
-                  setNewExpense((prevState: any) => ({
-                    ...prevState,
-                    PST: +e.target.value,
-                  }))
-                }
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">GST (5%)</Typography>
               <TextField
                 disabled
@@ -677,6 +688,24 @@ export default function StockPurchased({
                   setNewExpense((prevState: any) => ({
                     ...prevState,
                     GST: +e.target.value,
+                  }))
+                }
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">PST (7%)</Typography>
+              <TextField
+                disabled
+                placeholder="Enter epxense PST..."
+                fullWidth
+                type="number"
+                value={newExpense.PST}
+                onChange={(e) =>
+                  setNewExpense((prevState: any) => ({
+                    ...prevState,
+                    PST: +e.target.value,
                   }))
                 }
               />

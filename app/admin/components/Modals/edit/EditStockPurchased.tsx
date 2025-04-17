@@ -109,8 +109,6 @@ const EditStockPurchased = ({
     }
   }, [adminsAndDriversRes]);
 
-  console.log('stockPurchased', stockPurchased);
-
   // const fetchAdminsAndDrivers = async () => {
   //   const user: any = getAdminsAndDrivers(showNotification);
   //   setAdminsAndDrivers(user);
@@ -127,6 +125,19 @@ const EditStockPurchased = ({
       calculateNewAmount();
     }
   }, [purchasedItems]);
+
+  useEffect(() => {
+    if (updatedExpense) {
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        amount:
+          prevState?.subTotal +
+          prevState.GST +
+          prevState.PST -
+          (prevState?.discount || 0),
+      }));
+    }
+  }, [updatedExpense?.discount]);
 
   useEffect(() => {
     if (selectedVendorId !== -1) {
@@ -288,10 +299,12 @@ const EditStockPurchased = ({
       amount:
         parseFloat(total.subTotal.toFixed(2)) +
         parseFloat(total.PST.toFixed(2)) +
-        parseFloat(total.GST.toFixed(2)),
+        parseFloat(total.GST.toFixed(2)) -
+        (prevState?.discount || 0),
       subTotal: parseFloat(total.subTotal.toFixed(2)),
       GST: parseFloat(total.GST.toFixed(2)),
       PST: parseFloat(total.PST.toFixed(2)),
+      discount: parseFloat(prevState?.discount?.toFixed(2)),
     }));
   };
 
@@ -413,6 +426,7 @@ const EditStockPurchased = ({
         paymentMethodId: updatedExpense.paymentMethodId,
         spentBy: updatedExpense.spentBy,
         invoice: updatedExpense.invoice,
+        discount: updatedExpense?.discount || 0,
         oldItems: isUpdatePurchasedItems ? [] : stockPurchased?.orderedItems,
         updatedItems: isUpdatePurchasedItems ? [] : purchasedItems, // prevent update items if client does not update
         updatedAt: createdAt,
@@ -748,6 +762,23 @@ const EditStockPurchased = ({
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="h6">Discount</Typography>
+                  <TextField
+                    placeholder="Discount"
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.discount || 0}
+                    onChange={(e) =>
+                      setUpdatedExpense((prevState: any) => ({
+                        ...prevState,
+                        discount: +e.target.value,
+                      }))
+                    }
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">Subtotal</Typography>
                   <TextField
                     disabled
@@ -766,24 +797,6 @@ const EditStockPurchased = ({
               </Grid>
               <Grid item xs={6}>
                 <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography variant="h6">PST (7%)</Typography>
-                  <TextField
-                    disabled
-                    placeholder="Enter epxense PST..."
-                    fullWidth
-                    type="number"
-                    value={updatedExpense?.PST || 0}
-                    onChange={(e) =>
-                      setUpdatedExpense((prevState: any) => ({
-                        ...prevState,
-                        PST: +e.target.value,
-                      }))
-                    }
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">GST (5%)</Typography>
                   <TextField
                     disabled
@@ -795,6 +808,24 @@ const EditStockPurchased = ({
                       setUpdatedExpense((prevState: any) => ({
                         ...prevState,
                         GST: +e.target.value,
+                      }))
+                    }
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="h6">PST (7%)</Typography>
+                  <TextField
+                    disabled
+                    placeholder="Enter epxense PST..."
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.PST || 0}
+                    onChange={(e) =>
+                      setUpdatedExpense((prevState: any) => ({
+                        ...prevState,
+                        PST: +e.target.value,
                       }))
                     }
                   />

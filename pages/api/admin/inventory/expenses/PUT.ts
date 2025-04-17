@@ -32,6 +32,7 @@ interface IBody {
   oldItems: IPurchasedItem[];
   updatedItems: IPurchasedItem[];
   updatedAt: string;
+  discount?: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -52,6 +53,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       oldItems,
       updatedItems,
       updatedAt,
+      discount,
     }: IBody = req.body;
 
     const existingExpense = await prisma.expense.findUnique({
@@ -106,6 +108,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         invoice,
         paymentMethodId: paymentMethodId,
         spentBy: spentBy,
+        discount: discount,
       },
       include: {
         orderedItems: {

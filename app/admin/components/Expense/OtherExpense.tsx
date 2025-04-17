@@ -63,6 +63,18 @@ export default function OtherExpense({
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Discount</Typography>
+            <TextField
+              placeholder="Discount"
+              fullWidth
+              value={newExpense.discount}
+              type="number"
+              onChange={(e) => onChangeNewExpense('discount', +e.target.value)}
+            />
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Subtotal</Typography>
             <TextField
               label="Subtotal"

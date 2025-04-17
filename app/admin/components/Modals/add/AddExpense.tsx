@@ -34,6 +34,7 @@ export default function AddExpense({
     PST: 0,
     subTotal: 0,
     description: '',
+    discount: 0,
     paymentMethodId: codBoardId ? 4 : -1,
     spentBy: '-- Choose who spent --',
     status: TRANSACTION_STATUS.UNPAID,
@@ -74,9 +75,13 @@ export default function AddExpense({
   useEffect(() => {
     setNewExpense({
       ...newExpense,
-      amount: newExpense.subTotal + newExpense.GST + newExpense.PST,
+      amount:
+        newExpense.subTotal +
+        newExpense.GST +
+        newExpense.PST -
+        newExpense.discount,
     });
-  }, [newExpense.PST, newExpense.GST, newExpense.subTotal]);
+  }, [newExpense.PST, newExpense.GST, newExpense.subTotal, newExpense.discount]);
 
   const handleAddExpense = async () => {
     try {
@@ -93,6 +98,7 @@ export default function AddExpense({
           spentBy: newExpense.spentBy,
           amount: newExpense.amount,
           description: newExpense.description,
+          discount: newExpense.discount,
           paymentMethodId: newExpense.paymentMethodId,
           subTotal: newExpense.subTotal,
           GST: newExpense.GST,
@@ -110,6 +116,7 @@ export default function AddExpense({
           GST: newExpense.GST,
           PST: newExpense.PST,
           description: newExpense.description,
+          discount: newExpense.discount,
           paymentMethodId: newExpense.paymentMethodId,
           status: newExpense.status,
         });
