@@ -1,10 +1,13 @@
 import {
+  Box,
+  Button,
   Divider,
   FormControl,
   Grid,
   InputLabel,
   Modal,
   OutlinedInput,
+  useMediaQuery,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../admin/components/Modals/type';
@@ -31,6 +34,8 @@ export default function SetItemQuantity({
     item?.options[0] || null,
   );
 
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
   useEffect(() => {
     if (item?.options) {
       setSelectedOption(item?.options[0] || null);
@@ -47,6 +52,7 @@ export default function SetItemQuantity({
           onClose={onClose}
           onClick={() => onSubmit(quantity, selectedOption)}
           buttonProps={{}}
+          onlyHeading={smDown}
         />
 
         <Divider sx={{ my: 2 }} />
@@ -81,6 +87,19 @@ export default function SetItemQuantity({
             }}
           />
         </FormControl>
+
+        {
+          smDown && (
+            <Box width="100%" sx={{ display: 'flex', gap: 1, mt: 2 }}>
+              <Button variant="outlined" fullWidth onClick={onClose}>
+                Cancel
+              </Button>
+              <Button variant="contained" fullWidth onClick={() => onSubmit(quantity, selectedOption)}>
+                Add
+              </Button>
+            </Box>
+          )
+        }
       </BoxModal>
     </Modal>
   );

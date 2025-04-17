@@ -14,6 +14,7 @@ import {
 import './print.css';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
+import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
 
 export const printFontSize = 28;
 
@@ -35,6 +36,10 @@ export const ComponentToPrint = forwardRef(
     }
 
     const [announcement] = SWRFetchData(`${API_URL.ADMIN}/announcement`);
+
+    const total = generateOrderTotalPrice(order.items);
+
+    const totalPrice = total?.subTotal + (total?.PST || 0) + (total?.GST || 0) - (order?.discount || 0);
 
     const orderDetailsTemplate = [];
 
@@ -198,7 +203,7 @@ export const ComponentToPrint = forwardRef(
             </Table>
             <Divider sx={{ mt: 3, backgroundColor: 'black' }} />
             <Grid container>
-              {order?.discount && order?.discount > 0 ? (
+              {total?.discount && total?.discount > 0 ? (
                 <>
                   <Grid item xs={6}>
                     <Typography sx={{ fontSize: printFontSize - 5 }}>
@@ -207,7 +212,7 @@ export const ComponentToPrint = forwardRef(
                   </Grid>
                   <Grid item xs={6} textAlign="right">
                     <Typography sx={{ fontSize: printFontSize - 5 }}>
-                      -${order?.discount?.toFixed(2) || 0}
+                      -${total?.discount?.toFixed(2) || 0}
                     </Typography>
                   </Grid>
                 </>
@@ -220,8 +225,8 @@ export const ComponentToPrint = forwardRef(
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   $
-                  {order?.subTotal?.toFixed(2) ||
-                    order?.totalPrice?.toFixed(2) ||
+                  {total?.subTotal?.toFixed(2) ||
+                    order?.subTotal?.toFixed(2) ||
                     0}
                 </Typography>
               </Grid>
@@ -232,7 +237,7 @@ export const ComponentToPrint = forwardRef(
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${order?.GST?.toFixed(2) || 0}
+                  ${total?.GST?.toFixed(2) || order?.GST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -242,7 +247,7 @@ export const ComponentToPrint = forwardRef(
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${order?.PST?.toFixed(2) || 0}
+                  ${total?.PST?.toFixed(2) || order?.PST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
 
@@ -262,7 +267,7 @@ export const ComponentToPrint = forwardRef(
                   sx={{ fontSize: printFontSize - 5 }}
                   fontWeight="bold"
                 >
-                  ${order?.totalPrice?.toFixed(2) || 0}
+                  ${totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
                 </Typography>
               </Grid>
             </Grid>
