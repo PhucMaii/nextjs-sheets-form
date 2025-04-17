@@ -20,6 +20,7 @@ interface IBody {
     spentBy: string;
     status: TRANSACTION_STATUS;
     date: string;
+    discount?: number;
   };
 }
 
@@ -67,6 +68,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         amount: expenseData.amount,
         subTotal: expenseData.subTotal,
         GST: expenseData.tax,
+        discount: expenseData?.discount || 0,
         createdAt: today.dateAndTime,
         createdBy: createdBy,
         description: expenseData.description,

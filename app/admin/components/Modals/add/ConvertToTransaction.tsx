@@ -42,13 +42,19 @@ export default function ConvertToTransaction({
     spentBy: po.createdBy,
     status: TRANSACTION_STATUS.PAID,
     tax: po.tax,
+    discount: 0,
     subTotal: po.subtotal,
   });
+
+  const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
+
+  const { date, SelectDate } = useSelectDate(po.estArrival);
 
   const router = useRouter();
 
   useEffect(() => {
     if (po) {
+      console.log(po, 'po');
       setExpenseData({
         amount: po.totalCost,
         invoice: '',
@@ -58,18 +64,27 @@ export default function ConvertToTransaction({
         status: TRANSACTION_STATUS.PAID,
         tax: po.tax,
         subTotal: po.subtotal,
+        discount: po?.discount || 0,
       });
     }
   }, [po]);
-
-  const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
-
-  const { date, SelectDate } = useSelectDate(po.estArrival);
 
   useEffect(() => {
     fetchAdminsAndDrivers();
     fetchPaymentMethod();
   }, []);
+
+  useEffect(() => {
+    if (expenseData) {
+      setExpenseData((prevState: any) => ({
+        ...prevState,
+        amount: prevState.subTotal + prevState.tax - prevState.discount,
+        tax: prevState.tax,
+        discount: prevState.discount,
+        subTotal: prevState.subTotal,
+      }));
+    }
+  }, [expenseData?.discount, expenseData?.subTotal, expenseData?.tax,]);
 
   const fetchAdminsAndDrivers = async () => {
     try {
@@ -181,18 +196,51 @@ export default function ConvertToTransaction({
         <Divider sx={{ my: 2 }}>Bill</Divider>
 
         <Box display="flex" flexDirection="column" gap={2}>
+          <Box>
+            {/* Discount */}
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography>Discount</Typography>
+              <TextField
+                type="number"
+                value={expenseData?.discount}
+                fullWidth
+                onChange={(e) =>
+                  setExpenseData({ ...expenseData, discount: +e.target.value })
+                }
+              />
+            </Box>
+          </Box>
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Subtotal</Typography>
-            <TextField type="number" value={expenseData.subTotal} fullWidth />
+            <TextField
+              type="number"
+              value={expenseData.subTotal}
+              fullWidth
+              onChange={(e) =>
+                setExpenseData({ ...expenseData, subTotal: +e.target.value })
+              }
+            />
           </Box>
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Tax</Typography>
-            <TextField type="number" value={expenseData.tax} fullWidth />
+            <TextField
+              type="number"
+              value={expenseData.tax}
+              fullWidth
+              onChange={(e) =>
+                setExpenseData({ ...expenseData, tax: +e.target.value })
+              }
+            />
           </Box>
 
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Total</Typography>
-            <TextField type="number" value={expenseData.amount} fullWidth />
+            <TextField
+              type="number"
+              value={expenseData.amount}
+              fullWidth
+              disabled
+            />
           </Box>
         </Box>
 
@@ -206,13 +254,25 @@ export default function ConvertToTransaction({
 
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Invoice</Typography>
-            <TextField type="number" value={expenseData.invoice} fullWidth />
+            <TextField
+              type="number"
+              value={expenseData.invoice}
+              fullWidth
+              onChange={(e) =>
+                setExpenseData({ ...expenseData, invoice: +e.target.value })}
+            />
           </Box>
 
           {/* Description */}
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Description</Typography>
-            <TextField type="text" value={expenseData.description} fullWidth />
+            <TextField
+              type="text"
+              value={expenseData.description}
+              fullWidth
+              onChange={(e) =>
+                setExpenseData({ ...expenseData, description: e.target.value })}
+            />
           </Box>
 
           {/* Payment Method */}
