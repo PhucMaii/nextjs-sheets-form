@@ -280,4 +280,5 @@ export interface IPurchaseOrder extends PO {
 
 export interface IPOItem extends POItem {
   inventoryUnit: IInventoryUnit;
+  inventoryItem: IInventoryItem;
 }

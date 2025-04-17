@@ -276,6 +276,7 @@ model Expense {
   orderedItems  OrderedItems[]
   vendors       VendorExpense[]
   shifts        ShiftSession[]
+  purchaseOrders  PO[]
 }
 
 model VendorExpense {
@@ -566,9 +567,11 @@ model PO {
   createdBy  String
   receivedAt  String?
   note        String?
+  expenseId   Int?
 
   vendor   Vendor @relation(fields: [vendorId], references: [id])
   poItems  POItem[]
+  expense  Expense? @relation(fields: [expenseId], references: [id])
 
   @@index([vendorId])
 

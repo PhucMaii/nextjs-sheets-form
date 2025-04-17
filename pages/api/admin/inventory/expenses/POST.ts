@@ -162,7 +162,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           id: {
             in: itemsAlreadyExist.map((item: any) => item.id),
           },
-        },
+        }, 
         include: {
           unit: true,
         },
