@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { forwardRef } from 'react';
-import './print.css';
+import './summary-manifest.css';
 
 interface PropTypes {
   manifest: any;
