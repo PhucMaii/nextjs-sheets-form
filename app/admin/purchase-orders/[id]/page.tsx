@@ -49,7 +49,7 @@ export default function PurchaseOrder() {
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const { showNotification, NotificationComp } = useNotification();
-  const { SelectDate } = useSelectDate(po?.estArrival);
+  const { date, SelectDate } = useSelectDate(po?.estArrival);
 
   useEffect(() => {
     if (po?.poItems) {
@@ -171,7 +171,7 @@ export default function PurchaseOrder() {
         id: po?.id,
         items: selectedItems,
         discount: po?.discount,
-        estArrival: po?.estArrival,
+        estArrival: date,
         note: po?.note,
       });
 
@@ -204,6 +204,11 @@ export default function PurchaseOrder() {
 
     if (response) {
       showNotification('success', 'Purchase order updated');
+      // If success -> marks as ordered
+      setPO((prevState: any) => ({
+        ...prevState,
+        status: PO_STATUS.ORDERED,
+      }));
     } else {
       showNotification('error', 'Failed to update purchase order');
     }
@@ -442,6 +447,7 @@ export default function PurchaseOrder() {
                       note: e.target.value,
                     }))
                   }
+                  value={po?.note}
                 />
                 <Box display="flex" flexDirection="column" gap={1}>
                   {po?.discount ? (

@@ -6,6 +6,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
 } from '@mui/material';
 import React, { useState } from 'react';
 import StatusText from '../StatusText';
@@ -15,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
 import { LoadingButton } from '@mui/lab';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 
 export default function POTable({
   poList,
@@ -35,7 +37,11 @@ export default function POTable({
     e.preventDefault();
     e.stopPropagation();
 
-    setLoading({ id, loading: true, action: status === PO_STATUS.CANCELLED ? 'cancelPO' : 'markAsOrdered' });
+    setLoading({
+      id,
+      loading: true,
+      action: status === PO_STATUS.CANCELLED ? 'cancelPO' : 'markAsOrdered',
+    });
     const response = await handleUpdatePOStatus(id, status);
     setLoading({ id, loading: false, action: null });
 
@@ -44,7 +50,7 @@ export default function POTable({
     } else {
       showNotification('error', 'Failed to mark purchase order as ordered');
     }
-  };  
+  };
 
   return (
     <Table>
@@ -70,7 +76,16 @@ export default function POTable({
             }}
             onClick={() => router.push(`/admin/purchase-orders/${po.id}`)}
           >
-            <TableCell sx={{ fontWeight: 'bold' }}>{po.poNumber}</TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>
+              <Box display="flex" alignItems="center" gap={1}>
+                #{po.poNumber}
+                {po?.note && (
+                  <Tooltip title={po?.note}>
+                    <TextSnippetIcon fontSize="small" sx={{ color: grey[500] }} />
+                  </Tooltip>
+                )}
+              </Box>
+              </TableCell>
             <TableCell>{po.vendor.name}</TableCell>
             <TableCell>
               <StatusText
@@ -93,24 +108,41 @@ export default function POTable({
             <TableCell>{po.estArrival}</TableCell>
             <TableCell>
               <Box display="flex" alignItems="center" gap={1}>
-                {po?.status !== PO_STATUS.CANCELLED && <LoadingButton
-                  variant="outlined"
-                  color="error"
-                  loading={loading.id === po.id && loading.action === 'cancelPO' && loading.loading}
-                  onClick={(e: any) => updateStatus(e, po.id, PO_STATUS.CANCELLED)}
-                >
-                  Cancel
-                </LoadingButton>}
-                {po?.status === PO_STATUS.DRAFT || po?.status === PO_STATUS.CANCELLED && <LoadingButton
-                  variant="outlined"
-                  color='primary'
-                  loading={loading.id === po.id && loading.action === 'markAsOrdered' && loading.loading}
-                  onClick={(e: any) => {
-                    updateStatus(e, po.id, PO_STATUS.ORDERED)
-                  }}
-                >
-                  {po.status === PO_STATUS.ORDERED ? 'Mark as Received' : 'Mark as Ordered'}
-                </LoadingButton>}
+                {po?.status !== PO_STATUS.CANCELLED && (
+                  <LoadingButton
+                    variant="outlined"
+                    color="error"
+                    loading={
+                      loading.id === po.id &&
+                      loading.action === 'cancelPO' &&
+                      loading.loading
+                    }
+                    onClick={(e: any) =>
+                      updateStatus(e, po.id, PO_STATUS.CANCELLED)
+                    }
+                  >
+                    Cancel
+                  </LoadingButton>
+                )}
+                {po?.status === PO_STATUS.DRAFT ||
+                  (po?.status === PO_STATUS.CANCELLED && (
+                    <LoadingButton
+                      variant="outlined"
+                      color="primary"
+                      loading={
+                        loading.id === po.id &&
+                        loading.action === 'markAsOrdered' &&
+                        loading.loading
+                      }
+                      onClick={(e: any) => {
+                        updateStatus(e, po.id, PO_STATUS.ORDERED);
+                      }}
+                    >
+                      {po.status === PO_STATUS.ORDERED
+                        ? 'Mark as Received'
+                        : 'Mark as Ordered'}
+                    </LoadingButton>
+                  ))}
               </Box>
             </TableCell>
           </TableRow>

@@ -26,6 +26,7 @@ export default function AddVendor({ open, onClose, showNotification }: IProps) {
   const [newVendor, setNewVendor] = useState<any>({
     name: '',
     phoneNumber: '',
+    email: ''
   });
 
   const today = YYYYMMDDFormat(new Date());
@@ -42,6 +43,7 @@ export default function AddVendor({ open, onClose, showNotification }: IProps) {
         address: address?.description,
         joinedDate: date,
         createdAt,
+        email: newVendor.email,
       });
 
       if (response.data.error) {
@@ -95,6 +97,19 @@ export default function AddVendor({ open, onClose, showNotification }: IProps) {
               value={newVendor.name}
               onChange={(e) =>
                 setNewVendor({ ...newVendor, name: e.target.value })
+              }
+            />
+          </Box>
+
+          {/* Email */}
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Typography variant="h6">Email</Typography>
+            <TextField
+              fullWidth
+              placeholder="Enter vendor's email..."
+              value={newVendor.email}
+              onChange={(e) =>
+                setNewVendor({ ...newVendor, email: e.target.value })
               }
             />
           </Box>

@@ -88,6 +88,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           poItems: true,
           vendor: true,
         },
+        orderBy: {
+          id: 'desc',
+        },
       });
 
       // Format purchase orders

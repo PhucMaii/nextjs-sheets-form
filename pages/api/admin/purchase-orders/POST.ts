@@ -13,7 +13,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'No items in the purchase order' });
     }
 
-
     // Calculate subtotal, tax, totalCost
     const subtotal = purchaseOrder.items.reduce((acc: number, item: any) => {
       return acc + item.costPerItem * item.orderedQty;

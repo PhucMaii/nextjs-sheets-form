@@ -1,4 +1,9 @@
-import { Divider, TableCell, TableRow } from '@mui/material';
+import {
+  Divider,
+  TableCell,
+  TableRow,
+  useMediaQuery,
+} from '@mui/material';
 import { IconButton } from '@mui/material';
 import {
   FormControl,
@@ -28,6 +33,8 @@ export const POItemRow = ({
   setSelectedItems,
   isEditMode,
 }: IProps) => {
+  const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
   const calculateItemTotal = (item: any) => {
     const total = (item.costPerItem + item.tax) * item.orderedQty;
     return total;
@@ -67,7 +74,19 @@ export const POItemRow = ({
         spacing={2}
       >
         <Grid item xs={12}>
-          <Typography variant="h6">{item?.inventoryItem?.name}</Typography>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            gap={1}
+          >
+            <Typography variant="h6">{item?.inventoryItem?.name}</Typography>
+            {xsDown && (
+              <IconButton onClick={() => onDeleteItem(item)}>
+                <Trash2Icon />
+              </IconButton>
+            )}
+          </Box>
         </Grid>
         {isEditMode && (
           <Grid item xs={12}>
@@ -193,14 +212,16 @@ export const POItemRow = ({
             <Typography>${item?.tax?.toFixed(2) || 0}</Typography>
           )}
         </Grid>
-        <Grid item xs={10} lg={2} textAlign="right">
+        <Grid item xs={11} lg={2} textAlign="right">
           <Typography>Total: ${item?.total?.toFixed(2) || 0}</Typography>
         </Grid>
-        <Grid item xs={1} lg={0.5} textAlign="right">
-          <IconButton onClick={() => onDeleteItem(item)}>
-            <Trash2Icon />
-          </IconButton>
-        </Grid>
+        {!xsDown && (
+          <Grid item xs={1} lg={0.5} textAlign="right">
+            <IconButton onClick={() => onDeleteItem(item)}>
+              <Trash2Icon />
+            </IconButton>
+          </Grid>
+        )}
       </Grid>
 
       <Divider />
@@ -209,6 +230,7 @@ export const POItemRow = ({
 };
 
 export const POItemRowDisplay = ({ item }: any) => {
+
   return (
     <TableRow sx={{ alignItems: 'flex-start' }}>
       <TableCell>{item?.inventoryItem?.name}</TableCell>
@@ -233,7 +255,7 @@ export const POItemRowDisplay = ({ item }: any) => {
       </TableCell>
       <TableCell>
         <Typography>${item?.total?.toFixed(2) || 0}</Typography>
-      </TableCell>  
+      </TableCell>
     </TableRow>
   );
 };

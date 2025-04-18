@@ -83,6 +83,12 @@ export default function ReceiveInventory() {
     );
   };
 
+  const onReset = () => {
+    setPoItems((prev: any) =>
+      prev.map((i: any) => ({ ...i, receivedQty: 0, rejectedQty: 0 })),
+    );
+  };
+
   const handleSaveReceive = async () => {
     setIsSaving(true);
     try {
@@ -168,6 +174,7 @@ export default function ReceiveInventory() {
               <Typography variant="h6">Products</Typography>
 
               <Box display="flex" gap={1} alignItems="center">
+                <Button onClick={onReset}>Reset</Button>
                 <Button onClick={onAcceptAll}>Accept All</Button>
                 <Button onClick={onRejectAll}>Reject All</Button>
               </Box>

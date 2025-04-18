@@ -106,6 +106,16 @@ export default function CreatePO() {
 
   const onSelectItem = (newItems: any) => {
     const itemWithCostAndTax = newItems.map((item: any) => {
+      if (po?.items?.length > 0) {
+        const existingItem = po?.items?.find(
+          (i: any) => i.inventoryItemId === item.inventoryItemId,
+        );
+
+        if (existingItem) {
+          return existingItem;
+        }
+      }
+
       const inventoryUnit = item?.unit[0];
 
       const isGST = item.inventoryItem.hasGST;
@@ -203,7 +213,7 @@ export default function CreatePO() {
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <IconButton>
+          <IconButton onClick={() => router.back()}>
             <ArrowBackIcon />
           </IconButton>
           <Box

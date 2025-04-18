@@ -1,9 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import withAdminAuthGuard from "../../../utils/withAdminAuthGuard";
+import emailHandler from "@/pages/api/utils/email";
+import { generatePurchaseOrderTemplate } from "@/config/email";
 const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+    // This API is only used to change to status CANCELLED or ORDERED
     try {
         if (req.method !== 'PUT') {
             return res.status(405).json({ error: 'Method not allowed' });
@@ -15,6 +18,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             where: {
                 id: id,
             },
+            include: {
+                vendor: true,
+                poItems: {
+                    include: {
+                        inventoryItem: true,
+                    }
+                }
+            }
         });
         
         if (!po) {
@@ -27,6 +38,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 status: status,
             },
         });
+
+        if (status === 'CANCELLED') {
+            return res.status(200).json({ message: 'Purchase order status updated' });
+        }
+
+        if (po.vendor && po.vendor.email) {
+            const poTemplate = generatePurchaseOrderTemplate(po.vendor, po);
+            // Send email to vendor
+            await emailHandler(
+                po.vendor.email,
+                'Purchase Order Request',
+                'Purchase Order Request',
+                poTemplate,
+            )
+        }
 
         return res.status(200).json({ message: 'Purchase order status updated' });
     } catch (error) {

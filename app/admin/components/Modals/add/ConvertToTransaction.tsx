@@ -54,16 +54,25 @@ export default function ConvertToTransaction({
 
   useEffect(() => {
     if (po) {
-      console.log(po, 'po');
+      const subtotal = po?.poItems?.reduce((acc: number, item: IPOItem) => {
+        return acc + item.costPerItem * (item.receivedQty || 0);
+      }, 0);
+
+      const tax = po?.poItems?.reduce((acc: number, item: IPOItem) => {
+        return acc + (item.tax || 0) * (item.receivedQty || 0);
+      }, 0);
+
+      const totalCost = subtotal + tax - (po?.discount || 0);
+
       setExpenseData({
-        amount: po.totalCost,
+        amount: totalCost,
         invoice: '',
         description: `Payment for #${po.poNumber}`,
         paymentMethodId: mainPaymentMethodId,
         spentBy: po.createdBy,
         status: TRANSACTION_STATUS.PAID,
-        tax: po.tax,
-        subTotal: po.subtotal,
+        tax: tax,
+        subTotal: subtotal,
         discount: po?.discount || 0,
       });
     }
@@ -149,7 +158,7 @@ export default function ConvertToTransaction({
       <BoxModal maxHeight={'80vh'} overflow={'scroll'}>
         <ModalHead
           heading="Convert to Transaction"
-          buttonLabel="Convert"
+          buttonLabel="Approve"
           onClick={handleReceive}
           onClose={onClose}
           buttonProps={{ loading }}
@@ -199,7 +208,7 @@ export default function ConvertToTransaction({
           <Box>
             {/* Discount */}
             <Box display="flex" flexDirection="column" gap={1}>
-              <Typography>Discount</Typography>
+              <Typography>Discount ($)</Typography>
               <TextField
                 type="number"
                 value={expenseData?.discount}
@@ -211,7 +220,7 @@ export default function ConvertToTransaction({
             </Box>
           </Box>
           <Box display="flex" flexDirection="column" gap={1}>
-            <Typography>Subtotal</Typography>
+            <Typography>Subtotal ($)</Typography>
             <TextField
               type="number"
               value={expenseData.subTotal}
@@ -222,7 +231,7 @@ export default function ConvertToTransaction({
             />
           </Box>
           <Box display="flex" flexDirection="column" gap={1}>
-            <Typography>Tax</Typography>
+            <Typography>Tax ($)</Typography>
             <TextField
               type="number"
               value={expenseData.tax}
@@ -234,7 +243,7 @@ export default function ConvertToTransaction({
           </Box>
 
           <Box display="flex" flexDirection="column" gap={1}>
-            <Typography>Total</Typography>
+            <Typography>Total ($)</Typography>
             <TextField
               type="number"
               value={expenseData.amount}

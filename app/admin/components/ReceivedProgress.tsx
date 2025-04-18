@@ -5,6 +5,8 @@ const ReceivedProgress = ({
   rejectedQty,
   orderedQty,
 }: any) => {
+  // const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
   return (
     <Box
       sx={{

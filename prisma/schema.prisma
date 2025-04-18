@@ -296,10 +296,11 @@ model Vendor {
   address     String
   addressLat  Float?
   addressLng  Float?
-  phoneNumber String
+  phoneNumber String?
   createdAt   String
   createdBy   String
   joinedDate  String
+  email       String?
 
   expense    VendorExpense[]
   vendorItem VendorItem[]
