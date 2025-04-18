@@ -13,7 +13,7 @@ import React from 'react';
 import UnitRadio from './Radio/UnitRadio';
 import { Trash2Icon } from 'lucide-react';
 import { gstRate, pstRate } from '@/app/lib/constant';
-import { ReceivedProgress } from '../purchase-orders/[id]/receive/page';
+import ReceivedProgress from './ReceivedProgress';
 
 interface IProps {
   item: any;

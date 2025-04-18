@@ -10,7 +10,7 @@ import {
   Button,
 } from '@mui/material';
 import React from 'react';
-import { ReceivedProgress } from '../../purchase-orders/[id]/receive/page';
+import ReceivedProgress from '../ReceivedProgress';
 
 export default function ReceiveInventoryTable({ poItems, setPoItems }: any) {
   const onFillAll = (id: number, type: 'receivedQty' | 'rejectedQty') => {

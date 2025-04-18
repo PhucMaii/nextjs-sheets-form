@@ -15,43 +15,8 @@ import ReceiveInventoryTable from '@/app/admin/components/Tables/ReceiveInventor
 import { IPurchaseOrder } from '@/app/utils/type';
 import ConvertToTransaction from '@/app/admin/components/Modals/add/ConvertToTransaction';
 import { LoadingButton } from '@mui/lab';
-export const ReceivedProgress = ({
-  receivedQty,
-  rejectedQty,
-  orderedQty,
-}: any) => {
-  console.log(receivedQty, rejectedQty, orderedQty);
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        width: '100%',
-        height: 10,
-        borderRadius: 1,
-        overflow: 'hidden',
-        backgroundColor: '#e0e0e0', // fallback background for unfilled part
-      }}
-    >
-      {/* Received portion */}
-      <Box
-        sx={{
-          width: `${(receivedQty / orderedQty) * 100}%`,
-          backgroundColor: '#4caf50', // green for received
-          transition: 'width 0.3s ease',
-        }}
-      />
+import ReceivedProgress from '@/app/admin/components/ReceivedProgress';
 
-      {/* Rejected portion */}
-      <Box
-        sx={{
-          width: `${(rejectedQty / orderedQty) * 100}%`,
-          backgroundColor: '#f44336', // red for rejected
-          transition: 'width 0.3s ease',
-        }}
-      />
-    </Box>
-  );
-};
 
 export default function ReceiveInventory() {
   const { id }: any = useParams();
