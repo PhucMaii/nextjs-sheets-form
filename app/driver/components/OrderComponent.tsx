@@ -265,7 +265,6 @@ export default function OrderComponent({
                 !order.user?.deliveryAddressLat ||
                 !order.user?.deliveryAddressLng
               }
-              onClick={() => setIsOpenDetails(true)}
             >
               <AssistantDirectionIcon />
             </a>

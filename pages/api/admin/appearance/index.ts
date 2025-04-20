@@ -81,6 +81,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'No data found' });
     }
 
+    console.log(dbTypes, 'dbTypes');
+
     // Check and update types
     await checkAndUpdateContainers(updatedTypes, dbTypes, 'itemType', 'name');
 
@@ -260,6 +262,13 @@ const checkAndUpdateContainers = async (
     return container[compareField];
   });
 
+  console.log({
+    updatedContainerNames,
+    dbContainerNames,
+    compare: JSON.stringify(updatedContainerNames) ===
+      JSON.stringify(dbContainerNames),
+  }, 'in checkAndUpdateContainers');
+
   // Compare if types has any re arrangement
   if (
     JSON.stringify(updatedContainerNames) !== JSON.stringify(dbContainerNames)
@@ -267,6 +276,7 @@ const checkAndUpdateContainers = async (
     // Re arrange types
     let priority = 1;
     for (let i = 0; i < updatedContainers.length; i++) {
+      console.log(priority, 'priority');
       const container = updatedContainers[i];
       await prisma[tableName].update({
         where: { id: container.id },
