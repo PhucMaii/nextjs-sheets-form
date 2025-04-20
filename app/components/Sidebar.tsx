@@ -31,7 +31,7 @@ import useNotification from '@/hooks/useNotification';
 import { MaintenanceContext } from '../context/MaintenanceProvider';
 import Maintenance from './Maintenance';
 import { USER_CATEGORIZED } from '../utils/enum';
-import HolidayText from './HolidayText';
+// import HolidayText from './HolidayText';
 
 interface PropTypes {
   children: ReactNode;
@@ -147,7 +147,7 @@ export default function Sidebar({ children }: PropTypes) {
           gap={2}
           sx={{ mb: 10, p: 1 }}
         >
-          <HolidayText />
+          {/* <HolidayText /> */}
           {children}
         </Box>
         {isOpenSnackbar && (
@@ -249,7 +249,7 @@ export default function Sidebar({ children }: PropTypes) {
                 showNotification={showNotification}
               />
             )}
-            <HolidayText />
+            {/* <HolidayText /> */}
             <Box
               display="flex"
               width="100%"
@@ -301,7 +301,7 @@ export default function Sidebar({ children }: PropTypes) {
             gap={2}
             sx={{ maxWidth: clientMaxWidth, mx: 'auto', zIndex: 50 }}
           >
-            <HolidayText />
+            {/* <HolidayText /> */}
             {children}
           </Box>
         </Box>

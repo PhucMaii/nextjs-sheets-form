@@ -32,7 +32,7 @@ const BorderRightTableCell = styled(TableCell)<TableCellProps>`
   padding: 2px;
 `;
 
-const ITEMS_PER_PAGE = 15; // Adjust this number based on your page width
+const ITEMS_PER_PAGE = 20; // Adjust this number based on your page width
 
 const splitItemsIntoPages = (items: string[]) => {
   const pages = [];

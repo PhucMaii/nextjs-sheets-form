@@ -90,11 +90,11 @@ export default function SetItemQuantity({
 
         {
           smDown && (
-            <Box sx={{ display: 'flex', mt: 2 }}>
-              <Button variant="contained" onClick={onClose}>
+            <Box width="100%" sx={{ display: 'flex', gap: 1, mt: 2 }}>
+              <Button variant="outlined" fullWidth onClick={onClose}>
                 Cancel
               </Button>
-              <Button variant="contained" onClick={() => onSubmit(quantity, selectedOption)}>
+              <Button variant="contained" fullWidth onClick={() => onSubmit(quantity, selectedOption)}>
                 Add
               </Button>
             </Box>

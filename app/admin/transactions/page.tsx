@@ -49,7 +49,8 @@ export default function Transactions() {
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
-  const [transactions] = SWRFetchData(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [transactions, mutate, isValidating] = SWRFetchData(
     `${API_URL.ADMIN}/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
   );
   const [adminsAndDriversRes] = SWRFetchData(
@@ -60,11 +61,11 @@ export default function Transactions() {
     if (transactions) {
       setIsLoading(false);
       initializeTransactions();
-    } else {
+    } else if (!transactions && isValidating) {
       setIsLoading(true);
       setSelectedExpenses([]);
     }
-  }, [transactions?.data, dateRange]);
+  }, [transactions?.data, isValidating, dateRange]);
 
   // console.log(displayTransactions, 'displayTransactions');
 

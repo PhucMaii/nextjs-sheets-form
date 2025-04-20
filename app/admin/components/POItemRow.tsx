@@ -18,7 +18,7 @@ import {
 import { Box } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import UnitRadio from './Radio/UnitRadio';
-import { ArrowDownIcon, Trash2Icon } from 'lucide-react';
+import { Trash2Icon } from 'lucide-react';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import ReceivedProgress from './ReceivedProgress';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';

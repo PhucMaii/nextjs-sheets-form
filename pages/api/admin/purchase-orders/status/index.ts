@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import withAdminAuthGuard from "../../../utils/withAdminAuthGuard";
 import emailHandler from "@/pages/api/utils/email";
 import { generatePurchaseOrderTemplate } from "@/config/email";
+import { PO_STATUS } from "@/app/utils/enum";
 const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -43,7 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(200).json({ message: 'Purchase order status updated' });
         }
 
-        if (po.vendor && po.vendor.email) {
+        if (po.vendor && po.vendor.email && status === PO_STATUS.ORDERED) {
             const poTemplate = generatePurchaseOrderTemplate(po.vendor, po);
             // Send email to vendor
             await emailHandler(

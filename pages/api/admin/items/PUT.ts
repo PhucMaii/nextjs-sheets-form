@@ -261,9 +261,20 @@ const updateAllScheduleOrderItems = async (
       data: updatedData,
     });
 
+    const justUpdatedOrders = await prisma.scheduleOrders.findMany({
+      where: {
+        user: {
+          categoryId: oldItem.categoryId,
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+
     // Update all orders total price
     if (updatedData?.price) {
-      for (const scheduleOrder of scheduleOrders) {
+      for (const scheduleOrder of justUpdatedOrders) {
         // Fetch items again to get new data after update
         // const orderedItems = await prisma.orderedItems.findMany({
         //   where: {
@@ -275,7 +286,7 @@ const updateAllScheduleOrderItems = async (
         if (orderedItems.length > 0) {
           const totalPrice = orderedItems.reduce(
             (total: number, item: any) =>
-              total + item.quantity * updatedData.price,
+              total + item.quantity * item.price,
             0,
           );
 

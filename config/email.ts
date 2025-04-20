@@ -95,6 +95,8 @@ export const generateOrderTemplate = (
       ${order?.note ? `<hr /><p><strong>Note:</strong> ${order.note}</p>` : ''}
 
       <p style="text-align: right;">Order by: ${order?.createdBy}</p>
+      ${order?.updatedBy ? `<p style="text-align: right;">Updated by: ${order?.updatedBy}</p>` : ''}
+
     </div>
   `;
 };

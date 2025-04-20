@@ -17,9 +17,10 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { id, date, startedAt, endedAt, routeId, driverId, role }: IBody = req.body;
+    const { id, date, startedAt, endedAt, routeId, driverId, role }: IBody =
+      req.body;
 
-    console.log(date, 'date')
+    console.log(date, 'date');
     const existingShift = await prisma.shiftSession.findUnique({
       where: { id },
       include: {
@@ -84,13 +85,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         return res.status(404).json({ error: 'Conflict Driver not found' });
       }
 
-      const cost = (driver?.hourlyRate || 1) * (updatedFields?.hours || existingShift.hours);
+      const cost =
+        (driver?.hourlyRate || 1) *
+        (updatedFields?.hours || existingShift.hours);
       updatedFields.cost = cost;
     }
 
     const updatedShift = await prisma.shiftSession.update({
       where: { id },
-      data: updatedFields,
+      data: { ...updatedFields, isActive: false },
     });
 
     return res.status(200).json({

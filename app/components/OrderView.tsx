@@ -444,7 +444,15 @@ const OrderView = ({
       });
     });
 
-    return newPromotions;
+    // Check if there is at least one item that is not disabled -> add the promotion to the newPromotions
+    const returnPromotions: any = {};
+    Object.keys(newPromotions).forEach((key: string) => {
+      if (newPromotions[key].some((item: any) => !item.disabled)) {
+        returnPromotions[key] = newPromotions[key];
+      }
+    });
+
+    return returnPromotions;
   }, [appearance]);
 
   const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('xs'));
@@ -526,10 +534,10 @@ const OrderView = ({
       showNotification('success', response.data.message);
       setIsUpdatingAvoidInventory(false);
     } catch (error: any) {
-      console.log('Internal Server Error: ', error.response.data.error);
+      console.log('Internal Server Error: ', error?.response?.data?.error);
       showNotification(
         'error',
-        'Internal Server Error: ' + error.response.data.error,
+        'Internal Server Error: ' + error?.response?.data?.error,
       );
       setIsUpdatingAvoidInventory(false);
     }
