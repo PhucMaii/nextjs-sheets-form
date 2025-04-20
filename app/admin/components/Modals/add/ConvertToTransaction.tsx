@@ -18,6 +18,7 @@ import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import StatusText from '../../StatusText';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
@@ -346,8 +347,12 @@ export default function ConvertToTransaction({
                 setExpenseData({ ...expenseData, status: e.target.value });
               }}
             >
-              <MenuItem value={TRANSACTION_STATUS.PAID}>Paid</MenuItem>
-              <MenuItem value={TRANSACTION_STATUS.UNPAID}>Unpaid</MenuItem>
+              <MenuItem value={TRANSACTION_STATUS.PAID}>
+                <StatusText text={TRANSACTION_STATUS.PAID} type="success" />
+                </MenuItem>
+              <MenuItem value={TRANSACTION_STATUS.UNPAID}>
+                <StatusText text={TRANSACTION_STATUS.UNPAID} type="error" />
+              </MenuItem>
             </Select>
           </Box>
         </Box>

@@ -1,9 +1,11 @@
 import { IPurchaseOrder } from '@/app/utils/type';
 import {
   Box,
+  Paper,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Tooltip,
@@ -53,9 +55,10 @@ export default function POTable({
   };
 
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
+    <TableContainer component={Paper} sx={{overflow: 'scroll'}}>
+      <Table>
+        <TableHead>
+          <TableRow>
           <TableCell>PO Number</TableCell>
           <TableCell>Vendor</TableCell>
           <TableCell>Status</TableCell>
@@ -149,5 +152,6 @@ export default function POTable({
         ))}
       </TableBody>
     </Table>
+    </TableContainer>
   );
 }

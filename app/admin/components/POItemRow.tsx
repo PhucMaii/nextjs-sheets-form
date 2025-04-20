@@ -1,5 +1,7 @@
 import {
   Divider,
+  Menu,
+  MenuItem,
   TableCell,
   TableRow,
   useMediaQuery,
@@ -14,11 +16,13 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Box } from '@mui/material';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import UnitRadio from './Radio/UnitRadio';
-import { Trash2Icon } from 'lucide-react';
+import { ArrowDownIcon, Trash2Icon } from 'lucide-react';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import ReceivedProgress from './ReceivedProgress';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { green, red } from '@mui/material/colors';
 
 interface IProps {
   item: any;
@@ -230,6 +234,19 @@ export const POItemRow = ({
 };
 
 export const POItemRowDisplay = ({ item }: any) => {
+  const [anchorEl, setAnchorEl] = useState<any>(null);
+
+  const itemTotal = useMemo(() => {
+    return (item?.costPerItem || 0) * (item?.receivedQty || 0);
+  }, [item]);
+
+  const onMouseOver = (event: any) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const onMouseOut = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <TableRow sx={{ alignItems: 'flex-start' }}>
@@ -241,10 +258,46 @@ export const POItemRowDisplay = ({ item }: any) => {
             rejectedQty={item?.rejectedQty || 0}
             orderedQty={item?.orderedQty || 0}
           />
+        </Box>
+        <Box>
           <Typography variant="caption" sx={{ width: '100%' }}>
             {(item?.receivedQty || 0) + (item?.rejectedQty || 0)} /{' '}
             {item?.orderedQty || 0}
           </Typography>
+
+          <IconButton onClick={onMouseOver}>
+            <KeyboardArrowDownIcon />
+          </IconButton>
+          <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={onMouseOut}>
+            <MenuItem>
+              <Box display="flex" gap={1} alignItems="center">
+                <Box
+                  sx={{
+                    width: 10,
+                    height: 10,
+                    backgroundColor: green[500],
+                    borderRadius: '50%',
+                  }}
+                />
+                <Typography>Received</Typography>
+                <Typography>{item?.receivedQty || 0}</Typography>
+              </Box>
+            </MenuItem>
+            <MenuItem>
+              <Box display="flex" gap={1} alignItems="center">
+                <Box
+                  sx={{
+                    width: 10,
+                    height: 10,
+                    backgroundColor: red[500],
+                    borderRadius: '50%',
+                  }}
+                />
+                <Typography>Rejected</Typography>
+                <Typography>{item?.rejectedQty || 0}</Typography>
+              </Box>
+            </MenuItem>
+          </Menu>
         </Box>
       </TableCell>
       <TableCell>
@@ -254,7 +307,7 @@ export const POItemRowDisplay = ({ item }: any) => {
         <Typography>${item?.tax?.toFixed(2) || 0}</Typography>
       </TableCell>
       <TableCell>
-        <Typography>${item?.total?.toFixed(2) || 0}</Typography>
+        <Typography>${itemTotal?.toFixed(2) || 0}</Typography>
       </TableCell>
     </TableRow>
   );

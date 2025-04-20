@@ -141,7 +141,7 @@ export default function PurchaseOrders() {
         </Grid>
 
         <Grid container alignItems="center" spacing={1} mt={2}>
-          <Grid item xs={11}>
+          <Grid item xs={8} md={11}>
             <TextField
               label="Search"
               placeholder="Search order by amount, date, vendor, or name..."
@@ -151,7 +151,7 @@ export default function PurchaseOrders() {
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          <Grid item xs={1}>
+          <Grid item xs={4} md={1}>
             <Button
               onClick={() => router.push('/admin/purchase-orders/create')}
               variant="contained"
