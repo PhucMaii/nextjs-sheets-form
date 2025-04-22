@@ -116,6 +116,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
+<<<<<<< HEAD
   const preOrders = await prisma.scheduleOrders.findMany({
     include: {
       items: true,
@@ -144,6 +145,8 @@ async function main() {
     });
     console.log(`Updated total price for order ID ${preOrder.id} - ${preOrder?.user?.clientName}: ${totalPrice}`);
   }
+=======
+>>>>>>> dec3db9c2baf727f51416e1389b7e3f73505af5f
 }
 
 main()

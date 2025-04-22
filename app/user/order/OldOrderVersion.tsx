@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import SearchItem from '../../components/Modals/SearchItem';
 import OrderOnVacationModal from '../../admin/components/Modals/OrderOnVacationModal';
 import { Box, Grid, IconButton, TextField, Typography } from '@mui/material';
@@ -33,17 +33,16 @@ export default function OldOrderVersion({
     generateRecommendDate(),
   );
 
-  const onChangeItem = (e: any, targetItem: any) => {
-    const newItems = itemList.map((item: any) => {
-      if (item.id === targetItem.id) {
-        return { ...targetItem, quantity: +e.target.value };
-      }
-      return item;
-    });
-
-    setItemList(newItems);
-  };
-
+  const onChangeItem = useCallback((e: any, targetItem: any) => {
+    setItemList((prevList: any[]) =>
+      prevList.map((item: any) => {
+        if (item.id === targetItem.id) {
+          return { ...targetItem, quantity: +e.target.value };
+        }
+        return item;
+      }),
+    );
+  }, []);
   const onDateChange = (e: any) => {
     const formattedDate = formatDateChanged(e);
     setDeliveryDate(formattedDate);
@@ -124,24 +123,14 @@ export default function OldOrderVersion({
           </Box>
           <Box display="flex" flexDirection="column" gap={4}>
             {itemList.length > 0 &&
-              itemList.map((item: any, index: number) => {
+              itemList.map((item: any) => {
                 return (
-                  <Box
-                    key={index}
-                    display="flex"
-                    flexDirection="column"
-                    gap={1}
-                  >
-                    <SellingItemName item={item} />
-                    <TextField
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => onChangeItem(e, item)}
-                      placeholder={`Enter ${item.name} here...`}
-                      disabled={!item.availability}
-                      inputProps={{ min: 0 }}
-                    />
-                  </Box>
+                  <SellingItemName
+                    key={item.id}
+                    item={item}
+                    onChangeItem={onChangeItem}
+                    setItemList={setItemList}
+                  />
                 );
               })}
             <Box display="flex" flexDirection="column" gap={1}>

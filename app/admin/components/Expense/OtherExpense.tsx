@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 
 interface IProps {
-  paymentMethods: any;
+  paymentMethods: any[];
   codBoardId?: number;
   adminsAndDrivers: string[];
   SelectDate: any;
@@ -61,6 +61,18 @@ export default function OtherExpense({
       </Box> */}
       {/* GST and PST */}
       <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Discount</Typography>
+            <TextField
+              placeholder="Discount"
+              fullWidth
+              value={newExpense.discount}
+              type="number"
+              onChange={(e) => onChangeNewExpense('discount', +e.target.value)}
+            />
+          </Box>
+        </Grid>
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Subtotal</Typography>
@@ -133,7 +145,7 @@ export default function OtherExpense({
             size="small"
           >
             <MenuItem value={4} disabled>
-              {paymentMethods?.data[0]?.name}
+              {paymentMethods[0]?.name}
             </MenuItem>
           </Select>
         ) : (
@@ -148,8 +160,8 @@ export default function OtherExpense({
               -- Choose payment method --
             </MenuItem>
             {paymentMethods &&
-              paymentMethods?.data?.length > 0 &&
-              paymentMethods?.data.map(
+              paymentMethods?.length > 0 &&
+              paymentMethods.map(
                 (paymentMethod: IPaymentMethod, index: number) => {
                   return (
                     <MenuItem key={index} value={paymentMethod.id}>

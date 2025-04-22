@@ -42,7 +42,7 @@ const withBundlerAnalyzer = require('@next/bundle-analyzer')({
 
 const withPWA = require('next-pwa')({
   dest: 'public',
-  disable: process.env.NEXT_PUBLIC_CURRENT_STATE !== 'development',
+  disable: process.env.NEXT_PUBLIC_CURRENT_STATE !== 'production',
   register: true, // Register PWA service worker
   skipWaiting: true, // Skip wating for service worker activation
 });

@@ -19,8 +19,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const { user, items, scheduledOrderId, oldRouteId, newRouteId } =
       req.body as BodyTypes;
 
-    console.log(req.body, 'REQ BODY');
-
     // CASE: Move to new route
     if (oldRouteId && newRouteId) {
       // remove from user route
@@ -118,6 +116,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             prevPrice: item?.prevPrice,
             inventoryItemId: item.inventoryItemId,
             inventoryUnitId: item.inventoryUnitId,
+            option: item.option,
           },
         });
         continue;
@@ -133,6 +132,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           data: {
             quantity: item.quantity,
             price: item.price, // Price might be useless, since it is not able to update price at front end
+            inventoryUnitId: item.inventoryUnitId,
+            option: item.option,
           },
         });
       } else if (item.type === ITEM_CATEGORIZED.DELETE) {

@@ -203,7 +203,7 @@ const updateAllScheduleOrderItems = async (
       });
 
       // Re calculate their new total price if the udpated data included price
-      if (updatedData.price) {
+      if (updatedData?.price) {
         for (const scheduleOrder of scheduleOrders) {
           const totalPrice = scheduleOrder.items.reduce(
             (acc: number, item: any) => {
@@ -261,26 +261,45 @@ const updateAllScheduleOrderItems = async (
       data: updatedData,
     });
 
-    // Update all orders total price
-    for (const scheduleOrder of scheduleOrders) {
-      const orderedItems = await prisma.orderedItems.findMany({
-        where: {
-          scheduledOrderId: scheduleOrder.id,
+    const justUpdatedOrders = await prisma.scheduleOrders.findMany({
+      where: {
+        user: {
+          categoryId: oldItem.categoryId,
         },
-      });
-      const totalPrice = orderedItems.reduce(
-        (total: number, item: any) => total + item.quantity * item.price,
-        0,
-      );
+      },
+      include: {
+        items: true,
+      },
+    });
 
-      await prisma.scheduleOrders.update({
-        where: {
-          id: scheduleOrder.id,
-        },
-        data: {
-          totalPrice,
-        },
-      });
+    // Update all orders total price
+    if (updatedData?.price) {
+      for (const scheduleOrder of justUpdatedOrders) {
+        // Fetch items again to get new data after update
+        // const orderedItems = await prisma.orderedItems.findMany({
+        //   where: {
+        //     scheduledOrderId: scheduleOrder.id,
+        //   },
+        // });
+        const orderedItems = scheduleOrder.items;
+
+        if (orderedItems.length > 0) {
+          const totalPrice = orderedItems.reduce(
+            (total: number, item: any) =>
+              total + item.quantity * item.price,
+            0,
+          );
+
+          await prisma.scheduleOrders.update({
+            where: {
+              id: scheduleOrder.id,
+            },
+            data: {
+              totalPrice,
+            },
+          });
+        }
+      }
     }
 
     return { ok: true };

@@ -190,7 +190,16 @@ export default function OrderAccordion({
                   {order.items.length > 0 &&
                     order.items.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{item.name}</TableCell>
+                        <TableCell>
+                          <Box display="flex" gap={1} flexDirection="column">
+                            <Typography>{item.name}</Typography>
+                            {item?.option && (
+                              <Typography sx={{ color: grey[700] }}>
+                                {item?.option?.name}
+                              </Typography>
+                            )}
+                          </Box>
+                        </TableCell>
                         <TableCell>{item.quantity}</TableCell>
                         <TableCell>
                           <Box display="flex" flexDirection="row" gap={1}>

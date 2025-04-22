@@ -129,3 +129,20 @@ export enum USER_CATEGORIZED {
   GUEST = 'Guest',
   NONE = 'None',
 }
+
+export enum SHIFT_STATUS {
+  PAID = 'Paid',
+  UNPAID = 'Unpaid',
+}
+
+export enum WORKING_ROLE {
+  DRIVER = 'Driver',
+  IN_FACTORY = 'In Factory',
+}
+
+export enum PO_STATUS {
+  DRAFT = 'Draft',
+  ORDERED = 'Ordered',
+  RECEIVED = 'Received',
+  CANCELLED = 'Cancelled',
+}

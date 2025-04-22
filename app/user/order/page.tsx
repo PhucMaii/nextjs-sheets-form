@@ -95,6 +95,7 @@ export default function OrderForm() {
       .filter((item: any) => item.inventoryItem.typeId !== null);
 
     setItemList(formatItems);
+    console.log(formatItems, 'FORMAT ITEMS');
   };
 
   const onSubmit = async (order: Order): Promise<any> => {
@@ -171,7 +172,7 @@ export default function OrderForm() {
       // SHOULD BE /user/overview after website is done
       setTimeout(() => {
         router.push('/');
-      }, 2000);
+      }, 500);
     } catch (error: any) {
       console.log(error);
       showNotification('error', error.response.data.error);

@@ -49,10 +49,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    const startDateDate = startDate.split(' ')[2];
+    const startDateMonth = startDate.split(' ')[1];
+    const startDateYear = startDate.split(' ')[3];
+
+    const endDateDate = endDate.split(' ')[2];
+    const endDateMonth = endDate.split(' ')[1];
+    const endDateYear = endDate.split(' ')[3];
+
+    const isOneDayOverview =
+      startDateDate === endDateDate &&
+      startDateMonth === endDateMonth &&
+      startDateYear === endDateYear;
+
+    const isAddUpEndDate = !isOneDayOverview;
+
     // Generate list of dates in range
     const datesInRange = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
+      isAddUpEndDate,
     );
 
     console.log({

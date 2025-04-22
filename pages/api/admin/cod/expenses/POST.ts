@@ -17,6 +17,7 @@ interface IBody {
   codBoardId: number;
   createdAt: string;
   createdBy?: string;
+  discount?: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -36,6 +37,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       paymentMethodId,
       spentBy,
       codBoardId,
+      discount,
     }: IBody = req.body;
 
     const existingBoard = await prisma.codBoard.findUnique({
@@ -121,6 +123,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt,
         createdBy: createdBy ? createdBy : `Admin - ${user?.clientName}`,
         codBoardId,
+        discount,
       },
     });
 

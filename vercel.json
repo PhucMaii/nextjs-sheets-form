@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/init-cod-board",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/auto-clock-out",
+      "schedule": "0 9 * * *"
     }
   ],
   "functions": {

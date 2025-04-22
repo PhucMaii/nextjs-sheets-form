@@ -24,6 +24,8 @@ import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { TrashIcon } from 'lucide-react';
 import DeleteModal from '../delete/DeleteModal';
+import AddOption from '../add/AddOption';
+import OptionsTable from '../../Tables/OptionsTable';
 
 interface IProps {
   open: boolean;
@@ -41,6 +43,7 @@ export enum UPDATE_OPTION {
 const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isOpenAddOption, setIsOpenAddOption] = useState<boolean>(false);
   const [updatedField, setUpdatedField] = useState<string[]>([]);
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
   const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(
@@ -132,6 +135,14 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
 
   return (
     <>
+      {isOpenAddOption && (
+        <AddOption
+          open={isOpenAddOption}
+          onClose={() => setIsOpenAddOption(false)}
+          item={targetItem}
+          showNotification={showNotification}
+        />
+      )}
       <DeleteModal
         open={isOpenDeleteModal}
         handleCloseModal={() => setIsOpenDeleteModal(false)}
@@ -173,85 +184,114 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
           </RadioGroup>
           <Divider sx={{ my: 2 }}>Price ($)</Divider>
           <Grid container rowGap={2} alignItems="center">
-            <Grid item xs={12}>
-              <Box display="flex" alignItems="center" gap={2}>
-                {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
-                  <>
-                    <Checkbox
-                      value={updatedField.some((field) => field === 'price')}
-                      onChange={() => addToUpdatedField('price')}
+            {updatedItem?.options?.length === 0 ? (
+              <>
+                <Grid item textAlign="right" xs={12}>
+                  <Button onClick={() => setIsOpenAddOption(true)}>
+                    + Add Options
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                      <>
+                        <Checkbox
+                          value={updatedField.some(
+                            (field) => field === 'price',
+                          )}
+                          onChange={() => addToUpdatedField('price')}
+                        />
+                      </>
+                    )}
+                    <Typography variant="h6">Price:</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Price"
+                    type="number"
+                    value={updatedItem.price}
+                    onChange={(e) =>
+                      setUpdatedItem({ ...updatedItem, price: +e.target.value })
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    justifyContent="space-between"
+                  >
+                    <Box display="flex" alignItems="center" gap={1}>
+                      {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
+                        <>
+                          <Checkbox
+                            value={updatedField.some(
+                              (field) => field === 'isShowDiscount',
+                            )}
+                            onChange={() => addToUpdatedField('isShowDiscount')}
+                          />
+                        </>
+                      )}
+                      <Typography variant="h6">Discount</Typography>
+                    </Box>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={updatedItem.isShowDiscount}
+                          onChange={(e) =>
+                            setUpdatedItem({
+                              ...updatedItem,
+                              isShowDiscount: e.target.checked,
+                            })
+                          }
+                        />
+                      }
+                      label="Show Discount"
+                      labelPlacement="start"
                     />
-                  </>
-                )}
-                <Typography variant="h6">Price:</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Price"
-                type="number"
-                value={updatedItem.price}
-                onChange={(e) =>
-                  setUpdatedItem({ ...updatedItem, price: +e.target.value })
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Box
-                display="flex"
-                alignItems="center"
-                gap={1}
-                justifyContent="space-between"
-              >
-                <Box display="flex" alignItems="center" gap={1}>
-                  {updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME && (
-                    <>
-                      <Checkbox
-                        value={updatedField.some(
-                          (field) => field === 'isShowDiscount',
-                        )}
-                        onChange={() => addToUpdatedField('isShowDiscount')}
-                      />
-                    </>
-                  )}
-                  <Typography variant="h6">Discount</Typography>
-                </Box>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={updatedItem.isShowDiscount}
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  {updatedItem?.isShowDiscount ? (
+                    <TextField
+                      fullWidth
+                      label="Previous Price - Price Will Be Crossed Out"
+                      type="number"
+                      value={updatedItem?.prevPrice || 0}
                       onChange={(e) =>
                         setUpdatedItem({
                           ...updatedItem,
-                          isShowDiscount: e.target.checked,
+                          prevPrice: +e.target.value,
                         })
                       }
                     />
-                  }
-                  label="Show Discount"
-                  labelPlacement="start"
+                  ) : (
+                    <ErrorComponent errorText="No Discount Display" />
+                  )}
+                </Grid>
+              </>
+            ) : (
+              <Grid item xs={12}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Typography variant="h6">Options:</Typography>
+                  <Button onClick={() => setIsOpenAddOption(true)}>
+                    + Add Options
+                  </Button>
+                </Box>
+                <OptionsTable
+                  options={updatedItem?.options || []}
+                  showNotification={showNotification}
+                  
                 />
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              {updatedItem?.isShowDiscount ? (
-                <TextField
-                  fullWidth
-                  label="Previous Price - Price Will Be Crossed Out"
-                  type="number"
-                  value={updatedItem?.prevPrice || 0}
-                  onChange={(e) =>
-                    setUpdatedItem({
-                      ...updatedItem,
-                      prevPrice: +e.target.value,
-                    })
-                  }
-                />
-              ) : (
-                <ErrorComponent errorText="No Discount Display" />
-              )}
-            </Grid>
+              </Grid>
+            )}
           </Grid>
 
           <Divider sx={{ my: 2 }}>Other Details</Divider>
@@ -306,7 +346,6 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                         inventoryUnitId: JSON.parse(e.target.value).id,
                       }))
                     }
-                    isShowPrice
                   />
                 </Box>
               </Grid>

@@ -6,6 +6,7 @@ interface IBody {
   name: string;
   address: string;
   phoneNumber: string;
+  email: string;
   joinedDate: string;
   createdAt: string;
 }
@@ -14,7 +15,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, address, phoneNumber, joinedDate, createdAt }: IBody =
+    const { name, address, phoneNumber, email, joinedDate, createdAt }: IBody =
       req.body;
 
     const existingVendor = await prisma.vendor.findFirst({
@@ -22,6 +23,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         name,
         address,
         phoneNumber,
+        email,
       },
     });
 
@@ -38,6 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         name,
         address,
         phoneNumber,
+        email,
         joinedDate,
         createdAt,
         createdBy: `Admin - ${admin.clientName}`,

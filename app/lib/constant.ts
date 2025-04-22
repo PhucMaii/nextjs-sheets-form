@@ -10,6 +10,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import LanguageIcon from '@mui/icons-material/Language';
+import LocalMallIcon from '@mui/icons-material/LocalMall';
 import {
   ORDER_STATUS,
   ORDER_TYPE,
@@ -39,6 +40,7 @@ import {
 } from '../../theme/color';
 import { amber, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
+import { AccessTime } from '@mui/icons-material';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -137,6 +139,7 @@ export const productColors = [
 ];
 export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (0 = January)
 export const testAccountId = 223;
+export const TimLeAccountId = 240;
 export const clientMaxWidth = '1250px';
 
 export const sendChequeMsg = `
@@ -239,6 +242,11 @@ export const adminTabs = {
       path: '/admin/transactions',
     },
     {
+      name: 'Purchase Orders',
+      icon: LocalMallIcon,
+      path: '/admin/purchase-orders',
+    },
+    {
       name: 'C.O.D',
       icon: PaymentsIcon,
       path: '/admin/codBoard',
@@ -247,6 +255,11 @@ export const adminTabs = {
       name: 'Pre Orders',
       icon: PendingActionsIcon,
       path: '/admin/pre-orders',
+    },
+    {
+      name: 'Shifts',
+      icon: AccessTime,
+      path: '/admin/shifts',
     },
     {
       name: 'Order Layout',
@@ -327,6 +340,11 @@ export const clientTabs = [
     path: '/user/order',
   },
   {
+    name: 'Statements',
+    icon: DocumentScannerIcon,
+    path: '/statements',
+  },
+  {
     name: 'Account',
     icon: AccountCircleIcon,
     path: '/user/account',
@@ -348,6 +366,11 @@ export const driverTabs = [
     name: 'Add',
     icon: AddBoxIcon,
     path: '/driver/add',
+  },
+  {
+    name: 'Shifts',
+    icon: AccessTime,
+    path: '/driver/shifts',
   },
   {
     name: 'Blocking',

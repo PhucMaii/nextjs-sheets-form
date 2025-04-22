@@ -13,7 +13,7 @@ export const BoxModal = styled(Box)`
   width: ${(props: any) => props.width || '700px'};
 
   @media screen and (min-width: 1500px) {
-    width: 1400px;
+    width: 1200px;
   }
 
   @media screen and (max-width: 1450px) {

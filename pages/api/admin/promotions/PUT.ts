@@ -23,7 +23,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         items: {
           orderBy: {
             promoIndexPos: 'asc',
-          }
+          },
         },
       },
     });
@@ -55,7 +55,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const existingItemIds = existingPromotion.items.map((item: any) => item.id);
     const existingItems = existingPromotion.items;
-    if (itemIds && JSON.stringify(itemIds) !== JSON.stringify(existingItemIds)) {
+    if (
+      itemIds &&
+      JSON.stringify(itemIds) !== JSON.stringify(existingItemIds)
+    ) {
       // Get new items
       // const newItemIds = itemIds.filter(
       //   (id: number) => !existingItemIds.includes(id),
@@ -73,7 +76,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         );
 
         // Handle non-existing item | existing item with lower index
-        if (!existingItem || !existingItem.promoIndexPos || existingItem.promoIndexPos < lastIndexPos) {
+        if (
+          !existingItem ||
+          !existingItem.promoIndexPos ||
+          existingItem.promoIndexPos < lastIndexPos
+        ) {
           // Create new item
           await prisma.inventoryItem.update({
             where: {
@@ -86,7 +93,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           });
           lastIndexPos++;
         }
-      } 
+      }
 
       // Remove items from promotion
       await prisma.inventoryItem.updateMany({

@@ -218,7 +218,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       const manifestItem = groupItemRoutes[itemRoute].reduce(
-        (acc: any, item: IItem) => {
+        (acc: any, item: IItem | any) => {
           const { name } = item;
 
           let itemKey = name;
@@ -239,9 +239,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             allManifestSummary[itemKey] = 0;
           }
 
+          let actualQuantity = item?.quantity || 1;
+          if (item?.option?.name) {
+            actualQuantity = actualQuantity * item?.option?.ratio;
+          }
+
           allManifestSummary[itemKey] =
-            allManifestSummary[itemKey] + item.quantity;
-          acc[itemKey] = acc[itemKey] + item.quantity;
+            allManifestSummary[itemKey] + actualQuantity;
+          acc[itemKey] = acc[itemKey] + actualQuantity;
           return acc;
         },
         {},
@@ -250,8 +255,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // console.log({manifestItem, itemRoute}, 'manifestItem');
 
       const manifestDetail = groupItemRoutes[itemRoute].reduce(
-        (acc: any, item: IItem, index: number) => {
-          const { user, order, quantity } = item;
+        (acc: any, item: IItem | any, index: number) => {
+          const { user, order } = item;
           if (!user) {
             return acc;
           }
@@ -264,6 +269,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             itemKey = itemKey.includes('KONGNAMUL')
               ? itemKey.split(' - ')[1]
               : itemKey;
+          }
+
+          let actualQuantity = item?.quantity || 1;
+          if (item?.option?.name) {
+            actualQuantity = actualQuantity * item?.option?.ratio;
           }
 
           // Beginning of new customer
@@ -284,10 +294,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             ) {
               displayName = displayName.split(' - ')[0];
             }
+
             const newUserManifest = {
               user: { ...user, displayName },
               order,
-              [itemKey]: quantity,
+              [itemKey]: actualQuantity,
             };
 
             acc.push(newUserManifest);
@@ -298,7 +309,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           const updatedUserManifest = {
             ...currentUserManifest,
             order,
-            [itemKey]: quantity,
+            [itemKey]: actualQuantity,
           };
 
           // console.log(updatedUserManifest.user.clientName, 'updatedUserManifest');

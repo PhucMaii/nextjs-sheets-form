@@ -101,7 +101,7 @@ export default async function handler(
           not: null, // Make sure the orderId is not null
         },
         inventoryItemId: {
-          not: null, // Make sure do not touhch any custom amount
+          not: null, // Make sure do not touch any custom amount
         },
         Orders: {
           status: {
@@ -125,17 +125,23 @@ export default async function handler(
     // Create a set of same items and quantity
     const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
       if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
+
+      // If item has option, then set option
+      const itemUnit = item.inventoryUnit;
+
+      // Set the quantity to ratio of 1
+      const quantityWithRatio1 = item.quantity * itemUnit.ratio;
+
       if (!acc[item.inventoryItemId]) {
         console.log(item, 'item');
         acc[item.inventoryItemId] = {
-          quantity: item.quantity * item.inventoryUnit.ratio,
+          quantity: quantityWithRatio1,
           inventoryItem: item.inventoryItem,
           fifo: item.fifo,
-          inventoryUnit: item.inventoryUnit,
+          inventoryUnit: itemUnit,
         };
       } else {
-        acc[item.inventoryItemId].quantity +=
-          item.quantity * item.inventoryUnit.ratio;
+        acc[item.inventoryItemId].quantity += quantityWithRatio1;
       }
       return acc;
     }, {});

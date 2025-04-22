@@ -1,11 +1,11 @@
 import { ICustomAmount } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createOrderedItems } from '../../orders/POST';
 import { generateOrderTotalPrice } from '../../orderedItems/PUT';
 import { checkAndUpdateUnits } from '../../inventory/expenses/POST';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { getUserInfo } from '@/pages/api/utils/auth';
+import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 
 interface IBody {
   orderId: number;

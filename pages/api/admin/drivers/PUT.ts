@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   driverId: number;
+  hourlyRate: number;
   updatedName: string;
 }
 
@@ -10,7 +11,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { driverId, updatedName }: IBody = req.body;
+    const { driverId, hourlyRate, updatedName }: IBody = req.body;
 
     if (!driverId || !updatedName) {
       return res.status(404).json({
@@ -51,6 +52,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         name: updatedName,
+        hourlyRate,
       },
     });
 

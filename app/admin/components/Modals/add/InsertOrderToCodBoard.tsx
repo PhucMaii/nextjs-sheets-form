@@ -60,13 +60,11 @@ export default function InsertOrderToCodBoard({
     } else {
       return selectedClient && selectedClient?.id !== -1
         ? `${API_URL.DRIVER}/orders/clients?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`
-        : `${API_URL.DRIVER}/orders?deliveryDate=${date}`;
+        : `${API_URL.DRIVER}/orders/all?deliveryDate=${date}`;
     }
   };
 
   const [orders] = SWRFetchData(fetchUrl());
-
-  console.log('orders: ', orders);
 
   const [clients] = SWRFetchData(
     `${role === USER_ROLE.ADMIN ? API_URL.ADMIN : API_URL.DRIVER}/clients`,
@@ -182,10 +180,10 @@ export default function InsertOrderToCodBoard({
                 //     placement={mdDown ? 'top-start' : 'auto'}
                 //   />
                 // )}
-                getOptionLabel={(option: any) => option.clientName}
+                getOptionLabel={(option: any) => `${option?.clientName} - ${option?.clientId}`}
                 renderOption={(props, option) => (
                   <li {...props} aria-disabled={option.id === -1}>
-                    {option.clientName}
+                    {option?.clientName} - {option?.clientId}
                   </li>
                 )}
                 style={{ width: '100%' }}

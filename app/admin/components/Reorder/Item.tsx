@@ -1,6 +1,6 @@
 import { IItem } from '@/app/utils/type';
 import { AlertColor, Box, Grid, Paper, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import EditItemAvailability from '../Modals/edit/EditItemAvailability';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditItem from '../Modals/edit/EditItem';
@@ -19,6 +19,16 @@ export default function Item({
   handleDeleteItem,
   showNotification,
 }: IProps) {
+  const smallestOption = useMemo(() => {
+    if (item?.options && item?.options.length > 0) {
+      return item.options.reduce((prev, curr) =>
+        prev.price < curr.price ? prev : curr,
+      );
+    }
+
+    return null;
+  }, [item.options]);
+
   const [isOpenEditItem, setIsOpenEditItem] = useState<boolean>(false);
 
   return (
@@ -52,7 +62,9 @@ export default function Item({
           </Grid>
           <Grid item md={2}>
             <Typography variant="subtitle1">
-              ${item.price.toFixed(2)}
+              {item?.options && item.options.length > 0
+                ? `From $${smallestOption?.price.toFixed(2)}`
+                : `$${item.price.toFixed(2)}`}
             </Typography>
           </Grid>
           <Grid item md={3} xs={12}>

@@ -82,7 +82,7 @@ export default function EditPromotion({
           heading="Edit Promotion"
           buttonLabel="Save"
           onClose={onClose}
-          buttonProps={{loading: isLoading}}
+          buttonProps={{ loading: isLoading }}
           onClick={handleSave}
         />
 
@@ -140,9 +140,7 @@ export default function EditPromotion({
                   </li>
                 );
               }}
-              isOptionEqualToValue={(option, value) =>
-                option.id === value.id
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
             />
           </FormControl>
         </Box>

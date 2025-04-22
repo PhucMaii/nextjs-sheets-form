@@ -109,7 +109,7 @@ export default function EditCheque({
         showTargetObj={updatedCheque?.chequeNumber || ''}
       />
       <Modal open={open} onClose={onClose}>
-        <BoxModal>
+        <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Cheque"
             buttonLabel="EDIT"

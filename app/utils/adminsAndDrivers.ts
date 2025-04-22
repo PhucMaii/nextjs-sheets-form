@@ -10,6 +10,8 @@ export const getAdminsAndDrivers = async (showNotification: any) => {
       showNotification,
     );
 
+    console.log(admins, drivers);
+
     return [
       ...admins.map((admin: any) => `Admin - ${admin.clientName}`),
       ...drivers.map((driver: any) => `Driver - ${driver.name}`),

@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 
 describe('Check for incorrect orders', () => {
   const prisma = new PrismaClient();
-  const startDate = new Date('2024-12-02');
+  const startDate = new Date('2025-03-01');
   const endDate = getTodayDate();
   const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`);
   endDateFormatted.setDate(endDateFormatted.getDate() + 1);

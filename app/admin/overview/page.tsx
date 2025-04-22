@@ -2,7 +2,15 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { Box, Button, Grid, Skeleton, Switch, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  Grid,
+  Skeleton,
+  Switch,
+  Typography,
+} from '@mui/material';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import { API_URL } from '@/app/utils/enum';
@@ -20,6 +28,9 @@ import PrintIcon from '@mui/icons-material/Print';
 import useNotification from '@/hooks/useNotification';
 import OverviewData from '../components/Overview/OverviewData';
 import CustomersProfitTable from '../components/Tables/CustomersProfitTable';
+import StatusText from '../components/StatusText';
+import DriverTablesReport from '../components/Tables/DriverTablesReport';
+import TopDrivers from '../components/Tables/TopDrivers';
 
 export default function Overview() {
   const [beansproutsData, setBeansproutsData] = useState<any>();
@@ -31,7 +42,7 @@ export default function Overview() {
   const [revenueData, setRevenueData] = useState<any>();
 
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
-  const { showNotification, NotificationComp } = useNotification();
+  const { NotificationComp } = useNotification();
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();
@@ -39,6 +50,9 @@ export default function Overview() {
   // Data Fetching
   const [overview, _mutateOverview, isValidating] = SWRFetchData(
     `${API_URL.ORDER}/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  );
+  const [shiftOverview] = SWRFetchData(
+    `${API_URL.ADMIN}/shifts/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   console.log({ dateRange });
@@ -129,6 +143,85 @@ export default function Overview() {
             >
               <PieChart overviewData={overviewData} />
               <Typography variant="h6">Paid vs Unpaid</Typography>
+            </ShadowSection>
+          ) : (
+            <Skeleton
+              variant="rounded"
+              sx={{ width: '100% !important', height: '390px !important' }}
+            />
+          )}
+        </Grid>
+        <Grid item xs={12} md={3}>
+          {shiftOverview ? (
+            <Box display="flex" flexDirection="column" gap={1} sx={{height: '500px !important'}}>
+              <ShadowSection display="flex" flexDirection="column" gap={2} sx={{height: '150px !important'}}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  flexWrap={'wrap'}
+                >
+                  <Box>
+                    <Typography variant="h3" fontWeight="bold">
+                      {shiftOverview?.totalHours?.toFixed(2)}h
+                    </Typography>
+                    <Typography variant="body1" fontWeight="regular">
+                      Hours
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1} mt={2}>
+                      <StatusText
+                        text={`${shiftOverview?.unpaidShifts?.length}h`}
+                        type="error"
+                      />
+                      <StatusText
+                        text={`${shiftOverview?.paidShifts?.length}h`}
+                        type="success"
+                      />
+                    </Box>
+                  </Box>
+                  <Divider orientation="vertical" flexItem />
+                  <Box>
+                    <Typography variant="h3" fontWeight="bold">
+                      ${shiftOverview?.totalCosts?.toFixed(2)}
+                    </Typography>
+                    <Typography variant="body1" fontWeight="regular">
+                      Employee Costs
+                    </Typography>
+
+                    <Box display="flex" alignItems="center" gap={1} mt={2}>
+                      <StatusText
+                        text={`$${shiftOverview?.unpaidShiftCost?.toFixed(2)}`}
+                        type="error"
+                      />
+                      <StatusText
+                        text={`$${shiftOverview?.paidShiftCost?.toFixed(2)}`}
+                        type="success"
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              </ShadowSection>
+
+              <ShadowSection display="flex" flexDirection="column" gap={2} sx={{height: '350px !important'}}>
+                <TopDrivers data={shiftOverview?.sortedDriverWithDriverHours} limit={5} />
+              </ShadowSection>
+            </Box>
+          ) : (
+            <Skeleton
+              variant="rounded"
+              sx={{ width: '100% !important', height: '390px !important' }}
+            />
+          )}
+        </Grid>
+        <Grid item xs={12} md={9}>
+          {shiftOverview ? (
+            <ShadowSection
+              display="flex"
+              flexDirection="column"
+              gap={2}
+              sx={{ height: '500px !important' }}
+            >
+              <Typography variant="h6">Drivers Reports</Typography>
+              <DriverTablesReport data={shiftOverview.driverReports} />
             </ShadowSection>
           ) : (
             <Skeleton

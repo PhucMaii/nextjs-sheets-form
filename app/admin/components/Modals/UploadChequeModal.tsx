@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -49,6 +49,20 @@ export default function UploadChequeModal({
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  useEffect(() => {
+    setChequeData({
+      chequeNumber: '',
+      amount: 0,
+      month,
+      year,
+    });
+
+    setCheque({
+      front: '',
+      back: '',
+    });
+  }, [open]);
+  
   const handleUpload = async () => {
     console.log(client, 'client');
     if (!client) {

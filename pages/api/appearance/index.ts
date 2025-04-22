@@ -18,6 +18,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           orderBy: {
             promoIndexPos: 'asc',
           },
+          include: {
+            options: true,
+          },
         },
       },
       orderBy: {
@@ -44,6 +47,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         },
       },
+      orderBy: {
+        priority: 'asc',
+      }
     });
 
     // Fill in all empty position
@@ -73,7 +79,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (!promotion?.visibility) {
           return acc; // Skip if visibility is false for client side
         }
-        
+
         const key = promotion.title;
 
         if (!acc[key]) {

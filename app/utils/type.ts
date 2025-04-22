@@ -13,10 +13,14 @@ import {
   ItemPreference,
   ItemType,
   ItemType_Category,
+  Option,
   PaymentMethod,
+  PO,
+  POItem,
   PositionIndex,
   Promotion,
   Route,
+  ShiftSession,
   User,
   UserRoute,
   Vendor,
@@ -142,6 +146,7 @@ export interface IItem {
   order?: any;
   typeId?: number;
   type?: any;
+  options?: IOption[];
 
   image?: string;
 }
@@ -163,6 +168,7 @@ export interface OrderedItems {
   inventoryUnit?: any;
   isCustomAmount?: boolean;
   units?: IInventoryUnit[];
+  option?: any;
 }
 
 export interface ScheduledOrder {
@@ -218,6 +224,7 @@ export interface IPaymentMethod extends PaymentMethod {
 
 export interface IVendor extends Vendor {
   inventoryItems: any;
+  vendorItem: IVendorItem[];
 }
 
 export interface IInventoryItem extends InventoryItem {
@@ -288,4 +295,26 @@ export type OrderSummary = {
 };
 export interface IPromotion extends Promotion {
   items: IInventoryItem[];
+}
+
+export interface IOption extends Option {
+  // prevPrice?: number;
+  // isShowDiscount?: boolean;
+  item: IItem;
+  unit: IInventoryUnit | any;
+}
+
+export interface IShiftSession extends ShiftSession {
+  driver: IDriver;
+  route?: IRoutes;
+}
+
+export interface IPurchaseOrder extends PO {
+  poItems: IPOItem[];
+  vendor: IVendor;
+}
+
+export interface IPOItem extends POItem {
+  inventoryUnit: IInventoryUnit;
+  inventoryItem: IInventoryItem;
 }

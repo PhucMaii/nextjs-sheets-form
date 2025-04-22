@@ -31,9 +31,9 @@ export default function HolidayText() {
               borderRadius: 5,
             }}
           >
-            Banh Pho Sincere
+            BASIL
           </strong>{' '}
-          price will be affected by March 25th.
+          price will be affected.
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
           Thank you for your understanding and continued support!

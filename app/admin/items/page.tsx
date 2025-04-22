@@ -60,7 +60,7 @@ export default function ItemPage() {
   const [currentCategory, setCurrentCategory] = useState<ICategory>(
     categories?.data[0],
   );
-  const [itemsResponse, mutateItems] = SWRFetchData(
+  const [itemsResponse, mutateItems, isInitializing] = SWRFetchData(
     currentCategory ? `${API_URL.ITEM}?categoryId=${currentCategory?.id}` : '',
   );
 
@@ -84,9 +84,16 @@ export default function ItemPage() {
   }, [categories]);
 
   useEffect(() => {
-    if (itemsResponse && categories?.data.length > 0 && currentCategory) {
+    if (
+      itemsResponse &&
+      categories?.data.length > 0 &&
+      currentCategory &&
+      !isInitializing
+    ) {
       initializeItems();
       setSearchKeywords('');
+    } else if (!itemsResponse && isInitializing) {
+      setIsFetching(true);
     }
   }, [categories, currentCategory, itemsResponse]);
 

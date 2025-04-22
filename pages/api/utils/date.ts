@@ -115,6 +115,28 @@ export const getTodayDate = (
   return { date: dateRes, time, dateAndTime: `${dateRes} ${time}` };
 };
 
+export const formatDateString = (inputDate: Date | string) => {
+  const dateString = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    dateStyle: 'short',
+    timeStyle: 'long',
+    // timeStyle,
+  }).format(new Date(inputDate));
+
+  const date = dateString.split(',')[0];
+  const dateSplitted = date.split('/');
+
+  const month = dateSplitted[0].padStart(2, '0');
+  const day = dateSplitted[1].padStart(2, '0');
+  const year = dateSplitted[2];
+
+  const dateRes = `${month}/${day}/20${year}`;
+  const time = dateString.split(',')[1];
+
+  return `${dateRes} ${time}`;
+
+}
+
 export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
   const selectedDate = normalizeDate(deliveryDate);
   const today = getTodayDate();
@@ -165,3 +187,11 @@ export const convertToPSTDate = (date: string | Date) => {
   const pstDate = new Date(utcTimestamp.getTime() - 8 * 3600 * 1000);
   return pstDate;
 };
+
+export const formatDate = (date: string) => {
+  const formattedEndDate = normalizeDate(
+    `${date.split(' ')[1]} ${date.split(' ')[2]} ${date.split(' ')[3]}`,
+  );
+
+  return formattedEndDate;
+}

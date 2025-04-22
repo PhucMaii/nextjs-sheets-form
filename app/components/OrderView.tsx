@@ -48,7 +48,6 @@ import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
 import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
-import SingleFieldEdit from '../admin/components/Modals/edit/SingleFieldEdit';
 import { SWRFetchData } from '../utils/db';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
@@ -56,6 +55,7 @@ import { blackColor } from '@/theme/create-palette';
 import { generateImgUrl } from '../lib/s3';
 import { Discount } from '@mui/icons-material';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import SetItemQuantity from './SetItemQuantity';
 
 export const WhiteSpace = () => {
   return (
@@ -72,12 +72,17 @@ export const WhiteSpace = () => {
 const OnSaleBadge = ({
   discountPrice,
   prevPrice,
+  percentage, // if percentage is provided, no need to calculate percentage
 }: {
   discountPrice: number;
   prevPrice: number;
+  percentage?: number;
 }) => {
   const discountRate = useMemo(() => {
-    return (1 - discountPrice / prevPrice) * 100;
+    // if (percentage) {
+    //   return percentage;
+    // }
+    return Math.ceil((1 - discountPrice / prevPrice) * 100);
   }, [discountPrice, prevPrice]);
 
   return (
@@ -131,8 +136,17 @@ const OnSaleBadge = ({
       }}
     >
       <Discount sx={{ fontSize: 13, color: 'white' }} />
-      <Typography sx={{ fontSize: 10, fontWeight: 'medium', color: 'white' }}>
-        {discountRate.toFixed(0)}% off
+      <Typography
+        sx={{
+          fontSize: 10,
+          fontWeight: 'medium',
+          color: 'white',
+          textTransform: 'none',
+        }}
+      >
+        {percentage
+          ? `Up to ${percentage?.toFixed(0)}% off`
+          : `${discountRate.toFixed(0)}% off`}
       </Typography>
     </Box>
   );
@@ -157,6 +171,34 @@ export const ItemButton = ({
   flexColOnDiscount?: boolean;
   onRemove?: any;
 }) => {
+  const options = useMemo(() => {
+    if (!item?.options || item?.options.length === 0) return null;
+    const lowestPriceOption = item?.options.sort(
+      (a, b) => a.price - b.price,
+    )[0];
+
+    const highestDiscountPercent: any = item?.options
+      ?.map((option) => {
+        if (option?.prevPrice && option?.isShowDiscount) {
+          return (1 - option.price / option.prevPrice) * 100;
+        } else {
+          return null;
+        }
+      })
+      .filter((percentage) => percentage !== null);
+
+    const highestDiscount =
+      highestDiscountPercent.length > 0
+        ? Math.max(highestDiscountPercent)
+        : undefined;
+
+    return {
+      options: item?.options,
+      lowestPrice: lowestPriceOption?.price,
+      highestDiscount,
+    };
+  }, [item]);
+
   return (
     <Button
       key={item.id}
@@ -200,9 +242,9 @@ export const ItemButton = ({
               borderRadius: 'inherit',
               inset: 0, // Make the image stretch to fill the container
               zIndex: 0,
-              opacity: 0.5,
+              opacity: 0.3,
               // brightness
-              // filter: 'brightness(80%)',
+              filter: 'brightness(80%)',
             }}
           />
         )}
@@ -235,11 +277,13 @@ export const ItemButton = ({
               </IconButton>
             )}
           </Box>
-          {item?.isShowDiscount && item?.prevPrice && (
+          {((item?.isShowDiscount && item?.prevPrice) ||
+            options?.highestDiscount) && (
             // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
             <OnSaleBadge
               discountPrice={item.price}
-              prevPrice={item.prevPrice}
+              prevPrice={item?.prevPrice || 0}
+              percentage={options?.highestDiscount}
             />
 
             // </Box>
@@ -252,8 +296,10 @@ export const ItemButton = ({
           gap={1}
           sx={{ zIndex: 1 }}
         >
-          <Typography fontWeight="bold">
-            ${item.price?.toFixed(2) || 'N/A'}
+          <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
+            {options?.lowestPrice
+              ? `From $${options.lowestPrice.toFixed(2)}`
+              : `$${item.price?.toFixed(2) || 'N/A'}`}
           </Typography>
           {item.isShowDiscount && item.prevPrice && (
             <Typography
@@ -369,6 +415,8 @@ const OrderView = ({
       });
     });
 
+    console.log(newTypes, 'new Types');
+
     return newTypes;
   }, [items, appearance]);
 
@@ -396,7 +444,15 @@ const OrderView = ({
       });
     });
 
-    return newPromotions;
+    // Check if there is at least one item that is not disabled -> add the promotion to the newPromotions
+    const returnPromotions: any = {};
+    Object.keys(newPromotions).forEach((key: string) => {
+      if (newPromotions[key].some((item: any) => !item.disabled)) {
+        returnPromotions[key] = newPromotions[key];
+      }
+    });
+
+    return returnPromotions;
   }, [appearance]);
 
   const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('xs'));
@@ -478,16 +534,17 @@ const OrderView = ({
       showNotification('success', response.data.message);
       setIsUpdatingAvoidInventory(false);
     } catch (error: any) {
-      console.log('Internal Server Error: ', error.response.data.error);
+      console.log('Internal Server Error: ', error?.response?.data?.error);
       showNotification(
         'error',
-        'Internal Server Error: ' + error.response.data.error,
+        'Internal Server Error: ' + error?.response?.data?.error,
       );
       setIsUpdatingAvoidInventory(false);
     }
   };
 
-  const onAddItem = (quantity: number) => {
+  // Handle the input of order items
+  const onAddItem = (quantity: number, option: any | null = null) => {
     if (quantity % 1 !== 0) {
       showNotification('error', 'Quantity must be a whole number');
       return;
@@ -504,11 +561,19 @@ const OrderView = ({
       (i) => i[comparedField] === item[comparedField],
     );
 
+    console.log(option, 'ITEM OPTION');
     if (existingItem) {
       const newOrderedItems = orderedItems.map((i) => {
         if (i[comparedField] === item[comparedField]) {
           return {
             ...i,
+            option: option,
+            price: option?.price || item.price,
+            inventoryUnit: option?.unit || item.inventoryUnit,
+            inventoryUnitId: option?.unitId || item.inventoryUnitId,
+            prevPrice: option?.prevPrice || item?.prevPrice,
+            isShowDiscount:
+              option?.isShowDiscount || item?.isShowDiscount || false,
             quantity: Number(quantity),
           };
         }
@@ -520,7 +585,17 @@ const OrderView = ({
       // Add item to orderedItems
       setOrderedItems([
         ...orderedItems,
-        { ...item, quantity: Number(quantity) },
+        {
+          ...item,
+          option: option,
+          price: option?.price || item.price,
+          inventoryUnit: option?.unit || item.inventoryUnit,
+          inventoryUnitId: option?.unitId || item.inventoryUnitId,
+          prevPrice: option?.prevPrice || item?.prevPrice,
+          isShowDiscount:
+            option?.isShowDiscount || item?.isShowDiscount || false,
+          quantity: Number(quantity),
+        },
       ]);
     }
 
@@ -611,6 +686,8 @@ const OrderView = ({
     } catch (error: any) {
       console.log('There was an error: ', error);
       setIsLoading(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -661,7 +738,7 @@ const OrderView = ({
                           ? item?.inventoryItem?.color
                           : infoBackground,
                     }}
-                    disabled={item?.disabled}
+                    disabled={item?.disabled || order?.type === TYPE.LOCKED}
                     flexColOnDiscount={isModal && smDown}
                   />
                 )}
@@ -764,7 +841,10 @@ const OrderView = ({
           fullWidth
           variant="contained"
           sx={{ mt: 2, py: 2 }}
-          disabled={orderedItems.length === 0 && !isPreOrder || defaultOrder?.type === TYPE.LOCKED}
+          disabled={
+            (orderedItems.length === 0 && !isPreOrder) ||
+            defaultOrder?.type === TYPE.LOCKED
+          }
         >
           {purpose === ORDER_USAGE_PURPOSE.ITEM ? 'Save' : 'Place Order'}
         </LoadingButton>
@@ -844,7 +924,10 @@ const OrderView = ({
           {/* Only admin can add custom amount at order mode, neither edit mode nor pre order mode allowed to create custom amount */}
           {role === USER_ROLE.ADMIN && !isPreOrder && (
             <Grid item xs={6} sm={isModal ? 6 : 4} md={isModal ? 6 : 3}>
-              <Button onClick={() => setIsOpenAddCustomAmount(true)}>
+              <Button
+                onClick={() => setIsOpenAddCustomAmount(true)}
+                disabled={defaultOrder?.type === TYPE.LOCKED}
+              >
                 <Box
                   display="flex"
                   flexDirection="column"
@@ -911,7 +994,8 @@ const OrderView = ({
         </Typography>
 
         {orderedItems.length > 0 ? (
-          orderedItems.map((item: IItem) => {
+          orderedItems.map((item: IItem | any) => {
+            console.log('item', item);
             return (
               <Box
                 key={item.id}
@@ -940,12 +1024,17 @@ const OrderView = ({
                     <Trash2 />
                   </IconButton>
                 </Box>
+                {item?.option && (
+                  <Typography sx={{ color: grey[700] }}>
+                    {item.option.name}
+                  </Typography>
+                )}
 
                 <Box
                   display="flex"
-                  alignItems={smDown || isModal ? 'flex-start' : 'center'}
+                  alignItems="flex-start"
                   // justifyContent="space-between"
-                  flexDirection={smDown || isModal ? 'column' : 'row'}
+                  flexDirection="column"
                   gap={2}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
@@ -966,13 +1055,14 @@ const OrderView = ({
                     ) : (
                       <Typography>${item.price.toFixed(2)}</Typography>
                     )}
-                    {item.isShowDiscount && item.prevPrice && (
+
+                    {(item?.option?.isShowDiscount || item.isShowDiscount) && (
                       <Typography
                         // fontWeight="bold"
                         sx={{ textDecoration: 'line-through' }}
                         color="error"
                       >
-                        ${item.prevPrice.toFixed(2)}
+                        ${item?.option?.prevPrice?.toFixed(2) || item.prevPrice.toFixed(2)}
                       </Typography>
                     )}
                   </Box>
@@ -994,6 +1084,7 @@ const OrderView = ({
                           }}
                           color="primary"
                           onClick={() => onDecrementQuantity(item)}
+                          disabled={defaultOrder?.type === TYPE.LOCKED}
                         >
                           -
                         </Fab>
@@ -1010,6 +1101,7 @@ const OrderView = ({
                           }}
                           color="primary"
                           onClick={() => onIncrementQuantity(item)}
+                          disabled={defaultOrder?.type === TYPE.LOCKED}
                         >
                           +
                         </Fab>
@@ -1028,7 +1120,10 @@ const OrderView = ({
                         <Typography variant="h6">
                           Qty: <strong>{item.quantity}</strong>
                         </Typography>
-                        <IconButton color="primary">
+                        <IconButton
+                          color="primary"
+                          disabled={defaultOrder?.type === TYPE.LOCKED}
+                        >
                           <EditIcon onClick={() => setEditItemQuantity(item)} />
                         </IconButton>
                       </Box>
@@ -1199,7 +1294,7 @@ const OrderView = ({
           // addCustomAmount={addCustomAmount}
           showNotification={showNotification}
         />
-        <SingleFieldEdit
+        {/* <SingleFieldEdit
           title={`How many ${singleFieldProps?.item?.name}?`}
           inputLabel="Quantity"
           open={singleFieldProps.open}
@@ -1213,6 +1308,12 @@ const OrderView = ({
               min: 1,
             },
           }}
+        /> */}
+        <SetItemQuantity
+          open={singleFieldProps.open}
+          onClose={() => setSingleFieldProps({ open: false, defaultValue: 0 })}
+          item={singleFieldProps.item}
+          onSubmit={onAddItem}
         />
         {NotificationComp}
         <Box display="flex" flexDirection="column" gap={2} width="100%">
@@ -1256,7 +1357,9 @@ const OrderView = ({
         // addCustomAmount={addCustomAmount}
         showNotification={showNotification}
       />
-      <SingleFieldEdit
+
+      {/* Custom Quantity */}
+      {/* <SingleFieldEdit
         title={`How many ${singleFieldProps?.item?.name}?`}
         inputLabel="Quantity"
         open={singleFieldProps.open}
@@ -1270,14 +1373,20 @@ const OrderView = ({
             min: 1,
           },
         }}
+      /> */}
+      <SetItemQuantity
+        open={singleFieldProps.open}
+        onClose={() => setSingleFieldProps({ open: false, defaultValue: 0 })}
+        item={singleFieldProps.item}
+        onSubmit={onAddItem}
       />
       {NotificationComp}
       <Grid container spacing={2} width="100%">
-        <Grid item xs={12} sm={8.5}>
+        <Grid item xs={12} sm={7}>
           {renderDisplayItems()}
         </Grid>
 
-        <Grid item xs={12} sm={3.5}>
+        <Grid item xs={12} sm={5}>
           {renderMyOrder()}
         </Grid>
       </Grid>

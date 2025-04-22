@@ -19,7 +19,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const actualId = Number(typeId?.split(' - ')[1]);
     const isPromotion = typeId.includes('promotion');
-    
+
     let container;
     // Handle Promotion
     if (isPromotion) {
@@ -29,19 +29,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         include: {
           items: {
-            orderBy: {
-          
-        }}}
-      })
+            orderBy: {},
+          },
+        },
+      });
     } else {
       container = await prisma.itemType.findUnique({
         where: {
           id: actualId,
         },
       });
-
     }
-
 
     if (!container) {
       return res.status(404).json({ error: 'Container To Update Not Found' });

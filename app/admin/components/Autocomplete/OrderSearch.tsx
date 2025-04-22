@@ -49,7 +49,7 @@ const OrderSearch = ({
     return res;
   };
 
-  console.log(orders, ' orders in order search');
+  console.log(selectedOrders, ' orders in order search');
   return (
     <Autocomplete
       multiple

@@ -20,7 +20,7 @@ import {
   PAYMENT_TYPE,
   USER_ROLE,
 } from '@/app/utils/enum';
-import { YYYYMMDDFormat } from '@/app/utils/time';
+import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
 import { Item, Order } from '@/app/admin/orders/page';
 import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
 import { Virtuoso } from 'react-virtuoso';
@@ -32,7 +32,7 @@ import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import InsertOrderToCodBoard from '@/app/admin/components/Modals/add/InsertOrderToCodBoard';
-
+import SwitchRole from '../components/Modals/SwitchRole';
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
   return (
@@ -84,12 +84,14 @@ export default function OrdersPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [isOpenInsertToCOD, setIsOpenInsertToCOD] = useState<boolean>(false);
+  const [isOpenSwitchRole, setIsOpenSwitchRole] = useState<boolean>(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
 
   const date = new Date();
   const today = YYYYMMDDFormat(date);
+  const wcodDay = getWCODDay(today);
 
   const { showNotification, NotificationComp } = useNotification();
   // const { date: datePicker, SelectDate } = useSelectDate(today);
@@ -105,6 +107,21 @@ export default function OrdersPage() {
     const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
   }, []);
+
+  // useEffect(() => {
+  //   if (ordersResponse) {
+  //     const unfulfilledOrders = filterOrderByStatus(
+  //       ordersResponse?.data.deliveryOrders,
+  //       currentTab === 'Today'
+  //         ? ORDER_STATUS.INCOMPLETED
+  //         : ORDER_STATUS.COMPLETED,
+  //     );
+
+  //     // if (unfulfilledOrders.length === 0) {
+  //     //   setIsOpenSwitchRole(true);
+  //     // }
+  //   }
+  // }, [ordersResponse]);
 
   // Handle loading
   useEffect(() => {
@@ -162,7 +179,7 @@ export default function OrdersPage() {
     });
 
     const amount = nonVoidOrders.reduce((acc: number, order: Order) => {
-      if (order.user.preference.paymentType === PAYMENT_TYPE.COD) {
+      if (order.user.preference.paymentType === PAYMENT_TYPE.COD || order.user.preference.paymentType === wcodDay) {
         return acc + order.totalPrice;
       }
 
@@ -303,6 +320,10 @@ export default function OrdersPage() {
 
   return (
     <Sidebar>
+      <SwitchRole
+        open={isOpenSwitchRole}
+        onClose={() => setIsOpenSwitchRole(false)}
+      />
       {currentTab === 'C.O.D' && board?.data?.id && (
         <InsertOrderToCodBoard
           open={isOpenInsertToCOD}

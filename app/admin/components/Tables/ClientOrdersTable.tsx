@@ -203,7 +203,7 @@ const ClientOrdersTable = ({
               e.preventDefault();
             }}
             size="small"
-            disabled={order?.type === TYPE.LOCKED}
+            // disabled={order?.type === TYPE.LOCKED}
           >
             <MenuItem value={ORDER_STATUS.COMPLETED}>
               <StatusText text={ORDER_STATUS.COMPLETED} type="success" />
@@ -237,7 +237,7 @@ const ClientOrdersTable = ({
               Delete
             </Button>
             <Button
-              disabled={order?.type === TYPE.LOCKED}
+              // disabled={order?.type === TYPE.LOCKED}
               onClick={() => {
                 setOpenEdit(() => ({ order, open: true }));
               }}
@@ -274,7 +274,7 @@ const ClientOrdersTable = ({
           selected={isOrderSelected}
           sx={{ cursor: 'pointer', '&:hover': { backgroundColor: grey[50] } }}
           onClick={() => {
-            if (item?.type === TYPE.LOCKED) return;
+            // if (item?.type === TYPE.LOCKED) return;
             setOpenEdit(() => ({ order: item, open: true }));
           }}
           // disabled={item?.type === TYPE.LOCKED}
