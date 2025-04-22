@@ -97,13 +97,13 @@ export default function ApplicatinForm() {
             height: '80px',
           }}
         />
-        <Typography variant="h4" sx={{ color: landingPagePrimaryColor }}>
+        <Typography variant="h4" sx={{ }}>
           Thank you for applying to join Supreme Sprouts Ltd.
         </Typography>
         <Typography
           variant="h6"
           fontWeight="normal"
-          sx={{ color: landingPagePrimaryColor }}
+          sx={{ }}
         >
           Our team will contact you shortly to provide you with more
           information.

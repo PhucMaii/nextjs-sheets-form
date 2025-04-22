@@ -9,16 +9,16 @@ datasource db {
 }
 
 model Driver {
-  id       Int        @id @default(autoincrement())
-  name     String     @db.VarChar(255)
-  password String     @db.VarChar(255)
-  hourlyRate  Float?
+  id           Int     @id @default(autoincrement())
+  name         String  @db.VarChar(255)
+  password     String  @db.VarChar(255)
+  hourlyRate   Float?
   notification Json?
-  role        String?
+  role         String?
 
-  shiftSessions   ShiftSession[]
-  routes   Route[]
-  CodBoard CodBoard[]
+  shiftSessions ShiftSession[]
+  routes        Route[]
+  CodBoard      CodBoard[]
 }
 
 model User {
@@ -68,22 +68,23 @@ model SubCategory {
 }
 
 model Item {
-  id              Int      @id @default(autoincrement())
-  name            String   @db.VarChar(255)
+  id              Int     @id @default(autoincrement())
+  name            String  @db.VarChar(255)
   categoryId      Int?
-  subCategoryId   Int?
   price           Float
-  subCategoryId   Int?
   availability    Boolean
   inventoryItemId Int?
   inventoryUnitId Int?
+  isShowDiscount  Boolean?
+  prevPrice       Float?
 
-  options   Option[]
+  options Option[]
 
-  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
+  SubCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id])
+  subCategoryId Int?
 
   @@index([categoryId])
   @@index([inventoryItemId])
@@ -91,8 +92,8 @@ model Item {
 }
 
 model OrderedItems {
-  id               Int             @id @default(autoincrement())
-  name             String          @db.VarChar(255)
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(255)
   price            Float
   orderId          Int?
   quantity         Int
@@ -106,7 +107,7 @@ model OrderedItems {
   isCustomAmount   Boolean?
   cost             Float?
   profit           Float?
-  option          Json?
+  option           Json?
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -155,7 +156,6 @@ model Orders {
   @@index([userId])
 }
 
-
 model UserPreference {
   id          Int     @id @default(autoincrement())
   orderType   String?
@@ -185,12 +185,12 @@ model PositionIndex {
 }
 
 model Route {
-  id       Int         @id @default(autoincrement())
-  day      String
-  driverId Int
-  name     String
-  clients  UserRoute[]
-  shiftSessions  ShiftSession[]
+  id            Int            @id @default(autoincrement())
+  day           String
+  driverId      Int
+  name          String
+  clients       UserRoute[]
+  shiftSessions ShiftSession[]
 
   driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
 }
@@ -250,9 +250,12 @@ model PaymentMethod {
 }
 
 model Expense {
-  id              Int             @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   createdAt       String
   createdBy       String
+  subTotal        Float?
+  PST             Float?
+  GST             Float?
   amount          Float
   discount        Float?
   description     String
@@ -263,12 +266,12 @@ model Expense {
   invoice         String?
   status          String?
 
-  paymentMethod PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
-  codBoard      CodBoard?       @relation(fields: [codBoardId], references: [id])
-  orderedItems  OrderedItems[]
-  vendors       VendorExpense[]
-  shifts        ShiftSession[]
-  purchaseOrders  PO[]
+  paymentMethod  PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
+  codBoard       CodBoard?       @relation(fields: [codBoardId], references: [id])
+  orderedItems   OrderedItems[]
+  vendors        VendorExpense[]
+  shifts         ShiftSession[]
+  purchaseOrders PO[]
 }
 
 model VendorExpense {
@@ -281,7 +284,7 @@ model VendorExpense {
 }
 
 model Vendor {
-  id          Int             @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   name        String
   address     String
   addressLat  Float?
@@ -292,13 +295,13 @@ model Vendor {
   joinedDate  String
   email       String?
 
-  expense    VendorExpense[]
-  vendorItem VendorItem[]
-  purchaseOrders    PO[]
+  expense        VendorExpense[]
+  vendorItem     VendorItem[]
+  purchaseOrders PO[]
 }
 
 model InventoryItem {
-  id            Int              @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   name          String
   createdAt     String
   createdBy     String
@@ -311,20 +314,17 @@ model InventoryItem {
   isPromotion   Boolean?
   promotionId   Int?
   promoIndexPos Int?
-  createdAt String
-  createdBy String
-  promotionId     Int?
 
   item         Item[]
   vendorItem   VendorItem[]
   fifo         Fifo[]
   OrderedItems OrderedItems[]
   preference   ItemPreference[]
-  options     Option[]
+  options      Option[]
   poItems      POItem[]
-  
-  promotion    Promotion?     @relation(fields: [promotionId], references: [id])
-  type         ItemType?        @relation(fields: [typeId], references: [id])
+
+  promotion Promotion? @relation(fields: [promotionId], references: [id])
+  type      ItemType?  @relation(fields: [typeId], references: [id])
 
   @@index([indexPos])
   @@index([promoIndexPos])
@@ -375,7 +375,7 @@ model ItemType_Category {
 }
 
 model VendorItem {
-  id              Int             @id @default(autoincrement())
+  id              Int    @id @default(autoincrement())
   inventoryItemId Int
   vendorId        Int
   quantity        Float
@@ -414,7 +414,7 @@ model InventoryUnit {
   createdBy    String
   sellingItem  Item[]
 
-  itemOptions   Option[]
+  itemOptions     Option[]
   vendorItem      VendorItem       @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems    OrderedItems[]
   cartItems       CartItem[]
@@ -499,85 +499,81 @@ model Promotion {
   items      InventoryItem[]
 }
 
-  items  InventoryItem[]
-}
-
 model Option {
-  id    Int @id @default(autoincrement())
-  name  String
-  price  Float
-  prevPrice  Float?
+  id              Int      @id @default(autoincrement())
+  name            String
+  price           Float
+  prevPrice       Float?
   isShowDiscount  Boolean?
-  availability Boolean
+  availability    Boolean
   inventoryItemId Int
-  createdAt   String?
-  createdBy   String?
+  createdAt       String?
+  createdBy       String?
 
   unitId Int
   itemId Int
 
-  unit  InventoryUnit  @relation(fields: [unitId], references: [id])
-  item  Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  inventoryItem  InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  unit          InventoryUnit @relation(fields: [unitId], references: [id])
+  item          Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 }
 
 model ShiftSession {
-  id     Int @id  @default(autoincrement())
-  driverId   Int
+  id        Int      @id @default(autoincrement())
+  driverId  Int
   routeId   Int?
   date      String
-  startedAt   String
-  endedAt     String?
-  hours       Float?
-  isActive    Boolean?
-  cost        Float?
-  status      String?
-  expenseId   Int?
-  role       String?
+  startedAt String
+  endedAt   String?
+  hours     Float?
+  isActive  Boolean?
+  cost      Float?
+  status    String?
+  expenseId Int?
+  role      String?
 
-  driver     Driver  @relation(fields: [driverId], references: [id])
-  expense     Expense? @relation(fields: [expenseId], references: [id])
-  route     Route? @relation(fields: [routeId], references: [id])
+  driver  Driver   @relation(fields: [driverId], references: [id])
+  expense Expense? @relation(fields: [expenseId], references: [id])
+  route   Route?   @relation(fields: [routeId], references: [id])
 }
 
 model PO {
-  id    Int @id @default(autoincrement())
-  poNumber  String?
+  id         Int     @id @default(autoincrement())
+  poNumber   String?
   vendorId   Int
-  status      String
-  discount    Float?
-  totalCost   Float
-  tax         Float
-  subtotal    Float
-  estArrival  String
+  status     String
+  discount   Float?
+  totalCost  Float
+  tax        Float
+  subtotal   Float
+  estArrival String
   createdAt  String
   createdBy  String
-  receivedAt  String?
-  note        String?
-  expenseId   Int?
+  receivedAt String?
+  note       String?
+  expenseId  Int?
 
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
-  poItems  POItem[]
-  expense  Expense? @relation(fields: [expenseId], references: [id])
+  vendor  Vendor   @relation(fields: [vendorId], references: [id])
+  poItems POItem[]
+  expense Expense? @relation(fields: [expenseId], references: [id])
 
   @@index([vendorId])
-
 }
 
 model POItem {
-  id  Int @id @default(autoincrement())
-  inventoryItemId  Int
-  poId   Int
-  orderedQty  Float
-  receivedQty  Float?
-  rejectedQty  Float?
-  tax          Float?
-  costPerItem      Float
-  inventoryUnitId      Int
+  id              Int    @id @default(autoincrement())
+  inventoryItemId Int
+  poId            Int
+  orderedQty      Float
+  receivedQty     Float?
+  rejectedQty     Float?
+  tax             Float?
+  costPerItem     Float
+  inventoryUnitId Int
 
-  inventoryItem InventoryItem   @relation(fields: [inventoryItemId], references: [id])
-  inventoryUnit   InventoryUnit    @relation(fields: [inventoryUnitId], references: [id])
-  po   PO @relation(fields: [poId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
+  po            PO            @relation(fields: [poId], references: [id], onDelete: Cascade)
 
   @@index([poId])
   @@index([inventoryItemId])

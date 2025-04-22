@@ -21,6 +21,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const buf = await buffer(req);
     const webhookSecret =
+      process.env.STRIPE_WEBHOOK_SECRET ||
       'whsec_01a334a8b9bc36bfd9d6d88351918a7e18917556f0e350eab907e01b72d5d062';
 
     const prisma = new PrismaClient();
@@ -53,8 +54,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         ...clientInfo,
         type: USER_CATEGORIZED.PENDING,
       });
-
-      console.log({ newGuest, clientInfo }, 'newGuest');
 
       // Attach to cart
       const cart = await prisma.cart.update({

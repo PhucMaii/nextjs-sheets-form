@@ -14,12 +14,12 @@ import {
 } from '@mui/material';
 import { ShadowSection } from '../../admin/reports/styled';
 import axios from 'axios';
-import { API_URL } from '../utils/enum';
 import { signOut, useSession } from 'next-auth/react';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import useNotification from '@/hooks/useNotification';
 import { LogOutIcon } from 'lucide-react';
+import { API_URL } from '@/app/utils/enum';
 
 export default function AccountPage() {
   const [isFetching, setIsFetching] = useState<boolean>(true);

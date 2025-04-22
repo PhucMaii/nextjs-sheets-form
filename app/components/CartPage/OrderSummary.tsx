@@ -69,6 +69,7 @@ export default function OrderSummary({ showNotification }: IProps) {
 
       showNotification('success', response.data.message);
       dispatch(updateUser(response.data.data.user));
+      router.push('/');
     } catch (error: any) {
       console.log(
         'Fail to place order: ',
