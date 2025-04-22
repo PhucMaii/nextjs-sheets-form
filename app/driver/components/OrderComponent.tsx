@@ -59,7 +59,7 @@ export default function OrderComponent({
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
 
-  const abilityToEdit = useMemo(() => {
+  const isDateToday = useMemo(() => {
     const today = new Date();
     const deliveryDate = new Date(order.deliveryDate);
 
@@ -145,6 +145,17 @@ export default function OrderComponent({
         />
       )}
       <Grid container alignItems="center" spacing={1}>
+        {!isDateToday && (
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="flex-end">
+              <StatusText
+                text="Date Difference"
+                type="info"
+                icon={<InfoIcon />}
+              />
+            </Box>
+          </Grid>
+        )}
         <Grid item xs={1}>
           <IconButton onClick={() => setIsOpenDetails(true)}>
             <PreviewIcon color="primary" />
@@ -154,14 +165,14 @@ export default function OrderComponent({
           <StatusText text={statusText.text} type={statusText.type} />
         </Grid>
         <Grid item xs={6} textAlign="right">
-          {abilityToEdit ? (
-            <Box
-              display="flex"
-              justifyContent="flex-end"
-              alignItems="center"
-              gap={1}
-              width="100%"
-            >
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            gap={1}
+            width="100%"
+          >
+            {isDateToday && (
               <Fab
                 sx={{ zIndex: 0 }}
                 onClick={() =>
@@ -177,67 +188,59 @@ export default function OrderComponent({
               >
                 <DeleteIcon />
               </Fab>
-              {order.status !== ORDER_STATUS.INCOMPLETED && (
-                <Fab
-                  sx={{ zIndex: 0 }}
-                  onClick={() =>
-                    setConfirmModalProps({
-                      on: true,
-                      heading: `Are you sure to mark order as unfulfilled for ${order.clientName}`,
-                      color: 'warning',
-                      updatedStatus: ORDER_STATUS.INCOMPLETED,
-                    })
-                  }
-                  color="warning"
-                  size="small"
-                >
-                  <PendingIcon />
-                </Fab>
-              )}
-              {order.status !== ORDER_STATUS.DELIVERED && (
-                <Fab
-                  sx={{ zIndex: 0 }}
-                  onClick={() =>
-                    setConfirmModalProps({
-                      on: true,
-                      heading: `Have you delivered order for ${order.clientName}`,
-                      color: 'primary',
-                      updatedStatus: ORDER_STATUS.DELIVERED,
-                    })
-                  }
-                  color="primary"
-                  size="small"
-                >
-                  <LocalShippingIcon />
-                </Fab>
-              )}
-              {order.status !== ORDER_STATUS.COMPLETED && (
-                <Fab
-                  sx={{ zIndex: 0 }}
-                  onClick={() =>
-                    setConfirmModalProps({
-                      on: true,
-                      heading: `Have you delivered and collected money from order for ${order.clientName}`,
-                      color: 'success',
-                      updatedStatus: ORDER_STATUS.COMPLETED,
-                    })
-                  }
-                  color="success"
-                  size="small"
-                >
-                  <CreditScoreIcon />
-                </Fab>
-              )}
-            </Box>
-          ) : (
-            <Box display="flex" justifyContent="flex-end">
-              <StatusText
-                text="Date Difference"
-                type="info"
-                icon={<InfoIcon />}
-              />
-            </Box>
-          )}
+            )}
+            {order.status !== ORDER_STATUS.INCOMPLETED && isDateToday && (
+              <Fab
+                sx={{ zIndex: 0 }}
+                onClick={() =>
+                  setConfirmModalProps({
+                    on: true,
+                    heading: `Are you sure to mark order as unfulfilled for ${order.clientName}`,
+                    color: 'warning',
+                    updatedStatus: ORDER_STATUS.INCOMPLETED,
+                  })
+                }
+                color="warning"
+                size="small"
+              >
+                <PendingIcon />
+              </Fab>
+            )}
+            {order.status !== ORDER_STATUS.DELIVERED && (
+              <Fab
+                sx={{ zIndex: 0 }}
+                onClick={() =>
+                  setConfirmModalProps({
+                    on: true,
+                    heading: `Have you delivered order for ${order.clientName}`,
+                    color: 'primary',
+                    updatedStatus: ORDER_STATUS.DELIVERED,
+                  })
+                }
+                color="primary"
+                size="small"
+              >
+                <LocalShippingIcon />
+              </Fab>
+            )}
+            {order.status !== ORDER_STATUS.COMPLETED && (
+              <Fab
+                sx={{ zIndex: 0 }}
+                onClick={() =>
+                  setConfirmModalProps({
+                    on: true,
+                    heading: `Have you delivered and collected money from order for ${order.clientName}`,
+                    color: 'success',
+                    updatedStatus: ORDER_STATUS.COMPLETED,
+                  })
+                }
+                color="success"
+                size="small"
+              >
+                <CreditScoreIcon />
+              </Fab>
+            )}
+          </Box>
         </Grid>
         <Grid item xs={6}>
           <Typography variant="subtitle1">#{order.id}</Typography>
