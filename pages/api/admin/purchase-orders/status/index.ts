@@ -49,13 +49,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             // Send email to vendor
             await emailHandler(
                 po.vendor.email,
-                'Purchase Order Request',
-                'Purchase Order Request',
+                `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
+                `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
                 poTemplate,
             )
+
+            
         }
 
-        return res.status(200).json({ message: 'Purchase order status updated' });
+        return res.status(200).json({ message: 'Email Sent Successfully' });
     } catch (error) {
         console.log('Internal Server Error: ', error);
         return res.status(500).json({ error: 'Internal Server Error: ' + error });

@@ -5,13 +5,14 @@ import bcrypt from 'bcryptjs';
 interface IBody {
   driverName: string;
   driverPassword: string;
+  hourlyRate: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { driverName, driverPassword }: IBody = req.body;
+    const { driverName, driverPassword, hourlyRate }: IBody = req.body;
 
     const sameDriverName = await prisma.driver.findFirst({
       where: {
@@ -31,6 +32,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name: driverName,
         password: hashPassword,
+        hourlyRate,
       },
     });
 

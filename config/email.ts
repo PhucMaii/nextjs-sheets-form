@@ -52,7 +52,7 @@ export const generateOrderTemplate = (
       ${flagText}
       <h2 style="text-align: center; font-weight: 300;">Supreme Sprouts LTD</h2>
       <p style="text-align: center; margin: 0;">1-6420 Beresford Street, Burnaby, BC, V5E 1B3</p>
-      <p style="text-align: center;">778 789 1060 | 709 989 6000</p>
+      <p style="text-align: center;">778-789-1060 | 709-989-6000</p>
       
       <hr />
 
@@ -246,6 +246,9 @@ export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
     <h3 style="margin-top: 20px;">Purchase Order Details</h3>
     <p>
       <strong>PO Number:</strong> #${po.poNumber}<br />
+      <strong>Expected Arrival Date:</strong> ${po.estArrival}<br />
+      <strong>Note:</strong> ${po.note}<br />
+      
     </p>
 
     <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
@@ -261,8 +264,11 @@ export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
     </table>
 
     <p>
-      <strong>Tim Le</strong><br />
+      <strong>Louis Le</strong><br />
       Supreme Sprouts Ltd.<br />
+      1-6420 Beresford Street, Burnaby, BC, V5E 1B3<br />
+      Contact: 778-789-1060 | 709-989-6000<br />
+      Website: <a href="https://supremesprouts.com">supremesprouts.com</a>
     </p>
     </div>
   `;
