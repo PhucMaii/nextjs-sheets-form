@@ -74,8 +74,8 @@ export default function Header({ sx }: IProps) {
             textAlign="center"
             sx={{ color: grey[100], lineHeight: 1.5 }}
           >
-            Delivering farm-fresh produce with unmatched quality at competitive
-            prices, <br /> tailored for your business needs.
+            Delivering farm-fresh produce with unmatched quality <br /> at
+            competitive prices, tailored for your business needs.
           </Typography>
           <Box
             display="flex"

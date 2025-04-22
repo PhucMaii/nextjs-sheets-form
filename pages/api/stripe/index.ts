@@ -1,14 +1,14 @@
 import { stripe } from '@/app/lib/stripe';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createOrder } from '../admin/orders/POST';
+// import { createOrder } from '../admin/orders/POST';
 import { convertCartItemsToOrderItems } from '../public/place-order';
-import { getTodayDate } from '../utils/date';
+// import { getTodayDate } from '../utils/date';
 import { withGuestSessionGuard } from '../utils/withGuestSessionGuard';
 import { calculateShippingFee } from '@/app/utils/shipping';
 import { generateLatLng } from '../admin/clients/POST';
 import { verifyDeliveryAddress } from '../utils/address';
-import { ORDER_STATUS } from '@/app/utils/enum';
+// import { ORDER_STATUS } from '@/app/utils/enum';
 // import { generateCostAndProfit } from '../admin/orderedItems/single';
 
 export type CheckoutClientData = {
@@ -67,40 +67,40 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // If cart already had user -> place an order for user and send them to order successful page
-    if (cart?.user) {
-      // Check if user already order for provided date
-      const existingOrder = await prisma.orders.findFirst({
-        where: {
-          userId: cart?.user?.id,
-          deliveryDate: deliveryDate,
-          status: {
-           not: ORDER_STATUS.VOID 
-          }
-        },
-      });
+    // if (cart?.user) {
+    //   // Check if user already order for provided date
+    //   const existingOrder = await prisma.orders.findFirst({
+    //     where: {
+    //       userId: cart?.user?.id,
+    //       deliveryDate: deliveryDate,
+    //       status: {
+    //        not: ORDER_STATUS.VOID 
+    //       }
+    //     },
+    //   });
 
-      if (existingOrder) {
-        return res.status(400).json({
-          error: 'You already have an order for ' + deliveryDate,
-        });
-      }
+    //   if (existingOrder) {
+    //     return res.status(400).json({
+    //       error: 'You already have an order for ' + deliveryDate,
+    //     });
+    //   }
 
-      const formattedItems = convertCartItemsToOrderItems(cart.items);
+    //   const formattedItems = convertCartItemsToOrderItems(cart.items);
 
-      const { date, time } = getTodayDate();
-      const newOrder = createOrder(
-        cart.user,
-        formattedItems,
-        deliveryDate,
-        `${date} ${time}`,
-        cart?.note || '',
-      );
+    //   // const { date, time } = getTodayDate();
+    //   const newOrder = createOrder(
+    //     cart.user,
+    //     formattedItems,
+    //     deliveryDate,
+    //     `Guest - ${cart.user.clientName}`,
+    //     cart?.note || '',
+    //   );
 
-      return res.status(200).json({
-        data: newOrder,
-        message: 'Place an order successfully',
-      });
-    }
+    //   return res.status(200).json({
+    //     data: newOrder,
+    //     message: 'Place an order successfully',
+    //   });
+    // }
 
     const addressLatAndLng = await generateLatLng(clientData.deliveryAddress);
     const isAddressValid = verifyDeliveryAddress(

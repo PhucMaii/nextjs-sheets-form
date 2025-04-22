@@ -1,13 +1,9 @@
-import { USER_CATEGORIZED } from '@/app/utils/enum';
 import useCart from '@/hooks/useCart';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { CheckoutClientData } from '@/pages/api/stripe';
-import { RootState } from '@/state/store';
 import { AlertColor, LoadingButton } from '@mui/lab';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 interface IProps {
   style?: any;
@@ -49,18 +45,12 @@ export default function CheckoutButton({
   const [guestSession] = useLocalStorage('guest-session', '');
 
   const { cart } = useCart();
-  const user = useSelector((state: RootState) => state.user);
-  const router = useRouter();
+  // const user = useSelector((state: RootState) => state.user);
+  // const router = useRouter();
 
   const onPayment = async () => {
     setIsLoading(true);
     try {
-      if (user?.type === USER_CATEGORIZED.PENDING) {
-        router.push('/auth/login');
-        setIsLoading(false);
-
-        return;
-      }
 
       const { error } = await onStripePayment(cart.id, deliveryDate, {
         ...clientData,
@@ -93,7 +83,7 @@ export default function CheckoutButton({
       loading={isLoading}
       style={{ ...style }}
     >
-      {user?.type === USER_CATEGORIZED.PENDING ? 'Login to order' : 'Checkout'}
+      Checkout
     </LoadingButton>
   );
 }

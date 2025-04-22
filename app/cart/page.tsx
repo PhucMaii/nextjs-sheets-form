@@ -70,7 +70,7 @@ export default function CartPage() {
     );
   };
 
-  if (!cart || cart.items.length === 0) {
+  if (!cart || (cart as any).items.length === 0) {
     return <NavbarWrapper>{renderEmptyCart()}</NavbarWrapper>;
   }
 

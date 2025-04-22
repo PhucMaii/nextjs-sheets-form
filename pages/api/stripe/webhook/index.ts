@@ -5,7 +5,6 @@ import { USER_CATEGORIZED } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { createOrder } from '../../admin/orders/POST';
 import { convertCartItemsToOrderItems } from '../../public/place-order';
-import { getTodayDate } from '../../utils/date';
 import { sendEmail, sendWelcomeEmail } from '../../utils/email';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -55,6 +54,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         type: USER_CATEGORIZED.PENDING,
       });
 
+      console.log({ newGuest, clientInfo }, 'newGuest');
+
       // Attach to cart
       const cart = await prisma.cart.update({
         where: {
@@ -86,19 +87,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(404).json({ error: 'Guest not found' });
       }
 
-      const { date, time } = getTodayDate();
       const formattedItems = convertCartItemsToOrderItems(cart.items);
       // Create order
       const newOrder = await createOrder(
         newGuest,
         formattedItems,
         session.metadata.deliveryDate,
-        `${date} ${time}`,
-        `Client - ${session.metadata.clientId}`,
+        `Guest - ${clientInfo.clientName}`,
+        '',
         Number(session.metadata?.shippingFee) || 0,
       );
-
-      console.log('create order successfully');
 
       // Set guest to pending
       await prisma.user.update({

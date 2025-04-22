@@ -169,7 +169,7 @@ export const createGuest = async (client: any) => {
     });
 
     if (existingGuest) {
-      throw new Error('Guest already exists');
+      return existingGuest;
     }
 
     // Verify and Generate address lat and lng=

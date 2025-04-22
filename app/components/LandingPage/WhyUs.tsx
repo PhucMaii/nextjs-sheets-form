@@ -40,7 +40,7 @@ export default function WhyUs() {
         alignItems="center"
         gap={2}
         sx={{
-          maxWidth: '1000px',
+          maxWidth: '1200px',
           mx: 'auto',
         }}
       >
@@ -53,18 +53,28 @@ export default function WhyUs() {
           textAlign="center"
           sx={{ color: 'white', fontWeight: 'normal', lineHeight: '1.8rem' }}
         >
-          Supreme Sprouts Ltd. is a trusted name in the community, dedicated to
-          delivering freshness, quality, and variety since 1990. With over 35
-          years of experience, we pride ourselves on providing premium-quality
-          products and top-notch services.
+          Supreme Sprouts Ltd. has been a trusted name of community since 1990,
+          committed to delivering freshness, quality, and variety. <br />
+          With over 35 years of experience, we take pride in offering
+          premium-quality products and exceptional services.{' '}
           <br style={{ marginBottom: '1rem', marginTop: '1rem' }} />
-          Our commitment to being a one-stop solution for all your restaurant
-          needs sets us apart. Experience the convenience of ordering online at
-          any time through our user-friendly website.
+          Our dedication to being your one-stop solution for all restaurant
+          needs truly sets us apart.{' '}
           <br style={{ marginBottom: '1rem', marginTop: '1rem' }} />
-          We are proud to offer 7-day delivery to serve the Greater Vancouver,
-          Burnaby, Richmond, Coquitlam, Langley, Surrey, and surrounding areas.
-          Join us in our mission to elevate your dining experience with Supreme
+          Enjoy the convenience of 24/7 online ordering through our
+          user-friendly website.{' '}
+          <br style={{ marginBottom: '1rem', marginTop: '1rem' }} />
+        </Typography>
+
+        <Typography
+          variant="h6"
+          textAlign="center"
+          sx={{ color: 'white', fontWeight: 'normal', lineHeight: '1.8rem' }}
+        >
+          We proudly offer 7-day delivery to Greater Vancouver, Burnaby,
+          Richmond, Coquitlam, Langley, Surrey, and surrounding areas.{' '}
+          <br style={{ marginBottom: '1rem', marginTop: '2rem' }} />
+          Join us in our mission to enhance your dining experience with Supreme
           Sprouts.
         </Typography>
 

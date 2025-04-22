@@ -43,8 +43,6 @@ export default function OrderSummary({ showNotification }: IProps) {
   const { cart, renderDisplayTotal } = useCart();
   const user = useSelector((state: RootState) => state.user as any);
 
-  console.log('user: ', user);
-
   const dispatch = useDispatch<AppDispatch>();
   const { renderDatePicker, deliveryDate } = useDatePicker(0);
 
@@ -178,20 +176,13 @@ export default function OrderSummary({ showNotification }: IProps) {
               * Partner with us and no upfront payment required. Receive your
               products first and pay later.
             </Typography>
-            {user.type === USER_CATEGORIZED.GUEST && (
-              <>
-                <Divider>Or</Divider>
-                <LoadingButton
-                  onClick={proceedToCheckout}
-                  variant="outlined"
-                  fullWidth
-                >
-                  Go to checkout
-                </LoadingButton>
-              </>
-            )}
           </>
         )}
+
+        <Divider>Or</Divider>
+        <LoadingButton onClick={proceedToCheckout} variant="outlined" fullWidth>
+          Go to checkout
+        </LoadingButton>
       </Box>
     </>
   );

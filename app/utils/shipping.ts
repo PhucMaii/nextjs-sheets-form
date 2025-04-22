@@ -27,7 +27,7 @@ export function calculateShippingFee(distance: number, revenue: number) {
   if (revenue >= 100) {
     profitDiscountFactor = 0.8;  // 20% discount
   } else if (revenue >= 50) {
-    profitDiscountFactor = 0.7;  // 10% discount
+    profitDiscountFactor = 0.9;  // 10% discount
   } // else 1 (no discount)
 
   const costPerLiter = 1.8;
@@ -40,6 +40,7 @@ export function calculateShippingFee(distance: number, revenue: number) {
   const finalShippingCost = baseShipping * profitDiscountFactor;
 
   console.log({
+    distance,
     baseShipping,
     totalLiters,
     profitDiscountFactor,
