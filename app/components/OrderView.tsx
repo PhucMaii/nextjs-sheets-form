@@ -363,8 +363,8 @@ const OrderView = ({
     id: defaultOrder?.id || -1,
     subTotal: 0,
     totalPrice: 0,
-    PST: 0,
-    GST: 0,
+    PST: defaultOrder?.PST || 0,
+    GST: defaultOrder?.GST || 0,
     note: defaultOrder?.note || '',
     deliveryDate:
       defaultOrder?.deliveryDate ||
@@ -506,8 +506,8 @@ const OrderView = ({
       ...order,
       subTotal: newSubtotal?.subTotal || 0,
       totalPrice: newSubtotal?.totalPrice || 0,
-      PST: newSubtotal?.PST || 0,
-      GST: newSubtotal?.GST || 0,
+      PST: defaultOrder?.PST || newSubtotal?.PST || 0,
+      GST: defaultOrder?.GST || newSubtotal?.GST || 0,
     });
   }, [orderedItems]);
 
