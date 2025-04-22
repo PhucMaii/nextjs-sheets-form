@@ -246,6 +246,9 @@ export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
     <h3 style="margin-top: 20px;">Purchase Order Details</h3>
     <p>
       <strong>PO Number:</strong> #${po.poNumber}<br />
+      <strong>Expected Arrival Date:</strong> ${po.estArrival}<br />
+      <strong>Note:</strong> ${po.note}<br />
+      
     </p>
 
     <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
@@ -261,8 +264,10 @@ export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
     </table>
 
     <p>
-      <strong>Tim Le</strong><br />
+      <strong>Louis Le</strong><br />
       Supreme Sprouts Ltd.<br />
+      Contact: 778-789-1060<br />
+      Website: <a href="https://supremesprouts.com">supremesprouts.com</a>
     </p>
     </div>
   `;
