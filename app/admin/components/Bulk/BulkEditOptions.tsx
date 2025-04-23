@@ -80,9 +80,10 @@ export default function BulkEditOptions({
 
     setIsLoading(true);
     try {
+      const categoryIds = selectedCategories.map((category) => category.id);
       const response = await axios.put(`${API_URL.ADMIN}/bulk/options`, {
         inventoryItemId: item.inventoryItemId,
-        categories: selectedCategories,
+        categoryIds,
         updatedOptions: updatedItem?.data?.options,
       });
 

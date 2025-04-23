@@ -227,12 +227,12 @@ export const ItemButton = ({
           //   disabled || item?.availability === false
           //     ? grey[400]
           //     : blueGrey[800],
-          ...(!item?.image && containerStyle),
+          ...(!(item?.image || item?.inventoryItem?.image) && containerStyle),
         }}
       >
-        {item?.image && (
+        {(item?.image || item?.inventoryItem?.image) && (
           <img
-            src={generateImgUrl(item?.image)}
+            src={generateImgUrl(item?.image || item?.inventoryItem?.image)}
             alt="img"
             style={{
               position: 'absolute',

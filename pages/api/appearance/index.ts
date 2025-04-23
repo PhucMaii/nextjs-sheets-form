@@ -11,6 +11,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Handle Promotion
     const promotions = await prisma.promotion.findMany({
       where: {
+        isWebsite: null,
         status: PROMOTION_STATUS.ACTIVE,
       },
       include: {
