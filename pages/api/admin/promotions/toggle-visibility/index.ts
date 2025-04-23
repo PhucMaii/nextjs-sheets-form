@@ -20,6 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const existingPromotion = await prisma.promotion.findUnique({
       where: {
         id,
+        isWebsite: false
       },
     });
 

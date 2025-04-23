@@ -196,7 +196,7 @@ export default function PromotionTable({
                     </Select>
                     {/* {promotion.status} */}
                   </TableCell>
-                  <TableCell>{promotion.items.length}</TableCell>
+                  <TableCell>{promotion?.items?.length || promotion?.websiteItems?.length || 0}</TableCell>
                   <TableCell>{promotion.createdAt}</TableCell>
                   <TableCell>
                     <Button

@@ -169,6 +169,7 @@ export default function ItemPage() {
               loading={isAdding}
               variant="contained"
               onClick={onAddToCart}
+              disabled={!itemData?.availability}
               sx={{
                 color: 'white',
                 backgroundColor: landingPagePrimaryColor,
@@ -179,7 +180,7 @@ export default function ItemPage() {
               }}
               startIcon={<AddShoppingCartIcon />}
             >
-              Add to Cart
+              {itemData?.availability ? 'Add to Cart' : 'Out of stock'}
             </LoadingButton>
           </Grid>
         </Grid>

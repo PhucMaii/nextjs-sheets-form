@@ -78,10 +78,12 @@ model Item {
   isShowDiscount  Boolean?
   prevPrice       Float?
   image           String?
+  promotionId     Int?  // support for only item in website category
 
   options Option[]
   cartItem  CartItem[]
 
+  promotion     Promotion?     @relation(fields: [promotionId], references: [id])
   category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
@@ -496,7 +498,10 @@ model Promotion {
   rows       Int
   priority   Int
   visibility Boolean?
+  isWebsite  Boolean?
+  
   items      InventoryItem[]
+  websiteItems  Item[]
 }
 
 model Option {

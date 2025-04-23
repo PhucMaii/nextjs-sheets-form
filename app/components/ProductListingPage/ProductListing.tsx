@@ -147,6 +147,7 @@ export default function ProductListing({
         fullWidth
         loading={isAdding}
         onClick={onAddToCart}
+        disabled={!product?.availability}
         sx={{
           backgroundColor: landingPagePrimaryColor,
           alignSelf: 'flex-end',
@@ -157,7 +158,7 @@ export default function ProductListing({
           },
         }}
       >
-        Add to cart
+        {product?.availability ? 'Add to cart' : 'Out of stock'}
       </LoadingButton>
     </Box>
   );

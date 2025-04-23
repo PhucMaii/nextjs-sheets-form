@@ -1,12 +1,22 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
-import ProductType from '../components/Settings/ProductType';
+import WebsiteItems from '../components/Settings/WebsiteItems';
+import { Tab, Tabs } from '@mui/material';
+import WebsitePromotion from '../components/Settings/WebsitePromotion';
 
 export default function Website() {
+  const [tabIndex, setTabIndex] = useState<number>(0);
+
   return (
     <Sidebar>
-      <ProductType />
+      <Tabs value={tabIndex} onChange={(_, newValue) => setTabIndex(newValue)}>
+        <Tab label="Items" />
+        <Tab label="Promotions" />
+      </Tabs>
+
+      {tabIndex === 0 && <WebsiteItems />}
+      {tabIndex === 1 && <WebsitePromotion />}
     </Sidebar>
   );
 }

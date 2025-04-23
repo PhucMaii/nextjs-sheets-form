@@ -8,7 +8,7 @@ import { blueGrey } from '@mui/material/colors';
 import EditProfile from '../components/Settings/EditProfile';
 import ErrorComponent from '../components/ErrorComponent';
 import Announcement from '../components/Settings/Announcement';
-import ProductType from '../components/Settings/ProductType';
+import ProductType from '../components/Settings/WebsiteItems';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 function SettingsContent() {

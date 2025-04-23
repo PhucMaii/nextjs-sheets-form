@@ -272,43 +272,6 @@ export default function ItemPage() {
     }
   };
 
-  // const saveItemArrangement = async () => {
-  //   try {
-  //     setIsSavingArrangement(true);
-  //     const newListWithId = items.map((item: IItem, index: number) => {
-  //       const newOrderId = baseItems[index].id;
-  //       return { ...item, id: newOrderId };
-  //     });
-
-  //     const updatedIdList = newListWithId.map((item: IItem) => item.id);
-
-  //     const response = await axios.put(`${API_URL.ITEM}/reArrangement`, {
-  //       removedItemIdList: updatedIdList,
-  //       updatedItemList: newListWithId,
-  //     });
-
-  //     if (response.data.error) {
-  //       showNotification('error', response.data.error);
-
-  //       setIsSavingArrangement(false);
-
-  //       return;
-  //     }
-
-  //     mutateItems();
-
-  //     setIsSavingArrangement(false);
-  //     showNotification('success', response.data.message);
-  //   } catch (error: any) {
-  //     console.log('There was an error in rearrangement: ', error);
-  //     showNotification(
-  //       'error',
-  //       'There was an error in rearrangement: ' + error,
-  //     );
-  //     setIsSavingArrangement(false);
-  //   }
-  // };
-
   const switchCurrentCategory = (newCategory: Category) => {
     setCurrentCategory(newCategory);
   };

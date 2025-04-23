@@ -24,12 +24,16 @@ import StatusText from '../../StatusText';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
+  isWebsite?: boolean;
+  customOnClick?: (data: any) => void;
 }
 
 export default function AddPromotion({
   open,
   onClose,
   showNotification,
+  isWebsite = false,
+  customOnClick,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
@@ -38,16 +42,28 @@ export default function AddPromotion({
   );
   const [selectedItems, setSelectedItems] = useState<IInventoryItem[]>([]);
 
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  const [inventoryItems] = SWRFetchData(
+    `${isWebsite ? `${API_URL.ADMIN}/website/items` : `${API_URL.ADMIN}/inventory`}`,
+  );
 
   const handleAddPromotion = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API_URL.ADMIN}/promotions`, {
-        title,
-        status,
-        itemIds: selectedItems.map((item) => item.id),
-      });
+      let response: any;
+
+      if (customOnClick) {
+        response = await customOnClick({
+          title,
+          status,
+          itemIds: selectedItems.map((item) => item.id),
+        });
+      } else {
+        response = await axios.post(`${API_URL.ADMIN}/promotions`, {
+          title,
+          status,
+          itemIds: selectedItems.map((item) => item.id),
+        });
+      }
 
       if (response.data.error) {
         showNotification('error', response.data.error);

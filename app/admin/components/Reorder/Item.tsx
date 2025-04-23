@@ -61,9 +61,9 @@ export default function Item({
           </Grid>
           {item.categoryId === websiteItemCategory && (
             <Grid item md={2}>
-              {item?.image ? (
+              {item?.image || item?.inventoryItem?.image   ? (
                 <img
-                  src={generateImgUrl(item?.image || '')}
+                  src={generateImgUrl(item?.image || item?.inventoryItem?.image || '')}
                   alt={item?.name}
                   style={{ maxWidth: 100, height: 100, objectFit: 'contain' }}
                 />
