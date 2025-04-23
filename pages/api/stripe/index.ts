@@ -46,12 +46,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       include: {
         items: {
           include: {
-            itemPreference: {
+            item: {
               include: {
                 inventoryItem: true,
+                inventoryUnit: true,
               },
             },
-            inventoryUnit: true,
           },
         },
         user: true,
@@ -146,7 +146,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
     // console.log(shippingFee, 'shipping fee');
 
-    const stripeSession = await stripe.checkout.sessions.create({
+    const stripeSession: any = await stripe.checkout.sessions.create({
       success_url: `${process.env.NEXTAUTH_URL}/payment/successful`,
       cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
       mode: 'payment',
@@ -167,10 +167,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             currency: 'cad',
             product_data: {
               name:
-                item.itemPreference?.name ||
-                item.itemPreference.inventoryItem.name,
+                item.item?.name ||
+                item.item?.inventoryItem?.name,
             },
-            unit_amount: item.itemPreference.price * 100,
+            unit_amount: Math.round(Number(item.item?.price) * 100),
+
           },
           quantity: item.quantity,
         })),
@@ -181,7 +182,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             product_data: {
               name: 'Shipping Fee',
             },
-            unit_amount: Number(shippingFee.toFixed(2)) * 100,
+            unit_amount: Math.round(Number(shippingFee.toFixed(2)) * 100),
           },
           quantity: 1,
         },
@@ -196,7 +197,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }),
         shippingFee: String(shippingFee.toFixed(2)),
       },
-    });
+    }) as any;
 
     return res.status(200).json({
       url: stripeSession.url,

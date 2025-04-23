@@ -100,10 +100,10 @@ export default async function handler(
       include: {
         items: {
           include: {
-            inventoryUnit: true,
-            itemPreference: {
+            item: {
               include: {
                 inventoryItem: true,
+                inventoryUnit: true,
               },
             },
           },
@@ -182,12 +182,12 @@ export default async function handler(
 export const convertCartItemsToOrderItems = (cartItems: any) => {
   const formattedItems = cartItems.map((item: any) => {
     return {
-      ...item.itemPreference,
+      ...item.item,
       quantity: item.quantity,
       name:
-        item.itemPreference?.name || item?.itemPreference?.inventoryItem?.name,
-      inventoryUnitId: item.inventoryUnitId,
-      inventoryUnit: item.inventoryUnit,
+        item.item?.name || item?.item?.inventoryItem?.name,
+      inventoryUnitId: item.item?.inventoryUnitId,
+      inventoryUnit: item.item?.inventoryUnit,
     };
   });
 

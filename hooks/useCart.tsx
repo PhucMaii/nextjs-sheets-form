@@ -70,22 +70,22 @@ export default function useCart() {
             <Box display="flex" gap={1}>
               <img
                 src={
-                  item.itemPreference.image
-                    ? generateImgUrl(item.itemPreference.image)
+                  item?.item?.image || item?.item?.inventoryItem?.image
+                    ? generateImgUrl(item?.item?.image || item?.item?.inventoryItem?.image)
                     : '/images/landing/image_not_found.jpeg'
                 }
                 style={{ width: '100px', height: '100%', objectFit: 'contain' }}
               />
               <Box>
                 <Typography fontWeight="bold">
-                  {item.itemPreference?.name ||
-                    item.itemPreference.inventoryItem.name}
+                  {item?.item?.name ||
+                    item?.item?.inventoryItem?.name}
                 </Typography>
                 <Typography>x{item.quantity}</Typography>
               </Box>
             </Box>
             <Typography fontWeight="bold">
-              ${(item.itemPreference.price * item.quantity)?.toFixed(2)}
+              ${(item?.item?.price * item?.quantity)?.toFixed(2)}
             </Typography>
           </Box>
         ))}

@@ -125,7 +125,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const dbPromotions = await prisma.promotion.findMany({
       where: {
         status: PROMOTION_STATUS.ACTIVE,
-        isWebsite: false,
+        isWebsite: null,
       },
       orderBy: {
         priority: 'asc',

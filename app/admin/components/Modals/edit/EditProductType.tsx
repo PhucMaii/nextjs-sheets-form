@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { IProductType } from '@/app/utils/type';
+import { IItemType } from '@/app/utils/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 // import SelectIcons from '../../Select/SelectIcons';
 
 interface IProps extends ModalProps {
-  type: IProductType | null;
+  type: IItemType | null;
   showNotification: (type: AlertColor, message: string) => void;
 }
 

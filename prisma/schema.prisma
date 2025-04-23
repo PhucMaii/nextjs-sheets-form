@@ -79,6 +79,7 @@ model Item {
   prevPrice       Float?
   image           String?
   promotionId     Int?  // support for only item in website category
+  isBestSeller   Boolean?
 
   options Option[]
   cartItem  CartItem[]

@@ -83,6 +83,7 @@ export default function SearchPopover({
                   pointer: 'cursor',
                   '&:hover': { backgroundColor: grey[200] },
                 }}
+                
               >
                 <img
                   src={

@@ -7,18 +7,19 @@ interface IBody {
   status?: PROMOTION_STATUS;
   title?: string;
   itemIds?: number[];
+  isWebsite?: boolean;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, status, title, itemIds }: IBody = req.body;
+    const { id, status, title, itemIds, isWebsite }: IBody = req.body;
 
     const existingPromotion = await prisma.promotion.findUnique({
       where: {
         id: id,
-        isWebsite: false,
+        isWebsite: isWebsite || null,
       },
       include: {
         items: {
@@ -26,6 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             promoIndexPos: 'asc',
           },
         },
+        websiteItems: true,
       },
     });
 
@@ -58,6 +60,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const existingItems = existingPromotion.items;
     if (
       itemIds &&
+      !existingPromotion?.isWebsite &&
       JSON.stringify(itemIds) !== JSON.stringify(existingItemIds)
     ) {
       // Get new items
@@ -98,6 +101,34 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Remove items from promotion
       await prisma.inventoryItem.updateMany({
+        where: {
+          id: {
+            in: removedItemIds,
+          },
+        },
+        data: {
+          promotionId: null,
+        },
+      });
+    }
+
+    if (isWebsite && itemIds) {
+      const existingItemIds = existingPromotion?.websiteItems?.map((item: any) => item.id);
+      const removedItemIds = existingItemIds.filter(
+        (id: number) => !itemIds.includes(id),
+      );
+      await prisma.item.updateMany({
+        where: {
+          id: {
+            in: itemIds,
+          },
+        },
+        data: {
+          promotionId: id,
+        },
+      });
+
+      await prisma.item.updateMany({
         where: {
           id: {
             in: removedItemIds,

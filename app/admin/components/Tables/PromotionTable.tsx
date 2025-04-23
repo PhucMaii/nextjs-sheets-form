@@ -23,11 +23,13 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 interface IProps {
   promotions: IPromotion[];
   showNotification: ShowNotificationType;
+  isWebsite?: boolean;
 }
 
 export default function PromotionTable({
   promotions,
   showNotification,
+  isWebsite,
 }: IProps) {
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
@@ -68,6 +70,7 @@ export default function PromotionTable({
       const response = await axios.put(`${API_URL.ADMIN}/promotions`, {
         id,
         status,
+        isWebsite: isWebsite,
       });
 
       if (response.data.error) {
@@ -95,6 +98,7 @@ export default function PromotionTable({
         {
           id,
           visibility: e.target.checked,
+          isWebsite: isWebsite,
         },
       );
       if (response.data.error) {
@@ -128,6 +132,7 @@ export default function PromotionTable({
           onClose={() => setEditProps({ open: false, promotion: null })}
           promotion={editProps.promotion}
           showNotification={showNotification}
+          isWebsite={isWebsite}
         />
       )}
       <Table>

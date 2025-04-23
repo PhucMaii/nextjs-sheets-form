@@ -13,13 +13,15 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import '../../../styles/swiper.css';
-import { IItemPreference } from '@/app/utils/type';
+import { IItem, IPromotion } from '@/app/utils/type';
 import useNotification from '@/hooks/useNotification';
 
 export default function BestSeller() {
-  const [bestSeller, setBestSeller] = useState<IItemPreference[]>([]);
+  const [bestSeller, setBestSeller] = useState<IItem[]>([]);
+  const [promotion, setPromotion] = useState<IPromotion | null>(null);
   // const [weeklySpecials, setWeeklySpecials] = useState<IItemPreference[]>([]);
 
+  // FETCH BEST SELLERS AND POROMOTIONS
   const { showNotification, NotificationComp } = useNotification();
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function BestSeller() {
         }
 
         setBestSeller(response.data.bestSellerItems);
-        // setWeeklySpecials(response.data.weeklySpecials);
+        setPromotion(response.data.promotion);
       } catch (error: any) {
         console.log('Internal Server Error: ', error);
       }
@@ -102,7 +104,7 @@ export default function BestSeller() {
 
           <Grid item xs={12}>
             <Typography variant="h3" fontWeight="medium">
-              Weekly Specials 💸
+              {promotion?.title} 💸
             </Typography>
             <Swiper
               modules={[Navigation, Pagination, Scrollbar, A11y]}
@@ -112,7 +114,8 @@ export default function BestSeller() {
               slidesPerView={5}
               style={{ padding: '20px' }}
             >
-              {bestSeller && bestSeller?.map((item: any, index: number) => {
+              {promotion?.websiteItems &&
+                promotion?.websiteItems?.map((item: any, index: number) => {
                   return (
                     <SwiperSlide>
                       <ProductListing

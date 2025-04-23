@@ -4,6 +4,7 @@ import { Box, Grid, Popover, Typography } from '@mui/material';
 import React from 'react';
 import ProductListing from '../ProductListingPage/ProductListing';
 import useNotification from '@/hooks/useNotification';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
   open: boolean;
@@ -27,6 +28,7 @@ export default function ItemTypePopover({
   // const popoverWidth = anchorEl?.getBoundingClientRect().width || 0;
 
   const { showNotification, NotificationComp } = useNotification();
+  const router = useRouter();
 
   return (
     <>
@@ -75,6 +77,9 @@ export default function ItemTypePopover({
                   <ProductListing
                     product={item}
                     showNotification={showNotification}
+                    onClick={() => {
+                      router.push(`/products/${item.id}`);
+                    }}
                   />
                 </Grid>
               );

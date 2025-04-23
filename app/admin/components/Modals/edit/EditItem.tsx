@@ -194,6 +194,17 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
           </RadioGroup>
           <Divider sx={{ my: 2 }}>Price ($)</Divider>
           <Grid container rowGap={2} alignItems="center">
+            <Grid item xs={12} textAlign="right">
+              <FormControlLabel 
+                control={
+                  <Switch
+                    checked={updatedItem.isBestSeller}
+                    onChange={(e) => setUpdatedItem({ ...updatedItem, isBestSeller: e.target.checked })}
+                  />
+                }
+                label="Best Seller"
+              />
+            </Grid>
             {updatedItem?.options?.length === 0 ? (
               <>
                 <Grid item textAlign="right" xs={12}>

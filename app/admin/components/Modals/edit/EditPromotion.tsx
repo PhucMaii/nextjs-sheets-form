@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { ModalProps } from '../type';
-import { IInventoryItem, IPromotion } from '@/app/utils/type';
+import { IInventoryItem, IItem, IPromotion } from '@/app/utils/type';
 import { API_URL, PROMOTION_STATUS } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import { ShowNotificationType } from '@/hooks/useNotification';
@@ -25,6 +25,7 @@ import StatusText from '../../StatusText';
 interface IProps extends ModalProps {
   promotion: IPromotion;
   showNotification: ShowNotificationType;
+  isWebsite?: boolean;
 }
 
 export default function EditPromotion({
@@ -32,6 +33,7 @@ export default function EditPromotion({
   onClose,
   promotion,
   showNotification,
+  isWebsite,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -39,17 +41,29 @@ export default function EditPromotion({
   const [status, setStatus] = useState<PROMOTION_STATUS | string>(
     promotion?.status,
   );
-  const [selectedItems, setSelectedItems] = useState<IInventoryItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<IInventoryItem[] | IItem[]>(
+    [],
+  );
 
   useEffect(() => {
     if (promotion) {
       setTitle(promotion.title);
-      setSelectedItems(promotion.items);
+      // setSelectedItems(promotion.websiteItems || []);
       setStatus(promotion.status);
+    }
+
+    if (isWebsite) {
+      setSelectedItems(promotion.websiteItems || []);
+    } else {
+      setSelectedItems(promotion.items || []);
     }
   }, [promotion]);
 
-  const [inventoryItems] = SWRFetchData(`${API_URL.ADMIN}/inventory`);
+  const [inventoryItems] = SWRFetchData(
+    isWebsite
+      ? `${API_URL.ADMIN}/website/items`
+      : `${API_URL.ADMIN}/inventory`,
+  );
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -59,6 +73,7 @@ export default function EditPromotion({
         title,
         status: promotion.status,
         itemIds: selectedItems.map((item) => item.id),
+        isWebsite: isWebsite || null,
       });
 
       if (response.data.error) {

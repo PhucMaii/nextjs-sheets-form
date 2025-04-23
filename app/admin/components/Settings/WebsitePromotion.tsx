@@ -85,6 +85,7 @@ export default function WebsitePromotion() {
           <PromotionTable
             promotions={displayPromotions}
             showNotification={showNotification}
+            isWebsite
           />
         )}
       </ShadowSection>

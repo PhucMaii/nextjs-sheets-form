@@ -149,6 +149,7 @@ export interface IItem {
   options?: IOption[];
 
   image?: string;
+  isBestSeller?: boolean;
 }
 
 export interface OrderedItems {
@@ -295,6 +296,7 @@ export type OrderSummary = {
 };
 export interface IPromotion extends Promotion {
   items: IInventoryItem[];
+  websiteItems?: IItem[];
 }
 
 export interface IOption extends Option {

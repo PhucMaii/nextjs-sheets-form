@@ -26,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       container = await prisma.promotion.findUnique({
         where: {
           id: actualId,
-          isWebsite: false,
+          isWebsite: null,
         },
         include: {
           items: {

@@ -1,3 +1,4 @@
+import { websiteItemCategory } from '@/app/lib/constant';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -12,23 +13,27 @@ export default async function handler(
 
     const prisma = new PrismaClient();
 
-    const bestSellerItems = await prisma.itemPreference.findMany({
+    const bestSellerItems = await prisma.item.findMany({
       where: {
+        categoryId: websiteItemCategory,
         isBestSeller: true,
+        availability: true,
       },
     });
 
-    const weeklySpecials = await prisma.itemPreference.findMany({
+    const promotion = await prisma.promotion.findFirst({
       where: {
-        inventoryItem: {
-          isPromotion: true,
-        },
+        isWebsite: true,
+        status: 'ACTIVE',
+      },
+      include: {
+        websiteItems: true,
       },
     });
 
     return res.status(200).json({
       bestSellerItems,
-      weeklySpecials,
+      promotion,
       message: 'Fetch Best Seller Items Successfully',
     });
   } catch (error: any) {

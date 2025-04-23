@@ -23,7 +23,6 @@ export default async function DELETE(
     const existingPromotion = await prisma.promotion.findUnique({
       where: {
         id: Number(id),
-        isWebsite: false,
       },
     });
 

@@ -1,4 +1,4 @@
-import { IItemType, IProductType } from '@/app/utils/type';
+import { IItemType } from '@/app/utils/type';
 import {
   AlertColor,
   Box,
@@ -30,11 +30,11 @@ export default function ProductTypeTable({ types, showNotification }: IProps) {
     editProductType: false,
     deleteProductType: false,
   });
-  const [edittingType, setEdittingType] = useState<null | IProductType>(null);
-  const [deletingType, setDeletingType] = useState<null | IProductType>(null);
+  const [edittingType, setEdittingType] = useState<null | IItemType>(null);
+  const [deletingType, setDeletingType] = useState<null | IItemType>(null);
   const router = useRouter();
 
-  const onDeleteType = async (type: IProductType) => {
+  const onDeleteType = async (type: IItemType) => {
     try {
       const response = await axios.delete(
         `${API_URL.ADMIN}/productTypes?id=${type.id}`,
@@ -92,7 +92,7 @@ export default function ProductTypeTable({ types, showNotification }: IProps) {
                     onClick={() => router.push('/admin/productType/' + type.id)}
                   >
                     <TableCell>{type.name}</TableCell>
-                    <TableCell>{type.itemPreferences.length}</TableCell>
+                    <TableCell>{type.items.length}</TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={2}>
                         <Button
