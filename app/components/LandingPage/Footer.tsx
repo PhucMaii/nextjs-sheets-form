@@ -10,7 +10,7 @@ const linkStyles = { textDecoration: 'none', color: textColor };
 
 export default function Footer() {
   return (
-    <Box sx={{ backgroundColor: landingPagePrimaryColor }}>
+    <Box sx={{ backgroundColor: landingPagePrimaryColor, mt: 2 }}>
       <Grid
         container
         alignItems="flex-start"

@@ -26,16 +26,16 @@ export default async function handler(
     const { item, userId, cartId }: IBody = req.body;
 
     // Get the unit of ratio 1 for new item
-    const existingItemPreference = await prisma.itemPreference.findUnique({
+    const existingItem = await prisma.item.findUnique({
       where: {
-        id: item.itemPreferenceId,
+        id: item.id,
       },
       include: {
         inventoryItem: true,
       },
     });
 
-    if (!existingItemPreference) {
+    if (!existingItem) {
       return res.status(404).json({
         error: 'Item Not Found',
       });
@@ -56,7 +56,7 @@ export default async function handler(
         const existingItem = await prisma.cartItem.findFirst({
           where: {
             cartId,
-            itemPreferenceId: item.itemPreferenceId,
+            itemId: item.id,
           },
         });
 
@@ -74,11 +74,10 @@ export default async function handler(
           await prisma.cartItem.create({
             data: {
               quantity: item.quantity,
-              itemPreferenceId: item.itemPreferenceId,
+              itemId: item.id,
               cartId: selectedCart.id,
               createdAt: `${today.date} ${today.time}`,
               createdBy: 'Guest',
-              inventoryUnitId: existingItemPreference.inventoryUnitId,
             },
           });
         }
@@ -139,11 +138,10 @@ export default async function handler(
     await prisma.cartItem.create({
       data: {
         quantity: item.quantity,
-        itemPreferenceId: item.itemPreferenceId,
+        itemId: item.id,
         cartId: cart.id,
         createdAt: `${today.date} ${today.time}`,
         createdBy: 'Guest',
-        inventoryUnitId: existingItemPreference.inventoryUnitId,
       },
     });
 
@@ -170,7 +168,7 @@ export const updateCartTotalPrice = async (cartId: number) => {
         cartId,
       },
       include: {
-        itemPreference: {
+        item: {
           include: {
             inventoryItem: true,
           },
@@ -199,7 +197,7 @@ export const updateCartTotalPrice = async (cartId: number) => {
     // Format the item to generate total
     const formattedItems = allCartItems.map((item: any) => {
       return {
-        ...item.itemPreference,
+        ...item.item,
         quantity: item.quantity,
       };
     });
@@ -221,7 +219,7 @@ export const updateCartTotalPrice = async (cartId: number) => {
       include: {
         items: {
           include: {
-            itemPreference: {
+            item: {
               include: {
                 inventoryItem: true,
               },

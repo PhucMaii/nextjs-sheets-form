@@ -1,5 +1,5 @@
 import { generateImgUrl } from '@/app/lib/s3';
-import { IItemPreference } from '@/app/utils/type';
+import { IItem } from '@/app/utils/type';
 import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
@@ -13,7 +13,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 interface IProps {
-  product: IItemPreference;
+  product: IItem;
   showNotification: (type: AlertColor, message: string) => void;
   onClick?: () => void;
   containerStyle?: any;
@@ -42,8 +42,8 @@ export default function ProductListing({
           cartId: cart.id,
           item: {
             quantity: 1,
-            itemPreference: product,
-            itemPreferenceId: product.id,
+            item: product,
+            id: product.id,
           },
         }),
       );
@@ -92,11 +92,11 @@ export default function ProductListing({
     >
       <img
         src={
-          product?.image
-            ? generateImgUrl(product?.image)
+          product?.image || product?.inventoryItem?.image
+            ? generateImgUrl(product?.image || product?.inventoryItem?.image)
             : '/images/landing/image_not_found.jpeg'
         }
-        alt={product?.name || product.inventoryItem.name}
+        alt={product?.name || product?.inventoryItem?.name}
         width="100%"
         height={200}
         style={{ borderRadius: '20px' }}

@@ -3,7 +3,7 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import NavbarWrapper from '@/app/lib/NavbarWrapper';
 import { generateImgUrl } from '@/app/lib/s3';
 import { API_URL } from '@/app/utils/enum';
-import { IItemPreference } from '@/app/utils/type';
+import { IItem } from '@/app/utils/type';
 import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
@@ -27,9 +27,9 @@ export default function ItemPage() {
   const { itemId }: any = useParams();
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [itemData, setItemData] = useState<IItemPreference | null>(null);
+  const [itemData, setItemData] = useState<IItem | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
-  const [relatedProducts, setRelatedProducts] = useState<IItemPreference[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<IItem[]>([]);
 
   const cart = useSelector((state: RootState) => state.cart);
 
@@ -74,8 +74,8 @@ export default function ItemPage() {
           cartId: cart.id,
           item: {
             quantity,
-            itemPreference: itemData,
-            itemPreferenceId: itemData?.id,
+            item: itemData,
+            id: itemData?.id,
           },
         }),
       );
@@ -249,8 +249,8 @@ export default function ItemPage() {
           >
             <img
               src={
-                itemData?.image
-                  ? generateImgUrl(itemData?.image)
+                itemData?.image || itemData?.inventoryItem?.image
+                  ? generateImgUrl(itemData?.image || itemData?.inventoryItem?.image)
                   : '/images/landing/image_not_found.jpeg'
               }
               alt={itemData?.inventoryItem.name}

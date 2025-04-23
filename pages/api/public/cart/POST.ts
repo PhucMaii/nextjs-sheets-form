@@ -35,7 +35,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const formattedTotalItems = items.map((item: ICartItem) => {
       return {
         quantity: item.quantity,
-        ...item.itemPreference,
+        ...item.item,
       };
     });
 
@@ -60,8 +60,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const formattedInputItems = items.map((item: ICartItem) => {
       return {
         quantity: item.quantity,
-        itemPreferenceId: item.itemPreferenceId,
-        inventoryUnitId: item.itemPreference.inventoryUnitId,
+        itemId: item.id,
         cartId: newCart.id,
         createdAt: `${today.date} ${today.time}`,
         createdBy: 'Guestt',

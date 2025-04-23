@@ -240,7 +240,7 @@ export interface IInventoryItem extends InventoryItem {
 
 export interface IItemType extends ItemType {
   inventoryItems: IInventoryItem[];
-  itemPreferences: IItemPreference[];
+  items: IItem[];
 }
 
 export interface IVendorItem extends VendorItem {
@@ -280,9 +280,9 @@ export interface ICartItem extends CartItem {
   quantity: number;
   cartId: number;
   inventoryUnit: IInventoryUnit;
-  itemPreferenceId: number;
+  itemId: number;
 
-  itemPreference: IItemPreference;
+  item: IItem;
 }
 
 export type OrderSummary = {

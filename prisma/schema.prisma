@@ -77,8 +77,10 @@ model Item {
   inventoryUnitId Int?
   isShowDiscount  Boolean?
   prevPrice       Float?
+  image           String?
 
   options Option[]
+  cartItem  CartItem[]
 
   category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
@@ -347,7 +349,6 @@ model ItemPreference {
   name            String
   inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   type            ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
-  cartItems       CartItem[]
   inventoryUnit   InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
 }
 
@@ -417,7 +418,6 @@ model InventoryUnit {
   itemOptions     Option[]
   vendorItem      VendorItem       @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems    OrderedItems[]
-  cartItems       CartItem[]
   itemPreferences ItemPreference[]
   poItems         POItem[]
 
@@ -462,12 +462,12 @@ model CartItem {
   id               Int            @id @default(autoincrement())
   quantity         Int
   cartId           Int
-  itemPreferenceId Int
+  itemId           Int
   createdAt        String
   createdBy        String
-  inventoryUnitId  Int
-  inventoryUnit    InventoryUnit  @relation(fields: [inventoryUnitId], references: [id])
-  itemPreference   ItemPreference @relation(fields: [itemPreferenceId], references: [id], onDelete: Cascade)
+
+
+  item             Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
   cart             Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
 }
 

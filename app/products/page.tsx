@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { SWRFetchData } from '../utils/db';
 import { API_URL } from '../utils/enum';
-import { IItemPreference, IProductType } from '../utils/type';
+import { IItem, IProductType } from '../utils/type';
 import { green, grey } from '@mui/material/colors';
 import * as LucideIcons from 'lucide-react';
 import ProductListing from '../components/ProductListingPage/ProductListing';
@@ -39,7 +39,7 @@ const ProductPage = () => {
   const queryParams = searchParams?.get('q');
   const queryType = searchParams?.get('type');
 
-  const [displayItems, setDisplayItems] = useState<IItemPreference[]>([]);
+  const [displayItems, setDisplayItems] = useState<IItem[]>([]);
   const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
   const [selectedType, setSelectedType] = useState<IProductType | any>();
   const [sortedBy, setSortedBy] = useState<string>('featured');
@@ -57,7 +57,6 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (queryType && types?.data) {
-      console.log(queryType,' queryType RUNNNNNNNNNNN');
       const decodedTypeName = decodeURIComponent(queryType.replace(/\+/g, ' '));
 
       if (decodedTypeName === 'All') {
@@ -120,7 +119,7 @@ const ProductPage = () => {
       const items =
         selectedType?.name === 'All'
           ? [...allItemPreferences.data]
-          : [...selectedType.itemPreferences];
+          : [...selectedType.items];
       if (sortedBy === 'best-sellers') {
         filterBestSellerItems(items);
       } else if (sortedBy === 'a-z' || sortedBy === 'z-a') {
@@ -133,22 +132,22 @@ const ProductPage = () => {
     }
   }, [sortedBy, allItemPreferences, selectedType]);
 
-  const filterBestSellerItems = (items: IItemPreference[]) => {
+  const filterBestSellerItems = (items: IItem[]) => {
     if (!allItemPreferences) {
       setDisplayItems([]);
       return;
     }
 
-    const bestSeller = items.filter(
-      (item: IItemPreference) => item.isBestSeller,
-    );
+    // const bestSeller = items.filter(
+    //   (item: IItem) => item.isBestSeller,
+    // );
 
-    const nonBestSeller = items.filter(
-      (item: IItemPreference) => !item.isBestSeller,
-    );
+    // const nonBestSeller = items.filter(
+    //   (item: IItem) => !item.isBestSeller,
+    // );
 
     // Place the best seller on the top
-    setDisplayItems([...bestSeller, ...nonBestSeller]);
+    setDisplayItems(items);
   };
 
   const onUpdateQueryParams = () => {
@@ -185,7 +184,7 @@ const ProductPage = () => {
     router.push(`/products${query}`);
   };
 
-  const sortItemsAlphabetically = (items: IItemPreference[]) => {
+  const sortItemsAlphabetically = (items: IItem[]) => {
     if (!allItemPreferences) {
       setDisplayItems([]);
       return;
@@ -193,13 +192,13 @@ const ProductPage = () => {
 
     if (sortedBy === 'a-z') {
       const sortedItems = items.sort(
-        (itemA: IItemPreference, itemB: IItemPreference) =>
+        (itemA: IItem, itemB: IItem) =>
           itemA.inventoryItem.name.localeCompare(itemB.inventoryItem.name),
       );
       setDisplayItems(sortedItems);
     } else if (sortedBy === 'z-a') {
       const sortedItems = items.sort(
-        (itemA: IItemPreference, itemB: IItemPreference) =>
+        (itemA: IItem, itemB: IItem) =>
           itemB.inventoryItem.name.localeCompare(itemA.inventoryItem.name),
       );
       setDisplayItems(sortedItems);
@@ -208,7 +207,7 @@ const ProductPage = () => {
     }
   };
 
-  const sortByPrice = (items: IItemPreference[]) => {
+  const sortByPrice = (items: IItem[]) => {
     if (!allItemPreferences) {
       setDisplayItems([]);
       return;
@@ -216,13 +215,13 @@ const ProductPage = () => {
 
     if (sortedBy === 'price-asc') {
       const sortedItems = items.sort(
-        (itemA: IItemPreference, itemB: IItemPreference) =>
+        (itemA: IItem, itemB: IItem) =>
           itemA.price - itemB.price,
       );
       setDisplayItems(sortedItems);
     } else if (sortedBy === 'price-desc') {
       const sortedItems = items.sort(
-        (itemA: IItemPreference, itemB: IItemPreference) =>
+        (itemA: IItem, itemB: IItem) =>
           itemB.price - itemA.price,
       );
       setDisplayItems(sortedItems);
@@ -438,7 +437,7 @@ const ProductPage = () => {
             sx={{ my: 2, px: 2 }}
           >
             {displayItems?.length > 0 ? (
-              displayItems?.map((product: IItemPreference, index: number) => {
+              displayItems?.map((product: IItem, index: number) => {
                 return (
                   <Grid
                     item

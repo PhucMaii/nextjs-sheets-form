@@ -324,40 +324,11 @@ const EditItemPreference = ({ itemPreference, showNotification }: IProps) => {
               }}
             />
 
-            {/* <Typography>Description</Typography>
-          <TextField
-            label="Description"
-            placeholder="Enter item description..."
-            multiline
-            rows={2}
-            value={updatedItem?.description}
-            onChange={(e) => {
-              setUpdatedItem((prevState: any) => ({
-                ...prevState,
-                description: e.target.value,
-              }));
-            }}
-          /> */}
             <Typography>Select Image</Typography>
             {renderImageGallery()}
             <Divider>Or</Divider>
 
             <Typography>Upload Image</Typography>
-            {/* {promptedItem?.image && (
-              <Box display="flex" gap={2} alignItems="center">
-                <img
-                  src={
-                    promptedItem?.image
-                      ? generateImgUrl(promptedItem?.image)
-                      : ''
-                  }
-                  alt={promptedItem.name}
-                  width={100}
-                  height={100}
-                />
-                <Typography>{promptedItem?.image}</Typography>
-              </Box>
-            )} */}
             <FileUpload
               // item={promptedItem}
               showNotification={showNotification}

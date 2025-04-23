@@ -30,7 +30,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
   const dispatch = useDispatch<AppDispatch>();
 
   const totalPrice = useMemo(() => {
-    return quantity * item.itemPreference.price;
+    return quantity * item.item.price;
   }, [quantity]);
 
   useEffect(() => {
@@ -121,8 +121,8 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
           <img
             style={{ width: '150px', height: '100%', objectFit: 'contain' }}
             src={
-              item.itemPreference?.image
-                ? generateImgUrl(item.itemPreference.image)
+              item.item?.image
+                ? generateImgUrl(item.item.image)
                 : 'images/landing/image_not_found.jpeg'
             }
             alt=""
@@ -130,7 +130,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
           <Box
             component="a"
             aria-disabled={isLoading}
-            href={isLoading ? undefined : `/products/${item.itemPreferenceId}`}
+            href={isLoading ? undefined : `/products/${item.item.id}`}
             sx={{
               textDecoration: 'none',
               cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -143,8 +143,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
             }}
           >
             <Typography variant="h6">
-              {item.itemPreference?.name ||
-                item.itemPreference?.inventoryItem?.name}
+              {item.item?.name || item.item?.inventoryItem?.name}
             </Typography>
           </Box>
         </Box>
@@ -153,23 +152,23 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
       {/* Price */}
       <TableCell>
         <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
-          {item.itemPreference.isShowDiscount && (
+          {item.item.isShowDiscount && (
             <Typography
               variant="h6"
               fontWeight="bold"
               style={{ textDecoration: 'line-through' }}
             >
-              ${item.itemPreference.prevPrice?.toFixed(2)}
+              ${item.item.prevPrice?.toFixed(2)}
             </Typography>
           )}
           <Typography
             variant="h6"
             fontWeight="bold"
             style={{
-              color: item.itemPreference.isShowDiscount ? 'red' : 'black',
+              color: item.item.isShowDiscount ? 'red' : 'black',
             }}
           >
-            ${item.itemPreference.price?.toFixed(2)}
+            ${item.item.price?.toFixed(2)}
           </Typography>
         </Box>
       </TableCell>

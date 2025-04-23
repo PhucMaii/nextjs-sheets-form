@@ -1,3 +1,4 @@
+import { websiteItemCategory } from '@/app/lib/constant';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -16,16 +17,31 @@ export default async function handler(
 
     const types = await prisma.itemType.findMany({
       include: {
-        itemPreferences: {
-          include: {
-            inventoryItem: true,
-          },
-        },
+        inventoryItems: true,
       },
     });
 
+    const items = await prisma.item.findMany({
+      where: {
+        categoryId: websiteItemCategory,
+      },
+      include: {
+        inventoryItem: {
+          include: {
+            type: true
+          }
+        },
+      }
+    });
+
+    //  Add items to each type
+    const typesWithItems = types.map((type) => ({
+      ...type,
+      items: items.filter((item) => item.inventoryItem?.type?.id === type.id),
+    })).filter((type) => type.items.length > 0);
+
     return res.status(200).json({
-      data: types,
+      data: typesWithItems,
       message: 'Fetch All Types Successfully',
     });
   } catch (error: any) {

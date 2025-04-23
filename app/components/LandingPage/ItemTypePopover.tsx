@@ -69,7 +69,7 @@ export default function ItemTypePopover({
           <Typography variant="h6">{itemType?.name}</Typography>
 
           <Grid container spacing={1}>
-            {itemType?.itemPreferences?.map((item: any, index: number) => {
+            {itemType?.items?.map((item: any, index: number) => {
               return (
                 <Grid key={index} item xs={6} md={4} lg={3}>
                   <ProductListing

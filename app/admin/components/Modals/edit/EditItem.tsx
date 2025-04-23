@@ -26,6 +26,9 @@ import { TrashIcon } from 'lucide-react';
 import DeleteModal from '../delete/DeleteModal';
 import AddOption from '../add/AddOption';
 import OptionsTable from '../../Tables/OptionsTable';
+import useImageGallery from '@/hooks/useImageGallery';
+import FileUpload from '../../FileUpload';
+import { websiteItemCategory } from '@/app/lib/constant';
 
 interface IProps {
   open: boolean;
@@ -48,6 +51,12 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
   const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(
     UPDATE_OPTION.CURRENT_CATEGORY,
+  );
+
+  const { selectedImage, renderImageGallery } = useImageGallery(
+    'products',
+    targetItem?.image,
+    '100%',
   );
 
   useEffect(() => {
@@ -82,6 +91,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
   const updateItem = async () => {
     const newUpdatedItem = {
       ...updatedItem,
+      image: updatedItem?.image || selectedImage || null,
       name: updatedItem.name.toUpperCase(),
     };
 
@@ -288,7 +298,6 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                 <OptionsTable
                   options={updatedItem?.options || []}
                   showNotification={showNotification}
-                  
                 />
               </Grid>
             )}
@@ -349,6 +358,28 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                   />
                 </Box>
               </Grid>
+            )}
+
+            {targetItem.categoryId === websiteItemCategory && (
+              <Grid item xs={12}>
+                <Typography>Select Image</Typography>
+                {renderImageGallery()}
+                <Divider>Or</Divider>
+
+              <Typography>Upload Image</Typography>
+              <FileUpload
+                // item={promptedItem}
+                showNotification={showNotification}
+                onUploadImageUI={(fileKey: string) =>
+                  setUpdatedItem({
+                    ...updatedItem,
+                    image: fileKey,
+                  })
+                }
+                fileName={updatedItem.name + Date.now()}
+                uploadLocation={`products/${updatedItem?.name}/`}
+              />
+            </Grid>
             )}
 
             <Grid item xs={12}>

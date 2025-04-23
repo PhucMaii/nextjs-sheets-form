@@ -1,4 +1,5 @@
-import { IItemPreference } from '@/app/utils/type';
+import { websiteItemCategory } from '@/app/lib/constant';
+import { IItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -20,7 +21,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    const product: any = await prisma.itemPreference.findUnique({
+    const product: any = await prisma.item.findUnique({
       where: {
         id: Number(id),
       },
@@ -53,35 +54,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default handler;
 
-const getRelatedProducts = async (product: IItemPreference) => {
+const getRelatedProducts = async (product: IItem) => {
   try {
     const prisma = new PrismaClient();
 
-    const productType = await prisma.itemType.findUnique({
+    const sameTypeItem = await prisma.item.findMany({
       where: {
-        id: product.typeId,
-      },
-      include: {
-        itemPreferences: {
-          where: {
-            id: {
-              not: product.id,
-            },
-          },
-          include: {
-            inventoryItem: true,
-          },
+        inventoryItem: {
+          typeId: product.inventoryItem.typeId,
+        },
+        categoryId: websiteItemCategory,
+        id: {
+          not: product.id,
         },
       },
     });
 
-    const almostSameNameProducts: any = await prisma.itemPreference.findMany({
+    const almostSameNameProducts: any = await prisma.item.findMany({
       where: {
         inventoryItem: {
           name: {
             contains: product.inventoryItem.name,
           },
         },
+        categoryId: websiteItemCategory,
         id: {
           not: product.id,
         },
@@ -89,14 +85,10 @@ const getRelatedProducts = async (product: IItemPreference) => {
     });
 
     const relatedProducts = almostSameNameProducts.filter(
-      (item: IItemPreference) =>
-        item.id !== product.id &&
-        productType?.itemPreferences.every(
-          (itemPreference: any) => itemPreference.id !== item.id,
-        ),
+      (item: IItem) => item.id !== product.id
     );
 
-    return [...relatedProducts, ...(productType?.itemPreferences || [])];
+    return [...relatedProducts, ...sameTypeItem];
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     throw new Error('Internal Server Error: ' + error);

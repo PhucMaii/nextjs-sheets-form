@@ -5,6 +5,8 @@ import EditItemAvailability from '../Modals/edit/EditItemAvailability';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditItem from '../Modals/edit/EditItem';
 import { grey } from '@mui/material/colors';
+import { generateImgUrl } from '@/app/lib/s3';
+import { websiteItemCategory } from '@/app/lib/constant';
 
 interface IProps {
   item: IItem;
@@ -57,7 +59,24 @@ export default function Item({
               handleUpdateItem={handleUpdateItem}
             />
           </Grid>
-          <Grid item md={4}>
+          {item.categoryId === websiteItemCategory && (
+            <Grid item md={2}>
+              {item?.image ? (
+                <img
+                  src={generateImgUrl(item?.image || '')}
+                  alt={item?.name}
+                  style={{ maxWidth: 100, height: 100, objectFit: 'contain' }}
+                />
+              ) : (
+                <img
+                  src="/images/not-found.png"
+                  alt={item?.name}
+                  style={{ maxWidth: 100, height: 100, objectFit: 'contain' }}
+                />
+              )}
+            </Grid>
+          )}
+          <Grid item md={2}>
             <Typography variant="subtitle1">{item.name}</Typography>
           </Grid>
           <Grid item md={2}>

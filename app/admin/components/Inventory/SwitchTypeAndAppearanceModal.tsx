@@ -175,7 +175,7 @@ export default function SwitchTypeAndAppearanceModal({
           <FileUpload
             showNotification={showNotification}
             fileName={`${item?.name + Date.now()}`}
-            uploadLocation={`/products/${item?.name}`}
+            uploadLocation={`products/${item?.name}`}
             onUploadImageUI={(fileKey: string) => {
               setItemImage(fileKey);
             }}
