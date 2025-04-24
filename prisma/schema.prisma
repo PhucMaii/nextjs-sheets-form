@@ -79,6 +79,7 @@ model Item {
   prevPrice       Float?
   image           String?
   promotionId     Int?  // support for only item in website category
+  isBestSeller   Boolean?
 
   options Option[]
   cartItem  CartItem[]
@@ -215,6 +216,7 @@ model DayRange {
   userId    Int
   createdAt String?
   createdBy String?
+  isArchived  Boolean?
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -467,6 +469,7 @@ model CartItem {
   itemId           Int
   createdAt        String
   createdBy        String
+  option           Json?
 
 
   item             Item @relation(fields: [itemId], references: [id], onDelete: Cascade)

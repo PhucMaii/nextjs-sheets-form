@@ -317,7 +317,12 @@ export const createOrder = async (
         id: newOrder.id,
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            inventoryItem: true, // for calculate tax
+            inventoryUnit: true,
+          },
+        },
         user: true,
       },
     });

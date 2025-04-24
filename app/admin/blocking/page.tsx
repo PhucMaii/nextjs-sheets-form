@@ -311,7 +311,7 @@ export default function BlockingPage() {
                 );
               },
             )
-          ) : unavailableRanges?.data.length > 0 ? (
+          ) : unavailableRanges?.data && unavailableRanges.data.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {
               return (
                 <DayRange
