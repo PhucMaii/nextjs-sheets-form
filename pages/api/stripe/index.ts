@@ -147,7 +147,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // console.log(shippingFee, 'shipping fee');
 
     const stripeSession: any = (await stripe.checkout.sessions.create({
-      success_url: `${process.env.NEXTAUTH_URL}/payment/successful`,
+      success_url: `${process.env.NEXTAUTH_URL}/successful?type=payment`,
       cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
       mode: 'payment',
       billing_address_collection: 'auto',

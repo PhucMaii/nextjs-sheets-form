@@ -9,9 +9,12 @@ import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function PaymentSuccessful() {
+  const searchParams: any = useSearchParams();
+  const queryParams = searchParams?.get('type');
+
   const router = useRouter();
 
   const proceedToHome = () => {
@@ -47,7 +50,9 @@ export default function PaymentSuccessful() {
           variant="h3"
           fontWeight="bold"
         >
-          Payment Successful
+          {queryParams === 'payment'
+            ? 'Payment Successful'
+            : 'Order Successful'}
         </Typography>
         <Typography textAlign="center" variant="h6" fontWeight="bold" mt={2}>
           Thank you for your order
@@ -57,7 +62,7 @@ export default function PaymentSuccessful() {
           sx={{ color: grey[600] }}
           variant="subtitle1"
         >
-          We&apos;ve emailed you a confirmation along with your order details.
+          We&apos;ve emailed you a confirmation with order details. <br />
           Please check your inbox at your earliest convenience.
         </Typography>
 

@@ -15,6 +15,7 @@ export default function TrustedBrand() {
         sx={{
           maxWidth: maxWidth,
           mx: 'auto',
+          px: 6,
         }}
       >
         <Typography variant="h3" fontWeight="bold" textAlign="center">

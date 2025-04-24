@@ -30,12 +30,12 @@ export default function ProductCategories() {
   }, []);
   return (
     <Box sx={{ backgroundColor: 'white' }}>
-      <Box sx={{ maxWidth: maxWidth, mx: 'auto', pt: 4 }}>
+      <Box sx={{ maxWidth: maxWidth, mx: 'auto', pt: 4, px: 6 }}>
         <Typography variant="h4" textAlign="center">
           Product Categories
         </Typography>
 
-        <Grid container spacing={2} mt={2} alignItems="flex-end">
+        <Grid container spacing={2} alignItems="flex-end">
           {itemTypes.map((itemType: any, index: number) => {
             return (
               <Grid

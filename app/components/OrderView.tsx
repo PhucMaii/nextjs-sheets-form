@@ -1070,7 +1070,9 @@ const OrderView = ({
                         sx={{ textDecoration: 'line-through' }}
                         color="error"
                       >
-                        ${item?.option?.prevPrice?.toFixed(2) || item.prevPrice.toFixed(2)}
+                        $
+                        {item?.option?.prevPrice?.toFixed(2) ||
+                          item.prevPrice.toFixed(2)}
                       </Typography>
                     )}
                   </Box>
@@ -1241,7 +1243,7 @@ const OrderView = ({
           </Typography>
         </Grid>
         {order?.shippingFee &&
-          (order?.shippingFee > 0 && (
+          order?.shippingFee > 0 ? (
             <>
               <Grid item xs={4} textAlign="left" ml={2}>
                 <Typography>Shipping Fee</Typography>
@@ -1252,7 +1254,7 @@ const OrderView = ({
                 </Typography>
               </Grid>
             </>
-          ))}
+          ) : null}
         <Grid item xs={12}>
           <Divider />
         </Grid>

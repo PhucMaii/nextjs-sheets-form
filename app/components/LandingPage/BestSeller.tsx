@@ -52,8 +52,8 @@ export default function BestSeller() {
         display="flex"
         flexDirection="column"
         gap={4}
-        p={4}
-        pt={8}
+        px={6}
+        py={8}
         sx={{ backgroundColor: 'white' }}
       >
         <Grid
@@ -77,7 +77,7 @@ export default function BestSeller() {
               pagination={{ clickable: true }}
               spaceBetween={50}
               slidesPerView={5}
-              style={{ padding: '20px' }}
+              // style={{ padding: '20px' }}
             >
               {bestSeller &&
                 bestSeller?.map((item: any, index: number) => {
