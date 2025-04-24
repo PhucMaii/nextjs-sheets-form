@@ -19,6 +19,9 @@ import { LoadingButton } from '@mui/lab';
 import { getUniqueUnitRatios } from '@/app/utils/array';
 import BulkEditOptions from '@/app/admin/components/Bulk/BulkEditOptions';
 import AddOption from '@/app/admin/components/Modals/add/AddOption';
+import AddItem from '@/app/admin/components/Modals/add/AddItem';
+import { IItem } from '@/app/utils/type';
+import { generateCurrentTime } from '@/app/utils/time';
 // import AddItem from '@/app/admin/components/Modals/add/AddItem';
 
 function OptionsEditCell(props: GridRenderEditCellParams) {
@@ -65,6 +68,8 @@ export default function BulkEditItems() {
     open: false,
     item: null,
   });
+  const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
@@ -265,11 +270,54 @@ export default function BulkEditItems() {
     }
   };
 
+  const checkIsNewItemValid = (newItem: IItem) => {
+    if (
+      newItem.name.trim() === '' ||
+      newItem.price < 0 ||
+      !newItem.categoryId ||
+      !newItem.inventoryItemId ||
+      newItem.inventoryItemId < 1
+    ) {
+      showNotification('error', 'Your input data is invalid');
+      return false;
+    }
+    return true;
+  };
+
+  const handleAddItem = async (
+    newItem: IItem,
+    selectedCategoryIds: number[],
+  ) => {
+    try {
+      const isNewItemValid = checkIsNewItemValid(newItem);
+      if (!isNewItemValid) {
+        return;
+      }
+
+      const createdAt = generateCurrentTime();
+      const response = await axios.post(API_URL.ITEM, {
+        newItem,
+        createdAt,
+        categoryIds: selectedCategoryIds,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  };
+
   return (
     <Sidebar>
-      {/* <AddItem
+      <AddItem
         // categoryId={}
-        addItem={() => {}}
+        addItem={handleAddItem}
         showNotification={showNotification}
         open={isOpenAddItem}
         onClose={() => setIsOpenAddItem(false)}
@@ -277,8 +325,7 @@ export default function BulkEditItems() {
           inventoryItemId: Number(inventoryItemId),
           name: items[0]?.name,
         }}
-        onAddTempItem={onAddItem}
-      /> */}
+      />
       {NotificationComp}
       {editOptionProps.open && editOptionProps.item && (
         <BulkEditOptions

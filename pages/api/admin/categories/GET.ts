@@ -60,6 +60,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
+        orderBy: {
+          name: 'asc',
+        },
       });
 
       return res.status(200).json({
@@ -110,6 +113,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             itemType: true,
           },
         },
+      },
+      orderBy: {
+        name: 'asc',
       },
     });
 

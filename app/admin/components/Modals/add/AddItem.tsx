@@ -84,6 +84,16 @@ export default function AddItem({
     }
   }, [defaultItem, inventoryItems]);
 
+  useEffect(() => {
+    if (newItem.inventoryItemId > 0) {
+      const item = inventoryItems?.data?.find(
+        (item: any) => item.id === newItem.inventoryItemId,
+      );
+      
+      
+    }
+  }, [newItem, categories]);
+
   console.log(newItem, 'newItem');
 
   useEffect(() => {
