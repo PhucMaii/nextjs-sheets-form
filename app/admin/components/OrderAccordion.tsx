@@ -534,7 +534,7 @@ const OrderAccordion = ({
           <Grid item xs={12} md={4} textAlign={mdDown ? 'center' : 'left'}>
             <Button
               color={
-                order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'success'
+                order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'error'
               }
               variant="contained"
               sx={{ textTransform: 'none' }}

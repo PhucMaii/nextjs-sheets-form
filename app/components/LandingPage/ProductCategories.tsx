@@ -59,8 +59,12 @@ export default function ProductCategories() {
                 <Box display="flex" flexDirection="column" alignItems="center">
                   <img
                     src={
-                      itemType?.items[0]?.image
-                        ? generateImgUrl(itemType?.items[0]?.image)
+                      itemType?.items[0]?.image ||
+                      itemType?.items[0]?.inventoryItem?.image
+                        ? generateImgUrl(
+                            itemType?.items[0]?.image ||
+                              itemType?.items[0]?.inventoryItem?.image
+                          )
                         : '/images/not-found.png'
                     }
                     alt={itemType?.name}
