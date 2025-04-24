@@ -140,6 +140,7 @@ export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (
 export const testAccountId = 223;
 export const TimLeAccountId = 240;
 export const clientMaxWidth = '1250px';
+export const websiteItemCategoryId = 334;
 
 export const sendChequeMsg = `
 * Please either send your payment by cheque 
