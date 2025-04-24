@@ -27,6 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         inventoryItem: true,
+        options: true,
       },
     });
 
@@ -66,6 +67,13 @@ const getRelatedProducts = async (product: IItem) => {
         categoryId: websiteItemCategory,
         id: {
           not: product.id,
+        },
+      },
+      include: {
+        options: {
+          include: {
+            unit: true,
+          },
         },
       },
     });

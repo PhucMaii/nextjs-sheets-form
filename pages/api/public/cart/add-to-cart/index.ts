@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
-  item: ICartItem;
+  item: ICartItem | any;
   userId?: number;
   cartId: number;
 }
@@ -70,10 +70,18 @@ export default async function handler(
             },
           });
         } else {
-          // Create new item
+          // Create new item 
           await prisma.cartItem.create({
             data: {
               quantity: item.quantity,
+              option: {
+                name: item?.option?.name,
+                price: item?.option?.price,
+                ratio: item?.option?.unit?.ratio,
+                inventoryUnitId: item?.option?.unit?.id,
+                prevPrice: item?.option?.prevPrice,
+                showDiscount: item?.option?.showDiscount,
+              },
               itemId: item.id,
               cartId: selectedCart.id,
               createdAt: `${today.date} ${today.time}`,
@@ -198,6 +206,7 @@ export const updateCartTotalPrice = async (cartId: number) => {
     const formattedItems = allCartItems.map((item: any) => {
       return {
         ...item.item,
+        ...item?.option,
         quantity: item.quantity,
       };
     });

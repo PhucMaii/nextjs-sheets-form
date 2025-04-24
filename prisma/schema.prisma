@@ -468,6 +468,7 @@ model CartItem {
   itemId           Int
   createdAt        String
   createdBy        String
+  option           Json?
 
 
   item             Item @relation(fields: [itemId], references: [id], onDelete: Cascade)

@@ -16,6 +16,11 @@ export default async function handler(req: any, res: any) {
       },
       include: {
         inventoryItem: true,
+        options: {
+          include: {
+            unit: true,
+          },
+        },
       }
     })
 

@@ -282,6 +282,7 @@ export interface ICartItem extends CartItem {
   cartId: number;
   inventoryUnit: IInventoryUnit;
   itemId: number;
+  option: any;
 
   item: IItem;
 }

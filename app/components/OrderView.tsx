@@ -365,6 +365,7 @@ const OrderView = ({
     totalPrice: 0,
     PST: 0,
     GST: 0,
+    shippingFee: defaultOrder?.shippingFee || 0,
     note: defaultOrder?.note || '',
     deliveryDate:
       defaultOrder?.deliveryDate ||
@@ -477,6 +478,13 @@ const OrderView = ({
       0,
     );
   }, [orderedItems]);
+
+  useEffect(() => {
+    setOrder({
+      ...order,
+      ...defaultOrder,
+    });
+  }, [defaultOrder]);
 
   useEffect(() => {
     setOrderedItems(defaultOrderedItems || []);

@@ -19,6 +19,9 @@ export default async function handler(
         isBestSeller: true,
         availability: true,
       },
+      include: {
+        options: true,
+      },
     });
 
     const promotion = await prisma.promotion.findFirst({
@@ -27,7 +30,15 @@ export default async function handler(
         status: 'ACTIVE',
       },
       include: {
-        websiteItems: true,
+        websiteItems: {
+          include: {
+            options: {
+              include: {
+                unit: true,
+              },
+            },
+          },
+        },
       },
     });
 

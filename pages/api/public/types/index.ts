@@ -28,10 +28,15 @@ export default async function handler(
       include: {
         inventoryItem: {
           include: {
-            type: true
-          }
+            type: true,
+          },
         },
-      }
+        options: {
+          include: {
+            unit: true,
+          },
+        },
+      },
     });
 
     //  Add items to each type

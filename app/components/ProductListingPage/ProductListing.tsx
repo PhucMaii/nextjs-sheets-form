@@ -9,8 +9,9 @@ import { AppDispatch, RootState } from '@/state/store';
 import { LoadingButton } from '@mui/lab';
 import { AlertColor, Box, Typography } from '@mui/material';
 import { green, grey, red } from '@mui/material/colors';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import ChooseOption from '../ChooseOption';
 
 interface IProps {
   product: IItem;
@@ -25,6 +26,7 @@ export default function ProductListing({
   showNotification,
   containerStyle,
 }: IProps) {
+  const [isOpenChooseOption, setIsOpenChooseOption] = useState<boolean>(false);
   // const [cartId, setCartId] = useLocalStorage('cartId', '');
 
   const cart = useSelector((state: RootState) => state.cart);
@@ -32,7 +34,13 @@ export default function ProductListing({
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const onAddToCart = async (e: any) => {
+  const smallestOptionPrice = useMemo(() => {
+    return product?.options?.reduce((min, option) => {
+      return Math.min(min, option.price);
+    }, Infinity);
+  }, [product?.options]);
+
+  const onAddToCart = async (e: any, option: any = null) => {
     e.preventDefault();
     e.stopPropagation();
     try {
@@ -44,6 +52,7 @@ export default function ProductListing({
             quantity: 1,
             item: product,
             id: product.id,
+            option,
           },
         }),
       );
@@ -68,6 +77,13 @@ export default function ProductListing({
   };
 
   return (
+    <>
+    <ChooseOption 
+    open={isOpenChooseOption}
+    onClose={() => setIsOpenChooseOption(false)}
+    options={product?.options || []}
+    onAddOption={onAddToCart}
+    />
     <Box
       display="flex"
       flexDirection="column"
@@ -101,21 +117,6 @@ export default function ProductListing({
         height={200}
         style={{ borderRadius: '20px' }}
       />
-      {/* {product?.isBestSeller && (
-        <Box
-          position="absolute"
-          sx={{
-            backgroundColor: orange[800],
-            color: 'white',
-            p: 1,
-            borderRadius: 2,
-            top: -10,
-            right: 45,
-          }}
-        >
-          <Typography>Best Seller 🔥</Typography>
-        </Box>
-      )} */}
       <Typography variant="h6" fontWeight="regular" sx={{ color: green[800] }}>
         {product?.name || product.inventoryItem.name}
       </Typography>
@@ -131,7 +132,9 @@ export default function ProductListing({
                 : green[900],
           }}
         >
-          ${product?.price?.toFixed(2) || 'N/A'}
+          {product?.options && product?.options?.length > 0
+            ? `From $${smallestOptionPrice?.toFixed(2)}`
+            : `$${product?.price?.toFixed(2) || 'N/A'}`}
         </Typography>
         {product?.isShowDiscount && product?.prevPrice && (
           <Typography
@@ -146,7 +149,14 @@ export default function ProductListing({
         variant="contained"
         fullWidth
         loading={isAdding}
-        onClick={onAddToCart}
+        onClick={(e: any) => {
+          e.stopPropagation();
+          if (product?.options && product?.options?.length > 0) {
+            setIsOpenChooseOption(true)
+          } else {
+            onAddToCart(e)
+          }
+        }}
         disabled={!product?.availability}
         sx={{
           backgroundColor: landingPagePrimaryColor,
@@ -158,8 +168,14 @@ export default function ProductListing({
           },
         }}
       >
-        {product?.availability ? 'Add to cart' : 'Out of stock'}
+        {/* If product has options, show choose option button */}
+        {product?.options && product?.options?.length > 0
+          ? 'Choose Option'
+          : product?.availability
+            ? 'Add to cart'
+            : 'Out of stock'}
       </LoadingButton>
     </Box>
+    </>
   );
 }

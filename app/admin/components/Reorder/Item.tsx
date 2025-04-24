@@ -1,5 +1,5 @@
 import { IItem } from '@/app/utils/type';
-import { AlertColor, Box, Grid, Paper, Typography } from '@mui/material';
+import { AlertColor, Box, Chip, Grid, Paper, Typography } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import EditItemAvailability from '../Modals/edit/EditItemAvailability';
 import DeleteModal from '../Modals/delete/DeleteModal';
@@ -77,7 +77,13 @@ export default function Item({
             </Grid>
           )}
           <Grid item md={2}>
-            <Typography variant="subtitle1">{item.name}</Typography>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Typography variant="subtitle1">{item.name}</Typography>
+              {item?.isBestSeller && (
+                <Chip label="Best Seller" color="error" size="small" />
+              )}
+            </Box>
+
           </Grid>
           <Grid item md={2}>
             <Typography variant="subtitle1">

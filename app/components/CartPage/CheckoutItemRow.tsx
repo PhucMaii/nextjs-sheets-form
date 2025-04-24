@@ -26,12 +26,29 @@ interface IProps {
 export default function CheckoutItemRow({ item, showNotification }: IProps) {
   const [quantity, setQuantity] = useState<number>(item.quantity);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [targetItem, setTargetItem] = useState<ICartItem | null>(item);
+
+  useEffect(() => {
+    if (item) {
+      setTargetItem({
+        ...item,
+        item: {
+          ...item.item,
+          ...item?.option,
+          name: item.item?.name,
+        }
+      });
+    }
+  }, [item]);
 
   const dispatch = useDispatch<AppDispatch>();
 
   const totalPrice = useMemo(() => {
-    return quantity * item.item.price;
-  }, [quantity]);
+    if (!targetItem) {
+      return 0;
+    }
+    return quantity * targetItem?.item?.price;
+  }, [quantity, targetItem]);
 
   useEffect(() => {
     if (item) {
@@ -121,30 +138,38 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
           <img
             style={{ width: '150px', height: '100%', objectFit: 'contain' }}
             src={
-              item.item?.image
-                ? generateImgUrl(item.item.image)
+              targetItem?.item?.image
+                ? generateImgUrl(targetItem?.item?.image)
                 : 'images/landing/image_not_found.jpeg'
             }
             alt=""
           />
-          <Box
-            component="a"
-            aria-disabled={isLoading}
-            href={isLoading ? undefined : `/products/${item.item.id}`}
-            sx={{
-              textDecoration: 'none',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              pointerEvents: isLoading ? 'none' : 'auto',
-              color: 'inherit',
-              '&:hover': {
-                textDecoration: 'underline',
-                color: landingPagePrimaryColor,
-              },
-            }}
-          >
-            <Typography variant="h6">
-              {item.item?.name || item.item?.inventoryItem?.name}
-            </Typography>
+          <Box display="flex" flexDirection="column">
+            <Box
+              component="a"
+              aria-disabled={isLoading}
+              href={isLoading ? undefined : `/products/${item.item.id}`}
+              sx={{
+                textDecoration: 'none',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                pointerEvents: isLoading ? 'none' : 'auto',
+                color: 'inherit',
+                '&:hover': {
+                  textDecoration: 'underline',
+                  color: landingPagePrimaryColor,
+                },
+              }}
+            >
+              <Typography variant="h6">
+                {targetItem?.item?.name || targetItem?.item?.inventoryItem?.name}
+              </Typography>
+            </Box>
+
+            {targetItem?.option && (
+              <Typography variant="body2">
+                {targetItem?.option?.name}
+              </Typography>
+            )}
           </Box>
         </Box>
       </TableCell>
@@ -158,7 +183,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
               fontWeight="bold"
               style={{ textDecoration: 'line-through' }}
             >
-              ${item.item.prevPrice?.toFixed(2)}
+              ${targetItem?.item?.prevPrice?.toFixed(2)}
             </Typography>
           )}
           <Typography
@@ -168,7 +193,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
               color: item.item.isShowDiscount ? 'red' : 'black',
             }}
           >
-            ${item.item.price?.toFixed(2)}
+            ${targetItem?.item?.price?.toFixed(2)}
           </Typography>
         </Box>
       </TableCell>

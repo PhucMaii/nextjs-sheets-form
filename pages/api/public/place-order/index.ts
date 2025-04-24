@@ -183,11 +183,22 @@ export const convertCartItemsToOrderItems = (cartItems: any) => {
   const formattedItems = cartItems.map((item: any) => {
     return {
       ...item.item,
+      option: {
+        name: item?.option?.name,
+        price: item?.option?.price,
+        ratio: item?.option?.unit?.ratio,
+        unitId: item?.option?.unit?.id,
+        prevPrice: item?.option?.prevPrice,
+        showDiscount: item?.option?.showDiscount,
+      },
       quantity: item.quantity,
+      price: item?.option?.price || item.item?.price,
+      prevPrice: item?.option?.prevPrice || item.item?.prevPrice,
+      showDiscount: item?.option?.showDiscount || item.item?.showDiscount,
       name:
         item.item?.name || item?.item?.inventoryItem?.name,
-      inventoryUnitId: item.item?.inventoryUnitId,
-      inventoryUnit: item.item?.inventoryUnit,
+      inventoryUnitId: item?.item?.option?.inventoryUnitId || item.item?.inventoryUnitId,
+      inventoryUnit: item?.item?.option?.inventoryUnit || item.item?.inventoryUnit,
     };
   });
 

@@ -10,7 +10,7 @@ export default function Website() {
 
   return (
     <Sidebar>
-      <Tabs value={tabIndex} onChange={(_, newValue) => setTabIndex(newValue)}>
+      <Tabs value={tabIndex} onChange={(_, newValue) => setTabIndex(newValue)} sx={{borderBottom: '1px solid #e0e0e0'}}>
         <Tab label="Items" />
         <Tab label="Promotions" />
       </Tabs>

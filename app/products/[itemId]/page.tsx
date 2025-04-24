@@ -15,13 +15,15 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import React, { useEffect, useState } from 'react';
-import { orange } from '@mui/material/colors';
+import { grey, orange } from '@mui/material/colors';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ProductListing from '@/app/components/ProductListingPage/ProductListing';
 import { LoadingButton } from '@mui/lab';
 import { addItemToCartAsync } from '@/state/cart/cartSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/state/store';
+import { ItemButton } from '@/app/components/OrderView';
+import { primaryColor } from '@/theme/color';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
@@ -30,7 +32,7 @@ export default function ItemPage() {
   const [itemData, setItemData] = useState<IItem | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [relatedProducts, setRelatedProducts] = useState<IItem[]>([]);
-
+  const [selectedOption, setSelectedOption] = useState<any>(null);
   const cart = useSelector((state: RootState) => state.cart);
 
   const { showNotification, NotificationComp } = useNotification();
@@ -53,6 +55,7 @@ export default function ItemPage() {
 
       setItemData(response.data.data);
       setRelatedProducts(response.data.relatedProducts);
+      setSelectedOption(response.data.data.options[0]);
       setIsLoading(false);
     } catch (err: any) {
       showNotification(
@@ -76,6 +79,7 @@ export default function ItemPage() {
             quantity,
             item: itemData,
             id: itemData?.id,
+            option: selectedOption,
           },
         }),
       );
@@ -110,13 +114,30 @@ export default function ItemPage() {
           {itemData?.name || itemData?.inventoryItem?.name}
         </Typography>
 
-        <Typography
-          variant="h3"
-          fontWeight="bold"
-          sx={{ mt: 4, color: landingPagePrimaryColor }}
-        >
-          ${itemData?.price}
-        </Typography>
+        {itemData?.options && itemData.options.length > 0 ? (
+          <Grid container spacing={2}>
+          {itemData.options.map((option: any, index: number) => (
+            <Grid item xs={6} md={4} lg={3} key={index}>
+              <ItemButton
+                item={option}
+                onClick={() => setSelectedOption(option)}
+                containerStyle={{
+                  backgroundColor: grey[100],
+                  border: `3px solid ${selectedOption?.id === option.id ? primaryColor : 'transparent'}`,
+                }}
+              />
+            </Grid>
+          ))}
+        </Grid>
+        ) : (
+          <Typography
+            variant="h3"
+            fontWeight="bold"
+            sx={{ mt: 4, color: landingPagePrimaryColor }}
+          >
+            ${itemData?.price}
+          </Typography>
+        )}
 
         {/* Advertised user to get applied */}
         <Box
@@ -251,7 +272,9 @@ export default function ItemPage() {
             <img
               src={
                 itemData?.image || itemData?.inventoryItem?.image
-                  ? generateImgUrl(itemData?.image || itemData?.inventoryItem?.image)
+                  ? generateImgUrl(
+                      itemData?.image || itemData?.inventoryItem?.image,
+                    )
                   : '/images/landing/image_not_found.jpeg'
               }
               alt={itemData?.inventoryItem.name}

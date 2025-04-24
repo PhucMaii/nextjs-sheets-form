@@ -61,46 +61,6 @@ export default function CheckoutPage() {
     });
   };
 
-  // const onCreateGuest = async () => {
-  //   if (
-  //     !userInfo.name ||
-  //     !userInfo.email ||
-  //     !userInfo.contactNumber ||
-  //     !userInfo.deliveryAddress
-  //   ) {
-  //     showNotification('error', 'Please fill in all the fields');
-  //     return;
-  //   }
-  //   try {
-  //     setIsLoading(true);
-  //     console.log(guestSession.sessionId, guestSession.signature);
-  //     const response = await axios.post(`${API_URL.PUBLIC}/create-guest`, {
-  //       ...userInfo,
-  //       guestSessionId: guestSession?.sessionId,
-  //       guestSessionSignature: guestSession?.signature,
-  //     });
-
-  //     if (response.data.error) {
-  //       showNotification(
-  //         'error',
-  //         'Fail to apply guest: ' + response.data.error,
-  //       );
-  //       setIsLoading(false);
-  //       return;
-  //     }
-
-  //     setIsLoading(false);
-  //     showNotification('success', 'Success to apply guest');
-  //   } catch (error: any) {
-  //     console.log('Fail to apply guest: ', error);
-  //     showNotification(
-  //       'error',
-  //       'Fail to apply guest: ' + error.response.data.error,
-  //     );
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const onDataReceived = useCallback((data: any) => {
     if (!data) {
       return;
@@ -124,32 +84,6 @@ export default function CheckoutPage() {
       };
     });
   }, []);
-
-  // Place order before payment for now.
-  // const onPlaceOrder = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await axios.post(`${API_URL.PUBLIC}/place-order`, {
-  //       cartId: cart.id,
-  //       guestSessionId: guestSession?.sessionId,
-  //       deliveryDate,
-  //       note,
-  //     });
-
-  //     if (response.data.error) {
-  //       setIsLoading(false);
-  //       showNotification('error', response.data.error);
-  //       return;
-  //     }
-
-  //     setIsLoading(false);
-  //     showNotification('success', 'Success to place order');
-  //   } catch (error: any) {
-  //     console.log('Internal Server Error: ', error.response.data.error);
-  //     setIsLoading(true);
-  //     showNotification('error', error?.response?.data?.error);
-  //   }
-  // };
 
   const renderAddressInput = () => {
     return (

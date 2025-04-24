@@ -106,7 +106,10 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
     setIsUpdating(true);
     try {
       const response = await axios.put(API_URL.ITEM, {
-        updatedItem: newUpdatedItem,
+        updatedItem: {
+          ...newUpdatedItem,
+          image: selectedImage || newUpdatedItem?.image || null,
+        },
         updateOption,
         updatedFields: updatedField,
       });
