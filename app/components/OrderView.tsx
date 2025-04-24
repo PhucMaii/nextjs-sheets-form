@@ -69,7 +69,7 @@ export const WhiteSpace = () => {
   );
 };
 
-const OnSaleBadge = ({
+export const OnSaleBadge = ({
   discountPrice,
   prevPrice,
   percentage, // if percentage is provided, no need to calculate percentage

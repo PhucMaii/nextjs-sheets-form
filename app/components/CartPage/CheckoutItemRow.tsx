@@ -177,7 +177,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
       {/* Price */}
       <TableCell>
         <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
-          {item.item.isShowDiscount && (
+          {targetItem?.item?.isShowDiscount && (
             <Typography
               variant="h6"
               fontWeight="bold"
@@ -190,7 +190,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
             variant="h6"
             fontWeight="bold"
             style={{
-              color: item.item.isShowDiscount ? 'red' : 'black',
+              color: targetItem?.item?.isShowDiscount ? 'red' : 'black',
             }}
           >
             ${targetItem?.item?.price?.toFixed(2)}

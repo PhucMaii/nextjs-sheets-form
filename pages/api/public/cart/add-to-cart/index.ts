@@ -70,6 +70,7 @@ export default async function handler(
             },
           });
         } else {
+          console.log('item', item);
           // Create new item 
           await prisma.cartItem.create({
             data: {
@@ -80,7 +81,7 @@ export default async function handler(
                 ratio: item?.option?.unit?.ratio,
                 inventoryUnitId: item?.option?.unit?.id,
                 prevPrice: item?.option?.prevPrice,
-                showDiscount: item?.option?.showDiscount,
+                isShowDiscount: item?.option?.isShowDiscount,
               },
               itemId: item.id,
               cartId: selectedCart.id,

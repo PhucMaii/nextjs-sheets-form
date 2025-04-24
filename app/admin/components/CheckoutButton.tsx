@@ -49,6 +49,16 @@ export default function CheckoutButton({
   // const router = useRouter();
 
   const onPayment = async () => {
+    if (cart.items.length === 0) {
+      showNotification('error', 'Please add items to cart');
+      return;
+    }
+
+    if (clientData.clientName === '' || clientData.deliveryAdress === '' || clientData.contactNumber === '' || clientData.email === '' || clientData.contactName === '') {
+      showNotification('error', 'Please fill in all the fields');
+      return;
+    }
+
     setIsLoading(true);
     try {
 

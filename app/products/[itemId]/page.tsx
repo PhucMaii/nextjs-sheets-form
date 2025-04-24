@@ -115,20 +115,20 @@ export default function ItemPage() {
         </Typography>
 
         {itemData?.options && itemData.options.length > 0 ? (
-          <Grid container spacing={2}>
-          {itemData.options.map((option: any, index: number) => (
-            <Grid item xs={6} md={4} lg={3} key={index}>
-              <ItemButton
-                item={option}
-                onClick={() => setSelectedOption(option)}
-                containerStyle={{
-                  backgroundColor: grey[100],
-                  border: `3px solid ${selectedOption?.id === option.id ? primaryColor : 'transparent'}`,
-                }}
-              />
-            </Grid>
-          ))}
-        </Grid>
+          <Grid container spacing={2} sx={{ width: '100%' }}>
+            {itemData.options.map((option: any, index: number) => (
+              <Grid item xs={6} md={4} key={index}>
+                <ItemButton
+                  item={option}
+                  onClick={() => setSelectedOption(option)}
+                  containerStyle={{
+                    backgroundColor: grey[100],
+                    border: `3px solid ${selectedOption?.id === option.id ? primaryColor : 'transparent'}`,
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
         ) : (
           <Typography
             variant="h3"

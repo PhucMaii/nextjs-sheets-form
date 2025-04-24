@@ -24,7 +24,7 @@ export default function useCart() {
             justifyContent="space-between"
           >
             <Typography>Discount: </Typography>
-            <Typography>${cart.discount.toFixed(2)} </Typography>
+            <Typography>-${cart.discount.toFixed(2)} </Typography>
           </Box>
         )}
         <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -88,9 +88,29 @@ export default function useCart() {
                 <Typography variant="body2">x{item.quantity}</Typography>
               </Box>
             </Box>
-            <Typography fontWeight="bold">
+            {/* <Typography fontWeight="bold">
               ${((item?.option?.price || item?.item?.price) * item?.quantity)?.toFixed(2)}
-            </Typography>
+            </Typography> */}
+            <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
+              {(item?.option?.isShowDiscount || item?.item?.isShowDiscount) && (
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  style={{ textDecoration: 'line-through' }}
+                >
+                  ${((item?.option?.prevPrice || item?.item?.prevPrice) * item?.quantity)?.toFixed(2)}
+                </Typography>
+              )}
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                style={{
+                  color: (item?.option?.isShowDiscount || item?.item?.isShowDiscount) ? 'red' : 'black',
+                }}
+              >
+                ${((item?.option?.price || item?.item?.price) * item?.quantity)?.toFixed(2)}
+              </Typography>
+            </Box>
           </Box>
         ))}
       </Box>

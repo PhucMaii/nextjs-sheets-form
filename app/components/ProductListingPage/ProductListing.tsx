@@ -12,6 +12,7 @@ import { green, grey, red } from '@mui/material/colors';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ChooseOption from '../ChooseOption';
+import { OnSaleBadge } from '../OrderView';
 
 interface IProps {
   product: IItem;
@@ -33,6 +34,19 @@ export default function ProductListing({
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   const dispatch = useDispatch<AppDispatch>();
+
+  // Discount Percentage for options
+  const discountPercent = useMemo(() => {
+    if (product?.options && product?.options?.length > 0) {
+      return product?.options?.reduce((max, option) => {
+        if (option?.prevPrice && option?.isShowDiscount) {
+          return Math.max(max, Math.ceil((1 - option.price / option.prevPrice) * 100));
+        }
+        return max;
+      }, 0);
+    }
+    return 0;
+  }, [product?.options]);
 
   const smallestOptionPrice = useMemo(() => {
     return product?.options?.reduce((min, option) => {
@@ -106,6 +120,15 @@ export default function ProductListing({
       onClick={onClick}
       style={containerStyle}
     >
+      {(discountPercent || product?.isShowDiscount) && (
+        <Box position="absolute" top={30} right={20}>
+          <OnSaleBadge
+            discountPrice={product?.price}
+            prevPrice={product?.prevPrice || 0}
+            percentage={discountPercent || 0}
+          />
+        </Box>
+      )}
       <img
         src={
           product?.image || product?.inventoryItem?.image
