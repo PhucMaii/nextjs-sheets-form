@@ -15,7 +15,7 @@ import { ShadowSection } from '../reports/styled';
 import POTable from '../components/Tables/POTable';
 import { useRouter } from 'next/navigation';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, PO_STATUS } from '@/app/utils/enum';
 import { IPurchaseOrder } from '@/app/utils/type';
 import useNotification from '@/hooks/useNotification';
 import useDebounce from '@/hooks/useDebounce';
@@ -43,7 +43,9 @@ export default function PurchaseOrders() {
   );
 
   const itemsRate = useMemo(() => {
-    const receivedItems = poList?.reduce((acc, po) => {
+    const activePoList = poList?.filter((po) => po.status !== PO_STATUS.CANCELLED);
+
+    const receivedItems = activePoList?.reduce((acc, po) => {
       const receivedItems = po.poItems.reduce((acc, item) => {
         return acc + (item?.receivedQty || 0);
       }, 0);
@@ -51,7 +53,7 @@ export default function PurchaseOrders() {
       return acc + receivedItems;
     }, 0);
 
-    const rejectedItems = poList?.reduce((acc, po) => {
+    const rejectedItems = activePoList?.reduce((acc, po) => {
       const rejectedItems = po.poItems.reduce((acc, item) => {
         return acc + (item?.rejectedQty || 0);
       }, 0);
@@ -59,7 +61,7 @@ export default function PurchaseOrders() {
       return acc + rejectedItems;
     }, 0);  
 
-    const totalItems = poList?.reduce((acc, po) => {
+    const totalItems = activePoList?.reduce((acc, po) => {
       const totalItems = po.poItems.reduce((acc, item) => {
         return acc + (item?.orderedQty || 0);
       }, 0);
