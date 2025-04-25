@@ -278,6 +278,7 @@ export default function BulkEditItems() {
       !newItem.inventoryItemId ||
       newItem.inventoryItemId < 1
     ) {
+      console.log(newItem, 'NEW ITEM');
       showNotification('error', 'Your input data is invalid');
       return false;
     }
@@ -306,6 +307,8 @@ export default function BulkEditItems() {
         return;
       }
 
+      fetchItems();
+
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -316,7 +319,6 @@ export default function BulkEditItems() {
   return (
     <Sidebar>
       <AddItem
-        // categoryId={}
         addItem={handleAddItem}
         showNotification={showNotification}
         open={isOpenAddItem}
@@ -361,13 +363,13 @@ export default function BulkEditItems() {
           </Button>
 
           <Box display="flex" alignItems="center" gap={1}>
-            {/* <Button
+            <Button
               variant="outlined"
               size="small"
               onClick={() => setIsOpenAddItem(true)}
             >
               + Add Item
-            </Button> */}
+            </Button>
             <LoadingButton
               onClick={handleSaveChanges}
               variant="contained"
