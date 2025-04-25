@@ -33,7 +33,8 @@ import { useRouter } from 'next/navigation';
 import ConfirmModal from '@/app/admin/components/Modals/ConfirmModal';
 import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
 import { POItemRowDisplay, POItemRow } from '../../components/POItemRow';
-
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import TestPDF from '../../components/PDF/TestPDF';
 export default function PurchaseOrder() {
   const { id }: any = useParams();
   const router = useRouter();
@@ -220,6 +221,17 @@ export default function PurchaseOrder() {
     router.push(`/admin/purchase-orders/${id}/receive`);
   };
 
+  // const handleDownloadPDF = async () => {
+  //   if (!po) return;
+  //   const blob = await pdf(<POInvoice vendor={po.vendor} po={po} />).toBlob();
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement('a');
+  //   link.href = url;
+  //   link.download = `PO-${po.poNumber}.pdf`;
+  //   link.click();
+  //   URL.revokeObjectURL(url);
+  // };
+
   return (
     <Sidebar>
       <AddPODiscount
@@ -317,6 +329,26 @@ export default function PurchaseOrder() {
                     ? 'Mark as ordered'
                     : 'Receive Inventory'}
                 </LoadingButton>
+                <PDFDownloadLink
+                  document={
+                    <TestPDF />
+                    // <POInvoice vendor={po?.vendor || null} po={po || null} />
+                  }
+                  fileName={`PO-${po?.poNumber}.pdf`}
+                >
+                  <Button variant="outlined">Export PDF</Button>
+                </PDFDownloadLink>
+                {/* <PDFDownloadLink
+              document={
+                <InvoiceDocument
+                  client={currentMonthOrders[0].user}
+                  orders={currentMonthOrders}
+                  sortDebtKeys={debtData?.sortDebt}
+                  debtData={debtData?.debt}
+                />
+              }
+              fileName='invoice.pdf'
+            > */}
               </Box>
             </Box>
           </Box>
