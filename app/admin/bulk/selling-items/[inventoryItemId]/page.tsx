@@ -10,7 +10,7 @@ import {
 import useNotification from '@/hooks/useNotification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import { Box, Button, Paper } from '@mui/material';
+import { Box, Button, Checkbox, Paper } from '@mui/material';
 import { useParams, useRouter } from 'next/navigation';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import { ArrowLeftIcon } from 'lucide-react';
@@ -22,6 +22,7 @@ import AddOption from '@/app/admin/components/Modals/add/AddOption';
 import AddItem from '@/app/admin/components/Modals/add/AddItem';
 import { IItem } from '@/app/utils/type';
 import { generateCurrentTime } from '@/app/utils/time';
+import BulkEditItem from '@/app/admin/components/Bulk/BulkEditItem';
 // import AddItem from '@/app/admin/components/Modals/add/AddItem';
 
 function OptionsEditCell(props: GridRenderEditCellParams) {
@@ -68,6 +69,10 @@ export default function BulkEditItems() {
     open: false,
     item: null,
   });
+  const [editBulkItemProps, setEditBulkItemProps] = useState<any>({
+    open: false,
+    item: null,
+  });
   const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -92,6 +97,15 @@ export default function BulkEditItems() {
       headerName: 'Name',
       editable: true,
       width: 200,
+      renderCell: (params) => (
+        <span
+          onClick={() => {
+            setEditBulkItemProps({ open: true, item: params.row });
+          }}
+        >
+          {params.row.name || '—'}
+        </span>
+      ),
     },
     {
       field: 'price',
@@ -105,6 +119,9 @@ export default function BulkEditItems() {
             style={{
               color: isDisabled ? 'gray' : 'inherit',
               fontStyle: isDisabled ? 'italic' : 'normal',
+            }}
+            onClick={() => {
+              setEditBulkItemProps({ open: true, item: params.row });
             }}
           >
             {params.value}
@@ -155,12 +172,38 @@ export default function BulkEditItems() {
       headerName: 'Show Discount',
       editable: true,
       type: 'boolean',
+      renderCell: (params) => {
+        return (
+          <span
+            onClick={() => {
+              setEditBulkItemProps({ open: true, item: params.row });
+            }}
+          >
+            {params.row.isShowDiscount ? (
+              <Checkbox checked={true} />
+            ) : (
+              <Checkbox checked={false} />
+            )}
+          </span>
+        );
+      },
     },
     {
       field: 'prevPrice',
       headerName: 'Prev price',
       editable: true,
       type: 'number',
+      renderCell: (params) => {
+        return (
+          <span
+            onClick={() => {
+              setEditBulkItemProps({ open: true, item: params.row });
+            }}
+          >
+            {params.row?.prevPrice || '—'}
+          </span>
+        );
+      },
     },
     {
       field: 'inventoryUnitId',
@@ -328,6 +371,15 @@ export default function BulkEditItems() {
           name: items[0]?.name,
         }}
       />
+      {editBulkItemProps.open && editBulkItemProps.item && (
+        <BulkEditItem
+          open={editBulkItemProps.open}
+          onClose={() => setEditBulkItemProps({ open: false, item: null })}
+          item={editBulkItemProps.item}
+          showNotification={showNotification}
+          refresh={fetchItems}
+        />
+      )}
       {NotificationComp}
       {editOptionProps.open && editOptionProps.item && (
         <BulkEditOptions
