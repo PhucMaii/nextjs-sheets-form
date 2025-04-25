@@ -13,7 +13,7 @@ import {
   TableCell,
   Table,
 } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { ShadowSection } from '../../reports/styled';
 import AddPODiscount from '../../components/Modals/add/AddPODiscount';
@@ -33,6 +33,8 @@ import { useRouter } from 'next/navigation';
 import ConfirmModal from '@/app/admin/components/Modals/ConfirmModal';
 import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
 import { POItemRowDisplay, POItemRow } from '../../components/POItemRow';
+import { POInvoice } from '../../components/Printing/POInvoice';
+import { useReactToPrint } from 'react-to-print';
 
 export default function PurchaseOrder() {
   const { id }: any = useParams();
@@ -50,6 +52,8 @@ export default function PurchaseOrder() {
 
   const { showNotification, NotificationComp } = useNotification();
   const { date, SelectDate } = useSelectDate(po?.estArrival);
+
+  const poInvoiceRef = useRef(null);
 
   useEffect(() => {
     if (po?.poItems) {
@@ -220,6 +224,12 @@ export default function PurchaseOrder() {
     router.push(`/admin/purchase-orders/${id}/receive`);
   };
 
+  const handlePrintInvoice = useReactToPrint({
+    content: () => {
+      return poInvoiceRef.current;
+    },
+  });
+
   return (
     <Sidebar>
       <AddPODiscount
@@ -232,6 +242,11 @@ export default function PurchaseOrder() {
           }));
         }}
       />
+      {po && (
+        <div style={{ display: 'none' }}>
+          <POInvoice vendor={po?.vendor} po={po} ref={poInvoiceRef} />
+        </div>
+      )}
       <ConfirmModal
         open={isOpenRemovePODiscount}
         onClose={() => setIsOpenRemovePODiscount(false)}
@@ -284,7 +299,6 @@ export default function PurchaseOrder() {
               </Typography>
 
               <Box display="flex" alignItems="center" gap={1}>
-                {/* {po?.status !== PO_STATUS.RECEIVED && ( */}
                 <LoadingButton
                   loading={isSaving}
                   onClick={() => {
@@ -298,6 +312,7 @@ export default function PurchaseOrder() {
                 >
                   {isEditMode ? 'Save' : 'Edit'}
                 </LoadingButton>
+                <Button onClick={handlePrintInvoice} variant='outlined'>Export PO</Button>
                 <LoadingButton
                   variant="contained"
                   loading={isUpdatingStatus}
