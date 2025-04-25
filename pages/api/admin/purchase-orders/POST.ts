@@ -2,12 +2,20 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
-
+import { PO_STATUS } from '@/app/utils/enum';
+import { generatePurchaseOrderTemplate } from '@/config/email';
+import emailHandler from '../../utils/email';
 const prisma = new PrismaClient();
+
+interface IBody {
+  purchaseOrder: any;
+  selectedVendor: any;
+  isOrdered?: boolean;
+}
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { purchaseOrder, selectedVendor }: any = req.body;
+    const { purchaseOrder, selectedVendor, isOrdered }: IBody = req.body;
 
     if (purchaseOrder.items.length === 0) {
       return res.status(400).json({ error: 'No items in the purchase order' });
@@ -31,7 +39,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newPurchaseOrder = await prisma.pO.create({
       data: {
         estArrival: purchaseOrder.estArrival,
-        status: purchaseOrder.status,
+        status: isOrdered ? PO_STATUS.ORDERED : PO_STATUS.DRAFT,
         // vendorId: se lectedVendor.id,
         totalCost,
         note: purchaseOrder.note,
@@ -57,6 +65,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         poNumber: `PO${newPurchaseOrder.id}`,
       },
     });
+
     // Set up the purchase order items
     const poItems = purchaseOrder.items.map((item: any) => {
       // Handle empty unit
@@ -65,7 +74,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           .status(400)
           .json({ error: `Unit in ${item.inventoryItem.name} is required ` });
       }
-      
+
       return {
         poId: newPurchaseOrder.id,
         inventoryItemId: item.inventoryItemId,
@@ -81,8 +90,37 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Handle if status is Ordered -> Sent email to vendor
+    if (isOrdered) {
+      const newPO = await prisma.pO.findUnique({
+        where: {
+          id: newPurchaseOrder.id,
+        },
+        include: {
+          vendor: true,
+          poItems: {
+            include: {
+              inventoryItem: true,
+              inventoryUnit: true,
+            },
+          },
+        },
+      });
 
-    return res.status(200).json({ message: 'Purchase order created successfully' });
+      if (newPO?.vendor?.email) {
+        const poTemplate = generatePurchaseOrderTemplate(newPO?.vendor, newPO);
+        // Send email to vendor
+        await emailHandler(
+          newPO?.vendor?.email || '',
+          `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
+          `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
+          poTemplate,
+        );
+      }
+    }
+
+    return res
+      .status(200)
+      .json({ message: 'Purchase order created successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
