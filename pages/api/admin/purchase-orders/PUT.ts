@@ -33,7 +33,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Update PO - estArrival, note
-    if (estArrival !== existingPo.estArrival || note !== existingPo.note || discount !== existingPo.discount) {
+    if (
+      estArrival !== existingPo.estArrival ||
+      note !== existingPo.note ||
+      discount !== existingPo.discount
+    ) {
       await prisma.pO.update({
         where: {
           id: id,
@@ -104,8 +108,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Update PO - totalCost, subtotal, tax, total
-    const subtotal = items.reduce((acc: number, item: any) => acc + item.costPerItem * item.orderedQty, 0);
-    const tax = items.reduce((acc: number, item: any) => acc + item.tax * item.orderedQty, 0);
+    const subtotal = items.reduce(
+      (acc: number, item: any) => acc + item.costPerItem * item.orderedQty,
+      0,
+    );
+    const tax = items.reduce(
+      (acc: number, item: any) => acc + item.tax * item.orderedQty,
+      0,
+    );
     const total = subtotal + tax - discount;
 
     await prisma.pO.update({
@@ -117,9 +127,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         subtotal: subtotal,
         tax: tax,
       },
-    })
+    });
 
-    return res.status(200).json({ message: 'Purchase order updated successfully' });
+    return res
+      .status(200)
+      .json({ message: 'Purchase order updated successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

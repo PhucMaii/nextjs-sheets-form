@@ -18,7 +18,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const existingPromotion = await prisma.promotion.findUnique({
       where: {
         id: id,
-        isWebsite: null
+        isWebsite: null,
       },
       include: {
         items: {

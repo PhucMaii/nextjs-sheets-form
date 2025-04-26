@@ -16,7 +16,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    return res.status(200).json({data: routes, message: 'Fetch Routes Successfully'});
+    return res
+      .status(200)
+      .json({ data: routes, message: 'Fetch Routes Successfully' });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

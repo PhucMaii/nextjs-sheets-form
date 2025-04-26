@@ -370,9 +370,17 @@ export default function EditInventory({
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <SellIcon />
-                <Typography>{inventoryItem.listingCategories?.length} listing items</Typography>
+                <Typography>
+                  {inventoryItem.listingCategories?.length} listing items
+                </Typography>
               </Box>
-              <Button variant="contained" size="small" onClick={() => router.push(`/admin/bulk/selling-items/${inventoryItem.id}`)}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() =>
+                  router.push(`/admin/bulk/selling-items/${inventoryItem.id}`)
+                }
+              >
                 <Box display="flex" alignItems="center">
                   Bulk Listing Item Edit
                   <ArrowForwardIosIcon />

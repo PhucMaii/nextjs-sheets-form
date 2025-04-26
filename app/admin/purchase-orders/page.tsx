@@ -43,7 +43,9 @@ export default function PurchaseOrders() {
   );
 
   const itemsRate = useMemo(() => {
-    const activePoList = poList?.filter((po) => po.status !== PO_STATUS.CANCELLED);
+    const activePoList = poList?.filter(
+      (po) => po.status !== PO_STATUS.CANCELLED,
+    );
 
     const receivedItems = activePoList?.reduce((acc, po) => {
       const receivedItems = po.poItems.reduce((acc, item) => {
@@ -59,7 +61,7 @@ export default function PurchaseOrders() {
       }, 0);
 
       return acc + rejectedItems;
-    }, 0);  
+    }, 0);
 
     const totalItems = activePoList?.reduce((acc, po) => {
       const totalItems = po.poItems.reduce((acc, item) => {
@@ -123,21 +125,23 @@ export default function PurchaseOrders() {
             <OverviewCard
               text="Purchase Orders"
               value={poList?.length || 0}
-              icon={<ShoppingCart sx={{ color: blue[700], fontSize: 50 }}  />}
+              icon={<ShoppingCart sx={{ color: blue[700], fontSize: 50 }} />}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <OverviewCard
               text="Received Items Rate (%)"
               value={itemsRate?.receivedItemsRate?.toFixed(2) || 0}
-              icon={<TrendingUpIcon sx={{ color: blue[700], fontSize: 50 }}  />}
+              icon={<TrendingUpIcon sx={{ color: blue[700], fontSize: 50 }} />}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <OverviewCard
               text="Rejected Items Rate (%)"
               value={itemsRate?.rejectedItemsRate?.toFixed(2) || 0}
-              icon={<TrendingDownIcon sx={{ color: blue[700], fontSize: 50 }}  />}
+              icon={
+                <TrendingDownIcon sx={{ color: blue[700], fontSize: 50 }} />
+              }
             />
           </Grid>
         </Grid>

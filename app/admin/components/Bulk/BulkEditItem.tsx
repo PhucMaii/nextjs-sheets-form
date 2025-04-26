@@ -143,7 +143,9 @@ export default function BulkEditItem({
           onClose={onClose}
         />
 
-        <Typography variant="body2" sx={{ mt: 1, color: grey[600] }}>Please select categories and fields to update.</Typography>
+        <Typography variant="body2" sx={{ mt: 1, color: grey[600] }}>
+          Please select categories and fields to update.
+        </Typography>
 
         <Divider sx={{ my: 2 }} />
 
@@ -234,7 +236,11 @@ export default function BulkEditItem({
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Box display="flex" gap={2} alignItems="center">
                 <Checkbox
                   checked={updatedFields.some(

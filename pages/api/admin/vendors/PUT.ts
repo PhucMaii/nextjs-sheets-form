@@ -14,7 +14,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, name, address, phoneNumber, email, joinedDate }: IBody = req.body;
+    const { id, name, address, phoneNumber, email, joinedDate }: IBody =
+      req.body;
 
     if (!name || !address || !joinedDate) {
       return res.status(404).json({

@@ -26,8 +26,8 @@ export function createTheme() {
     components: {
       MuiButton: {
         defaultProps: {
-          size: 'small'
-        }
+          size: 'small',
+        },
       },
       MuiTextField: {
         defaultProps: {

@@ -57,7 +57,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
       );
       const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);
 
-      setUpdatedItem({ ...targetItem, units: sellingUnits });   
+      setUpdatedItem({ ...targetItem, units: sellingUnits });
     }
   }, [targetItem]);
 
@@ -288,7 +288,6 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                 <OptionsTable
                   options={updatedItem?.options || []}
                   showNotification={showNotification}
-                  
                 />
               </Grid>
             )}

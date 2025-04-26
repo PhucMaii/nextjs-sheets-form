@@ -1062,7 +1062,9 @@ const OrderView = ({
                         sx={{ textDecoration: 'line-through' }}
                         color="error"
                       >
-                        ${item?.option?.prevPrice?.toFixed(2) || item.prevPrice.toFixed(2)}
+                        $
+                        {item?.option?.prevPrice?.toFixed(2) ||
+                          item.prevPrice.toFixed(2)}
                       </Typography>
                     )}
                   </Box>

@@ -243,7 +243,8 @@ export const ComponentToPrint = forwardRef(
                   sx={{ fontSize: printFontSize - 5 }}
                   fontWeight="bold"
                 >
-                  ${totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                  $
+                  {totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
                 </Typography>
               </Grid>
             </Grid>

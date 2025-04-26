@@ -312,7 +312,9 @@ export default function PurchaseOrder() {
                 >
                   {isEditMode ? 'Save' : 'Edit'}
                 </LoadingButton>
-                <Button onClick={handlePrintInvoice} variant='outlined'>Export PO</Button>
+                <Button onClick={handlePrintInvoice} variant="outlined">
+                  Export PO
+                </Button>
                 <LoadingButton
                   variant="contained"
                   loading={isUpdatingStatus}

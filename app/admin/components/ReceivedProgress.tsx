@@ -1,10 +1,6 @@
-import { Box } from "@mui/material";
+import { Box } from '@mui/material';
 
-const ReceivedProgress = ({
-  receivedQty,
-  rejectedQty,
-  orderedQty,
-}: any) => {
+const ReceivedProgress = ({ receivedQty, rejectedQty, orderedQty }: any) => {
   // const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   return (

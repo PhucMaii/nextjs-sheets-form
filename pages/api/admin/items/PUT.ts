@@ -285,8 +285,7 @@ const updateAllScheduleOrderItems = async (
 
         if (orderedItems.length > 0) {
           const totalPrice = orderedItems.reduce(
-            (total: number, item: any) =>
-              total + item.quantity * item.price,
+            (total: number, item: any) => total + item.quantity * item.price,
             0,
           );
 

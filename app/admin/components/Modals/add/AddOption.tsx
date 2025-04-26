@@ -201,49 +201,50 @@ export default function AddOption({
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" flexDirection="column" gap={2}>
-            {!noIncludeBulkAdd && <FormControl fullWidth>
-              <Typography>Add to other client categories</Typography>
-              <Autocomplete
-                multiple
-                disableCloseOnSelect
-                options={categories?.data || []}
-                getOptionLabel={(option: ICategory) => option?.name}
-                isOptionEqualToValue={(option: ICategory, value: ICategory) =>
-                  option.id === value.id
-                }
-                value={selectedCategories}
-                onChange={(e, newValue: ICategory[]) => {
-                  setSelectedCategories(newValue);
-                  //   setOption({
-                  //     ...option,
-                  //     categories: selectedCategories,
-                  //   });
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} placeholder="Enter categories..." />
-                )}
-                renderOption={(props, option, { selected }) => {
-                  const { key, ...optionProps } = props;
-                  return (
-                    <li
-                      key={key}
-                      {...optionProps}
-                      aria-disabled={option.id === item.categoryId}
-                    >
-                      <Checkbox
-                        icon={checkBoxOutlinedIcon}
-                        checkedIcon={checkedBoxOutlinedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                        disabled={option.id === item.categoryId}
-                      />
-                      {option.name}
-                    </li>
-                  );
-                }}
-              />
-            </FormControl>
-}
+            {!noIncludeBulkAdd && (
+              <FormControl fullWidth>
+                <Typography>Add to other client categories</Typography>
+                <Autocomplete
+                  multiple
+                  disableCloseOnSelect
+                  options={categories?.data || []}
+                  getOptionLabel={(option: ICategory) => option?.name}
+                  isOptionEqualToValue={(option: ICategory, value: ICategory) =>
+                    option.id === value.id
+                  }
+                  value={selectedCategories}
+                  onChange={(e, newValue: ICategory[]) => {
+                    setSelectedCategories(newValue);
+                    //   setOption({
+                    //     ...option,
+                    //     categories: selectedCategories,
+                    //   });
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} placeholder="Enter categories..." />
+                  )}
+                  renderOption={(props, option, { selected }) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <li
+                        key={key}
+                        {...optionProps}
+                        aria-disabled={option.id === item.categoryId}
+                      >
+                        <Checkbox
+                          icon={checkBoxOutlinedIcon}
+                          checkedIcon={checkedBoxOutlinedIcon}
+                          style={{ marginRight: 8 }}
+                          checked={selected}
+                          disabled={option.id === item.categoryId}
+                        />
+                        {option.name}
+                      </li>
+                    );
+                  }}
+                />
+              </FormControl>
+            )}
             <FormControl fullWidth>
               <Typography>Name</Typography>
               <TextField

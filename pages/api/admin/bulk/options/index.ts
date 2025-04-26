@@ -171,7 +171,7 @@ const handleUpdateAllScheduleOrders = async (
 
     // If there is no pre ordered items -> return
     if (targetOrderedItems.length === 0) {
-      return {ok: true}
+      return { ok: true };
     }
 
     const promisesItem = targetOrderedItems.map((item: any) => {
@@ -188,7 +188,7 @@ const handleUpdateAllScheduleOrders = async (
             price: ratioOf1 ? ratioOf1.price : updatedOptions[0]?.price,
             prevPrice: ratioOf1
               ? ratioOf1.prevPrice
-              : updatedOptions[0]?.prevPrice, 
+              : updatedOptions[0]?.prevPrice,
             isShowDiscount: ratioOf1
               ? ratioOf1.isShowDiscount
               : updatedOptions[0]?.isShowDiscount,
@@ -276,11 +276,11 @@ const handleUpdateAllScheduleOrders = async (
       where: {
         userId: {
           in: users.map((user: any) => user.id),
-        }
+        },
       },
       include: {
         items: true,
-      }
+      },
     });
 
     const promisesOrder = scheduledOrders.map((order: any) => {

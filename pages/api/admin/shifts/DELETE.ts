@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { NextApiRequest, NextApiResponse } from "next";
+import { PrismaClient } from '@prisma/client';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   id?: string;
@@ -7,7 +7,7 @@ interface IQuery {
 
 export default async function DELETE(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   try {
     const prisma = new PrismaClient();

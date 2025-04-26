@@ -205,7 +205,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     //     }
     // });
 
-
     // Sort the orders: if orders.deliveryDate !== date, push it first
     const sortedOrders = sortedDeliveryOrders.sort((a) => {
       if (a.deliveryDate !== date) {

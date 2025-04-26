@@ -40,7 +40,7 @@ export default function ConvertToTransaction({
     description: `Payment for #${po.poNumber}`,
     paymentMethodId: mainPaymentMethodId,
     spentBy: po.createdBy,
-    status: TRANSACTION_STATUS.PAID,
+    status: TRANSACTION_STATUS.UNPAID,
     tax: po.tax,
     discount: 0,
     subTotal: po.subtotal,
@@ -172,7 +172,7 @@ export default function ConvertToTransaction({
 
       showNotification('success', res.data.message);
       onClose();
-      router.push(`/admin/purchase-orders/${po.id}`);
+      router.push(`/admin/purchase-orders`);
     } catch (error: any) {
       showNotification('error', error.message);
     } finally {

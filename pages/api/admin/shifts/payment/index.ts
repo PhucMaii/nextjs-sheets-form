@@ -14,7 +14,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const { newExpense, shifts } = req.body;
-    
 
     if (!newExpense) {
       return res.status(400).json({ error: 'Missing newExpense data' });
@@ -37,7 +36,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         subTotal: newExpense.subTotal,
         spentBy: newExpense.spentBy,
         createdAt: today.dateAndTime,
-        createdBy: `Admin - ${admin.clientName}`
+        createdBy: `Admin - ${admin.clientName}`,
       },
     });
 
@@ -57,7 +56,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(200).json({
       message: 'Payment added successfully',
     });
-
   } catch (error: any) {
     console.error('Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });

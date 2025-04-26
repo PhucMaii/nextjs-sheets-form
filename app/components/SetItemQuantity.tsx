@@ -88,18 +88,20 @@ export default function SetItemQuantity({
           />
         </FormControl>
 
-        {
-          smDown && (
-            <Box width="100%" sx={{ display: 'flex', gap: 1, mt: 2 }}>
-              <Button variant="outlined" fullWidth onClick={onClose}>
-                Cancel
-              </Button>
-              <Button variant="contained" fullWidth onClick={() => onSubmit(quantity, selectedOption)}>
-                Add
-              </Button>
-            </Box>
-          )
-        }
+        {smDown && (
+          <Box width="100%" sx={{ display: 'flex', gap: 1, mt: 2 }}>
+            <Button variant="outlined" fullWidth onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => onSubmit(quantity, selectedOption)}
+            >
+              Add
+            </Button>
+          </Box>
+        )}
       </BoxModal>
     </Modal>
   );

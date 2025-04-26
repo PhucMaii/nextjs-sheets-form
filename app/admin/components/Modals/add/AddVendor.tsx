@@ -26,7 +26,7 @@ export default function AddVendor({ open, onClose, showNotification }: IProps) {
   const [newVendor, setNewVendor] = useState<any>({
     name: '',
     phoneNumber: '',
-    email: ''
+    email: '',
   });
 
   const today = YYYYMMDDFormat(new Date());

@@ -72,8 +72,8 @@ export default function AddOptionWarning({
           <>
             <Typography fontWeight="semibold">
               * Please note that {relevantItemPreOrders?.length || 0} pre-order
-              items will be changed to <strong>${item?.price}</strong> and will be
-              automatically assigned to this option
+              items will be changed to <strong>${item?.price}</strong> and will
+              be automatically assigned to this option
             </Typography>
 
             <Typography sx={{ mt: 2 }}>Relevant Pre Orders</Typography>

@@ -78,7 +78,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const isExist = acc.find((accShift: any) => accShift.name === name);
 
-      const fieldHours = shift.routeId !== null ? 'driverHours' : 'factoryHours';
+      const fieldHours =
+        shift.routeId !== null ? 'driverHours' : 'factoryHours';
 
       if (isExist) {
         isExist[fieldHours] += shift.hours;
@@ -134,7 +135,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       paidShifts,
       unpaidShiftCost,
       paidShiftCost,
-      sortedDriverWithTotalHours
+      sortedDriverWithTotalHours,
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

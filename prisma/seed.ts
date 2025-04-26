@@ -117,10 +117,10 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 
 const prisma = new PrismaClient({
   log: ['info'],
-})
+});
 
 async function main() {
-  await prisma.user.findMany()
+  await prisma.user.findMany();
 }
 
 main()

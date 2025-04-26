@@ -17,7 +17,6 @@ import ConvertToTransaction from '@/app/admin/components/Modals/add/ConvertToTra
 import { LoadingButton } from '@mui/lab';
 import ReceivedProgress from '@/app/admin/components/ReceivedProgress';
 
-
 export default function ReceiveInventory() {
   const { id }: any = useParams();
   const router = useRouter();
@@ -122,7 +121,7 @@ export default function ReceiveInventory() {
           open={openConvertToTransactionModal}
           onClose={() => setOpenConvertToTransactionModal(false)}
           showNotification={showNotification}
-          po={{...po, poItems}}
+          po={{ ...po, poItems }}
         />
       )}
       {NotificationComp}

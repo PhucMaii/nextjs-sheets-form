@@ -1,11 +1,11 @@
-import { IPOItem } from "@/app/utils/type";
-import withAdminAuthGuard from "@/pages/api/utils/withAdminAuthGuard";
-import { PrismaClient } from "@prisma/client";
-import { NextApiRequest, NextApiResponse } from "next";
+import { IPOItem } from '@/app/utils/type';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
+import { PrismaClient } from '@prisma/client';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
-    poId: number;
-    poItems: IPOItem[];
+  poId: number;
+  poItems: IPOItem[];
 }
 
 const prisma = new PrismaClient();
@@ -29,8 +29,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    return res.status(200).json({ message: 'Save Items Received Successfully' });
-    
+    return res
+      .status(200)
+      .json({ message: 'Save Items Received Successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

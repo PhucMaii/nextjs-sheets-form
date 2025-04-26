@@ -134,8 +134,7 @@ export const formatDateString = (inputDate: Date | string) => {
   const time = dateString.split(',')[1];
 
   return `${dateRes} ${time}`;
-
-}
+};
 
 export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
   const selectedDate = normalizeDate(deliveryDate);
@@ -194,4 +193,4 @@ export const formatDate = (date: string) => {
   );
 
   return formattedEndDate;
-}
+};

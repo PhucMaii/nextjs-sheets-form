@@ -46,7 +46,6 @@ function CircularProgressWithLabel(props: any) {
         p: 1,
       }}
     >
-
       <CircularProgress
         variant="determinate"
         size={175}
@@ -193,7 +192,10 @@ export default function OrdersPage() {
     });
 
     const amount = nonVoidOrders.reduce((acc: number, order: Order) => {
-      if (order.user.preference.paymentType === PAYMENT_TYPE.COD || order.user.preference.paymentType === wcodDay) {
+      if (
+        order.user.preference.paymentType === PAYMENT_TYPE.COD ||
+        order.user.preference.paymentType === wcodDay
+      ) {
         return acc + order.totalPrice;
       }
 

@@ -202,16 +202,16 @@ export default function BulkEditOptions({
               </Button>
             </Box>
             {updatedItem?.data?.options &&
-              updatedItem?.data?.options.length > 0 ? (
-                <OptionsTable
-                  options={updatedItem?.data?.options || []}
-                  showNotification={showNotification}
-                  noIncludeOption
-                  setItems={setItems}
-                />
-              ): (
-                <ErrorComponent errorText="No options found" />
-              )}
+            updatedItem?.data?.options.length > 0 ? (
+              <OptionsTable
+                options={updatedItem?.data?.options || []}
+                showNotification={showNotification}
+                noIncludeOption
+                setItems={setItems}
+              />
+            ) : (
+              <ErrorComponent errorText="No options found" />
+            )}
           </Box>
         </BoxModal>
       </Modal>
