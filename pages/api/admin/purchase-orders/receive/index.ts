@@ -52,6 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         data: {
           receivedQty: poItem.receivedQty,
           rejectedQty: poItem.rejectedQty,
+          costPerItem: poItem.costPerItem,
         },
       });
     });

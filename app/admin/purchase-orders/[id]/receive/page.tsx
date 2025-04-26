@@ -123,7 +123,6 @@ export default function ReceiveInventory() {
           onClose={() => setOpenConvertToTransactionModal(false)}
           showNotification={showNotification}
           po={{...po, poItems}}
-          poItems={poItems}
         />
       )}
       {NotificationComp}
