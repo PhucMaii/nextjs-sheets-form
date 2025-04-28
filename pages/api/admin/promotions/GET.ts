@@ -17,6 +17,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const promotion = await prisma.promotion.findUnique({
         where: {
           id: Number(id),
+          isWebsite: null,
         },
         include: {
           items: {
@@ -43,6 +44,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const promotions = await prisma.promotion.findMany({
         where: {
           status: status,
+          isWebsite: null,
         },
         include: {
           items: true,
@@ -59,6 +61,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const allPromotions = await prisma.promotion.findMany({
+      where: {
+        isWebsite: null,
+      },
       include: {
         items: {
           orderBy: {

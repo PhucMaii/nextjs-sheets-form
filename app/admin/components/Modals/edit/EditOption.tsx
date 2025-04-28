@@ -35,7 +35,7 @@ export default function EditOption({
   onClose,
   option,
   showNotification,
-  noIncludeOption
+  noIncludeOption,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [units, setUnits] = useState<IInventoryUnit[]>([]);
@@ -136,23 +136,25 @@ export default function EditOption({
             onClose={onClose}
           />
 
-          {!noIncludeOption && <RadioGroup
-            row
-            value={updateChoice}
-            onChange={(e) => setUpdateChoice(e.target.value as UPDATE_OPTION)}
-            // onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
-          >
-            <FormControlLabel
-              value={UPDATE_OPTION.CURRENT_CATEGORY}
-              control={<Radio />}
-              label="Only current category"
-            />
-            <FormControlLabel
-              value={UPDATE_OPTION.ALL_ITEMS_SAME_NAME}
-              control={<Radio />}
-              label="Same inventory item"
-            />
-          </RadioGroup>}
+          {!noIncludeOption && (
+            <RadioGroup
+              row
+              value={updateChoice}
+              onChange={(e) => setUpdateChoice(e.target.value as UPDATE_OPTION)}
+              // onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
+            >
+              <FormControlLabel
+                value={UPDATE_OPTION.CURRENT_CATEGORY}
+                control={<Radio />}
+                label="Only current category"
+              />
+              <FormControlLabel
+                value={UPDATE_OPTION.ALL_ITEMS_SAME_NAME}
+                control={<Radio />}
+                label="Same inventory item"
+              />
+            </RadioGroup>
+          )}
 
           <Divider sx={{ my: 2 }}>Price</Divider>
 

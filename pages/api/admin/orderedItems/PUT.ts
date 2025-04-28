@@ -123,7 +123,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Calculate cost: prevCost / prevRatio to get cost for ratio of 1 -> then multiply to new ratio
         const cost =
-          (item?.cost / (item?.inventoryUnit?.ratio || 1)) * (item?.inventoryUnit?.ratio || 1);
+          (item?.cost / (item?.inventoryUnit?.ratio || 1)) *
+          (item?.inventoryUnit?.ratio || 1);
 
         await prisma.orderedItems.update({
           where: {

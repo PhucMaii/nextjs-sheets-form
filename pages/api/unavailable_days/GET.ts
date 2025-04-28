@@ -56,9 +56,24 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    if (userId !== 'All Clients' && date) {
+      const filteredRange = filterRangeByDate(date, unavailableRanges);
+      console.log('filteredRange: ', filteredRange);
+
+      console.log(
+        'existingUser.clientName: ',
+        filteredRange[Object.keys(filteredRange)[0]],
+      );
+
+      return res.status(200).json({
+        message: 'Fetch Unavailable Days Ranges Successfully',
+        data: filteredRange[Object.keys(filteredRange)[0]],
+      });
+    }
+
     return res.status(200).json({
-      message: 'Fetch Unavailable Days Ranges Successfully',
-      data: unavailableRanges,
+      data: [],
+      message: 'No Unavailable Days Ranges Found',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

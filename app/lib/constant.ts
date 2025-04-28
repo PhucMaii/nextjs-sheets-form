@@ -9,6 +9,7 @@ import PeopleIcon from '@mui/icons-material/People';
 // import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
+import LocalMallIcon from '@mui/icons-material/LocalMall';
 import {
   ORDER_STATUS,
   ORDER_TYPE,
@@ -139,6 +140,7 @@ export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (
 export const testAccountId = 223;
 export const TimLeAccountId = 240;
 export const clientMaxWidth = '1250px';
+export const websiteItemCategoryId = 334;
 
 export const sendChequeMsg = `
 * Please either send your payment by cheque 
@@ -238,6 +240,11 @@ export const adminTabs = {
       name: 'Transactions',
       icon: SyncAltIcon,
       path: '/admin/transactions',
+    },
+    {
+      name: 'Purchase Orders',
+      icon: LocalMallIcon,
+      path: '/admin/purchase-orders',
     },
     {
       name: 'C.O.D',

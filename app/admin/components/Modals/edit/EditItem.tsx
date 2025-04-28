@@ -288,7 +288,6 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                 <OptionsTable
                   options={updatedItem?.options || []}
                   showNotification={showNotification}
-                  
                 />
               </Grid>
             )}

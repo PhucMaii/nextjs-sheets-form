@@ -170,7 +170,10 @@ const handleUpdatAllScheduleOrders = async (items: any) => {
         ),
       )[0];
 
-      console.log('matchingScheduleOrder: ', {matchingScheduleOrder, newItem});
+      console.log('matchingScheduleOrder: ', {
+        matchingScheduleOrder,
+        newItem,
+      });
 
       if (!matchingScheduleOrder) {
         return null;

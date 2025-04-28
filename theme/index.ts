@@ -24,6 +24,11 @@ export function createTheme() {
     },
     typography,
     components: {
+      MuiButton: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
       MuiTextField: {
         defaultProps: {
           size: 'small', // Set default size to 'small'

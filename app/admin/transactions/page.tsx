@@ -105,6 +105,7 @@ export default function Transactions() {
   };
 
   const handleSelectExpense = (e: any, targetExpense: IExpense) => {
+    e.stopPropagation();
     e.preventDefault();
     const selectedExpense = selectedExpenses.find((expense: IExpense) => {
       return expense.id === targetExpense.id;

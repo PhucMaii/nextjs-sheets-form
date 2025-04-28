@@ -227,12 +227,12 @@ export const ItemButton = ({
           //   disabled || item?.availability === false
           //     ? grey[400]
           //     : blueGrey[800],
-          ...(!item?.image && containerStyle),
+          ...(!(item?.image || item?.inventoryItem?.image) && containerStyle),
         }}
       >
-        {item?.image && (
+        {(item?.image || item?.inventoryItem?.image) && (
           <img
-            src={generateImgUrl(item?.image)}
+            src={generateImgUrl(item?.image || item?.inventoryItem?.image)}
             alt="img"
             style={{
               position: 'absolute',
@@ -363,8 +363,8 @@ const OrderView = ({
     id: defaultOrder?.id || -1,
     subTotal: 0,
     totalPrice: 0,
-    PST: 0,
-    GST: 0,
+    PST: defaultOrder?.PST || 0,
+    GST: defaultOrder?.GST || 0,
     note: defaultOrder?.note || '',
     deliveryDate:
       defaultOrder?.deliveryDate ||
@@ -444,7 +444,15 @@ const OrderView = ({
       });
     });
 
-    return newPromotions;
+    // Check if there is at least one item that is not disabled -> add the promotion to the newPromotions
+    const returnPromotions: any = {};
+    Object.keys(newPromotions).forEach((key: string) => {
+      if (newPromotions[key].some((item: any) => !item.disabled)) {
+        returnPromotions[key] = newPromotions[key];
+      }
+    });
+
+    return returnPromotions;
   }, [appearance]);
 
   const xsDown = useMediaQuery((theme: any) => theme.breakpoints.down('xs'));
@@ -498,8 +506,8 @@ const OrderView = ({
       ...order,
       subTotal: newSubtotal?.subTotal || 0,
       totalPrice: newSubtotal?.totalPrice || 0,
-      PST: newSubtotal?.PST || 0,
-      GST: newSubtotal?.GST || 0,
+      PST: defaultOrder?.PST || newSubtotal?.PST || 0,
+      GST: defaultOrder?.GST || newSubtotal?.GST || 0,
     });
   }, [orderedItems]);
 
@@ -1054,7 +1062,9 @@ const OrderView = ({
                         sx={{ textDecoration: 'line-through' }}
                         color="error"
                       >
-                        ${item?.option?.prevPrice?.toFixed(2) || item.prevPrice.toFixed(2)}
+                        $
+                        {item?.option?.prevPrice?.toFixed(2) ||
+                          item.prevPrice.toFixed(2)}
                       </Typography>
                     )}
                   </Box>

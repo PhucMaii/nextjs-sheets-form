@@ -6,6 +6,7 @@ interface IBody {
   name: string;
   address: string;
   phoneNumber: string;
+  email: string;
   joinedDate: string;
 }
 
@@ -13,9 +14,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, name, address, phoneNumber, joinedDate }: IBody = req.body;
+    const { id, name, address, phoneNumber, email, joinedDate }: IBody =
+      req.body;
 
-    if (!name || !address || !phoneNumber || !joinedDate) {
+    if (!name || !address || !joinedDate) {
       return res.status(404).json({
         error: 'You are missing body data',
       });
@@ -56,6 +58,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         name,
+        email,
         address,
         phoneNumber,
         joinedDate,

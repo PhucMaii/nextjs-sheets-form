@@ -19,6 +19,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const isTitleExisted = await prisma.promotion.findFirst({
       where: {
         title,
+        isWebsite: null,
       },
     });
 
@@ -30,6 +31,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     // Get the next priority
     const allPromotions = await prisma.promotion.findMany({
+      where: {
+        isWebsite: null,
+      },
       orderBy: {
         priority: 'desc',
       },

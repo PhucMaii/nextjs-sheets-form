@@ -12,6 +12,8 @@ import {
   ItemType_Category,
   Option,
   PaymentMethod,
+  PO,
+  POItem,
   PositionIndex,
   Promotion,
   Route,
@@ -218,6 +220,7 @@ export interface IPaymentMethod extends PaymentMethod {
 
 export interface IVendor extends Vendor {
   inventoryItems: any;
+  vendorItem: IVendorItem[];
 }
 
 export interface IInventoryItem extends InventoryItem {
@@ -268,4 +271,14 @@ export interface IOption extends Option {
 export interface IShiftSession extends ShiftSession {
   driver: IDriver;
   route?: IRoutes;
+}
+
+export interface IPurchaseOrder extends PO {
+  poItems: IPOItem[];
+  vendor: IVendor;
+}
+
+export interface IPOItem extends POItem {
+  inventoryUnit: IInventoryUnit;
+  inventoryItem: IInventoryItem;
 }

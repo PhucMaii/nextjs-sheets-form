@@ -205,8 +205,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     //     }
     // });
 
+    // Sort the orders: if orders.deliveryDate !== date, push it first
+    const sortedOrders = sortedDeliveryOrders.sort((a) => {
+      if (a.deliveryDate !== date) {
+        return -1;
+      }
+      return 1;
+    });
+
     return res.status(200).json({
-      data: { ...codBoard, orders: sortedDeliveryOrders },
+      data: { ...codBoard, orders: sortedOrders },
       message: 'Fetch All Cod Successfully',
     });
   } catch (error: any) {

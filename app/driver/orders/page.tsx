@@ -33,6 +33,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import InsertOrderToCodBoard from '@/app/admin/components/Modals/add/InsertOrderToCodBoard';
 import SwitchRole from '../components/Modals/SwitchRole';
+
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
   return (
@@ -47,7 +48,8 @@ function CircularProgressWithLabel(props: any) {
     >
       <CircularProgress
         variant="determinate"
-        size={120}
+        size={175}
+        thickness={2.4}
         value={value > 100 ? 100 : value}
         sx={{ color: props.color }}
       />
@@ -61,15 +63,26 @@ function CircularProgressWithLabel(props: any) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          flexWrap: 'wrap',
+          px: 2,
+          gap: 0.5,
         }}
       >
         <Typography
           variant="h6"
-          component="div"
+          fontWeight="semibold"
           textAlign="center"
           color={props.valueColor}
         >
-          {props.currentValue} / {props.basedValue}
+          {props.currentValue} /
+        </Typography>
+        <Typography
+          variant="h6"
+          fontWeight="semibold"
+          textAlign="center"
+          color={props.valueColor}
+        >
+          {props.basedValue}
         </Typography>
       </Box>
     </Box>

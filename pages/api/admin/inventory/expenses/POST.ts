@@ -19,6 +19,7 @@ interface IBody {
   subTotal?: number;
   GST?: number;
   PST?: number;
+  discount?: number;
   codBoardId?: number;
   status: TRANSACTION_STATUS;
   items: {
@@ -44,6 +45,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       spentBy,
       createdAt,
       status,
+      discount,
       subTotal,
       GST,
       PST,
@@ -100,6 +102,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         codBoardId: codBoardId,
         status,
         createdBy,
+        discount,
       },
     });
 

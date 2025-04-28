@@ -24,7 +24,12 @@ interface IProps {
   setItems?: any;
 }
 
-export default function OptionsTable({ options, showNotification, noIncludeOption, setItems }: IProps) {
+export default function OptionsTable({
+  options,
+  showNotification,
+  noIncludeOption,
+  setItems,
+}: IProps) {
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
     option: null,

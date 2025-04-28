@@ -46,6 +46,7 @@ export default function VendorTable({ vendors, showNotification }: IProps) {
           <TableRow>
             <TableCell>Id</TableCell>
             <TableCell>Name</TableCell>
+            <TableCell>Email</TableCell>
             <TableCell>Phone Number</TableCell>
             <TableCell>Address</TableCell>
             <TableCell>Joined Date</TableCell>
@@ -59,6 +60,7 @@ export default function VendorTable({ vendors, showNotification }: IProps) {
                 <TableRow key={index}>
                   <TableCell>{vendor.id}</TableCell>
                   <TableCell>{vendor.name}</TableCell>
+                  <TableCell>{vendor?.email}</TableCell>
                   <TableCell>{vendor.phoneNumber}</TableCell>
                   <TableCell>{vendor.address}</TableCell>
                   <TableCell>{vendor.joinedDate}</TableCell>

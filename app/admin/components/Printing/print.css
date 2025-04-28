@@ -23,6 +23,7 @@
   /* Ensure page breaks after each element with this class */
   .page-break {
     page-break-after: always;
+    /* Removed page-break-before to prevent blank pages */
   }
 
   /* Prevent content from being split across pages

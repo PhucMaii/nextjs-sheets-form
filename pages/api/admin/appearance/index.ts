@@ -125,6 +125,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const dbPromotions = await prisma.promotion.findMany({
       where: {
         status: PROMOTION_STATUS.ACTIVE,
+        isWebsite: null,
       },
       orderBy: {
         priority: 'asc',
@@ -262,12 +263,16 @@ const checkAndUpdateContainers = async (
     return container[compareField];
   });
 
-  console.log({
-    updatedContainerNames,
-    dbContainerNames,
-    compare: JSON.stringify(updatedContainerNames) ===
-      JSON.stringify(dbContainerNames),
-  }, 'in checkAndUpdateContainers');
+  console.log(
+    {
+      updatedContainerNames,
+      dbContainerNames,
+      compare:
+        JSON.stringify(updatedContainerNames) ===
+        JSON.stringify(dbContainerNames),
+    },
+    'in checkAndUpdateContainers',
+  );
 
   // Compare if types has any re arrangement
   if (

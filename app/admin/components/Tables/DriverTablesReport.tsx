@@ -69,11 +69,10 @@ export default function DriverTablesReport({ data }: IProps) {
                 <TableCell component="th" scope="row">
                   {row.name}
                 </TableCell>
-                <TableCell align="right">{((row?.driverHours || 0) + (row?.factoryHours || 0))?.toFixed(2)}</TableCell>
-                <TableCell align="right">{row?.driverHours?.toFixed(2) || 0}</TableCell>
-                <TableCell align="right">{row?.factoryHours?.toFixed(2) || 0}</TableCell>
                 <TableCell align="right">
-                  ${row?.cost?.toFixed(2)}
+                  {(
+                    (row?.driverHours || 0) + (row?.factoryHours || 0)
+                  )?.toFixed(2)}
                 </TableCell>
                 <TableCell align="right">
                   {row?.driverHours?.toFixed(2) || 0}
@@ -81,7 +80,7 @@ export default function DriverTablesReport({ data }: IProps) {
                 <TableCell align="right">
                   {row?.factoryHours?.toFixed(2) || 0}
                 </TableCell>
-                <TableCell align="right">${row.cost.toFixed(2)}</TableCell>
+                <TableCell align="right">${row?.cost?.toFixed(2)}</TableCell>
               </TableRow>
             ))}
 

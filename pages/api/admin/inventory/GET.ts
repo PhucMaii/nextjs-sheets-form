@@ -151,10 +151,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         (i: any) => i.name === item,
       );
 
-      const listingCategories = inventoryItem?.item?.map((item: any) => item.category.name);
+      const listingCategories = inventoryItem?.item?.map(
+        (item: any) => item.category.name,
+      );
 
       if (inventoryItem) {
-        sortedInventoryItem.push({...inventoryItem, listingCategories});
+        sortedInventoryItem.push({ ...inventoryItem, listingCategories });
       }
     }
 

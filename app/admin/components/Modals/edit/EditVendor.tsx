@@ -45,6 +45,7 @@ const EditVendor = ({ vendor, showNotification }: IProps) => {
         name: updatedVendor.name,
         phoneNumber: updatedVendor.phoneNumber,
         address: address ? address : vendor.address,
+        email: updatedVendor.email,
         joinedDate: date,
       });
 
@@ -69,7 +70,16 @@ const EditVendor = ({ vendor, showNotification }: IProps) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Edit</Button>
+      <Button
+        onClick={(e: any) => {
+          e.stopPropagation();
+          e.preventDefault();
+
+          setOpen(true);
+        }}
+      >
+        Edit
+      </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <BoxModal>
           <ModalHead
@@ -92,6 +102,19 @@ const EditVendor = ({ vendor, showNotification }: IProps) => {
                 value={updatedVendor.name}
                 onChange={(e) =>
                   setUpdatedVendor({ ...updatedVendor, name: e.target.value })
+                }
+              />
+            </Box>
+
+            {/* Email */}
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Email</Typography>
+              <TextField
+                fullWidth
+                placeholder="Enter vendor's email..."
+                value={updatedVendor.email}
+                onChange={(e) =>
+                  setUpdatedVendor({ ...updatedVendor, email: e.target.value })
                 }
               />
             </Box>

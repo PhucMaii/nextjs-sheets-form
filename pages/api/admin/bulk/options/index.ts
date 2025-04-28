@@ -1,9 +1,14 @@
-import { ICategory } from '@/app/utils/type';
 import { getUserInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+
+interface IProps {
+  inventoryItemId: number;
+  categoryIds: number[];
+  updatedOptions: any;
+}
 
 const prisma = new PrismaClient();
 
@@ -13,13 +18,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
 
-    const { inventoryItemId, categories, updatedOptions } = req.body;
+    const { inventoryItemId, categoryIds, updatedOptions }: IProps = req.body;
 
-    if (!categories) {
-      return res.status(400).json({ error: 'Categories are required' });
+    if (!categoryIds) {
+      return res.status(400).json({ error: 'Category Ids are required' });
     }
-
-    const categoryIds = categories.map((category: any) => category.id);
 
     const items = await prisma.item.findMany({
       where: {
@@ -79,7 +82,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Handle update scheduled orders
     const responseStatus = await handleUpdateAllScheduleOrders(
       inventoryItemId,
-      categories,
+      categoryIds,
       updatedOptions,
     );
 
@@ -139,14 +142,14 @@ export default withAdminAuthGuard(handler);
 
 const handleUpdateAllScheduleOrders = async (
   inventoryItemId: number,
-  categories: ICategory[],
+  categoryIds: number[],
   updatedOptions: any,
 ) => {
   try {
     const users = await prisma.user.findMany({
       where: {
         categoryId: {
-          in: categories.map((category: any) => category.id),
+          in: categoryIds,
         },
       },
       include: {
@@ -168,7 +171,7 @@ const handleUpdateAllScheduleOrders = async (
 
     // If there is no pre ordered items -> return
     if (targetOrderedItems.length === 0) {
-      return {ok: true}
+      return { ok: true };
     }
 
     const promisesItem = targetOrderedItems.map((item: any) => {
@@ -185,7 +188,7 @@ const handleUpdateAllScheduleOrders = async (
             price: ratioOf1 ? ratioOf1.price : updatedOptions[0]?.price,
             prevPrice: ratioOf1
               ? ratioOf1.prevPrice
-              : updatedOptions[0]?.prevPrice, 
+              : updatedOptions[0]?.prevPrice,
             isShowDiscount: ratioOf1
               ? ratioOf1.isShowDiscount
               : updatedOptions[0]?.isShowDiscount,
@@ -273,11 +276,11 @@ const handleUpdateAllScheduleOrders = async (
       where: {
         userId: {
           in: users.map((user: any) => user.id),
-        }
+        },
       },
       include: {
         items: true,
-      }
+      },
     });
 
     const promisesOrder = scheduledOrders.map((order: any) => {
