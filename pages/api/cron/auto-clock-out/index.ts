@@ -16,17 +16,29 @@ export default async function handler(
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const activeShifts = await prisma.shiftSession.findMany({
+  const activeShifts = await prisma.shiftSession.findMany({
       where: {
         endedAt: null,
+        isActive: true,
+      },
+      include: {
+        driver: true,
+        route: true,
       },
     });
 
     // End shifts
     const today = getTodayDate();
 
+    const todayOrders = await prisma.orders.findMany({
+      where: {
+        deliveryDate: today.date,
+      },
+    });
+
     for (const shift of activeShifts) {
       const hours = calculateHours(shift.startedAt, today.dateAndTime);
+
       await prisma.shiftSession.update({
         where: {
           id: shift.id,
@@ -35,8 +47,38 @@ export default async function handler(
           endedAt: today.dateAndTime,
           hours,
           isActive: false,
+          
         },
       });
+
+      const orderDeliveredByDriver = todayOrders.filter((order) => {
+        return order.deliveredBy === shift.driver.name;
+      });
+
+      // Get the latest order delivered by driver
+      const latestOrder = orderDeliveredByDriver.sort((a, b) => {
+        return new Date(b.deliveryDate).getTime() - new Date(a.deliveryDate).getTime();
+      })[0];
+
+      if (latestOrder && latestOrder.deliveredAt) {
+        await prisma.shiftSession.update({
+          where: {
+            id: shift.id,
+          },
+          data: {
+            endedAt: latestOrder.deliveredAt,
+          }
+        });
+      } else {
+        await prisma.shiftSession.update({
+          where: {
+            id: shift.id,
+          },
+          data: {
+            endedAt: today.dateAndTime,
+          }
+        });
+      }
     }
 
     return res.status(200).json({

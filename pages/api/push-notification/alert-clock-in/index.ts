@@ -71,7 +71,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               'Good morning ' +
               driver.name +
               ', you have a shift today at ' +
-              driver.routes[0].name,
+              driver?.routes[0]?.name || 'No route',
             body: 'Do not forget to clock in your shift',
           }),
         );

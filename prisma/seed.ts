@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-// const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
 //   const koreanRange = /[\uAC00-\uD7AF]/;
@@ -115,12 +115,13 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-const prisma = new PrismaClient({
-  log: ['info'],
-});
 
 async function main() {
-  await prisma.user.findMany();
+  await prisma.driver.updateMany({
+    data: {
+      notification: undefined,
+    }  
+  })
 }
 
 main()

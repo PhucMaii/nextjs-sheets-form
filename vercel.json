@@ -22,7 +22,7 @@
     },
     {
       "path": "/api/cron/auto-clock-out",
-      "schedule": "0 9 * * *"
+      "schedule": "59 6 * * *"
     }
   ],
   "functions": {

@@ -150,6 +150,7 @@ model Orders {
   shippingFee       Float?
   type              String?
   deliveredBy       String?
+  deliveredAt       String?
   addedToCODBy      String?
   insertedAt        String?
   insertedBy        String?
