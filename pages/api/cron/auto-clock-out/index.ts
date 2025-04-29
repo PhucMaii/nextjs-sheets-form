@@ -16,7 +16,7 @@ export default async function handler(
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-  const activeShifts = await prisma.shiftSession.findMany({
+    const activeShifts = await prisma.shiftSession.findMany({
       where: {
         endedAt: null,
         isActive: true,
@@ -37,19 +37,19 @@ export default async function handler(
     });
 
     for (const shift of activeShifts) {
-      const hours = calculateHours(shift.startedAt, today.dateAndTime);
+      // const hours = calculateHours(shift.startedAt, today.dateAndTime);
 
-      await prisma.shiftSession.update({
-        where: {
-          id: shift.id,
-        },
-        data: {
-          endedAt: today.dateAndTime,
-          hours,
-          isActive: false,
-          
-        },
-      });
+      // await prisma.shiftSession.update({
+      //   where: {
+      //     id: shift.id,
+      //   },
+      //   data: {
+      //     endedAt: today.dateAndTime,
+      //     hours,
+      //     isActive: false,
+
+      //   },
+      // });
 
       const orderDeliveredByDriver = todayOrders.filter((order) => {
         return order.deliveredBy === shift.driver.name;
@@ -57,26 +57,38 @@ export default async function handler(
 
       // Get the latest order delivered by driver
       const latestOrder = orderDeliveredByDriver.sort((a, b) => {
-        return new Date(b.deliveryDate).getTime() - new Date(a.deliveryDate).getTime();
+        return (
+          new Date(b.deliveryDate).getTime() -
+          new Date(a.deliveryDate).getTime()
+        );
       })[0];
 
       if (latestOrder && latestOrder.deliveredAt) {
+        const hours = calculateHours(shift.startedAt, latestOrder.deliveredAt);
+
         await prisma.shiftSession.update({
           where: {
             id: shift.id,
           },
           data: {
             endedAt: latestOrder.deliveredAt,
-          }
+            hours,
+            isActive: false,
+            cost: hours * (shift?.driver?.hourlyRate || 1),
+          },
         });
       } else {
+        const hours = calculateHours(shift.startedAt, today.dateAndTime);
         await prisma.shiftSession.update({
           where: {
             id: shift.id,
           },
           data: {
             endedAt: today.dateAndTime,
-          }
+            isActive: false,
+            hours,
+            cost: hours * (shift?.driver?.hourlyRate || 1),
+          },
         });
       }
     }

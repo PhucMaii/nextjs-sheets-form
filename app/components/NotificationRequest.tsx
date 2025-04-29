@@ -88,9 +88,24 @@ export default function NotificationRequest() {
       if (response.data.error) {
         showNotification('error', response.data.error);
       }
+
+      await confirmAllowNotification();
     } catch (error) {
       console.log('Fail to update driver noti: ', error);
       showNotification('error', 'Fail to update driver noti: ' + error);
+    }
+  };
+
+  const confirmAllowNotification = async () => {
+    try {
+      const response = await axios.post(`/api/push-notification/confirm-allow`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+      }
+    } catch (error) {
+      console.log('Fail to confirm allow notification: ', error);
+      showNotification('error', 'Fail to confirm allow notification: ' + error);
     }
   };
 

@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import webpush from 'web-push';
-// import {
-//   convertDeliveryDateStringToDate,
-//   getTodayDate,
-// } from '../../utils/date';
-// import { days } from '@/app/lib/constant';
+// import { getTodayDate } from '../../utils/date';
+import {
+  convertDeliveryDateStringToDate,
+  getTodayDate,
+} from '../../utils/date';
+import { days } from '@/app/lib/constant';
 // import { getDriverInfo } from '../../utils/auth';
 
 const prisma = new PrismaClient();
@@ -35,21 +36,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // const driverData: any = await getDriverInfo(req, res);
     // driverId = driverData.id;
 
-    // const today = getTodayDate();
+    const today = getTodayDate();
 
-    // const date = convertDeliveryDateStringToDate(today.date);
-    // const day = days[date.getDay()];
+    const date = convertDeliveryDateStringToDate(today.date);
+    const day = days[date.getDay()];
 
-    console.log('🔔 Drivers: ', drivers);
     for (const driver of drivers) {
       console.log('🔔 Driver: ', driver);
-      // const currentRoute = driver.routes.find((route: any) => {
-      //   return route.day === day;
-      // });
+      const currentRoute = driver.routes.find((route: any) => {
+        return route.day === day;
+      });
 
-      // if (!currentRoute) {
-      //   continue;
-      // }
+      if (!currentRoute) {
+        continue;
+      }
 
       try {
         console.log(
@@ -69,10 +69,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           JSON.stringify({
             message:
               'Good morning ' +
-              driver.name +
-              ', you have a shift today at ' +
-              driver?.routes[0]?.name || 'No route',
-            body: 'Do not forget to clock in your shift',
+              driver.name,
+            body: 'Clock in now to view your route for today 🚚. Have a safe drive!',
           }),
         );
       } catch (error: any) {
