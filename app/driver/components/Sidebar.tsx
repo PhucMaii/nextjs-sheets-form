@@ -60,7 +60,7 @@ export default function Sidebar({ children }: IProps) {
   const router = useRouter();
   const pathname: any = usePathname();
 
-  const isForceToClockIn = todaySession?.data?.length === 0 && todaySession?.isWorkingDay;
+  const isForceToClockIn = todaySession?.data?.length === 0 && todaySession?.isWorkingDay && pathname === '/driver/orders';
 
   useEffect(() => {
     setCurrentTab(pathname);

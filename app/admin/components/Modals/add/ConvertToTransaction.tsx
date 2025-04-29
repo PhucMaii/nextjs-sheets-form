@@ -38,7 +38,7 @@ export default function ConvertToTransaction({
     amount: po.totalCost,
     invoice: '',
     description: `Payment for #${po.poNumber}`,
-    paymentMethodId: mainPaymentMethodId,
+    paymentMethodId: -1,
     spentBy: po.createdBy,
     status: TRANSACTION_STATUS.UNPAID,
     tax: po.tax,
@@ -60,15 +60,15 @@ export default function ConvertToTransaction({
         amount: cost.totalCost,
         invoice: '',
         description: `Payment for #${po.poNumber}`,
-        paymentMethodId: mainPaymentMethodId,
+        paymentMethodId: expenseData?.paymentMethodId || -1,
         spentBy: po.createdBy,
-        status: TRANSACTION_STATUS.PAID,
+        status: expenseData?.status || TRANSACTION_STATUS.UNPAID,
         tax: cost.tax,
         subTotal: cost.subtotal,
         discount: po?.discount || 0,
       });
 
-      setUpdatedPOItems(po?.poItems);
+      setUpdatedPOItems([...(po?.poItems || [])]);
     }
   }, [po]);
 
@@ -201,8 +201,8 @@ export default function ConvertToTransaction({
         <Divider sx={{ my: 2 }}>Items</Divider>
 
         <Box display="flex" flexDirection="column" gap={2}>
-          {updatedPOItems?.map((item: any) => (
-            <Box key={item.id} display="flex" flexDirection="column" gap={1}>
+          {updatedPOItems?.map((item: any, index: number) => (
+            <Box key={index} display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">{item.inventoryItem.name}</Typography>
               <Box
                 display="flex"
@@ -291,11 +291,11 @@ export default function ConvertToTransaction({
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Invoice</Typography>
             <TextField
-              type="number"
+              type="text"
               value={expenseData.invoice}
               fullWidth
               onChange={(e) =>
-                setExpenseData({ ...expenseData, invoice: +e.target.value })
+                setExpenseData({ ...expenseData, invoice: e.target.value })
               }
             />
           </Box>
@@ -339,8 +339,12 @@ export default function ConvertToTransaction({
                 -- Choose a method --
               </MenuItem>
               {paymentMethods.length > 0 &&
-                paymentMethods.map((item: any) => {
-                  return <MenuItem value={item.id}>{item.name}</MenuItem>;
+                paymentMethods.map((item: any, index: number) => {
+                  return (
+                    <MenuItem key={index} value={item.id}>
+                      {item.name}
+                    </MenuItem>
+                  );
                 })}
             </Select>
           </Box>
@@ -358,8 +362,10 @@ export default function ConvertToTransaction({
                 });
               }}
             >
-              {adminsAndDrivers.map((item: any) => (
-                <MenuItem value={item}>{item}</MenuItem>
+              {adminsAndDrivers.map((item: any, index: number) => (
+                <MenuItem key={index} value={item}>
+                  {item}
+                </MenuItem>
               ))}
             </Select>
           </Box>
