@@ -35,6 +35,9 @@ import NotificationRequest from '@/app/components/NotificationRequest';
 // import axios from 'axios';
 import PushReSubscriber from '@/app/components/PushResubscriber';
 // import axios from 'axios';
+import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
+import axios from 'axios';
+import useNotification from '@/hooks/useNotification';
 
 interface IProps {
   children: ReactNode;
@@ -54,6 +57,8 @@ export default function Sidebar({ children }: IProps) {
   //   'isAskedClockIn',
   //   false,
   // );
+
+  const { showNotification, NotificationComp } = useNotification();
 
   const [todaySession] = SWRFetchData(`${API_URL.DRIVER}/shift/today`);
 
@@ -100,6 +105,20 @@ export default function Sidebar({ children }: IProps) {
   //     console.log(error);
   //   }
   // };
+
+  const confirmAllowNotification = async () => {
+    try {
+      const response = await axios.post(`/api/push-notification/confirm-allow`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+      }
+    } catch (error) {
+      console.log('Fail to confirm allow notification: ', error);
+      showNotification('error', 'Fail to confirm allow notification: ' + error);
+    }
+  };
+
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -163,6 +182,7 @@ export default function Sidebar({ children }: IProps) {
   if (smDown) {
     return (
       <>
+        {NotificationComp}
         <PushReSubscriber />
         <NotificationRequest />
 
@@ -175,7 +195,10 @@ export default function Sidebar({ children }: IProps) {
             onOpenSwitchRole={() => setIsOpenSwitchRole(true)}
           />
         ) : (
-          <Box display="flex" alignItems="center" justifyContent="flex-end">
+          <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+            <IconButton onClick={confirmAllowNotification}>
+              <CircleNotificationsIcon />
+            </IconButton>
             <Button
               onClick={() =>
                 setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN })
