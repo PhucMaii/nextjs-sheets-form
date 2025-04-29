@@ -53,6 +53,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
         poTemplate,
       );
+
+      // Send email to gm@supremesprout.com
+      await emailHandler(
+        'gm@supremesprout.com',
+        `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
+        `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
+        poTemplate,
+      );
     }
 
     return res.status(200).json({ message: 'Email Sent Successfully' });

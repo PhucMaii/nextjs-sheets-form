@@ -106,8 +106,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      const poTemplate = generatePurchaseOrderTemplate(newPO?.vendor, newPO);
       if (newPO?.vendor?.email) {
-        const poTemplate = generatePurchaseOrderTemplate(newPO?.vendor, newPO);
         // Send email to vendor
         await emailHandler(
           newPO?.vendor?.email || '',
@@ -116,6 +116,20 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           poTemplate,
         );
       }
+
+      // Send email to gm@supremesprout.com
+      await emailHandler(
+        'gm@supremesprout.com',
+        `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
+        `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
+        poTemplate,
+      );
+
+      // Return with email sent message if sending email to vendor and gm@supremesprout.com is successful
+      return res.status(200).json({
+        message: 'Purchase order created and email sent successfully',
+        po: newPO,
+      });
     }
 
     return res
