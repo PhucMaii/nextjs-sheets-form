@@ -55,8 +55,6 @@ export default function Overview() {
     `${API_URL.ADMIN}/shifts/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
-  console.log({ dateRange });
-
   useEffect(() => {
     if (overview && dateRange) {
       initializeOverviewData();

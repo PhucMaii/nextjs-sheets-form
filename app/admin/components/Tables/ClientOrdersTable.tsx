@@ -4,13 +4,15 @@ import {
   Box,
   Button,
   Checkbox,
+  IconButton,
   MenuItem,
   Paper,
   Select,
   Table,
   TableBody,
-  TableCell,
   TableRow,
+  TableCell,
+  Tooltip,
 } from '@mui/material';
 import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
@@ -29,7 +31,7 @@ import { TableComponents, TableVirtuoso } from 'react-virtuoso';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { renderType } from '@/app/lib/render';
 import LockIcon from '@mui/icons-material/Lock';
-
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { grey } from '@mui/material/colors';
 
 interface PropTypes {
@@ -162,19 +164,28 @@ const ClientOrdersTable = ({
     return (
       <>
         <TableCell>
-          {order?.type === TYPE.LOCKED ? (
-            <StatusText
-              text={`Locked`}
-              type={'info'}
-              icon={<LockIcon color="info" fontSize="small" />}
-            />
-          ) : order.isReplacement ? (
-            <StatusText text="Replaced" type="error" />
-          ) : order.isVoid ? (
-            <StatusText text="Voided" type="error" />
-          ) : (
-            ''
-          )}
+          <Box display="flex" gap={1} alignItems="center">
+            {order?.type === TYPE.LOCKED ? (
+              <StatusText
+                text={`Locked`}
+                type={'info'}
+                icon={<LockIcon color="info" fontSize="small" />}
+              />
+            ) : order.isReplacement ? (
+              <StatusText text="Replaced" type="error" />
+            ) : order.isVoid ? (
+              <StatusText text="Voided" type="error" />
+            ) : (
+              ''
+            )}
+            {order?.note && order.note !== '' && (
+              <Tooltip title={order.note}>
+                <IconButton size="small">
+                  <TextSnippetIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
         </TableCell>
         <TableCell padding="checkbox">
           <Checkbox
