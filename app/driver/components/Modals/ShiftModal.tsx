@@ -71,9 +71,16 @@ export const RoleOption = ({
 interface IProps extends ModalProps {
   type: ShiftType;
   shift: IShiftSession | null;
+  isDisabledClose: boolean;
 }
 
-const ShiftModal = ({ open, onClose, type, shift }: IProps) => {
+const ShiftModal = ({
+  open,
+  onClose,
+  type,
+  shift,
+  isDisabledClose,
+}: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<WORKING_ROLE>(
     WORKING_ROLE.DRIVER,
@@ -143,23 +150,33 @@ const ShiftModal = ({ open, onClose, type, shift }: IProps) => {
   return (
     <>
       {NotificationComp}
-      <Modal open={open} onClose={onClose}>
+      <Modal
+        open={open}
+        onClose={() => {
+          if (!isDisabledClose) {
+            setIsAsked(true);
+            onClose();
+          }
+        }}
+      >
         <BoxModal
           display="flex"
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
         >
-          <Box display="flex" width="100%" justifyContent="flex-end">
-            <IconButton
-              onClick={() => {
-                setIsAsked(true);
-                onClose();
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
+          {!isDisabledClose && (
+            <Box display="flex" width="100%" justifyContent="flex-end">
+              <IconButton
+                onClick={() => {
+                  setIsAsked(true);
+                  onClose();
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          )}
           <Typography variant="h5">{today.time.slice(0, 12)}</Typography>
 
           {type === ShiftType.CLOCK_IN && (

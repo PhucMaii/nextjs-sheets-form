@@ -34,7 +34,7 @@ import SwitchRole from './Modals/SwitchRole';
 import NotificationRequest from '@/app/components/NotificationRequest';
 // import axios from 'axios';
 import PushReSubscriber from '@/app/components/PushResubscriber';
-import axios from 'axios';
+// import axios from 'axios';
 
 interface IProps {
   children: ReactNode;
@@ -60,19 +60,23 @@ export default function Sidebar({ children }: IProps) {
   const router = useRouter();
   const pathname: any = usePathname();
 
+  const isForceToClockIn = todaySession?.data?.length === 0 && todaySession?.isWorkingDay;
+
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
 
   useEffect(() => {
     if (todaySession) {
-      if (todaySession.data.length > 0) {
+      // Has shift session
+      if (todaySession?.data?.length > 0) {
         const currentShift = todaySession.data.find(
           (shift: IShiftSession) => shift.isActive,
         );
         setShiftSession(currentShift);
         setShiftModalProps({ open: false, type: null });
-      } else if (todaySession.data.length === 0) {
+        // No shift session and is working day => Force to clock in
+      } else if (todaySession?.data?.length === 0 && todaySession?.isWorkingDay) {
         setShiftSession(null);
         setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN });
         // setIsAsked(true);
@@ -84,18 +88,18 @@ export default function Sidebar({ children }: IProps) {
     router.push(path);
   };
 
-  const sendNotification = async () => {
-    try {
-      // if (Notification.permission === 'granted') {
-      //   new Notification('Supreme Sprouts', {
-      //     body: 'You have been clocked in',
-      //   })
-      // };
-      await axios.post('/api/push-notification/alert-clock-in');
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const sendNotification = async () => {
+  //   try {
+  //     // if (Notification.permission === 'granted') {
+  //     //   new Notification('Supreme Sprouts', {
+  //     //     body: 'You have been clocked in',
+  //     //   })
+  //     // };
+  //     await axios.post('/api/push-notification/alert-clock-in');
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -191,13 +195,14 @@ export default function Sidebar({ children }: IProps) {
           onClose={() => setShiftModalProps({ open: false, type: null })}
           type={shiftModalProps.type}
           shift={shiftSession}
+          isDisabledClose={isForceToClockIn}
         />
         <SwitchRole
           open={isOpenSwitchRole}
           onClose={() => setIsOpenSwitchRole(false)}
         />
         <Box sx={{ pb: 8, m: 1 }}>
-          <Button onClick={sendNotification}>Send notification</Button>
+          {/* <Button onClick={sendNotification}>Send notification</Button> */}
           {children}
         </Box>
         <Paper
@@ -285,6 +290,7 @@ export default function Sidebar({ children }: IProps) {
           onClose={() => setShiftModalProps({ open: false, type: null })}
           type={shiftModalProps.type}
           shift={shiftSession}
+          isDisabledClose={isForceToClockIn}
         />
         <SwitchRole
           open={isOpenSwitchRole}
@@ -359,6 +365,7 @@ export default function Sidebar({ children }: IProps) {
         onClose={() => setShiftModalProps({ open: false, type: null })}
         type={shiftModalProps.type}
         shift={shiftSession}
+        isDisabledClose={isForceToClockIn}
       />
       <SwitchRole
         open={isOpenSwitchRole}

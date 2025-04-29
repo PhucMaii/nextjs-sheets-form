@@ -1,5 +1,6 @@
+import { days } from '@/app/lib/constant';
 import { getDriverInfo } from '@/pages/api/utils/auth';
-import { getTodayDate } from '@/pages/api/utils/date';
+import { convertDeliveryDateStringToDate, getTodayDate } from '@/pages/api/utils/date';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -16,17 +17,37 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const today = getTodayDate();
 
+    const date = convertDeliveryDateStringToDate(today.date);
+    const day = days[date.getDay()];
+    // Check if driver has route today
+    const route = await prisma.route.findFirst({
+      where: {
+        driverId: driver.id,
+        day,
+      },
+    });
+
     const shiftSession = await prisma.shiftSession.findMany({
       where: {
         driverId: driver.id,
         date: today.date,
       },
     });
+    
+    if (!route) {
+      return res.status(200).json({
+        data: shiftSession,
+        isWorkingDay: false,
+        message: 'No route found for today',
+      });
+    }
+
 
     return res
       .status(200)
       .json({
         data: shiftSession,
+        isWorkingDay: true,
         message: 'Fetch Shift Session Successfully',
       });
   } catch (error: any) {
