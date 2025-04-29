@@ -16,6 +16,8 @@ model Driver {
   notification Json?
   role         String?
 
+  lossReports LossReport[]
+
   shiftSessions ShiftSession[]
   routes        Route[]
   CodBoard      CodBoard[]
@@ -68,8 +70,8 @@ model SubCategory {
 }
 
 model Item {
-  id              Int     @id @default(autoincrement())
-  name            String  @db.VarChar(255)
+  id              Int      @id @default(autoincrement())
+  name            String   @db.VarChar(255)
   categoryId      Int?
   price           Float
   availability    Boolean
@@ -78,11 +80,11 @@ model Item {
   isShowDiscount  Boolean?
   prevPrice       Float?
   image           String?
-  promotionId     Int?  // support for only item in website category
-  isBestSeller   Boolean?
+  promotionId     Int? // support for only item in website category
+  isBestSeller    Boolean?
 
-  options Option[]
-  cartItem  CartItem[]
+  options  Option[]
+  cartItem CartItem[]
 
   promotion     Promotion?     @relation(fields: [promotionId], references: [id])
   category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -211,14 +213,14 @@ model UserRoute {
 }
 
 model DayRange {
-  id        Int      @id @default(autoincrement())
-  startDate DateTime
-  endDate   DateTime
-  userId    Int
-  createdAt String?
-  createdBy String?
-  isArchived  Boolean?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         Int      @id @default(autoincrement())
+  startDate  DateTime
+  endDate    DateTime
+  userId     Int
+  createdAt  String?
+  createdBy  String?
+  isArchived Boolean?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Announcement {
@@ -329,6 +331,7 @@ model InventoryItem {
   preference   ItemPreference[]
   options      Option[]
   poItems      POItem[]
+  lossReports  LossReport[]
 
   promotion Promotion? @relation(fields: [promotionId], references: [id])
   type      ItemType?  @relation(fields: [typeId], references: [id])
@@ -418,13 +421,14 @@ model InventoryUnit {
   ratio        Float
   createdAt    String
   createdBy    String
-  sellingItem  Item[]
 
+  sellingItem     Item[]
   itemOptions     Option[]
   vendorItem      VendorItem       @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems    OrderedItems[]
   itemPreferences ItemPreference[]
   poItems         POItem[]
+  lossReports     LossReport[]
 
   @@index([vendorItemId])
 }
@@ -464,17 +468,16 @@ model ClientStatement {
 }
 
 model CartItem {
-  id               Int            @id @default(autoincrement())
-  quantity         Int
-  cartId           Int
-  itemId           Int
-  createdAt        String
-  createdBy        String
-  option           Json?
+  id        Int    @id @default(autoincrement())
+  quantity  Int
+  cartId    Int
+  itemId    Int
+  createdAt String
+  createdBy String
+  option    Json?
 
-
-  item             Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  cart             Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
 }
 
 model Cart {
@@ -495,7 +498,7 @@ model Cart {
 }
 
 model Promotion {
-  id         Int             @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   title      String
   status     String
   createdAt  String
@@ -503,9 +506,9 @@ model Promotion {
   priority   Int
   visibility Boolean?
   isWebsite  Boolean?
-  
-  items      InventoryItem[]
-  websiteItems  Item[]
+
+  items        InventoryItem[]
+  websiteItems Item[]
 }
 
 model Option {
@@ -586,4 +589,32 @@ model POItem {
 
   @@index([poId])
   @@index([inventoryItemId])
+}
+
+model LossReport {
+  id              Int     @id @default(autoincrement())
+  inventoryItemId Int
+  driverId        Int?
+  quantityLost    Int
+  inventoryUnitId Int
+  totalCost       Float?
+  lossType        String
+  description     String?
+  reportedDate    String
+  createdAt       String
+
+  medias Media[]
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  employee      Driver?       @relation(fields: [driverId], references: [id])
+  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
+}
+
+model Media {
+  id           Int    @id @default(autoincrement())
+  type         String
+  fileKey      String
+  lossReportId Int?
+
+  lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
 }
