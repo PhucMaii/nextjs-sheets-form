@@ -594,7 +594,7 @@ model POItem {
 model LossReport {
   id              Int     @id @default(autoincrement())
   inventoryItemId Int
-  driverId        Int?
+  employeeId        Int?
   quantityLost    Int
   inventoryUnitId Int
   totalCost       Float?
@@ -602,11 +602,12 @@ model LossReport {
   description     String?
   reportedDate    String
   createdAt       String
+  createdBy       String
 
   medias Media[]
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  employee      Driver?       @relation(fields: [driverId], references: [id])
+  employee      Driver?       @relation(fields: [employeeId], references: [id])
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
 }
 
@@ -614,6 +615,8 @@ model Media {
   id           Int    @id @default(autoincrement())
   type         String
   fileKey      String
+  createdAt   String
+  createdBy   String
   lossReportId Int?
 
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)

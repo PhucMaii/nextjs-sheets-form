@@ -40,6 +40,7 @@ import {
 import { amber, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { AccessTime } from '@mui/icons-material';
+import ReportIcon from '@mui/icons-material/Report';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -275,6 +276,11 @@ export const adminTabs = {
       name: 'Statements',
       icon: DocumentScannerIcon,
       path: '/admin/statements',
+    },
+    {
+      name: 'Product Loss',
+      icon: ReportIcon,
+      path: '/admin/product-loss',
     },
     {
       name: 'Blocking',

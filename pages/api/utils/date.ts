@@ -188,9 +188,9 @@ export const convertToPSTDate = (date: string | Date) => {
 };
 
 export const formatDate = (date: string) => {
-  const formattedEndDate = normalizeDate(
+  const formattedDate = normalizeDate(
     `${date.split(' ')[1]} ${date.split(' ')[2]} ${date.split(' ')[3]}`,
   );
 
-  return formattedEndDate;
+  return formattedDate;
 };
