@@ -2,11 +2,15 @@ import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { MenuItem, Select } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-const useEmployee = () => {
+const useEmployee = (defaultEmployee?: string) => {
   const [employee, setEmployee] = useState<string[]>([]);
-  const [selectedEmployee, setSelectedEmployee] = useState<string>('');
+  const [selectedEmployee, setSelectedEmployee] = useState<string>(defaultEmployee || '');
 
-    console.log(selectedEmployee, 'selectedEmployee');
+  useEffect(() => {
+    if (defaultEmployee) {
+      setSelectedEmployee(defaultEmployee);
+    }
+  }, [defaultEmployee]);
 
   const fetchEmployee = async () => {
     try {

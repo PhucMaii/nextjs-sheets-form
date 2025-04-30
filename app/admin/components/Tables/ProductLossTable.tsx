@@ -10,12 +10,21 @@ import {
 import React, { useState } from 'react';
 import DisplayFile from '../Modals/DisplayFile';
 import ViewImg from '../ViewImg';
+import EditProductLoss from '../Modals/edit/EditProductLoss';
+import { grey } from '@mui/material/colors';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps {
   productLossList: any[];
+  showNotification: ShowNotificationType;
+  refresh: () => Promise<void>;
 }
 
-export default function ProductLossTable({ productLossList }: IProps) {
+export default function ProductLossTable({ productLossList, showNotification, refresh }: IProps) {
+  const [editProps, setEditProps] = useState<any>({
+    open: false,
+    productLoss: null,
+  });
   const [viewImgProps, setViewImgProps] = useState<any>({
     open: false,
     fileKey: '',
@@ -23,6 +32,15 @@ export default function ProductLossTable({ productLossList }: IProps) {
 
   return (
     <>
+      {editProps.productLoss && (
+        <EditProductLoss
+          open={editProps.open}
+          onClose={() => setEditProps({ open: false, productLoss: null })}
+          productLoss={editProps.productLoss}
+          showNotification={showNotification}
+          refresh={refresh}
+        />
+      )}
       <ViewImg
         open={viewImgProps.open}
         fileKeyFront={viewImgProps.fileKey}
@@ -45,8 +63,22 @@ export default function ProductLossTable({ productLossList }: IProps) {
           </TableHead>
           <TableBody>
             {productLossList.map((productLoss) => (
-              <TableRow key={productLoss.id}>
-                <TableCell onClick={() => setViewImgProps({ fileKey: productLoss.medias[0].fileKey, open: true })}>
+              <TableRow key={productLoss.id} sx={{
+                '&:hover': {
+                  backgroundColor: grey[100],
+                },
+                }}
+                onClick={() => {
+                  setEditProps({
+                    open: true,
+                    productLoss,
+                  })
+                }}
+              >
+                <TableCell onClick={(e: any) => {
+                  e.stopPropagation();
+                  setViewImgProps({ fileKey: productLoss.medias[0].fileKey, open: true });
+                }}>
                   {productLoss.medias[0] && (
                     <DisplayFile
                       fileKey={productLoss.medias[0].fileKey}

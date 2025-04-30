@@ -80,7 +80,7 @@ export default function AddProductLoss({
             reportedDate: date,
             reportedBy: selectedEmployee,
           },
-          fileKeys: [productLoss.fileKey],
+          fileKeys: productLoss?.fileKey ? [productLoss.fileKey] : [],
         }
       );
 
@@ -119,13 +119,13 @@ export default function AddProductLoss({
             xs={12}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Item</Typography>
+            <Typography>Item:</Typography>
             {renderInventoryItemSearch()}
           </Grid>
 
           {selectedInventoryItem && (
             <Grid item xs={12}>
-              <Typography>Choose a unit</Typography>
+              <Typography>Choose a unit:</Typography>
               <UnitRadio
                 units={selectedInventoryItem?.units}
                 value={productLoss.inventoryUnit}
@@ -145,7 +145,7 @@ export default function AddProductLoss({
             xs={6}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Quantity</Typography>
+            <Typography>Quantity:</Typography>
             <TextField
               fullWidth
               variant="outlined"
@@ -163,7 +163,7 @@ export default function AddProductLoss({
             xs={6}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Total Cost</Typography>
+            <Typography>Total Cost:</Typography>
             <TextField
               fullWidth
               variant="outlined"
@@ -181,7 +181,7 @@ export default function AddProductLoss({
             xs={12}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Loss Type</Typography>
+            <Typography>Loss Type:</Typography>
             <Select
               fullWidth
               variant="outlined"
@@ -207,7 +207,7 @@ export default function AddProductLoss({
             xs={12}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Reported By</Typography>
+            <Typography>Reported By:</Typography>
             {renderEmployeeSearch()}
           </Grid>
 
@@ -216,7 +216,7 @@ export default function AddProductLoss({
             xs={12}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Reported Date</Typography>
+            <Typography>Reported Date:</Typography>
             {SelectDate}
           </Grid>
 
@@ -225,7 +225,7 @@ export default function AddProductLoss({
             xs={12}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Description</Typography>
+            <Typography>Description:</Typography>
             <TextField
               fullWidth
               variant="outlined"
@@ -248,7 +248,7 @@ export default function AddProductLoss({
             xs={12}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Typography>Evidence Images</Typography>
+            <Typography>Evidence Images:</Typography>
             {productLoss.fileKey ? (
               <DisplayFile fileKey={productLoss.fileKey} alt="product loss" />
             ) : (

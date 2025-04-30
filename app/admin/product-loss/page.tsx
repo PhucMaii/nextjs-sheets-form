@@ -11,8 +11,10 @@ import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { fetchApi } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 
 export default function ProductLoss() {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isOpenProductLoss, setIsOpenProductLoss] = useState<boolean>(false);
   const [productLossList, setProductLossList] = useState<IProductLoss[]>([]);
   const [dateRange, setDateRange] = useState<any>(generateMonthRange());
@@ -26,10 +28,14 @@ export default function ProductLoss() {
     );
 
     setProductLossList(data);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    fetchProductLossList();
+    if (dateRange) {
+      setIsLoading(true);
+      fetchProductLossList();
+    }
   }, [dateRange]);
 
   return (
@@ -71,7 +77,15 @@ export default function ProductLoss() {
           </Grid>
         </Grid>
 
-        <ProductLossTable productLossList={productLossList} />
+        {isLoading ? (
+          <LoadingComponent />
+        ) : (
+          <ProductLossTable
+            productLossList={productLossList}
+            showNotification={showNotification}
+            refresh={fetchProductLossList}
+          />
+        )}
       </ShadowSection>
     </Sidebar>
   );
