@@ -114,16 +114,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
           `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
           poTemplate,
+          'gm@supremesprout.com',
         );
       }
 
-      // Send email to gm@supremesprout.com
-      await emailHandler(
-        'gm@supremesprout.com',
-        `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
-        `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
-        poTemplate,
-      );
+      // // Send email to gm@supremesprout.com
+      // await emailHandler(
+      //   'gm@supremesprout.com',
+      //   `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
+      //   `Supreme Sprouts Purchase Order Request #${newPO?.poNumber}`,
+      //   poTemplate,
+      // );
 
       // Return with email sent message if sending email to vendor and gm@supremesprout.com is successful
       return res.status(200).json({

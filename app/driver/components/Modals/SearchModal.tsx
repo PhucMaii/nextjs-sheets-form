@@ -52,14 +52,14 @@ export default function SearchModal({
   }, [orders]);
 
   useEffect(() => {
-    if (debouncedKeywords) {
+    if (debouncedKeywords && orderList && orderList.length > 0) {
       const newOrderList = orderList.filter((order: Order) => {
         if (
-          order.clientId.includes(debouncedKeywords) ||
+          order?.clientId?.includes(debouncedKeywords) ||
           debouncedKeywords == order.id.toString() ||
-          order.clientName
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
+          order?.clientName
+            ?.toLowerCase()
+            ?.includes(debouncedKeywords.toLowerCase())
         ) {
           return true;
         }
