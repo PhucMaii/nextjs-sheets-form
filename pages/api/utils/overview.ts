@@ -124,7 +124,11 @@ export const getLastMonthRevenue = async (
     },
     0,
   );
-  return { chartData: formatLengthRevenue, revenue: lastMonthRevenue };
+  return {
+    chartData: formatLengthRevenue,
+    revenue: lastMonthRevenue,
+    keys: revenueByDate.keys,
+  };
 };
 
 export const getCustomersInDebt = (debtOrders: Order[]) => {

@@ -10,6 +10,7 @@ import {
   Skeleton,
   Switch,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
@@ -46,6 +47,8 @@ export default function Overview() {
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
 
   // Data Fetching
   const [overview, _mutateOverview, isValidating] = SWRFetchData(
@@ -149,92 +152,79 @@ export default function Overview() {
             />
           )}
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} mt={2}>
           {shiftOverview ? (
-            <Box
+            // <Box
+            //   display="flex"
+            //   flexDirection="column"
+            //   gap={1}
+            //   sx={{ height: '500px !important' }}
+            // >
+            <ShadowSection
               display="flex"
               flexDirection="column"
-              gap={1}
-              sx={{ height: '500px !important' }}
+              gap={2}
+              sx={{ height: '100%' }}
             >
-              <ShadowSection
+              <Typography variant="h6" fontWeight="normal">Shift Overview</Typography>
+              <Box
                 display="flex"
-                flexDirection="column"
-                gap={2}
-                sx={{ height: '150px !important' }}
+                justifyContent="space-between"
+                flexWrap={'wrap'}
+                sx={{ height: '100%' }}
               >
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  flexWrap={'wrap'}
-                >
-                  <Box>
-                    <Typography variant="h3" fontWeight="bold">
-                      {shiftOverview?.totalHours?.toFixed(2)}h
-                    </Typography>
-                    <Typography variant="body1" fontWeight="regular">
-                      Hours
-                    </Typography>
-                    <Box display="flex" alignItems="center" gap={1} mt={2}>
-                      <StatusText
-                        text={`${shiftOverview?.unpaidShifts?.length}h`}
-                        type="error"
-                      />
-                      <StatusText
-                        text={`${shiftOverview?.paidShifts?.length}h`}
-                        type="success"
-                      />
-                    </Box>
-                  </Box>
-                  <Divider orientation="vertical" flexItem />
-                  <Box>
-                    <Typography variant="h3" fontWeight="bold">
-                      ${shiftOverview?.totalCosts?.toFixed(2)}
-                    </Typography>
-                    <Typography variant="body1" fontWeight="regular">
-                      Employee Costs
-                    </Typography>
-
-                    <Box display="flex" alignItems="center" gap={1} mt={2}>
-                      <StatusText
-                        text={`$${shiftOverview?.unpaidShiftCost?.toFixed(2)}`}
-                        type="error"
-                      />
-                      <StatusText
-                        text={`$${shiftOverview?.paidShiftCost?.toFixed(2)}`}
-                        type="success"
-                      />
-                    </Box>
+                <Box>
+                  <Typography variant={mdDown ? 'h6' : 'h3'} fontWeight="bold">
+                    {shiftOverview?.totalHours?.toFixed(2)}h
+                  </Typography>
+                  <Typography variant="body1" fontWeight="regular">
+                    Hours
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1} mt={2}>
+                    <StatusText
+                      text={`${shiftOverview?.unpaidShifts?.length}h`}
+                      type="error"
+                    />
+                    <StatusText
+                      text={`${shiftOverview?.paidShifts?.length}h`}
+                      type="success"
+                    />
                   </Box>
                 </Box>
-              </ShadowSection>
+                <Divider orientation="vertical" flexItem />
+                <Box>
+                  <Typography variant={mdDown ? 'h6' : 'h3'} fontWeight="bold">
+                    ${shiftOverview?.totalCosts?.toFixed(2)}
+                  </Typography>
+                  <Typography variant="body1" fontWeight="regular">
+                    Employee Costs
+                  </Typography>
 
-              <ShadowSection
-                display="flex"
-                flexDirection="column"
-                gap={2}
-                sx={{ height: '350px !important' }}
-              >
-                <TopDrivers
-                  data={shiftOverview?.sortedDriverWithDriverHours}
-                  limit={5}
-                />
-              </ShadowSection>
-            </Box>
+                  <Box display="flex" alignItems="center" gap={1} mt={2}>
+                    <StatusText
+                      text={`$${shiftOverview?.unpaidShiftCost?.toFixed(2)}`}
+                      type="error"
+                    />
+                    <StatusText
+                      text={`$${shiftOverview?.paidShiftCost?.toFixed(2)}`}
+                      type="success"
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            </ShadowSection>
           ) : (
-            <Skeleton
-              variant="rounded"
-              sx={{ width: '100% !important', height: '390px !important' }}
-            />
+            // </Box>
+            <Skeleton variant="rounded" sx={{ width: '100% !important' }} />
           )}
         </Grid>
-        <Grid item xs={12} md={9}>
+        <Grid item xs={12}>
           {shiftOverview ? (
             <ShadowSection
               display="flex"
               flexDirection="column"
               gap={2}
-              sx={{ height: '500px !important' }}
+              sx={{ height: '100%' }}
             >
               <Typography variant="h6">Drivers Reports</Typography>
               <DriverTablesReport data={shiftOverview.driverReports} />
@@ -242,7 +232,7 @@ export default function Overview() {
           ) : (
             <Skeleton
               variant="rounded"
-              sx={{ width: '100% !important', height: '390px !important' }}
+              sx={{ width: '100% !important', height: '100%' }}
             />
           )}
         </Grid>

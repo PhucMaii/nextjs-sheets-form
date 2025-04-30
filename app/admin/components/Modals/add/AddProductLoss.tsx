@@ -51,20 +51,22 @@ export default function AddProductLoss({
 
   useEffect(() => {
     if (selectedInventoryItem) {
-      setProductLoss({
-        ...productLoss,
+      console.log(selectedInventoryItem.unit, 'selectedInventoryItem');
+      setProductLoss((prev: any) => ({
+        ...prev,
         inventoryUnitId: selectedInventoryItem.unit.id,
         inventoryUnit: selectedInventoryItem.unit,
-      });
+      }));
     }
   }, [selectedInventoryItem]);
 
+  console.log(productLoss, 'productLoss');
   useEffect(() => {
     if (productLoss.quantityLost && productLoss.inventoryUnit) {
-      setProductLoss({
-        ...productLoss,
+      setProductLoss((prev: any) => ({
+        ...prev,
         totalCost: productLoss.quantityLost * productLoss.inventoryUnit.unitPrice,
-      });
+      }));
     }
   }, [productLoss.quantityLost, productLoss.inventoryUnit]);
 
@@ -102,7 +104,7 @@ export default function AddProductLoss({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="80vh" overflow="auto">
         <ModalHead
           heading="Report Loss"
           buttonLabel="Report"
@@ -123,12 +125,12 @@ export default function AddProductLoss({
             {renderInventoryItemSearch()}
           </Grid>
 
-          {selectedInventoryItem && (
+          {selectedInventoryItem && productLoss.inventoryUnit && (
             <Grid item xs={12}>
               <Typography>Choose a unit:</Typography>
               <UnitRadio
                 units={selectedInventoryItem?.units}
-                value={productLoss.inventoryUnit}
+                value={JSON.stringify(productLoss.inventoryUnit)}
                 onChange={(e: any) =>
                   setProductLoss({
                     ...productLoss,

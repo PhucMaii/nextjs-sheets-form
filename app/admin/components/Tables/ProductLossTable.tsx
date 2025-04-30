@@ -50,7 +50,7 @@ export default function ProductLossTable({ productLossList, showNotification, re
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell></TableCell>
+              <TableCell>Evidence</TableCell>
               <TableCell>Id</TableCell>
               <TableCell>Product</TableCell>
               <TableCell>Quantity</TableCell>

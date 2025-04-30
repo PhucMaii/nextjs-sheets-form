@@ -17,38 +17,64 @@ export default function AreaChart({
   thisMonthData,
   lastMonthData,
 }: IProps) {
-  const series = [
-    {
-      name: 'Current Month',
-      data: thisMonthData,
-    },
-  ];
+  const series = lastMonthData
+    ? [
+        {
+          name: 'Current Month',
+          data: thisMonthData,
+        },
+        {
+          name: 'Last Month',
+          data: lastMonthData,
+        },
+      ]
+    : [
+        {
+          name: 'Current Month',
+          data: thisMonthData,
+        },
+      ];
 
-  if (lastMonthData) {
-    series.push({
-      name: 'Last Month',
-      data: lastMonthData,
-    });
-  }
-
+  console.log(timeSeries);
   const options: ApexOptions = {
     chart: {
+      type: 'bar',
       height: 350,
-      type: 'area',
+      // stacked: true,
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '60%',
+        borderRadius: 5,
+        borderRadiusApplication: 'end',
+      },
     },
     dataLabels: {
       enabled: false,
     },
     stroke: {
-      curve: 'smooth',
+      show: true,
+      width: 2,
+      colors: ['transparent'],
     },
     xaxis: {
       type: 'datetime',
       categories: timeSeries,
     },
+    yaxis: {
+      title: {
+        text: 'Revenue',
+      },
+    },
+    fill: {
+      opacity: 1,
+    },
     tooltip: {
-      x: {
-        format: 'dd/MM/yy HH:mm',
+      y: {
+        formatter: function (val) {
+          return '$ ' + val;
+        },
       },
     },
   };
@@ -57,7 +83,7 @@ export default function AreaChart({
     <DynamicApexCharts
       options={options}
       series={series}
-      type="line"
+      type="bar"
       height={350}
     />
   );

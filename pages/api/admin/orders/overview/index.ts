@@ -249,6 +249,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           thisMonth: thisMonthRevenueReport.values,
           lastMonth: lastMonthRevenueReport.chartData,
           timeSeries: thisMonthRevenueReport.keys, // Time series for displaying time for the chart
+          lastMonthTimeSeries: lastMonthRevenueReport.keys,
         },
       },
       message: 'Fetch Overview Data Successfully',
