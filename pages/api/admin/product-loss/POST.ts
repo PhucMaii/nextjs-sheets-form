@@ -4,6 +4,7 @@ import { getUserInfo } from '../../utils/auth';
 import { getTodayDate } from '../../utils/date';
 import { MEDIA_TYPE } from '@/app/utils/enum';
 import { InventoryUnit } from '@prisma/client';
+import { manuallySubtractInventoryItemQty } from '../../utils/inventoryItem';
 interface ProductLoss {
   inventoryItemId: number;
   employeeId: number;
@@ -58,31 +59,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // PURPOSE: Subtract the quantity lost from the inventory item
-    // Get furthest in time fifos of the invenotryItem
-    const fifos = await prisma.fifo.findMany({
-      where: {
-        inventoryItemId: productLoss.inventoryItemId,
-      },
-    });
-
-    // Sort the fifos by date
-    const furthestFifo = fifos.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
-
-    // Subtract the quantity lost from the fifos
-    const ratio = productLoss.inventoryUnit?.ratio || 1;
-    const normalizedQuantityLost = productLoss.quantityLost * ratio;
-    const updatedQuantity = furthestFifo.quantity - normalizedQuantityLost;
-
-    // Update the fifo quantity
-    await prisma.fifo.update({
-      where: {
-        id: furthestFifo.id,
-      },
-      data: {
-        quantity: updatedQuantity,
-      },
-    });
+    await manuallySubtractInventoryItemQty(
+      productLoss.inventoryItemId,
+      productLoss.quantityLost,
+      productLoss?.inventoryUnit?.ratio || 1
+    );
 
     return res.status(200).json({
       message: 'Product loss reported successfully',
