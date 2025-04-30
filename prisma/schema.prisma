@@ -16,8 +16,6 @@ model Driver {
   notification Json?
   role         String?
 
-  lossReports LossReport[]
-
   shiftSessions ShiftSession[]
   routes        Route[]
   CodBoard      CodBoard[]
@@ -42,9 +40,11 @@ model User {
   type                String?
   guestSessionId      String?
   contactName         String?
+
   category            Category?         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   subCategory         SubCategory?      @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   preference          UserPreference?   @relation(fields: [userPreferenceId], references: [id], onDelete: Cascade)
+
   Orders              Orders[]
   scheduleOrders      ScheduleOrders[]
   routes              UserRoute[]
@@ -594,20 +594,19 @@ model POItem {
 model LossReport {
   id              Int     @id @default(autoincrement())
   inventoryItemId Int
-  employeeId        Int?
   quantityLost    Int
   inventoryUnitId Int
   totalCost       Float?
   lossType        String
   description     String?
   reportedDate    String
+  reportedBy      String
   createdAt       String
   createdBy       String
 
   medias Media[]
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  employee      Driver?       @relation(fields: [employeeId], references: [id])
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
 }
 

@@ -13,6 +13,7 @@ interface ProductLoss {
     totalCost: number;
     reportedDate: string;
     inventoryUnitId: number;
+    reportedBy: string;
 }
 
 interface IBody {
@@ -32,13 +33,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         const newProductLoss = await prisma.lossReport.create({
             data: {
                 inventoryItemId: productLoss.inventoryItemId,
-                employeeId: productLoss.employeeId,
                 quantityLost: productLoss.quantityLost,
                 inventoryUnitId: productLoss.inventoryUnitId,
                 totalCost: productLoss.totalCost,
                 lossType: productLoss.lossType,
                 description: productLoss.description,
                 reportedDate: productLoss.reportedDate,
+                reportedBy: productLoss.reportedBy,
                 createdAt: today.dateAndTime,
                 createdBy: `${admin?.role || 'Admin'} - ${admin?.clientName}`,
             }

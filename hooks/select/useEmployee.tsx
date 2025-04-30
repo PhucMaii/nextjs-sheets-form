@@ -1,19 +1,16 @@
-import { getAllDataAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
-import { USER_ROLE } from '@/app/utils/enum';
+import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { MenuItem, Select } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 const useEmployee = () => {
-  const [employee, setEmployee] = useState<any[]>([]);
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [employee, setEmployee] = useState<string[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<string>('');
 
-  console.log(selectedEmployee, 'selectedEmployee');
+    console.log(selectedEmployee, 'selectedEmployee');
 
   const fetchEmployee = async () => {
     try {
-      const data = await getAllDataAdminsAndDrivers();
-
-      console.log(data, 'data');
+      const data = await getAdminsAndDrivers();
 
       setEmployee(data || []);
     } catch (error: any) {
@@ -33,11 +30,10 @@ const useEmployee = () => {
         size="small"
         fullWidth
       >
-        {employee.map((employee: any, index: number) => (
+        {employee.map((employee: string, index: number) => (
           <MenuItem key={index} value={employee}>
-            {employee?.role === USER_ROLE.DRIVER ? 'Driver' : 'Admin'}-{' '}
-            {employee?.clientName || employee?.name}
-          </MenuItem>
+            {employee}
+          </MenuItem> 
         ))}
       </Select>
     );

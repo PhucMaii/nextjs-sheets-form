@@ -3,18 +3,21 @@ import React from 'react';
 
 interface IProps {
   fileKey: string;
+  alt?: string;
+  width?: string;
+  height?: string;
 }
 
-export default function DisplayFile({ fileKey }: IProps) {
+export default function DisplayFile({ fileKey, alt, width, height }: IProps) {
   return (
     <>
       {fileKey.split('.')[1] === 'pdf' ? (
-        <embed src={generateImgUrl(fileKey)} width="100px" height="100px" />
+        <embed src={generateImgUrl(fileKey)} width={width || '100px'} height={height || '100px'} />
       ) : (
         <img
           src={generateImgUrl(fileKey)}
-          alt="cheque"
-          style={{ width: '100px', height: '100px' }}
+          alt={alt || 'file'}
+          style={{ width: width || '100px', height: height || '100px' }}
         />
       )}
     </>

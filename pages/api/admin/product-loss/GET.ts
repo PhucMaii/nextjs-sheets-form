@@ -22,6 +22,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 },
                 include: {
                     medias: true,
+                    inventoryItem: true,
+                    inventoryUnit: true,
                 },
             });
 
@@ -44,6 +46,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 },
                 include: {
                     medias: true,
+                    inventoryItem: true,
+                    inventoryUnit: true,
                 },
             });
     

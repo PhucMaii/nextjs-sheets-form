@@ -1,5 +1,4 @@
 import {
-  Autocomplete,
   Divider,
   Grid,
   MenuItem,
@@ -17,20 +16,25 @@ import useInventoryItems from '@/hooks/autocomplete/useInventoryItems';
 import { IProductLoss } from '@/app/utils/type';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import useSelectDate from '@/hooks/useSelectDate';
-import { LOSS_REPORT_TYPE } from '@/app/utils/enum';
+import { API_URL, LOSS_REPORT_TYPE } from '@/app/utils/enum';
 import UnitRadio from '../../Radio/UnitRadio';
 import useEmployee from '@/hooks/select/useEmployee';
 import FileUpload from '../../FileUpload';
+import DisplayFile from '../DisplayFile';
+import axios from 'axios';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
+  refresh: () => Promise<void>;
 }
 
 export default function AddProductLoss({
   open,
   onClose,
   showNotification,
+  refresh,
 }: IProps) {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [productLoss, setProductLoss] = useState<IProductLoss | any>({
     quantityLost: 0,
     lossType: '-- Choose Loss Type --',
@@ -43,7 +47,7 @@ export default function AddProductLoss({
   const { selectedEmployee, renderEmployeeSearch } = useEmployee();
 
   const today = YYYYMMDDFormat(new Date());
-  const { SelectDate } = useSelectDate(today, true, true);
+  const { date, SelectDate } = useSelectDate(today, true, true);
 
   useEffect(() => {
     if (selectedInventoryItem) {
@@ -55,21 +59,66 @@ export default function AddProductLoss({
     }
   }, [selectedInventoryItem]);
 
+  useEffect(() => {
+    if (productLoss.quantityLost && productLoss.inventoryUnit) {
+      setProductLoss({
+        ...productLoss,
+        totalCost: productLoss.quantityLost * productLoss.inventoryUnit.unitPrice,
+      });
+    }
+  }, [productLoss.quantityLost, productLoss.inventoryUnit]);
+
+  const handleReportLoss = async () => {
+    try {
+      setIsSubmitting(true);
+      const response = await axios.post(
+        `${API_URL.ADMIN}/product-loss`,
+        {
+          productLoss: {
+            ...productLoss,
+            inventoryItemId: selectedInventoryItem.id,
+            reportedDate: date,
+            reportedBy: selectedEmployee,
+          },
+          fileKeys: [productLoss.fileKey],
+        }
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', 'Product loss reported successfully');
+      await refresh();
+      onClose();
+    } catch (error: any) {
+      console.log('Something went wrong: ', error);
+      showNotification('error', error?.response?.data?.error || 'Something went wrong');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal>
         <ModalHead
           heading="Report Loss"
           buttonLabel="Report"
-          onClick={() => {}}
-          buttonProps={{}}
+          onClick={handleReportLoss}
+          buttonProps={{ loading: isSubmitting }}
           onClose={onClose}
         />
 
         <Divider sx={{ my: 2 }} />
 
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography>Item</Typography>
             {renderInventoryItemSearch()}
           </Grid>
@@ -91,7 +140,11 @@ export default function AddProductLoss({
               />
             </Grid>
           )}
-          <Grid item xs={6} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={6}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography>Quantity</Typography>
             <TextField
               fullWidth
@@ -100,12 +153,16 @@ export default function AddProductLoss({
               type="number"
               value={productLoss.quantityLost}
               onChange={(e) =>
-                setProductLoss({ ...productLoss, quantityLost: e.target.value })
+                setProductLoss({ ...productLoss, quantityLost: +e.target.value })
               }
             />
           </Grid>
 
-          <Grid item xs={6} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={6}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography>Total Cost</Typography>
             <TextField
               fullWidth
@@ -119,7 +176,11 @@ export default function AddProductLoss({
             />
           </Grid>
 
-          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography>Loss Type</Typography>
             <Select
               fullWidth
@@ -141,17 +202,29 @@ export default function AddProductLoss({
             </Select>
           </Grid>
 
-          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography>Reported By</Typography>
             {renderEmployeeSearch()}
           </Grid>
 
-          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography>Reported Date</Typography>
             {SelectDate}
           </Grid>
 
-          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography>Description</Typography>
             <TextField
               fullWidth
@@ -170,13 +243,27 @@ export default function AddProductLoss({
             />
           </Grid>
 
-          <Grid item xs={12}>
-            <FileUpload 
-              showNotification={showNotification}
-              fileName={productLoss.fileName}
-              onUploadImageUI={() => {}}
-              uploadLocation={`/product-loss/${productLoss.inventoryItemId}`}
-            />
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
+            <Typography>Evidence Images</Typography>
+            {productLoss.fileKey ? (
+              <DisplayFile fileKey={productLoss.fileKey} alt="product loss" />
+            ) : (
+              <FileUpload
+                showNotification={showNotification}
+                fileName={productLoss.fileName}
+                onUploadImageUI={(fileKey: string) => {
+                  setProductLoss({
+                    ...productLoss,
+                    fileKey: fileKey,
+                  });
+                }}
+                uploadLocation={`/product-loss/${productLoss.inventoryItemId}`}
+              />
+            )}
           </Grid>
         </Grid>
       </BoxModal>
