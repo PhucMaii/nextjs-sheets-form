@@ -9,7 +9,7 @@ import {
 } from '@/app/utils/time'; // Assuming this utility exists
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
+const useSelectDate = (providedDate?: string, fullWidth?: boolean, hideLabel?: boolean) => {
   const [date, setDate] = useState(
     providedDate ? providedDate : generateRecommendDate(),
   );
@@ -30,7 +30,7 @@ const useSelectDate = (providedDate?: string, fullWidth?: boolean) => {
     <FormControl fullWidth={fullWidth}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
-          label="Date Filter"
+          label={hideLabel ? '' : 'Date Filter'}
           value={dayjs(date)}
           onChange={(e: any) => handleDateChange(e)}
           sx={{

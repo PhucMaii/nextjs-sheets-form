@@ -35,20 +35,20 @@ export const fetchData = async (
 
 export const fetchApi = async (
   api: string,
-  showNotification: (type: AlertColor, message: string) => void,
+  showNotification?: (type: AlertColor, message: string) => void,
 ) => {
   try {
     const response = await axios.get(api);
 
     if (response.data.error) {
-      showNotification('error', response.data.error);
+      showNotification && showNotification('error', response.data.error);
       return null;
     }
 
     return response.data.data;
   } catch (error: any) {
     console.log('There was an error: ', error);
-    showNotification('error', error.response.data.error);
+    showNotification && showNotification('error', error.response.data.error);
     return null;
   }
 };
