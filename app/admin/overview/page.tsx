@@ -133,7 +133,7 @@ export default function Overview() {
         <OverviewData isMinify={isMinify} overviewData={overviewData} />
         <Grid item md={8} xs={12}>
           {revenueData ? (
-            <ShadowSection sx={{ height: 365 }}>
+            <ShadowSection sx={{ height: 365, mb: 2 }}>
               <Typography variant="h6">Revenue</Typography>
               <AreaChart
                 timeSeries={revenueData.timeSeries}
