@@ -189,6 +189,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         (route: UserRoute) => route.routeId === targetRoute.id,
       );
       sortedDeliveryOrders.push({
+        ...order?.user,
         ...order,
         items: newItems,
         notInBoard: !orderExistedInBoard.includes(order.id),

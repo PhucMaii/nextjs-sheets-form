@@ -117,7 +117,7 @@ export default function OrdersPage() {
   );
 
   useEffect(() => {
-    const windowDimensions = getWindowDimensions();
+  const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
   }, []);
 

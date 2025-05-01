@@ -45,6 +45,7 @@ export default function SearchModal({
   const [returnOrders, setReturnOrders] = useState<Order[]>([]);
   const [orderList, setOrderList] = useState<Order[]>([]);
 
+  // console.log(orderList, 'ORDER LIST');
   useEffect(() => {
     if (orders) {
       setOrderList(orders);
@@ -52,7 +53,15 @@ export default function SearchModal({
   }, [orders]);
 
   useEffect(() => {
+    console.log(
+      {
+        debouncedKeywords,
+        compare: debouncedKeywords && orderList && orderList.length > 0,
+      },
+      'DEBOUNCED KEYWORDS',
+    );
     if (debouncedKeywords && orderList && orderList.length > 0) {
+      console.log(orderList, 'ORDER LIST');
       const newOrderList = orderList.filter((order: Order) => {
         if (
           order?.clientId?.includes(debouncedKeywords) ||
@@ -70,6 +79,7 @@ export default function SearchModal({
       setReturnOrders([]);
     }
   }, [debouncedKeywords, orderList]);
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal
