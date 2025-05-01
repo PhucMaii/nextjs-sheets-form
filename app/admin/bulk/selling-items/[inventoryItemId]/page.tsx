@@ -144,7 +144,9 @@ export default function BulkEditItems() {
         if (Array.isArray(options) && options.length > 0) {
           return (
             <div
-              onClick={() => {
+              onClick={(e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
                 setEditOptionProps({ open: true, item: params.row });
               }}
               style={{ cursor: 'pointer' }}
@@ -155,7 +157,9 @@ export default function BulkEditItems() {
         } else {
           return (
             <div
-              onClick={() => {
+              onClick={(e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
                 setAddOptionProps({ open: true, item: params.row });
               }}
               style={{ cursor: 'pointer' }}
@@ -438,6 +442,9 @@ export default function BulkEditItems() {
             columns={columns}
             checkboxSelection
             disableRowSelectionOnClick
+            onRowClick={(params) => {
+              setEditBulkItemProps({ open: true, item: params.row });
+            }}
             processRowUpdate={handleRowUpdate}
             experimentalFeatures={{ newEditingApi: true } as any}
             onRowSelectionModelChange={(newSelection) => {

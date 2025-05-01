@@ -69,7 +69,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             createdAt: today.dateAndTime,
             createdBy: `Admin - ${admin.clientName}`,
             prevPrice: option?.prevPrice,
-            isShowDiscount: option?.isShowDiscount,
+            isShowDiscount: option.isShowDiscount,
             inventoryItemId: item.inventoryItemId,
             itemId: item.id,
           };
