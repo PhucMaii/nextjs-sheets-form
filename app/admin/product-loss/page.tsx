@@ -14,10 +14,10 @@ import { API_URL } from '@/app/utils/enum';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import useDebounce from '@/hooks/useDebounce';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
-import ReportIcon from '@mui/icons-material/Report';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { blue, grey } from '@mui/material/colors';
+import FlagIcon from '@mui/icons-material/Flag';
 
 export default function ProductLoss() {
   const [displayList, setDisplayList] = useState<IProductLoss[]>([]);
@@ -144,7 +144,7 @@ export default function ProductLoss() {
             <OverviewCard
               text="Most Common Loss Type"
               value={overviewData.mostCommonLossType}
-              icon={<ReportIcon sx={{ color: blue[700], fontSize: 50 }} />}
+              icon={<FlagIcon sx={{ color: blue[700], fontSize: 50 }} />}
               extraText={{
                 text: `(${overviewData.mostCommonLossTypeCount})`,
                 color: grey[500],

@@ -35,7 +35,6 @@ export default function AreaChart({
         },
       ];
 
-  console.log(timeSeries);
   const options: ApexOptions = {
     chart: {
       type: 'bar',

@@ -22,7 +22,7 @@ import ManifestTable from '../components/Tables/ManifestTable';
 import CustomersInDebt from '../components/Tables/CustomersInDebt';
 import LoadingModal from '../components/Modals/LoadingModal';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { SWRFetchData } from '@/app/utils/db';
+import { fetchApi, SWRFetchData } from '@/app/utils/db';
 import DebtCustomers from '../components/Printing/DebtCustomers';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
@@ -31,17 +31,25 @@ import OverviewData from '../components/Overview/OverviewData';
 import CustomersProfitTable from '../components/Tables/CustomersProfitTable';
 import StatusText from '../components/StatusText';
 import DriverTablesReport from '../components/Tables/DriverTablesReport';
-import TopDrivers from '../components/Tables/TopDrivers';
+import { IconBackground } from '../components/OverviewCard/styled';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import { blue, red } from '@mui/material/colors';
+import ProductLossOverview from '../components/Overview/ProductLossOverview';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import ReportIcon from '@mui/icons-material/Report';
+import FlagIcon from '@mui/icons-material/Flag';
+import ProductLossTable from '../components/Tables/ProductLossTable';
+
 
 export default function Overview() {
-  const [beansproutsData, setBeansproutsData] = useState<any>();
+  // const [beansproutsData, setBeansproutsData] = useState<any>();
   const [customersInDebt, setCustomersInDebt] = useState<any>();
   const [customersProfit, setCustomersProfit] = useState<any>();
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [overviewData, setOverviewData] = useState<any>();
   const [revenueData, setRevenueData] = useState<any>();
-
+  const [productLossData, setProductLossData] = useState<any>();
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
   const { NotificationComp } = useNotification();
 
@@ -61,6 +69,7 @@ export default function Overview() {
   useEffect(() => {
     if (overview && dateRange) {
       initializeOverviewData();
+      fetchProductLossData();
     }
   }, [overview, dateRange]);
 
@@ -77,7 +86,7 @@ export default function Overview() {
     const overviewFetchedData = overview.data;
     setOverviewData(overviewFetchedData.overviewData);
     setRevenueData(overviewFetchedData.reports);
-    setBeansproutsData(overviewFetchedData.beansprouts);
+    // setBeansproutsData(overviewFetchedData.beansprouts);
     setCustomersInDebt(overviewFetchedData.customersInDebt);
     setCustomersProfit(overviewFetchedData.customersProfit);
   };
@@ -85,6 +94,13 @@ export default function Overview() {
   const handlePrintCustomersInDebt = useReactToPrint({
     content: () => printDetbCustomersRef.current,
   });
+
+  const fetchProductLossData = async () => {
+    const data = await fetchApi(
+      `${API_URL.ADMIN}/product-loss/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    );
+    setProductLossData(data);
+  };
 
   return (
     <Sidebar>
@@ -152,6 +168,64 @@ export default function Overview() {
             />
           )}
         </Grid>
+        <Grid item xs={12} md={4}>
+          {productLossData ? (
+            <ShadowSection sx={{ height: 400 }}>
+              <Typography variant="h6" fontWeight="normal">
+                Loss Overview
+              </Typography>
+
+              <Grid container spacing={4} mt={2}>
+                <Grid item xs={6}>
+                  <ProductLossOverview
+                    text="Total Loss"
+                    value={productLossData?.totalLoss?.toFixed(2) || 0}
+                    icon={<AttachMoneyIcon sx={{ color: red[700], fontSize: 24 }} />}
+                    backgroundColorIcon={red[50]}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ProductLossOverview
+                    text="Loss Quantity"
+                    value={productLossData?.lossQuantity || 0}
+                    icon={<Inventory2Icon sx={{ color: red[700], fontSize: 24 }} />}
+                    backgroundColorIcon={red[50]}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ProductLossOverview
+                    text="Reports"
+                    value={productLossData?.productLosses?.length || 0}
+                    icon={<ReportIcon sx={{ color: red[700], fontSize: 24 }} />}
+                    backgroundColorIcon={red[50]}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ProductLossOverview
+                    text="Most Common Loss"
+                    value={productLossData?.mostCommonLossType || ''}
+                    icon={<FlagIcon sx={{ color: red[700], fontSize: 24 }} />}
+                    backgroundColorIcon={red[50]}
+                  />
+                </Grid>
+              </Grid>
+            </ShadowSection>
+          ) : (
+            <Skeleton variant="rounded" sx={{ width: '100% !important', height: '400px !important' }} />
+          )}
+        </Grid>
+        <Grid item xs={12} md={8}>
+          {productLossData ? (
+            <ShadowSection sx={{ height: 400 }}>
+              <Typography variant="h6" fontWeight="normal">
+                Top Product Loss
+              </Typography>
+              <ProductLossTable productLossList={productLossData?.productLosses} mode="view" />
+            </ShadowSection>
+          ) : (
+            <Skeleton variant="rounded" sx={{ width: '100% !important', height: '400px !important' }} />
+          )}
+        </Grid>
         <Grid item xs={12} mt={2}>
           {shiftOverview ? (
             // <Box
@@ -166,7 +240,9 @@ export default function Overview() {
               gap={2}
               sx={{ height: '100%' }}
             >
-              <Typography variant="h6" fontWeight="normal">Shift Overview</Typography>
+              <Typography variant="h6" fontWeight="normal">
+                Shift Overview
+              </Typography>
               <Box
                 display="flex"
                 justifyContent="space-between"
