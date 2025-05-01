@@ -178,6 +178,13 @@ export default function AddItem({
             </Grid>
             <Grid item xs={12}>
               <Autocomplete
+                getOptionDisabled={(option: any) => {
+                  console.log(option, 'OPTION');
+                  const isExistInCateogory = selectedCategories[0].items.some(
+                    (item: any) => item.inventoryItemId === option.id,
+                  );
+                  return isExistInCateogory;
+                }}
                 options={inventoryItems?.data || []}
                 getOptionLabel={(option: any) => option?.name || ''}
                 renderInput={(params) => <TextField {...params} label="Item" />}

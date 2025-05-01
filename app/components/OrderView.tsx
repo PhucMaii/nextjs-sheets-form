@@ -242,9 +242,9 @@ export const ItemButton = ({
               borderRadius: 'inherit',
               inset: 0, // Make the image stretch to fill the container
               zIndex: 0,
-              opacity: 0.3,
+              opacity: 0.5,
               // brightness
-              filter: 'brightness(80%)',
+              filter: 'brightness(93%)',
             }}
           />
         )}
