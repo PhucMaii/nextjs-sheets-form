@@ -207,7 +207,7 @@ export default function PurchaseOrder() {
     const response = await handleUpdatePOStatus(po?.id, PO_STATUS.ORDERED);
 
     if (response) {
-      showNotification('success', 'Purchase order updated');
+      showNotification('success', response.message);
       // If success -> marks as ordered
       setPO((prevState: any) => ({
         ...prevState,

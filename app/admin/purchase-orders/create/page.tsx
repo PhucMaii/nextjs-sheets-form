@@ -190,8 +190,11 @@ export default function CreatePO() {
         return;
       }
 
-      showNotification('success', 'Purchase order created successfully');
-      router.push(`/admin/purchase-orders`);
+      showNotification('success', response.data.message);
+
+      setTimeout(() => {
+        router.push(`/admin/purchase-orders`);
+      }, 2500);
     } catch (error) {
       console.log(error, 'Something went wrong');
       showNotification('error', 'Something went wrong');

@@ -44,7 +44,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(200).json({ message: 'Purchase order status updated' });
     }
 
-    if (po.vendor && po.vendor.email && status === PO_STATUS.ORDERED) {
+    if (
+      po.vendor &&
+      po.vendor.email &&
+      po?.status !== PO_STATUS.ORDERED &&
+      status === PO_STATUS.ORDERED
+    ) {
       const poTemplate = generatePurchaseOrderTemplate(po.vendor, po);
       // Send email to vendor
       await emailHandler(
@@ -52,7 +57,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
         `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
         poTemplate,
+        'gm@supremesprout.com',
       );
+
+      // Send email to gm@supremesprout.com
+      // await emailHandler(
+      //   'gm@supremesprout.com',
+      //   `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
+      //   `Supreme Sprouts Purchase Order Request #${po.poNumber}`,
+      //   poTemplate,
+      // );
     }
 
     return res.status(200).json({ message: 'Email Sent Successfully' });

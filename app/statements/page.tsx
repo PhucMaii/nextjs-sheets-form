@@ -107,7 +107,7 @@ export default function StatementPage() {
   const downloadPDF = async (
     orders: any,
     fileName: string,
-    isOldInvoice: boolean = false,
+    // isOldInvoice: boolean = false,
   ) => {
     setLoading({
       month: fileName,
@@ -123,7 +123,7 @@ export default function StatementPage() {
         orders: orders,
         debtData: debtData?.debt,
         sortDebtKeys: debtData?.sortDebt,
-        isOldInvoice: isOldInvoice,
+        isOldInvoice: true,
       }), // pass whatever data you need
     });
 
@@ -141,7 +141,6 @@ export default function StatementPage() {
     });
     showNotification('success', 'Statement downloaded successfully');
   };
-  console.log(prevStatements, 'PREV STATEMENTS');
 
   return (
     <Sidebar>
@@ -228,7 +227,7 @@ export default function StatementPage() {
                   <IconButton
                     color="primary"
                     onClick={() =>
-                      downloadPDF(prevStatements[monthYear], monthYear, true)
+                      downloadPDF(prevStatements[monthYear], monthYear)
                     }
                   >
                     {loading.isLoading && loading.month === monthYear ? (
