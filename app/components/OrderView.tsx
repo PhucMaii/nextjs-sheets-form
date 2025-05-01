@@ -227,12 +227,12 @@ export const ItemButton = ({
           //   disabled || item?.availability === false
           //     ? grey[400]
           //     : blueGrey[800],
-          ...(!item?.image && containerStyle),
+          ...(!(item?.image || item?.inventoryItem?.image) && containerStyle),
         }}
       >
-        {item?.image && (
+        {(item?.image || item?.inventoryItem?.image) && (
           <img
-            src={generateImgUrl(item?.image)}
+            src={generateImgUrl(item?.image || item?.inventoryItem?.image)}
             alt="img"
             style={{
               position: 'absolute',
@@ -242,9 +242,9 @@ export const ItemButton = ({
               borderRadius: 'inherit',
               inset: 0, // Make the image stretch to fill the container
               zIndex: 0,
-              opacity: 0.3,
+              opacity: 0.5,
               // brightness
-              filter: 'brightness(80%)',
+              filter: 'brightness(93%)',
             }}
           />
         )}
@@ -363,9 +363,8 @@ const OrderView = ({
     id: defaultOrder?.id || -1,
     subTotal: 0,
     totalPrice: 0,
-    PST: 0,
-    GST: 0,
-    shippingFee: defaultOrder?.shippingFee || 0,
+    PST: defaultOrder?.PST || 0,
+    GST: defaultOrder?.GST || 0,
     note: defaultOrder?.note || '',
     deliveryDate:
       defaultOrder?.deliveryDate ||
@@ -514,8 +513,8 @@ const OrderView = ({
       ...order,
       subTotal: newSubtotal?.subTotal || 0,
       totalPrice: newSubtotal?.totalPrice || 0,
-      PST: newSubtotal?.PST || 0,
-      GST: newSubtotal?.GST || 0,
+      PST: defaultOrder?.PST || newSubtotal?.PST || 0,
+      GST: defaultOrder?.GST || newSubtotal?.GST || 0,
     });
   }, [orderedItems]);
 

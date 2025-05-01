@@ -33,14 +33,19 @@ export default function DriverTablesReport({ data }: IProps) {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   // Calculate the slice of data to display
-//   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
-  const visibleRows = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  //   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+  const visibleRows = data.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
+  );
 
   return (
     <Box sx={{ width: '100%', height: '400px !important' }}>
@@ -64,12 +69,18 @@ export default function DriverTablesReport({ data }: IProps) {
                 <TableCell component="th" scope="row">
                   {row.name}
                 </TableCell>
-                <TableCell align="right">{((row?.driverHours || 0) + (row?.factoryHours || 0))?.toFixed(2)}</TableCell>
-                <TableCell align="right">{row?.driverHours?.toFixed(2) || 0}</TableCell>
-                <TableCell align="right">{row?.factoryHours?.toFixed(2) || 0}</TableCell>
                 <TableCell align="right">
-                  ${row?.cost?.toFixed(2)}
+                  {(
+                    (row?.driverHours || 0) + (row?.factoryHours || 0)
+                  )?.toFixed(2)}
                 </TableCell>
+                <TableCell align="right">
+                  {row?.driverHours?.toFixed(2) || 0}
+                </TableCell>
+                <TableCell align="right">
+                  {row?.factoryHours?.toFixed(2) || 0}
+                </TableCell>
+                <TableCell align="right">${row?.cost?.toFixed(2)}</TableCell>
               </TableRow>
             ))}
 
@@ -85,13 +96,13 @@ export default function DriverTablesReport({ data }: IProps) {
           </TableBody>
         </Table>
         <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={data.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </TableContainer>
     </Box>

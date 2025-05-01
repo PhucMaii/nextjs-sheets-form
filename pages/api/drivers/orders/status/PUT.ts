@@ -33,9 +33,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Get driver update info
     const driverUpdate: any = await getDriverInfo(req, res);
-    const { date, time } = getTodayDate();
+    const { date, time, dateAndTime } = getTodayDate();
 
     const updatedBy = `Driver - ${driverUpdate.name}`;
+
+    let deliveredAt: string | null = dateAndTime;
+
+    if (
+      (existingOrder.status !== ORDER_STATUS.DELIVERED &&
+        existingOrder.status !== ORDER_STATUS.COMPLETED) &&
+      (updatedStatus === ORDER_STATUS.DELIVERED ||
+        updatedStatus === ORDER_STATUS.COMPLETED)
+    ) {
+      deliveredAt = dateAndTime;
+    } else {
+      deliveredAt = existingOrder?.deliveredAt || null;
+    }
 
     const updatedOrder = await prisma.orders.update({
       where: {
@@ -47,6 +60,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         updateTime: new Date(`${date} ${time}`),
         deliveredBy:
           updatedStatus !== ORDER_STATUS.VOID ? driverUpdate.name : null,
+        deliveredAt,
         isVoid: updatedStatus === ORDER_STATUS.VOID && true,
       },
       include: {

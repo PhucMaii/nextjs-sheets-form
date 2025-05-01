@@ -115,7 +115,13 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
+
 async function main() {
+  await prisma.driver.updateMany({
+    data: {
+      notification: undefined,
+    }  
+  })
 }
 
 main()

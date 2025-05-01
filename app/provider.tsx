@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import axios from 'axios';
 import { SessionProvider } from 'next-auth/react';
 import { SWRConfig } from 'swr';
@@ -8,12 +8,18 @@ import MaintenanceProvider from './context/MaintenanceProvider';
 import { Provider } from 'react-redux';
 import { store } from '@/state/store';
 import { DragDropProvider } from '@dnd-kit/react';
+import registerSW from './registerSW';
 
 type Props = {
   children?: React.ReactNode;
 };
 
 export const Providers = ({ children }: Props) => {
+
+  useEffect(() => {
+    registerSW();
+  }, [])
+  
   return (
     <SessionProvider>
       <AuthenGuard>

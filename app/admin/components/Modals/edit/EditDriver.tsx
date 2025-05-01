@@ -37,7 +37,7 @@ export default function EditDriver({
       const response = await axios.put(`${API_URL.ADMIN}/drivers`, {
         driverId: driver.id,
         updatedName: updatedName.toUpperCase(),
-        hourlyRate
+        hourlyRate,
       });
 
       if (response.data.error) {

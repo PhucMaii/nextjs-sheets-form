@@ -40,6 +40,7 @@ export default function AddItem({
   defaultItem,
   onAddTempItem,
 }: IProps) {
+  const [disabledCategories, setDisabledCategories] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newItem, setNewItem] = useState<any>({
     id: -1,
@@ -84,7 +85,21 @@ export default function AddItem({
     }
   }, [defaultItem, inventoryItems]);
 
-  console.log(newItem, 'newItem');
+  useEffect(() => {
+    if (newItem.inventoryItemId > 0) {
+      const targetInventoryItem = inventoryItems?.data?.find(
+        (item: any) => item.id === newItem.inventoryItemId,
+      );
+
+      if (targetInventoryItem) {
+        const categoriesRelated = targetInventoryItem.item
+          .map((item: any) => item.category)
+          .flat();
+
+        setDisabledCategories(categoriesRelated);
+      }
+    }
+  }, [newItem, categories]);
 
   useEffect(() => {
     if (categoryId) {
@@ -119,6 +134,7 @@ export default function AddItem({
       ...newItem,
       units: newItem.units,
       unit: newItem.unit,
+      categoryId: selectedCategories[0].id,
       name: newItem.name.toUpperCase(),
     };
     setIsAdding(true);
@@ -148,50 +164,6 @@ export default function AddItem({
             }}
             onClose={onClose}
           />
-          <Divider sx={{ my: 2 }}>Categories</Divider>
-
-          <Box display="flex" flexDirection={'column'} gap={1}>
-            <Typography variant="h6">New Item Categories:</Typography>
-            <Autocomplete
-              multiple
-              value={selectedCategories}
-              onChange={(e: any, newValue: any) =>
-                setSelectedCategories(newValue)
-              }
-              id="tags-standard"
-              disableCloseOnSelect
-              options={categories?.data || []}
-              getOptionLabel={(option) => option.name}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  label="Categories"
-                  placeholder="Select Categories..."
-                />
-              )}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              renderOption={(props, option, { selected }) => {
-                const { key, ...optionProps } = props;
-                return (
-                  <li
-                    key={key}
-                    {...optionProps}
-                    aria-disabled={option.id === categoryId}
-                  >
-                    <Checkbox
-                      icon={checkBoxOutlinedIcon}
-                      checkedIcon={checkedBoxOutlinedIcon}
-                      style={{ marginRight: 8 }}
-                      checked={selected}
-                      disabled={option.id === categoryId}
-                    />
-                    {option.name}
-                  </li>
-                );
-              }}
-            />
-          </Box>
 
           <Divider sx={{ my: 2 }}>Item</Divider>
           <Grid
@@ -202,10 +174,17 @@ export default function AddItem({
             rowGap={2}
           >
             <Grid item xs={12}>
-              <Typography variant="h6">Inventory Item:</Typography>
+              <Typography>Inventory Item:</Typography>
             </Grid>
             <Grid item xs={12}>
               <Autocomplete
+                getOptionDisabled={(option: any) => {
+                  console.log(option, 'OPTION');
+                  const isExistInCateogory = selectedCategories[0].items.some(
+                    (item: any) => item.inventoryItemId === option.id,
+                  );
+                  return isExistInCateogory;
+                }}
                 options={inventoryItems?.data || []}
                 getOptionLabel={(option: any) => option?.name || ''}
                 renderInput={(params) => <TextField {...params} label="Item" />}
@@ -242,7 +221,7 @@ export default function AddItem({
               />
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6">Name:</Typography>
+              <Typography>Name:</Typography>
             </Grid>
 
             <Grid item xs={12}>
@@ -271,7 +250,7 @@ export default function AddItem({
             )}
 
             <Grid item xs={12}>
-              <Typography variant="h6">Price:</Typography>
+              <Typography>Price:</Typography>
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -285,6 +264,54 @@ export default function AddItem({
               />
             </Grid>
           </Grid>
+
+          <Divider sx={{ my: 2 }}>Categories</Divider>
+
+          <Box display="flex" flexDirection={'column'} gap={1}>
+            <Typography>Assign Categories:</Typography>
+            <Autocomplete
+              multiple
+              value={selectedCategories}
+              onChange={(e: any, newValue: any) =>
+                setSelectedCategories(newValue)
+              }
+              id="tags-standard"
+              disableCloseOnSelect
+              options={categories?.data || []}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label="Categories"
+                  placeholder="Select Categories..."
+                />
+              )}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderOption={(props, option, { selected }) => {
+                const { key, ...optionProps } = props;
+                const isDisabled = disabledCategories.some(
+                  (cat: any) => cat.id === option.id,
+                );
+                return (
+                  <li
+                    key={key}
+                    {...optionProps}
+                    aria-disabled={isDisabled || option.id === categoryId}
+                  >
+                    <Checkbox
+                      icon={checkBoxOutlinedIcon}
+                      checkedIcon={checkedBoxOutlinedIcon}
+                      style={{ marginRight: 8 }}
+                      checked={selected}
+                      disabled={isDisabled || option.id === categoryId}
+                    />
+                    {option.name}
+                  </li>
+                );
+              }}
+            />
+          </Box>
         </BoxModal>
       </Modal>
     </>

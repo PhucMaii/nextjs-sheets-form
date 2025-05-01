@@ -81,7 +81,12 @@ export default function AddExpense({
         newExpense.PST -
         newExpense.discount,
     });
-  }, [newExpense.PST, newExpense.GST, newExpense.subTotal, newExpense.discount]);
+  }, [
+    newExpense.PST,
+    newExpense.GST,
+    newExpense.subTotal,
+    newExpense.discount,
+  ]);
 
   const handleAddExpense = async () => {
     try {

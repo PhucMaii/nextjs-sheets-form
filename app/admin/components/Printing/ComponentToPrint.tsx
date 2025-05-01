@@ -15,6 +15,7 @@ import './print.css';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
+import { header } from '@/app/lib/print';
 
 export const printFontSize = 28;
 
@@ -127,32 +128,7 @@ export const ComponentToPrint = forwardRef(
           p={2}
           className="print-container"
         >
-          <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            sx={{ width: '100%' }}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              {order.isReplacement
-                ? 'REPLACEMENT ORDER'
-                : order.isVoid
-                  ? 'VOID ORDER'
-                  : ''}
-            </Typography>
-            <Typography textAlign="center" variant="h4" fontWeight="bold">
-              SUPREME SPROUTS LTD
-            </Typography>
-            <Typography textAlign="center" variant="h5">
-              1-6420 Beresford Street, Burnaby, BC, V5E 1B3
-            </Typography>
-            <Typography variant="h5">
-              778 789 1060
-              <br />
-              709 989 6000
-            </Typography>
-          </Box>
+          {header(order)}
           <Divider sx={{ my: 3, backgroundColor: 'black' }} />
           <Grid container alignItems="center" rowGap={2} mb={2}>
             {orderFields &&
@@ -280,7 +256,8 @@ export const ComponentToPrint = forwardRef(
                   sx={{ fontSize: printFontSize - 5 }}
                   fontWeight="bold"
                 >
-                  ${totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                  $
+                  {totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
                 </Typography>
               </Grid>
             </Grid>

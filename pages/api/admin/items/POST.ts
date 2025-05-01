@@ -139,63 +139,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: newItemsInMultiCategory,
     });
 
-    // Get categories that have been added
-    // const addedCategoryIds = newItemsInMultiCategory.map((item: any) => {
-    //   return item.categoryId;
-    // });
-
-    // const createdItem = await prisma.item.create({
-    //   data: {
-    //     name: newItem.name,
-    //     categoryId: newItem.categoryId,
-    //     price: newItem.price,
-    //     availability: newItem?.availability || true,
-    //     inventoryItemId: newItem?.inventoryItemId || null,
-    //     inventoryUnitId: selectedUnit.id,
-    //   },
-    // });
-
-    // Add new item into all schedule orders related to this category
-    // const scheduleOrders = await prisma.scheduleOrders.findMany({
-    //   where: {
-    //     user: {
-    //       categoryId: {
-    //         in: addedCategoryIds,
-    //       },
-    //     },
-    //   },
-    // });
-
-    // const scheduledOrderedItems = scheduleOrders.map((scheduleOrder: any) => {
-    //   return {
-    //     name: newItem.name,
-    //     price: newItem.price,
-    //     scheduledOrderId: scheduleOrder.id,
-    //     inventoryItemId: newItem.inventoryItemId,
-    //     inventoryUnitId: selectedUnit.id,
-    //     quantity: 0,
-    //   };
-    // });
-
-    // await prisma.orderedItems.createMany({
-    //   data: scheduledOrderedItems,
-    // });
-
-    // for (const scheduleOrder of scheduleOrders) {
-    //   await prisma.orderedItems.create({
-    //     data: {
-    //       name: newItem.name,
-    //       price: newItem.price,
-    //       scheduledOrderId: scheduleOrder.id,
-    //       inventoryItemId: newItem.inventoryItemId,
-    //       inventoryUnitId: selectedUnit.id,
-    //       quantity: 0,
-    //     },
-    //   });
-    // }
-
     return res.status(201).json({
-      // data: createdItem,
       message: 'Item Created Succesfully',
     });
   } catch (error: any) {

@@ -45,86 +45,86 @@ const SwitchRole = ({ open, onClose }: IProps) => {
 
   return (
     <>
-    {NotificationComp}
-    <Modal open={open} onClose={onClose}>
-      <BoxModal
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Box display="flex" width="100%" justifyContent="flex-end">
-          <IconButton
-            onClick={() => {
-              onClose();
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Typography variant="h5">{today.time.slice(0, 11)}</Typography>
-
-        <Box
+      {NotificationComp}
+      <Modal open={open} onClose={onClose}>
+        <BoxModal
           display="flex"
           flexDirection="column"
-          // alignItems="center"
-          sx={{ my: 2 }}
-          gap={1}
+          justifyContent="center"
+          alignItems="center"
         >
-          <Typography justifySelf={'start'} sx={{ justifyItems: 'start' }}>
-            Working as:
-          </Typography>
-          <Box
-            display={'flex'}
-            alignItems="center"
-            justifyContent="center"
-            gap={2}
-          >
-            {roles.map((role, index) => {
-              const isSelected = selectedRole === role.role;
-              return (
-                <RoleOption
-                  key={index}
-                  role={role.role}
-                  icon={role.icon}
-                  isSelected={isSelected}
-                  onClick={() => setSelectedRole(role.role)}
-                />
-              );
-            })}
+          <Box display="flex" width="100%" justifyContent="flex-end">
+            <IconButton
+              onClick={() => {
+                onClose();
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
-        </Box>
+          <Typography variant="h5">{today.time.slice(0, 11)}</Typography>
 
-        <LoadingButton
-          loading={isLoading}
-          variant="contained"
-          fullWidth
-          onClick={onSubmit}
-          sx={{
-            width: '150px',
-            height: '150px',
-            borderRadius: '50%',
-            alignSelf: 'center',
-            mt: 2,
-          }}
-        >
           <Box
             display="flex"
             flexDirection="column"
-            alignItems="center"
-            gap={0.5}
+            // alignItems="center"
+            sx={{ my: 2 }}
+            gap={1}
           >
-            <TransferWithinAStationIcon fontSize="medium" />
-            <Typography variant="h6" sx={{ mt: 2 }}>
-              Switch
+            <Typography justifySelf={'start'} sx={{ justifyItems: 'start' }}>
+              Working as:
             </Typography>
+            <Box
+              display={'flex'}
+              alignItems="center"
+              justifyContent="center"
+              gap={2}
+            >
+              {roles.map((role, index) => {
+                const isSelected = selectedRole === role.role;
+                return (
+                  <RoleOption
+                    key={index}
+                    role={role.role}
+                    icon={role.icon}
+                    isSelected={isSelected}
+                    onClick={() => setSelectedRole(role.role)}
+                  />
+                );
+              })}
+            </Box>
           </Box>
-        </LoadingButton>
-      </BoxModal>
-    </Modal>
+
+          <LoadingButton
+            loading={isLoading}
+            variant="contained"
+            fullWidth
+            onClick={onSubmit}
+            sx={{
+              width: '150px',
+              height: '150px',
+              borderRadius: '50%',
+              alignSelf: 'center',
+              mt: 2,
+            }}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={0.5}
+            >
+              <TransferWithinAStationIcon fontSize="medium" />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                Switch
+              </Typography>
+            </Box>
+          </LoadingButton>
+        </BoxModal>
+      </Modal>
     </>
   );
-}
+};
 
 export default memo(SwitchRole, (prev, next) => {
   return prev.open === next.open;

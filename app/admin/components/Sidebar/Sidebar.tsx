@@ -123,8 +123,6 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   // };
 
   const handleChangeTab = (path: string) => {
-    console.log('handleChangeTab called with path:', path);
-    console.log('router object:', router);
     router.push(path);
   };
 

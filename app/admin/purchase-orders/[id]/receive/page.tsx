@@ -17,11 +17,11 @@ import ConvertToTransaction from '@/app/admin/components/Modals/add/ConvertToTra
 import { LoadingButton } from '@mui/lab';
 import ReceivedProgress from '@/app/admin/components/ReceivedProgress';
 
-
 export default function ReceiveInventory() {
   const { id }: any = useParams();
   const router = useRouter();
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [po, setPo] = useState<IPurchaseOrder>({} as IPurchaseOrder);
   const [poItems, setPoItems] = useState<any[]>([]);
@@ -29,9 +29,13 @@ export default function ReceiveInventory() {
     useState(false);
   const { showNotification, NotificationComp } = useNotification();
 
-  const receivedSummary = useMemo(() => {
+  const receivedSummary: any = useMemo(() => {
     if (!poItems || poItems.length === 0) {
-      return { orderedQty: 0, receivedQty: 0, rejectedQty: 0 };
+      return {
+        orderedQty: receivedSummary?.orderedQty || 0,
+        receivedQty: receivedSummary?.receivedQty || 0,
+        rejectedQty: receivedSummary?.rejectedQty || 0,
+      };
     }
 
     const orderedQty = poItems.reduce((acc, item) => acc + item.orderedQty, 0);
@@ -65,7 +69,8 @@ export default function ReceiveInventory() {
       }
 
       setPo(res.data.data);
-      setPoItems(res.data.data.poItems);
+      setPoItems([...res.data.data.poItems]);
+      setIsLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -122,8 +127,7 @@ export default function ReceiveInventory() {
           open={openConvertToTransactionModal}
           onClose={() => setOpenConvertToTransactionModal(false)}
           showNotification={showNotification}
-          po={{...po, poItems}}
-          poItems={poItems}
+          po={{ ...po, poItems }}
         />
       )}
       {NotificationComp}
@@ -164,7 +168,7 @@ export default function ReceiveInventory() {
           </Box>
         </Box>
 
-        {poItems?.length > 0 ? (
+        {!isLoading && poItems?.length > 0 ? (
           <ShadowSection>
             <Box
               display="flex"

@@ -7,7 +7,7 @@ import { XIcon } from 'lucide-react';
 
 interface IProps extends ModalProps {
   fileKeyFront: string;
-  fileKeyBack: string;
+  fileKeyBack?: string;
 }
 
 export default function ViewImg({
@@ -18,25 +18,52 @@ export default function ViewImg({
 }: IProps) {
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{ width: '100vw', height: '100vh' }}>
-        <Box display="flex" width="100%" justifyContent="flex-end">
+      <Box sx={{ 
+        width: '100vw', 
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'rgba(0, 0, 0, 0.9)'
+      }}>
+        <Box sx={{ 
+          position: 'absolute',
+          top: 16,
+          right: 16
+        }}>
           <IconButton onClick={onClose} color="inherit">
             <XIcon
               style={{ width: '50px', height: '50px', color: grey[300] }}
             />
           </IconButton>
         </Box>
-        <Box display="flex" flexDirection="column">
-          <img
+        <Box sx={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          overflow: 'auto'
+        }}>
+          {fileKeyFront && <img
             src={generateImgUrl(fileKeyFront)}
             alt="front"
-            style={{ width: '100%', height: '300px', objectFit: 'contain' }}
-          />
-          <img
+            style={{ 
+              maxWidth: '100%',
+              maxHeight: '45vh',
+              objectFit: 'contain'
+            }}
+          />}
+          {fileKeyBack && <img
             src={generateImgUrl(fileKeyBack)}
             alt="back"
-            style={{ width: '100%', height: '300px', objectFit: 'contain' }}
-          />
+            style={{ 
+              maxWidth: '100%',
+              maxHeight: '45vh',
+              objectFit: 'contain'
+            }}
+          />}
         </Box>
       </Box>
     </Modal>

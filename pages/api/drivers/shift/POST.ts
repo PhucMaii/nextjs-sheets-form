@@ -1,7 +1,10 @@
 import { PrismaClient, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
-import { convertDeliveryDateStringToDate, getTodayDate } from '../../utils/date';
+import {
+  convertDeliveryDateStringToDate,
+  getTodayDate,
+} from '../../utils/date';
 import { days } from '@/app/lib/constant';
 import { SHIFT_STATUS } from '@/app/utils/enum';
 

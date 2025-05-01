@@ -11,8 +11,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Handle Promotion
     const promotions = await prisma.promotion.findMany({
       where: {
-        status: PROMOTION_STATUS.ACTIVE,
         isWebsite: null,
+        status: PROMOTION_STATUS.ACTIVE,
       },
       include: {
         items: {
@@ -50,7 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       orderBy: {
         priority: 'asc',
-      }
+      },
     });
 
     // Fill in all empty position

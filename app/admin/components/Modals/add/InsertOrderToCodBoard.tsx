@@ -180,7 +180,9 @@ export default function InsertOrderToCodBoard({
                 //     placement={mdDown ? 'top-start' : 'auto'}
                 //   />
                 // )}
-                getOptionLabel={(option: any) => `${option?.clientName} - ${option?.clientId}`}
+                getOptionLabel={(option: any) =>
+                  `${option?.clientName} - ${option?.clientId}`
+                }
                 renderOption={(props, option) => (
                   <li {...props} aria-disabled={option.id === -1}>
                     {option?.clientName} - {option?.clientId}

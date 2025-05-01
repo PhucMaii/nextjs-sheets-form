@@ -2,6 +2,7 @@ import { IInventoryItem } from '@/app/utils/type';
 import {
   AlertColor,
   Box,
+  Button,
   Checkbox,
   IconButton,
   MenuItem,
@@ -20,11 +21,12 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import BatchQuantityModal from '../Inventory/BatchQuantityModal';
-import { PhoneIcon } from 'lucide-react';
+import { ArrowRightIcon, PhoneIcon } from 'lucide-react';
 import ViewItemMissing from '../Modals/ViewItemMissing';
 import { ItemType } from '@prisma/client';
 import LoadingModal from '../Modals/LoadingModal';
 import { grey } from '@mui/material/colors';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
   inventoryItems: IInventoryItem[];
@@ -51,6 +53,8 @@ export default function InventoryTable({
     inventoryItem: inventoryItems[0],
     quantity: inventoryItems[0]?.quantity || 0,
   });
+
+  const router = useRouter();
 
   const handleDelete = async (targetObj: IInventoryItem) => {
     setIsLoading(true);
@@ -166,6 +170,7 @@ export default function InventoryTable({
               </TableCell>
               <TableCell style={{ width: 50 }}></TableCell>
               <TableCell>Name</TableCell>
+              <TableCell>Listing</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Vendor - Unit Value</TableCell>
               <TableCell>Quantity</TableCell>
@@ -174,7 +179,7 @@ export default function InventoryTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {inventoryItems.map((item: IInventoryItem, index: number) => {
+            {inventoryItems.map((item: IInventoryItem | any, index: number) => {
               let unit;
               for (const vendorItem of item.vendorItem) {
                 unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
@@ -225,6 +230,27 @@ export default function InventoryTable({
                     <Typography>{item.name}</Typography>
                   </TableCell>
                   <TableCell>
+                    <Box display="flex" gap={1} alignItems="center">
+                      <Typography>
+                        {item?.listingCategories?.length || 0} listing items
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          router.push(`/admin/bulk/selling-items/${item.id}`);
+                        }}
+                      >
+                        <Box display="flex" gap={1} alignItems="center">
+                          <Typography variant="caption">Edit</Typography>
+                          <ArrowRightIcon size={16} />
+                        </Box>
+                      </Button>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
                     <Select
                       value={item?.typeId || 0}
                       onChange={(e: any) =>
@@ -243,7 +269,7 @@ export default function InventoryTable({
                   </TableCell>
                   <TableCell>
                     <Box display="flex" flexDirection="column" gap={3}>
-                      {item?.vendorItem?.map((vItem) => {
+                      {item?.vendorItem?.map((vItem: any) => {
                         const smallestUnit = vItem?.unit.find(
                           (unit: any) => unit?.ratio === 1,
                         );

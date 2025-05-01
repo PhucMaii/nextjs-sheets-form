@@ -16,7 +16,8 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { driverId, date, startedAt, endedAt, routeId, role }: IBody = req.body;
+    const { driverId, date, startedAt, endedAt, routeId, role }: IBody =
+      req.body;
 
     const existingDriver = await prisma.driver.findUnique({
       where: {
@@ -37,7 +38,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       startedAt,
       endedAt,
       hours,
-    })
+    });
 
     const newShift = await prisma.shiftSession.create({
       data: {

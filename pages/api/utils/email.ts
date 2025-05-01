@@ -17,7 +17,8 @@ const emailHandler = async (
   email: string,
   subject: string,
   title: string,
-  template: string = '',
+  template: string,
+  cc?: string,
 ) => {
   try {
     console.log(
@@ -31,6 +32,7 @@ const emailHandler = async (
         subject: subject,
         text: title,
         html: template,
+        cc,
       });
       return;
     }
@@ -46,15 +48,19 @@ const emailHandler = async (
         subject: subject,
         text: title,
         html: template,
+        cc,
       });
     }
 
+    console.log(cc, 'CC');
     await emailTransporter.sendMail({
       from: process.env.NODEMAILER_EMAIL,
       to: email,
       subject: subject,
       text: title,
-      html: template || '',
+      html: template,
+      ...(cc && typeof cc === 'string' && cc.trim() !== '' ? { cc } : {}),
+
     });
   } catch (error) {
     console.log('Fail to send email, ', error);
@@ -205,6 +211,7 @@ export const sendWelcomeEmail = async (guest: User) => {
   await emailHandler(
     guest.email,
     'Welcome to Supreme Sprouts',
+    'Supreme Sprouts Ltd',
     generateWelcomeEmail(guest.clientName),
   );
 };

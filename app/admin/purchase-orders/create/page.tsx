@@ -34,7 +34,10 @@ import { useRouter } from 'next/navigation';
 import { LoadingButton } from '@mui/lab';
 
 export default function CreatePO() {
-  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [creating, setCreating] = useState<any>({
+    isCreating: false,
+    type: 'draft',
+  });
   const [vendors, setVendors] = useState<IVendor[]>([]);
   const [po, setPO] = useState<any>({
     status: PO_STATUS.DRAFT,
@@ -166,8 +169,12 @@ export default function CreatePO() {
     }));
   };
 
-  const handleCreatePO = async () => {
-    setIsCreating(true);
+  const handleCreatePO = async (isOrdered: boolean = false) => {
+    setCreating((prevState: any) => ({
+      ...prevState,
+      isCreating: true,
+      type: isOrdered ? 'ordered' : 'draft',
+    }));
     try {
       const response = await axios.post(`${API_URL.ADMIN}/purchase-orders`, {
         purchaseOrder: {
@@ -175,6 +182,7 @@ export default function CreatePO() {
           estArrival,
         },
         selectedVendor,
+        isOrdered,
       });
 
       if (response.data.error) {
@@ -182,13 +190,20 @@ export default function CreatePO() {
         return;
       }
 
-      showNotification('success', 'Purchase order created successfully');
-      router.push(`/admin/purchase-orders`);
+      showNotification('success', response.data.message);
+
+      setTimeout(() => {
+        router.push(`/admin/purchase-orders`);
+      }, 2500);
     } catch (error) {
       console.log(error, 'Something went wrong');
       showNotification('error', 'Something went wrong');
     } finally {
-      setIsCreating(false);
+      setCreating((prevState: any) => ({
+        ...prevState,
+        isCreating: false,
+        type: 'draft',
+      }));
     }
   };
 
@@ -227,11 +242,17 @@ export default function CreatePO() {
             </Typography>
 
             <Box display="flex" alignItems="center" gap={1}>
-              <Button variant="outlined">Mark as ordered</Button>
               <LoadingButton
-                loading={isCreating}
+                variant="outlined"
+                onClick={() => handleCreatePO(true)}
+                loading={creating.isCreating && creating.type === 'ordered'}
+              >
+                Mark as ordered
+              </LoadingButton>
+              <LoadingButton
+                loading={creating.isCreating && creating.type === 'draft'}
                 variant="contained"
-                onClick={handleCreatePO}
+                onClick={() => handleCreatePO()}
               >
                 Create Draft
               </LoadingButton>

@@ -40,7 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Get types and promotions into 2 arrays
     const updatedTypes = itemTypes
-      .filter((itemType: any) => {
+      ?.filter((itemType: any) => {
         return !itemType.id.includes('promotion');
       })
       .map((itemType: any) => {
@@ -105,10 +105,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Handle Promotion
     const updatedPromotions = itemTypes
-      .filter((promotion: any) => {
-        return promotion.id.includes('promotion');
+      ?.filter((promotion: any) => {
+        return (
+          promotion.id.includes('promotion') &&
+          promotion?.inventoryItems &&
+          promotion?.inventoryItems?.length > 0
+        );
       })
-      .map((itemType: any) => {
+      ?.map((itemType: any) => {
         const items = itemType.inventoryItems.map((item: any) => {
           return {
             ...item,
@@ -121,6 +125,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           inventoryItems: items,
         };
       });
+
+    console.log(updatedPromotions, 'updatedPromotions');
 
     const dbPromotions = await prisma.promotion.findMany({
       where: {
@@ -263,12 +269,16 @@ const checkAndUpdateContainers = async (
     return container[compareField];
   });
 
-  console.log({
-    updatedContainerNames,
-    dbContainerNames,
-    compare: JSON.stringify(updatedContainerNames) ===
-      JSON.stringify(dbContainerNames),
-  }, 'in checkAndUpdateContainers');
+  console.log(
+    {
+      updatedContainerNames,
+      dbContainerNames,
+      compare:
+        JSON.stringify(updatedContainerNames) ===
+        JSON.stringify(dbContainerNames),
+    },
+    'in checkAndUpdateContainers',
+  );
 
   // Compare if types has any re arrangement
   if (
@@ -323,10 +333,10 @@ const checkAndUpdateItemsArrangement = async (
     // Get the removed items from promotion (if in promotion mode currently)
     if (keyField === 'promotionId') {
       const removedItems = dbItemArrangementMap[container.id]
-        .filter((item: any) => !inventoryItemNames.includes(item.name))
+        ?.filter((item: any) => !inventoryItemNames.includes(item.name))
         .map((item: any) => item.id);
 
-      if (removedItems.length > 0) {
+      if (removedItems && removedItems.length > 0) {
         await prisma.inventoryItem.updateMany({
           where: {
             id: {

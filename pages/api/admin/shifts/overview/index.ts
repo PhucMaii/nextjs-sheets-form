@@ -1,5 +1,6 @@
 import { SHIFT_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
+import { formatDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -23,12 +24,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: 'Missing startDate or endDate' });
     }
 
-    const formattedStartDate = `${startDate.split(' ')[1]} ${startDate.split(' ')[2]} ${startDate.split(' ')[3]}`;
-    const formattedEndDate = `${endDate.split(' ')[1]} ${endDate.split(' ')[2]} ${endDate.split(' ')[3]}`;
+    const formattedStartDate = formatDate(startDate);
+    const formattedEndDate = formatDate(endDate);
 
     const listOfDateString = generateListOfDateString(
-      new Date(formattedStartDate),
-      new Date(formattedEndDate),
+      formattedStartDate,
+      formattedEndDate,
     );
 
     const shifts = await prisma.shiftSession.findMany({
@@ -78,7 +79,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const isExist = acc.find((accShift: any) => accShift.name === name);
 
-      const fieldHours = shift.routeId !== null ? 'driverHours' : 'factoryHours';
+      const fieldHours =
+        shift.routeId !== null ? 'driverHours' : 'factoryHours';
 
       if (isExist) {
         isExist[fieldHours] += shift.hours;
@@ -134,7 +136,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       paidShifts,
       unpaidShiftCost,
       paidShiftCost,
-      sortedDriverWithTotalHours
+      sortedDriverWithTotalHours,
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

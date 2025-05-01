@@ -40,7 +40,7 @@ export default function BlockingPage() {
 
   const { showNotification, NotificationComp } = useNotification();
   const mdDown = useMediaQuery((them: any) => them.breakpoints.down('md'));
-
+// 
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
@@ -202,7 +202,7 @@ export default function BlockingPage() {
       >
         <Typography variant="h6">Client</Typography>
         <Autocomplete
-          options={clientList ? clientList.data : []}
+          options={clientList ? clientList?.data : []}
           getOptionLabel={(option) => {
             return `${option.clientName} - ${option.clientId}`;
           }}

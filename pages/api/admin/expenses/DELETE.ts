@@ -47,7 +47,7 @@ export default async function DELETE(
           expenseId: null,
         },
       });
-    } 
+    }
 
     await prisma.expense.delete({
       where: {

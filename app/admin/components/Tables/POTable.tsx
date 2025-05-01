@@ -1,6 +1,7 @@
 import { IPurchaseOrder } from '@/app/utils/type';
 import {
   Box,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -12,13 +13,15 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import StatusText from '../StatusText';
-import { PO_STATUS } from '@/app/utils/enum';
+import { API_URL, PO_STATUS } from '@/app/utils/enum';
 import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
 import { LoadingButton } from '@mui/lab';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import DeleteModal from '../Modals/delete/DeleteModal';
+import axios from 'axios';
 
 export default function POTable({
   poList,
@@ -31,6 +34,12 @@ export default function POTable({
     id: null,
     loading: false,
     action: null,
+  });
+
+  const [deleteModal, setDeleteModal] = useState<any>({
+    open: false,
+    id: null,
+    targetObj: null,
   });
 
   const router = useRouter();
@@ -54,104 +63,149 @@ export default function POTable({
     }
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL.ADMIN}/purchase-orders?id=${id}`,
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', 'Purchase order deleted successfully');
+      setDeleteModal({ open: false, id: null, targetObj: null });
+    } catch (error: any) {
+      console.log('Internal Server Error', error);
+      showNotification('error', 'Failed to delete purchase order');
+    }
+  };
+
   return (
-    <TableContainer component={Paper} sx={{overflow: 'scroll'}}>
-      <Table>
-        <TableHead>
-          <TableRow>
-          <TableCell>PO Number</TableCell>
-          <TableCell>Vendor</TableCell>
-          <TableCell>Status</TableCell>
-          <TableCell>Received</TableCell>
-          <TableCell>Total</TableCell>
-          <TableCell>Est. Arrival</TableCell>
-          <TableCell></TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {poList.map((po: IPurchaseOrder | any) => (
-          <TableRow
-            key={po.poNumber}
-            sx={{
-              '&:hover': {
-                backgroundColor: grey[100],
-              },
-            }}
-            onClick={() => router.push(`/admin/purchase-orders/${po.id}`)}
-          >
-            <TableCell sx={{ fontWeight: 'bold' }}>
-              <Box display="flex" alignItems="center" gap={1}>
-                #{po.poNumber}
-                {po?.note && (
-                  <Tooltip title={po?.note}>
-                    <TextSnippetIcon fontSize="small" sx={{ color: grey[500] }} />
-                  </Tooltip>
-                )}
-              </Box>
-              </TableCell>
-            <TableCell>{po.vendor.name}</TableCell>
-            <TableCell>
-              <StatusText
-                text={po.status}
-                type={
-                  po.status === PO_STATUS.DRAFT
-                    ? 'warning'
-                    : po.status === PO_STATUS.ORDERED
-                      ? 'info'
-                      : po.status === PO_STATUS.RECEIVED
-                        ? 'success'
-                        : 'error'
-                }
-              />
-            </TableCell>
-            <TableCell>
-              {po?.receivedItems || 0} of {po?.totalItems || 0}
-            </TableCell>
-            <TableCell>${po?.totalCost?.toFixed(2) || 0}</TableCell>
-            <TableCell>{po.estArrival}</TableCell>
-            <TableCell>
-              <Box display="flex" alignItems="center" gap={1}>
-                {po?.status !== PO_STATUS.CANCELLED && (
-                  <LoadingButton
-                    variant="outlined"
-                    color="error"
-                    loading={
-                      loading.id === po.id &&
-                      loading.action === 'cancelPO' &&
-                      loading.loading
+    <>
+      <DeleteModal
+        open={deleteModal.open}
+        handleCloseModal={() => setDeleteModal({ open: false, id: null })}
+        handleDelete={handleDelete}
+        targetObj={deleteModal.id}
+        showTargetObj={deleteModal.targetObj?.poNumber}
+      />
+      <TableContainer component={Paper} sx={{ overflow: 'scroll' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>PO Number</TableCell>
+              <TableCell>Vendor</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Received</TableCell>
+              <TableCell>Total</TableCell>
+              <TableCell>Est. Arrival</TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {poList.map((po: IPurchaseOrder | any) => (
+              <TableRow
+                key={po.poNumber}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: grey[100],
+                  },
+                }}
+                onClick={() => router.push(`/admin/purchase-orders/${po.id}`)}
+              >
+                <TableCell sx={{ fontWeight: 'bold' }}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    #{po.poNumber}
+                    {po?.note && (
+                      <Tooltip title={po?.note}>
+                        <TextSnippetIcon
+                          fontSize="small"
+                          sx={{ color: grey[500] }}
+                        />
+                      </Tooltip>
+                    )}
+                  </Box>
+                </TableCell>
+                <TableCell>{po.vendor.name}</TableCell>
+                <TableCell>
+                  <StatusText
+                    text={po.status}
+                    type={
+                      po.status === PO_STATUS.DRAFT
+                        ? 'warning'
+                        : po.status === PO_STATUS.ORDERED
+                          ? 'info'
+                          : po.status === PO_STATUS.RECEIVED
+                            ? 'success'
+                            : 'error'
                     }
-                    onClick={(e: any) =>
-                      updateStatus(e, po.id, PO_STATUS.CANCELLED)
-                    }
-                  >
-                    Cancel
-                  </LoadingButton>
-                )}
-                {po?.status === PO_STATUS.DRAFT ||
-                  (po?.status === PO_STATUS.CANCELLED && (
-                    <LoadingButton
-                      variant="outlined"
-                      color="primary"
-                      loading={
-                        loading.id === po.id &&
-                        loading.action === 'markAsOrdered' &&
-                        loading.loading
-                      }
+                  />
+                </TableCell>
+                <TableCell>
+                  {po?.receivedItems || 0} of {po?.totalItems || 0}
+                </TableCell>
+                <TableCell>${po?.totalCost?.toFixed(2) || 0}</TableCell>
+                <TableCell>{po.estArrival}</TableCell>
+                <TableCell>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Button
+                      color="error"
                       onClick={(e: any) => {
-                        updateStatus(e, po.id, PO_STATUS.ORDERED);
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setDeleteModal({
+                          open: true,
+                          id: po.id,
+                          targetObj: po,
+                        });
                       }}
                     >
-                      {po.status === PO_STATUS.ORDERED
-                        ? 'Mark as Received'
-                        : 'Mark as Ordered'}
-                    </LoadingButton>
-                  ))}
-              </Box>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-    </TableContainer>
+                      Delete
+                    </Button>
+                    {po?.status !== PO_STATUS.CANCELLED && (
+                      <LoadingButton
+                        variant="outlined"
+                        color="error"
+                        loading={
+                          loading.id === po.id &&
+                          loading.action === 'cancelPO' &&
+                          loading.loading
+                        }
+                        onClick={(e: any) =>
+                          updateStatus(e, po.id, PO_STATUS.CANCELLED)
+                        }
+                      >
+                        Cancel
+                      </LoadingButton>
+                    )}
+                    {po?.status === PO_STATUS.DRAFT ||
+                      (po?.status === PO_STATUS.CANCELLED && (
+                        <LoadingButton
+                          variant="outlined"
+                          color="primary"
+                          loading={
+                            loading.id === po.id &&
+                            loading.action === 'markAsOrdered' &&
+                            loading.loading
+                          }
+                          onClick={(e: any) => {
+                            updateStatus(e, po.id, PO_STATUS.ORDERED);
+                          }}
+                        >
+                          {po.status === PO_STATUS.ORDERED
+                            ? 'Mark as Received'
+                            : 'Mark as Ordered'}
+                        </LoadingButton>
+                      ))}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }

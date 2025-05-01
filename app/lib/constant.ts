@@ -41,6 +41,7 @@ import {
 import { amber, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { AccessTime } from '@mui/icons-material';
+import ReportIcon from '@mui/icons-material/Report';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -141,6 +142,7 @@ export const officiallyStartDate = new Date(2024, 0, 1); // Month is 0-indexed (
 export const testAccountId = 223;
 export const TimLeAccountId = 240;
 export const clientMaxWidth = '1250px';
+export const websiteItemCategoryId = 334;
 export const websiteItemCategory = 334;
 
 export const sendChequeMsg = `
@@ -277,6 +279,11 @@ export const adminTabs = {
       name: 'Statements',
       icon: DocumentScannerIcon,
       path: '/admin/statements',
+    },
+    {
+      name: 'Product Loss',
+      icon: ReportIcon,
+      path: '/admin/product-loss',
     },
     {
       name: 'Blocking',

@@ -23,7 +23,6 @@ import StatusText from '../../StatusText';
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
   po: IPurchaseOrder;
-  poItems: IPOItem[];
 }
 
 export default function ConvertToTransaction({
@@ -31,17 +30,17 @@ export default function ConvertToTransaction({
   onClose,
   showNotification,
   po,
-  poItems,
 }: IProps) {
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  const [updatedPOItems, setUpdatedPOItems] = useState<IPOItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [expenseData, setExpenseData] = useState<any>({
     amount: po.totalCost,
     invoice: '',
     description: `Payment for #${po.poNumber}`,
-    paymentMethodId: mainPaymentMethodId,
+    paymentMethodId: -1,
     spentBy: po.createdBy,
-    status: TRANSACTION_STATUS.PAID,
+    status: TRANSACTION_STATUS.UNPAID,
     tax: po.tax,
     discount: 0,
     subTotal: po.subtotal,
@@ -55,27 +54,21 @@ export default function ConvertToTransaction({
 
   useEffect(() => {
     if (po) {
-      const subtotal = po?.poItems?.reduce((acc: number, item: IPOItem) => {
-        return acc + item.costPerItem * (item.receivedQty || 0);
-      }, 0);
-
-      const tax = po?.poItems?.reduce((acc: number, item: IPOItem) => {
-        return acc + (item.tax || 0) * (item.receivedQty || 0);
-      }, 0);
-
-      const totalCost = subtotal + tax - (po?.discount || 0);
+      const cost = calculateTransactionCost(po?.poItems, po?.discount || 0);
 
       setExpenseData({
-        amount: totalCost,
+        amount: cost.totalCost,
         invoice: '',
         description: `Payment for #${po.poNumber}`,
-        paymentMethodId: mainPaymentMethodId,
+        paymentMethodId: expenseData?.paymentMethodId || -1,
         spentBy: po.createdBy,
-        status: TRANSACTION_STATUS.PAID,
-        tax: tax,
-        subTotal: subtotal,
+        status: expenseData?.status || TRANSACTION_STATUS.UNPAID,
+        tax: cost.tax,
+        subTotal: cost.subtotal,
         discount: po?.discount || 0,
       });
+
+      setUpdatedPOItems([...(po?.poItems || [])]);
     }
   }, [po]);
 
@@ -94,7 +87,21 @@ export default function ConvertToTransaction({
         subTotal: prevState.subTotal,
       }));
     }
-  }, [expenseData?.discount, expenseData?.subTotal, expenseData?.tax,]);
+  }, [expenseData?.discount, expenseData?.subTotal, expenseData?.tax]);
+
+  const calculateTransactionCost = (items: IPOItem[], discount: number = 0) => {
+    const subtotal = items?.reduce((acc: number, item: IPOItem) => {
+      return acc + item.costPerItem * (item.receivedQty || 0);
+    }, 0);
+
+    const tax = items?.reduce((acc: number, item: IPOItem) => {
+      return acc + (item.tax || 0) * (item.receivedQty || 0);
+    }, 0);
+
+    const totalCost = subtotal + tax - (discount || 0);
+
+    return { subtotal, tax, totalCost };
+  };
 
   const fetchAdminsAndDrivers = async () => {
     try {
@@ -127,12 +134,31 @@ export default function ConvertToTransaction({
     }
   };
 
+  const onChangeItemCost = (itemId: number, cost: number) => {
+    // Change the cost of the item
+    const newPOItems = updatedPOItems.map((item: IPOItem) => {
+      if (item.id === itemId) {
+        return { ...item, costPerItem: cost };
+      }
+      return item;
+    });
+
+    // Calculate the new subtotal
+    const newSubtotal = newPOItems.reduce((acc: number, item: IPOItem) => {
+      return acc + item.costPerItem * (item.receivedQty || 0);
+    }, 0);
+
+    setUpdatedPOItems(newPOItems);
+
+    setExpenseData({ ...expenseData, subTotal: newSubtotal });
+  };
+
   const handleReceive = async () => {
     setLoading(true);
     try {
       const res = await axios.put(`${API_URL.ADMIN}/purchase-orders/receive`, {
         poId: po.id,
-        poItems: poItems,
+        poItems: updatedPOItems,
         expenseData: {
           ...expenseData,
           date: date,
@@ -146,7 +172,7 @@ export default function ConvertToTransaction({
 
       showNotification('success', res.data.message);
       onClose();
-      router.push(`/admin/purchase-orders/${po.id}`);
+      router.push(`/admin/purchase-orders`);
     } catch (error: any) {
       showNotification('error', error.message);
     } finally {
@@ -175,8 +201,8 @@ export default function ConvertToTransaction({
         <Divider sx={{ my: 2 }}>Items</Divider>
 
         <Box display="flex" flexDirection="column" gap={2}>
-          {poItems?.map((item: any) => (
-            <Box key={item.id} display="flex" flexDirection="column" gap={1}>
+          {updatedPOItems?.map((item: any, index: number) => (
+            <Box key={index} display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">{item.inventoryItem.name}</Typography>
               <Box
                 display="flex"
@@ -185,11 +211,11 @@ export default function ConvertToTransaction({
                 gap={1}
               >
                 <TextField
-                  disabled
                   type="number"
                   value={item?.costPerItem || 0}
                   fullWidth
                   label="Unit Price"
+                  onChange={(e) => onChangeItemCost(item.id, +e.target.value)}
                 />
                 <TextField
                   disabled
@@ -265,11 +291,12 @@ export default function ConvertToTransaction({
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Invoice</Typography>
             <TextField
-              type="number"
+              type="text"
               value={expenseData.invoice}
               fullWidth
               onChange={(e) =>
-                setExpenseData({ ...expenseData, invoice: +e.target.value })}
+                setExpenseData({ ...expenseData, invoice: e.target.value })
+              }
             />
           </Box>
 
@@ -281,7 +308,8 @@ export default function ConvertToTransaction({
               value={expenseData.description}
               fullWidth
               onChange={(e) =>
-                setExpenseData({ ...expenseData, description: e.target.value })}
+                setExpenseData({ ...expenseData, description: e.target.value })
+              }
             />
           </Box>
 
@@ -311,8 +339,12 @@ export default function ConvertToTransaction({
                 -- Choose a method --
               </MenuItem>
               {paymentMethods.length > 0 &&
-                paymentMethods.map((item: any) => {
-                  return <MenuItem value={item.id}>{item.name}</MenuItem>;
+                paymentMethods.map((item: any, index: number) => {
+                  return (
+                    <MenuItem key={index} value={item.id}>
+                      {item.name}
+                    </MenuItem>
+                  );
                 })}
             </Select>
           </Box>
@@ -330,8 +362,10 @@ export default function ConvertToTransaction({
                 });
               }}
             >
-              {adminsAndDrivers.map((item: any) => (
-                <MenuItem value={item}>{item}</MenuItem>
+              {adminsAndDrivers.map((item: any, index: number) => (
+                <MenuItem key={index} value={item}>
+                  {item}
+                </MenuItem>
               ))}
             </Select>
           </Box>
@@ -349,7 +383,7 @@ export default function ConvertToTransaction({
             >
               <MenuItem value={TRANSACTION_STATUS.PAID}>
                 <StatusText text={TRANSACTION_STATUS.PAID} type="success" />
-                </MenuItem>
+              </MenuItem>
               <MenuItem value={TRANSACTION_STATUS.UNPAID}>
                 <StatusText text={TRANSACTION_STATUS.UNPAID} type="error" />
               </MenuItem>

@@ -335,7 +335,6 @@ export const insertOrdersToSelectedBoards = async (
         codBoardId: noRouteBoard.id,
         insertedAt: pacificTime.dateAndTime,
         insertedBy: user.clientName,
-
       },
     });
   }

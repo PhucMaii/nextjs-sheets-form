@@ -146,3 +146,16 @@ export enum PO_STATUS {
   RECEIVED = 'Received',
   CANCELLED = 'Cancelled',
 }
+
+export enum LOSS_REPORT_TYPE {
+  DAMAGED = 'Damaged',
+  EXPIRED = 'Expired',
+  OTHER = 'Other',
+}
+
+export enum MEDIA_TYPE {
+  LOSS_REPORT = 'loss report',
+  INVENTORY_ITEM = 'inventory item',
+  CHEQUE = 'cheque',
+  OTHER = 'other',
+}

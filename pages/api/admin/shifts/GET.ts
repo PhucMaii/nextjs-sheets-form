@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { normalizeDate } from '../../utils/date';
+import { formatDate } from '../../utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
 
 interface IQuery {
@@ -19,12 +19,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Missing startDate or endDate' });
     }
 
-    const formattedStartDate = normalizeDate(
-      `${startDate.split(' ')[1]} ${startDate.split(' ')[2]} ${startDate.split(' ')[3]}`,
-    );
-    const formattedEndDate = normalizeDate(
-      `${endDate.split(' ')[1]} ${endDate.split(' ')[2]} ${endDate.split(' ')[3]}`,
-    );
+    const formattedStartDate = formatDate(startDate);
+    const formattedEndDate = formatDate(endDate);
 
     const listOfDateString = generateListOfDateString(
       formattedStartDate,

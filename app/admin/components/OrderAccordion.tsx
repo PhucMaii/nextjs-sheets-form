@@ -12,6 +12,7 @@ import {
   Menu,
   MenuItem,
   Switch,
+  Tooltip,
   Typography,
   useMediaQuery,
 } from '@mui/material';
@@ -48,6 +49,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LockIcon from '@mui/icons-material/Lock';
 import { renderType } from '@/app/lib/render';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 
 interface PropTypes {
   order: Order;
@@ -498,9 +500,18 @@ const OrderAccordion = ({
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Typography fontWeight="bold" variant="subtitle1">
-              #{order.id}
-            </Typography>
+            <Box display="flex" alignItems="center">
+              <Typography fontWeight="bold" variant="subtitle1">
+                #{order.id}
+              </Typography>
+              {order?.note && order.note !== '' && (
+                <Tooltip title={order.note}>
+                  <IconButton size="small">
+                    <TextSnippetIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
             <Typography variant="body2">Order at: {order.orderTime}</Typography>
           </Grid>
           {mdDown && (

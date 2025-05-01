@@ -52,6 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         data: {
           receivedQty: poItem.receivedQty,
           rejectedQty: poItem.rejectedQty,
+          costPerItem: poItem.costPerItem,
         },
       });
     });
@@ -128,7 +129,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (itemParamsFifo.length > 0) {
       await createFifo(itemParamsFifo, today.dateAndTime, createdBy);
 
-      const response = await createOrderedItems(itemParamsFifo, newTransaction, today.dateAndTime, createdBy);
+      const response = await createOrderedItems(
+        itemParamsFifo,
+        newTransaction,
+        today.dateAndTime,
+        createdBy,
+      );
 
       if (!response.ok) {
         return res.status(404).json({

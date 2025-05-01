@@ -13,6 +13,7 @@ import {
   ItemPreference,
   ItemType,
   ItemType_Category,
+  LossReport,
   Option,
   PaymentMethod,
   PO,
@@ -320,4 +321,9 @@ export interface IPurchaseOrder extends PO {
 export interface IPOItem extends POItem {
   inventoryUnit: IInventoryUnit;
   inventoryItem: IInventoryItem;
+}
+
+export interface IProductLoss extends LossReport {
+  inventoryItem?: IInventoryItem;
+  inventoryUnit?: IInventoryUnit;
 }

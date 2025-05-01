@@ -54,7 +54,11 @@ export default function EditExpense({
     if (updatedExpense) {
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
-        amount: prevState?.subTotal + prevState.GST + prevState.PST - (prevState?.discount || 0),
+        amount:
+          prevState?.subTotal +
+          prevState.GST +
+          prevState.PST -
+          (prevState?.discount || 0),
       }));
     }
   }, [updatedExpense?.discount]);

@@ -80,9 +80,10 @@ export default function BulkEditOptions({
 
     setIsLoading(true);
     try {
+      const categoryIds = selectedCategories.map((category) => category.id);
       const response = await axios.put(`${API_URL.ADMIN}/bulk/options`, {
         inventoryItemId: item.inventoryItemId,
-        categories: selectedCategories,
+        categoryIds,
         updatedOptions: updatedItem?.data?.options,
       });
 
@@ -201,16 +202,16 @@ export default function BulkEditOptions({
               </Button>
             </Box>
             {updatedItem?.data?.options &&
-              updatedItem?.data?.options.length > 0 ? (
-                <OptionsTable
-                  options={updatedItem?.data?.options || []}
-                  showNotification={showNotification}
-                  noIncludeOption
-                  setItems={setItems}
-                />
-              ): (
-                <ErrorComponent errorText="No options found" />
-              )}
+            updatedItem?.data?.options.length > 0 ? (
+              <OptionsTable
+                options={updatedItem?.data?.options || []}
+                showNotification={showNotification}
+                noIncludeOption
+                setItems={setItems}
+              />
+            ) : (
+              <ErrorComponent errorText="No options found" />
+            )}
           </Box>
         </BoxModal>
       </Modal>

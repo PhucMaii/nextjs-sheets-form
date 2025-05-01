@@ -70,12 +70,16 @@ const EditVendor = ({ vendor, showNotification }: IProps) => {
 
   return (
     <>
-      <Button onClick={(e: any) => {
-        e.stopPropagation();
-        e.preventDefault();
-        
-        setOpen(true)
-        }}>Edit</Button>
+      <Button
+        onClick={(e: any) => {
+          e.stopPropagation();
+          e.preventDefault();
+
+          setOpen(true);
+        }}
+      >
+        Edit
+      </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <BoxModal>
           <ModalHead

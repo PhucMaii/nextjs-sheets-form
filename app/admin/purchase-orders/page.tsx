@@ -15,7 +15,7 @@ import { ShadowSection } from '../reports/styled';
 import POTable from '../components/Tables/POTable';
 import { useRouter } from 'next/navigation';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, PO_STATUS } from '@/app/utils/enum';
 import { IPurchaseOrder } from '@/app/utils/type';
 import useNotification from '@/hooks/useNotification';
 import useDebounce from '@/hooks/useDebounce';
@@ -43,7 +43,11 @@ export default function PurchaseOrders() {
   );
 
   const itemsRate = useMemo(() => {
-    const receivedItems = poList?.reduce((acc, po) => {
+    const activePoList = poList?.filter(
+      (po) => po.status !== PO_STATUS.CANCELLED,
+    );
+
+    const receivedItems = activePoList?.reduce((acc, po) => {
       const receivedItems = po.poItems.reduce((acc, item) => {
         return acc + (item?.receivedQty || 0);
       }, 0);
@@ -51,15 +55,15 @@ export default function PurchaseOrders() {
       return acc + receivedItems;
     }, 0);
 
-    const rejectedItems = poList?.reduce((acc, po) => {
+    const rejectedItems = activePoList?.reduce((acc, po) => {
       const rejectedItems = po.poItems.reduce((acc, item) => {
         return acc + (item?.rejectedQty || 0);
       }, 0);
 
       return acc + rejectedItems;
-    }, 0);  
+    }, 0);
 
-    const totalItems = poList?.reduce((acc, po) => {
+    const totalItems = activePoList?.reduce((acc, po) => {
       const totalItems = po.poItems.reduce((acc, item) => {
         return acc + (item?.orderedQty || 0);
       }, 0);
@@ -121,21 +125,23 @@ export default function PurchaseOrders() {
             <OverviewCard
               text="Purchase Orders"
               value={poList?.length || 0}
-              icon={<ShoppingCart sx={{ color: blue[700], fontSize: 50 }}  />}
+              icon={<ShoppingCart sx={{ color: blue[700], fontSize: 50 }} />}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <OverviewCard
               text="Received Items Rate (%)"
               value={itemsRate?.receivedItemsRate?.toFixed(2) || 0}
-              icon={<TrendingUpIcon sx={{ color: blue[700], fontSize: 50 }}  />}
+              icon={<TrendingUpIcon sx={{ color: blue[700], fontSize: 50 }} />}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <OverviewCard
               text="Rejected Items Rate (%)"
               value={itemsRate?.rejectedItemsRate?.toFixed(2) || 0}
-              icon={<TrendingDownIcon sx={{ color: blue[700], fontSize: 50 }}  />}
+              icon={
+                <TrendingDownIcon sx={{ color: blue[700], fontSize: 50 }} />
+              }
             />
           </Grid>
         </Grid>

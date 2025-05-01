@@ -31,6 +31,13 @@ import ShiftBanner from './ShiftBanner';
 import { AccessTime } from '@mui/icons-material';
 // import useLocalStorage from '@/hooks/useLocalStorage';
 import SwitchRole from './Modals/SwitchRole';
+import NotificationRequest from '@/app/components/NotificationRequest';
+// import axios from 'axios';
+import PushReSubscriber from '@/app/components/PushResubscriber';
+// import axios from 'axios';
+import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
+import axios from 'axios';
+import useNotification from '@/hooks/useNotification';
 
 interface IProps {
   children: ReactNode;
@@ -51,10 +58,14 @@ export default function Sidebar({ children }: IProps) {
   //   false,
   // );
 
+  const { showNotification, NotificationComp } = useNotification();
+
   const [todaySession] = SWRFetchData(`${API_URL.DRIVER}/shift/today`);
 
   const router = useRouter();
   const pathname: any = usePathname();
+
+  const isForceToClockIn = todaySession?.data?.length === 0 && todaySession?.isWorkingDay && pathname === '/driver/orders';
 
   useEffect(() => {
     setCurrentTab(pathname);
@@ -62,13 +73,15 @@ export default function Sidebar({ children }: IProps) {
 
   useEffect(() => {
     if (todaySession) {
-      if (todaySession.data.length > 0) {
+      // Has shift session
+      if (todaySession?.data?.length > 0) {
         const currentShift = todaySession.data.find(
           (shift: IShiftSession) => shift.isActive,
         );
         setShiftSession(currentShift);
         setShiftModalProps({ open: false, type: null });
-      } else if (todaySession.data.length === 0) {
+        // No shift session and is working day => Force to clock in
+      } else if (todaySession?.data?.length === 0 && todaySession?.isWorkingDay) {
         setShiftSession(null);
         setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN });
         // setIsAsked(true);
@@ -79,6 +92,33 @@ export default function Sidebar({ children }: IProps) {
   const handleChangeTab = (path: string) => {
     router.push(path);
   };
+
+  // const sendNotification = async () => {
+  //   try {
+  //     // if (Notification.permission === 'granted') {
+  //     //   new Notification('Supreme Sprouts', {
+  //     //     body: 'You have been clocked in',
+  //     //   })
+  //     // };
+  //     await axios.post('/api/push-notification/alert-clock-in');
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  const confirmAllowNotification = async () => {
+    try {
+      const response = await axios.post(`/api/push-notification/confirm-allow`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+      }
+    } catch (error) {
+      console.log('Fail to confirm allow notification: ', error);
+      showNotification('error', 'Fail to confirm allow notification: ' + error);
+    }
+  };
+
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -142,6 +182,10 @@ export default function Sidebar({ children }: IProps) {
   if (smDown) {
     return (
       <>
+        {NotificationComp}
+        <PushReSubscriber />
+        <NotificationRequest />
+
         {shiftSession ? (
           <ShiftBanner
             shift={shiftSession}
@@ -151,7 +195,10 @@ export default function Sidebar({ children }: IProps) {
             onOpenSwitchRole={() => setIsOpenSwitchRole(true)}
           />
         ) : (
-          <Box display="flex" alignItems="center" justifyContent="flex-end">
+          <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+            <IconButton onClick={confirmAllowNotification}>
+              <CircleNotificationsIcon />
+            </IconButton>
             <Button
               onClick={() =>
                 setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN })
@@ -171,12 +218,16 @@ export default function Sidebar({ children }: IProps) {
           onClose={() => setShiftModalProps({ open: false, type: null })}
           type={shiftModalProps.type}
           shift={shiftSession}
+          isDisabledClose={isForceToClockIn}
         />
         <SwitchRole
           open={isOpenSwitchRole}
           onClose={() => setIsOpenSwitchRole(false)}
         />
-        <Box sx={{ pb: 8, m: 1 }}>{children}</Box>
+        <Box sx={{ pb: 8, m: 1 }}>
+          {/* <Button onClick={sendNotification}>Send notification</Button> */}
+          {children}
+        </Box>
         <Paper
           sx={{ position: 'fixed', bottom: '0 !important', zIndex: 100 }}
           elevation={3}
@@ -231,6 +282,8 @@ export default function Sidebar({ children }: IProps) {
   if (mdDown) {
     return (
       <>
+        <NotificationRequest />
+
         {shiftSession ? (
           <ShiftBanner
             shift={shiftSession}
@@ -260,6 +313,7 @@ export default function Sidebar({ children }: IProps) {
           onClose={() => setShiftModalProps({ open: false, type: null })}
           type={shiftModalProps.type}
           shift={shiftSession}
+          isDisabledClose={isForceToClockIn}
         />
         <SwitchRole
           open={isOpenSwitchRole}
@@ -304,6 +358,7 @@ export default function Sidebar({ children }: IProps) {
 
   return (
     <>
+      <NotificationRequest />
       {shiftSession ? (
         <ShiftBanner
           shift={shiftSession}
@@ -333,6 +388,7 @@ export default function Sidebar({ children }: IProps) {
         onClose={() => setShiftModalProps({ open: false, type: null })}
         type={shiftModalProps.type}
         shift={shiftSession}
+        isDisabledClose={isForceToClockIn}
       />
       <SwitchRole
         open={isOpenSwitchRole}
