@@ -312,6 +312,7 @@ model Vendor {
 model InventoryItem {
   id            Int      @id @default(autoincrement())
   name          String
+  sku           String?  @unique
   createdAt     String
   createdBy     String
   hasGST        Boolean?

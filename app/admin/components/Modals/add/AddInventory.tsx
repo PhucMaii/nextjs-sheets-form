@@ -50,6 +50,7 @@ export default function AddInventory({
   });
   const [newItem, setNewItem] = useState<any>({
     name: '',
+    sku: '',
     hasPST: false,
     hasGST: false,
     typeId: -1,
@@ -90,7 +91,7 @@ export default function AddInventory({
   const handleAddInventory = async () => {
     setIsLoading(true);
     try {
-      if (!newItem.name) {
+      if (!newItem.name || !newItem.sku || newItem.typeId === -1) {
         showNotification('error', 'Missing required data');
         setIsLoading(false);
         return;
@@ -99,6 +100,7 @@ export default function AddInventory({
       const createdAt = generateCurrentTime();
       const response = await axios.post(`${API_URL.ADMIN}/inventory`, {
         name: newItem.name,
+        sku: newItem.sku,
         typeId: newItem.typeId,
         hasPST: newItem.hasPST,
         hasGST: newItem.hasGST,
@@ -361,6 +363,18 @@ export default function AddInventory({
                 value={newItem.name}
                 onChange={(e) =>
                   setNewItem({ ...newItem, name: e.target.value })
+                }
+              />
+            </Box>
+
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">SKU</Typography>
+              <TextField
+                fullWidth
+                placeholder="Enter item SKU..."
+                value={newItem.sku}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, sku: e.target.value })
                 }
               />
             </Box>
