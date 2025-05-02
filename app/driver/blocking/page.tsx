@@ -49,7 +49,7 @@ export default function BlockingPage() {
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
-    `${apiURL}?userId=${selectedClient?.id}`,
+    `${apiURL}?userId=${selectedClient?.id}&date=${newDateRange[0]}`,
   );
 
   useEffect(() => {
