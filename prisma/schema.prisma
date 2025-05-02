@@ -255,7 +255,34 @@ model PaymentMethod {
   type         String
   updatedAt    String?
   updatedBy    String?
+
   transactions Expense[]
+  fixedTransactions  FixedTransaction[]
+}
+
+model FixedTransaction {
+  id                 Int    @id @default(autoincrement())
+  title              String
+  isDynamicAmount    Boolean     @default(false)
+  defaultSubtotal    Float?
+  defaultAmount      Float?
+  defaultPST         Float?
+  defaultGST         Float?
+  recurrence         String     // monthly, quarterly, etc
+  initialDueDate     String
+  nextDueDate        String
+  lastGeneratedAt    String?
+  note               String?
+  createdAt          String
+  createdBy          String
+  updatedAt          String?
+  updatedBy          String?
+  defaultSpentBy     String?
+  defaultTransactionStatus   String?    // Paid & Unpaid
+
+  paymentMethodId    Int
+
+  paymentMethod      PaymentMethod    @relation(fields: [paymentMethodId], references: [id])
 }
 
 model Expense {
