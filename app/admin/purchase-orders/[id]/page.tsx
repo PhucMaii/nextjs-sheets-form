@@ -366,14 +366,18 @@ export default function PurchaseOrder() {
                       value={selectedItems}
                       options={po?.vendor?.vendorItem || []}
                       getOptionLabel={(option) =>
-                        option?.inventoryItem?.name || ''
+                        option?.inventoryItem?.sku
+                          ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
+                          : option?.inventoryItem?.name
                       }
                       renderOption={(props, option, { selected }) => {
                         const { key, ...optionProps } = props;
                         return (
                           <li key={key} {...optionProps}>
                             <FormControlLabel
-                              label={option?.inventoryItem?.name}
+                              label={option?.inventoryItem?.sku
+                                ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
+                                : option?.inventoryItem?.name}
                               control={<Checkbox checked={selected} />}
                             />
                           </li>

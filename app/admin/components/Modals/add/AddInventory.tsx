@@ -51,6 +51,7 @@ export default function AddInventory({
   const [newItem, setNewItem] = useState<any>({
     name: '',
     sku: '',
+    supplierSku: '',
     hasPST: false,
     hasGST: false,
     typeId: -1,
@@ -101,6 +102,7 @@ export default function AddInventory({
       const response = await axios.post(`${API_URL.ADMIN}/inventory`, {
         name: newItem.name,
         sku: newItem.sku,
+        supplierSku: newItem.supplierSku,
         typeId: newItem.typeId,
         hasPST: newItem.hasPST,
         hasGST: newItem.hasGST,
@@ -355,14 +357,15 @@ export default function AddInventory({
                 />
               </Box>
             </Box>
+
             <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Name</Typography>
+              <Typography variant="h6">Supplier SKU</Typography>
               <TextField
                 fullWidth
-                placeholder="Enter item name..."
-                value={newItem.name}
+                placeholder="Enter item supplier SKU..."
+                value={newItem.supplierSku}
                 onChange={(e) =>
-                  setNewItem({ ...newItem, name: e.target.value })
+                  setNewItem({ ...newItem, supplierSku: e.target.value })
                 }
               />
             </Box>
@@ -375,6 +378,18 @@ export default function AddInventory({
                 value={newItem.sku}
                 onChange={(e) =>
                   setNewItem({ ...newItem, sku: e.target.value })
+                }
+              />
+            </Box>
+
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Name</Typography>
+              <TextField
+                fullWidth
+                placeholder="Enter item name..."
+                value={newItem.name}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, name: e.target.value })
                 }
               />
             </Box>

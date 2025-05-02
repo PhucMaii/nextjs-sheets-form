@@ -79,6 +79,8 @@ export default function AddItem({
             ...defaultItem,
             units: newUnits,
             unit: newUnits[0],
+            inventoryItemId: newValue.id,
+            inventoryItem: newValue,
           };
         });
       }
@@ -177,16 +179,19 @@ export default function AddItem({
               <Typography>Inventory Item:</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Autocomplete
+              <Typography variant="h5">{newItem?.inventoryItem?.sku
+                ? `${newItem?.inventoryItem?.sku} | ${newItem?.inventoryItem?.name}`
+                : newItem?.inventoryItem?.name}</Typography>
+              {/* <Autocomplete
                 getOptionDisabled={(option: any) => {
-                  console.log(option, 'OPTION');
-                  const isExistInCateogory = selectedCategories[0].items.some(
+                  if (!selectedCategories[0]) return false;
+                  const isExistInCateogory = selectedCategories[0]?.items?.some(
                     (item: any) => item.inventoryItemId === option.id,
                   );
                   return isExistInCateogory;
                 }}
                 options={inventoryItems?.data || []}
-                getOptionLabel={(option: any) => option?.name || ''}
+                getOptionLabel={(option: any) => option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
                 renderInput={(params) => <TextField {...params} label="Item" />}
                 value={
                   inventoryItems?.data?.find(
@@ -218,7 +223,7 @@ export default function AddItem({
                   setNewItem({ ...newItem, name: newInputValue });
                 }}
                 sx={{ width: 'auto' }}
-              />
+              /> */}
             </Grid>
             <Grid item xs={12}>
               <Typography>Name:</Typography>

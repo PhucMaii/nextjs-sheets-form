@@ -134,9 +134,16 @@ export default function StockItems({
 
   useEffect(() => {
     if (debouncedKeywords) {
+      console.log('debouncedKeywords', debouncedKeywords);
       const newDisplayData = inventoryItems?.data.filter(
         (item: IInventoryItem) => {
           return (
+            item?.sku
+              ?.toLowerCase()
+              .includes(debouncedKeywords.toLowerCase()) ||
+            item?.supplierSku
+              ?.toLowerCase()
+              .includes(debouncedKeywords.toLowerCase()) ||
             item.name.toLowerCase().includes(debouncedKeywords.toLowerCase()) ||
             item.vendorItem.some((vendorItem: any) =>
               vendorItem.vendor.name

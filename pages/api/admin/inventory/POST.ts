@@ -8,6 +8,7 @@ import { calculateNextIndexPosAndRows } from '../../utils/appearance';
 interface IBody {
   name: string;
   sku: string;
+  supplierSku: string;
   typeId: number;
   hasPST: boolean;
   hasGST: boolean;
@@ -19,7 +20,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name, sku, typeId, hasPST, hasGST, vendorItems, createdAt }: IBody =
+    const { name, sku, supplierSku, typeId, hasPST, hasGST, vendorItems, createdAt }: IBody =
       req.body;
 
     const vendorIds = vendorItems.map((vendorItem: any) => {
@@ -55,10 +56,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { nextPos, newRows } = await calculateNextIndexPosAndRows(typeId, 1);
+
     // Create Main Inventory Item
     const newInventory = await prisma.inventoryItem.create({
       data: {
         name,
+        supplierSku,
         sku,
         hasPST,
         hasGST,

@@ -58,6 +58,10 @@ export default function VendorItemSearch({
         if (option.title) {
           return option.title;
         }
+
+        if (option?.inventoryItem?.sku) {
+          return `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`;
+        }
         // Regular option
         return option?.inventoryItem?.name || '';
       }}
@@ -67,7 +71,7 @@ export default function VendorItemSearch({
         const isDisabled = disabledItems?.includes(option?.id);
         return (
           <li key={key} {...optionProps} aria-disabled={isDisabled}>
-            {option.title || option?.inventoryItem?.name}
+            {option.title ? option.title : option?.inventoryItem?.sku ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}` : option?.inventoryItem?.name}
           </li>
         );
       }}

@@ -306,13 +306,20 @@ export default function CreatePO() {
                 <Autocomplete
                   size="small"
                   options={selectedVendor?.vendorItem || []}
-                  getOptionLabel={(option) => option?.inventoryItem?.name || ''}
+                  getOptionLabel={(option: any) => {
+                    console.log(option, 'OPTION');
+                    return option?.inventoryItem?.sku
+                      ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
+                      : option?.inventoryItem?.name;
+                  }}
                   renderOption={(props, option, { selected }) => {
                     const { key, ...optionProps } = props;
                     return (
                       <li key={key} {...optionProps}>
                         <FormControlLabel
-                          label={option?.inventoryItem?.name}
+                          label={option?.inventoryItem?.sku
+                            ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
+                            : option?.inventoryItem?.name}
                           control={<Checkbox checked={selected} />}
                         />
                       </li>
@@ -353,7 +360,9 @@ export default function CreatePO() {
                         >
                           <Grid item xs={12}>
                             <Typography variant="h6">
-                              {item?.inventoryItem?.name}
+                              {item?.inventoryItem?.sku
+                                ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
+                                : item?.inventoryItem?.name}
                             </Typography>
                           </Grid>
                           <Grid item xs={12}>
