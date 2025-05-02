@@ -139,8 +139,6 @@ export default function EditInventory({
       const response = await axios.put(`${API_URL.ADMIN}/inventory`, {
         id: inventoryItem.id,
         ...updatedItem,
-        // color: color.hex,
-        // name: updatedItem.name,
         vendorItems: updatedVendorItems,
         updatedAt,
       });
@@ -339,16 +337,11 @@ export default function EditInventory({
           updateUnit(updatedUnit, editUnit.unitIndex)
         }
       />
-      {/* <DisplayListingCategory
-        anchorEl={anchorListingPopover}
-        listing={inventoryItem?.listingCategories || []}
-      /> */}
-      {/* <Button onClick={() => setOpen(true)}>Edit</Button> */}
       <Modal open={open} onClose={onClose}>
         <BoxModal maxHeight="80vh" overflow="scroll">
           <ModalHead
             heading="Edit Inventory"
-            buttonLabel="EDIT"
+            buttonLabel="Save"
             buttonProps={{ loading: isLoading }}
             onClose={onClose}
             onClick={handleUpdate}
@@ -466,6 +459,34 @@ export default function EditInventory({
                 />
               </Box>
             </Box>
+
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">Supplier SKU</Typography>
+              <TextField
+                fullWidth
+                placeholder="Enter item supplier SKU..."
+                value={updatedItem?.supplierSku || ''}
+                onChange={(e) =>
+                  setUpdatedItem({
+                    ...updatedItem,
+                    supplierSku: e.target.value,
+                  })
+                }
+              />
+            </Box>
+
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h6">SKU</Typography>
+              <TextField
+                fullWidth
+                placeholder="Enter item SKU..."
+                value={updatedItem?.sku || ''}
+                onChange={(e) =>
+                  setUpdatedItem({ ...updatedItem, sku: e.target.value })
+                }
+              />
+            </Box>
+
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Name</Typography>
               <TextField

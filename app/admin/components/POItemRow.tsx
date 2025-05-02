@@ -84,7 +84,9 @@ export const POItemRow = ({
             justifyContent="space-between"
             gap={1}
           >
-            <Typography variant="h6">{item?.inventoryItem?.name}</Typography>
+            <Typography variant="h6">{item?.inventoryItem?.sku
+              ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
+              : item?.inventoryItem?.name}</Typography>
             {xsDown && (
               <IconButton onClick={() => onDeleteItem(item)}>
                 <Trash2Icon />
@@ -250,7 +252,9 @@ export const POItemRowDisplay = ({ item }: any) => {
 
   return (
     <TableRow sx={{ alignItems: 'flex-start' }}>
-      <TableCell>{item?.inventoryItem?.name}</TableCell>
+      <TableCell>{item?.inventoryItem?.sku
+        ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
+        : item?.inventoryItem?.name}</TableCell>
       <TableCell>
         <Box display="flex" gap={1} alignItems="center" width="100%">
           <ReceivedProgress

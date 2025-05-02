@@ -15,13 +15,13 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import EditInventory from '../Modals/edit/EditInventory';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import BatchQuantityModal from '../Inventory/BatchQuantityModal';
-import { ArrowRightIcon, PhoneIcon } from 'lucide-react';
+import { ArrowRightIcon, EditIcon } from 'lucide-react';
 import ViewItemMissing from '../Modals/ViewItemMissing';
 import { ItemType } from '@prisma/client';
 import LoadingModal from '../Modals/LoadingModal';
@@ -36,13 +36,13 @@ interface IProps {
   setSelectedItems: (item: IInventoryItem[]) => void;
 }
 
-export default function InventoryTable({
+const InventoryTable = ({
   inventoryItems,
   showNotification,
   itemTypes,
   selectedItems,
   setSelectedItems,
-}: IProps) {
+}: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editItemProps, setEditItemProps] = useState<any>({
     open: false,
@@ -53,6 +53,12 @@ export default function InventoryTable({
     inventoryItem: inventoryItems[0],
     quantity: inventoryItems[0]?.quantity || 0,
   });
+  const[batchProps, setBatchProps] = useState<any>({
+    open: false,
+    inventoryItem: inventoryItems[0],
+  });
+
+  console.log('re render');
 
   const router = useRouter();
 
@@ -131,6 +137,17 @@ export default function InventoryTable({
 
   return (
     <>
+      {batchProps.open && (
+        <BatchQuantityModal
+          open={batchProps.open}
+          onClose={() => setBatchProps((prevState: any) => ({
+            ...prevState,
+            open: false,
+          }))}
+          fifoList={batchProps.inventoryItem?.fifo || []}
+          showNotification={showNotification}
+        />
+      )}
       <LoadingModal open={isLoading} />
       {editItemProps.inventoryItem && (
         <EditInventory
@@ -168,7 +185,8 @@ export default function InventoryTable({
                   onClick={onSelectAll}
                 />
               </TableCell>
-              <TableCell style={{ width: 50 }}></TableCell>
+              <TableCell>Supplier SKU</TableCell>
+              <TableCell>SKU</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Listing</TableCell>
               <TableCell>Type</TableCell>
@@ -205,8 +223,10 @@ export default function InventoryTable({
                       onClick={(e: any) => onSelectItem(e, item)}
                     />
                   </TableCell>
-                  <TableCell>
-                    {item.quantity < 0 ? (
+                  <TableCell sx={{ width: 200 }}>
+                    <Typography>{item?.supplierSku || 'N/A'}</Typography>
+                  </TableCell>
+                  {/* {item.quantity < 0 ? (
                       <IconButton
                         size="small"
                         color="primary"
@@ -224,15 +244,17 @@ export default function InventoryTable({
                       >
                         <PhoneIcon size={20} />
                       </IconButton>
-                    ) : null}
+                    ) : null} */}
+                  <TableCell sx={{ width: 200 }}>
+                    <Typography>{item?.sku || 'N/A'}</Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ width: 300 }}>
                     <Typography>{item.name}</Typography>
                   </TableCell>
                   <TableCell>
                     <Box display="flex" gap={1} alignItems="center">
                       <Typography>
-                        {item?.listingCategories?.length || 0} listing items
+                        {item?.listingCategories?.length || 0} listing
                       </Typography>
                       <Button
                         size="small"
@@ -253,9 +275,16 @@ export default function InventoryTable({
                   <TableCell>
                     <Select
                       value={item?.typeId || 0}
-                      onChange={(e: any) =>
-                        handleChangeType(item, e.target.value)
-                      }
+                      onChange={(e: any) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        handleChangeType(item, e.target.value);
+                      }}
+                      onClick={(e: any) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
                     >
                       {itemTypes.map((type: ItemType, index: number) => {
                         return (
@@ -292,10 +321,24 @@ export default function InventoryTable({
                       <Typography>
                         {item?.quantity} {unit?.unit}
                       </Typography>
-                      <BatchQuantityModal
+                      {/* <BatchQuantityModal
                         fifoList={item?.fifo || []}
                         showNotification={showNotification}
-                      />
+                      /> */}
+                      <IconButton
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setBatchProps((prevState: any) => ({
+                            ...prevState,
+                            open: true,
+                            inventoryItem: item,
+                          }));
+                        }}
+                        size="small"
+                      >
+                        <EditIcon fontSize={24} />
+                      </IconButton>
                     </Box>
                   </TableCell>
                   <TableCell>
@@ -319,4 +362,13 @@ export default function InventoryTable({
       </Paper>
     </>
   );
-}
+};
+
+export default memo(InventoryTable, (prev, next) => {
+  return (
+    JSON.stringify(prev.inventoryItems) ===
+      JSON.stringify(next.inventoryItems) &&
+    JSON.stringify(prev.itemTypes) === JSON.stringify(next.itemTypes) &&
+    JSON.stringify(prev.selectedItems) === JSON.stringify(next.selectedItems)
+  );
+});

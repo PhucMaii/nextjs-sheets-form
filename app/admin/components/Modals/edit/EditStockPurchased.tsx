@@ -711,7 +711,9 @@ const EditStockPurchased = ({
                     <Grid item xs={12} fontWeight="bold">
                       <Box display="flex" alignItems="center" gap={1}>
                         <Typography variant="h6" fontWeight="bold">
-                          {item.name}
+                          {item?.inventoryItem?.sku
+                            ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
+                            : item?.inventoryItem?.name}
                         </Typography>
                         <IconButton
                           onClick={() => removeItem(item.id)}

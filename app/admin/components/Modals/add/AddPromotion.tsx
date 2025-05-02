@@ -107,7 +107,7 @@ export default function AddPromotion({
               multiple
               id="tags-standard"
               options={inventoryItems?.data || []}
-              getOptionLabel={(option: any) => option.name}
+              getOptionLabel={(option: any) => option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -124,7 +124,7 @@ export default function AddPromotion({
                 return (
                   <li {...props}>
                     <Checkbox style={{ marginRight: 8 }} checked={selected} />
-                    {option.name}
+                    {option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
                   </li>
                 );
               }}

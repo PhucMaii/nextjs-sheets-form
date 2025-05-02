@@ -1147,7 +1147,7 @@ const OrderView = ({
 
         {!isPreOrder && renderDateAndNoteInput()}
         {renderTotal()}
-        {!smDown && !hideButton && renderPlaceOrdeButton()}
+        {!smDown && renderPlaceOrdeButton()}
       </ShadowSection>
     );
   };

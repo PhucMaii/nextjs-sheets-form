@@ -605,7 +605,7 @@ export default function StockPurchased({
                 <Grid item xs={12} fontWeight="bold">
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography variant="h6" fontWeight="bold">
-                      {item.name}
+                      {item?.sku ? `${item?.sku} | ${item?.name}` : item?.name}
                     </Typography>
                     <IconButton onClick={() => removeItem(item.name)}>
                       <RemoveCircleIcon sx={{ color: errorColor }} />

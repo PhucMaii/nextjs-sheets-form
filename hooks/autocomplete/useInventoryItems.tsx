@@ -21,6 +21,7 @@ const useInventoryItems = () => {
       }
 
       setInventoryItems(response.data.data);
+
     } catch (error: any) {
       console.log('Error fetching inventory items', error);
     }
@@ -30,7 +31,7 @@ const useInventoryItems = () => {
     return (
       <Autocomplete
         options={inventoryItems || []}
-        getOptionLabel={(option: any) => option?.name || ''}
+        getOptionLabel={(option: any) => option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
         renderInput={(params) => <TextField {...params} label="Item" />}
         value={
           inventoryItems?.find(

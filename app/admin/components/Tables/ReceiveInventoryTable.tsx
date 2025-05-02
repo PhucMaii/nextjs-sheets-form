@@ -32,7 +32,9 @@ export default function ReceiveInventoryTable({ poItems, setPoItems }: any) {
       <TableBody>
         {poItems.map((item: any) => (
           <TableRow key={item.id}>
-            <TableCell>{item?.inventoryItem?.name}</TableCell>
+            <TableCell>{item?.inventoryItem?.sku
+              ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
+              : item?.inventoryItem?.name}</TableCell>
             <TableCell>
               <Box display="flex" gap={1}>
                 <TextField

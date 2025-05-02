@@ -36,7 +36,7 @@ export default function MoveItemToEmpty({
 
         <Autocomplete
           options={inventoryItems || []}
-          getOptionLabel={(option) => option.name}
+          getOptionLabel={(option) => option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
           renderInput={(params) => <TextField {...params} label="Items" />}
           value={selectedItem}
           onChange={(e, newValue) => setSelectedItem(newValue)}

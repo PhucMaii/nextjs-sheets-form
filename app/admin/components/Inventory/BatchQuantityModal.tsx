@@ -2,18 +2,17 @@ import {
   AlertColor,
   Box,
   Divider,
-  IconButton,
   Modal,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import { BoxModal } from '../Modals/styled';
 import { IFifo } from '@/app/utils/type';
 import BatchQuantity from './BatchQuantity';
 import ErrorComponent from '../ErrorComponent';
-import EditIcon from '@mui/icons-material/Edit';
+import { ModalProps } from '../Modals/type';
 
-interface IProps {
+interface IProps extends ModalProps {
   fifoList: IFifo[];
   showNotification: (type: AlertColor, message: string) => void;
 }
@@ -21,12 +20,14 @@ interface IProps {
 export default function BatchQuantityModal({
   fifoList,
   showNotification,
+  open,
+  onClose,
 }: IProps) {
-  const [open, setOpen] = useState<boolean>(false);
+  // const [open, setOpen] = useState<boolean>(false);
 
   return (
     <>
-      <IconButton
+      {/* <IconButton
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -35,8 +36,8 @@ export default function BatchQuantityModal({
         size="small"
       >
         <EditIcon fontSize="small" />
-      </IconButton>
-      <Modal open={open} onClose={() => setOpen(false)}>
+      </IconButton> */}
+      <Modal open={open} onClose={onClose}>
         <BoxModal
           maxHeight="80vh"
           overflow="scroll"

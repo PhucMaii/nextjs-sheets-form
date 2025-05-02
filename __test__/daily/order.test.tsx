@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 
 describe('Check for incorrect orders', () => {
   const prisma = new PrismaClient();
-  const startDate = new Date('2025-03-01');
+  const startDate = new Date('2025-04-01');
   const endDate = getTodayDate();
   const endDateFormatted = new Date(`${endDate.date} ${endDate.time}`);
   endDateFormatted.setDate(endDateFormatted.getDate() + 1);
@@ -30,14 +30,18 @@ describe('Check for incorrect orders', () => {
     });
     const incorrectOrders = [];
     for (const order of ordersInDecember) {
-      const actualTotalPrice = order.items.reduce((acc: number, item: any) => {
+      let actualTotalPrice = order.items.reduce((acc: number, item: any) => {
         return acc + item.price * item.quantity;
       }, 0);
+
+      actualTotalPrice = actualTotalPrice + (order?.PST || 0) + (order?.GST || 0);
       if (
-        actualTotalPrice.toFixed(2) !==
-          (order?.subTotal || order?.totalPrice)?.toFixed(2) &&
-        (order?.discount === 0 || order?.discount === null)
+        actualTotalPrice.toFixed(2) !== order?.totalPrice?.toFixed(2)
       ) {
+        console.log({
+          actualTotalPrice: actualTotalPrice.toFixed(2),
+          orderTotalPrice: order.totalPrice.toFixed(2),
+        });
         incorrectOrders.push({
           id: order.id,
           deliveryDate: order.deliveryDate,
@@ -81,6 +85,10 @@ describe('Check for incorrect orders', () => {
         (order?.GST || 0);
 
       if (subTotalWithTax?.toFixed(2) !== order.totalPrice?.toFixed(2)) {
+        console.log({
+          subTotalWithTax: subTotalWithTax?.toFixed(2),
+          orderTotalPrice: order.totalPrice?.toFixed(2),
+        });
         incorrectOrders.push(order);
       }
     }
