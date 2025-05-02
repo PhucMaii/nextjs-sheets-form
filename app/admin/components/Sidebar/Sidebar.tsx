@@ -62,9 +62,9 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
 
   const recommendDateRange = generateMonthRange();
 
-  const [bugOrders] = SWRFetchData(
-    `${API_URL.ADMIN}/orders/invalid-orders?startDate=${recommendDateRange[0]}&endDate=${recommendDateRange[1]}`,
-  );
+  // const [bugOrders] = SWRFetchData(
+  //   `${API_URL.ADMIN}/orders/invalid-orders?startDate=${recommendDateRange[0]}&endDate=${recommendDateRange[1]}`,
+  // );
 
   const singlePrintRef: any = useRef();
   const allPrintRef: any = useRef();
@@ -168,7 +168,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
         component="nav"
         aria-labelledby="nested-list-subheader"
       >
-        {bugOrders && bugOrders?.data?.length > 0 && (
+        {/* {bugOrders && bugOrders?.data?.length > 0 && (
           <Toolbar sx={{ mt: 2 }}>
             <Box display="flex" flexDirection="column" rowGap={2}>
               {bugOrders?.data.map((order: any, index: number) => {
@@ -199,7 +199,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
               })}
             </Box>
           </Toolbar>
-        )}
+        )} */}
         <Box display="flex" flexDirection="column" rowGap={2}>
           {Object.keys(adminTabs).map((section: string, index: number) => {
             const sectionKey = section as keyof typeof adminTabs;
