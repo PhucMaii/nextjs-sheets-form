@@ -179,51 +179,63 @@ export default function AddItem({
               <Typography>Inventory Item:</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h5">{newItem?.inventoryItem?.sku
-                ? `${newItem?.inventoryItem?.sku} | ${newItem?.inventoryItem?.name}`
-                : newItem?.inventoryItem?.name}</Typography>
-              {/* <Autocomplete
-                getOptionDisabled={(option: any) => {
-                  if (!selectedCategories[0]) return false;
-                  const isExistInCateogory = selectedCategories[0]?.items?.some(
-                    (item: any) => item.inventoryItemId === option.id,
-                  );
-                  return isExistInCateogory;
-                }}
-                options={inventoryItems?.data || []}
-                getOptionLabel={(option: any) => option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
-                renderInput={(params) => <TextField {...params} label="Item" />}
-                value={
-                  inventoryItems?.data?.find(
-                    (item: any) =>
-                      item.id === newItem.inventoryItemId ||
-                      item.name === newItem.name,
-                  ) || null
-                }
-                onChange={(e, newValue: any) => {
-                  let newUnits = newValue.vendorItem.flatMap(
-                    (item: any) => item.unit,
-                  );
+              {defaultItem ? (
+                <Typography variant="h5">
+                  {newItem?.inventoryItem?.sku
+                    ? `${newItem?.inventoryItem?.sku} | ${newItem?.inventoryItem?.name}`
+                    : newItem?.inventoryItem?.name}
+                </Typography>
+              ) : (
+                <Autocomplete
+                  getOptionDisabled={(option: any) => {
+                    if (!selectedCategories[0]) return false;
+                    const isExistInCateogory =
+                      selectedCategories[0]?.items?.some(
+                        (item: any) => item.inventoryItemId === option.id,
+                      );
+                    return isExistInCateogory;
+                  }}
+                  options={inventoryItems?.data || []}
+                  getOptionLabel={(option: any) =>
+                    option?.sku
+                      ? `${option?.sku} | ${option?.name}`
+                      : option?.name
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Item" />
+                  )}
+                  value={
+                    inventoryItems?.data?.find(
+                      (item: any) =>
+                        item.id === newItem.inventoryItemId ||
+                        item.name === newItem.name,
+                    ) || null
+                  }
+                  onChange={(e, newValue: any) => {
+                    let newUnits = newValue.vendorItem.flatMap(
+                      (item: any) => item.unit,
+                    );
 
-                  newUnits = Array.from(
-                    new Map(
-                      newUnits.map((unit: any) => [unit.ratio, unit]),
-                    ).values(),
-                  );
-                  setNewItem({
-                    ...newItem,
-                    name: newValue.name || '',
-                    price: newValue?.unitPrice || 0,
-                    units: newUnits,
-                    unit: newUnits[0],
-                    inventoryItemId: newValue.id,
-                  });
-                }}
-                onInputChange={(e, newInputValue) => {
-                  setNewItem({ ...newItem, name: newInputValue });
-                }}
-                sx={{ width: 'auto' }}
-              /> */}
+                    newUnits = Array.from(
+                      new Map(
+                        newUnits.map((unit: any) => [unit.ratio, unit]),
+                      ).values(),
+                    );
+                    setNewItem({
+                      ...newItem,
+                      name: newValue.name || '',
+                      price: newValue?.unitPrice || 0,
+                      units: newUnits,
+                      unit: newUnits[0],
+                      inventoryItemId: newValue.id,
+                    });
+                  }}
+                  onInputChange={(e, newInputValue) => {
+                    setNewItem({ ...newItem, name: newInputValue });
+                  }}
+                  sx={{ width: 'auto' }}
+                />
+              )}
             </Grid>
             <Grid item xs={12}>
               <Typography>Name:</Typography>
