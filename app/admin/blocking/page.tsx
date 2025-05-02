@@ -17,9 +17,14 @@ import DayRange from '../components/DayRange';
 import { blueGrey } from '@mui/material/colors';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
+import BlockOrders from '../components/Modals/BlockOrders';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
+  const [blockOrdersProps, setBlockOrdersProps] = useState<any>({
+    open: false,
+    orders: [],
+  });
   const [updatedDateRange, setUpdatedDateRange] = useState<any>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -88,8 +93,13 @@ export default function BlockingPage() {
         role: USER_ROLE.ADMIN,
       });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
+      // This means if error and stil return data
+      if (response.data.error && response.data.data) {
+        setBlockOrdersProps({
+          open: true,
+          orders: response.data.data,
+        });
+        // showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
@@ -183,6 +193,20 @@ export default function BlockingPage() {
   return (
     <Sidebar>
       {NotificationComp}
+      <BlockOrders
+        open={blockOrdersProps.open}
+        onClose={() =>
+          setBlockOrdersProps({
+            open: false,
+            orders: [],
+          })
+        }
+        orders={blockOrdersProps.orders}
+        showNotification={showNotification}
+        startDate={newDateRange[0]}
+        endDate={newDateRange[1]}
+        role={USER_ROLE.ADMIN}
+      />
       <DateRange
         open={isSelectRangeOpen}
         onClose={() => setIsSelectRangeOpen(false)}

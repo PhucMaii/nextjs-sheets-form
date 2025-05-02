@@ -332,6 +332,7 @@ interface IProps {
   isPreOrder?: boolean;
   clientName?: string;
   role?: USER_ROLE;
+  hideButton?: boolean;
 }
 
 const OrderView = ({
@@ -345,6 +346,7 @@ const OrderView = ({
   defaultOrder,
   clientName,
   role,
+  hideButton,
 }: IProps) => {
   const [displayItems, setDisplayItems] = useState<IItem[]>(items);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -951,7 +953,6 @@ const OrderView = ({
             </Grid>
           )}
         </Grid>
-        {/* {smDown && renderPlaceOrdeButton()} */}
       </ShadowSection>
     );
   };
@@ -959,7 +960,7 @@ const OrderView = ({
   const renderMyOrder = () => {
     return (
       <ShadowSection
-        display="flex"
+        display="flex" 
         flexDirection="column"
         gap={1}
         // sx={{
@@ -1146,7 +1147,7 @@ const OrderView = ({
 
         {!isPreOrder && renderDateAndNoteInput()}
         {renderTotal()}
-        {!smDown && renderPlaceOrdeButton()}
+        {!smDown && !hideButton && renderPlaceOrdeButton()}
       </ShadowSection>
     );
   };
@@ -1329,7 +1330,7 @@ const OrderView = ({
             pb={isModal ? 0 : 8}
             sx={{ position: 'sticky', bottom: 0, zIndex: 50 }}
           >
-            {renderPlaceOrdeButton()}
+            {!hideButton && renderPlaceOrdeButton()}
           </Box>
           {/* </Box> */}
         </Box>

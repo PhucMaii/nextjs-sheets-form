@@ -30,7 +30,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Check is same start date or same end date exist
     const isRangeValid = await handleCheckRangeValid(
-      prisma,
       startDate,
       endDate,
       userId,

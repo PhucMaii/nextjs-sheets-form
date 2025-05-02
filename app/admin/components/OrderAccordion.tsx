@@ -52,16 +52,16 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 
 interface PropTypes {
   order: Order;
-  showNotification: (type: AlertColor, message: string) => void;
-  selectedOrders: Order[];
-  handleSelectOrder: (e: any, targetOrder: Order) => void;
+  showNotification?: (type: AlertColor, message: string) => void;
+  selectedOrders?: Order[];
+  handleSelectOrder?: (e: any, targetOrder: Order) => void;
   // handleUpdateItem?: (
   //   orderTotalPrice: number,
   //   order: Order,
   //   updatedItem: OrderedItems,
   //   isConvertToCustom?: boolean,
   // ) => Promise<void>;
-  mutateOrders: any;
+  mutateOrders?: any;
   handleOpenDetails?: any;
   isMarkDateDifference?: boolean;
   handleRemoveOrder?: (order: Order[]) => Promise<void>;
@@ -109,7 +109,7 @@ const OrderAccordion = ({
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
-  const isOrderSelected = selectedOrders.some(
+  const isOrderSelected = selectedOrders?.some(
     (targetOrder: Order) => order.id === targetOrder.id,
   );
 
@@ -130,6 +130,10 @@ const OrderAccordion = ({
   }, [order]);
 
   const handleAvoidInventory = async (e: any) => {
+    if (!showNotification) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await axios.put(
@@ -169,6 +173,10 @@ const OrderAccordion = ({
   });
 
   const handleChangeStatus = async (e: any, status: ORDER_STATUS) => {
+    if (!showNotification) {
+      return;
+    }
+
     e.stopPropagation();
     try {
       setIsMarkButtonDisabled(true);
@@ -195,6 +203,10 @@ const OrderAccordion = ({
   };
 
   const handleDeleteOrder = async (targetOrder: Order) => {
+    if (!showNotification) {
+      return;
+    }
+
     try {
       const response = await axios.delete(`${API_URL.ADMIN}/clients/orders`, {
         data: { orderId: targetOrder.id },
@@ -359,31 +371,34 @@ const OrderAccordion = ({
         contactNumber={order?.user?.contactNumber || ''}
         categoryName={order?.user?.category?.name || ''}
       />
-      <EditDeliveryDate
-        open={isEditDateOpen}
-        onClose={() => setIsEditDateOpen(false)}
-        order={order}
-        showNotification={showNotification}
-        mutateOrders={mutateOrders}
-      />
-      <EditPrice
-        open={isOpenEditPrice}
-        onClose={() => setIsOpenEditPrice(false)}
-        showNotification={showNotification}
-        order={order}
-        mutateOrders={mutateOrders}
-      />
-      <ConfirmModal
-        open={open.isOpenConfirmModal}
-        onClose={() => setOpen('isOpenConfirmModal', false)}
-        title="Are you sure to delete this order ?"
-        buttonLabel="Delete"
-        handleSubmit={onSubmitConfirmModal}
-        showNotification={showNotification}
-        color="error"
-      />
-
-      {isOpenDetails && (
+      {showNotification && (
+        <>
+          <EditDeliveryDate
+            open={isEditDateOpen}
+            onClose={() => setIsEditDateOpen(false)}
+            order={order}
+            showNotification={showNotification}
+            mutateOrders={mutateOrders}
+          />
+          <EditPrice
+            open={isOpenEditPrice}
+            onClose={() => setIsOpenEditPrice(false)}
+            showNotification={showNotification}
+            order={order}
+            mutateOrders={mutateOrders}
+          />
+          <ConfirmModal
+            open={open.isOpenConfirmModal}
+            onClose={() => setOpen('isOpenConfirmModal', false)}
+            title="Are you sure to delete this order ?"
+            buttonLabel="Delete"
+            handleSubmit={onSubmitConfirmModal}
+            showNotification={showNotification}
+            color="error"
+          />
+        </>
+      )}
+      {isOpenDetails && showNotification && (
         <OrderDetails
           open={isOpenDetails}
           onClose={() => setIsOpenDetails(false)}
@@ -394,12 +409,14 @@ const OrderAccordion = ({
       )}
       <ShadowSection my={2}>
         <Grid container alignItems="center" columnSpacing={1} rowGap={1}>
-          <Grid item sm={0.5} xs={2}>
-            <Checkbox
-              checked={isOrderSelected}
-              onClick={(e: any) => handleSelectOrder(e, order)}
-            />
-          </Grid>
+          {handleSelectOrder && (
+            <Grid item sm={0.5} xs={2}>
+              <Checkbox
+                checked={isOrderSelected}
+                onClick={(e: any) => handleSelectOrder(e, order)}
+              />
+            </Grid>
+          )}
           <Grid item xs={10} md={9}>
             <Box display="flex" alignItems="center" gap={1}>
               {order?.type === TYPE.LOCKED && (
@@ -471,7 +488,7 @@ const OrderAccordion = ({
                     />
                   )
                 : null}
-              {actions}
+              {showNotification ? actions : null}
             </Box>
           </Grid>
           <Grid item xs={6}>

@@ -30,6 +30,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const formattedStartDate = formatDate(startDate);
     const formattedEndDate = formatDate(endDate);
 
+    console.log({
+      startDate,
+      endDate,
+      formattedStartDate,
+      formattedEndDate,
+    });
+
     const listOfDateString = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,

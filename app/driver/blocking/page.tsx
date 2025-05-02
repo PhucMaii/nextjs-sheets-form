@@ -22,9 +22,14 @@ import DayRange from '@/app/admin/components/DayRange';
 import ErrorComponent from '@/app/admin/components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import useNotification from '@/hooks/useNotification';
+import BlockOrders from '@/app/admin/components/Modals/BlockOrders';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
+  const [blockOrdersProps, setBlockOrdersProps] = useState<any>({
+    open: false,
+    orders: [],
+  });
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
@@ -40,7 +45,7 @@ export default function BlockingPage() {
 
   const { showNotification, NotificationComp } = useNotification();
   const mdDown = useMediaQuery((them: any) => them.breakpoints.down('md'));
-// 
+  //
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
@@ -87,8 +92,12 @@ export default function BlockingPage() {
         role: USER_ROLE.DRIVER,
       });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
+      if (response.data.error && response.data.data) {
+        setBlockOrdersProps({
+          open: true,
+          orders: response.data.data,
+        });
+        // showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
@@ -184,6 +193,17 @@ export default function BlockingPage() {
   return (
     <Sidebar>
       {NotificationComp}
+      <BlockOrders
+        open={blockOrdersProps.open}
+        onClose={() =>
+          setBlockOrdersProps({ ...blockOrdersProps, open: false })
+        }
+        orders={blockOrdersProps.orders}
+        showNotification={showNotification}
+        startDate={newDateRange[0]}
+        endDate={newDateRange[1]}
+        role={USER_ROLE.DRIVER}
+      />
       <DateRange
         open={isSelectRangeOpen}
         onClose={() => setIsSelectRangeOpen(false)}
