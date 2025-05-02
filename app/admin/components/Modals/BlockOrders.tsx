@@ -57,6 +57,7 @@ export default function BlockOrders({ open, onClose, orders, showNotification, s
           onClose={() => setSelectedOrder(null)}
           order={selectedOrder}
           showNotification={() => {}}
+          hideButton
         />
       )}
       <Modal open={open} onClose={onClose}>

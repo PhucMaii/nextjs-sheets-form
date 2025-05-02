@@ -13,10 +13,11 @@ import { onUpdateOrder } from '@/app/utils/orders';
 
 interface IProps extends ModalProps {
   order: Order;
+  hideButton?: boolean;
   showNotification: (type: AlertColor, message: string) => void;
 }
 
-const OrderDetails = ({ open, onClose, order, showNotification }: IProps) => {
+const OrderDetails = ({ open, onClose, order, showNotification, hideButton }: IProps) => {
   const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
   const [clientItems] = SWRFetchData(
@@ -206,7 +207,7 @@ const OrderDetails = ({ open, onClose, order, showNotification }: IProps) => {
             role={USER_ROLE.ADMIN}
             clientName={order?.user?.clientName || ''}
             purpose={ORDER_USAGE_PURPOSE.ITEM}
-            hideButton={true}
+            hideButton={hideButton}
           />
         </BoxModal>
       </Modal>

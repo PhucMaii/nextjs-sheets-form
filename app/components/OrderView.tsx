@@ -960,7 +960,7 @@ const OrderView = ({
   const renderMyOrder = () => {
     return (
       <ShadowSection
-        display="flex" 
+        display="flex"
         flexDirection="column"
         gap={1}
         // sx={{
@@ -1147,7 +1147,7 @@ const OrderView = ({
 
         {!isPreOrder && renderDateAndNoteInput()}
         {renderTotal()}
-        {!smDown && renderPlaceOrdeButton()}
+        {!smDown && !hideButton && renderPlaceOrdeButton()}
       </ShadowSection>
     );
   };
