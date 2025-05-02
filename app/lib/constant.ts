@@ -41,6 +41,7 @@ import { amber, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { AccessTime } from '@mui/icons-material';
 import ReportIcon from '@mui/icons-material/Report';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -241,6 +242,11 @@ export const adminTabs = {
       name: 'Transactions',
       icon: SyncAltIcon,
       path: '/admin/transactions',
+    },
+    {
+      name: 'Fixed Transactions',
+      icon: AutorenewIcon,
+      path: '/admin/fixed-transactions',
     },
     {
       name: 'Purchase Orders',

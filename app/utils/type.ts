@@ -6,6 +6,7 @@ import {
   Driver,
   Expense,
   Fifo,
+  FixedTransaction,
   InventoryItem,
   InventoryUnit,
   ItemType,
@@ -287,4 +288,8 @@ export interface IPOItem extends POItem {
 export interface IProductLoss extends LossReport {
   inventoryItem?: IInventoryItem;
   inventoryUnit?: IInventoryUnit;
+}
+
+export interface IFixedTransaction extends FixedTransaction {
+  paymentMethod: IPaymentMethod;
 }

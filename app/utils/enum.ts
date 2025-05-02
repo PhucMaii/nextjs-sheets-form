@@ -155,3 +155,19 @@ export enum MEDIA_TYPE {
   CHEQUE = 'cheque',
   OTHER = 'other',
 }
+
+export enum RECURRENCE_TYPE {
+  MONTHLY = 'monthly',
+  BI_WEEKLY = 'bi-weekly',
+  WEEKLY = 'weekly',
+  DAILY = 'daily',
+  YEARLY = 'yearly',
+}
+
+export enum FIXED_TRANSACTION_STATUS {
+  ACTIVE = 'Active',
+  PENDING = 'Pending',
+  COMPLETED = 'Completed',
+  CANCELLED = 'Cancelled',
+  ARCHIVED = 'Archived',
+}
