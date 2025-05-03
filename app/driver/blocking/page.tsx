@@ -272,7 +272,7 @@ export default function BlockingPage() {
         <Box display="flex" flexDirection="column" gap={3} mt={2}>
           {isFetching ? (
             <LoadingComponent />
-          ) : unavailableRanges && unavailableRanges?.data.length > 0 ? (
+          ) : unavailableRanges && unavailableRanges?.data?.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {
               return (
                 <DayRange
