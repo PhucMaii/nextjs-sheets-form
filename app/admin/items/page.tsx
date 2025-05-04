@@ -1,5 +1,5 @@
 'use client';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { ICategory, IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
@@ -36,6 +36,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { generateCurrentTime } from '@/app/utils/time';
 import AddCategory from '../components/Modals/add/AddCategory';
 import ExportCategory from '../components/Printing/ExportCategory';
+import { useReactToPrint } from 'react-to-print';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -45,6 +46,7 @@ export default function ItemPage() {
   //   useState<boolean>(false);
   const [isOpenAddCategory, setIsOpenAddCategory] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const exportCategoryRef: any = useRef(null);
 
   const [open, setOpen] = useMultipleBoolean({
     isAddItemOpen: false,
@@ -134,6 +136,10 @@ export default function ItemPage() {
     setBaseItems(itemsResponse?.data);
     setIsFetching(false);
   };
+
+  const handleExportCategory = useReactToPrint({
+    content: () => exportCategoryRef.current,
+  });
 
   const handleAddItem = async (
     newItem: IItem,
@@ -353,12 +359,12 @@ export default function ItemPage() {
         currentName={currentCategory?.name}
       />
 
-      <div style={{display: 'none'}}>
+      <div style={{ display: 'none' }}>
         <ExportCategory
           category={currentCategory}
-          to="John Doe"
+          clientName="John Doe"
+          ref={exportCategoryRef}
         />
-
       </div>
       {NotificationComp}
       <PasteItemsModal
@@ -391,7 +397,18 @@ export default function ItemPage() {
               </IconButton>
             </Box>
           </Grid>
-          <Grid item xs={12} md={2} textAlign="right">
+          <Grid
+            item
+            xs={12}
+            md={2}
+            textAlign="right"
+            display="flex"
+            gap={1}
+            alignItems="center"
+          >
+            <Button variant="outlined" onClick={handleExportCategory}>
+              Export
+            </Button>
             <Button
               disabled={!currentCategory}
               color="error"
