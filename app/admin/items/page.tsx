@@ -35,6 +35,7 @@ import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateCurrentTime } from '@/app/utils/time';
 import AddCategory from '../components/Modals/add/AddCategory';
+import ExportCategory from '../components/Printing/ExportCategory';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -351,6 +352,14 @@ export default function ItemPage() {
         updateCategory={handleUpdateCategoryName}
         currentName={currentCategory?.name}
       />
+
+      <div style={{display: 'none'}}>
+        <ExportCategory
+          category={currentCategory}
+          to="John Doe"
+        />
+
+      </div>
       {NotificationComp}
       <PasteItemsModal
         currentCategoryId={currentCategory?.id}
@@ -385,7 +394,6 @@ export default function ItemPage() {
           <Grid item xs={12} md={2} textAlign="right">
             <Button
               disabled={!currentCategory}
-              fullWidth
               color="error"
               variant="outlined"
               onClick={() => setOpen('isDeleteModalOpen', true)}
