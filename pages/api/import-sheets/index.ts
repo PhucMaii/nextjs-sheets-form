@@ -307,8 +307,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // overviewFormattedData,
       message: 'Order Submitted Successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
+    // If it's a Pusher "Payload Too Large" error (413)
+    if (error?.status === 413 || error?.message?.includes('413')) {
+      return res.status(200).json({
+        message:
+          'Payload too large – event not sent, but continuing gracefully.',
+      });
+    }
     return res.status(500).json({
       error: 'Internal Server Error: ' + error,
     });
