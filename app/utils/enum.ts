@@ -12,7 +12,7 @@ export enum API_URL {
   ORDER_STATUS = '/api/admin/orders/status',
   ORDERED_ITEMS = '/api/admin/orderedItems',
   CLIENTS = '/api/admin/clients',
-  CLIENT_ORDER = '/api/order',
+CLIENT_ORDER = '/api/order',
   CATEGORIES = '/api/admin/categories',
   SCHEDULED_ORDER = '/api/admin/scheduledOrders',
   SUBCATEGORIES = '/api/admin/subcategories',

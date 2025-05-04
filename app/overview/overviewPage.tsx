@@ -31,7 +31,7 @@ export default function MainPage() {
     }
     return false;
   });
-  const [userOrder, setUserOrder] = useState<Order | null>(null);
+  const [userOrders, setUserOrders] = useState<Order[]>([]);
   const [thisMonthOrders, setThisMonthOrders] = useState<Order[]>([]);
   // const [totalBill, setTotalBill] = useState<number>(0);
 
@@ -87,7 +87,9 @@ export default function MainPage() {
       });
 
       showNotification('success', response.data.message);
-      setUserOrder(null);
+
+      const newUserOrders = userOrders.filter((order: Order) => order.id !== orderId);
+      setUserOrders(newUserOrders);
       setThisMonthOrders(newThisMonthOrders);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
@@ -102,12 +104,14 @@ export default function MainPage() {
     }
     const formattedDate = YYYYMMDDFormat(dateObj);
     const userOrderList = clientOrders.data.userOrders;
-    const orderToday = userOrderList.find((order: Order) => {
+    const orderToday = userOrderList.filter((order: Order) => {
       return order.deliveryDate === formattedDate;
+    }).map((order: Order) => {
+      return { ...clientOrders.data.user, ...order };
     });
 
     setClient(clientOrders.data.user);
-    setUserOrder({ ...clientOrders.data.user, ...orderToday });
+    setUserOrders(orderToday);
 
     const orderList = filterDateRangeOrders(
       clientOrders.data.userOrders,
@@ -119,7 +123,6 @@ export default function MainPage() {
   };
 
   const handleUpdateOrderUI = (updatedOrder: Order) => {
-    setUserOrder(updatedOrder);
     const newOrders = thisMonthOrders.map((order: Order) => {
       if (order.id === updatedOrder.id) {
         return updatedOrder;
@@ -127,7 +130,15 @@ export default function MainPage() {
       return order;
     });
 
+    const todayOrders = userOrders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
+
     setThisMonthOrders(newOrders);
+    setUserOrders(todayOrders);
   };
 
   if (isValidating && !clientOrders) {
@@ -210,14 +221,17 @@ export default function MainPage() {
           Order
         </Typography>
       </Divider>
-      {userOrder?.items ? (
-        <OrderAccordion
-          handleDeleteOrder={handleDeleteOrder}
-          order={userOrder}
-          showNotification={showNotification}
-          handleUpdateOrderUI={handleUpdateOrderUI}
-          isEdit
-        />
+      {userOrders.length > 0 ? (
+        userOrders.map((order: Order) => (
+          <OrderAccordion
+            key={order.id}
+            handleDeleteOrder={handleDeleteOrder}
+            order={order}
+            showNotification={showNotification}
+            handleUpdateOrderUI={handleUpdateOrderUI}
+            isEdit
+          />
+        ))
       ) : (
         <Box
           display="flex"
