@@ -21,9 +21,11 @@ import SelectExpenseStatus from '../../Select/SelectExpenseStatus';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { mainPaymentMethodId } from '@/app/lib/constant';
+import dayjs from 'dayjs';
 interface IProps extends ModalProps {
   defaultDate?: string;
   showNotification: ShowNotificationType;
+  refresh: () => Promise<void>;
 }
 
 export default function AddFixedTransaction({
@@ -31,6 +33,7 @@ export default function AddFixedTransaction({
   onClose,
   defaultDate,
   showNotification,
+  refresh,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [newFixedTransaction, setNewFixedTransaction] = useState<
@@ -62,7 +65,7 @@ export default function AddFixedTransaction({
       const res = await axios.post(`${API_URL.ADMIN}/fixed-transactions`, {
         ...newFixedTransaction,
         defaultSpentBy: selectedEmployee,
-        initialDueDate,
+        initialDueDate: dayjs(initialDueDate).format('MM/DD/YYYY'),
       });
 
       if (res.data.error) {
@@ -70,6 +73,8 @@ export default function AddFixedTransaction({
         return;
       }
 
+      await refresh();
+      
       showNotification('success', 'Fixed transaction created successfully');
       onClose();
     } catch (error: any) {
@@ -205,11 +210,11 @@ export default function AddFixedTransaction({
               <TextField
                 label="Total"
                 fullWidth
-                value={newFixedTransaction.defaultTotal}
+                value={newFixedTransaction.defaultAmount}
                 onChange={(e) =>
                   setNewFixedTransaction({
                     ...newFixedTransaction,
-                    defaultTotal: +e.target.value,
+                    defaultAmount: +e.target.value,
                   })
                 }
               />

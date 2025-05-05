@@ -17,9 +17,19 @@ import { IFixedTransaction } from '@/app/utils/type';
 import { fetchApi } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import EditFixedTransaction from '../components/Modals/edit/EditFixedTransaction';
+
 export default function FixedTransactionsPage() {
-  const [isOpenAddFixedTransaction, setIsOpenAddFixedTransaction] =
-    useState<boolean>(false);
+  const [addFixedTransactionProps, setAddFixedTransactionProps] =
+    useState<any>({
+      open: false,
+      defaultDate: null,
+    });
+  const [editFixedTransactionProps, setEditFixedTransactionProps] =
+    useState<any>({
+      open: false,
+      fixedTransaction: null,
+    });
   const [fixedTransactions, setFixedTransactions] = useState<
     IFixedTransaction[]
   >([]);
@@ -34,6 +44,8 @@ export default function FixedTransactionsPage() {
     }
   }, [dateRange]);
 
+  console.log(fixedTransactions, 'fixedTransactions');
+
   const fetchFixedTransactions = async () => {
     const data = await fetchApi(
       `${API_URL.ADMIN}/fixed-transactions?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
@@ -47,17 +59,42 @@ export default function FixedTransactionsPage() {
     <Sidebar>
       {NotificationComp}
       <AddFixedTransaction
-        open={isOpenAddFixedTransaction}
-        onClose={() => setIsOpenAddFixedTransaction(false)}
+        open={addFixedTransactionProps.open}
+        onClose={() =>
+          setAddFixedTransactionProps({
+            open: false,
+            defaultDate: null,
+          })
+        }
         showNotification={showNotification}
+        defaultDate={addFixedTransactionProps.defaultDate}
+        refresh={fetchFixedTransactions}
       />
+
+      {editFixedTransactionProps.fixedTransaction && (
+        <EditFixedTransaction
+          open={editFixedTransactionProps.open}
+          onClose={() =>
+            setEditFixedTransactionProps({
+            open: false,
+            fixedTransaction: null,
+          })
+          }
+          fixedTransaction={editFixedTransactionProps.fixedTransaction}
+        />
+      )}
 
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5">Fixed Transactions</Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={() => setIsOpenAddFixedTransaction(true)}
+          onClick={() =>
+            setAddFixedTransactionProps({
+              open: true,
+              defaultDate: new Date(),
+            })
+          }
         >
           + New Transaction
         </Button>
@@ -124,9 +161,13 @@ export default function FixedTransactionsPage() {
           //     { title: 'event 1', date: '2025-05-01' },
           //     { title: 'event 2', date: '2025-05-02' }
           //   ]}
-          dateClick={(params) => {
-            console.log(params);
-          }}
+          // dateClick={(params) => {
+          //   console.log(params);
+          //   setAddFixedTransactionProps({
+          //     open: true,
+          //     defaultDate: params.date,
+          //   });
+          // }}
           dayCellContent={(params) => {
             const date = YYYYMMDDFormat(params.date);
             const dateFixedTransactions = fixedTransactions.filter(
@@ -147,6 +188,18 @@ export default function FixedTransactionsPage() {
                 params={params}
                 fixedTransactions={dateFixedTransactions}
                 transactions={dateTransactions}
+                onOpenEditTransaction={(transaction: any) => {
+                  setEditFixedTransactionProps({
+                    open: true,
+                    fixedTransaction: transaction,
+                  });
+                }}
+                onOpenAddTransaction={(defaultDate: string) => {
+                  setAddFixedTransactionProps({
+                    open: true,
+                    defaultDate: defaultDate,
+                  });
+              }}
               />
             );
           }}

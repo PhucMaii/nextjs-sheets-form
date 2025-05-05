@@ -39,12 +39,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       paymentMethodId,
     } = req.body as IBody;
 
-    if (
-      !title ||
-      !recurrence ||
-      !initialDueDate ||
-      !paymentMethodId
-    ) {
+    if (!title || !recurrence || !initialDueDate || !paymentMethodId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -98,7 +93,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export const calculateNextDueDate = (initialDueDate: string, recurrence: RECURRENCE_TYPE) => {
+export const calculateNextDueDate = (
+  initialDueDate: string,
+  recurrence: RECURRENCE_TYPE,
+) => {
   const recurrenceMap = {
     [RECURRENCE_TYPE.DAILY]: 1,
     [RECURRENCE_TYPE.WEEKLY]: 7,
@@ -112,5 +110,9 @@ export const calculateNextDueDate = (initialDueDate: string, recurrence: RECURRE
   nextDueDateObj.setDate(nextDueDateObj.getDate() + recurrenceMap[recurrence]);
 
   const nextDueDateString = YYYYMMDDFormat(nextDueDateObj);
+  console.log(
+    { nextDueDateObj, initialDueDateObj, nextDueDateString },
+    'nextDueDateObj',
+  );
   return nextDueDateString;
 };
