@@ -21,7 +21,7 @@ const PreViewExport = ({ open, onClose, items }: PreViewExportProps) => {
     if (items) {
       // Init items
       const newItems = items.map((item: IItem) => {
-        const uom = item.inventoryUnit?.unit;
+        const uom = extractUOM(item.name, item.inventoryUnit?.unit);
         const category = item.inventoryItem?.type?.name;
         return {
           ...item,
@@ -98,6 +98,35 @@ const PreViewExport = ({ open, onClose, items }: PreViewExportProps) => {
   const handleExport = useReactToPrint({
     content: () => exportCategoryRef.current,
   });
+
+  const extractUOM = (itemName: string, fallback: string) => {
+    const splittedName = itemName.split(' - ');
+
+    let uom = splittedName.length > 1 ? splittedName[splittedName.length - 1] : null;
+    
+    // If name has hyphen, extract last 2 words
+    if (uom) {
+        // only extract last 2 words
+        const splittedUom = uom.split(' ');
+
+        if (splittedUom.length > 1) {
+            uom = splittedUom[splittedUom.length - 2] + ' ' + splittedUom[splittedUom.length - 1];
+            return uom;
+        }
+
+        return uom + ' counts';
+    } else {
+     // Check if last 2 words has number, then return last 2 words
+     if (itemName.match(/\d/)) {
+        const splittedItemName = itemName.split(' ');
+        uom = splittedItemName[splittedItemName.length - 2] + ' ' + splittedItemName[splittedItemName.length - 1];
+        return uom
+     }
+
+     return fallback;
+    }
+    
+  }
 
   return (
     <>
