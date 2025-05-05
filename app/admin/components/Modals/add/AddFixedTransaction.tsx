@@ -6,15 +6,18 @@ import {
   Modal,
   Select,
   TextField,
-  FormControlLabel,
-  Checkbox,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { IFixedTransaction } from '@/app/utils/type';
-import { API_URL, FIXED_TRANSACTION_STATUS, RECURRENCE_TYPE, TRANSACTION_STATUS } from '@/app/utils/enum';
+import {
+  API_URL,
+  FIXED_TRANSACTION_STATUS,
+  RECURRENCE_TYPE,
+  TRANSACTION_STATUS,
+} from '@/app/utils/enum';
 import useSelectDate from '@/hooks/useSelectDate';
 import useEmployee from '@/hooks/select/useEmployee';
 import SelectExpenseStatus from '../../Select/SelectExpenseStatus';
@@ -41,12 +44,11 @@ export default function AddFixedTransaction({
   >({
     title: '',
     recurrence: RECURRENCE_TYPE.MONTHLY,
-    isDynamicAmount: false,
     paymentMethodId: mainPaymentMethodId,
     defaultSubtotal: 0,
     defaultPST: 0,
     defaultGST: 0,
-    defaultTotal: 0,
+    defaultAmount: 0,
     defaultSpentBy: '',
     defaultTransactionStatus: TRANSACTION_STATUS.PAID,
   });
@@ -58,6 +60,38 @@ export default function AddFixedTransaction({
     true,
     true,
   );
+
+  useEffect(() => {
+    if (open) {
+      setNewFixedTransaction({
+        title: '',
+        recurrence: RECURRENCE_TYPE.MONTHLY,
+        paymentMethodId: mainPaymentMethodId,
+        defaultSubtotal: 0,
+        defaultPST: 0,
+        defaultGST: 0,
+        defaultAmount: 0,
+        defaultSpentBy: '',
+        defaultTransactionStatus: TRANSACTION_STATUS.PAID,
+      });
+    }
+  }, [open]);
+
+  useEffect(() => {
+    // if (newFixedTransaction?.defaultSubtotal) {
+    setNewFixedTransaction({
+      ...newFixedTransaction,
+      defaultAmount:
+        (newFixedTransaction?.defaultSubtotal || 0) +
+        (newFixedTransaction.defaultPST || 0) +
+        (newFixedTransaction.defaultGST || 0),
+    });
+    // }
+  }, [
+    newFixedTransaction?.defaultSubtotal,
+    newFixedTransaction?.defaultPST,
+    newFixedTransaction?.defaultGST,
+  ]);
 
   const handleCreateTransaction = async () => {
     try {
@@ -74,16 +108,19 @@ export default function AddFixedTransaction({
       }
 
       await refresh();
-      
+
       showNotification('success', 'Fixed transaction created successfully');
       onClose();
     } catch (error: any) {
       console.log('Internal Server Error', error);
-      showNotification('error', error.response.data.message || 'Something went wrong');
+      showNotification(
+        'error',
+        error.response.data.message || 'Something went wrong',
+      );
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -146,7 +183,7 @@ export default function AddFixedTransaction({
         <Divider sx={{ my: 2 }}>Payment Info</Divider>
 
         <Grid container spacing={2}>
-          <Grid
+          {/* <Grid
             item
             xs={12}
             display="flex"
@@ -158,7 +195,7 @@ export default function AddFixedTransaction({
               control={<Checkbox />}
               label="Is Dynamic Amount"
             />
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Default Subtotal</Typography>
@@ -172,6 +209,7 @@ export default function AddFixedTransaction({
                   defaultSubtotal: +e.target.value,
                 })
               }
+              type="number"
             />
           </Grid>
 
@@ -187,38 +225,41 @@ export default function AddFixedTransaction({
                   defaultPST: +e.target.value,
                 })
               }
+              type="number"
             />
           </Grid>
 
-            <Grid item xs={6} display="flex" gap={1} flexDirection="column">
-              <Typography variant="body1">Default GST</Typography>
-              <TextField
-                label="GST"
-                fullWidth
-                value={newFixedTransaction.defaultGST}
-                onChange={(e) =>
-                  setNewFixedTransaction({
-                    ...newFixedTransaction,
-                    defaultGST: +e.target.value,
-                  })
-                }
-              />
-            </Grid>
+          <Grid item xs={6} display="flex" gap={1} flexDirection="column">
+            <Typography variant="body1">Default GST</Typography>
+            <TextField
+              label="GST"
+              fullWidth
+              value={newFixedTransaction.defaultGST}
+              onChange={(e) =>
+                setNewFixedTransaction({
+                  ...newFixedTransaction,
+                  defaultGST: +e.target.value,
+                })
+              }
+              type="number"
+            />
+          </Grid>
 
-            <Grid item xs={12} display="flex" gap={1} flexDirection="column">
-              <Typography variant="body1">Default Total</Typography>
-              <TextField
-                label="Total"
-                fullWidth
-                value={newFixedTransaction.defaultAmount}
-                onChange={(e) =>
-                  setNewFixedTransaction({
-                    ...newFixedTransaction,
-                    defaultAmount: +e.target.value,
-                  })
-                }
-              />
-            </Grid>
+          <Grid item xs={12} display="flex" gap={1} flexDirection="column">
+            <Typography variant="body1">Default Total</Typography>
+            <TextField
+              label="Total"
+              fullWidth
+              value={newFixedTransaction.defaultAmount}
+              type="number"
+              onChange={(e) =>
+                setNewFixedTransaction({
+                  ...newFixedTransaction,
+                  defaultAmount: +e.target.value,
+                })
+              }
+            />
+          </Grid>
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Default Spent By</Typography>

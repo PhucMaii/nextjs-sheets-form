@@ -20,11 +20,12 @@ import { YYYYMMDDFormat } from '@/app/utils/time';
 import EditFixedTransaction from '../components/Modals/edit/EditFixedTransaction';
 
 export default function FixedTransactionsPage() {
-  const [addFixedTransactionProps, setAddFixedTransactionProps] =
-    useState<any>({
+  const [addFixedTransactionProps, setAddFixedTransactionProps] = useState<any>(
+    {
       open: false,
       defaultDate: null,
-    });
+    },
+  );
   const [editFixedTransactionProps, setEditFixedTransactionProps] =
     useState<any>({
       open: false,
@@ -76,11 +77,13 @@ export default function FixedTransactionsPage() {
           open={editFixedTransactionProps.open}
           onClose={() =>
             setEditFixedTransactionProps({
-            open: false,
-            fixedTransaction: null,
-          })
+              open: false,
+              fixedTransaction: null,
+            })
           }
           fixedTransaction={editFixedTransactionProps.fixedTransaction}
+          showNotification={showNotification}
+          refresh={fetchFixedTransactions}
         />
       )}
 
@@ -199,7 +202,7 @@ export default function FixedTransactionsPage() {
                     open: true,
                     defaultDate: defaultDate,
                   });
-              }}
+                }}
               />
             );
           }}

@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
+import { FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
 
 interface IQuery {
   startDate?: string;
@@ -40,6 +41,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           { initialDueDate: { in: listOfDates } },
           { nextDueDate: { in: listOfDates } },
         ],
+        status: {
+          not: FIXED_TRANSACTION_STATUS.ARCHIVED,
+        },
       },
     });
 

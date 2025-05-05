@@ -263,7 +263,6 @@ model PaymentMethod {
 model FixedTransaction {
   id                 Int    @id @default(autoincrement())
   title              String
-  isDynamicAmount    Boolean     @default(false)
   defaultSubtotal    Float?
   defaultAmount      Float?
   defaultPST         Float?

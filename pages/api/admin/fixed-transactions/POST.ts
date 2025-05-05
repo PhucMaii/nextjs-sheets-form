@@ -7,7 +7,6 @@ import { YYYYMMDDFormat } from '@/app/utils/time';
 
 interface IBody {
   title: string;
-  isDynamicAmount: boolean;
   defaultAmount?: number;
   defaultSubtotal?: number;
   defaultPST?: number;
@@ -26,7 +25,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const {
       title,
-      isDynamicAmount,
       defaultAmount,
       defaultSubtotal,
       defaultPST,
@@ -65,7 +63,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newTransaction = await prisma.fixedTransaction.create({
       data: {
         title,
-        isDynamicAmount,
         defaultAmount,
         defaultSubtotal,
         defaultPST,

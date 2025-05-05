@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { calculateNextDueDate } from './POST';
 
 interface IBody {
   id: number;
@@ -25,14 +24,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // if (existingFixedTransaction.recurrence !== updatedTransaction.recurrence) {
-    //     const newNextDueDate = calculateNextDueDate(updatedTransaction.recurrence, existingFixedTransaction.nextDueDate);
-    // }
     const updatedFixedTransaction = await prisma.fixedTransaction.update({
       where: {
         id: id,
       },
-      data: updatedTransaction,
+      data: {
+        defaultSubtotal: updatedTransaction.defaultSubtotal,
+        defaultPST: updatedTransaction.defaultPST,
+        defaultGST: updatedTransaction.defaultGST,
+        defaultAmount: updatedTransaction.defaultAmount,
+        defaultTransactionStatus: updatedTransaction.defaultTransactionStatus,
+        defaultSpentBy: updatedTransaction.defaultSpentBy,
+        recurrence: updatedTransaction.recurrence,
+      },
     });
 
     return res.status(200).json({
