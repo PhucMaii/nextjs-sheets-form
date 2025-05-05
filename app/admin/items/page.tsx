@@ -1,5 +1,5 @@
 'use client';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { ICategory, IItem } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
@@ -35,8 +35,7 @@ import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateCurrentTime } from '@/app/utils/time';
 import AddCategory from '../components/Modals/add/AddCategory';
-import ExportCategory from '../components/Printing/ExportCategory';
-import { useReactToPrint } from 'react-to-print';
+import PreViewExport from '../components/Modals/PreViewExport';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -46,7 +45,6 @@ export default function ItemPage() {
   //   useState<boolean>(false);
   const [isOpenAddCategory, setIsOpenAddCategory] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  const exportCategoryRef: any = useRef(null);
 
   const [open, setOpen] = useMultipleBoolean({
     isAddItemOpen: false,
@@ -55,6 +53,7 @@ export default function ItemPage() {
     isDeleteModalOpen: false,
     isEditCategoryOpen: false,
     isShowingClients: false,
+    isPreViewExport: false,
   });
   const { showNotification, NotificationComp } = useNotification();
 
@@ -136,10 +135,6 @@ export default function ItemPage() {
     setBaseItems(itemsResponse?.data);
     setIsFetching(false);
   };
-
-  const handleExportCategory = useReactToPrint({
-    content: () => exportCategoryRef.current,
-  });
 
   const handleAddItem = async (
     newItem: IItem,
@@ -339,6 +334,11 @@ export default function ItemPage() {
         onClose={() => setOpen('isShowingClients', false)}
         clients={currentCategory?.users || []}
       />
+      <PreViewExport
+        open={open.isPreViewExport}
+        onClose={() => setOpen('isPreViewExport', false)}
+        items={items}
+      />
       <AddItem
         open={open.isAddItemOpen}
         onClose={() => setOpen('isAddItemOpen', false)}
@@ -359,13 +359,13 @@ export default function ItemPage() {
         currentName={currentCategory?.name}
       />
 
-      <div style={{ display: 'none' }}>
+      {/* <div style={{ display: 'none' }}>
         <ExportCategory
           category={currentCategory}
           clientName="John Doe"
           ref={exportCategoryRef}
         />
-      </div>
+      </div> */}
       {NotificationComp}
       <PasteItemsModal
         currentCategoryId={currentCategory?.id}
@@ -406,7 +406,7 @@ export default function ItemPage() {
             gap={1}
             alignItems="center"
           >
-            <Button variant="outlined" onClick={handleExportCategory}>
+            <Button variant="outlined" onClick={() => setOpen('isPreViewExport', true)}>
               Export
             </Button>
             <Button

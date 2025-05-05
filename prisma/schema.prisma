@@ -277,10 +277,13 @@ model FixedTransaction {
   createdBy          String
   updatedAt          String?
   updatedBy          String?
+  status             String
   defaultSpentBy     String?
   defaultTransactionStatus   String?    // Paid & Unpaid
-
   paymentMethodId    Int
+
+  transactions      Expense[]
+
 
   paymentMethod      PaymentMethod    @relation(fields: [paymentMethodId], references: [id])
 }
@@ -301,6 +304,7 @@ model Expense {
   codBoardId      Int?
   invoice         String?
   status          String?
+  fixedTransactionId  Int?
 
   paymentMethod  PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
   codBoard       CodBoard?       @relation(fields: [codBoardId], references: [id])
@@ -308,6 +312,7 @@ model Expense {
   vendors        VendorExpense[]
   shifts         ShiftSession[]
   purchaseOrders PO[]
+  fixedTransaction  FixedTransaction?  @relation(fields: [fixedTransactionId], references: [id])
 }
 
 model VendorExpense {

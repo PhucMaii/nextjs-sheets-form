@@ -6,11 +6,12 @@ import {
   Grid,
   Table,
   Typography,
-  TableCell,
   TableBody,
 } from '@mui/material';
+
 import React, { forwardRef } from 'react';
-const ExportCategory = forwardRef(({ category, clientName }: any, ref: any) => {
+import { BorderTableCell } from './ManifestPrint';
+const ExportCategory = forwardRef(({ items }: any, ref: any) => {
   return (
     <div ref={ref} style={{ padding: '20px' }}>
       {/* Header */}
@@ -28,8 +29,8 @@ const ExportCategory = forwardRef(({ category, clientName }: any, ref: any) => {
         </Typography>
       </Box> */}
 
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={6}>
           <Box
             display="flex"
             // justifyContent="center"
@@ -42,55 +43,57 @@ const ExportCategory = forwardRef(({ category, clientName }: any, ref: any) => {
               width={50}
               height={50}
             />
-            <Typography variant="h6">Supreme Sprouts Ltd.</Typography>
+            <Typography variant="h4">Supreme Sprouts Ltd.</Typography>
           </Box>
         </Grid>
-        <Grid item xs={6}>
+        {/* <Grid item xs={6}>
           <Typography variant="body1">
             <strong>For:</strong> {clientName}
           </Typography>
-        </Grid>
+        </Grid> */}
         <Grid item xs={6} textAlign="right">
           <Typography variant="body1">
             <strong>Date:</strong> {new Date().toLocaleDateString()}
           </Typography>
         </Grid>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Typography variant="body1">
             <strong>Category:</strong> {category?.name}
           </Typography>
-        </Grid>
+        </Grid> */}
       </Grid>
 
       {/* Items */}
-      <Typography variant="body1" fontWeight="bold" sx={{ mt: 1 }}>
+      <Typography variant="body1" fontWeight="bold" sx={{ my: 1.5 }}>
         Product Pricing
       </Typography>
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Image</TableCell>
-            <TableCell>Product</TableCell>
-            <TableCell>Price</TableCell>
-            <TableCell>Qty / Unit</TableCell>
+            <BorderTableCell align="center">Image</BorderTableCell>
+            <BorderTableCell sx={{paddingX: 2}}>Product</BorderTableCell>
+            <BorderTableCell align="center">UOM</BorderTableCell>
+            <BorderTableCell align="center">Price</BorderTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {category?.items.map((item: any) => (
-            <TableRow key={item.id}>
-              <TableCell>
+          {items.map((item: any) => (
+            <TableRow key={item.id} sx={{height: 35}}>
+              <BorderTableCell align="center">
                 {item?.inventoryItem?.image ? (
                   <img
                     src={generateImgUrl(item?.inventoryItem?.image)}
                     alt={item?.name}
-                    width={50}
-                    height={50}
+                    width={30}
+                    height={30}
                   />
                 ) : null}
-              </TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>${item.price?.toFixed(2)}</TableCell>
-              <TableCell>{item?.inventoryUnit?.ratio} {item?.inventoryUnit?.unit}</TableCell>
+              </BorderTableCell>
+              <BorderTableCell sx={{paddingX: 2}}>
+                <Typography variant="body1" fontWeight="bold">{item?.name}</Typography>
+              </BorderTableCell>
+              <BorderTableCell align="center">{item?.uom}</BorderTableCell>
+              <BorderTableCell align="center">${item?.price?.toFixed(2)}</BorderTableCell>
             </TableRow>
           ))}
         </TableBody>
