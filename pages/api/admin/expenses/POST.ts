@@ -72,16 +72,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const newBalance = existingMethod.balance + amount;
+    // const newBalance = existingMethod.balance + amount;
 
-    await prisma.paymentMethod.update({
-      where: {
-        id: paymentMethodId,
-      },
-      data: {
-        balance: newBalance,
-      },
-    });
+    // await prisma.paymentMethod.update({
+    //   where: {
+    //     id: paymentMethodId,
+    //   },
+    //   data: {
+    //     balance: newBalance,
+    //   },
+    // });
 
     return res.status(201).json({
       data: newExpense,

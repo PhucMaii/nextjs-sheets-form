@@ -18,6 +18,8 @@ import { fetchApi } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import EditFixedTransaction from '../components/Modals/edit/EditFixedTransaction';
+import PercentIcon from '@mui/icons-material/Percent';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 
 export default function FixedTransactionsPage() {
   const [addFixedTransactionProps, setAddFixedTransactionProps] = useState<any>(
@@ -26,6 +28,7 @@ export default function FixedTransactionsPage() {
       defaultDate: null,
     },
   );
+  const [dateRange, setDateRange] = useState<any>(null);
   const [editFixedTransactionProps, setEditFixedTransactionProps] =
     useState<any>({
       open: false,
@@ -34,18 +37,16 @@ export default function FixedTransactionsPage() {
   const [fixedTransactions, setFixedTransactions] = useState<
     IFixedTransaction[]
   >([]);
+  const [overview, setOverview] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [dateRange, setDateRange] = useState<any>(null);
 
-  const { showNotification, NotificationComp } = useNotification();
+  const { showNotification, NotificationComp } = useNotification()
 
   useEffect(() => {
     if (dateRange) {
       fetchFixedTransactions();
     }
   }, [dateRange]);
-
-  console.log(fixedTransactions, 'fixedTransactions');
 
   const fetchFixedTransactions = async () => {
     const data = await fetchApi(
@@ -54,6 +55,7 @@ export default function FixedTransactionsPage() {
     );
     setFixedTransactions(data?.fixedTransactions || []);
     setTransactions(data?.transactions || []);
+    setOverview(data?.overview || null);
   };
 
   return (
@@ -108,9 +110,9 @@ export default function FixedTransactionsPage() {
         <Grid item xs={12} md={6} lg={4}>
           <OverviewCard
             text="Total Fixed Transactions"
-            value={10}
+            value={overview?.totalFixedTransactions || 0}
             icon={
-              <AttachMoneyIcon
+                <AttachMoneyIcon
                 sx={{ fontSize: '2rem', color: 'primary.main' }}
               />
             }
@@ -118,10 +120,10 @@ export default function FixedTransactionsPage() {
         </Grid>
         <Grid item xs={12} md={6} lg={4}>
           <OverviewCard
-            text="Total Fixed Transactions"
-            value={10}
+            text="Fixed Cost to Total Expense (%)"
+            value={overview?.percentageOfExpenses?.toFixed(2) || 0}
             icon={
-              <AttachMoneyIcon
+              <PercentIcon
                 sx={{ fontSize: '2rem', color: 'primary.main' }}
               />
             }
@@ -129,10 +131,10 @@ export default function FixedTransactionsPage() {
         </Grid>
         <Grid item xs={12} md={6} lg={4}>
           <OverviewCard
-            text="Total Fixed Transactions"
-            value={10}
+            text="Fixed Transactions"
+            value={overview?.numberOfFixedTransactions || 0}
             icon={
-              <AttachMoneyIcon
+              <PointOfSaleIcon
                 sx={{ fontSize: '2rem', color: 'primary.main' }}
               />
             }
@@ -172,19 +174,33 @@ export default function FixedTransactionsPage() {
           //   });
           // }}
           dayCellContent={(params) => {
+            console.log(params);
             const date = YYYYMMDDFormat(params.date);
-            const dateFixedTransactions = fixedTransactions.filter(
-              (transaction: any) => {
+            const dateFixedTransactions = fixedTransactions
+              .filter((transaction: any) => {
                 return (
                   transaction.initialDueDate === date ||
                   transaction.nextDueDate === date
                 );
-              },
-            );
+              })
+              .map((transaction: any) => {
+                return {
+                  ...transaction,
+                  isGrey: transaction.initialDueDate === date && params.isPast,
+                };
+              });
 
-            const dateTransactions = transactions.filter((transaction: any) => {
-              return transaction.date === date;
-            });
+              
+              const dateTransactions = transactions.filter((transaction: any) => {
+                return transaction.date === date;
+              }).map((transaction: any) => {
+                return {
+                  ...transaction,
+                  defaultAmount: transaction.amount,
+                  title: transaction?.description || transaction?.fixedTransaction?.title,
+                  recurrence: transaction?.fixedTransaction?.recurrence,
+                };
+              });
 
             return (
               <FixedTransactionDate

@@ -37,10 +37,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Get fixed transactions that have either initialDueDate or nextDueDate in the list of dates
     const fixedTransactions = await prisma.fixedTransaction.findMany({
       where: {
-        OR: [
-          { initialDueDate: { in: listOfDates } },
-          { nextDueDate: { in: listOfDates } },
-        ],
+        nextDueDate: { in: listOfDates },
         status: {
           not: FIXED_TRANSACTION_STATUS.ARCHIVED,
         },
@@ -54,11 +51,54 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           in: listOfDates,
         },
       },
+      include: {
+        fixedTransaction: true,
+      },
     });
+
+    // Calculate overview data
+    // Total Cost
+    const totalFixedTransactions =
+      fixedTransactions.reduce(
+        (acc, transaction) => acc + (transaction?.defaultAmount || 0),
+        0,
+      ) || 0;
+    const totalTransactions =
+      alreadyTransactions.reduce(
+        (acc, transaction) => acc + (transaction?.amount || 0),
+        0,
+      ) || 0;
+    const totalAmount = totalFixedTransactions + totalTransactions;
+
+    // % Takes in Expenses
+    const expensesInRange = await prisma.expense.findMany({
+      where: {
+        date: {
+          in: listOfDates,
+        },
+      },
+    });
+
+    const totalExpenses =
+      expensesInRange.reduce(
+        (acc, expense) => acc + (expense?.amount || 0),
+        0,
+      ) || 0;
+    const percentageOfExpenses = (totalAmount / totalExpenses) * 100;
 
     return res.status(200).json({
       message: 'Fixed transactions fetched successfully',
-      data: { fixedTransactions, transactions: alreadyTransactions },
+      data: {
+        fixedTransactions,
+        transactions: alreadyTransactions,
+        overview: {
+          totalFixedTransactions,
+          totalTransactions,
+          totalAmount,
+          numberOfFixedTransactions: fixedTransactions?.length + alreadyTransactions?.length,
+          percentageOfExpenses,
+        },
+      },
     });
   } catch (error: any) {
     console.log('Internal Server Error', error);

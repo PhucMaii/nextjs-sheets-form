@@ -2,9 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate, normalizeDate } from '../../utils/date';
 import { getUserInfo } from '../../utils/auth';
-import { FIXED_TRANSACTION_STATUS, RECURRENCE_TYPE } from '@/app/utils/enum';
-import { YYYYMMDDFormat } from '@/app/utils/time';
-
+import { RECURRENCE_TYPE, FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
 interface IBody {
   title: string;
   defaultAmount?: number;
@@ -41,10 +39,21 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Check if initialDueDate is past
+    const initialDueDateObj = normalizeDate(initialDueDate);
+    const todayDate = getTodayDate();
+    const todayObj = normalizeDate(todayDate.dateAndTime);
+    if (initialDueDateObj.getTime() < todayObj.getTime()) {
+      return res.status(400).json({ error: 'Initial due date cannot be in the past' });
+    }
+
     // Check if title is available
     const existingTransaction = await prisma.fixedTransaction.findFirst({
       where: {
         title,
+        status: {
+          not: FIXED_TRANSACTION_STATUS.ARCHIVED,
+        }
       },
     });
 
@@ -58,7 +67,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const admin: any = await getUserInfo(req, res);
 
     // Calculate next due date
-    const nextDueDate = calculateNextDueDate(initialDueDate, recurrence);
+    // const nextDueDate = calculateNextDueDate(initialDueDate, recurrence);
 
     const newTransaction = await prisma.fixedTransaction.create({
       data: {
@@ -71,7 +80,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         defaultTransactionStatus,
         recurrence,
         initialDueDate,
-        nextDueDate,
+        nextDueDate: initialDueDate,
         note,
         status: FIXED_TRANSACTION_STATUS.ACTIVE,
         createdAt: today.dateAndTime,
@@ -89,27 +98,3 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
-
-export const calculateNextDueDate = (
-  initialDueDate: string,
-  recurrence: RECURRENCE_TYPE,
-) => {
-  const recurrenceMap = {
-    [RECURRENCE_TYPE.DAILY]: 1,
-    [RECURRENCE_TYPE.WEEKLY]: 7,
-    [RECURRENCE_TYPE.BI_WEEKLY]: 14,
-    [RECURRENCE_TYPE.MONTHLY]: 30,
-    [RECURRENCE_TYPE.YEARLY]: 365,
-  };
-
-  const initialDueDateObj = normalizeDate(initialDueDate);
-  const nextDueDateObj = new Date(initialDueDateObj);
-  nextDueDateObj.setDate(nextDueDateObj.getDate() + recurrenceMap[recurrence]);
-
-  const nextDueDateString = YYYYMMDDFormat(nextDueDateObj);
-  console.log(
-    { nextDueDateObj, initialDueDateObj, nextDueDateString },
-    'nextDueDateObj',
-  );
-  return nextDueDateString;
-};

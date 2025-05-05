@@ -59,6 +59,7 @@ export default function AddFixedTransaction({
     defaultDate || '',
     true,
     true,
+    true,
   );
 
   useEffect(() => {
@@ -115,7 +116,7 @@ export default function AddFixedTransaction({
       console.log('Internal Server Error', error);
       showNotification(
         'error',
-        error.response.data.message || 'Something went wrong',
+        error.response.data.error || 'Something went wrong',
       );
     } finally {
       setIsLoading(false);
@@ -175,7 +176,7 @@ export default function AddFixedTransaction({
           </Grid>
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
-            <Typography variant="body1">Initial Due Date</Typography>
+            <Typography variant="body1">Next Due Date</Typography>
             {SelectDate}
           </Grid>
         </Grid>
