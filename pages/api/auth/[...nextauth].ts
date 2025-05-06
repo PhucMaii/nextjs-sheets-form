@@ -113,23 +113,23 @@ const loginUser = async (credentials: any) => {
 const loginDriver = async (credentials: any) => {
   const prisma = new PrismaClient();
 
-  const driver = await prisma.driver.findFirst({
+  const employee = await prisma.employee.findFirst({
     where: {
       name: credentials.driverName,
     },
   });
-  if (!driver) {
-    throw new Error('Driver name does not Exist');
+  if (!employee) {
+    throw new Error('Employee name does not Exist');
   }
   const isPasswordValid = await bcrypt.compare(
     credentials.password,
-    driver.password,
+    employee.password,
   );
   if (!isPasswordValid) {
     throw new Error('Incorrect Credentials');
   }
   return {
-    id: driver.id + '',
-    name: driver.name,
+    id: employee.id + '',
+    name: employee.name,
   };
 };

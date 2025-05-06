@@ -25,7 +25,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const session: any = await getServerSession(req, res, authOptions);
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingEmployee = await prisma.employee.findUnique({
       where: {
         id: Number(session?.user?.id),
       },
@@ -38,23 +38,23 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    if (!existingDriver) {
+    if (!existingEmployee) {
       return res.status(404).json({
-        error: 'Driver Not Found',
+        error: 'Employee Not Found',
       });
     }
 
     const date = convertDeliveryDateStringToDate(deliveryDate);
     const day = days[date.getDay()];
 
-    const targetRoute = existingDriver.routes.find((route: Route) => {
+    const targetRoute = existingEmployee.routes.find((route: Route) => {
       return route.day === day;
     });
 
     if (!targetRoute) {
       return res.status(200).json({
         data: {
-          driver: existingDriver,
+          employee: existingEmployee,
           deliveryOrders: [],
           manifest: {},
           codAmount: 0,
@@ -156,7 +156,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     return res.status(200).json({
       data: {
-        driver: existingDriver,
+        driver: existingEmployee,
         deliveryOrders: sortedDeliveryOrders,
         manifest,
         codAmount,

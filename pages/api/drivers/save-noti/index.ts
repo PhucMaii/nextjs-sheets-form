@@ -15,23 +15,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const driverData: any = await getDriverInfo(req, res);
+    const employeeData: any = await getDriverInfo(req, res);
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingEmployee = await prisma.employee.findUnique({
       where: {
-        id: driverData.id,
+        id: employeeData.id,
       },
     });
 
-    if (!existingDriver) {
+    if (!existingEmployee) {
       return res.status(404).json({
-        error: 'Driver Not Found',
+        error: 'Employee Not Found',
       });
     }
 
-    await prisma.driver.update({
+    await prisma.employee.update({
       where: {
-        id: existingDriver.id,
+        id: existingEmployee.id,
       },
       data: {
         notification: notiJson,

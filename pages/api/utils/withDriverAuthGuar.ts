@@ -20,13 +20,13 @@ const withDriverAuthGuard =
         return res.status(401).json({ error: 'You are not authenticated' });
       }
 
-      const existingDriver = await prisma.driver.findUnique({
+      const existingEmployee = await prisma.employee.findUnique({
         where: {
           id: Number(session.user.id),
         },
       });
 
-      if (!existingDriver) {
+      if (!existingEmployee) {
         return res.status(404).json({ error: 'User Not Found in DB' });
       }
 

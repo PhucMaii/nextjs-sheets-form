@@ -4,8 +4,8 @@ import bcrypt from 'bcryptjs';
 import { USER_ROLE } from '@/app/utils/enum';
 
 interface IBody {
-  driverName: string;
-  driverPassword: string;
+  employeeName: string;
+  employeePassword: string;
   hourlyRate: number;
 }
 
@@ -13,25 +13,25 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { driverName, driverPassword, hourlyRate }: IBody = req.body;
+    const { employeeName, employeePassword, hourlyRate }: IBody = req.body;
 
-    const sameDriverName = await prisma.driver.findFirst({
+    const sameEmployeeName = await prisma.employee.findFirst({
       where: {
-        name: driverName,
+        name: employeeName,
       },
     });
 
-    if (sameDriverName) {
+    if (sameEmployeeName) {
       return res.status(400).json({
-        error: 'Driver Name Existed Already',
+        error: 'Employee Name Existed Already',
       });
     }
 
-    const hashPassword = await bcrypt.hash(driverPassword, 12);
+    const hashPassword = await bcrypt.hash(employeePassword, 12);
 
-    const newDriver = await prisma.driver.create({
+    const newEmployee = await prisma.employee.create({
       data: {
-        name: driverName,
+        name: employeeName,
         password: hashPassword,
         hourlyRate,
         role: USER_ROLE.DRIVER,
@@ -39,8 +39,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     return res.status(201).json({
-      data: newDriver,
-      message: 'Driver Added Successfully',
+      data: newEmployee,
+      message: 'Employee Added Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

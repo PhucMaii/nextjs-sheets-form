@@ -26,8 +26,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       vapidKeys.privateKey,
     );
 
-    // Check if this is driver
-    const drivers: any = await prisma.driver.findMany({
+    // Check if this is employee
+    const employees: any = await prisma.employee.findMany({
       include: {
         routes: true,
       },
@@ -41,9 +41,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const date = convertDeliveryDateStringToDate(today.date);
     const day = days[date.getDay()];
 
-    for (const driver of drivers) {
-      console.log('🔔 Driver: ', driver);
-      const currentRoute = driver.routes.find((route: any) => {
+    for (const employee of employees) {
+      console.log('🔔 Employee: ', employee);
+      const currentRoute = employee.routes.find((route: any) => {
         return route.day === day;
       });
 
@@ -53,10 +53,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       try {
         console.log(
-          '🔔 Send push notification to driver: ',
-          driver.notification,
+          '🔔 Send push notification to employee: ',
+          employee.notification,
         );
-        const subscription = JSON.parse(driver.notification);
+        const subscription = JSON.parse(employee.notification);
         console.log(subscription);
 
         if (!subscription) {
@@ -69,16 +69,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           JSON.stringify({
             message:
               'Good morning ' +
-              driver.name,
+              employee.name,
             body: 'Clock in now to view your route for today 🚚. Have a safe drive!',
           }),
         );
       } catch (error: any) {
         console.log('🔔 Error send push notification to driver: ', error);
         if (error.statusCode === 410 || error.statusCode === 404) {
-          await prisma.driver.update({
+          await prisma.employee.update({
             where: {
-              id: driver.id,
+              id: employee.id,
             },
             data: {
               notification: {},

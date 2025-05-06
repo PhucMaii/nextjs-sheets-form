@@ -8,7 +8,7 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Driver {
+model Employee {
   id           Int     @id @default(autoincrement())
   name         String  @db.VarChar(255)
   password     String  @db.VarChar(255)
@@ -19,6 +19,8 @@ model Driver {
   shiftSessions ShiftSession[]
   routes        Route[]
   CodBoard      CodBoard[]
+
+  @@map("driver")
 }
 
 model User {
@@ -195,12 +197,12 @@ model PositionIndex {
 model Route {
   id            Int            @id @default(autoincrement())
   day           String
-  driverId      Int
+  employeeId      Int?
   name          String
   clients       UserRoute[]
   shiftSessions ShiftSession[]
 
-  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 model UserRoute {
@@ -240,9 +242,9 @@ model CodBoard {
   note      String
   cash      Float
   status    String
-  driverId  Int?
+  employeeId  Int?
   orders    Orders[]
-  driver    Driver?   @relation(fields: [driverId], references: [id])
+  employee    Employee?   @relation(fields: [employeeId], references: [id])
   expense   Expense[]
 }
 
@@ -565,7 +567,7 @@ model Option {
 
 model ShiftSession {
   id        Int      @id @default(autoincrement())
-  driverId  Int
+  employeeId  Int
   routeId   Int?
   date      String
   startedAt String
@@ -577,7 +579,7 @@ model ShiftSession {
   expenseId Int?
   role      String?
 
-  driver  Driver   @relation(fields: [driverId], references: [id])
+  employee  Employee   @relation(fields: [employeeId], references: [id])
   expense Expense? @relation(fields: [expenseId], references: [id])
   route   Route?   @relation(fields: [routeId], references: [id])
 }

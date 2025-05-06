@@ -13,25 +13,25 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     if (!id) {
       return res.status(404).json({
-        error: 'Driver Id Not Provided',
+        error: 'Employee Id Not Provided',
       });
     }
 
-    const driver = await prisma.driver.findUnique({
+    const employee = await prisma.employee.findUnique({
       where: {
         id: Number(id),
       },
     });
 
-    if (!driver) {
+    if (!employee) {
       return res.status(500).json({
-        error: 'Driver Not Found',
+        error: 'Employee Not Found',
       });
     }
 
     return res.status(200).json({
-      data: driver,
-      message: 'Fetch Driver Successfully',
+      data: employee,
+      message: 'Fetch Employee Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ' + error);

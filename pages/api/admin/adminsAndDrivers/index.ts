@@ -19,11 +19,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const drivers = await prisma.driver.findMany({});
+    const employees = await prisma.employee.findMany({});
 
     const adminsAndDrivers = [
       ...admins.map((admin: any) => `Admin - ${admin.clientName}`),
-      ...drivers.map((driver: any) => `Driver - ${driver.name}`),
+      ...employees.map((employee: any) => `${employee?.role || 'Driver'} - ${employee.name}`),
     ];
 
     return res.status(200).json({

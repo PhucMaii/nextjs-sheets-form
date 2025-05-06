@@ -54,7 +54,7 @@ export const getDriverInfo = async (
       });
     }
 
-    const driverInfo = await prisma.driver.findUnique({
+    const employeeInfo = await prisma.employee.findUnique({
       where: {
         id: Number(session.user.id),
       },
@@ -68,13 +68,13 @@ export const getDriverInfo = async (
       },
     });
 
-    if (!driverInfo) {
+    if (!employeeInfo) {
       return res.status(404).json({
         error: 'User Not Found',
       });
     }
 
-    return driverInfo;
+    return employeeInfo;
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({

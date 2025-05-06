@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
-  driverId: number;
+  employeeId: number;
   hourlyRate: number;
   updatedName: string;
 }
@@ -11,44 +11,44 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { driverId, hourlyRate, updatedName }: IBody = req.body;
+    const { employeeId, hourlyRate, updatedName }: IBody = req.body;
 
-    if (!driverId || !updatedName) {
+    if (!employeeId || !updatedName) {
       return res.status(404).json({
         error: 'You are missing body data',
       });
     }
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingEmployee = await prisma.employee.findUnique({
       where: {
-        id: driverId,
+        id: employeeId,
       },
     });
 
-    if (!existingDriver) {
+    if (!existingEmployee) {
       return res.status(404).json({
-        error: 'Driver Not Found',
+        error: 'Employee Not Found',
       });
     }
 
-    const sameDriverName = await prisma.driver.findFirst({
+    const sameEmployeeName = await prisma.employee.findFirst({
       where: {
         name: updatedName,
         id: {
-          not: driverId,
+          not: employeeId,
         },
       },
     });
 
-    if (sameDriverName) {
+    if (sameEmployeeName) {
       return res.status(400).json({
-        error: 'Driver Name Existed Already',
+        error: 'Employee Name Existed Already',
       });
     }
 
-    const updatedDriver = await prisma.driver.update({
+    const updatedEmployee = await prisma.employee.update({
       where: {
-        id: driverId,
+        id: employeeId,
       },
       data: {
         name: updatedName,
@@ -57,8 +57,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
 
     return res.status(200).json({
-      data: updatedDriver,
-      message: 'Update Driver Successfully',
+      data: updatedEmployee,
+      message: 'Update Employee Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

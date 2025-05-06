@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
-  driverId?: string;
+  employeeId?: string;
 }
 
 export default async function DELETE(
@@ -12,34 +12,34 @@ export default async function DELETE(
   try {
     const prisma = new PrismaClient();
 
-    const { driverId }: IQuery = req.query;
+    const { employeeId }: IQuery = req.query;
 
-    if (!driverId) {
+    if (!employeeId) {
       return res.status(404).json({
-        error: 'You are missing driver id',
+        error: 'You are missing employee id',
       });
     }
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingEmployee = await prisma.employee.findUnique({
       where: {
-        id: Number(driverId),
+        id: Number(employeeId),
       },
     });
 
-    if (!existingDriver) {
+    if (!existingEmployee) {
       return res.status(404).json({
-        error: 'Driver Not Found',
+        error: 'Employee Not Found',
       });
     }
 
-    await prisma.driver.delete({
+    await prisma.employee.delete({
       where: {
-        id: existingDriver.id,
+        id: existingEmployee.id,
       },
     });
 
     return res.status(200).json({
-      message: 'Delete Driver Successfully',
+      message: 'Delete Employee Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

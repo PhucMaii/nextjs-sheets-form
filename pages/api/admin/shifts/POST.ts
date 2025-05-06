@@ -6,7 +6,7 @@ import { SHIFT_STATUS, WORKING_ROLE } from '@/app/utils/enum';
 const prisma = new PrismaClient();
 
 interface IBody {
-  driverId: number;
+  employeeId: number;
   date: string;
   startedAt: string;
   endedAt: string;
@@ -16,17 +16,17 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { driverId, date, startedAt, endedAt, routeId, role }: IBody =
+    const { employeeId, date, startedAt, endedAt, routeId, role }: IBody =
       req.body;
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingEmployee = await prisma.employee.findUnique({
       where: {
-        id: driverId,
+        id: employeeId,
       },
     });
 
-    if (!existingDriver) {
-      return res.status(404).json({ error: 'Driver not found' });
+    if (!existingEmployee) {
+      return res.status(404).json({ error: 'Employee not found' });
     }
 
     const hours = calculateHours(startedAt, endedAt);
@@ -42,13 +42,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const newShift = await prisma.shiftSession.create({
       data: {
-        driverId,
+        employeeId, // error becaus have not change in the schema
         date,
         startedAt,
         endedAt,
         routeId,
         hours,
-        cost: hours * (existingDriver?.hourlyRate || 1),
+        cost: hours * (existingEmployee?.hourlyRate || 1),
         status: SHIFT_STATUS.UNPAID,
         role,
       },

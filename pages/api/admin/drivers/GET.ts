@@ -22,29 +22,29 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           day,
         },
         include: {
-          driver: true,
+          employee: true,
         },
       });
 
-      const drivers = dayRoutes.map((route) => {
-        return route.driver;
+      const employees = dayRoutes.map((route) => {
+        return route.employee;
       });
 
       return res.status(200).json({
-        data: drivers,
-        message: 'Fetch Drivers Successfully',
+        data: employees,
+        message: 'Fetch Employees Successfully',
       });
     }
 
-    const drivers = await prisma.driver.findMany({
+    const employees = await prisma.employee.findMany({
       include: {
         routes: true,
       },
     });
 
     return res.status(200).json({
-      data: drivers,
-      message: 'Fetch Drivers Successfully',
+      data: employees,
+      message: 'Fetch Employees Successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

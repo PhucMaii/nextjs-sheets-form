@@ -20,20 +20,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ error: 'You are not authenticated' });
     }
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingEmployee = await prisma.employee.findUnique({
       where: {
         id: Number(session.user.id),
       },
     });
 
-    if (!existingDriver) {
+    if (!existingEmployee) {
       return res.status(404).json({ error: 'User Not Found in DB' });
     }
 
     if (oldPassword && newPassword) {
       const isOldPasswordMatch = await bcrypt.compare(
         oldPassword,
-        existingDriver.password,
+        existingEmployee.password,
       );
       if (!isOldPasswordMatch) {
         return res.status(401).json({
@@ -43,7 +43,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       const newHashedPassword = await bcrypt.hash(newPassword, 12);
 
-      await prisma.driver.update({
+      await prisma.employee.update({
         where: {
           id: Number(session.user.id),
         },

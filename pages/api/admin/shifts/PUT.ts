@@ -11,13 +11,13 @@ interface IBody {
   startedAt: string;
   endedAt: string;
   routeId: number;
-  driverId: number;
+  employeeId: number;
   role: WORKING_ROLE;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { id, date, startedAt, endedAt, routeId, driverId, role }: IBody =
+    const { id, date, startedAt, endedAt, routeId, employeeId, role }: IBody =
       req.body;
 
     console.log(date, 'date');
@@ -25,7 +25,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       where: { id },
       include: {
         route: true,
-        driver: true,
+        employee: true,
       },
     });
 
@@ -56,8 +56,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    if (driverId !== existingShift.driverId) {
-      updatedFields.driverId = driverId;
+    if (employeeId !== existingShift.employeeId) {
+      updatedFields.employeeId = employeeId;
     }
 
     if (date !== existingShift.date) {
@@ -73,20 +73,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Handle update cost if anything hours or driverId changed
-    if (updatedFields.hours || updatedFields.driverId) {
-      const driver = await prisma.driver.findUnique({
-        where: { id: updatedFields.driverId || existingShift.driverId },
+    if (updatedFields.hours || updatedFields.employeeId) {
+      const employee = await prisma.employee.findUnique({
+        where: { id: updatedFields.employeeId || existingShift.employeeId },
         include: {
           routes: true,
         },
       });
 
-      if (!driver) {
-        return res.status(404).json({ error: 'Conflict Driver not found' });
+      if (!employee) {
+        return res.status(404).json({ error: 'Conflict Employee not found' });
       }
 
       const cost =
-        (driver?.hourlyRate || 1) *
+        (employee?.hourlyRate || 1) *
         (updatedFields?.hours || existingShift.hours);
       updatedFields.cost = cost;
     }
