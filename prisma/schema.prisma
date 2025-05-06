@@ -52,6 +52,31 @@ model User {
   printStatements     ClientStatement[]
   cart                Cart[]
   cheques             Cheque[]
+  quotes               Quote[]
+}
+
+model Quote {
+  id      Int     @id @default(autoincrement())
+  userId  Int
+  status  QuoteStatus   @default(DRAFT)
+  total   Float
+  createdAt  String
+  createdBy  String
+
+  items     QuoteItem[]
+
+  user      User  @relation(fields: [userId], references: [id])
+}
+
+model QuoteItem {
+  id      Int       @id @default(autoincrement())
+  quoteId   Int
+  inventoryItemId Int
+  inventoryUnitId Int
+  quantity    Int
+  price       Int
+
+  quote       Quote   @relation(fields: [quoteId], references: [id])
 }
 
 model Category {
@@ -282,7 +307,6 @@ model FixedTransaction {
   paymentMethodId    Int
 
   transactions      Expense[]
-
 
   paymentMethod      PaymentMethod    @relation(fields: [paymentMethodId], references: [id])
 }
@@ -652,4 +676,13 @@ model Media {
   lossReportId Int?
 
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
+}
+
+
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
 }
