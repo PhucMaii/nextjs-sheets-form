@@ -238,8 +238,6 @@ const ItemExportPage = () => {
     );
   }
 
-  console.log(selectedItemIds, 'selectedItemIds');
-
   return (
     <Sidebar>
       {openEditImgProps.item && (

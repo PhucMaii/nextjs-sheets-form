@@ -84,15 +84,15 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
         <TableBody>
           {items.map((item: any) => (
             <TableRow key={item.id} sx={{ height: 35 }}>
-              <BorderTableCell align="center">
+              <BorderTableCell align="center" sx={{ width: 50, height: 50 }}>
                 {item?.image || item?.inventoryItem?.image ? (
                   <img
                     src={generateImgUrl(
                       item?.image || item?.inventoryItem?.image,
                     )}
                     alt={item?.name}
-                    width={30}
-                    height={30}
+                    width={50}
+                    height={50}
                   />
                 ) : null}
               </BorderTableCell>
