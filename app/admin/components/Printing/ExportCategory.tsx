@@ -17,19 +17,6 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
     <div ref={ref} style={{ padding: '20px' }}>
       {/* Header */}
 
-      {/* 
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        gap={1}
-      >
-        <Typography variant="body1">For: {clientName}</Typography>
-        <Typography variant="body1">
-          Date: {new Date().toLocaleDateString()}
-        </Typography>
-      </Box> */}
-
       <Grid container spacing={1} alignItems="center">
         <Grid item xs={6}>
           <img
@@ -50,21 +37,11 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
             <Typography variant="subtitle1">709 989 6000</Typography>
           </Box>
         </Grid>
-        {/* <Grid item xs={6}>
-          <Typography variant="body1">
-            <strong>For:</strong> {clientName}
-          </Typography>
-        </Grid> */}
         <Grid item xs={6} textAlign="right">
           <Typography variant="body1">
             <strong>Date:</strong> {new Date().toLocaleDateString()}
           </Typography>
         </Grid>
-        {/* <Grid item xs={12}>
-          <Typography variant="body1">
-            <strong>Category:</strong> {category?.name}
-          </Typography>
-        </Grid> */}
       </Grid>
 
       {/* Items */}

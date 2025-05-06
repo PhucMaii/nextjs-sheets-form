@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
-import { IFixedTransaction } from '@/app/utils/type';
+import { IFixedTransaction, IPaymentMethod } from '@/app/utils/type';
 import {
   API_URL,
   FIXED_TRANSACTION_STATUS,
@@ -25,6 +25,7 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import dayjs from 'dayjs';
+import { fetchApi } from '@/app/utils/db';
 interface IProps extends ModalProps {
   defaultDate?: string;
   showNotification: ShowNotificationType;
@@ -38,13 +39,14 @@ export default function AddFixedTransaction({
   showNotification,
   refresh,
 }: IProps) {
+  const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [newFixedTransaction, setNewFixedTransaction] = useState<
     IFixedTransaction | any
   >({
     title: '',
     recurrence: RECURRENCE_TYPE.MONTHLY,
-    paymentMethodId: mainPaymentMethodId,
+    paymentMethodId: -1,
     defaultSubtotal: 0,
     defaultPST: 0,
     defaultGST: 0,
@@ -61,6 +63,10 @@ export default function AddFixedTransaction({
     true,
     true,
   );
+
+  useEffect(() => {
+    fetchPaymentMethods();
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -93,6 +99,11 @@ export default function AddFixedTransaction({
     newFixedTransaction?.defaultPST,
     newFixedTransaction?.defaultGST,
   ]);
+
+  const fetchPaymentMethods = async () => {
+    const data = await fetchApi(`${API_URL.ADMIN}/paymentMethods`);
+    setPaymentMethods(data);
+  };
 
   const handleCreateTransaction = async () => {
     try {
@@ -265,6 +276,37 @@ export default function AddFixedTransaction({
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Default Spent By</Typography>
             {renderEmployeeSearch()}
+          </Grid>
+
+          <Grid item xs={12} display="flex" gap={1} flexDirection="column">
+            <Typography variant="body1">Default Payment Method</Typography>
+            <Select
+              value={newFixedTransaction.paymentMethodId}
+              onChange={(e) =>
+                setNewFixedTransaction({
+                  ...newFixedTransaction,
+                  paymentMethodId: +e.target.value,
+                })
+              }
+            >
+              <MenuItem value={-1} disabled>
+                -- Choose payment method --
+              </MenuItem>
+              {paymentMethods?.length > 0 &&
+                paymentMethods.map(
+                  (paymentMethod: IPaymentMethod, index: number) => {
+                    return (
+                      <MenuItem
+                        key={index}
+                        value={paymentMethod.id}
+                        // disabled={paymentMethod.id !== mainPaymentMethodId}
+                      >
+                        {paymentMethod.name}
+                      </MenuItem>
+                    );
+                  },
+                )}
+            </Select>
           </Grid>
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">

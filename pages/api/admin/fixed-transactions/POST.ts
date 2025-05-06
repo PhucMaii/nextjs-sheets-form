@@ -35,7 +35,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       paymentMethodId,
     } = req.body as IBody;
 
-    if (!title || !recurrence || !initialDueDate || !paymentMethodId) {
+    if (!title || !recurrence || !initialDueDate || !paymentMethodId || paymentMethodId === -1) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 

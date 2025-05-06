@@ -56,8 +56,23 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // Calculate overview data
-    // Total Cost
+    if (fixedTransactions.length === 0 && alreadyTransactions.length === 0) {
+      return res.status(200).json({
+        message: 'No fixed transactions or transactions found',
+        data: {
+          fixedTransactions: [],
+          transactions: [],
+          overview: {
+            totalFixedTransactions: 0,
+            totalTransactions: 0,
+            totalAmount: 0,
+            numberOfFixedTransactions: 0,
+            percentageOfExpenses: 0,
+          },
+        },
+      });
+    }
+
     const totalFixedTransactions =
       fixedTransactions.reduce(
         (acc, transaction) => acc + (transaction?.defaultAmount || 0),

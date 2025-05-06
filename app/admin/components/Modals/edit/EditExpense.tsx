@@ -118,7 +118,7 @@ export default function EditExpense({
           <ModalHead
             heading="Edit Expense"
             buttonLabel="EDIT"
-            onClose={() => console.log('CLOSE PRESSED')}
+            onClose={onClose}
             onClick={handleUpdateExpense}
             buttonProps={{
               loading: isLoading,
