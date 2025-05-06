@@ -200,7 +200,7 @@ model Route {
   clients       UserRoute[]
   shiftSessions ShiftSession[]
 
-  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  driver Driver @relation(fields: [driverId], references: [id])
 }
 
 model UserRoute {
@@ -242,8 +242,9 @@ model CodBoard {
   status    String
   driverId  Int?
   orders    Orders[]
-  driver    Driver?   @relation(fields: [driverId], references: [id])
   expense   Expense[]
+
+  driver    Driver?   @relation(fields: [driverId], references: [id])
 }
 
 model PaymentMethod {

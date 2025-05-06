@@ -202,7 +202,13 @@ export const ItemButton = ({
   return (
     <Button
       key={item.id}
-      sx={{ posiion: 'relative', width: '100%', height: '100%', ...style }}
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        ...style,
+        opacity: disabled ? 0.5 : 1,
+      }}
       onClick={onClick}
       ref={ref}
       disabled={disabled || item?.availability === false}
@@ -242,7 +248,7 @@ export const ItemButton = ({
               borderRadius: 'inherit',
               inset: 0, // Make the image stretch to fill the container
               zIndex: 0,
-              opacity: 0.5,
+              opacity: disabled ? 0.2 : 0.5,
               // brightness
               filter: 'brightness(93%)',
             }}
