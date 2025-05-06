@@ -40,7 +40,10 @@ export default function ProductListing({
     if (product?.options && product?.options?.length > 0) {
       return product?.options?.reduce((max, option) => {
         if (option?.prevPrice && option?.isShowDiscount) {
-          return Math.max(max, Math.ceil((1 - option.price / option.prevPrice) * 100));
+          return Math.max(
+            max,
+            Math.ceil((1 - option.price / option.prevPrice) * 100),
+          );
         }
         return max;
       }, 0);
@@ -92,113 +95,119 @@ export default function ProductListing({
 
   return (
     <>
-    <ChooseOption 
-    open={isOpenChooseOption}
-    onClose={() => setIsOpenChooseOption(false)}
-    options={product?.options || []}
-    onAddOption={onAddToCart}
-    />
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="space-between"
-      // alignItems="center"
-      flexGrow={1}
-      gap={1}
-      sx={{
-        height: '100%',
-        maxWidth: '300px',
-        minWidth: '250px',
-        cursor: 'pointer',
-        p: 2,
-        borderRadius: 1,
-        '&:hover': {
-          border: `1px solid ${grey[300]}`,
-        },
-      }}
-      position="relative"
-      onClick={onClick}
-      style={containerStyle}
-    >
-      {(discountPercent || product?.isShowDiscount) && (
-        <Box position="absolute" top={30} right={20}>
-          <OnSaleBadge
-            discountPrice={product?.price}
-            prevPrice={product?.prevPrice || 0}
-            percentage={discountPercent || 0}
-          />
-        </Box>
-      )}
-      <img
-        src={
-          product?.image || product?.inventoryItem?.image
-            ? generateImgUrl(product?.image || product?.inventoryItem?.image)
-            : '/images/landing/image_not_found.jpeg'
-        }
-        alt={product?.name || product?.inventoryItem?.name}
-        width="100%"
-        height={200}
-        style={{ borderRadius: '20px' }}
+      <ChooseOption
+        open={isOpenChooseOption}
+        onClose={() => setIsOpenChooseOption(false)}
+        options={product?.options || []}
+        onAddOption={onAddToCart}
       />
-      <Typography variant="h6" fontWeight="regular" sx={{ color: green[800] }}>
-        {product?.name || product.inventoryItem.name}
-      </Typography>
-      <div style={{ flexGrow: 1 }} />
-      <Box display="flex" alignItems="flex-end" gap={1}>
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          sx={{
-            color:
-              product?.isShowDiscount && product?.prevPrice
-                ? red[600]
-                : green[900],
-          }}
-        >
-          {product?.options && product?.options?.length > 0
-            ? `From $${smallestOptionPrice?.toFixed(2)}`
-            : `$${product?.price?.toFixed(2) || 'N/A'}`}
-        </Typography>
-        {product?.isShowDiscount && product?.prevPrice && (
-          <Typography
-            variant="body1"
-            sx={{ color: green[900], textDecoration: 'line-through' }}
-          >
-            ${product.prevPrice.toFixed(2)}
-          </Typography>
-        )}
-      </Box>
-      <LoadingButton
-        variant="contained"
-        fullWidth
-        loading={isAdding}
-        onClick={(e: any) => {
-          e.stopPropagation();
-          if (product?.options && product?.options?.length > 0) {
-            setIsOpenChooseOption(true)
-          } else {
-            onAddToCart(e)
-          }
-        }}
-        disabled={!product?.availability}
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="space-between"
+        // alignItems="center"
+        flexGrow={1}
+        gap={1}
         sx={{
-          backgroundColor: landingPagePrimaryColor,
-          alignSelf: 'flex-end',
-          color: 'white',
-          borderRadius: 2,
-          ':hover': {
-            backgroundColor: landingPageSecondaryColor,
+          height: '100%',
+          maxWidth: '300px',
+          minWidth: '250px',
+          cursor: 'pointer',
+          p: 2,
+          borderRadius: 1,
+          '&:hover': {
+            border: `1px solid ${grey[300]}`,
           },
         }}
+        position="relative"
+        onClick={onClick}
+        style={containerStyle}
       >
-        {/* If product has options, show choose option button */}
-        {product?.options && product?.options?.length > 0
-          ? 'Choose Option'
-          : product?.availability
-            ? 'Add to cart'
-            : 'Out of stock'}
-      </LoadingButton>
-    </Box>
+        {(discountPercent || product?.isShowDiscount) && (
+          <Box position="absolute" top={30} right={20}>
+            <OnSaleBadge
+              discountPrice={product?.price}
+              prevPrice={product?.prevPrice || 0}
+              percentage={discountPercent || 0}
+            />
+          </Box>
+        )}
+        <img
+          src={
+            product?.image || product?.inventoryItem?.image
+              ? generateImgUrl(product?.image || product?.inventoryItem?.image)
+              : '/images/landing/image_not_found.jpeg'
+          }
+          alt={product?.name || product?.inventoryItem?.name}
+          width="100%"
+          height={200}
+          style={{ borderRadius: '20px' }}
+        />
+        <Typography
+          variant="h6"
+          fontWeight="regular"
+          sx={{ color: green[800] }}
+        >
+          {product?.name || product.inventoryItem.name}
+        </Typography>
+        <div style={{ flexGrow: 1 }} />
+        <Box display="flex" alignItems="flex-end" gap={1}>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            sx={{
+              color:
+                product?.isShowDiscount && product?.prevPrice
+                  ? red[600]
+                  : green[900],
+            }}
+          >
+            {!product?.availability
+              ? 'N/A'
+              : product?.options && product?.options?.length > 0
+                ? `From $${smallestOptionPrice?.toFixed(2)}`
+                : `$${product?.price?.toFixed(2) || 'N/A'}`}
+          </Typography>
+          {product?.isShowDiscount && product?.prevPrice && (
+            <Typography
+              variant="body1"
+              sx={{ color: green[900], textDecoration: 'line-through' }}
+            >
+              ${product.prevPrice.toFixed(2)}
+            </Typography>
+          )}
+        </Box>
+        <LoadingButton
+          variant="contained"
+          fullWidth
+          loading={isAdding}
+          onClick={(e: any) => {
+            e.stopPropagation();
+            if (product?.options && product?.options?.length > 0) {
+              setIsOpenChooseOption(true);
+            } else {
+              onAddToCart(e);
+            }
+          }}
+          disabled={!product?.availability}
+          sx={{
+            backgroundColor: landingPagePrimaryColor,
+            alignSelf: 'flex-end',
+            color: 'white',
+            borderRadius: 2,
+            ':hover': {
+              backgroundColor: landingPageSecondaryColor,
+            },
+          }}
+        >
+          {/* If product has options, show choose option button */}
+          {product?.options && product?.options?.length > 0
+            ? 'Choose Option'
+            : product?.availability
+              ? 'Add to cart'
+              : 'Out of stock'}
+        </LoadingButton>
+      </Box>
     </>
   );
 }

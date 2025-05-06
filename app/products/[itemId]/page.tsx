@@ -135,7 +135,7 @@ export default function ItemPage() {
             fontWeight="bold"
             sx={{ mt: 4, color: landingPagePrimaryColor }}
           >
-            ${itemData?.price}
+            {itemData?.availability ? `$${itemData?.price}` : 'N/A'}
           </Typography>
         )}
 
