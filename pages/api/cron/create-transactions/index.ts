@@ -3,7 +3,6 @@ import { RECURRENCE_TYPE, FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate, normalizeDate } from '../../utils/date';
-import { getUserInfo } from '../../utils/auth';
 
 const prisma = new PrismaClient();
 
@@ -29,13 +28,13 @@ export default async function handler(
 
     for (const transaction of fixedTransactions) {
       // Create a new expense
-      const admin: any = await getUserInfo(req, res);
+      // const admin: any = await getUserInfo(req, res);
       await prisma.expense.create({
         data: {
           amount: transaction?.defaultAmount || 0,
           description: transaction.title,
           createdAt: todayDate.dateAndTime,
-          createdBy: `Admin - ${admin.clientName}`,
+          createdBy: transaction?.defaultSpentBy || '',
           PST: transaction?.defaultPST || 0,
           GST: transaction?.defaultGST || 0,
           subTotal: transaction?.defaultSubtotal || 0,
