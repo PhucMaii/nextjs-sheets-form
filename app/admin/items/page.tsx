@@ -35,6 +35,8 @@ import CategoryClients from '../components/CategoryClients';
 import InfoIcon from '@mui/icons-material/Info';
 import { generateCurrentTime } from '@/app/utils/time';
 import AddCategory from '../components/Modals/add/AddCategory';
+import PreViewExport from '../components/Modals/PreViewExport';
+import { useRouter } from 'next/navigation';
 
 export default function ItemPage() {
   const [baseItems, setBaseItems] = useState<IItem[]>([]);
@@ -52,7 +54,10 @@ export default function ItemPage() {
     isDeleteModalOpen: false,
     isEditCategoryOpen: false,
     isShowingClients: false,
+    isPreViewExport: false,
   });
+
+  const router = useRouter();
   const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
@@ -332,6 +337,11 @@ export default function ItemPage() {
         onClose={() => setOpen('isShowingClients', false)}
         clients={currentCategory?.users || []}
       />
+      <PreViewExport
+        open={open.isPreViewExport}
+        onClose={() => setOpen('isPreViewExport', false)}
+        items={items}
+      />
       <AddItem
         open={open.isAddItemOpen}
         onClose={() => setOpen('isAddItemOpen', false)}
@@ -351,6 +361,14 @@ export default function ItemPage() {
         updateCategory={handleUpdateCategoryName}
         currentName={currentCategory?.name}
       />
+
+      {/* <div style={{ display: 'none' }}>
+        <ExportCategory
+          category={currentCategory}
+          clientName="John Doe"
+          ref={exportCategoryRef}
+        />
+      </div> */}
       {NotificationComp}
       <PasteItemsModal
         currentCategoryId={currentCategory?.id}
@@ -382,10 +400,20 @@ export default function ItemPage() {
               </IconButton>
             </Box>
           </Grid>
-          <Grid item xs={12} md={2} textAlign="right">
+          <Grid
+            item
+            xs={12}
+            md={2}
+            textAlign="right"
+            display="flex"
+            gap={1}
+            alignItems="center"
+          >
+            <Button variant="outlined" onClick={() => router.push(`/admin/items/export/${currentCategory?.id}`)}>
+              Export
+            </Button>
             <Button
               disabled={!currentCategory}
-              fullWidth
               color="error"
               variant="outlined"
               onClick={() => setOpen('isDeleteModalOpen', true)}

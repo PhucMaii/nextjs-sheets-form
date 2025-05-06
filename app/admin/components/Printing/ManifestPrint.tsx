@@ -25,7 +25,7 @@ interface TableCellProps {
   $productColor?: string;
 }
 
-const BorderRightTableCell = styled(TableCell)<TableCellProps>`
+export const BorderTableCell = styled(TableCell)<TableCellProps>`
   border: 1px solid black;
   background-color: ${(props) =>
     props.$isSelected ? props?.$productColor : 'white'} !important;
@@ -126,7 +126,7 @@ export const ManifestPrint = forwardRef(
                   <Table sx={{ mx: 2 }}>
                     <TableHead>
                       <TableRow>
-                        <BorderRightTableCell align="center"></BorderRightTableCell>
+                        <BorderTableCell align="center"></BorderTableCell>
                         {sortedItems?.length > 0 &&
                           sortedItems.map((item: string, index: number) => {
                             const { summary } = manifest[routeId];
@@ -135,7 +135,7 @@ export const ManifestPrint = forwardRef(
                             }
                             return (
                               <Fragment key={index}>
-                                <BorderRightTableCell
+                                <BorderTableCell
                                   align="center"
                                   sx={{
                                     padding: 2,
@@ -145,7 +145,7 @@ export const ManifestPrint = forwardRef(
                                   }}
                                 >
                                   {item}
-                                </BorderRightTableCell>
+                                </BorderTableCell>
                               </Fragment>
                             );
                           })}
@@ -171,7 +171,7 @@ export const ManifestPrint = forwardRef(
 
                             return (
                               <TableRow key={index}>
-                                <BorderRightTableCell
+                                <BorderTableCell
                                   // align="center"
                                   sx={{
                                     fontSize: 18,
@@ -183,7 +183,7 @@ export const ManifestPrint = forwardRef(
                                   {user?.user?.displayName} -{' '}
                                   {user?.user?.preference?.paymentType} -{' '}
                                   {user.user.clientId}
-                                </BorderRightTableCell>
+                                  </BorderTableCell>
                                 {sortedItems.map(
                                   (item: string, index: number) => {
                                     const itemQuantity = user[item];
@@ -193,10 +193,10 @@ export const ManifestPrint = forwardRef(
 
                                     if (!itemQuantity || itemQuantity === 0) {
                                       return (
-                                        <BorderRightTableCell
+                                        <BorderTableCell
                                           align="center"
                                           key={index}
-                                        ></BorderRightTableCell>
+                                        ></BorderTableCell>
                                       );
                                     }
 
@@ -207,18 +207,18 @@ export const ManifestPrint = forwardRef(
                                         itemQuantity,
                                       );
                                       return (
-                                        <BorderRightTableCell
+                                        <BorderTableCell
                                           key={itemQuantity}
                                           align="center"
                                           sx={{ fontSize: 20 }}
                                         >
                                           NaN
-                                        </BorderRightTableCell>
+                                        </BorderTableCell>
                                       );
                                     }
 
                                     return (
-                                      <BorderRightTableCell
+                                      <BorderTableCell
                                         align="center"
                                         sx={{ fontSize: 20 }}
                                         key={index}
@@ -226,7 +226,7 @@ export const ManifestPrint = forwardRef(
                                         $productColor={productColors[index]}
                                       >
                                         {itemQuantity}
-                                      </BorderRightTableCell>
+                                      </BorderTableCell>
                                     );
                                   },
                                 )}

@@ -1,11 +1,15 @@
+import FileUpload from '@/app/admin/components/FileUpload';
 import { generateImgUrl, getAllS3Images } from '@/app/lib/s3';
 import { primaryColor } from '@/theme/color';
 import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
+import useNotification from './useNotification';
 
 const useImageGallery = (
   initialSelectedImage: string = '',
   width: string | number,
+  folder: string = '',
+  isIncludeUploadImg: boolean = false,
 ) => {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] =
@@ -13,13 +17,14 @@ const useImageGallery = (
 
   useEffect(() => {
     const getImages = async () => {
-      const images = await getAllS3Images();
-      console.log(images, 'images');
+      const images = await getAllS3Images(folder);
       setGalleryImages(images || []);
     };
 
     getImages();
   }, []);
+
+  const { showNotification } = useNotification();
 
   const onSelectImage = (image: string) => {
     setSelectedImage(() => (image === selectedImage ? '' : image));
@@ -29,8 +34,6 @@ const useImageGallery = (
     <Box
       sx={{
         width,
-        overflowX: 'auto', // Enables horizontal scrolling
-        whiteSpace: 'nowrap', // Prevents wrapping
       }}
     >
       <Box
@@ -39,6 +42,9 @@ const useImageGallery = (
         sx={{
           whitespace: 'nowrap',
           paddingBottom: 2,
+          width,
+          overflowX: 'auto', // Enables horizontal scrolling
+          whiteSpace: 'nowrap', // Prevents wrapping
         }}
       >
         {galleryImages.length > 0 &&
@@ -75,6 +81,17 @@ const useImageGallery = (
             </Box>
           ))}
       </Box>
+
+      {isIncludeUploadImg && (
+        <FileUpload
+          showNotification={showNotification}
+          fileName={`${folder + Date.now()}`}
+          uploadLocation={`products/export/${folder} + ${Date.now()}`}
+          onUploadImageUI={(fileKey: string) => {
+            setSelectedImage(fileKey);
+          }}
+        />
+      )}
     </Box>
   );
 

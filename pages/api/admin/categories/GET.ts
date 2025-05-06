@@ -20,9 +20,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               inventoryItemId: Number(inventoryItemId),
             },
           },
-          id: {
-            not: websiteItemCategoryId,
-          },
+          // id: {
+          //   not: websiteItemCategoryId,
+          // },
         },
         include: {
           users: true,
@@ -74,9 +74,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Get all categories
     const categories = await prisma.category.findMany({
       where: {
-        id: {
-          not: websiteItemCategoryId,
-        },
+        // id: {
+        //   not: websiteItemCategoryId,
+        // },
       },
       include: {
         users: true,

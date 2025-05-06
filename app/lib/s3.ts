@@ -45,6 +45,7 @@ export default async function uploadToS3(
 }
 
 export const generateImgUrl = (fileKey: string) => {
+  if (!fileKey) return '';
   return `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com/${fileKey}`;
 };
 
