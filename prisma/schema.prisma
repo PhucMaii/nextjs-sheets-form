@@ -29,7 +29,7 @@ model User {
   contactNumber       String            @db.VarChar(11)
   deliveryAddress     String            @db.VarChar(255)
   password            String            @db.VarChar(255)
-  sheetName           String            @db.VarChar(255)
+  sheetName           String?            @db.VarChar(255)
   role                String            @db.VarChar(255)
   email               String?           @db.VarChar(255)
   userPreferenceId    Int?
@@ -59,7 +59,11 @@ model Quote {
   id      Int     @id @default(autoincrement())
   userId  Int
   status  QuoteStatus   @default(DRAFT)
-  total   Float
+  subtotal  Float
+  PST       Float
+  GST       Float
+  total     Float
+  note      String
   createdAt  String
   createdBy  String
 

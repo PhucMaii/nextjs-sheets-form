@@ -4,7 +4,7 @@ import { Autocomplete, Checkbox, FormControlLabel, TextField } from '@mui/materi
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-const useInventoryItems = (multiple: boolean = false) => {
+const useInventoryItems = () => {
   const [inventoryItems, setInventoryItems] = useState<IInventoryItem[]>([]);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<
     any | null
@@ -60,6 +60,7 @@ const useInventoryItems = (multiple: boolean = false) => {
             </li>
           );
         }}
+        limitTags={3}
         renderInput={(params) => <TextField {...params} label="Search Items" />}
         multiple
         isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -81,7 +82,6 @@ const useInventoryItems = (multiple: boolean = false) => {
           option?.sku ? `${option?.sku} | ${option?.name}` : option?.name
         }
         renderInput={(params) => <TextField {...params} label="Item" />}
-        multiple={multiple}
         value={
           inventoryItems?.find(
             (item: any) =>
