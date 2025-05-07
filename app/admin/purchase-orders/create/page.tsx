@@ -307,7 +307,6 @@ export default function CreatePO() {
                   size="small"
                   options={selectedVendor?.vendorItem || []}
                   getOptionLabel={(option: any) => {
-                    console.log(option, 'OPTION');
                     return option?.inventoryItem?.sku
                       ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
                       : option?.inventoryItem?.name;

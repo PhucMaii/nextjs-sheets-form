@@ -1,28 +1,36 @@
-import { TextField, TextFieldVariants } from '@mui/material';
+import { InputAdornment, TextField, TextFieldVariants } from '@mui/material';
+import { SearchIcon } from 'lucide-react';
 import React from 'react';
 
 interface TextInputProps {
-  value: string | undefined;
-  onChange: (value: string) => void;
+  value: string | number;
+  onChange: (value: string | number) => void;
   label: string;
   name: string;
   placeholder?: string;
   variant?: TextFieldVariants;
+  type?: string;
 }
 
 function SearchInput(props: TextInputProps) {
   return (
     <TextField
-      label={props.label}
-      aria-labelledby={props.name}
+      // label={props.label}
+      // aria-labelledby={props.name}
       name={props.name}
       placeholder={props.placeholder}
       variant={props.variant || 'outlined'}
-      type="text"
+      type={props.type || 'text'}
       fullWidth
       value={props.value}
       onChange={(e) => props.onChange(e.target.value)}
-      sx={{ paddingTop: 2 }}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
     />
   );
 }

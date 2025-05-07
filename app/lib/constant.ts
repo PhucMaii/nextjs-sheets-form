@@ -31,6 +31,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import WysiwygIcon from '@mui/icons-material/Wysiwyg';
 import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import {
   errorColor,
   infoColor,
@@ -287,6 +288,11 @@ export const adminTabs = {
       name: 'Product Loss',
       icon: ReportIcon,
       path: '/admin/product-loss',
+    },
+    {
+      name: 'Quotes',
+      icon: RequestQuoteIcon,
+      path: '/admin/quotes',
     },
     {
       name: 'Blocking',

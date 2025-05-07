@@ -1,12 +1,17 @@
 import { API_URL } from '@/app/utils/enum';
 import { IInventoryItem } from '@/app/utils/type';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, Checkbox, FormControlLabel, TextField } from '@mui/material';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-const useInventoryItems = () => {
+const useInventoryItems = (multiple: boolean = false) => {
   const [inventoryItems, setInventoryItems] = useState<IInventoryItem[]>([]);
-  const [selectedInventoryItem, setSelectedInventoryItem] = useState<any | null>(null);
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState<
+    any | null
+  >(null);
+  const [selectedInventoryItems, setSelectedInventoryItems] = useState<
+    any[]
+  >([]);
 
   useEffect(() => {
     fetchInventoryItems();
@@ -21,22 +26,67 @@ const useInventoryItems = () => {
       }
 
       setInventoryItems(response.data.data);
-
     } catch (error: any) {
       console.log('Error fetching inventory items', error);
     }
+  };
+
+  const renderMultipleInventoryItemSearch = () => {
+    return (
+      <Autocomplete
+        size="small"
+        options={inventoryItems || []}
+        getOptionLabel={(option: any) => {
+          return option?.sku
+            ? `${option?.sku} | ${option?.name}`
+            : option?.name;
+        }}
+        renderOption={(props, option, { selected }) => {
+          const { key, ...optionProps } = props;
+          return (
+            <li key={key} {...optionProps}>
+              <FormControlLabel
+                label={
+                  option?.sku
+                    ? `${option?.sku} | ${option?.name}`
+                    : option?.name
+                }
+                control={<Checkbox checked={selected} />}
+                onClick={(e) => {
+                  // e.stopPropagation();
+                  e.preventDefault();
+                }}
+              />
+            </li>
+          );
+        }}
+        renderInput={(params) => <TextField {...params} label="Search Items" />}
+        multiple
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        onChange={(event, newValue) => {
+          setSelectedInventoryItems(newValue);
+        }}
+        disableCloseOnSelect
+        value={selectedInventoryItems}
+        // openOnFocus
+      />
+    );
   };
 
   const renderInventoryItemSearch = () => {
     return (
       <Autocomplete
         options={inventoryItems || []}
-        getOptionLabel={(option: any) => option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
+        getOptionLabel={(option: any) =>
+          option?.sku ? `${option?.sku} | ${option?.name}` : option?.name
+        }
         renderInput={(params) => <TextField {...params} label="Item" />}
+        multiple={multiple}
         value={
           inventoryItems?.find(
             (item: any) =>
-              item.id === selectedInventoryItem?.id || item.name === selectedInventoryItem?.name,
+              item.id === selectedInventoryItem?.id ||
+              item.name === selectedInventoryItem?.name,
           ) || null
         }
         onChange={(e, newValue: any) => {
@@ -60,7 +110,10 @@ const useInventoryItems = () => {
   return {
     inventoryItems,
     selectedInventoryItem,
+    selectedInventoryItems,
+    setSelectedInventoryItems,
     renderInventoryItemSearch,
+    renderMultipleInventoryItemSearch,
   };
 };
 
