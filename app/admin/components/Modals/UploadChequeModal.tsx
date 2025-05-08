@@ -117,7 +117,9 @@ export default function UploadChequeModal({
 
         <Box display="flex" flexDirection="column" gap={2} mb={2}>
           <Typography>Front of cheque</Typography>
-          {cheque?.front && <DisplayFile fileKey={cheque.front} />}
+          {cheque?.front && (
+            <DisplayFile fileKey={cheque.front} isCheque />
+          )}
           <FileUpload
             showNotification={showNotification}
             fileName={`${month}-${year}-${client?.clientId}_front`}
@@ -128,10 +130,13 @@ export default function UploadChequeModal({
                 front: fileKey,
               });
             }}
+            isCheque
           />
 
           <Typography>Back of cheque</Typography>
-          {cheque?.back && <DisplayFile fileKey={cheque.back} />}
+          {cheque?.back && (
+            <DisplayFile fileKey={cheque.back} isCheque />
+          )}
           <FileUpload
             showNotification={showNotification}
             fileName={`${month}-${year}-${client?.clientId}_back`}
@@ -142,6 +147,7 @@ export default function UploadChequeModal({
                 back: fileKey,
               });
             }}
+            isCheque
           />
 
           <Typography variant="h6" fontWeight="regular">

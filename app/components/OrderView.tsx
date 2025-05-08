@@ -52,10 +52,10 @@ import { SWRFetchData } from '../utils/db';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { blackColor } from '@/theme/create-palette';
-import { generateImgUrl } from '../lib/s3';
 import { Discount } from '@mui/icons-material';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import SetItemQuantity from './SetItemQuantity';
+import DisplayFile from '../admin/components/Modals/DisplayFile';
 
 export const WhiteSpace = () => {
   return (
@@ -237,9 +237,26 @@ export const ItemButton = ({
         }}
       >
         {(item?.image || item?.inventoryItem?.image) && (
-          <img
-            src={generateImgUrl(item?.image || item?.inventoryItem?.image)}
-            alt="img"
+          // <img
+          //   src={generateImgUrl(item?.image || item?.inventoryItem?.image)}
+          //   alt="img"
+          //   style={{
+          //     position: 'absolute',
+          //     objectFit: 'cover',
+          //     width: '100%',
+          //     height: '100%',
+          //     borderRadius: 'inherit',
+          //     inset: 0, // Make the image stretch to fill the container
+          //     zIndex: 0,
+          //     opacity: disabled ? 0.2 : 0.5,
+          //     // brightness
+          //     filter: 'brightness(93%)',
+          //   }}
+          // />
+          <DisplayFile
+            fileKey={item?.image || item?.inventoryItem?.image}
+            width="100%"
+            height="100%"
             style={{
               position: 'absolute',
               objectFit: 'cover',

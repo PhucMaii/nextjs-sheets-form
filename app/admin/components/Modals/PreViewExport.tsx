@@ -4,9 +4,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ModalProps } from './type';
 import { IItem } from '@/app/utils/type';
 import { BoxModal } from './styled';
-import { generateImgUrl } from '@/app/lib/s3';
 import ExportCategory from '../Printing/ExportCategory';
 import { useReactToPrint } from 'react-to-print';
+import DisplayFile from './DisplayFile';
 
 interface PreViewExportProps extends ModalProps {
   items: IItem[];
@@ -39,12 +39,13 @@ const PreViewExport = ({ open, onClose, items }: PreViewExportProps) => {
       headerName: 'Image',
       width: 100,
       renderCell: (params: any) => {
+        // const url = await gen erateImgUrl(params.row?.inventoryItem?.image)
         if (!params.row?.inventoryItem?.image) return null;
         return (
-          <img
-            src={generateImgUrl(params.row?.inventoryItem?.image)}
-            alt={params.row.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          <DisplayFile
+            fileKey={params.row?.inventoryItem?.image}
+            width='100%'
+            height='100%'
           />
         );
       },    

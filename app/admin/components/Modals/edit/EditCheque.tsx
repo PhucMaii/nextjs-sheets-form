@@ -123,7 +123,7 @@ export default function EditCheque({
           <Box display="flex" flexDirection="column" gap={2} mb={2}>
             <Typography>Front of cheque</Typography>
             {updatedCheque?.fileKeyFront && (
-              <DisplayFile fileKey={updatedCheque.fileKeyFront} />
+              <DisplayFile fileKey={updatedCheque.fileKeyFront} isCheque />
             )}
             <FileUpload
               showNotification={showNotification}
@@ -135,11 +135,12 @@ export default function EditCheque({
                   fileKeyFront: fileKey,
                 });
               }}
+              isCheque
             />
 
             <Typography>Back of cheque</Typography>
             {updatedCheque?.fileKeyBack && (
-              <DisplayFile fileKey={updatedCheque.fileKeyBack} />
+              <DisplayFile fileKey={updatedCheque.fileKeyBack} isCheque />
             )}
             <FileUpload
               showNotification={showNotification}
@@ -151,6 +152,7 @@ export default function EditCheque({
                   fileKeyBack: fileKey,
                 });
               }}
+              isCheque
             />
 
             <Typography variant="h6" fontWeight="regular">

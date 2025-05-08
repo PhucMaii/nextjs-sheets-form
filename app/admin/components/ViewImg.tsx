@@ -1,5 +1,5 @@
 import { Box, IconButton, Modal } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { generateImgUrl } from '@/app/lib/s3';
 import { ModalProps } from './Modals/type';
 import { grey } from '@mui/material/colors';
@@ -16,6 +16,24 @@ export default function ViewImg({
   open,
   onClose,
 }: IProps) {
+  const [urlFront, setUrlFront] = useState('');
+  const [urlBack, setUrlBack] = useState('');
+
+  useEffect(() => {
+    const fetchUrl = async () => {
+      if (fileKeyFront) {
+        const urlFront = await generateImgUrl(fileKeyFront, true);
+        setUrlFront(urlFront);
+      }
+
+      if (fileKeyBack) {
+        const urlBack = await generateImgUrl(fileKeyBack, true);
+        setUrlBack(urlBack);
+      }
+    };
+    fetchUrl();
+  }, [fileKeyFront, fileKeyBack]);
+  
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={{ 
@@ -47,7 +65,7 @@ export default function ViewImg({
           overflow: 'auto'
         }}>
           {fileKeyFront && <img
-            src={generateImgUrl(fileKeyFront)}
+            src={urlFront}
             alt="front"
             style={{ 
               maxWidth: '100%',
@@ -56,7 +74,7 @@ export default function ViewImg({
             }}
           />}
           {fileKeyBack && <img
-            src={generateImgUrl(fileKeyBack)}
+            src={urlBack}
             alt="back"
             style={{ 
               maxWidth: '100%',

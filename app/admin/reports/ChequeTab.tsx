@@ -168,6 +168,7 @@ export default function ChequeTab({ client, showNotification }: IProps) {
                             ? cheque?.fileKeyBack
                             : cheque.fileKeyFront
                         }
+                        isCheque
                       />
                     </Box>
                   </TableCell>
