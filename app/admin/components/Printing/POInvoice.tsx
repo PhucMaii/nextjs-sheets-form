@@ -54,6 +54,7 @@ export const POInvoice = forwardRef(({ vendor, po }: any, ref: any) => {
                   <TableRow>
                     <TableCell>Item</TableCell>
                     <TableCell>Quantity</TableCell>
+                    <TableCell>Note</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -63,6 +64,7 @@ export const POInvoice = forwardRef(({ vendor, po }: any, ref: any) => {
                       <TableCell>
                         {item.orderedQty} {item?.inventoryUnit?.unit}
                       </TableCell>
+                      <TableCell>{item?.note}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

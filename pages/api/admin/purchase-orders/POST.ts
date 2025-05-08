@@ -82,6 +82,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         costPerItem: item.costPerItem,
         inventoryUnitId: item.inventoryUnit.id,
         tax: item.tax,
+        note: item.note,
       };
     });
 

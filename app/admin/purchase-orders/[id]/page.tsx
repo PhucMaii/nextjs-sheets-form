@@ -26,7 +26,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import useSelectDate from '@/hooks/useSelectDate';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import SellIcon from '@mui/icons-material/Sell';
-import { Autocomplete, Checkbox, FormControlLabel } from '@mui/material';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { LoadingButton } from '@mui/lab';
 import { useRouter } from 'next/navigation';
@@ -35,6 +34,8 @@ import { handleUpdatePOStatus } from '@/app/utils/purchase-orders';
 import { POItemRowDisplay, POItemRow } from '../../components/POItemRow';
 import { POInvoice } from '../../components/Printing/POInvoice';
 import { useReactToPrint } from 'react-to-print';
+import SearchInventoryItems from '../../components/Modals/SearchInventoryItems';
+import useDebounce from '@/hooks/useDebounce';
 
 export default function PurchaseOrder() {
   const { id }: any = useParams();
@@ -49,6 +50,11 @@ export default function PurchaseOrder() {
   // const [vendorItemSelection, setVendorItemSelection] = useState<any[]>([]);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isOpenModalInventoryItemSearch, setIsOpenModalInventoryItemSearch] =
+    useState<boolean>(false);
+
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const debouncedSearch = useDebounce(searchKeywords, 1000);
 
   const { showNotification, NotificationComp } = useNotification();
   const { date, SelectDate } = useSelectDate(po?.estArrival);
@@ -65,6 +71,7 @@ export default function PurchaseOrder() {
 
         return {
           ...vendorItem,
+          id: item?.id,
           orderedQty: item.orderedQty,
           costPerItem: item.costPerItem,
           tax: item?.tax || 0,
@@ -72,6 +79,7 @@ export default function PurchaseOrder() {
           inventoryUnit: item?.inventoryUnit,
           receivedQty: item?.receivedQty || 0,
           rejectedQty: item?.rejectedQty || 0,
+          note: item?.note || '',
         };
       });
       setSelectedItems(newSelectedItems);
@@ -130,43 +138,44 @@ export default function PurchaseOrder() {
     }
   };
 
-  const onSelectItem = (newItems: any) => {
-    const itemWithCostAndTax = newItems.map((item: any) => {
-      // Check if the item is already in the PO
-      const existingItem = selectedItems.find(
-        (poItem: any) => poItem.inventoryItemId === item.inventoryItemId,
-      );
+  // const onSelectItem = (newItems: any) => {
+  //   const itemWithCostAndTax = newItems.map((item: any) => {
+  //     // Check if the item is already in the PO
+  //     const existingItem = selectedItems.find(
+  //       (poItem: any) => poItem.inventoryItemId === item.inventoryItemId,
+  //     );
 
-      if (existingItem) {
-        return { ...existingItem };
-      }
+  //     if (existingItem) {
+  //       return { ...existingItem };
+  //     }
 
-      const inventoryUnit = item?.unit[0];
+  //     const inventoryUnit = item?.unit[0];
 
-      const isGST = item.inventoryItem.hasGST;
-      const isPST = item.inventoryItem.hasPST;
+  //     const isGST = item.inventoryItem.hasGST;
+  //     const isPST = item.inventoryItem.hasPST;
 
-      const tax =
-        inventoryUnit?.unitPrice * (isGST ? gstRate : 0) +
-        inventoryUnit?.unitPrice * (isPST ? pstRate : 0);
+  //     const tax =
+  //       inventoryUnit?.unitPrice * (isGST ? gstRate : 0) +
+  //       inventoryUnit?.unitPrice * (isPST ? pstRate : 0);
 
-      return {
-        ...item,
-        orderedQty: 1,
-        costPerItem: inventoryUnit?.unitPrice,
-        tax,
-        total: (inventoryUnit?.unitPrice + tax) * 1,
-        inventoryUnit: item?.unit[0],
-      };
-    });
+  //     return {
+  //       ...item,
+  //       orderedQty: 1,
+  //       costPerItem: inventoryUnit?.unitPrice,
+  //       tax,
+  //       total: (inventoryUnit?.unitPrice + tax) * 1,
+  //       inventoryUnit: item?.unit[0],
+  //       note: '',
+  //     };
+  //   });
 
-    setSelectedItems(itemWithCostAndTax);
+  //   setSelectedItems(itemWithCostAndTax);
 
-    // setPO((prevState: any) => ({
-    //   ...prevState,
-    //   poItems: itemWithCostAndTax,
-    // }));
-  };
+  //   // setPO((prevState: any) => ({
+  //   //   ...prevState,
+  //   //   poItems: itemWithCostAndTax,
+  //   // }));
+  // };
 
   const handleSaveItems = async () => {
     setIsSaving(true);
@@ -230,6 +239,34 @@ export default function PurchaseOrder() {
     },
   });
 
+  const onAddItem = (item: any) => {
+    const inventoryUnit = item?.unit[0];
+
+    const isGST = item.hasGST;
+    const isPST = item.hasPST;
+
+    const tax =
+      inventoryUnit?.unitPrice * (isGST ? gstRate : 0) +
+      inventoryUnit?.unitPrice * (isPST ? pstRate : 0);
+
+    const newItem = {
+      id: -1,
+      inventoryItem: item,
+      orderedQty: 1,
+      costPerItem: inventoryUnit?.unitPrice,
+      tax,
+      total: inventoryUnit?.unitPrice + tax,
+      inventoryUnit: item?.unit[0],
+      unit: item?.unit,
+      inventoryItemId: item?.id,
+    };
+
+    setPO((prevState: any) => ({
+      ...prevState,
+      poItems: [...(prevState?.poItems || []), newItem],
+    }));
+  };
+
   return (
     <Sidebar>
       <AddPODiscount
@@ -259,6 +296,18 @@ export default function PurchaseOrder() {
             discount: null,
           }));
         }}
+      />
+      <SearchInventoryItems
+        open={isOpenModalInventoryItemSearch}
+        onClose={() => setIsOpenModalInventoryItemSearch(false)}
+        onAddItem={onAddItem}
+        inventoryItems={
+          po?.vendor?.vendorItem?.map((item: any) => ({
+            ...item.inventoryItem,
+            unit: item.unit,
+          })) || []
+        }
+        defaultSearchKeywords={debouncedSearch}
       />
       {NotificationComp}
 
@@ -361,7 +410,12 @@ export default function PurchaseOrder() {
                 {isEditMode ? (
                   <Box display="flex" flexDirection="column" gap={1}>
                     <Typography>Search Items</Typography>
-                    <Autocomplete
+                    <TextField
+                      label="Search Items"
+                      value={searchKeywords}
+                      onChange={(e) => setSearchKeywords(e.target.value)}
+                    />
+                    {/* <Autocomplete
                       size="small"
                       value={selectedItems}
                       options={po?.vendor?.vendorItem || []}
@@ -375,9 +429,11 @@ export default function PurchaseOrder() {
                         return (
                           <li key={key} {...optionProps}>
                             <FormControlLabel
-                              label={option?.inventoryItem?.sku
-                                ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
-                                : option?.inventoryItem?.name}
+                              label={
+                                option?.inventoryItem?.sku
+                                  ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
+                                  : option?.inventoryItem?.name
+                              }
                               control={<Checkbox checked={selected} />}
                             />
                           </li>
@@ -394,7 +450,7 @@ export default function PurchaseOrder() {
                         onSelectItem(newValue);
                       }}
                       disableCloseOnSelect
-                    />
+                    /> */}
                   </Box>
                 ) : (
                   <Typography>Ordered Items</Typography>
@@ -402,13 +458,15 @@ export default function PurchaseOrder() {
                 {/* Display items */}
                 {isEditMode ? (
                   <>
-                    {selectedItems.map((item: any) => {
+                    {selectedItems.map((item: any, index: number) => {
                       return (
                         <POItemRow
+                          key={index}
                           item={item}
                           selectedItems={selectedItems}
                           setSelectedItems={setSelectedItems}
                           isEditMode={true}
+                          index={index}
                         />
                       );
                     })}
@@ -418,7 +476,7 @@ export default function PurchaseOrder() {
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell>Item</TableCell>
+                          <TableCell colSpan={2}>Item</TableCell>
                           <TableCell>Quantity</TableCell>
                           <TableCell>Cost</TableCell>
                           <TableCell>Tax</TableCell>
@@ -426,8 +484,8 @@ export default function PurchaseOrder() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {selectedItems.map((item: any) => {
-                          return <POItemRowDisplay item={item} />;
+                        {selectedItems.map((item: any, index: number) => {
+                          return <POItemRowDisplay item={item} key={index} />;
                         })}
                       </TableBody>
                     </Table>

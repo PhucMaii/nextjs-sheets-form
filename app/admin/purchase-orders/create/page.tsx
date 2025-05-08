@@ -3,15 +3,10 @@ import {
   Autocomplete,
   Box,
   Button,
-  Checkbox,
-  Divider,
-  FormControl,
-  FormControlLabel,
+  // Checkbox,
+  // FormControlLabel,
   Grid,
   IconButton,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
   TextField,
   Typography,
 } from '@mui/material';
@@ -25,13 +20,14 @@ import { API_URL, PO_STATUS } from '@/app/utils/enum';
 import { ShadowSection } from '../../reports/styled';
 import { generateRecommendDate } from '@/app/utils/time';
 import useSelectDate from '@/hooks/useSelectDate';
-import { Trash2Icon } from 'lucide-react';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import AddPODiscount from '../../components/Modals/add/AddPODiscount';
 import SellIcon from '@mui/icons-material/Sell';
-import UnitRadio from '../../components/Radio/UnitRadio';
 import { useRouter } from 'next/navigation';
 import { LoadingButton } from '@mui/lab';
+import { POItemRow } from '../../components/POItemRow';
+import SearchInventoryItems from '../../components/Modals/SearchInventoryItems';
+import useDebounce from '@/hooks/useDebounce';
 
 export default function CreatePO() {
   const [creating, setCreating] = useState<any>({
@@ -48,7 +44,19 @@ export default function CreatePO() {
     note: '',
   });
   const [isOpenPODiscount, setIsOpenPODiscount] = useState<boolean>(false);
+  const [isOpenModalInventoryItemSearch, setIsOpenModalInventoryItemSearch] =
+    useState<boolean>(false);
   const [selectedVendor, setSelectedVendor] = useState<IVendor | null>(null);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+
+  const debouncedSearch = useDebounce(searchKeywords, 1000);
+  
+
+  useEffect(() => {
+    if (debouncedSearch) {
+      setIsOpenModalInventoryItemSearch(true);
+    }
+  }, [debouncedSearch]);
 
   const router = useRouter();
 
@@ -100,75 +108,44 @@ export default function CreatePO() {
     }
   };
 
-  const onDeleteItem = (item: any) => {
-    setPO((prevState: any) => ({
-      ...prevState,
-      items: prevState.items.filter((i: any) => i.id !== item.id),
-    }));
-  };
+  // const onSelectItem = (newItems: any) => {
+  //   const itemWithCostAndTax = newItems.map((item: any) => {
+  //     if (po?.items?.length > 0) {
+  //       const existingItem = po?.items?.find(
+  //         (i: any) => i.inventoryItemId === item.inventoryItemId,
+  //       );
 
-  const onSelectItem = (newItems: any) => {
-    const itemWithCostAndTax = newItems.map((item: any) => {
-      if (po?.items?.length > 0) {
-        const existingItem = po?.items?.find(
-          (i: any) => i.inventoryItemId === item.inventoryItemId,
-        );
+  //       if (existingItem) {
+  //         return existingItem;
+  //       }
+  //     }
 
-        if (existingItem) {
-          return existingItem;
-        }
-      }
+  //     const inventoryUnit = item?.unit[0];
 
-      const inventoryUnit = item?.unit[0];
+  //     const isGST = item.inventoryItem.hasGST;
+  //     const isPST = item.inventoryItem.hasPST;
 
-      const isGST = item.inventoryItem.hasGST;
-      const isPST = item.inventoryItem.hasPST;
+  //     const tax =
+  //       inventoryUnit?.unitPrice * (isGST ? gstRate : 0) +
+  //       inventoryUnit?.unitPrice * (isPST ? pstRate : 0);
 
-      const tax =
-        inventoryUnit?.unitPrice * (isGST ? gstRate : 0) +
-        inventoryUnit?.unitPrice * (isPST ? pstRate : 0);
+  //     return {
+  //       ...item,
+  //       orderedQty: 1,
+  //       costPerItem: inventoryUnit?.unitPrice,
+  //       tax,
+  //       total: (inventoryUnit?.unitPrice + tax) * 1,
+  //       inventoryUnit: item?.unit[0],
+  //     };
+  //   });
 
-      return {
-        ...item,
-        orderedQty: 1,
-        costPerItem: inventoryUnit?.unitPrice,
-        tax,
-        total: (inventoryUnit?.unitPrice + tax) * 1,
-        inventoryUnit: item?.unit[0],
-      };
-    });
+  //   setPO((prevState: any) => ({
+  //     ...prevState,
+  //     items: itemWithCostAndTax,
+  //   }));
+  // };
 
-    setPO((prevState: any) => ({
-      ...prevState,
-      items: itemWithCostAndTax,
-    }));
-  };
-
-  const calculateItemTotal = (item: any) => {
-    const total = (item.costPerItem + item.tax) * item.orderedQty;
-    return total;
-  };
-
-  const onChangeItem = (item: any, field: string, value: any) => {
-    const newItems = po.items.map((i: any) => {
-      // Id here is equal to vendorItemId
-      if (i.id === item.id) {
-        return {
-          ...i,
-          [field]: value,
-          total: calculateItemTotal({ ...i, [field]: value }),
-        };
-      }
-
-      return i;
-    });
-
-    setPO((prevState: any) => ({
-      ...prevState,
-      items: newItems,
-    }));
-  };
-
+  console.log(po, 'PO');
   const handleCreatePO = async (isOrdered: boolean = false) => {
     setCreating((prevState: any) => ({
       ...prevState,
@@ -180,6 +157,10 @@ export default function CreatePO() {
         purchaseOrder: {
           ...po,
           estArrival,
+          items: po?.items?.map((item: any) => ({
+            ...item,
+            inventoryItemId: item?.inventoryItem?.id,
+          })),
         },
         selectedVendor,
         isOrdered,
@@ -207,6 +188,33 @@ export default function CreatePO() {
     }
   };
 
+  const onAddItem = (item: any) => {
+    const inventoryUnit = item?.unit[0];
+
+    const isGST = item.hasGST;
+    const isPST = item.hasPST;
+
+    const tax =
+      inventoryUnit?.unitPrice * (isGST ? gstRate : 0) +
+      inventoryUnit?.unitPrice * (isPST ? pstRate : 0);
+
+    const newItem = {
+      inventoryItem: item,
+      orderedQty: 1,
+      costPerItem: inventoryUnit?.unitPrice,
+      tax,
+      total: inventoryUnit?.unitPrice + tax,
+      inventoryUnit: item?.unit[0],
+      unit: item?.unit,
+      inventoryItemId: item?.id,
+    };
+
+    setPO((prevState: any) => ({
+      ...prevState,
+      items: [...(prevState?.items || []), newItem],
+    }));
+  };
+
   return (
     <Sidebar>
       <AddPODiscount
@@ -218,6 +226,19 @@ export default function CreatePO() {
             discount,
           }));
         }}
+      />
+
+      <SearchInventoryItems
+        open={isOpenModalInventoryItemSearch}
+        onClose={() => setIsOpenModalInventoryItemSearch(false)}
+        onAddItem={onAddItem}
+        inventoryItems={
+          selectedVendor?.vendorItem?.map((item: any) => ({
+            ...item.inventoryItem,
+            unit: item.unit,
+          })) || []
+        }
+        defaultSearchKeywords={debouncedSearch}
       />
       {NotificationComp}
       <Box
@@ -303,7 +324,12 @@ export default function CreatePO() {
               {/* Items */}
               <Box display="flex" flexDirection="column" gap={1}>
                 <Typography>Search Items</Typography>
-                <Autocomplete
+                <TextField
+                  value={searchKeywords}
+                  onChange={(e) => setSearchKeywords(e.target.value)}
+                  placeholder="Search Items"
+                />
+                {/* <Autocomplete
                   size="small"
                   options={selectedVendor?.vendorItem || []}
                   getOptionLabel={(option: any) => {
@@ -317,9 +343,11 @@ export default function CreatePO() {
                     return (
                       <li key={key} {...optionProps}>
                         <FormControlLabel
-                          label={option?.inventoryItem?.sku
-                            ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
-                            : option?.inventoryItem?.name}
+                          label={
+                            option?.inventoryItem?.sku
+                              ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
+                              : option?.inventoryItem?.name
+                          }
                           control={<Checkbox checked={selected} />}
                         />
                       </li>
@@ -336,167 +364,180 @@ export default function CreatePO() {
                     onSelectItem(newValue);
                   }}
                   disableCloseOnSelect
-                />
+                /> */}
               </Box>
 
               {/* Display items */}
               <Box display="flex" flexDirection="column" gap={2}>
                 {po?.items &&
                   po?.items.length > 0 &&
-                  po?.items.map((item: any) => {
+                  po?.items.map((item: any, index: number) => {
                     return (
-                      <Box
-                        key={item.id}
-                        display="flex"
-                        flexDirection="column"
-                        gap={2}
-                      >
-                        <Grid
-                          container
-                          key={item.id}
-                          display="flex"
-                          alignItems="center"
-                          spacing={1}
-                        >
-                          <Grid item xs={12}>
-                            <Typography variant="h6">
-                              {item?.inventoryItem?.sku
-                                ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
-                                : item?.inventoryItem?.name}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <UnitRadio
-                              units={item?.unit}
-                              value={JSON.stringify(item?.inventoryUnit || {})}
-                              onChange={(e: any) => {
-                                setPO((prevState: any) => ({
-                                  ...prevState,
-                                  items: prevState.items.map((i: any) => {
-                                    if (i.id === item.id) {
-                                      const tax =
-                                        JSON.parse(e.target.value).unitPrice *
-                                          (item?.inventoryItem?.hasGST
-                                            ? gstRate
-                                            : 0) +
-                                        JSON.parse(e.target.value).unitPrice *
-                                          (item?.inventoryItem?.hasPST
-                                            ? pstRate
-                                            : 0);
+                      <POItemRow
+                        key={index}
+                        index={index}
+                        item={item}
+                        isEditMode={true}
+                        selectedItems={po?.items || []}
+                        setSelectedItems={(items: any) => {
+                          setPO((prevState: any) => ({
+                            ...prevState,
+                            items,
+                          }));
+                        }}
+                      />
+                      // <Box
+                      //   key={item.id}
+                      //   display="flex"
+                      //   flexDirection="column"
+                      //   gap={2}
+                      // >
+                      //   <Grid
+                      //     container
+                      //     key={item.id}
+                      //     display="flex"
+                      //     alignItems="center"
+                      //     spacing={1}
+                      //   >
+                      //     <Grid item xs={12}>
+                      //       <Typography variant="h6">
+                      //         {item?.inventoryItem?.sku
+                      //           ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
+                      //           : item?.inventoryItem?.name}
+                      //       </Typography>
+                      //     </Grid>
+                      //     <Grid item xs={12}>
+                      //       <UnitRadio
+                      //         units={item?.unit}
+                      //         value={JSON.stringify(item?.inventoryUnit || {})}
+                      //         onChange={(e: any) => {
+                      //           setPO((prevState: any) => ({
+                      //             ...prevState,
+                      //             items: prevState.items.map((i: any) => {
+                      //               if (i.id === item.id) {
+                      //                 const tax =
+                      //                   JSON.parse(e.target.value).unitPrice *
+                      //                     (item?.inventoryItem?.hasGST
+                      //                       ? gstRate
+                      //                       : 0) +
+                      //                   JSON.parse(e.target.value).unitPrice *
+                      //                     (item?.inventoryItem?.hasPST
+                      //                       ? pstRate
+                      //                       : 0);
 
-                                      const costPerItem = JSON.parse(
-                                        e.target.value,
-                                      ).unitPrice;
+                      //                 const costPerItem = JSON.parse(
+                      //                   e.target.value,
+                      //                 ).unitPrice;
 
-                                      const total = calculateItemTotal({
-                                        ...i,
-                                        costPerItem,
-                                        tax,
-                                      });
-                                      return {
-                                        ...i,
-                                        inventoryUnit: JSON.parse(
-                                          e.target.value,
-                                        ),
-                                        costPerItem,
-                                        tax,
-                                        total,
-                                      };
-                                    }
-                                    return i;
-                                  }),
-                                }));
-                              }}
-                            />
-                          </Grid>
-                          <Grid item xs={3.8} lg={3}>
-                            <FormControl fullWidth>
-                              <InputLabel htmlFor="item-quantity">
-                                Quantity
-                              </InputLabel>
-                              <OutlinedInput
-                                id="item-quantity"
-                                size="small"
-                                placeholder="Quantity"
-                                label="Quantity"
-                                sx={{ width: '100%' }}
-                                value={item?.orderedQty || 0}
-                                onChange={(e) =>
-                                  onChangeItem(
-                                    item,
-                                    'orderedQty',
-                                    Number(e.target.value),
-                                  )
-                                }
-                              />
-                            </FormControl>
-                          </Grid>
-                          <Grid item xs={3.8} lg={3}>
-                            <FormControl fullWidth>
-                              <InputLabel htmlFor="item-cost">Cost</InputLabel>
-                              <OutlinedInput
-                                id="item-cost"
-                                size="small"
-                                placeholder="Cost"
-                                sx={{ width: '100%' }}
-                                value={item?.costPerItem || 0}
-                                startAdornment={
-                                  <InputAdornment position="start">
-                                    <Typography>$</Typography>
-                                  </InputAdornment>
-                                }
-                                type="number"
-                                onChange={(e) =>
-                                  onChangeItem(
-                                    item,
-                                    'costPerItem',
-                                    Number(e.target.value),
-                                  )
-                                }
-                                label="Cost"
-                              />
-                            </FormControl>
-                          </Grid>
-                          <Grid item xs={3.8} lg={3}>
-                            <FormControl fullWidth>
-                              <InputLabel htmlFor="item-tax">Tax</InputLabel>
-                              <OutlinedInput
-                                id="item-tax"
-                                size="small"
-                                placeholder="Tax"
-                                sx={{ width: '100%' }}
-                                value={item?.tax || 0}
-                                startAdornment={
-                                  <InputAdornment position="start">
-                                    <Typography>$</Typography>
-                                  </InputAdornment>
-                                }
-                                onChange={(e) =>
-                                  onChangeItem(
-                                    item,
-                                    'tax',
-                                    Number(e.target.value),
-                                  )
-                                }
-                                label="Tax"
-                                type="number"
-                              />
-                            </FormControl>
-                          </Grid>
-                          <Grid item xs={10} lg={2} textAlign="right">
-                            <Typography>
-                              Total: ${item?.total?.toFixed(2) || 0}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={1} lg={0.5} textAlign="right">
-                            <IconButton onClick={() => onDeleteItem(item)}>
-                              <Trash2Icon />
-                            </IconButton>
-                          </Grid>
-                        </Grid>
+                      //                 const total = calculateItemTotal({
+                      //                   ...i,
+                      //                   costPerItem,
+                      //                   tax,
+                      //                 });
+                      //                 return {
+                      //                   ...i,
+                      //                   inventoryUnit: JSON.parse(
+                      //                     e.target.value,
+                      //                   ),
+                      //                   costPerItem,
+                      //                   tax,
+                      //                   total,
+                      //                 };
+                      //               }
+                      //               return i;
+                      //             }),
+                      //           }));
+                      //         }}
+                      //       />
+                      //     </Grid>
+                      //     <Grid item xs={3.8} lg={3}>
+                      //       <FormControl fullWidth>
+                      //         <InputLabel htmlFor="item-quantity">
+                      //           Quantity
+                      //         </InputLabel>
+                      //         <OutlinedInput
+                      //           id="item-quantity"
+                      //           size="small"
+                      //           placeholder="Quantity"
+                      //           label="Quantity"
+                      //           sx={{ width: '100%' }}
+                      //           value={item?.orderedQty || 0}
+                      //           onChange={(e) =>
+                      //             onChangeItem(
+                      //               item,
+                      //               'orderedQty',
+                      //               Number(e.target.value),
+                      //             )
+                      //           }
+                      //         />
+                      //       </FormControl>
+                      //     </Grid>
+                      //     <Grid item xs={3.8} lg={3}>
+                      //       <FormControl fullWidth>
+                      //         <InputLabel htmlFor="item-cost">Cost</InputLabel>
+                      //         <OutlinedInput
+                      //           id="item-cost"
+                      //           size="small"
+                      //           placeholder="Cost"
+                      //           sx={{ width: '100%' }}
+                      //           value={item?.costPerItem || 0}
+                      //           startAdornment={
+                      //             <InputAdornment position="start">
+                      //               <Typography>$</Typography>
+                      //             </InputAdornment>
+                      //           }
+                      //           type="number"
+                      //           onChange={(e) =>
+                      //             onChangeItem(
+                      //               item,
+                      //               'costPerItem',
+                      //               Number(e.target.value),
+                      //             )
+                      //           }
+                      //           label="Cost"
+                      //         />
+                      //       </FormControl>
+                      //     </Grid>
+                      //     <Grid item xs={3.8} lg={3}>
+                      //       <FormControl fullWidth>
+                      //         <InputLabel htmlFor="item-tax">Tax</InputLabel>
+                      //         <OutlinedInput
+                      //           id="item-tax"
+                      //           size="small"
+                      //           placeholder="Tax"
+                      //           sx={{ width: '100%' }}
+                      //           value={item?.tax || 0}
+                      //           startAdornment={
+                      //             <InputAdornment position="start">
+                      //               <Typography>$</Typography>
+                      //             </InputAdornment>
+                      //           }
+                      //           onChange={(e) =>
+                      //             onChangeItem(
+                      //               item,
+                      //               'tax',
+                      //               Number(e.target.value),
+                      //             )
+                      //           }
+                      //           label="Tax"
+                      //           type="number"
+                      //         />
+                      //       </FormControl>
+                      //     </Grid>
+                      //     <Grid item xs={10} lg={2} textAlign="right">
+                      //       <Typography>
+                      //         Total: ${item?.total?.toFixed(2) || 0}
+                      //       </Typography>
+                      //     </Grid>
+                      //     <Grid item xs={1} lg={0.5} textAlign="right">
+                      //       <IconButton onClick={() => onDeleteItem(item)}>
+                      //         <Trash2Icon />
+                      //       </IconButton>
+                      //     </Grid>
+                      //   </Grid>
 
-                        <Divider />
-                      </Box>
+                      //   <Divider />
+                      // </Box>
                     );
                   })}
               </Box>

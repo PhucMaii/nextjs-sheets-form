@@ -55,7 +55,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const toCreateItems: any[] = [];
     const categorizeItemsPromises = items.map((updatedItem: any) => {
       const existingItem = existingPo.poItems.find(
-        (item: any) => item.inventoryItemId === updatedItem.inventoryItemId,
+        (item: any) => item.id === updatedItem.id,
       );
       if (existingItem) {
         // Update existing item
@@ -68,6 +68,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             costPerItem: updatedItem.costPerItem,
             inventoryUnitId: updatedItem.inventoryUnit.id,
             tax: updatedItem.tax,
+            note: updatedItem.note,
           },
         });
       } else {
@@ -79,6 +80,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           costPerItem: updatedItem.costPerItem,
           inventoryUnitId: updatedItem.inventoryUnit.id,
           tax: updatedItem.tax,
+          note: updatedItem.note,
         });
       }
     });
@@ -92,8 +94,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     // Deleted items - existingpo.items have but updated item does not have
     const deletedItems = existingPo.poItems.filter((item: any) => {
       const existUpdatedItem = items.find(
-        (updatedItem: any) =>
-          updatedItem.inventoryItemId === item.inventoryItemId,
+        (updatedItem: any) => updatedItem.id === item.id,
       );
 
       return !existUpdatedItem;

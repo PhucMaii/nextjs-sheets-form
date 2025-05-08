@@ -29,7 +29,7 @@ model User {
   contactNumber       String            @db.VarChar(11)
   deliveryAddress     String            @db.VarChar(255)
   password            String            @db.VarChar(255)
-  sheetName           String            @db.VarChar(255)
+  sheetName           String?            @db.VarChar(255)
   role                String            @db.VarChar(255)
   email               String?           @db.VarChar(255)
   userPreferenceId    Int?
@@ -52,6 +52,37 @@ model User {
   printStatements     ClientStatement[]
   cart                Cart[]
   cheques             Cheque[]
+  quotes               Quote[]
+}
+
+model Quote {
+  id      Int     @id @default(autoincrement())
+  userId  Int
+  status  QuoteStatus   @default(DRAFT)
+  subtotal  Float
+  PST       Float
+  GST       Float
+  total     Float
+  note      String
+  createdAt  String
+  createdBy  String
+
+  items     QuoteItem[]
+
+  user      User  @relation(fields: [userId], references: [id])
+}
+
+model QuoteItem {
+  id      Int       @id @default(autoincrement())
+  quoteId   Int
+  inventoryItemId Int
+  inventoryUnitId Int
+  quantity    Int
+  price       Int
+
+  quote       Quote   @relation(fields: [quoteId], references: [id])
+  inventoryItem InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  inventoryUnit InventoryUnit  @relation(fields: [inventoryUnitId], references: [id])
 }
 
 model Category {
@@ -283,7 +314,6 @@ model FixedTransaction {
 
   transactions      Expense[]
 
-
   paymentMethod      PaymentMethod    @relation(fields: [paymentMethodId], references: [id])
 }
 
@@ -365,6 +395,7 @@ model InventoryItem {
   options      Option[]
   poItems      POItem[]
   lossReports  LossReport[]
+  quoteItems   QuoteItem[]
 
   promotion Promotion? @relation(fields: [promotionId], references: [id])
   type      ItemType?  @relation(fields: [typeId], references: [id])
@@ -462,6 +493,7 @@ model InventoryUnit {
   itemPreferences ItemPreference[]
   poItems         POItem[]
   lossReports     LossReport[]
+  quoteItems      QuoteItem[]
 
   @@index([vendorItemId])
 }
@@ -614,6 +646,7 @@ model POItem {
   rejectedQty     Float?
   tax             Float?
   costPerItem     Float
+  note            String?
   inventoryUnitId Int
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
@@ -652,4 +685,13 @@ model Media {
   lossReportId Int?
 
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
+}
+
+
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
 }

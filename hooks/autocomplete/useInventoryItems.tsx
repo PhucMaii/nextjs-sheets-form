@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
 
 const useInventoryItems = () => {
   const [inventoryItems, setInventoryItems] = useState<IInventoryItem[]>([]);
-  const [selectedInventoryItem, setSelectedInventoryItem] = useState<any | null>(null);
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState<
+    any | null
+  >(null);
 
   useEffect(() => {
     fetchInventoryItems();
@@ -21,7 +23,6 @@ const useInventoryItems = () => {
       }
 
       setInventoryItems(response.data.data);
-
     } catch (error: any) {
       console.log('Error fetching inventory items', error);
     }
@@ -31,12 +32,15 @@ const useInventoryItems = () => {
     return (
       <Autocomplete
         options={inventoryItems || []}
-        getOptionLabel={(option: any) => option?.sku ? `${option?.sku} | ${option?.name}` : option?.name}
+        getOptionLabel={(option: any) =>
+          option?.sku ? `${option?.sku} | ${option?.name}` : option?.name
+        }
         renderInput={(params) => <TextField {...params} label="Item" />}
         value={
           inventoryItems?.find(
             (item: any) =>
-              item.id === selectedInventoryItem?.id || item.name === selectedInventoryItem?.name,
+              item.id === selectedInventoryItem?.id ||
+              item.name === selectedInventoryItem?.name,
           ) || null
         }
         onChange={(e, newValue: any) => {
