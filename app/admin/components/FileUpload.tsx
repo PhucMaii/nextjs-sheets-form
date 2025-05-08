@@ -11,6 +11,7 @@ interface IProps {
   fileName: string;
   onUploadImageUI: (fileKey: string) => void;
   uploadLocation: string;
+  isCheque?: boolean;
 }
 
 export default function FileUpload({
@@ -18,6 +19,7 @@ export default function FileUpload({
   showNotification,
   onUploadImageUI,
   uploadLocation,
+  isCheque,
 }: IProps) {
   const [uploadingProgress] = useState<number>(0);
 
@@ -40,7 +42,12 @@ export default function FileUpload({
 
       try {
         setIsUploading(true);
-        const data = await uploadToS3(files, fileName, uploadLocation);
+        const data = await uploadToS3(
+          files,
+          fileName,
+          uploadLocation,
+          isCheque,
+        );
         if (!data?.fileKey) {
           showNotification('error', 'Something went wrong');
           return;

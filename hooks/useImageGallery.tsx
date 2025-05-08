@@ -1,9 +1,10 @@
 import FileUpload from '@/app/admin/components/FileUpload';
-import { generateImgUrl, getAllS3Images } from '@/app/lib/s3';
+import { getAllS3Images } from '@/app/lib/s3';
 import { primaryColor } from '@/theme/color';
 import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useNotification from './useNotification';
+import DisplayFile from '@/app/admin/components/Modals/DisplayFile';
 
 const useImageGallery = (
   initialSelectedImage: string = '',
@@ -64,7 +65,7 @@ const useImageGallery = (
               //     border: selectedImage === image ? `2px solid ${primaryColor}` : 'none',
               //   }}
             >
-              <img
+              {/* <img
                 key={key}
                 src={generateImgUrl(image)}
                 alt={image}
@@ -77,7 +78,19 @@ const useImageGallery = (
                       ? `4px solid ${primaryColor}`
                       : 'none',
                 }}
-              />
+              /> */}
+              <DisplayFile
+                fileKey={image}
+                width='100px'
+                height='100px'
+                style={{
+                  borderRadius: '10px',
+                  border:
+                    selectedImage === image
+                      ? `4px solid ${primaryColor}`
+                      : 'none',
+                }} 
+                />
             </Box>
           ))}
       </Box>

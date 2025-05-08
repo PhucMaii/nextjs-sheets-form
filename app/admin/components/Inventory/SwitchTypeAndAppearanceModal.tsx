@@ -46,8 +46,18 @@ export default function SwitchTypeAndAppearanceModal({
   const [itemImage, setItemImage] = useState<string>(item?.image || '');
   const [imageGallery, setImageGallery] = useState<string[]>([]);
   const [isUploadFile, setIsUploadFile] = useState<boolean>(false);
+  
+  const [imgUrl, setImgUrl] = useState<string>('');
 
   const [color, setColor] = useColor(item?.color || infoBackground);
+
+  useEffect(() => {
+    const fetchUrl = async () => {
+      const url = await generateImgUrl(itemImage, true);
+      setImgUrl(url);
+    };
+    fetchUrl();
+  }, [itemImage]);
 
   useEffect(() => {
     if (item) {
@@ -146,7 +156,7 @@ export default function SwitchTypeAndAppearanceModal({
           {imageGallery?.map((image: string, index: number) => (
             <img
               key={index}
-              src={generateImgUrl(image)}
+              src={imgUrl}
               alt={item?.name}
               width={100}
               height={100}

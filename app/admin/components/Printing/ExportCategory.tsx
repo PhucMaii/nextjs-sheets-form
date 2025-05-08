@@ -1,4 +1,3 @@
-import { generateImgUrl } from '@/app/lib/s3';
 import {
   TableHead,
   TableRow,
@@ -12,6 +11,7 @@ import {
 import React, { forwardRef } from 'react';
 import { BorderTableCell } from './ManifestPrint';
 import { CheckIcon, XIcon } from 'lucide-react';
+import DisplayFile from '../Modals/DisplayFile';
 const ExportCategory = forwardRef(({ items }: any, ref: any) => {
   return (
     <div ref={ref} style={{ padding: '20px' }}>
@@ -63,13 +63,10 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
             <TableRow key={item.id} sx={{ height: 35 }}>
               <BorderTableCell align="center" sx={{ width: 50, height: 50 }}>
                 {item?.image || item?.inventoryItem?.image ? (
-                  <img
-                    src={generateImgUrl(
-                      item?.image || item?.inventoryItem?.image,
-                    )}
-                    alt={item?.name}
-                    width={50}
-                    height={50}
+                  <DisplayFile 
+                    fileKey={item?.image || item?.inventoryItem?.image}
+                    width='50px'
+                    height='50px'
                   />
                 ) : null}
               </BorderTableCell>

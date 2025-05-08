@@ -52,7 +52,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
 
   useEffect(() => {
     if (Object.keys(targetItem).length > 0) {
-      const inventoryItemUnits = targetItem.inventoryItem.vendorItem.flatMap(
+      const inventoryItemUnits = targetItem?.inventoryItem?.vendorItem.flatMap(
         (item: any) => item.unit,
       );
       const sellingUnits = getUniqueUnitRatios(inventoryItemUnits);

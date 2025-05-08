@@ -3,7 +3,6 @@ import { Box, Button, Checkbox, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IItem } from '@/app/utils/type';
-import { generateImgUrl } from '@/app/lib/s3';
 import { useReactToPrint } from 'react-to-print';
 import Sidebar from '@/app/admin/components/Sidebar/Sidebar';
 import { useParams } from 'next/navigation';
@@ -13,6 +12,7 @@ import ExportCategory from '@/app/admin/components/Printing/ExportCategory';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { ShadowSection } from '@/app/admin/reports/styled';
 import EditItemImage from '@/app/admin/components/Modals/EditItemImage';
+import DisplayFile from '@/app/admin/components/Modals/DisplayFile';
 
 const ItemExportPage = () => {
   const { id }: any = useParams();
@@ -76,10 +76,18 @@ const ItemExportPage = () => {
       renderCell: (params: any) => {
         if (!params.row?.image && !params.row?.inventoryItem?.image) return null;
         return (
-          <img
-            src={generateImgUrl(params.row?.image || params.row?.inventoryItem?.image)}
-            alt={params.row.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+          // <img
+          //   src={generateImgUrl(params.row?.image || params.row?.inventoryItem?.image)}
+          //   alt={params.row.name}
+          //   style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+          //   onClick={() => {
+          //     setOpenEditImgProps({ open: true, item: params.row });
+          //   }}
+          // />
+          <DisplayFile 
+            fileKey={params.row?.image || params.row?.inventoryItem?.image}
+            width='100%'
+            height='100%'
             onClick={() => {
               setOpenEditImgProps({ open: true, item: params.row });
             }}
