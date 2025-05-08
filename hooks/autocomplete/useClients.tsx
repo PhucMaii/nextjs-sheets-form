@@ -1,7 +1,7 @@
 import { fetchApi } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import { Autocomplete, TextField } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const useClients = () => {
   const [clients, setClients] = useState<any[]>([]);
@@ -18,7 +18,7 @@ const useClients = () => {
 
   console.log(selectedClient);
 
-  const renderClientSearch = () => {
+  const renderClientSearch = useCallback(() => {
     return (
       <Autocomplete
         options={clients || []}
@@ -37,14 +37,16 @@ const useClients = () => {
         sx={{ width: 'auto' }}
       />
     );
-  };
+  }, [clients, selectedClient]);
 
-  return {
-    clients,
-    renderClientSearch,
-    selectedClient,
-    setSelectedClient,
-  };
+  return useMemo(() => {
+    return {
+      clients,
+      renderClientSearch,
+      selectedClient,
+      setSelectedClient,
+    };
+  }, [clients, selectedClient]);
 };
 
 export default useClients;

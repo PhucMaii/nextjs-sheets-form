@@ -1,87 +1,95 @@
-import { generateImgUrl } from '@/app/lib/s3';
-import {
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material';
-import { Trash2Icon } from 'lucide-react';
-import { TextField, InputAdornment } from '@mui/material';
+import { Grid } from '@mui/material';
+import { memo } from 'react';
+import QuoteItemRow from '../QuoteItemRow';
 
-export default function QuoteItemTable({
+const QuoteItemTable = ({
   selectedItems,
-  onUpdateItem, 
+  onUpdateItem,
   onRemoveItem,
 }: {
   selectedItems: any[];
   onUpdateItem: (item: any) => void;
   onRemoveItem: (item: any) => void;
-}) {
+}) => {
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell colSpan={2}>Item</TableCell>
-          <TableCell>Quoted Price</TableCell>
-          <TableCell>Quantity</TableCell>
-          <TableCell>Total</TableCell>
-          <TableCell></TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {selectedItems.map((item) => (
-          <TableRow key={item.id}>
-            <TableCell sx={{ width: 50 }}>
-              {item.image && (
-                <img
-                  src={generateImgUrl(item.image)}
-                  alt={item.name}
-                  width={50}
-                  height={50}
-                  style={{ borderRadius: 4 }}
-                />
-              )}
-            </TableCell>
-            <TableCell>
-              <Typography>{item.name}</Typography>
-            </TableCell>
-            <TableCell>
-              <TextField
-                value={item.price}
-                fullWidth
-                onChange={(e) =>
-                  onUpdateItem({ ...item, price: e.target.value })
-                }
-                type="number"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-              />
-            </TableCell>
-            <TableCell>
-              <TextField
-                value={item.quantity}
-                fullWidth
-                onChange={(e) =>
-                  onUpdateItem({ ...item, quantity: e.target.value })
-                }
-                type="number"
-              />
-            </TableCell>
-            <TableCell>${item.price * item.quantity}</TableCell>
-            <TableCell>
-              <IconButton onClick={() => onRemoveItem(item)}>
-                <Trash2Icon />
-              </IconButton>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <Grid container spacing={2}>
+      {selectedItems.map((item) => (
+        <QuoteItemRow
+          key={item.id}
+          item={item}
+          onUpdateItem={onUpdateItem}
+          onRemoveItem={onRemoveItem}
+        />
+        // <Fragment key={item.id}>
+        //   <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        //     {item?.image && (
+        //       <img
+        //         src={generateImgUrl(item.image)}
+        //         alt={item.name}
+        //         width={50}
+        //         height={50}
+        //         style={{ borderRadius: 4 }}
+        //       />
+        //     )}
+        //     <Typography sx={{ fontWeight: 'semibold' }}>{item.name}</Typography>
+        //   </Grid>
+        //   <Grid item xs={12}>
+        //     <UnitRadio
+        //       value={JSON.stringify(item?.unit)}
+        //       units={item.units}
+        //       onChange={(e: any) =>
+        //         onUpdateItem({ ...item, unit: JSON.parse(e.target.value) })
+        //       }
+        //     />
+        //   </Grid>
+
+        //   <Grid item xs={5}>
+        //     <TextField
+        //       value={item.price}
+        //       fullWidth
+        //       onChange={(e) => onUpdateItem({ ...item, price: e.target.value })}
+        //       type="number"
+        //       InputProps={{
+        //         startAdornment: (
+        //           <InputAdornment position="start">$</InputAdornment>
+        //         ),
+        //       }}
+        //     />
+        //   </Grid>
+
+        //   <Grid item xs={5}>
+        //     <TextField
+        //       value={item.quantity}
+        //       fullWidth
+        //       onChange={(e) =>
+        //         onUpdateItem({ ...item, quantity: e.target.value })
+        //       }
+        //     />
+        //   </Grid>
+
+        //   <Grid
+        //     item
+        //     xs={2}
+        //     sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        //   >
+        //     <Typography sx={{ fontWeight: 'semibold' }}>${item.price * item.quantity}</Typography>
+        //     <IconButton size="small" onClick={() => onRemoveItem(item)}>
+        //       <Trash2Icon style={{ width: 16, height: 16 }} />
+        //     </IconButton>
+        //   </Grid>
+        //   <Grid item xs={12}>
+        //     <Divider />
+        //   </Grid>
+        // </Fragment>
+      ))}
+    </Grid>
   );
-}
+};
+
+export default memo(QuoteItemTable, (prevProps, nextProps) => {
+  return (
+    Object.is(prevProps.selectedItems, nextProps.selectedItems) &&
+    Object.is(prevProps.onUpdateItem, nextProps.onUpdateItem) &&
+    Object.is(prevProps.onRemoveItem, nextProps.onRemoveItem)
+  );
+});

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import {
   Box,
@@ -17,7 +17,12 @@ import QuoteItemTable from '../../components/Tables/QuoteItemTable';
 import useInventoryItems from '@/hooks/autocomplete/useInventoryItems';
 import PasteCategory from '../../components/Modals/PasteCategory';
 import useClients from '@/hooks/autocomplete/useClients';
-import AutoCompleteAddress from '../../components/AutoCompleteAddress';
+import { generateQuoteTotal } from '@/app/utils/quote';
+import useNotification from '@/hooks/useNotification';
+import axios from 'axios';
+import { API_URL, QUOTE_STATUS } from '@/app/utils/enum';
+import ClientSection from './ClientSection';
+import { LoadingButton } from '@mui/lab';
 
 export default function CreateQuotePage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -29,6 +34,8 @@ export default function CreateQuotePage() {
     contactNumber: '',
     deliveryAddress: '',
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [note, setNote] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [isOpenPasteCategory, setIsOpenPasteCategory] =
     useState<boolean>(false);
@@ -36,39 +43,16 @@ export default function CreateQuotePage() {
   const router = useRouter();
 
   const totalOverview = useMemo(() => {
-    const total = selectedItems.reduce((acc, item) => {
-      if (!acc.subtotal) {
-        acc.subtotal = 0;
-      }
+    if (selectedItems.length === 0) {
+      return {
+        subtotal: 0,
+        gst: 0,
+        pst: 0,
+        total: 0,
+      };
+    }
 
-      if (!acc.pst) {
-        acc.pst = 0;
-      }
-
-      if (!acc.gst) {
-        acc.gst = 0;
-      }
-
-      if (!acc.total) {
-        acc.total = 0;
-      }
-
-      acc.subtotal += item.price * item.quantity;
-
-      if (item?.isPST) {
-        acc.pst += item.price * item.quantity * 0.15;
-      }
-
-      if (item?.isGST) {
-        acc.gst += item.price * item.quantity * 0.15;
-      }
-
-      acc.total = acc.subtotal + acc.pst + acc.gst;
-
-      return acc;
-    }, {});
-
-    return total;
+    return generateQuoteTotal(selectedItems);
   }, [selectedItems]);
 
   const {
@@ -80,6 +64,10 @@ export default function CreateQuotePage() {
 
   const { renderClientSearch, selectedClient, setSelectedClient } =
     useClients();
+
+  console.log('re render page');
+
+  const { showNotification, NotificationComp } = useNotification();
 
   useEffect(() => {
     const newSelectedItems = selectedInventoryItems.map((item) => {
@@ -115,8 +103,18 @@ export default function CreateQuotePage() {
           return null;
         }
 
+        const units = inventoryItem.vendorItem.flatMap(
+          (item: any) => item.unit,
+        );
+        const uniqueUnits = Array.from(
+          new Map(units.map((unit: any) => [unit.ratio, unit])).values(),
+        );
+
+        console.log({ item: item?.inventoryUnit, units: uniqueUnits });
         return {
           ...inventoryItem,
+          units: uniqueUnits,
+          unit: item.inventoryUnit,
           price: item.price,
           quantity: 1,
         };
@@ -125,33 +123,38 @@ export default function CreateQuotePage() {
 
     const newSelectedInventoryItems = newSelectedItems.map((item: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const {price, ...restOfItem}= item;
+      const { price, ...restOfItem } = item;
 
       return restOfItem;
     });
     setSelectedItems(newSelectedItems);
     setSelectedInventoryItems(newSelectedInventoryItems);
-
   };
 
-  const onUpdateItem = (item: any) => {
-    const newSelectedItems = selectedItems.map((selectedItem) => {
-      if (selectedItem.id === item.id) {
-        return item;
-      }
+  const onUpdateItem = useCallback(
+    (item: any) => {
+      const newSelectedItems = selectedItems.map((selectedItem) => {
+        if (selectedItem.id === item.id) {
+          return item;
+        }
 
-      return selectedItem;
-    });
+        return selectedItem;
+      });
 
-    setSelectedItems(newSelectedItems);
-  };
+      setSelectedItems(newSelectedItems);
+    },
+    [selectedItems],
+  );
 
-  const onRemoveItem = (item: any) => {
-    const newSelectedItems = selectedInventoryItems.filter(
-      (selectedItem) => selectedItem.id !== item.id,
-    );
-    setSelectedInventoryItems(newSelectedItems);
-  };
+  const onRemoveItem = useCallback(
+    (item: any) => {
+      const newSelectedItems = selectedInventoryItems.filter(
+        (selectedItem) => selectedItem.id !== item.id,
+      );
+      setSelectedInventoryItems(newSelectedItems);
+    },
+    [selectedInventoryItems],
+  );
 
   const onResetNewCustomer = () => {
     setClient({
@@ -164,8 +167,50 @@ export default function CreateQuotePage() {
     setSelectedClient(null);
   };
 
+  const handleCreateQuote = async () => {
+    setIsLoading(true);
+    try {
+      const quoteItems = selectedItems.map((item) => {
+        return {
+          ...item,
+          inventoryItemId: item.id,
+          inventoryUnitId: item.unit.id,
+        };
+      });
+      const response = await axios.post(`${API_URL.ADMIN}/quotes`, {
+        quote: {
+          status: QUOTE_STATUS.SENT,
+          note,
+        },
+        quoteItems,
+        user: client,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', 'Quote created successfully');
+
+      // TODO: Redirect to the quote page
+      setTimeout(() => {
+        router.push(`/admin/quotes`);
+      }, 1000);
+    } catch (error: any) {
+      console.log('Something went wrong: ', error);
+      showNotification(
+        'error',
+        error?.response?.data?.error || 'Something went wrong',
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Sidebar>
+      {NotificationComp}
       <PasteCategory
         open={isOpenPasteCategory}
         onClose={() => setIsOpenPasteCategory(false)}
@@ -181,9 +226,14 @@ export default function CreateQuotePage() {
           </Typography>
         </Box>
 
-        <Button variant="contained" color="primary">
+        <LoadingButton
+          variant="contained"
+          color="primary"
+          onClick={handleCreateQuote}
+          loading={isLoading}
+        >
           + Create Draft
-        </Button>
+        </LoadingButton>
       </Box>
 
       <Grid container spacing={2}>
@@ -219,7 +269,16 @@ export default function CreateQuotePage() {
           sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
           {/* Customer Details */}
-          <ShadowSection display="flex" flexDirection="column" gap={2}>
+          <ClientSection
+            selectedClient={selectedClient}
+            client={client}
+            setClient={setClient}
+            setAddress={setAddress}
+            renderClientSearch={renderClientSearch}
+            onResetNewCustomer={onResetNewCustomer}
+            setSelectedClient={setSelectedClient}
+          />
+          {/* <ShadowSection display="flex" flexDirection="column" gap={2}>
             <Box
               display="flex"
               justifyContent="space-between"
@@ -350,22 +409,37 @@ export default function CreateQuotePage() {
                 </Box>
               </Grid>
             </Grid>
-          </ShadowSection>
+          </ShadowSection> */}
 
           <ShadowSection display="flex" flexDirection="column" gap={2}>
             <Typography variant="body1" fontWeight="semibold">
               Total Overview
             </Typography>
 
+            <TextField
+              label="Note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              multiline
+              rows={3}
+              fullWidth
+            />
+
             <Grid container spacing={2}>
-              <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Grid
+                item
+                xs={12}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography variant="body1" fontWeight="semibold">
                   Total Items
                 </Typography>
 
-                <Typography variant="body1">
-                  {selectedItems.length}
-                </Typography>
+                <Typography variant="body1">{selectedItems.length}</Typography>
               </Grid>
 
               <Grid
@@ -382,7 +456,7 @@ export default function CreateQuotePage() {
                 </Typography>
 
                 <Typography variant="body1">
-                  {totalOverview.subtotal}
+                  ${totalOverview?.subtotal?.toFixed(2)}
                 </Typography>
               </Grid>
 
@@ -399,7 +473,9 @@ export default function CreateQuotePage() {
                   GST
                 </Typography>
 
-                <Typography variant="body1">{totalOverview.gst}</Typography>
+                <Typography variant="body1">
+                  ${totalOverview?.gst?.toFixed(2)}
+                </Typography>
               </Grid>
 
               <Grid
@@ -415,7 +491,9 @@ export default function CreateQuotePage() {
                   PST
                 </Typography>
 
-                <Typography variant="body1">{totalOverview.pst}</Typography>
+                <Typography variant="body1">
+                  ${totalOverview?.pst?.toFixed(2)}
+                </Typography>
               </Grid>
 
               <Grid
@@ -431,7 +509,9 @@ export default function CreateQuotePage() {
                   Total
                 </Typography>
 
-                <Typography variant="body1">{totalOverview.total}</Typography>
+                <Typography variant="body1">
+                  ${totalOverview?.total?.toFixed(2)}
+                </Typography>
               </Grid>
             </Grid>
           </ShadowSection>

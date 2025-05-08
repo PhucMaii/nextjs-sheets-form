@@ -81,6 +81,8 @@ model QuoteItem {
   price       Int
 
   quote       Quote   @relation(fields: [quoteId], references: [id])
+  inventoryItem InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  inventoryUnit InventoryUnit  @relation(fields: [inventoryUnitId], references: [id])
 }
 
 model Category {
@@ -393,6 +395,7 @@ model InventoryItem {
   options      Option[]
   poItems      POItem[]
   lossReports  LossReport[]
+  quoteItems   QuoteItem[]
 
   promotion Promotion? @relation(fields: [promotionId], references: [id])
   type      ItemType?  @relation(fields: [typeId], references: [id])
@@ -490,6 +493,7 @@ model InventoryUnit {
   itemPreferences ItemPreference[]
   poItems         POItem[]
   lossReports     LossReport[]
+  quoteItems      QuoteItem[]
 
   @@index([vendorItemId])
 }

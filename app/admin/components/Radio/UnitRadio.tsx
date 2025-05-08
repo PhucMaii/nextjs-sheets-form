@@ -36,9 +36,8 @@ export default function UnitRadio({
     <RadioGroup row name="unit" value={value} onChange={onChange}>
       {units.map((unit: any, index: number) => {
         return (
-          <Box display="flex" alignItems="center" mx={2}>
+          <Box display="flex" alignItems="center" mx={2} key={index}>
             <FormControlLabel
-              key={index}
               value={idValue ? Number(unit.id) : JSON.stringify(unit)}
               control={<Radio />}
               label={`${isShowPrice ? `($${unit?.unitPrice})` : ''} 1:${unit.ratio} - ${unit.unit}`}

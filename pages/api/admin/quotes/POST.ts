@@ -1,6 +1,9 @@
+import { generateQuoteTotal } from "@/app/utils/quote";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
+import { getTodayDate } from "../../utils/date";
+import { getUserInfo } from "../../utils/auth";
 
 const prisma = new PrismaClient();
 
@@ -32,20 +35,34 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Create Quote
+    const quoteTotal = generateQuoteTotal(quoteItems);
+    
+    const today = getTodayDate();
+    const admin: any = await getUserInfo(req, res);
     const newQuote = await prisma.quote.create({
       data: {
         ...quote,
         userId: quoteUser.id,
+        total: quoteTotal.total,
+        PST: quoteTotal.pst,
+        GST: quoteTotal.gst,
+        subtotal: quoteTotal.subtotal,
+        createdBy: `Admin - ${admin?.clientName}`,
+        createdAt: today.dateAndTime,
       },
     });
 
     // Create Quote Items
     const newQuoteItems = await prisma.quoteItem.createMany({
       data: quoteItems.map((item: any) => ({
-        ...item,
+        inventoryItemId: item.inventoryItemId,
+        inventoryUnitId: item.inventoryUnitId,
         quoteId: newQuote.id,
+        price: item.price,
+        quantity: item.quantity,
       })),
     });
+
 
     // TODO: Send email to user with quote details
 
@@ -55,6 +72,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       quoteItems: newQuoteItems,
     });
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    console.log('Internal server error', error);
+    return res.status(500).json({ error: "Internal server error: " + error });
   }
 }

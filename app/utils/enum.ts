@@ -171,3 +171,10 @@ export enum FIXED_TRANSACTION_STATUS {
   CANCELLED = 'Cancelled',
   ARCHIVED = 'Archived',
 }
+
+export enum QUOTE_STATUS {
+  DRAFT = 'DRAFT',
+  SENT = 'SENT',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+}

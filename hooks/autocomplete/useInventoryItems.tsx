@@ -1,18 +1,25 @@
 import { API_URL } from '@/app/utils/enum';
 import { IInventoryItem } from '@/app/utils/type';
-import { Autocomplete, Checkbox, FormControlLabel, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+} from '@mui/material';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 
 const useInventoryItems = () => {
   const [inventoryItems, setInventoryItems] = useState<IInventoryItem[]>([]);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<
     any | null
   >(null);
-  const [selectedInventoryItems, setSelectedInventoryItems] = useState<
-    any[]
-  >([]);
+  const [selectedInventoryItems, setSelectedInventoryItems] = useState<any[]>(
+    [],
+  );
 
+  console.log('re fetch inventory items');
+  
   useEffect(() => {
     fetchInventoryItems();
   }, []);
@@ -31,7 +38,7 @@ const useInventoryItems = () => {
     }
   };
 
-  const renderMultipleInventoryItemSearch = () => {
+  const renderMultipleInventoryItemSearch = useCallback(() => {
     return (
       <Autocomplete
         size="small"
@@ -65,14 +72,25 @@ const useInventoryItems = () => {
         multiple
         isOptionEqualToValue={(option, value) => option.id === value.id}
         onChange={(event, newValue) => {
-          setSelectedInventoryItems(newValue);
+          const newSelectedInventoryItems = newValue.map((item: any) => {
+            const newUnits = item.vendorItem.flatMap((item: any) => item.unit);
+            const uniqueUnits = Array.from(
+              new Map(newUnits.map((unit: any) => [unit.ratio, unit])).values(),
+            );
+            return {
+              ...item,
+              unit: uniqueUnits[0],
+              units: uniqueUnits,
+            };
+          });
+          setSelectedInventoryItems(newSelectedInventoryItems);
         }}
         disableCloseOnSelect
         value={selectedInventoryItems}
         // openOnFocus
       />
     );
-  };
+  }, [inventoryItems, selectedInventoryItems]);
 
   const renderInventoryItemSearch = () => {
     return (
@@ -107,14 +125,16 @@ const useInventoryItems = () => {
     );
   };
 
-  return {
-    inventoryItems,
-    selectedInventoryItem,
-    selectedInventoryItems,
-    setSelectedInventoryItems,
-    renderInventoryItemSearch,
-    renderMultipleInventoryItemSearch,
-  };
+  return useMemo(() => {
+    return {
+      inventoryItems,
+      selectedInventoryItem,
+      selectedInventoryItems,
+      setSelectedInventoryItems,
+      renderInventoryItemSearch,
+      renderMultipleInventoryItemSearch,
+    };
+  }, [inventoryItems, selectedInventoryItem, selectedInventoryItems]);
 };
 
 export default useInventoryItems;
