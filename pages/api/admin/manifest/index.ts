@@ -298,6 +298,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             const newUserManifest = {
               user: { ...user, displayName },
               order,
+              // TODO: Fix bug ADD quantity if the itemKey is already exist
               [itemKey]: actualQuantity,
             };
 
@@ -309,10 +310,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           const updatedUserManifest = {
             ...currentUserManifest,
             order,
-            [itemKey]: actualQuantity,
+            [itemKey]: (currentUserManifest[itemKey] || 0) + actualQuantity, // Handle if the itemKey is already exist, then add the quantity
           };
 
-          // console.log(updatedUserManifest.user.clientName, 'updatedUserManifest');
           acc[acc.length - 1] = updatedUserManifest;
           return acc;
         },
