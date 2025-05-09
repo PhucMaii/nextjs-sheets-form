@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import axios from 'axios';
-import { ShadowSection } from '../admin/reports/styled';
+import { ShadowSection } from '../admin/[companyId]/reports/styled';
 import { blueGrey, grey } from '@mui/material/colors';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { UserContext } from '../context/UserContextAPI';

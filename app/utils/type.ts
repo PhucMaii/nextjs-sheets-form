@@ -27,7 +27,7 @@ import {
   VendorItem,
 } from '@prisma/client';
 import { Session } from 'next-auth';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import { STOCK_STATUS, USER_CATEGORIZED, USER_ROLE } from './enum';
 
 export interface IDayRange extends DayRange {}

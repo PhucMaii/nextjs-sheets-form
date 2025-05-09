@@ -115,18 +115,17 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-
 async function main() {
   await prisma.expense.updateMany({
     where: {
       id: {
-        in: [1186, 1185, 1184, 1183]
-      }
+        in: [1186, 1185, 1184, 1183],
+      },
     },
     data: {
       fixedTransactionId: null,
-    }  
-  })
+    },
+  });
 }
 
 main()

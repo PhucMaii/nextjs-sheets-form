@@ -3,16 +3,16 @@ import { PrismaClient } from '@prisma/client';
 import {
   restockInventoryItem,
   updateSingleInventoryItem,
-} from '../admin/orderedItems/single';
-import { sendEmail } from '../utils/email';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
+import { sendEmail } from '@/pages/api/utils/email';
 import { pusherServer } from '@/app/pusher';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { generateOrderTotalPrice } from '../admin/orderedItems/PUT';
+import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { checkOrderDeliveryDateValid } from '../utils/date';
 import { OrderedItems } from '@/app/utils/type';
-import { createOrderedItems } from '../utils/orderedItems';
+import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

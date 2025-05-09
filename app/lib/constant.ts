@@ -17,7 +17,7 @@ import {
   PAYMENT_TYPE,
   TRANSACTION_STATUS,
 } from '../utils/enum';
-import { COLOR_TYPE } from '../admin/components/StatusText';
+import { COLOR_TYPE } from '../admin/[companyId]/components/StatusText';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import PendingIcon from '@mui/icons-material/Pending';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -187,111 +187,111 @@ export const adminTabs = {
     {
       name: 'Overview',
       icon: DashboardIcon,
-      path: '/admin/overview',
+      path: '/admin/[companyId]/overview',
     },
     {
       name: 'Orders',
       icon: ReceiptLongIcon,
-      path: '/admin/orders',
+      path: '/admin/[companyId]/orders',
     },
     {
       name: 'Reports',
       icon: ArticleIcon,
-      path: '/admin/reports',
+      path: '/admin/[companyId]/reports',
     },
     {
       name: 'Settings',
       icon: SettingsIcon,
-      path: '/admin/settings',
+      path: '/admin/[companyId]/settings',
     },
   ],
   Manage: [
     {
       name: 'Expenses',
       icon: PaymentIcon,
-      path: '/admin/cards',
+      path: '/admin/[companyId]/cards',
     },
     {
       name: 'Inventory',
       icon: InventoryIcon,
-      path: '/admin/inventory',
+      path: '/admin/[companyId]/inventory',
     },
     {
       name: 'Items',
       icon: SellIcon,
-      path: '/admin/items',
+      path: '/admin/[companyId]/items',
     },
     {
       name: 'Users',
       icon: PeopleIcon,
-      path: '/admin/clients',
+      path: '/admin/[companyId]/clients',
     },
     {
       name: 'Drivers',
       icon: LocalShippingIcon,
-      path: '/admin/drivers',
+      path: '/admin/[companyId]/drivers',
     },
     {
       name: 'Vendors',
       icon: StoreIcon,
-      path: '/admin/vendors',
+      path: '/admin/[companyId]/vendors',
     },
   ],
   Others: [
     {
       name: 'Transactions',
       icon: SyncAltIcon,
-      path: '/admin/transactions',
+      path: '/admin/[companyId]/transactions',
     },
     {
       name: 'Fixed Transactions',
       icon: AutorenewIcon,
-      path: '/admin/fixed-transactions',
+      path: '/admin/[companyId]/fixed-transactions',
     },
     {
       name: 'Purchase Orders',
       icon: LocalMallIcon,
-      path: '/admin/purchase-orders',
+      path: '/admin/[companyId]/purchase-orders',
     },
     {
       name: 'C.O.D',
       icon: PaymentsIcon,
-      path: '/admin/codBoard',
+      path: '/admin/[companyId]/codBoard',
     },
     {
       name: 'Pre Orders',
       icon: PendingActionsIcon,
-      path: '/admin/pre-orders',
+      path: '/admin/[companyId]/pre-orders',
     },
     {
       name: 'Shifts',
       icon: AccessTime,
-      path: '/admin/shifts',
+      path: '/admin/[companyId]/shifts',
     },
     {
       name: 'Order Layout',
       icon: WysiwygIcon,
-      path: '/admin/order-layout',
+      path: '/admin/[companyId]/order-layout',
     },
     {
       name: 'Promotions',
       icon: CampaignIcon,
-      path: '/admin/promotions',
+      path: '/admin/[companyId]/promotions',
     },
     {
       name: 'Statements',
       icon: DocumentScannerIcon,
-      path: '/admin/statements',
+      path: '/admin/[companyId]/statements',
     },
     {
       name: 'Product Loss',
       icon: ReportIcon,
-      path: '/admin/product-loss',
+      path: '/admin/[companyId]/product-loss',
     },
     {
       name: 'Blocking',
       icon: AppBlockingIcon,
-      path: '/admin/blocking',
+      path: '/admin/[companyId]/blocking',
     },
   ],
 };

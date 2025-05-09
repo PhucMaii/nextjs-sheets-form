@@ -13,7 +13,7 @@ import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;

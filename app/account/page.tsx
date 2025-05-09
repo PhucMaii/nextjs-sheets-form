@@ -12,7 +12,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { ShadowSection } from '../admin/reports/styled';
+import { ShadowSection } from '../admin/[companyId]/reports/styled';
 import axios from 'axios';
 import { API_URL } from '../utils/enum';
 import { signOut, useSession } from 'next-auth/react';

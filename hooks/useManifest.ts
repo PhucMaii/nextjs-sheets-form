@@ -1,11 +1,12 @@
-import { Order } from '@/app/admin/orders/page';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { Order } from '@/app/admin/[companyId]/orders/page';
+import { ORDER_STATUS, getAdminApiUrl } from '@/app/utils/enum';
 import { IRoutes } from '@/app/utils/type';
 import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { days } from '@/app/lib/constant';
 import axios from 'axios';
 import { AlertColor } from '@mui/material';
+import { useParams } from 'next/navigation';
 
 const useManifest = (
   orderList: Order[],
@@ -20,6 +21,7 @@ const useManifest = (
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderPrint, setOrderPrint] = useState<any>([]);
   const [itemManifest, setItemManifest] = useState<any>({});
+  const { companyId }: any = useParams();
 
   const selectedRouteIds = useMemo(() => {
     return selectedRoutes.map((route: IRoutes) => {
@@ -31,7 +33,7 @@ const useManifest = (
   const givenDay = days[formattedDate.getDay()];
 
   const { data: userRoute } = useSWR(
-    `${API_URL.ROUTES}/clients?day=${givenDay}`,
+    getAdminApiUrl(companyId, `/routes/clients?day=${givenDay}`),
   );
 
   useEffect(() => {
@@ -49,11 +51,14 @@ const useManifest = (
   const handleGetManifest = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API_URL.ADMIN}/manifest`, {
-        day: givenDay,
-        orderList,
-        userRoute: userRoute?.data,
-      });
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/manifest'),
+        {
+          day: givenDay,
+          orderList,
+          userRoute: userRoute?.data,
+        },
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);

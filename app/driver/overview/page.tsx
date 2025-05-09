@@ -3,15 +3,15 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import OverviewCard from '@/app/admin/components/OverviewCard/OverviewCard';
+import OverviewCard from '@/app/admin/[companyId]/components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import { primaryColor } from '@/theme/color';
 import { API_URL } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import ManifestTable from '@/app/admin/components/Tables/ManifestTable';
+import ManifestTable from '@/app/admin/[companyId]/components/Tables/ManifestTable';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import StatusText from '@/app/admin/components/StatusText';
+import StatusText from '@/app/admin/[companyId]/components/StatusText';
 import { SWRFetchData } from '@/app/utils/db';
 
 export default function OverviewPage() {

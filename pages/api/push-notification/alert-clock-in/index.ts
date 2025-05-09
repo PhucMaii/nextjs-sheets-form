@@ -67,9 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         await webpush.sendNotification(
           subscription,
           JSON.stringify({
-            message:
-              'Good morning ' +
-              driver.name,
+            message: 'Good morning ' + driver.name,
             body: 'Clock in now to view your route for today 🚚. Have a safe drive!',
           }),
         );

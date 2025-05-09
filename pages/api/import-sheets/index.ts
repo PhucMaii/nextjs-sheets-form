@@ -10,7 +10,7 @@ import {
 } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 import { checkHasClientOrder, getCreatedBy } from './utils';
-import { createOrder } from '../admin/orders/POST';
+import { createOrder } from '@/pages/api/admin/[companyId]/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
 import { formatItemsWithTotalPrice } from '../utils/order';

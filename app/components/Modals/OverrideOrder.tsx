@@ -9,9 +9,9 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { Order } from '@/app/admin/orders/page';
-import { BoxModal } from '../../admin/components/Modals/styled';
-import { ModalProps } from '@/app/admin/components/Modals/type';
+import { Order } from '@/app/admin/[companyId]/orders/page';
+import { BoxModal } from '../../admin/[companyId]/components/Modals/styled';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
 import { LoadingButton } from '@mui/lab';

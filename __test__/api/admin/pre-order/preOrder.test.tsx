@@ -1,4 +1,4 @@
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { days } from '@/app/lib/constant';
 import { generateRecommendDate } from '@/app/utils/time';
 import { createOrder } from '@/pages/api/admin/orders/POST';

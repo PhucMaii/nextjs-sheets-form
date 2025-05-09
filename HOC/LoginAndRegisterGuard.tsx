@@ -1,8 +1,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { API_URL } from '../app/utils/enum';
 import useSWR from 'swr';
 import { fetcher } from './AuthenGuard';
+import { API_URL } from '../app/utils/enum';
 
 export default function LoginAndRegisterGuard({ children }: any) {
   const router = useRouter();

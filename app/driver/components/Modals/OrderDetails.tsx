@@ -1,8 +1,8 @@
 import React from 'react';
-import { BoxModal } from '@/app/admin/components/Modals/styled';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
 import { AlertColor, Modal } from '@mui/material';
-import { ModalProps } from '@/app/admin/components/Modals/type';
-import { Order } from '@/app/admin/orders/page';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
 import { SWRFetchData } from '@/app/utils/db';

@@ -60,11 +60,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Check if order exist
-    const orders = await getOrdersByDateRange(
-      startDate,
-      endDate,
-      userId,
-    );
+    const orders = await getOrdersByDateRange(startDate, endDate, userId);
 
     if (orders.length > 0) {
       return res.status(200).json({
@@ -108,12 +104,11 @@ export const getOrdersByDateRange = async (
   const normalizeStartDate = formatDateString(startDate);
   const normalizeEndDate = formatDateString(endDate);
 
-  
   const listOfDates = generateListOfDateString(
     new Date(normalizeStartDate),
     new Date(normalizeEndDate),
   );
-  
+
   console.log({
     startDate,
     endDate,
@@ -129,7 +124,7 @@ export const getOrdersByDateRange = async (
       userId,
       status: {
         not: ORDER_STATUS.VOID,
-      }
+      },
     },
     include: {
       user: {

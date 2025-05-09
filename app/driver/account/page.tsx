@@ -9,7 +9,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { ShadowSection } from '@/app/admin/reports/styled';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';

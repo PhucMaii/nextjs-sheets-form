@@ -1,4 +1,4 @@
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { IItem } from '@/app/utils/type';
 import { Typography } from '@mui/material';
 import React, { useMemo } from 'react';

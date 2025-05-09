@@ -1,4 +1,4 @@
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';

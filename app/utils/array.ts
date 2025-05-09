@@ -1,5 +1,5 @@
 import { UserRoute } from '@prisma/client';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import { fetchWcodOrders } from './db';
 import { ORDER_STATUS, PAYMENT_TYPE } from './enum';
 import { getWCODDay } from './time';
@@ -63,13 +63,22 @@ export const sortedItemKeys = (
   });
 };
 
-export const getCODData = async (routeOrders: Order[], date: string) => {
+export const getCODData = async (
+  routeOrders: Order[],
+  date: string,
+  companyId: string,
+) => {
   if (!routeOrders || routeOrders.length === 0) {
     return {};
   }
 
   const wcodDay: any = getWCODDay(date);
-  const wcodResponse = await fetchWcodOrders(routeOrders, date, wcodDay);
+  const wcodResponse = await fetchWcodOrders(
+    routeOrders,
+    date,
+    wcodDay,
+    companyId,
+  );
 
   const orders = [...routeOrders];
 

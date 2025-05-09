@@ -63,7 +63,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const admin: any = await getUserInfo(req, res);
       createdBy = `S Admin - ${admin?.clientName}`;
     }
-    
+
     // Void orders
     await prisma.orders.updateMany({
       where: {

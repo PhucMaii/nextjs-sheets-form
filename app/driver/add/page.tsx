@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Tab, Tabs } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { ShadowSection } from '@/app/admin/reports/styled';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import PlaceOrder from '../components/PlaceOrder';
 import useNotification from '@/hooks/useNotification';
 import AddExpense from '../components/AddExpense';

@@ -1,7 +1,7 @@
 import React from 'react';
-import { BoxModal } from '@/app/admin/components/Modals/styled';
-import { ModalProps } from '@/app/admin/components/Modals/type';
-import { Order } from '@/app/admin/orders/page';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { AlertColor, Box, Divider, Modal, Typography } from '@mui/material';
 import axios from 'axios';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';

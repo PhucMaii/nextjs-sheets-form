@@ -40,8 +40,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     let deliveredAt: string | null = dateAndTime;
 
     if (
-      (existingOrder.status !== ORDER_STATUS.DELIVERED &&
-        existingOrder.status !== ORDER_STATUS.COMPLETED) &&
+      existingOrder.status !== ORDER_STATUS.DELIVERED &&
+      existingOrder.status !== ORDER_STATUS.COMPLETED &&
       (updatedStatus === ORDER_STATUS.DELIVERED ||
         updatedStatus === ORDER_STATUS.COMPLETED)
     ) {

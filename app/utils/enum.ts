@@ -12,7 +12,7 @@ export enum API_URL {
   ORDER_STATUS = '/api/admin/orders/status',
   ORDERED_ITEMS = '/api/admin/orderedItems',
   CLIENTS = '/api/admin/clients',
-CLIENT_ORDER = '/api/order',
+  CLIENT_ORDER = '/api/order',
   CATEGORIES = '/api/admin/categories',
   SCHEDULED_ORDER = '/api/admin/scheduledOrders',
   SUBCATEGORIES = '/api/admin/subcategories',
@@ -20,6 +20,11 @@ CLIENT_ORDER = '/api/order',
   ADMIN_DRIVERS = '/api/admin/drivers',
   DRIVER_ORDERS = '/api/drivers/orders',
 }
+
+// Helper function to get admin API URL with companyId
+export const getAdminApiUrl = (companyId: string, path: string) => {
+  return `/api/admin/${companyId}${path}`;
+};
 
 export enum VIEW_TYPE {
   STOCK_PURCHASED = 'stock_purchased',

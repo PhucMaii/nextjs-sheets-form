@@ -1,10 +1,12 @@
 import axios from 'axios';
-import { Order } from '../admin/orders/page';
-import { API_URL, USER_CATEGORIZED } from './enum';
-import { OrderedItems, ScheduledOrder } from './type';
+import { Order } from '../admin/[companyId]/orders/page';
+import { USER_CATEGORIZED } from './enum';
+import { ScheduledOrder } from './type';
 import { Dispatch, SetStateAction } from 'react';
+import { getAdminApiUrl } from '@/app/utils/enum';
 
 export const updateStatus = async (
+  companyId: string,
   status: string,
   selectedOrders: Order[],
   showNotification: any,
@@ -13,10 +15,13 @@ export const updateStatus = async (
     const orderIds = selectedOrders.map((order: Order) => {
       return order.id;
     });
-    const response = await axios.put(`${API_URL.ADMIN}/orders/status`, {
-      status,
-      updatedOrderIds: orderIds,
-    });
+    const response = await axios.put(
+      getAdminApiUrl(companyId, '/orders/status'),
+      {
+        status,
+        updatedOrderIds: orderIds,
+      },
+    );
 
     if (response.data.error) {
       showNotification('error', response.data.error);
@@ -33,51 +38,52 @@ export const updateStatus = async (
   }
 };
 
-export const updateOrderedItems = async (
-  orderTotalPrice: number,
-  order: Order,
-  updatedItem: OrderedItems,
-  showNotification: any,
-  isConvertToCustom: boolean = false,
-  itemId = null,
-) => {
-  try {
-    let response: any;
+// export const updateOrderedItems = async (
+//   companyId: string,
+//   orderTotalPrice: number,
+//   order: Order,
+//   updatedItem: OrderedItems,
+//   showNotification: any,
+//   isConvertToCustom: boolean = false,
+//   itemId = null,
+// ) => {
+//   try {
+//     let response: any;
 
-    if (isConvertToCustom) {
-      response = await axios.put(
-        `${API_URL.ADMIN}/orderedItems/single/convert-to-custom`,
-        {
-          ...updatedItem,
-          orderId: order.id,
-          newUnits: updatedItem.units,
-          inventoryUnit: updatedItem.inventoryUnit,
-          itemId: itemId,
-        },
-      );
-    } else {
-      response = await axios.put(`${API_URL.ADMIN}/orderedItems/single`, {
-        ...updatedItem,
-        orderId: order.id,
-        orderTotalPrice,
-      });
-    }
+//     if (isConvertToCustom) {
+//       response = await axios.put(
+//         getAdminApiUrl(companyId, '/orderedItems/single/convert-to-custom'),
+//         {
+//           ...updatedItem,
+//           orderId: order.id,
+//           newUnits: updatedItem.units,
+//           inventoryUnit: updatedItem.inventoryUnit,
+//           itemId: itemId,
+//         },
+//       );
+//     } else {
+//       response = await axios.put(getAdminApiUrl(companyId, '/orderedItems/single'), {
+//         ...updatedItem,
+//         orderId: order.id,
+//         orderTotalPrice,
+//       });
+//     }
 
-    if (response.data.error) {
-      showNotification('error', response.data.error);
-      return;
-    }
+//     if (response.data.error) {
+//       showNotification('error', response.data.error);
+//       return;
+//     }
 
-    showNotification('success', 'Update Item Successfully');
-    return response;
-  } catch (error: any) {
-    console.log('Fail to update order items: ', error);
-    showNotification(
-      'error',
-      'Fail to update order items: ' + error.response.data.error,
-    );
-  }
-};
+//     showNotification('success', 'Update Item Successfully');
+//     return response;
+//   } catch (error: any) {
+//     console.log('Fail to update order items: ', error);
+//     showNotification(
+//       'error',
+//       'Fail to update order items: ' + error.response.data.error,
+//     );
+//   }
+// };
 
 export const onSelectOrders = (
   targetOrder: Order,
@@ -120,14 +126,21 @@ export const checkIsPreOrderQualified = (scheduledOrder: ScheduledOrder) => {
   return totalPriceGt0 && hasItems && !hasOrdered && !isInactive && !isBlocked;
 };
 
-export const onUpdateOrder = async (orderId: number, orderParam: Order) => {
+export const onUpdateOrder = async (
+  companyId: string,
+  orderId: number,
+  orderParam: Order,
+) => {
   try {
-    const response = await axios.put(API_URL.ORDERED_ITEMS, {
-      updatedItems: orderParam.items,
-      orderId,
-      note: orderParam.note,
-      deliveryDate: orderParam.deliveryDate,
-    });
+    const response = await axios.put(
+      getAdminApiUrl(companyId, '/orderedItems/single'),
+      {
+        updatedItems: orderParam.items,
+        orderId,
+        note: orderParam.note,
+        deliveryDate: orderParam.deliveryDate,
+      },
+    );
 
     return response;
   } catch (error: any) {

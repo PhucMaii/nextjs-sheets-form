@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { limitOrderHour } from '../lib/constant';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import { UserType } from '../utils/type';
 import axios from 'axios';
 import { API_URL, ORDER_STATUS } from '../utils/enum';
@@ -9,7 +9,7 @@ import { YYYYMMDDFormat, generateMonthRange } from '../utils/time';
 import Sidebar from '../components/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import { Box, Divider, Grid, IconButton, Typography } from '@mui/material';
-import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
+import OverviewCard from '../admin/[companyId]/components/OverviewCard/OverviewCard';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { blue, blueGrey } from '@mui/material/colors';
@@ -88,7 +88,9 @@ export default function MainPage() {
 
       showNotification('success', response.data.message);
 
-      const newUserOrders = userOrders.filter((order: Order) => order.id !== orderId);
+      const newUserOrders = userOrders.filter(
+        (order: Order) => order.id !== orderId,
+      );
       setUserOrders(newUserOrders);
       setThisMonthOrders(newThisMonthOrders);
     } catch (error: any) {
@@ -104,11 +106,13 @@ export default function MainPage() {
     }
     const formattedDate = YYYYMMDDFormat(dateObj);
     const userOrderList = clientOrders.data.userOrders;
-    const orderToday = userOrderList.filter((order: Order) => {
-      return order.deliveryDate === formattedDate;
-    }).map((order: Order) => {
-      return { ...clientOrders.data.user, ...order };
-    });
+    const orderToday = userOrderList
+      .filter((order: Order) => {
+        return order.deliveryDate === formattedDate;
+      })
+      .map((order: Order) => {
+        return { ...clientOrders.data.user, ...order };
+      });
 
     setClient(clientOrders.data.user);
     setUserOrders(orderToday);
