@@ -245,6 +245,10 @@ export const categorizeUpdatedItems = (
       return item[comparedField] === updatedItem[comparedField];
     });
 
+    if (updatedItem?.option?.name) {
+      console.log({ updatedItem }, 'updatedItem?.option?.name');
+    }
+
     if (baseItem) {
       console.log({ baseItem, updatedItem });
       trackBaseItems = trackBaseItems.filter((item: any) => {
@@ -269,7 +273,7 @@ export const categorizeUpdatedItems = (
           option: {
             name: updatedItem?.option?.name,
             price: updatedItem?.option?.price,
-            ratio: updatedItem?.option?.unit?.ratio,
+            ratio: updatedItem?.inventoryUnit?.ratio,
             prevPrice: updatedItem?.option?.prevPrice,
             isShowDiscount: updatedItem?.option?.isShowDiscount,
           },

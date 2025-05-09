@@ -58,6 +58,7 @@ export default function ReceiveInventory() {
   useEffect(() => {
     fetchPoItems();
   }, []);
+  
 
   const fetchPoItems = async () => {
     try {

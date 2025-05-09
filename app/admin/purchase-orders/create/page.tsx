@@ -322,7 +322,7 @@ export default function CreatePO() {
                 {SelectDate}
               </Box>
               {/* Items */}
-              <Box display="flex" flexDirection="column" gap={1}>
+              <Box display="flex" flexDirection="column" gap={1} onClick={() => setIsOpenModalInventoryItemSearch(true)}>
                 <Typography>Search Items</Typography>
                 <TextField
                   value={searchKeywords}
