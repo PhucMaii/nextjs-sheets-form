@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { calculateNextPriority } from '../../utils/appearance';
+import { calculateNextPriority } from '@/pages/api/utils/appearance';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {

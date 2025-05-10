@@ -1,8 +1,8 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { days } from '@/app/lib/constant';
 import { generateRecommendDate } from '@/app/utils/time';
-import { createOrder } from '@/pages/api/admin/orders/POST';
-import { getRouteScheduledOrders } from '@/pages/api/admin/scheduledOrders/POST';
+import { createOrder } from '@/pages/api/admin/[companyId]/orders/POST';
+import { getRouteScheduledOrders } from '@/pages/api/admin/[companyId]/scheduledOrders/POST';
 import { PrismaClient } from '@prisma/client';
 
 describe('Pre Order', () => {

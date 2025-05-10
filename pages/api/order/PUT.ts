@@ -9,12 +9,12 @@ import {
   // generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
-} from '../admin/orderedItems/single';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
 import {
   categorizeUpdatedItems,
   generateOrderTotalPrice,
   ITEM_CATEGORIZED,
-} from '../admin/orderedItems/PUT';
+} from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { formatItemsWithTotalPrice } from '../utils/order';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { createOrderedItems } from '../utils/orderedItems';

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
-import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

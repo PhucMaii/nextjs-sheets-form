@@ -1,8 +1,8 @@
 import { Fifo, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
-import { subtractInventoryItem } from '../../admin/orderedItems/single';
+import { subtractInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 
 interface ItemMap {

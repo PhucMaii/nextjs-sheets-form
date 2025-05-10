@@ -1,6 +1,6 @@
+import { sortByDeliveryDate } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { sortByDeliveryDate } from '../../utils/date';
 
 interface IQuery {
   name?: string;

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { ACTION, TYPE, USER_ROLE } from '@/app/utils/enum';

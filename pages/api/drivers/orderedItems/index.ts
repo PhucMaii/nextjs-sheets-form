@@ -1,12 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
-import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
-import { getDriverInfo } from '../../utils/auth';
+import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
+import { getDriverInfo } from '@/pages/api/utils/auth';
 import {
   generateCostAndProfit,
   updateSingleInventoryItem,
-} from '../../admin/orderedItems/single';
-import { generateOrderTotalPrice } from '../../admin/orderedItems/PUT';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
+import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 
 interface IBody {
   id: number; // ordered item id

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '../../utils/auth';
+import { getUserInfo } from '@/pages/api/utils/auth';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 
 interface IBody {

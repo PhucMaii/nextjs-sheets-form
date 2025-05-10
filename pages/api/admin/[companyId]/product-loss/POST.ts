@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '../../utils/auth';
-import { getTodayDate } from '../../utils/date';
+import { getUserInfo } from '@/pages/api/utils/auth';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { MEDIA_TYPE } from '@/app/utils/enum';
 import { InventoryUnit } from '@prisma/client';
-import { manuallySubtractInventoryItemQty } from '../../utils/inventoryItem';
+import { manuallySubtractInventoryItemQty } from '@/pages/api/utils/inventoryItem';
 interface ProductLoss {
   inventoryItemId: number;
   employeeId: number;

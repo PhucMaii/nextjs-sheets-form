@@ -1,8 +1,8 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { formatDate, sortExpenseByDate } from '../../utils/date';
 import { VIEW_TYPE } from '@/app/utils/enum';
+import { formatDate, sortExpenseByDate } from '@/pages/api/utils/date';
 
 interface IQuery {
   startDate?: string;

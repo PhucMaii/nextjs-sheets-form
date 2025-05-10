@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { calculateHours } from '../../drivers/shift/clock-out';
 import { SHIFT_STATUS, WORKING_ROLE } from '@/app/utils/enum';
+import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 
 const prisma = new PrismaClient();
 

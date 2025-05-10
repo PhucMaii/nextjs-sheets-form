@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
-import { getUserInfo } from '../../utils/auth';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { getUserInfo } from '@/pages/api/utils/auth';
 
 const prisma = new PrismaClient();
 

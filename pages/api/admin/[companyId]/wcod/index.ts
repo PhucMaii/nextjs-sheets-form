@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { Orders, PrismaClient } from '@prisma/client';
-import { generate7DaysBefore } from '../../utils/date';
+import { generate7DaysBefore } from '@/pages/api/utils/date';
 import { ORDER_STATUS } from '@/app/utils/enum';
 
 interface IQuery {

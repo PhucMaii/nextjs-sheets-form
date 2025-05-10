@@ -1,4 +1,4 @@
-import { UpdateOption } from '@/pages/api/admin/orderedItems/PUT';
+import { UpdateOption } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import React, { Dispatch, SetStateAction } from 'react';
 

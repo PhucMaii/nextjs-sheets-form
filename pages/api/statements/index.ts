@@ -5,8 +5,8 @@ import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import withAuthGuard from '../utils/withAuthGuard';
 import { getUserInfo } from '../utils/auth';
-import { groupOrderByMMYYYY } from '../admin/clients/debt';
-import { calculateTotalPrice, sortKeys } from '../admin/sendInvoicePdf';
+import { groupOrderByMMYYYY } from '@/pages/api/admin/[companyId]/clients/debt';
+import { calculateTotalPrice, sortKeys } from '@/pages/api/admin/[companyId]/sendInvoicePdf';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

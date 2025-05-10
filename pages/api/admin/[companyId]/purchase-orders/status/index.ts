@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import emailHandler from '@/pages/api/utils/email';
 import { generatePurchaseOrderTemplate } from '@/config/email';
 import { PO_STATUS } from '@/app/utils/enum';

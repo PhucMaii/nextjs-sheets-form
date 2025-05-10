@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
 import POST from './POST';
 import PUT from './PUT';
-import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import DELETE from './DELETE';
 import reArrangement from './reArrangement';
 

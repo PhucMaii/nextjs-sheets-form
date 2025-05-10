@@ -5,7 +5,7 @@ import { BoxModal } from '../styled';
 import ErrorIcon from '@mui/icons-material/Error';
 import { errorColor } from '@/theme/color';
 import { grey } from '@mui/material/colors';
-import { DELETE_OPTION } from '@/pages/api/admin/scheduledOrders/DELETE';
+import { DELETE_OPTION } from '@/pages/api/admin/[companyId]/scheduledOrders/DELETE';
 import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {

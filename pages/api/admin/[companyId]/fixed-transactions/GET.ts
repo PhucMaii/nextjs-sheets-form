@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { normalizeDate } from '../../utils/date';
+import { normalizeDate } from '@/pages/api/utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
 import { FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
 

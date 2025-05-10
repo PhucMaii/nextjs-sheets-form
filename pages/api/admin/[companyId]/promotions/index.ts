@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import GET from './GET';
 import POST from './POST';
 import PUT from './PUT';

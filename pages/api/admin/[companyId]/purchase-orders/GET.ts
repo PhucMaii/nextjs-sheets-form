@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { formatDate } from '../../utils/date';
+import { formatDate } from '@/pages/api/utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
 
 const prisma = new PrismaClient();

@@ -3,12 +3,12 @@ import {
   categorizeUpdatedItems,
   generateOrderTotalPrice,
   ITEM_CATEGORIZED,
-} from '@/pages/api/admin/orderedItems/PUT';
+} from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import {
   // generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
-} from '@/pages/api/admin/orderedItems/single';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';

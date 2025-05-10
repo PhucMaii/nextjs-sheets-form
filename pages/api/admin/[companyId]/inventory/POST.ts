@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '../../utils/auth';
+import { getUserInfo } from '@/pages/api/utils/auth';
 import { infoBackground } from '@/theme/color';
 import { otherTypeId } from '@/app/lib/constant';
-import { calculateNextIndexPosAndRows } from '../../utils/appearance';
+import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
 
 interface IBody {
   name: string;

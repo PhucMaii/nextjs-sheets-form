@@ -1,7 +1,7 @@
 import { generateListOfDateString } from '@/app/utils/time';
+import { formatDate } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { formatDate } from '../../utils/date';
 
 interface IQuery {
   id?: string;

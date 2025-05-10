@@ -1,4 +1,4 @@
-import { ClientStatementType } from '@/pages/api/admin/routes/GET';
+import { ClientStatementType } from '@/pages/api/admin/[companyId]/routes/GET';
 import {
   AlertColor,
   Checkbox,

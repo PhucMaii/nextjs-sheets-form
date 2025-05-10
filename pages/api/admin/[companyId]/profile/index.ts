@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import PUT from './PUT';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {

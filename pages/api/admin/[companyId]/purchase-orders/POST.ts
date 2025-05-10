@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
-import { getUserInfo } from '../../utils/auth';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { getUserInfo } from '@/pages/api/utils/auth';
 import { PO_STATUS } from '@/app/utils/enum';
 import { generatePurchaseOrderTemplate } from '@/config/email';
-import emailHandler from '../../utils/email';
+import emailHandler from '@/pages/api/utils/email';
 const prisma = new PrismaClient();
 
 interface IBody {

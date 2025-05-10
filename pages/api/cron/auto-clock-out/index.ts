@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
-import { calculateHours } from '../../drivers/shift/clock-out';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 
 const prisma = new PrismaClient();
 
@@ -16,7 +16,7 @@ export default async function handler(
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const activeShifts = await prisma.shiftSession.findMany({
+    const activeShifts: any = await prisma.shiftSession.findMany({
       where: {
         endedAt: null,
         isActive: true,

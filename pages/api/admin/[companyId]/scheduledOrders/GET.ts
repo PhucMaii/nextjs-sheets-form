@@ -1,7 +1,7 @@
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { DayRange, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { convertToPSTDate, normalizeDate } from '../../utils/date';
+import { convertToPSTDate, normalizeDate } from '@/pages/api/utils/date';
 
 interface QueryTypes {
   day?: string;

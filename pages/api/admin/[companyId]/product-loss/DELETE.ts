@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { manuallyRestockInventoryItemQty } from '../../utils/inventoryItem';
+import { manuallyRestockInventoryItemQty } from '@/pages/api/utils/inventoryItem';
 
 interface IQuery {
   id?: string;

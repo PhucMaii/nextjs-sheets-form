@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { getTodayDate, normalizeDate } from '../../utils/date';
+import { getTodayDate, normalizeDate } from '@/pages/api/utils/date';
 import { days } from '@/app/lib/constant';
 import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
-import { insertOrdersToSelectedBoards } from '../../admin/cod/auto-add-board';
+import { insertOrdersToSelectedBoards } from '@/pages/api/admin/[companyId]/cod/auto-add-board';
 
 export default async function handler(req: any, res: any) {
   try {

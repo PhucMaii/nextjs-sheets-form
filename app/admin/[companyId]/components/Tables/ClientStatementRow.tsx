@@ -12,7 +12,7 @@ import StatusText from '../StatusText';
 import { useReactToPrint } from 'react-to-print';
 import { blue, grey } from '@mui/material/colors';
 import CheckIcon from '@mui/icons-material/Check';
-import { ClientStatementType } from '@/pages/api/admin/routes/GET';
+import { ClientStatementType } from '@/pages/api/admin/[companyId]/routes/GET';
 
 interface IProps {
   client: ClientStatementType;

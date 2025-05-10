@@ -8,7 +8,7 @@ import {
   createFifo,
   createOrderedItems,
   updateVendorItemQuantity,
-} from '@/pages/api/admin/inventory/expenses/POST';
+} from '@/pages/api/admin/[companyId]/inventory/expenses/POST';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

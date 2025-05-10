@@ -2,7 +2,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import {
   restockInventoryItem,
   subtractInventoryItem,
-} from '@/pages/api/admin/orderedItems/single';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { OrderedItems, PrismaClient } from '@prisma/client';

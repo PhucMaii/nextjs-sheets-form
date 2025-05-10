@@ -1,14 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import withAdminAuthGuard from '../../utils/withAdminAuthGuard';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { UserType } from '@/app/utils/type';
-import { sendInvoiceThroughEmail } from '../../utils/email';
+import { sendInvoiceThroughEmail } from '@/pages/api/utils/email';
 import { groupOrderByMMYYYY } from '../clients/debt';
 import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
-import { normalizeDate } from '../../utils/date';
-import { formatItemsWithTotalPrice } from '../../utils/order';
+import { normalizeDate } from '@/pages/api/utils/date';
+import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 
 interface IBody {
   client: UserType | null;

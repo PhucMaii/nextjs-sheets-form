@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate, normalizeDate } from '../../utils/date';
-import { getUserInfo } from '../../utils/auth';
+import { getTodayDate, normalizeDate } from '@/pages/api/utils/date';
+import { getUserInfo } from '@/pages/api/utils/auth';
 import { RECURRENCE_TYPE, FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
 interface IBody {
   title: string;
