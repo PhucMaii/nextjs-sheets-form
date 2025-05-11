@@ -50,7 +50,7 @@ export default function SearchInventoryItems({
     } else {
       setDisplayItems(inventoryItems);
     }
-  }, [debouncedSearch]);
+  }, [debouncedSearch, inventoryItems]);
 
   return (
     <Modal open={open} onClose={onClose}>

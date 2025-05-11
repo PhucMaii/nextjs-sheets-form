@@ -798,6 +798,7 @@ export const createOrderedItems = async (
       expenseId: newExpense.id,
       price: item.unit.unitPrice,
       name: fifoItem.inventoryItem.name,
+      inventoryItemId: fifoItem.inventoryItemId,
       inventoryUnitId: selectedUnit?.id,
     };
   });
