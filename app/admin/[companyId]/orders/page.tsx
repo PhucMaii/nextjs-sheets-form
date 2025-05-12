@@ -175,9 +175,14 @@ export default function Orders() {
   }, [date]);
 
   // Data Fetching
+  // const [orders, mutate, isValidating] = SWRFetchData(
+  //   getAdminApiUrl(companyId, `/orders?date=${date}&status=${currentStatus}`),
+  // );
   const [orders, mutate, isValidating] = SWRFetchData(
     getAdminApiUrl(companyId, `/orders?date=${date}&status=${currentStatus}`),
   );
+
+  // console.log(orders, 'orders');
 
   const selectedDate = new Date(date);
   const [routes] = SWRFetchData(

@@ -36,13 +36,15 @@ export default function AuthenGuard({ children }: any) {
     },
   );
 
-  const { data: driver } = useSWR(
-    session?.user?.name ? `${API_URL.DRIVER}?id=${session?.user?.id}` : null,
+  const { data: employee } = useSWR(
+    session?.user?.name ? `/api/employee` : null,
     fetcher,
     {
       revalidateOnFocus: false,
     },
   );
+
+  // console.log('employee', {employee, session});
 
   useEffect(() => {
     if (
@@ -58,16 +60,20 @@ export default function AuthenGuard({ children }: any) {
     ) {
       router.push('/');
     } else if (
-      user &&
-      !pathname?.startsWith('/admin') &&
-      (user.data.role === USER_ROLE.ADMIN ||
-        user.data.role === USER_ROLE.SUPER_ADMIN)
+      employee &&
+      (employee.data.role === USER_ROLE.ADMIN ||
+        employee.data.role === USER_ROLE.SUPER_ADMIN) &&
+      !pathname?.startsWith('/admin')
     ) {
-      router.push('/admin/orders');
-    } else if (driver && !pathname?.startsWith('/driver')) {
+      router.push(`/admin/${employee.data.companyId}/orders`);
+    } else if (
+      employee &&
+      employee.data.role === USER_ROLE.DRIVER &&
+      !pathname?.startsWith('/driver')
+    ) {
       router.push('/driver/overview');
     }
-  }, [pathname, session, user, driver]);
+  }, [pathname, session, user, employee]);
 
   return children;
 }

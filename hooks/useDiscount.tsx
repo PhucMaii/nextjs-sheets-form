@@ -5,6 +5,10 @@ import React, { useMemo } from 'react';
 
 export const useDiscount = (items: IItem[], order: Order) => {
   const discountPrice = useMemo(() => {
+    if (!items || items.length === 0) {
+      return 0;
+    }
+
     const isDiscount = items.some(
       (item: any) => item?.isShowDiscount && item?.prevPrice,
     );

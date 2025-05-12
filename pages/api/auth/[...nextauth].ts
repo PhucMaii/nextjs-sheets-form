@@ -16,8 +16,8 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       credentials: {
-        driverName: {
-          label: 'Driver Name',
+        employeeCode: {
+          label: 'Employee Code',
           type: 'text',
         },
         clientId: {
@@ -37,9 +37,9 @@ export const authOptions: NextAuthOptions = {
             return userData;
           }
 
-          if (credentials?.driverName) {
-            const driverData = await loginDriver(credentials);
-            return driverData;
+          if (credentials?.employeeCode) {
+            const employeeData = await loginEmployee(credentials);
+            return employeeData;
           }
 
           throw new Error('Credentials missing');
@@ -102,34 +102,31 @@ const loginUser = async (credentials: any) => {
   if (!isPasswordValid) {
     throw new Error('Your password is incorrect');
   }
-  return {
-    id: user.id + '',
-    clientId: user.clientId,
-    clientName: user.clientName,
-    role: user.role,
-  };
+
+  const { password, ...userData } = user;
+  return userData;
 };
 
-const loginDriver = async (credentials: any) => {
+const loginEmployee = async (credentials: any) => {
   const prisma = new PrismaClient();
 
-  const driver = await prisma.driver.findFirst({
+  const employee = await prisma.employee.findFirst({
     where: {
-      name: credentials.driverName,
+      employeeCode: credentials.employeeCode,
     },
   });
-  if (!driver) {
-    throw new Error('Driver name does not Exist');
+  if (!employee) {
+    throw new Error('Employee code does not Exist');
   }
   const isPasswordValid = await bcrypt.compare(
     credentials.password,
-    driver.password,
+    employee.password,
   );
   if (!isPasswordValid) {
     throw new Error('Incorrect Credentials');
   }
-  return {
-    id: driver.id + '',
-    name: driver.name,
-  };
+
+  const { password, ...employeeData } = employee;
+  console.log(employeeData, 'employeeData');
+  return employeeData;
 };

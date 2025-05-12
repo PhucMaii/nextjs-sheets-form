@@ -21,8 +21,12 @@ export enum API_URL {
 }
 
 // Helper function to get admin API URL with companyId
-export const getAdminApiUrl = (companyId: string, path: string) => {
-  return `/api/admin/${companyId}${path}`;
+export const getAdminApiUrl = (
+  companyId: string,
+  path: string,
+  query?: string,
+) => {
+  return `/api/admin/${companyId}${path}${query ? `?${query}` : ''}`;
 };
 
 export enum VIEW_TYPE {

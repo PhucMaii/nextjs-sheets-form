@@ -47,9 +47,9 @@ export const ComponentToPrint = forwardRef(
 
     const totalPrice = total?.subTotal + (total?.PST || 0) + (total?.GST || 0);
 
-    const orderDetailsTemplate = [];
+    const orderDetailsTemplate: any = [];
 
-    for (const item of order.items) {
+    for (const item of order?.items || []) {
       if (item.quantity > 0) {
         orderDetailsTemplate.push(
           <TableRow key={item.name}>

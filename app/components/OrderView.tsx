@@ -442,7 +442,7 @@ const OrderView = ({
       });
     });
 
-    console.log(newTypes, 'new Types');
+    // console.log(newTypes, 'new Types');
 
     return newTypes;
   }, [items, appearance]);
@@ -588,7 +588,7 @@ const OrderView = ({
       (i) => i[comparedField] === item[comparedField],
     );
 
-    console.log(option, 'ITEM OPTION');
+    // console.log(option, 'ITEM OPTION');
     if (existingItem) {
       const newOrderedItems = orderedItems.map((i) => {
         if (i[comparedField] === item[comparedField]) {
@@ -1021,7 +1021,7 @@ const OrderView = ({
 
         {orderedItems.length > 0 ? (
           orderedItems.map((item: IItem | any) => {
-            console.log('item', item);
+            // console.log('item', item);
             return (
               <Box
                 key={item.id}

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -116,15 +117,17 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.expense.updateMany({
-    where: {
-      id: {
-        in: [1186, 1185, 1184, 1183],
+  const password = await bcrypt.hash('maiphuc0102', 12);
+  await prisma.employee.createMany({
+    data: [
+      {
+        employeeCode: '0102',
+        name: 'Phuc Mai',
+        password,
+        companyId: 1,
+        role: 'super admin',
       },
-    },
-    data: {
-      fixedTransactionId: null,
-    },
+    ],
   });
 }
 

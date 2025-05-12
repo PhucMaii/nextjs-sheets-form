@@ -7,6 +7,9 @@ import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
+    console.log('Items API called with method:', req.method);
+    console.log('Query parameters:', req.query);
+
     if (req.method === 'GET') {
       const response = await GET(req, res);
       return response;
@@ -31,7 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       error: 'Your method is not supported',
     });
   } catch (error: any) {
-    console.log('Internal Server Error: ', error);
+    console.log('Internal Server Error in items API: ', error);
     return res.status(500).json({
       error: 'Internal Server Error: ' + error,
     });

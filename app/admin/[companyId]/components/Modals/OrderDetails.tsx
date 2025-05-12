@@ -1,5 +1,5 @@
 import { AlertColor, Modal } from '@mui/material';
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import { Order } from '../../orders/page';
@@ -29,8 +29,32 @@ const OrderDetails = ({
   const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
   const [clientItems] = SWRFetchData(
-    `${getAdminApiUrl(companyId, `/items?categoryId=${order?.user?.categoryId}`)}`,
+    getAdminApiUrl(companyId, `/items?categoryId=${order?.user?.categoryId}`),
   );
+
+  useEffect(() => {
+    if (order?.user?.categoryId) {
+      fetchClientItems();
+    }
+  }, [order?.user?.categoryId]);
+
+  const fetchClientItems = async () => {
+    try {
+      const response = await axios.get(
+        getAdminApiUrl(
+          companyId,
+          `/items?categoryId=${order?.user?.categoryId}`,
+        ),
+      );
+      
+      
+    } catch (error: any) {
+      console.log('Fail to fetch client items: ', error);
+    }
+  };
+
+  // console.log('Fetching items for categoryId:', order?.user?.categoryId);
+  // console.log('Client items response:', clientItems);
 
   // useEffect(() => {
   //   if (order.items) {
