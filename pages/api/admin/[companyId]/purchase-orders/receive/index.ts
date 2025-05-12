@@ -32,6 +32,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     const { poId, poItems, expenseData } = req.body as IBody;
 
     const existingPo = await prisma.pO.findUnique({
@@ -78,6 +84,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         paymentMethodId: expenseData.paymentMethodId,
         status: expenseData.status,
         invoice: expenseData.invoice,
+        companyId: Number(companyId),
       },
     });
 
@@ -122,14 +129,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           inventoryItemId: poItem.inventoryItemId,
           inventoryItem: poItem.inventoryItem,
+          companyId: Number(companyId),
         });
       }
     }
     // Create items for the transaction
     if (itemParamsFifo.length > 0) {
-      await createFifo(itemParamsFifo, today.dateAndTime, createdBy);
+      await createFifo(
+        Number(companyId),
+        itemParamsFifo,
+        today.dateAndTime,
+        createdBy,
+      );
 
       const response = await createOrderedItems(
+        Number(companyId),
         itemParamsFifo,
         newTransaction,
         today.dateAndTime,

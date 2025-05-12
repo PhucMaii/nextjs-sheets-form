@@ -8,17 +8,24 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { startDate, endDate } = req.query as IQuery;
+    const { startDate, endDate, companyId } = req.query as IQuery;
 
     if (!startDate || !endDate) {
       return res.status(400).json({
         message: 'Start date and end date are required',
+      });
+    }
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
       });
     }
 
@@ -34,6 +41,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         reportedDate: {
           in: listOfDates,
         },
+        companyId: Number(companyId),
       },
       include: {
         medias: true,

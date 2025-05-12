@@ -5,12 +5,17 @@ import { normalizeDate } from '../../../utils/date';
 
 interface IQuery {
   date?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { date } = req.query as IQuery;
+    const { date, companyId } = req.query as IQuery;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
 
     if (date) {
       const selectedDate = normalizeDate(new Date(date));
@@ -20,6 +25,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const dayRoutes = await prisma.route.findMany({
         where: {
           day,
+          companyId: Number(companyId),
         },
         include: {
           driver: true,
@@ -36,7 +42,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // TODO: Fetch all drivers from employee table where role === driver
     const drivers = await prisma.driver.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         routes: true,
       },

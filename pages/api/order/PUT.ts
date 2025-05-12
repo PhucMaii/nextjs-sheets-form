@@ -66,7 +66,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const newItems = categorizeUpdatedItems(userLastOrder.items, body.items);
+    const newItems = categorizeUpdatedItems(
+      userLastOrder?.companyId || -1,
+      userLastOrder.items,
+      body.items,
+    );
 
     console.log(newItems, 'acutalUpdatedItems');
 
@@ -75,7 +79,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // CREATE
       if (item.type === ITEM_CATEGORIZED.CREATE) {
-        await createOrderedItems(userLastOrder, [item]);
+        await createOrderedItems(
+          userLastOrder?.companyId || -1,
+          userLastOrder,
+          [item],
+        );
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN

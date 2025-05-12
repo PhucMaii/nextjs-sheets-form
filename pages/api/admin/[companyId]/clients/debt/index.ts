@@ -7,6 +7,7 @@ interface IQuery {
   userId?: string;
   endMonth?: string;
   endYear?: string;
+  companyId?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -18,9 +19,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const prisma = new PrismaClient();
 
-    const { userId, endMonth, endYear }: IQuery = req.query;
+    const { userId, endMonth, endYear, companyId }: IQuery = req.query;
 
-    if (!userId || !endMonth || !endYear) {
+    if (!userId || !endMonth || !endYear || !companyId) {
       return res.status(404).json({
         error: 'Parameters are missing',
       });
@@ -32,6 +33,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: {
           in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
         },
+        companyId: Number(companyId),
       },
     });
 

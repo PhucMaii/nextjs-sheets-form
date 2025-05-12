@@ -14,6 +14,14 @@ export default async function DELETE(
 
     const { removedId }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+    
     if (removedId) {
       const deletedItem = await prisma.item.delete({
         where: {
@@ -27,6 +35,7 @@ export default async function DELETE(
           user: {
             categoryId: deletedItem.categoryId,
           },
+          companyId: Number(companyId),
         },
         include: {
           items: true,

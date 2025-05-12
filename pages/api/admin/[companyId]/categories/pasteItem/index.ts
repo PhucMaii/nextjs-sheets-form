@@ -18,6 +18,7 @@ export default async function handler(
     const prisma = new PrismaClient();
 
     const { categoryId, newItems }: IBody = req.body;
+    const { companyId } = req.query;
 
     const existingCategory = await prisma.category.findUnique({
       where: {
@@ -59,6 +60,7 @@ export default async function handler(
         prevPrice: item?.prevPrice,
         inventoryItemId: item?.inventoryItemId,
         inventoryUnitId: item?.inventoryUnitId,
+        companyId: Number(companyId),
       };
     });
 
@@ -93,6 +95,7 @@ export default async function handler(
               isShowDiscount: newItem?.isShowDiscount,
               prevPrice: newItem?.prevPrice,
               scheduledOrderId: oldScheduledOrder.id,
+              companyId: Number(companyId),
             };
           } else {
             return {

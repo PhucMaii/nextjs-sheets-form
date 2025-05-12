@@ -38,6 +38,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }: IBody = req.body;
     console.log(req.body);
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const existingItem = await prisma.orderedItems.findUnique({
       where: {
         id,
@@ -91,6 +99,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     await checkAndUpdateUnits(
+      Number(companyId),
       dbUnits,
       customAmount?.units || [],
       customAmount.inventoryUnit.vendorItemId,
@@ -105,13 +114,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    await createOrderedItems(existingOrder, [
-      {
-        ...customAmount,
-        inventoryUnit: targetUnit,
-        inventoryUnitId: targetUnit?.id,
-      },
-    ]);
+    await createOrderedItems(
+      Number(companyId),
+      existingOrder,
+      [
+        {
+          ...customAmount,
+          inventoryUnit: targetUnit,
+          inventoryUnitId: targetUnit?.id,
+        },
+      ],
+    );
 
     // Delete prev ordered item
     await prisma.orderedItems.delete({

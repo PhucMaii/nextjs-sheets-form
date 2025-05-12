@@ -114,7 +114,12 @@ export const overrideOrder = async (
 
       if (!existingItem) {
         // If item not exists -> create new item
-        await createOrderedItems(order, [item], updatedBy);
+        await createOrderedItems(
+          order?.companyId || -1,
+          order,
+          [item],
+          updatedBy,
+        );
       } else {
         // Else, Update each item
         const newItem = await prisma.orderedItems.update({

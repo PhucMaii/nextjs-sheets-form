@@ -17,6 +17,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+    
     const {
       fileKeyFront,
       fileKeyBack,
@@ -51,6 +53,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         chequeNumber,
         amount,
         userId,
+        companyId: Number(companyId),
         createdBy: `Admin - ${admin?.clientName || ''}`,
         createdAt: dateAndTime,
       },

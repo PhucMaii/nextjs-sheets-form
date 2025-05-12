@@ -7,13 +7,21 @@ interface IQuery {
   userId?: string;
   itemId?: string;
   inventoryItemId?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { itemId, categoryId, userId, inventoryItemId }: IQuery = req.query;
+    const { itemId, categoryId, userId, inventoryItemId, companyId }: IQuery =
+      req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
 
     if (itemId) {
       const item = await prisma.item.findUnique({
@@ -135,6 +143,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const existingUser = await prisma.user.findUnique({
         where: {
           id: Number(userId),
+          companyId: Number(companyId),
         },
       });
 
@@ -147,6 +156,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const items = await prisma.item.findMany({
         where: {
           categoryId: existingUser?.categoryId || 0,
+          companyId: Number(companyId),
         },
         include: {
           options: {

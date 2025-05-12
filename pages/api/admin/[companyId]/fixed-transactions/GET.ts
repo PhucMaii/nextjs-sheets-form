@@ -7,15 +7,16 @@ import { FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
 interface IQuery {
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 const prisma = new PrismaClient();
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { startDate, endDate } = req.query as IQuery;
+    const { startDate, endDate, companyId } = req.query as IQuery;
 
-    if (!startDate || !endDate) {
+    if (!startDate || !endDate || !companyId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     const normalizedStartDate = normalizeDate(new Date(startDate));
@@ -41,6 +42,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         status: {
           not: FIXED_TRANSACTION_STATUS.ARCHIVED,
         },
+        companyId: Number(companyId),
       },
     });
 
@@ -50,6 +52,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         date: {
           in: listOfDates,
         },
+        companyId: Number(companyId),
       },
       include: {
         fixedTransaction: true,
@@ -73,6 +76,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // Overview calculation
     const totalFixedTransactions =
       fixedTransactions.reduce(
         (acc, transaction) => acc + (transaction?.defaultAmount || 0),

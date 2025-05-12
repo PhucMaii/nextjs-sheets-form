@@ -21,6 +21,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(404).json({
+        error: 'Parameters are missing',
+      });
+    }
+
     const {
       clientId,
       clientName,
@@ -62,6 +70,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         deliveryAddressLat: addresss.latitude,
         deliveryAddressLng: addresss.longitude,
         createdAt,
+        companyId: Number(companyId),
       },
     });
 

@@ -10,6 +10,7 @@ interface IBody {
   id: number;
 }
 
+
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();

@@ -7,13 +7,14 @@ interface IQuery {
   id?: string;
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 const prisma = new PrismaClient();
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { id, startDate, endDate } = req.query as IQuery;
+    const { id, startDate, endDate, companyId } = req.query as IQuery;
 
     if (id) {
       const productLoss = await prisma.lossReport.findUnique({
@@ -46,6 +47,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           reportedDate: {
             in: listOfDates,
           },
+          companyId: Number(companyId),
         },
         include: {
           medias: true,

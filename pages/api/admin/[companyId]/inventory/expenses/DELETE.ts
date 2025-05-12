@@ -9,9 +9,9 @@ export default async function DELETE(
   try {
     const prisma = new PrismaClient();
 
-    const { id }: { id?: string } = req.query;
+    const { id, companyId }: { id?: string; companyId?: string } = req.query;
 
-    if (!id) {
+    if (!id || !companyId) {
       return res.status(404).json({ error: 'Expense Id Not Provided' });
     }
 
@@ -33,7 +33,11 @@ export default async function DELETE(
       return res.status(404).json({ error: 'Expense Not Found' });
     }
 
-    const vendorItems = await prisma.vendorItem.findMany({});
+    const vendorItems = await prisma.vendorItem.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
+    });
 
     // Decrease quantity
     for (const item of existingExpense.orderedItems) {

@@ -31,11 +31,20 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       skipChecked,
     }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     if (!skipChecked) {
       const existedDriverInDate = await prisma.codBoard.findMany({
         where: {
           date,
           driverId,
+          companyId: Number(companyId),
         },
       });
 
@@ -55,6 +64,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         cash,
         driverId,
         status: COD_STATUS.IN_PROCESS,
+        companyId: Number(companyId),
       },
     });
 
@@ -73,6 +83,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             paymentType: PAYMENT_TYPE.COD,
           },
         },
+        companyId: Number(companyId),
       },
       include: {
         items: true,
@@ -90,6 +101,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         day,
         driverId,
+        companyId: Number(companyId),
       },
       include: {
         clients: {

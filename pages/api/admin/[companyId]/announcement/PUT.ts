@@ -12,6 +12,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId }: any = req.query;
+
     const {
       announcementId,
       announcement = '',
@@ -28,6 +30,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const existingAnnouncement = await prisma.announcement.findUnique({
       where: {
         id: announcementId,
+        companyId,
       },
     });
 

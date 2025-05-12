@@ -23,7 +23,14 @@ interface IBody {
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
+    const { companyId } = req.query;
 
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+    
     const {
       createdAt,
       createdBy,
@@ -124,6 +131,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdBy: createdBy ? createdBy : `Admin - ${user?.clientName}`,
         codBoardId,
         discount,
+        companyId: Number(companyId),
       },
     });
 

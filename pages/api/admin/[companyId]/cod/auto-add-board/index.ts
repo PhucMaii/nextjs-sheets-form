@@ -25,6 +25,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const prisma = new PrismaClient();
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
 
     const { todayString }: IBody = req.body;
 
@@ -41,6 +48,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const boards: any = await prisma.codBoard.findMany({
       where: {
         date: todayString,
+        companyId: Number(companyId),
       },
       include: {
         orders: true,
@@ -50,14 +58,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const wcodDay: any = getWCODDay(todayString);
     const last7Days = generate7DaysBefore(todayString);
 
-    console.log(last7Days, 'last7Days');
-
     // Check if boards are added already
     const newWCODBoardOrders = await prisma.orders.findMany({
       where: {
         deliveryDate: {
           in: [...last7Days, todayString],
         },
+        companyId: Number(companyId),
         status: {
           not: ORDER_STATUS.VOID,
         },
@@ -92,6 +99,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: {
           not: ORDER_STATUS.VOID,
         },
+        companyId: Number(companyId),
         codBoardId: null,
         user: {
           preference: {

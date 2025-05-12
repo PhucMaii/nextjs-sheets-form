@@ -17,6 +17,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const { id, name, address, phoneNumber, email, joinedDate }: IBody =
       req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Missing companyId' });
+    }
+
     if (!name || !address || !joinedDate) {
       return res.status(404).json({
         error: 'You are missing body data',
@@ -43,6 +49,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: {
           not: id,
         },
+        companyId: Number(companyId),
       },
     });
 

@@ -16,13 +16,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prisma = new PrismaClient();
 
     const { activePromotionIds }: IBody = req.body;
-
+    const { companyId } = req.query;
     if (!activePromotionIds) {
       return res.status(400).json({ error: 'Missing parameters' });
     }
 
     const dbActivePromotions = await prisma.promotion.findMany({
       where: {
+        companyId: Number(companyId),
         status: PROMOTION_STATUS.ACTIVE,
         isWebsite: null,
       },

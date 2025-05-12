@@ -6,11 +6,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { categoryName } = req.body;
+    const { companyId } = req.query;
 
     // Check if name existed
     const sameNameCategory = await prisma.category.findFirst({
       where: {
         name: categoryName,
+        companyId: Number(companyId),
       },
     });
 
@@ -23,6 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newCategory = await prisma.category.create({
       data: {
         name: categoryName,
+        companyId: Number(companyId),
       },
     });
 

@@ -14,6 +14,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const { newItem, createdAt, categoryIds }: IBody = req.body;
 
     const isItemValid: any = await checkIsItemValid(newItem);
@@ -54,6 +62,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       );
 
       await checkAndUpdateUnits(
+        Number(companyId),
         vItem.unit,
         clientVendorItemUnits,
         vItem.id,
@@ -77,6 +86,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             unitPrice: unit.unitPrice,
             createdAt,
             createdBy,
+            companyId: Number(companyId),
           };
         }),
       });
@@ -91,6 +101,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         unit: newItem.unit.unit,
         ratio: newItem.unit.ratio,
         unitPrice: newItem.unit.unitPrice,
+        companyId: Number(companyId),
       },
     });
 
@@ -102,6 +113,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const sellingItems = await prisma.item.findMany({
       where: {
+        companyId: Number(companyId),
         categoryId: {
           in: categoryIds,
         },
@@ -129,6 +141,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           inventoryItemId: newItem?.inventoryItemId || null,
           inventoryUnitId: selectedUnit.id,
           categoryId,
+          companyId: Number(companyId),
         };
       })
       .filter((item: any) => {

@@ -5,6 +5,7 @@ import { getAllUnitsByInventoryItemId } from './units';
 import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POST';
 
 export const createOrderedItems = async (
+  companyId: number,
   order: Orders,
   items: any,
   createdBy: string = '',
@@ -13,6 +14,9 @@ export const createOrderedItems = async (
 
   // STEP 1: Loop through each item
   const inventoryItems = await prisma.inventoryItem.findMany({
+    where: {
+      companyId,
+    },
     include: {
       vendorItem: {
         include: {
@@ -33,6 +37,7 @@ export const createOrderedItems = async (
 
   // // Check is order valid to affect inventory
   const isValidToCheckInventory = await checkOrderValidToAffectInventory(
+    companyId,
     order.deliveryDate,
   );
 
@@ -55,6 +60,7 @@ export const createOrderedItems = async (
         profit: item.price - item.cost,
         quantity: item.quantity,
         isCustomAmount: item.isCustomAmount,
+        companyId,
       });
       continue;
     }
@@ -75,6 +81,7 @@ export const createOrderedItems = async (
       });
       const updatedAt = getTodayDate();
       await checkAndUpdateUnits(
+        companyId,
         dbUnits,
         item.units,
         item.inventoryUnit.vendorItemId,
@@ -86,6 +93,7 @@ export const createOrderedItems = async (
         where: {
           vendorItemId: item.inventoryUnit.vendorItemId,
           ratio: item.inventoryUnit.ratio,
+          companyId,
         },
       });
 
@@ -107,6 +115,7 @@ export const createOrderedItems = async (
             : 0,
           createdAt: order.orderTime,
           createdBy: order?.createdBy || '',
+          companyId,
         },
         include: {
           vendorItem: true,
@@ -149,6 +158,7 @@ export const createOrderedItems = async (
         inventoryUnitId: unitId,
         inventoryItemId: item.inventoryItemId,
         isCustomAmount: item?.isCustomAmount || false,
+        companyId,
       });
     } else {
       // CASE 2: Check if vendor item has batch
@@ -250,6 +260,7 @@ export const createOrderedItems = async (
             prevPrice: item?.option?.prevPrice,
             isShowDiscount: item?.option?.isShowDiscount,
           },
+          companyId,
           name: item.name,
           cost: cost,
           profit: item.price - cost,
@@ -287,6 +298,7 @@ export const createOrderedItems = async (
           inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
+          companyId,
         });
       }
     }

@@ -16,6 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
     const { itemTypes }: IBody = req.body;
 
     if (!itemTypes) {
@@ -58,6 +59,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
     const dbTypes = await prisma.itemType.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         inventoryItems: {
           include: {
@@ -87,6 +91,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await checkAndUpdateContainers(updatedTypes, dbTypes, 'itemType', 'name');
 
     const dbInventoryItems: any = await prisma.inventoryItem.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         type: true,
       },
@@ -130,6 +137,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const dbPromotions = await prisma.promotion.findMany({
       where: {
+        companyId: Number(companyId),
         status: PROMOTION_STATUS.ACTIVE,
         isWebsite: null,
       },
@@ -159,6 +167,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const dbPromoItems: any = await prisma.inventoryItem.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         type: true,
       },

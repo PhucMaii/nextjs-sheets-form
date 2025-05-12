@@ -16,6 +16,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(404).json({
+        error: 'Parameters are missing',
+      });
+    }
+
     const { user, items, scheduledOrderId, oldRouteId, newRouteId } =
       req.body as BodyTypes;
 
@@ -97,6 +105,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Attach type of items: CREATE, UPDATE, DELETE
     const categorizedItems = categorizeUpdatedItems(
+      Number(companyId),
       existingScheduleOrder.items,
       items,
     );
@@ -117,6 +126,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             inventoryItemId: item.inventoryItemId,
             inventoryUnitId: item.inventoryUnitId,
             option: item.option,
+            companyId: Number(companyId),
           },
         });
         continue;

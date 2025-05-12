@@ -18,6 +18,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { orderId, customAmount }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const existingOrder = await prisma.orders.findUnique({
       where: {
         id: orderId,
@@ -39,6 +47,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log(customAmount.units, 'units');
 
     await checkAndUpdateUnits(
+      Number(companyId),
       dbUnits,
       customAmount?.units || [],
       customAmount.inventoryUnit.vendorItemId,
@@ -53,15 +62,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    console.log(targetUnit, 'targetUnit');
-
-    const orderedItems = await createOrderedItems(existingOrder, [
-      {
-        ...customAmount,
-        inventoryUnit: targetUnit,
-        inventoryUnitId: targetUnit?.id,
-      },
-    ]);
+    const orderedItems = await createOrderedItems(
+      Number(companyId),
+      existingOrder,
+      [
+        {
+          ...customAmount,
+          inventoryUnit: targetUnit,
+          inventoryUnitId: targetUnit?.id,
+        },
+      ],
+    );
 
     // Generate total price order newly added custom amount order
     const newlyAddedCustomAmountOrder = await prisma.orders.findUnique({

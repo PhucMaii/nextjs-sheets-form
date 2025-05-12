@@ -3,13 +3,20 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   id?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id }: IQuery = req.query;
+    const { id, companyId }: IQuery = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
 
     if (id) {
       const method = await prisma.paymentMethod.findUnique({
@@ -27,6 +34,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const allMethods = await prisma.paymentMethod.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         transactions: true,
       },

@@ -9,9 +9,19 @@ interface IBody {
   updatedFields: string[];
 }
 
+interface IQuery {
+  companyId?: string;
+}
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { categoryIds, updatedItem, updatedFields } = req.body as IBody;
+
+    const { companyId }: IQuery = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
 
     const fieldsToUpdate: any = {};
     if (updatedFields.includes('name')) {
@@ -58,6 +68,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         user: {
           categoryId: { in: categoryIds },
         },
+        companyId: Number(companyId),
       },
       include: {
         items: {

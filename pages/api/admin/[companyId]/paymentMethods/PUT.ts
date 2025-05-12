@@ -16,6 +16,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const { updatedData, methodId, updatedAt }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const existingMethod = await prisma.paymentMethod.findUnique({
       where: {
         id: methodId,
@@ -33,6 +41,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const sameMethodName = await prisma.paymentMethod.findFirst({
         where: {
           name: updatedData.name,
+          companyId: Number(companyId),
         },
       });
 

@@ -5,7 +5,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Missing companyId' });
+    }
+
     const vendors = await prisma.vendor.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         vendorItem: {
           include: {

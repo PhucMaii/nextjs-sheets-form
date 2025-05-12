@@ -9,17 +9,30 @@ interface IBody {
   itemIds: number[];
 }
 
+interface IQuery {
+  companyId?: string;
+}
+
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
     const { title, status, itemIds }: IBody = req.body;
 
+    const { companyId } = req.query as IQuery;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
+
     // Check is the title existed
     const isTitleExisted = await prisma.promotion.findFirst({
       where: {
         title,
         isWebsite: null,
+        companyId: Number(companyId),
       },
     });
 
@@ -33,6 +46,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const allPromotions = await prisma.promotion.findMany({
       where: {
         isWebsite: null,
+        companyId: Number(companyId),
       },
       orderBy: {
         priority: 'desc',
@@ -50,6 +64,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         rows: 1,
         priority: nextPriority,
         visibility: false,
+        companyId: Number(companyId),
       },
     });
 

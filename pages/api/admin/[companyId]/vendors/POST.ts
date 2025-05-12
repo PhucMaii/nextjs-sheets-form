@@ -18,12 +18,19 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const { name, address, phoneNumber, email, joinedDate, createdAt }: IBody =
       req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Missing companyId' });
+    }
+
     const existingVendor = await prisma.vendor.findFirst({
       where: {
         name,
         address,
         phoneNumber,
         email,
+        companyId: Number(companyId),
       },
     });
 
@@ -44,6 +51,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         joinedDate,
         createdAt,
         createdBy: `Admin - ${admin.clientName}`,
+        companyId: Number(companyId),
       },
     });
 

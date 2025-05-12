@@ -6,11 +6,21 @@ interface IBody {
   name: string;
 }
 
+interface IQuery {
+  companyId?: string;
+}
+
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
     const { id, name }: IBody = req.body;
+
+    const { companyId }: IQuery = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
 
     const existingItemType = await prisma.itemType.findUnique({
       where: {
@@ -30,6 +40,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: {
           not: id,
         },
+        companyId: Number(companyId),
       },
     });
 

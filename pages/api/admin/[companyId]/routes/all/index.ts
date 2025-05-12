@@ -6,7 +6,17 @@ const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
     const routes = await prisma.route.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         clients: {
           include: {

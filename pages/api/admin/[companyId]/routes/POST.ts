@@ -13,6 +13,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { day, driverId, name }: BodyType = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
+
     const existedRoute = await prisma.route.findFirst({
       where: {
         day,
@@ -31,6 +39,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         day,
         driverId,
         name,
+        companyId: Number(companyId),
       },
     });
 

@@ -16,6 +16,10 @@ interface IBody {
   createdAt: string;
 }
 
+interface IQuery {
+  companyId?: string;
+}
+
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
@@ -30,6 +34,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       vendorItems,
       createdAt,
     }: IBody = req.body;
+
+    const { companyId }: IQuery = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
 
     const vendorIds = vendorItems.map((vendorItem: any) => {
       return vendorItem.vendorId;
@@ -54,6 +64,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const sameNameInventory = await prisma.inventoryItem.findFirst({
       where: {
         name,
+        companyId: Number(companyId),
       },
     });
 
@@ -78,6 +89,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         color: infoBackground,
         typeId: typeId > 0 ? typeId : otherTypeId,
         indexPos: nextPos[0],
+        companyId: Number(companyId),
       },
     });
 
@@ -99,6 +111,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         quantity: 0,
         createdAt,
         createdBy,
+        companyId: Number(companyId),
       };
     });
 
@@ -136,6 +149,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           unitPrice: unit.unitPrice,
           createdAt,
           createdBy,
+          companyId: Number(companyId),
         };
       });
     });

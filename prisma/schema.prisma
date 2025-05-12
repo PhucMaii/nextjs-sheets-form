@@ -17,6 +17,8 @@ model Company {
   createdAt String
   createdBy String
 
+  actions           Action[]
+  announcements     Announcement[]
   users             User[]
   employees         Employee[]
   orders            Orders[]
@@ -30,7 +32,18 @@ model Company {
   fixedTransactions FixedTransaction[]
   paymentMethods    PaymentMethod[]
   purchaseOrders    PO[]
+  poItems           POItem[]
   itemTypes         ItemType[]
+  promotions        Promotion[]
+  sellingItems      Item[]
+  orderedItems      OrderedItems[]
+  cheques           Cheque[]
+  clientStatements  ClientStatement[]
+  inventoryUnits    InventoryUnit[]
+  fifos              Fifo[]
+  vendorItems       VendorItem[]
+  scheduledOrders   ScheduleOrders[]
+  lossReports       LossReport[]
 }
 
 model Employee {
@@ -150,6 +163,7 @@ model SubCategory {
 model Item {
   id              Int      @id @default(autoincrement())
   name            String   @db.VarChar(255)
+  companyId       Int?
   categoryId      Int?
   price           Float
   availability    Boolean
@@ -168,6 +182,7 @@ model Item {
   category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
+  company        Company?      @relation(fields: [companyId], references: [id])
   SubCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id])
   subCategoryId Int?
 
@@ -180,6 +195,7 @@ model OrderedItems {
   id               Int      @id @default(autoincrement())
   name             String   @db.VarChar(255)
   price            Float
+  companyId        Int?
   orderId          Int?
   quantity         Int
   scheduledOrderId Int?
@@ -200,8 +216,10 @@ model OrderedItems {
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
+  company         Company?       @relation(fields: [companyId], references: [id])
 
   @@index([orderId])
+  @@index([companyId])
   @@index([expenseId])
   @@index([scheduledOrderId])
   @@index([inventoryItemId])
@@ -254,6 +272,7 @@ model UserPreference {
 
 model ScheduleOrders {
   id            Int            @id @default(autoincrement())
+  companyId     Int?
   totalPrice    Float
   userId        Int
   day           String
@@ -261,6 +280,7 @@ model ScheduleOrders {
   positionIndex PositionIndex? @relation("ScheduledOrderIndex")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company?   @relation(fields: [companyId], references: [id])
 
   @@index([userId])
 }
@@ -309,9 +329,12 @@ model DayRange {
 
 model Announcement {
   id           Int      @id @default(autoincrement())
+  companyId    Int?
   updatedBy    String
   updatedAt    DateTime
   announcement String
+
+  company      Company?   @relation(fields: [companyId], references: [id])
 }
 
 model CodBoard {
@@ -522,6 +545,7 @@ model ItemType_Category {
 
 model VendorItem {
   id              Int    @id @default(autoincrement())
+  companyId       Int?
   inventoryItemId Int
   vendorId        Int
   quantity        Float
@@ -530,6 +554,8 @@ model VendorItem {
 
   inventoryItem InventoryItem   @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   vendor        Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  company       Company?        @relation(fields: [companyId], references: [id])
+
   fifo          Fifo[]
   unit          InventoryUnit[]
 
@@ -539,25 +565,32 @@ model VendorItem {
 
 model Fifo {
   id              Int            @id @default(autoincrement())
+  companyId       Int?
   inventoryItemId Int
   vendorItemId    Int
   quantity        Float
   createdAt       String
   createdBy       String
   price           Float?
-  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  
   vendorItem      VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems    OrderedItems[]
+
+  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  company         Company?       @relation(fields: [companyId], references: [id])
 }
 
 model InventoryUnit {
   id           Int    @id @default(autoincrement())
   vendorItemId Int
+  companyId    Int?
   unit         String
   unitPrice    Float  @db.Double
   ratio        Float
   createdAt    String
   createdBy    String
+
+  company      Company?       @relation(fields: [companyId], references: [id])
 
   sellingItem     Item[]
   itemOptions     Option[]
@@ -575,13 +608,17 @@ model Action {
   id          Int     @id @default(autoincrement())
   name        String
   description String? @db.Text
+  companyId   Int?
   date        String
   createdAt   String
   createdBy   String?
+
+  company     Company?  @relation(fields: [companyId], references: [id])
 }
 
 model Cheque {
   id           Int     @id @default(autoincrement())
+  companyId    Int?
   fileKeyFront String
   fileKeyBack  String?
   month        String
@@ -591,18 +628,23 @@ model Cheque {
   createdAt    String
   createdBy    String
   userId       Int
+  
   user         User    @relation(fields: [userId], references: [id])
+  company      Company?  @relation(fields: [companyId], references: [id])
 }
 
 model ClientStatement {
   id        Int     @id @default(autoincrement())
+  companyId Int?
   month     String
   isPrinted Boolean
   userId    Int
   createdAt String
   printedBy String
   updatedBy String?
+
   user      User    @relation(fields: [userId], references: [id])
+  company   Company?  @relation(fields: [companyId], references: [id])
 }
 
 model CartItem {
@@ -637,6 +679,7 @@ model Cart {
 
 model Promotion {
   id         Int      @id @default(autoincrement())
+  companyId  Int?
   title      String
   status     String
   createdAt  String
@@ -647,6 +690,8 @@ model Promotion {
 
   items        InventoryItem[]
   websiteItems Item[]
+
+  company     Company?      @relation(fields: [companyId], references: [id])
 }
 
 model Option {
@@ -688,7 +733,7 @@ model ShiftSession {
   employee Employee? @relation(fields: [employeeId], references: [id])
   expense  Expense?  @relation(fields: [expenseId], references: [id])
   company  Company?  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Route    Route?    @relation(fields: [routeId], references: [id])
+  route    Route?    @relation(fields: [routeId], references: [id])
 }
 
 model PO {
@@ -720,6 +765,7 @@ model PO {
 model POItem {
   id              Int     @id @default(autoincrement())
   inventoryItemId Int
+  companyId       Int?
   poId            Int
   orderedQty      Float
   receivedQty     Float?
@@ -732,6 +778,7 @@ model POItem {
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
   po            PO            @relation(fields: [poId], references: [id], onDelete: Cascade)
+  company       Company?      @relation(fields: [companyId], references: [id])
 
   @@index([poId])
   @@index([inventoryItemId])
@@ -739,6 +786,7 @@ model POItem {
 
 model LossReport {
   id              Int     @id @default(autoincrement())
+  companyId       Int?
   inventoryItemId Int
   quantityLost    Int
   inventoryUnitId Int
@@ -754,6 +802,7 @@ model LossReport {
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
+  company       Company?      @relation(fields: [companyId], references: [id])
 }
 
 model Media {

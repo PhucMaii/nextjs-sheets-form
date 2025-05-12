@@ -7,6 +7,7 @@ import { days } from '@/app/lib/constant';
 interface RequestQuery {
   date?: string;
   status?: ORDER_STATUS;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
@@ -14,7 +15,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { date, status } = req.query as RequestQuery;
+    const { date, status, companyId } = req.query as RequestQuery;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
 
     const fetchCondition: any = {};
 
@@ -27,7 +34,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const orders: any = await prisma.orders.findMany({
-      where: fetchCondition,
+      where: { ...fetchCondition, companyId: Number(companyId) },
       orderBy: [
         {
           updateTime: 'desc', // Sort by updateTime in descending order
@@ -80,6 +87,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             paymentType: PAYMENT_TYPE.COD,
           },
         },
+        companyId: Number(companyId),
       },
       include: {
         user: true,

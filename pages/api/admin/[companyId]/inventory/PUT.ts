@@ -19,6 +19,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const {
       id,
       name,
@@ -58,6 +66,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: {
           not: existingInventoryItem.id,
         },
+        companyId: Number(companyId),
       },
     });
 
@@ -127,6 +136,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Check units and update units
         await checkAndUpdateUnits(
+          Number(companyId),
           existingVendorItem.unit,
           updatedVendorItem.units,
           existingVendorItem.id,
@@ -146,6 +156,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             quantity: updatedVendorItem.quantity,
             createdAt: updatedAt,
             createdBy,
+            companyId: Number(companyId),
           },
         });
 
@@ -159,6 +170,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               ratio: unit.ratio,
               createdAt: updatedAt,
               createdBy,
+              companyId: Number(companyId),
             };
           }),
         });

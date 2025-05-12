@@ -7,13 +7,14 @@ interface QueryTypes {
   day?: string;
   clientList?: string;
   deliveryDate?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { day, clientList, deliveryDate }: QueryTypes = req.query;
+    const { day, clientList, deliveryDate, companyId }: QueryTypes = req.query;
 
     const clientIds = clientList
       ? clientList.split(',').map((id) => parseInt(id))
@@ -25,6 +26,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         userId: {
           in: clientIds,
         },
+        companyId: Number(companyId),
       },
       include: {
         items: {

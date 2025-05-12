@@ -23,11 +23,22 @@ interface IBody {
   fileKeys: string[];
 }
 
+interface IQuery {
+  companyId?: string;
+} 
+
 const prisma = new PrismaClient();
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { productLoss, fileKeys } = req.body as IBody;
+    const { companyId } = req.query as IQuery;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
 
     const admin: any = await getUserInfo(req, res);
     const today = getTodayDate();
@@ -44,6 +55,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         reportedBy: productLoss.reportedBy,
         createdAt: today.dateAndTime,
         createdBy: `${admin?.role || 'Admin'} - ${admin?.clientName}`,
+        companyId: Number(companyId),
       },
     });
 

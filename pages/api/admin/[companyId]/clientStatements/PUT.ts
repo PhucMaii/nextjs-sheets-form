@@ -13,6 +13,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(404).json({
+        error: 'Parameters are missing',
+      });
+    }
+
     const { month, clientIds, isPrinted }: IBody = req.body;
 
     if (!month || !clientIds) {
@@ -27,6 +35,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         userId: {
           in: clientIds,
         },
+        companyId: Number(companyId),
       },
     });
 
@@ -47,6 +56,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         isPrinted,
         printedBy: createdBy,
         createdAt: `${date} ${time}`,
+        companyId: Number(companyId),
       }));
 
     // Update existing client statements
@@ -59,6 +69,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               (clientStatement) => clientStatement.id,
             ),
           },
+          companyId: Number(companyId),
         },
         data: {
           isPrinted,

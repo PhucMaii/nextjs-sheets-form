@@ -39,6 +39,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const {
       id,
       amount,
@@ -85,6 +93,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               vendorId: updatedItems[0].vendorId,
             },
           },
+          companyId: Number(companyId),
         },
       });
 
@@ -156,12 +165,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const createdBy = `Admin - ${user?.clientName}`;
 
       const vendorItems = await prisma.vendorItem.findMany({
+        where: {
+          companyId: Number(companyId),
+        },
         include: {
           unit: true,
         },
       });
 
-      const allFifos = await prisma.fifo.findMany({});
+      const allFifos = await prisma.fifo.findMany({
+        where: {
+          companyId: Number(companyId),
+        },
+      });
       const newAddedItems = [];
       // Update inventory units
       for (const item of updatedItems) {
@@ -174,6 +190,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
 
         await checkAndUpdateUnits(
+          Number(companyId),
           vendorItem.unit,
           item?.units || [],
           vendorItem.id,
@@ -255,10 +272,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }));
         console.log(vendorItemList, 'vendorItemList');
 
-        await createFifo(vendorItemList, updatedAt, createdBy);
+        await createFifo(
+          Number(companyId),
+          vendorItemList,
+          updatedAt,
+          createdBy,
+        );
 
+        // Get just created fifos
         const newFifos = await prisma.fifo.findMany({
           where: {
+            companyId: Number(companyId),
             createdAt: updatedAt,
             createdBy,
           },
@@ -291,6 +315,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             fifoId: selectedFifo.id,
             inventoryUnitId: newItem.unit.id,
             inventoryItemId: newItem.inventoryItemId,
+            companyId: Number(companyId),
           };
         });
 

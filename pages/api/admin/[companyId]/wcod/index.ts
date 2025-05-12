@@ -7,6 +7,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 interface IQuery {
   clientIdList?: string;
   date?: string;
+  companyId?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -19,9 +20,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    const { clientIdList, date }: IQuery = req.query;
+    const { clientIdList, date, companyId }: IQuery = req.query;
 
-    if (!clientIdList || !date || clientIdList.length === 0) {
+    if (!clientIdList || !date || clientIdList.length === 0 || !companyId) {
       return res.status(404).json({
         error: 'You are missing body data',
       });
@@ -47,6 +48,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             ORDER_STATUS.COMPLETED,
           ],
         },
+        companyId: Number(companyId),
       },
       include: {
         user: {

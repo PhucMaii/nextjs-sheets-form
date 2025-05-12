@@ -35,6 +35,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       paymentMethodId,
     } = req.body as IBody;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     if (
       !title ||
       !recurrence ||
@@ -62,6 +68,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         status: {
           not: FIXED_TRANSACTION_STATUS.ARCHIVED,
         },
+        companyId: Number(companyId),
       },
     });
 
@@ -94,6 +101,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt: today.dateAndTime,
         createdBy: `Admin - ${admin?.clientName}`,
         paymentMethodId: paymentMethodId,
+        companyId: Number(companyId),
       },
     });
 

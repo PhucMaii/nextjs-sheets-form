@@ -40,6 +40,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log('Request Body Size:', requestBodySize, 'bytes');
     const { deliveryDate, scheduleOrderIds } = req.body as BodyTypes;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     // Get person create info
     const adminCreate: any = await getUserInfo(req, res);
 
@@ -204,6 +212,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
 
         const newOrder: any = await createOrder(
+          Number(companyId),
           scheduleOrder.user,
           scheduleOrder.items,
           deliveryDate,
@@ -256,6 +265,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export const createOrder = async (
+  companyId: number,
   user: User | UserType,
   items: OrderedItems[],
   deliveryDate: string,
@@ -307,10 +317,11 @@ export const createOrder = async (
         isAffectInventory: true,
         orderTime: `${date} ${time}`,
         createdBy,
+        companyId,
       },
     });
 
-    await createOrderedItems(newOrder, items, createdBy);
+    await createOrderedItems(companyId, newOrder, items, createdBy);
 
     const updatedOrder = await prisma.orders.findUnique({
       where: {

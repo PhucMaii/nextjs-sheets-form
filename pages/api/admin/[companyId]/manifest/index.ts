@@ -34,6 +34,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const { day, orderList, userRoute } = req.body as IBody;
+
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
     // const buffers = [];
     //   for await (const chunk of req) {
     //     buffers.push(chunk);
@@ -52,6 +60,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const dayRoutes = await prisma.route.findMany({
       where: {
         day,
+        companyId: Number(companyId),
       },
       include: {
         driver: true,

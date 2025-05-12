@@ -10,7 +10,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { name }: IQuery = req.query;
+    const { name, companyId }: IQuery = req.query;
 
     if (!name) {
       return res.status(404).json({
@@ -21,6 +21,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const actions = await prisma.action.findMany({
       where: {
         name,
+        companyId,
       },
     });
 

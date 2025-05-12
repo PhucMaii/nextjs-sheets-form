@@ -9,6 +9,7 @@ interface IQuery {
   endDate?: string;
   id?: string;
   type?: VIEW_TYPE;
+  companyId?: string;
 }
 
 export const config = {
@@ -21,9 +22,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { startDate, endDate, id, type }: IQuery = req.query;
+    const { startDate, endDate, id, type, companyId }: IQuery = req.query;
 
-    if (!startDate || !endDate) {
+    if (!startDate || !endDate || !companyId) {
       return res.status(404).json({ error: 'Missing required parameters' });
     }
 
@@ -50,6 +51,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           date: {
             in: listOfDateString,
           },
+          companyId: Number(companyId),
         },
         include: {
           paymentMethod: true,
@@ -198,6 +200,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         orderedItems: {
           some: {},
         },
+        companyId: Number(companyId),
       });
 
       expenses = [...stockPurchased];
@@ -212,6 +215,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         vendors: {
           none: {},
         },
+        companyId: Number(companyId),
       });
 
       expenses = [...stockPurchased];

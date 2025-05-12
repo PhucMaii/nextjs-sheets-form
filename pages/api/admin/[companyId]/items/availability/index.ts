@@ -8,6 +8,10 @@ interface IBody {
   availability: boolean;
 }
 
+interface IQuery {
+  companyId?: string;
+}
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'PUT') {
@@ -20,9 +24,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { item, availability }: IBody = req.body;
 
+    const { companyId }: IQuery = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     const itemNameExisted = await prisma.item.findMany({
       where: {
         name: item.name,
+        companyId: Number(companyId),
       },
     });
 
@@ -46,6 +57,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await prisma.item.updateMany({
       where: {
         inventoryItemId: item.inventoryItemId,
+        companyId: Number(companyId),
       },
       data: {
         availability,

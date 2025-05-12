@@ -16,6 +16,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { name, price, ratio, vendorItemId, createdAt }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Missing companyId' });
+    }
+
     const sameRatioUnit = await prisma.inventoryUnit.findFirst({
       where: {
         vendorItemId,
@@ -52,6 +58,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         vendorItemId,
         createdAt,
         createdBy: 'Admin - ' + user?.clientName,
+        companyId: Number(companyId),
       },
     });
 

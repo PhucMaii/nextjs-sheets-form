@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 interface IQuery {
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -18,10 +19,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Method Not Allowed' });
     }
 
-    const { startDate, endDate }: IQuery = req.query;
+    const { startDate, endDate, companyId }: IQuery = req.query;
 
-    if (!startDate || !endDate) {
-      return res.status(400).json({ error: 'Missing startDate or endDate' });
+    if (!startDate || !endDate || !companyId) {
+      return res.status(400).json({ error: 'Missing startDate or endDate or companyId' });
     }
 
     const formattedStartDate = formatDate(startDate);
@@ -37,6 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         date: {
           in: listOfDateString,
         },
+        companyId: Number(companyId),
       },
       include: {
         driver: true,

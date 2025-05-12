@@ -10,6 +10,7 @@ interface QueryType {
   day?: string;
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 export interface ClientStatementType {
@@ -26,7 +27,13 @@ export interface ClientStatementType {
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { day, startDate, endDate }: QueryType = req.query;
+    const { day, startDate, endDate, companyId }: QueryType = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
 
     if (startDate && endDate) {
       const normalizedStartDate = normalizeDate(new Date(startDate));
@@ -40,6 +47,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const routes = await prisma.route.findMany({
         where: {
           day,
+          companyId: Number(companyId),
         },
         include: {
           driver: true,
@@ -121,6 +129,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const routes: any = await prisma.route.findMany({
       where: {
         day,
+        companyId: Number(companyId),
       },
       include: {
         driver: true,

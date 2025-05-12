@@ -13,6 +13,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const { driverId, hourlyRate, updatedName }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     if (!driverId || !updatedName) {
       return res.status(404).json({
         error: 'You are missing body data',

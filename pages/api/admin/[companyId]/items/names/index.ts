@@ -10,10 +10,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    const { companyId } = req.query;
+
     const prisma = new PrismaClient();
 
     const items = await prisma.item.findMany({
       distinct: ['name'],
+      where: {
+        companyId: Number(companyId),
+      },
     });
 
     const itemNames = items.map((item) => item.name);

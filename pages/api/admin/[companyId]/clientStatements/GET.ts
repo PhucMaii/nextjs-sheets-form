@@ -10,6 +10,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { month }: IQuery = req.query;
+    const { companyId } = req.query;
 
     if (!month) {
       return res.status(404).json({
@@ -20,6 +21,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const clientStatements = await prisma.clientStatement.findMany({
       where: {
         month,
+        companyId: Number(companyId),
       },
     });
 

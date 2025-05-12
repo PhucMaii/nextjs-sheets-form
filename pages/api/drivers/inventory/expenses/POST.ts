@@ -29,6 +29,7 @@ interface IBody {
     unit: IInventoryUnit;
     units: IInventoryUnit[];
     inventoryItemId: number;
+    companyId: number;
   }[];
 }
 
@@ -124,7 +125,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const vendorItems = await prisma.vendorItem.findMany({});
     // Create ordered items
     if (items.length > 0) {
-      await createFifo(items, createdAt, createdBy);
+      await createFifo(driver?.companyId || -1, items, createdAt, createdBy);
 
       const vendorItems = await prisma.vendorItem.findMany({
         where: {
@@ -147,6 +148,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         // STEP 3: Check unit price in Inventory Unit (Update if needed)
         await checkAndUpdateUnits(
+          item?.companyId || -1,
           existedItem.unit,
           item.units,
           item.id,
@@ -157,6 +159,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       // STEP 4: Create OrderedItems
       // Use item already exist to easy to retrieve unitPrice
       const response = await createOrderedItems(
+        Number(driver?.companyId || -1),
         items,
         newExpense,
         createdAt,

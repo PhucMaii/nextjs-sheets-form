@@ -15,6 +15,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { driverName, driverPassword, hourlyRate }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     const sameDriverName = await prisma.driver.findFirst({
       where: {
         name: driverName,
@@ -35,6 +41,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         password: hashPassword,
         hourlyRate,
         role: USER_ROLE.DRIVER,
+        companyId: Number(companyId),
       },
     });
 

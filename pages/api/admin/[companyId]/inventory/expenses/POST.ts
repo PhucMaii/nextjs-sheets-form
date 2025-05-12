@@ -56,6 +56,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     console.log(items, 'items');
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const existingMethod = await prisma.paymentMethod.findUnique({
       where: {
         id: paymentMethodId,
@@ -77,7 +85,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     if (invoice && invoice?.trim() !== '') {
       // Check if vendor has expense on that date
-      const isExpenseValid = await checkIsExpenseValid(invoice, date, vendors);
+      const isExpenseValid = await checkIsExpenseValid(
+        Number(companyId),
+        invoice,
+        date,
+        vendors,
+      );
 
       if (!isExpenseValid.ok) {
         return res.status(409).json({ error: isExpenseValid.error });
@@ -89,6 +102,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const newExpense = await prisma.expense.create({
       data: {
+        companyId: Number(companyId),
         invoice,
         date: date,
         amount: amount,
@@ -118,7 +132,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const inventoryItems = await prisma.inventoryItem.findMany({});
+    const inventoryItems = await prisma.inventoryItem.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
+    });
 
     // 3 CASES for each item - Brand new item, New vendor item but inventory exists, Item already exists
 
@@ -158,7 +176,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // CASE 1: ITEM ALREADY EXISTS
     if (itemsAlreadyExist.length > 0) {
       // STEP 1: Create FIFO
-      await createFifo(itemsAlreadyExist, createdAt, createdBy);
+      await createFifo(
+        Number(companyId),
+        itemsAlreadyExist,
+        createdAt,
+        createdBy,
+      );
 
       const vendorItems = await prisma.vendorItem.findMany({
         where: {
@@ -181,6 +204,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         // STEP 3: Check unit price in Inventory Unit (Update if needed)
         await checkAndUpdateUnits(
+          Number(companyId),
           existedItem.unit,
           item.units,
           item.id,
@@ -191,6 +215,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       // STEP 4: Create OrderedItems
       // Use item already exist to easy to retrieve unitPrice
       const response = await createOrderedItems(
+        Number(companyId),
         itemsAlreadyExist,
         newExpense,
         createdAt,
@@ -222,6 +247,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         await prisma.inventoryItem.create({
           data: {
+            companyId: Number(companyId),
             name: newItem.name,
             createdAt,
             createdBy,
@@ -255,8 +281,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       //   }),
       // });
 
+      // Get just created inventory items
       const newInventoryItems = await prisma.inventoryItem.findMany({
         where: {
+          companyId: Number(companyId),
           createdAt,
           createdBy,
         },
@@ -278,6 +306,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           inventoryItemId: existedItem.id,
           vendorId: item.vendorId,
           quantity: item.quantity,
+          companyId: Number(companyId),
           createdAt,
           createdBy,
         };
@@ -287,8 +316,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         data: newVendorItems,
       });
 
+      // Get just created vendor items
       const newVendorItemsCreated = await prisma.vendorItem.findMany({
         where: {
+          companyId: Number(companyId),
           createdAt,
           createdBy,
         },
@@ -318,6 +349,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
               ratio: unit.ratio,
               createdAt,
               createdBy,
+              companyId: Number(companyId),
             };
           });
         })
@@ -346,10 +378,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           inventoryItemId: vendorItem.inventoryItemId,
         };
       });
-      await createFifo(newItemsWithVendorItemId, createdAt, createdBy);
+      await createFifo(
+        Number(companyId),
+        newItemsWithVendorItemId,
+        createdAt,
+        createdBy,
+      );
 
       // STEP 5: Create OrderedItems
       const response = await createOrderedItems(
+        Number(companyId),
         newItemsWithVendorItemId,
         newExpense,
         createdAt,
@@ -379,15 +417,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             quantity: item.quantity,
             createdAt,
             createdBy,
+            companyId: Number(companyId),
           };
         }),
       });
 
       // STEP 2: Create FIFO
+      // Get just created vendor items
       const newVendorItemsCreated = await prisma.vendorItem.findMany({
         where: {
           createdAt,
           createdBy,
+          companyId: Number(companyId),
         },
         include: {
           inventoryItem: true,
@@ -412,7 +453,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         };
       });
 
-      await createFifo(newItemsWithVendorItemId, createdAt, createdBy);
+      await createFifo(
+        Number(companyId),
+        newItemsWithVendorItemId,
+        createdAt,
+        createdBy,
+      );
 
       // STEP 3: Create Inventory Units
       const newUnits = existedItems
@@ -435,6 +481,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
               ratio: unit.ratio,
               createdAt,
               createdBy,
+              companyId: Number(companyId),
             };
           });
         })
@@ -446,6 +493,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
       // STEP 4: Create OrderedItems
       const response = await createOrderedItems(
+        Number(companyId),
         newItemsWithVendorItemId,
         newExpense,
         createdAt,
@@ -467,6 +515,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export const checkIsExpenseValid = async (
+  companyId: number,
   invoice: string,
   date: string,
   vendors: number[],
@@ -477,6 +526,7 @@ export const checkIsExpenseValid = async (
     where: {
       invoice: invoice,
       date: date,
+      companyId: Number(companyId),
       vendors: {
         some: {
           vendorId: {
@@ -498,6 +548,7 @@ export const checkIsExpenseValid = async (
 };
 
 export const checkAndUpdateUnits = async (
+  companyId: number,
   dbUnits: InventoryUnit[],
   newUnits: IInventoryUnit[],
   vendorItemId: number,
@@ -565,6 +616,7 @@ export const checkAndUpdateUnits = async (
             ratio: sortedNewUnits[newIndex]?.ratio,
             createdAt,
             createdBy,
+            companyId,
           },
         });
         newIndex++;
@@ -642,6 +694,7 @@ export const checkAndUpdateUnits = async (
 };
 
 export const createFifo = async (
+  companyId: number,
   vendorItemList: any,
   createdAt: string,
   createdBy: string,
@@ -650,6 +703,7 @@ export const createFifo = async (
 
   const allNegativeFifo = await prisma.fifo.findMany({
     where: {
+      companyId, 
       quantity: {
         lt: 0,
       },
@@ -681,6 +735,7 @@ export const createFifo = async (
           price: item.unit?.unitPrice / item?.unit?.ratio,
           createdAt,
           createdBy,
+          companyId,
         },
       });
 
@@ -716,6 +771,7 @@ export const createFifo = async (
         price: item.unit?.unitPrice / item?.unit?.ratio,
         createdAt,
         createdBy,
+        companyId,
       };
     });
 
@@ -741,6 +797,7 @@ export const updateVendorItemQuantity = async (
 };
 
 export const createOrderedItems = async (
+  companyId: number,
   vendorItemList: any,
   newExpense: any,
   createdAt: string,
@@ -753,6 +810,7 @@ export const createOrderedItems = async (
       vendorItemId: {
         in: vendorItemList.map((item: any) => item.id),
       },
+      companyId,
     },
   });
 
@@ -763,6 +821,7 @@ export const createOrderedItems = async (
       },
       createdAt,
       createdBy,
+      companyId,
     },
     include: {
       inventoryItem: true,
@@ -799,6 +858,7 @@ export const createOrderedItems = async (
       price: item.unit.unitPrice,
       name: fifoItem.inventoryItem.name,
       inventoryUnitId: selectedUnit?.id,
+      companyId,
     };
   });
 

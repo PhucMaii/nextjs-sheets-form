@@ -6,6 +6,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 export default async function handler(
@@ -17,7 +18,13 @@ export default async function handler(
       return res.status(404).json({ error: 'Your method is not supported' });
     }
 
-    const { startDate, endDate }: IQuery = req.query;
+    const { startDate, endDate, companyId }: IQuery = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
 
     if (!startDate || !endDate) {
       return res.status(404).json({ error: 'You are missing selected date' });
@@ -34,6 +41,7 @@ export default async function handler(
 
     const orders = await prisma.orders.findMany({
       where: {
+        companyId: Number(companyId),
         deliveryDate: {
           in: deliveryDate,
         },

@@ -71,14 +71,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     // Categorize updated items into create, update, delete
-    const newItems = categorizeUpdatedItems(orderedItemList, updatedItems);
+    const newItems = categorizeUpdatedItems(
+      existingOrder?.companyId || -1,
+      orderedItemList,
+      updatedItems,
+    );
 
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 
       // CREATE
       if (item.type === ITEM_CATEGORIZED.CREATE) {
-        await createOrderedItems(existingOrder, [item]);
+        await createOrderedItems(
+          existingOrder?.companyId || -1,
+          existingOrder,
+          [item],
+        );
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN

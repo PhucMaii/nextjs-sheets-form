@@ -13,12 +13,13 @@ interface RequestQuery {
   startDate?: string;
   endDate?: string;
   deliveryDate?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { userId, deliveryDate, startDate, endDate } =
+    const { userId, deliveryDate, startDate, endDate, companyId } =
       req.query as RequestQuery;
 
     // Check if there is no userId, then fetch all orders with specific delivery date
@@ -52,6 +53,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           deliveryDate: {
             in: listOfDateString,
           },
+          companyId: Number(companyId),
         },
         include: {
           items: {
@@ -109,6 +111,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       userOrders = await prisma.orders.findMany({
         where: {
           deliveryDate,
+          companyId: Number(companyId),
         },
         include: {
           items: {

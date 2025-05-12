@@ -27,6 +27,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prisma = new PrismaClient();
     const { client, orders, endDate }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
+
     if (!client || !orders || !endDate) {
       return res.status(404).json({
         error: 'Parameters are missing',
@@ -43,6 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const incompletedOrders: any = await prisma.orders.findMany({
       where: {
+        companyId: Number(companyId),
         userId: client.id,
         status: {
           in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],

@@ -35,6 +35,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       discount,
     }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     const adminUser = await getUserInfo(req, res);
 
     if (!adminUser) {
@@ -69,6 +75,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         paymentMethodId,
         status,
         discount,
+        companyId: Number(companyId),
       },
     });
 

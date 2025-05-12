@@ -11,9 +11,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const { id }: IQuery = req.query;
 
-    if (!id) {
+    if (!id ) {
       return res.status(404).json({
-        error: 'FIFO Id Not Provided',
+        error: 'FIFO Id Or Company Id Not Provided',
       });
     }
 

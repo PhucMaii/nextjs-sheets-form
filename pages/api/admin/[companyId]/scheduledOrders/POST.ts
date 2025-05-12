@@ -13,6 +13,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { userId, items, day, routeId } = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -37,6 +45,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     const allRoutes = await prisma.route.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         clients: true,
       },
@@ -66,6 +77,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         const newScheduleOrder = await prisma.scheduleOrders.create({
           data: {
             userId,
+            companyId: Number(companyId),
             totalPrice: newTotalPrice,
             day,
           },
@@ -119,6 +131,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             inventoryItemId: item.inventoryItemId,
             inventoryUnitId: item?.option?.unitId || item.inventoryUnitId,
             scheduledOrderId: newScheduleOrder.id,
+            companyId: Number(companyId),
           })),
         });
 
@@ -180,6 +193,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newScheduleOrder = await prisma.scheduleOrders.create({
       data: {
         userId,
+        companyId: Number(companyId),
         totalPrice: newTotalPrice,
         day,
       },

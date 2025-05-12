@@ -13,13 +13,14 @@ interface IQuery {
   endDate?: string;
   date?: string;
   id?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, date, startDate, endDate }: IQuery = req.query;
+    const { id, date, startDate, endDate, companyId }: IQuery = req.query;
 
     if (id) {
       const codBoard: any = await prisma.codBoard.findUnique({
@@ -195,6 +196,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const dateBoards: any = await prisma.codBoard.findMany({
         where: {
           date,
+          companyId: Number(companyId),
         },
         include: {
           driver: true,
@@ -253,6 +255,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           date: {
             in: listOfDateString,
           },
+          companyId: Number(companyId),
         },
         include: {
           expense: {

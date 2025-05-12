@@ -44,6 +44,13 @@ interface BodyType {
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(404).json({
+        error: 'Parameters are missing',
+      });
+    }
     const updatedData = req.body as any;
     const {
       orderId,
@@ -87,14 +94,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Categorize updated items into create, update, delete
-    const newItems = categorizeUpdatedItems(orderedItemList, updatedItems);
+    const newItems = categorizeUpdatedItems(
+      Number(companyId),
+      orderedItemList,
+      updatedItems,
+    );
 
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 
       // CREATE
       if (item.type === ITEM_CATEGORIZED.CREATE) {
-        await createOrderedItems(existingOrder, [item]);
+        await createOrderedItems(
+          Number(companyId),
+          existingOrder,
+          [item],
+        );
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN
@@ -234,6 +249,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export const categorizeUpdatedItems = (
+  companyId: number,
   baseItems: any,
   updatedItems: any,
   comparedField: string = 'id',
@@ -283,6 +299,7 @@ export const categorizeUpdatedItems = (
     } else {
       return {
         ...updatedItem,
+        companyId,
         type: ITEM_CATEGORIZED.CREATE,
       };
     }

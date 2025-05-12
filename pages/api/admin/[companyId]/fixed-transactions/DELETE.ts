@@ -21,7 +21,7 @@ export default async function DELETE(
 
     const fixedTransaction = await prisma.fixedTransaction.findUnique({
       where: {
-        id: +id,
+        id: Number(id),
       },
     });
 

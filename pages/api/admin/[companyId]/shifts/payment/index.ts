@@ -19,6 +19,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: 'Missing newExpense data' });
     }
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Missing companyId' });
+    }
+
     const today = getTodayDate();
 
     const admin: any = await getUserInfo(req, res);
@@ -37,6 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         spentBy: newExpense.spentBy,
         createdAt: today.dateAndTime,
         createdBy: `Admin - ${admin.clientName}`,
+        companyId: Number(companyId),
       },
     });
 

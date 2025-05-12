@@ -53,6 +53,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         isCustomAmount: true,
         cost: customAmount?.cost || 0,
         profit: customAmount.price - (customAmount.cost || 0),
+        companyId: existingOrder?.companyId || -1,
       },
     });
 

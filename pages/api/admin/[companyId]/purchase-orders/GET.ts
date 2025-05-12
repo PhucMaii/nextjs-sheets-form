@@ -9,11 +9,18 @@ interface IQuery {
   id?: string;
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { startDate, endDate, id } = req.query as IQuery;
+    const { startDate, endDate, id, companyId } = req.query as IQuery;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
 
     if (id) {
       const purchaseOrder = await prisma.pO.findUnique({
@@ -81,6 +88,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           estArrival: {
             in: listOfDateString,
           },
+          companyId: Number(companyId),
         },
         include: {
           poItems: true,

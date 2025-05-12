@@ -28,7 +28,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
     const prisma = new PrismaClient();
-    const officiallyStartDate = new Date(2024, 0, 1);
+
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
 
     const { startDate, endDate }: IQuery = req.query;
 
@@ -37,6 +44,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Date Range Is Not Provided',
       });
     }
+
+    const officiallyStartDate = new Date(2024, 0, 1);
 
     const formattedStartDate = normalizeDate(new Date(startDate));
     const formattedEndDate = normalizeDate(new Date(endDate));
@@ -81,6 +90,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const orders: any = await prisma.orders.findMany({
       where: {
+        companyId: Number(companyId),
         status: {
           in: [
             ORDER_STATUS.COMPLETED,
@@ -127,6 +137,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       sortedThisMonthOrders,
     );
     const lastMonthRevenueReport: any = await getLastMonthRevenue(
+      Number(companyId),
       thisMonthRevenueReport,
       formattedStartDate,
     );
@@ -139,6 +150,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // EXPENSES
     const expenses = await prisma.expense.findMany({
       where: {
+        companyId: Number(companyId),
         date: {
           in: datesInRange,
         },
@@ -147,8 +159,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const totalExpenses = expenses.reduce((acc: number, expense: any) => {
       return acc + expense.amount;
     }, 0);
-    const lastMonthExpenses: any =
-      await getLastMonthExpenses(formattedStartDate);
+    const lastMonthExpenses: any = await getLastMonthExpenses(
+      Number(companyId),
+      formattedStartDate,
+    );
     const totalExpensesChange =
       ((totalExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
 
@@ -211,6 +225,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     while (trueCondition) {
       const fetchedDebtOrders: any = await prisma.orders.findMany({
         where: {
+          companyId: Number(companyId),
           status: {
             in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
           },

@@ -17,6 +17,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { purchaseOrder, selectedVendor, isOrdered }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
     if (purchaseOrder.items.length === 0) {
       return res.status(400).json({ error: 'No items in the purchase order' });
     }
@@ -36,11 +43,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const admin: any = await getUserInfo(req, res);
 
     // Set up the purchase order
-    const newPurchaseOrder = await prisma.pO.create({
+    const newPurchaseOrder: any = await prisma.pO.create({
       data: {
         estArrival: purchaseOrder.estArrival,
         status: isOrdered ? PO_STATUS.ORDERED : PO_STATUS.DRAFT,
-        // vendorId: se lectedVendor.id,
+        company: {
+          connect: {
+            id: Number(companyId),
+          },
+        },
         totalCost,
         note: purchaseOrder.note,
         discount: purchaseOrder.discount,
@@ -83,6 +94,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         inventoryUnitId: item.inventoryUnit.id,
         tax: item.tax,
         note: item.note,
+        companyId: Number(companyId),
       };
     });
 

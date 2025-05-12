@@ -6,15 +6,16 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   startDate?: string;
   endDate?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { startDate, endDate }: IQuery = req.query;
+    const { startDate, endDate, companyId }: IQuery = req.query;
 
-    if (!startDate || !endDate) {
+    if (!startDate || !endDate || !companyId) {
       return res.status(404).json({
         error: 'Missing required parameters',
       });
@@ -35,6 +36,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         orderedItems: {
           some: {}, // Ensures there is at least one ordered item
         },
+        companyId: Number(companyId),
       },
       include: {
         paymentMethod: true,

@@ -11,6 +11,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { inventoryItemId } = req.query as IQuery;
+    const { companyId } = req.query;
 
     if (inventoryItemId) {
       const categories = await prisma.category.findMany({
@@ -74,6 +75,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Get all categories
     const categories = await prisma.category.findMany({
       where: {
+        companyId: Number(companyId),
         // id: {
         //   not: websiteItemCategoryId,
         // },

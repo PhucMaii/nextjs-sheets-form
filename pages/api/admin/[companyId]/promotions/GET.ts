@@ -5,13 +5,20 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   id?: string;
   status?: PROMOTION_STATUS;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id, status }: IQuery = req.query;
+    const { id, status, companyId }: IQuery = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        message: 'Company ID is required',
+      });
+    }
 
     if (id) {
       const promotion = await prisma.promotion.findUnique({
@@ -45,6 +52,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         where: {
           status: status,
           isWebsite: null,
+          companyId: Number(companyId),
         },
         include: {
           items: true,
@@ -63,6 +71,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const allPromotions = await prisma.promotion.findMany({
       where: {
         isWebsite: null,
+        companyId: Number(companyId),
       },
       include: {
         items: {

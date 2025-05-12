@@ -38,6 +38,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       type,
     }: BodyTypes = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(404).json({
+        error: 'Parameters are missing',
+      });
+    }
     const existingUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -149,12 +156,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                   inventoryUnitId: item.inventoryUnitId,
                   prevPrice: item?.prevPrice,
                   isShowDiscount: item?.isShowDiscount,
+                  companyId: Number(companyId),
                 };
               },
             );
 
             // Compare by name
             const categorizedItems = categorizeUpdatedItems(
+              Number(companyId),
               formatItemToOrderedItem,
               orderdItems,
               'name',
@@ -184,6 +193,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                   inventoryUnitId: item.inventoryUnitId,
                   prevPrice: item?.prevPrice,
                   isShowDiscount: item?.isShowDiscount,
+                  companyId: Number(companyId),
                 };
               }),
             });

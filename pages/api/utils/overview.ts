@@ -73,6 +73,7 @@ export const generateManifest = (orders: any, revenue: number = 0) => {
 };
 
 export const getLastMonthRevenue = async (
+  companyId: number,
   // orders: any,
   // startDate: Date,
   thisMonthRevenue: any[],
@@ -95,6 +96,7 @@ export const getLastMonthRevenue = async (
   );
   const orders: any = await prisma.orders.findMany({
     where: {
+      companyId,
       status: {
         in: [
           ORDER_STATUS.COMPLETED,
@@ -176,7 +178,10 @@ export const revenueGroupByDeliveryDate = (orders: any) => {
   };
 };
 
-export const getLastMonthExpenses = async (startDate: Date) => {
+export const getLastMonthExpenses = async (
+  companyId: number,
+  startDate: Date,
+) => {
   const prisma = new PrismaClient();
   const lastMonth = startDate.getMonth();
 
@@ -194,6 +199,7 @@ export const getLastMonthExpenses = async (startDate: Date) => {
   );
   const transactions: any = await prisma.expense.findMany({
     where: {
+      companyId,
       date: {
         in: datesInRange,
       },

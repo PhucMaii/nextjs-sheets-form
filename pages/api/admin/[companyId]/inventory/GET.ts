@@ -8,13 +8,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   vendorId?: string;
   inventoryItemId?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { vendorId, inventoryItemId }: IQuery = req.query;
+    const { vendorId, inventoryItemId, companyId }: IQuery = req.query;
 
     if (vendorId) {
       const vendorItems = await prisma.vendorItem.findMany({
@@ -108,7 +109,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     const inventory: any = await prisma.inventoryItem.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         fifo: {
           include: {
@@ -161,6 +169,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const types = await prisma.itemType.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
       include: {
         inventoryItems: {
           include: {

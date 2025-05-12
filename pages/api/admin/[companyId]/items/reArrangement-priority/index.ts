@@ -29,6 +29,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       categoryId,
     }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     // Update itemType_category priority
     console.log({
       priority,
@@ -93,6 +101,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         categoryId: item.categoryId,
         inventoryItemId: item?.inventoryItemId,
         inventoryUnitId: item?.inventoryUnitId,
+        companyId: Number(companyId),
       };
     });
 

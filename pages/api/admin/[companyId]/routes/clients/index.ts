@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   day?: string;
+  companyId?: string;
 }
 
 export default async function handler(
@@ -18,17 +19,18 @@ export default async function handler(
 
     const prisma = new PrismaClient();
 
-    const { day }: IQuery = req.query;
+    const { day, companyId }: IQuery = req.query;
 
-    if (!day) {
+    if (!day || !companyId) {
       return res.status(404).json({
-        error: 'Day is not provided',
+        error: 'Day and Company ID is not provided',
       });
     }
 
     const routeList = await prisma.route.findMany({
       where: {
         day,
+        companyId: Number(companyId),
       },
       include: {
         clients: true,
@@ -38,6 +40,7 @@ export default async function handler(
     const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
         day,
+        companyId: Number(companyId),
       },
       include: {
         user: {

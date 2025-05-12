@@ -18,9 +18,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { name, type, createdAt, balance }: IBody = req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     const existingMethodName = await prisma.paymentMethod.findFirst({
       where: {
         name,
+        companyId: Number(companyId),
       },
     });
 
@@ -57,6 +66,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt,
         createdBy: `Admin - ${adminUser.clientName}`,
         balance,
+        companyId: Number(companyId),
       },
     });
 

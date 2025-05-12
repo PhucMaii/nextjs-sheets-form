@@ -29,6 +29,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID is required' });
+    }
+
     const prisma = new PrismaClient();
     const { id, orderId, quantity, price, itemId } = req.body as IBody;
 
@@ -65,9 +71,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(404).json({ error: 'Item not found' });
       }
 
-      updatedOrderedItem = await createOrderedItems(existingOrder, [
-        { ...targetItem, price, quantity },
-      ]);
+      updatedOrderedItem = await createOrderedItems(
+        Number(companyId),
+        existingOrder,
+        [
+          { ...targetItem, price, quantity },
+        ],
+      );
     } else {
       const existingOrderedItem = await prisma.orderedItems.findUnique({
         where: {
@@ -249,6 +259,7 @@ export const updateSingleInventoryItem = async (
       }
 
       const isValidToCheckInventory = await checkOrderValidToAffectInventory(
+        order.companyId,
         order.deliveryDate,
       );
 

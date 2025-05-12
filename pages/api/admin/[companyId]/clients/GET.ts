@@ -3,18 +3,26 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface QueryTypes {
   dayRoute?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { dayRoute }: QueryTypes = req.query;
+    const { dayRoute, companyId }: QueryTypes = req.query;
+
+    if (!companyId) {
+      return res.status(404).json({
+        error: 'Parameters are missing',
+      });
+    }
 
     // Get all clients
     const clientList = await prisma.user.findMany({
       where: {
         role: 'client',
+        companyId: Number(companyId),
       },
       include: {
         category: true,
@@ -33,6 +41,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const routesInDay = await prisma.route.findMany({
       where: {
         day: dayRoute,
+        companyId: Number(companyId),
       },
       include: {
         clients: {

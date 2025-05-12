@@ -19,6 +19,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const { driverId, date, startedAt, endedAt, routeId, role }: IBody =
       req.body;
 
+    const { companyId } = req.query;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'Missing companyId' });
+    }
+
     const existingDriver = await prisma.driver.findUnique({
       where: {
         id: driverId,
@@ -51,6 +57,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         cost: hours * (existingDriver?.hourlyRate || 1),
         status: SHIFT_STATUS.UNPAID,
         role,
+        companyId: Number(companyId),
       },
     });
 
