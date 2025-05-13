@@ -25,7 +25,8 @@ export default function AuthenGuard({ children }: any) {
   } = useSWR('/api/auth/session', fetcher, {
     revalidateOnFocus: false,
   });
-
+  console.log('pathname?.split("/")[2]"', pathname?.split("/")[2]);
+  console.log('session?.user.companyId', session?.user?.companyId);
   useEffect(() => {
     if (
       (sessionError ||
@@ -43,7 +44,8 @@ export default function AuthenGuard({ children }: any) {
       session?.user &&
       (session?.user.role === USER_ROLE.ADMIN ||
         session?.user.role === USER_ROLE.SUPER_ADMIN) &&
-      !pathname?.startsWith('/admin')
+      (!pathname?.startsWith('/admin') ||
+        session?.user.companyId !== Number(pathname?.split('/')[2]))
     ) {
       router.push(`/admin/${session?.user.companyId}/orders`);
     } else if (

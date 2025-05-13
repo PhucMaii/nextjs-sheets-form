@@ -39,6 +39,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { startDate, endDate }: IQuery = req.query;
 
+
     if (!startDate || !endDate) {
       return res.status(404).json({
         error: 'Date Range Is Not Provided',
@@ -115,8 +116,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (!orders || orders.length === 0) {
-      return res.status(500).json({
-        error: 'No Orders Found',
+      return res.status(200).json({
+        data: {
+          customersInDebt: [],
+          overviewData: {},
+          customersProfit: {},
+          reports: {
+            thisMonth: [],
+            lastMonth: [],
+            timeSeries: [], // Time series for displaying time for the chart
+            lastMonthTimeSeries: [],
+          },
+        },
+        message: 'Fetch Overview Data Successfully',
       });
     }
 

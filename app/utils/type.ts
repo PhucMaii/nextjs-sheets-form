@@ -82,12 +82,13 @@ export interface FetchForm {
 }
 
 export interface SessionWithId extends Session {
-  user: {
-    name?: string | null | undefined;
-    email?: string | null | undefined;
-    image?: string | null | undefined;
-    id?: string | null | undefined;
-  };
+  // user: {
+  //   name?: string | null | undefined;
+  //   email?: string | null | undefined;
+  //   image?: string | null | undefined;
+  //   id?: string | null | undefined;
+  //   role?: USER_ROLE;
+  // };
 }
 
 export interface SessionClientType {

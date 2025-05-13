@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   name?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
@@ -21,7 +22,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const actions = await prisma.action.findMany({
       where: {
         name,
-        companyId,
+        companyId: Number(companyId),
       },
     });
 

@@ -55,6 +55,8 @@ model Employee {
   notification Json?
   role         String?
   companyId    Int
+  createdAt    String?
+  createdBy    String?
 
   shiftSessions ShiftSession[]
   routes        Route[]

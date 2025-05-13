@@ -63,7 +63,7 @@ export default function Overview() {
   const [overview, _mutateOverview, isValidating] = SWRFetchData(
     getAdminApiUrl(
       companyId,
-      `/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+      `/orders/overview?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
     ),
   );
   const [shiftOverview] = SWRFetchData(
