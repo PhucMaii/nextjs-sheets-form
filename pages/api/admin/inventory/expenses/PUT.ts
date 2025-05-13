@@ -30,7 +30,7 @@ interface IBody {
   subTotal?: number;
   // oldItemIds: number[]; // Ordered items ids
   oldItems: IPurchasedItem[];
-  updatedItems: IPurchasedItem[];
+  updatedItems: IPurchasedItem[] | any;
   updatedAt: string;
   discount?: number;
 }
@@ -127,7 +127,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Check is there any changes in ordered items
     let isOrderedItemsChange = false;
-
     if (oldItemIds.length !== updatedItems.length) {
       isOrderedItemsChange = true;
     } else {
@@ -151,6 +150,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
+    // If there is any changes in ordered items
     if (isOrderedItemsChange) {
       const user = await getUserInfo(req, res);
       const createdBy = `Admin - ${user?.clientName}`;
@@ -166,7 +166,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // Update inventory units
       for (const item of updatedItems) {
         const vendorItem = vendorItems.find((vendorItem: any) => {
-          return vendorItem.id === item?.vendorItemId;
+          return vendorItem.id === item?.inventoryUnit?.vendorItemId;
         });
 
         if (!vendorItem) {
@@ -183,8 +183,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Check if item already existed in bill
         const existedItem = existingExpense.orderedItems.find(
-          (oldItem: OrderedItems) => oldItem.name === item.name,
+          (oldItem: OrderedItems) => oldItem.id === item.id,
         );
+
+        // If item is new, add to newAddedItems
         if (!existedItem) {
           newAddedItems.push({ ...item, vendorItem });
           continue;
@@ -195,6 +197,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           const existedFifo = allFifos.find(
             (fifo: any) => fifo.id === existedItem?.fifoId,
           );
+
+          console.log({ existedFifo });
 
           if (!existedFifo) {
             continue;
@@ -223,15 +227,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             },
           });
 
-          await prisma.vendorItem.update({
-            where: {
-              id: item.vendorItemId,
-            },
-            data: {
-              quantity:
-                vendorItem.quantity - existedFifo.quantity + newFifoQuantity,
-            },
-          });
+          // await prisma.vendorItem.update({
+          //   where: {
+          //     id: item.vendorItemId,
+          //   },
+          //   data: {
+          //     quantity:
+          //       vendorItem.quantity - existedFifo.quantity + newFifoQuantity,
+          //   },
+          // });
         }
 
         // If price is different - only change in ordered items because checkAndUpdateUnits already update the unit price

@@ -152,7 +152,7 @@ const ClientsTable = ({
         </TableCell>
         <TableCell>{client.clientId}</TableCell>
         <TableCell>{client.clientName}</TableCell>
-        <TableCell>{client.category.name}</TableCell>
+        <TableCell>{client?.category?.name}</TableCell>
         <TableCell>{client?.email}</TableCell>
         <TableCell>{client.contactNumber}</TableCell>
         <TableCell>{client.deliveryAddress}</TableCell>
