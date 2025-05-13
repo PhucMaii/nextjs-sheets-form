@@ -17,8 +17,23 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    // If no user found, find employee
     if (!existingUser) {
-      return res.status(404).json({ error: 'User Not Found' });
+      const existingEmployee = await prisma.employee.findUnique({
+        where: {
+          id: parseInt(userId),
+        },
+      });
+
+      if (!existingEmployee) {
+        return res.status(404).json({ error: 'User Not Found' });
+      }
+      
+      return res.status(200).json({
+        data: existingEmployee,
+        message: 'Fetch User Successfully',
+      });
+      // return res.status(404).json({ error: 'User Not Found' });
     }
 
     return res.status(200).json({

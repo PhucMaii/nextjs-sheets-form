@@ -117,17 +117,140 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const password = await bcrypt.hash('maiphuc0102', 12);
-  await prisma.employee.createMany({
-    data: [
-      {
-        employeeCode: '0102',
-        name: 'Phuc Mai',
-        password,
-        companyId: 1,
-        role: 'super admin',
+  // Update all models with companyId to have companyId = 1
+  const BATCH_SIZE = 99999; // Process 1000 records at a time
+
+  // Process orderedItems in batches
+  let processed = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const batch = await prisma.orderedItems.findMany({
+      take: BATCH_SIZE,
+      skip: processed,
+      where: {
+        companyId: null,
       },
-    ],
+    });
+
+    if (batch.length === 0) {
+      hasMore = false;
+      continue;
+    }
+
+    const ids = batch.map((item) => item.id);
+    await prisma.orderedItems.updateMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      data: { companyId: 1 },
+    });
+
+    processed += batch.length;
+    console.log(`Processed ${processed} records for orderedItems`);
+  }
+
+  // Update other models directly
+  await prisma.employee.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.user.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.category.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.item.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.orders.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.scheduleOrders.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.route.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.announcement.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.codBoard.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.paymentMethod.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.fixedTransaction.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.expense.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.vendor.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.inventoryItem.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.itemType.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.vendorItem.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.fifo.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.inventoryUnit.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.action.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.cheque.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.clientStatement.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.promotion.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.shiftSession.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.pO.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.lossReport.updateMany({
+    data: { companyId: 1 },
   });
 }
 

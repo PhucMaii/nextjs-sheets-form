@@ -26,26 +26,6 @@ export default function AuthenGuard({ children }: any) {
     revalidateOnFocus: false,
   });
 
-  const { data: user } = useSWR(
-    session?.user && !session.user.name
-      ? `${API_URL.USER}?id=${session?.user.id}`
-      : null,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    },
-  );
-
-  const { data: employee } = useSWR(
-    session?.user?.name ? `/api/employee` : null,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    },
-  );
-
-  // console.log('employee', {employee, session});
-
   useEffect(() => {
     if (
       (sessionError ||
@@ -54,26 +34,26 @@ export default function AuthenGuard({ children }: any) {
     ) {
       router.push('/auth/login');
     } else if (
-      user &&
+      session?.user &&
       (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
-      user.data.role === USER_ROLE.CLIENT
+      session.user.role === USER_ROLE.CLIENT
     ) {
       router.push('/');
     } else if (
-      employee &&
-      (employee.data.role === USER_ROLE.ADMIN ||
-        employee.data.role === USER_ROLE.SUPER_ADMIN) &&
+      session?.user &&
+      (session?.user.role === USER_ROLE.ADMIN ||
+        session?.user.role === USER_ROLE.SUPER_ADMIN) &&
       !pathname?.startsWith('/admin')
     ) {
-      router.push(`/admin/${employee.data.companyId}/orders`);
+      router.push(`/admin/${session?.user.companyId}/orders`);
     } else if (
-      employee &&
-      employee.data.role === USER_ROLE.DRIVER &&
+      session?.user &&
+      session?.user.role === USER_ROLE.DRIVER &&
       !pathname?.startsWith('/driver')
     ) {
       router.push('/driver/overview');
     }
-  }, [pathname, session, user, employee]);
+  }, [pathname, session]);
 
   return children;
 }

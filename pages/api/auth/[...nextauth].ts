@@ -7,6 +7,35 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
+
+// Define custom types for our user data
+interface CustomUser {
+  id: number;
+  role: string;
+  clientId?: string;
+  clientName?: string;
+  contactNumber?: string;
+  deliveryAddress?: string;
+  email?: string | null;
+  companyId?: number | null;
+  categoryId?: number | null;
+  subCategoryId?: number | null;
+  type?: string;
+  sheetName?: string | null;
+  contactName?: string | null;
+}
+
+// Extend the built-in session type
+declare module 'next-auth' {
+  interface Session {
+    user: CustomUser & {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
@@ -34,12 +63,12 @@ export const authOptions: NextAuthOptions = {
 
           if (credentials?.clientId) {
             const userData = await loginUser(credentials);
-            return userData;
+            return userData as any; // Type assertion needed due to NextAuth's type constraints
           }
 
           if (credentials?.employeeCode) {
             const employeeData = await loginEmployee(credentials);
-            return employeeData;
+            return employeeData as any; // Type assertion needed due to NextAuth's type constraints
           }
 
           throw new Error('Credentials missing');
@@ -51,24 +80,52 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: ({ session, token }) => {
+    async jwt({ token, user }: any) {
+      if (user) {
+        // Add user data to the token
+        return {
+          ...token,
+          ...user,
+          id: user.id,
+          role: user.role,
+          // clientId: user.clientId,
+          // clientName: user.clientName,
+          // contactNumber: user.contactNumber,
+          // deliveryAddress: user.deliveryAddress,
+          // email: user.email,
+          // companyId: user.companyId,
+          // categoryId: user.categoryId,
+          // subCategoryId: user.subCategoryId,
+          // type: user.type,
+          // sheetName: user.sheetName,
+          // contactName: user.contactName,
+        };
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Add token data to the session
+      // console.log('session in session', {session, token});
       return {
         ...session,
         user: {
           ...session.user,
-          id: token.id,
+          ...token,
+          id: token.id as number,
+          role: token.role as string,
+          // clientId: token.clientId as string,
+          // clientName: token.clientName as string,
+          // contactNumber: token.contactNumber as string,
+          // deliveryAddress: token.deliveryAddress as string,
+          // email: token.email as string,
+          // companyId: token.companyId as number,
+          // categoryId: token.categoryId as number,
+          // subCategoryId: token.subCategoryId as number,
+          // type: token.type as string,
+          // sheetName: token.sheetName as string,
+          // contactName: token.contactName as string,
         },
       };
-    },
-    jwt: ({ token, user }) => {
-      if (user) {
-        const u = user as unknown as any;
-        return {
-          ...token,
-          id: u.id,
-        };
-      }
-      return token;
     },
   },
 };
@@ -127,6 +184,5 @@ const loginEmployee = async (credentials: any) => {
   }
 
   const { password, ...employeeData } = employee;
-  console.log(employeeData, 'employeeData');
   return employeeData;
 };
