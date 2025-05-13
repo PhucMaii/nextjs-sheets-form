@@ -28,7 +28,7 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
       if (!existingEmployee) {
         return res.status(404).json({ error: 'User Not Found' });
       }
-      
+
       return res.status(200).json({
         data: existingEmployee,
         message: 'Fetch User Successfully',

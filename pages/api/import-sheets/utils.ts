@@ -253,19 +253,20 @@ export const getCreatedBy = async (
 
   let createdBy = '';
 
-  if (createdByRole === USER_ROLE.DRIVER) {
+  if (
+    createdByRole === USER_ROLE.DRIVER ||
+    createdByRole === USER_ROLE.ADMIN ||
+    createdByRole === USER_ROLE.SUPER_ADMIN
+  ) {
     const driverCreate: any = await prisma.employee.findUnique({
       where: {
         id: Number(session.user.id),
       },
     });
 
-    createdBy = `Driver - ${driverCreate.name}`;
-  } else if (
-    createdByRole === USER_ROLE.ADMIN ||
-    createdByRole === USER_ROLE.CLIENT ||
-    createdByRole === USER_ROLE.SUPER_ADMIN
-  ) {
+    const capitalizeRole = createdByRole.charAt(0).toUpperCase() + createdByRole.slice(1);
+    createdBy = `${capitalizeRole} - ${driverCreate.name}`;
+  } else if (createdByRole === USER_ROLE.CLIENT) {
     const userCreate: any = await prisma.user.findUnique({
       where: {
         id: Number(session.user.id),

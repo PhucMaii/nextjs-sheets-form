@@ -10,13 +10,12 @@ interface IBody {
   id: number;
 }
 
-
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
     const { oldPassword, newPassword, email, name, id }: IBody = req.body;
 
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.employee.findUnique({
       where: {
         id,
       },
@@ -42,7 +41,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       const newHashedPassword = await bcrypt.hash(newPassword, 12);
 
-      await prisma.user.update({
+      await prisma.employee.update({
         where: {
           id,
         },
@@ -57,13 +56,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (email && name) {
-      const updatedUser = await prisma.user.update({
+      const updatedUser = await prisma.employee.update({
         where: {
           id: existingUser.id,
         },
         data: {
           email,
-          clientName: name,
+          name,
         },
       });
 

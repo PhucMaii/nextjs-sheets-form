@@ -105,11 +105,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // CREATE
       if (item.type === ITEM_CATEGORIZED.CREATE) {
-        await createOrderedItems(
-          Number(companyId),
-          existingOrder,
-          [item],
-        );
+        await createOrderedItems(Number(companyId), existingOrder, [item]);
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN

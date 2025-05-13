@@ -17,7 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const prisma = new PrismaClient();
-    
+
     const { orders, boardId }: IBody = req.body;
 
     const orderIdList = orders.map((order: Order) => order.id);

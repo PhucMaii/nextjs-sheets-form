@@ -52,6 +52,7 @@ model Employee {
   password     String  @db.VarChar(255)
   hourlyRate   Float?
   employeeCode    String
+  email        String?
   notification Json?
   role         String?
   companyId    Int

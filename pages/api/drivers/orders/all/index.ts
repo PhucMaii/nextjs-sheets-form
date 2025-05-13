@@ -14,7 +14,7 @@ interface IQuery {
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { deliveryDate }: IQuery = req.query;
-    
+
     const session: any = await getServerSession(req, res, authOptions);
 
     const driver = session?.user;

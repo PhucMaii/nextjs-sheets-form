@@ -305,11 +305,13 @@ export default function ShiftPage() {
           sx={{ mt: 1 }}
         >
           <MenuItem value={-1}>All</MenuItem>
-          {drivers.map((driver: any) => (
-            <MenuItem value={driver.id} key={driver.id}>
-              <Typography>{driver.name}</Typography>
-            </MenuItem>
-          ))}
+          {drivers &&
+            drivers?.length > 0 &&
+            drivers.map((driver: any) => (
+              <MenuItem value={driver.id} key={driver.id}>
+                <Typography>{driver.name}</Typography>
+              </MenuItem>
+            ))}
         </Select>
 
         <Box

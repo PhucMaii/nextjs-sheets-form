@@ -269,7 +269,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 //       data: { employeeId: route.driverId },
 //     });
 //   }
-  
+
 // }
 
 async function main() {
@@ -280,7 +280,7 @@ async function main() {
       companyId: 2,
       role: 'super admin',
       password,
-      employeeCode: '1111'
+      employeeCode: '1111',
     },
   });
 
@@ -290,7 +290,7 @@ async function main() {
       companyId: 3,
       role: 'super admin',
       password,
-      employeeCode: '2222'
+      employeeCode: '2222',
     },
   });
 

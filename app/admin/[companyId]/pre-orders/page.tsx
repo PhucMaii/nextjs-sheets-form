@@ -125,7 +125,7 @@ export default function ScheduledOrderPage() {
   }, []);
   // Data Fetching
   const [routesResponse] = SWRFetchData(
-    `${API_URL.ROUTES}?day=${days[dayIndex]}`,
+    getAdminApiUrl(companyId, `/routes?day=${days[dayIndex]}`),
   );
 
   const clientIds = routesResponse?.data[routeIndex]?.clients?.map(
@@ -133,18 +133,21 @@ export default function ScheduledOrderPage() {
       return userRoute.userId;
     },
   );
+  // const [orders, mutateOrders] = SWRFetchData(
+  //   `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}&deliveryDate=${recommendDate.day === days[dayIndex] ? recommendDate.deliveryDate : ''}`,
+  // );
   const [orders, mutateOrders] = SWRFetchData(
-    `${API_URL.SCHEDULED_ORDER}?day=${days[dayIndex]}&clientList=${clientIds || []}&deliveryDate=${recommendDate.day === days[dayIndex] ? recommendDate.deliveryDate : ''}`,
+    getAdminApiUrl(companyId, `/scheduledOrders?day=${days[dayIndex]}&clientList=${clientIds || []}&deliveryDate=${recommendDate.day === days[dayIndex] ? recommendDate.deliveryDate : ''}`),
   );
   const [drivers] = SWRFetchData(getAdminApiUrl(companyId, '/drivers'));
   const [clients, mutateClients] = SWRFetchData(
-    `${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`,
+    getAdminApiUrl(companyId, `/clients?dayRoute=${days[dayIndex]}`),
   );
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   useEffect(() => {
-    if (orders && routes.length > 0) {
+    if (orders && routes && routes?.length > 0) {
       // fetchOrders();
       initializeOrders();
     } else {
@@ -344,6 +347,7 @@ export default function ScheduledOrderPage() {
   };
 
   const initializeOrders = () => {
+    console.log('orders', orders);
     setBaseOrderList(orders?.data);
     setOrderList(orders?.data);
   };
@@ -399,6 +403,8 @@ export default function ScheduledOrderPage() {
       setSelectedOrders(orderList);
     }
   };
+
+  console.log('orderList', orderList);
 
   // const handleUpdateOrderUI = (updatedOrder: ScheduledOrder) => {
   //   // update base order list
@@ -778,12 +784,7 @@ export default function ScheduledOrderPage() {
             <Grid item xs={12}>
               {isLoading ? (
                 <SplashScreen />
-              ) : orderList.length > 0 ? (
-                // <Reorder.Group
-                //   style={{ padding: 0 }}
-                //   values={orderList}
-                //   onReorder={setOrderList}
-                // >
+              ) : orderList && orderList.length > 0 ? (
                 orderList.map(
                   (order: ScheduledOrder) => {
                     return (

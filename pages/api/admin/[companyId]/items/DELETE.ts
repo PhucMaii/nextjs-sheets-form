@@ -21,7 +21,7 @@ export default async function DELETE(
         error: 'Company ID is required',
       });
     }
-    
+
     if (removedId) {
       const deletedItem = await prisma.item.delete({
         where: {

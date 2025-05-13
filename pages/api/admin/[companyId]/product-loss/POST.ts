@@ -25,7 +25,7 @@ interface IBody {
 
 interface IQuery {
   companyId?: string;
-} 
+}
 
 const prisma = new PrismaClient();
 

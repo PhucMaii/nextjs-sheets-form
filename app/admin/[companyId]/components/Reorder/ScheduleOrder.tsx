@@ -138,18 +138,18 @@ export default function ScheduleOrder({
         )}
         <Grid item xs={2}>
           <Typography variant="subtitle1">
-            {scheduleOrder.user.clientId}
+            {scheduleOrder?.user?.clientId}
           </Typography>
         </Grid>
         <Grid item md={4} xs={10}>
           <Typography variant="subtitle1">
-            {scheduleOrder.user.clientName}
+            {scheduleOrder?.user?.clientName}
           </Typography>
         </Grid>
         <Grid item md={2} xs={12} textAlign={mdDown ? 'right' : 'left'}>
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="subtitle1">
-              ${scheduleOrder.totalPrice.toFixed(2)}
+              ${scheduleOrder?.totalPrice?.toFixed(2)}
             </Typography>
             {isOrderQualified && (
               <Verified fontSize="small" sx={{ color: green[500] }} />

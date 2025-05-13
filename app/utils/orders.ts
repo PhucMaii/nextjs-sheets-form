@@ -117,6 +117,9 @@ export const onSelectAllOrders = (
 };
 
 export const checkIsPreOrderQualified = (scheduledOrder: ScheduledOrder) => {
+  if (!scheduledOrder || !scheduledOrder.items) {
+    return false;
+  }
   const totalPriceGt0 = scheduledOrder.totalPrice > 0;
   const hasItems = scheduledOrder.items.length > 0;
   const hasOrdered = scheduledOrder?.alreadyOrder;

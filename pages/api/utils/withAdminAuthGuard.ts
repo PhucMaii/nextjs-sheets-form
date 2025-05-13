@@ -45,7 +45,10 @@ const withAdminAuthGuard =
 
       // console.log(existingAdmin.role, 'existingAdmin.role');
 
-      if (isSuperAdminPrivilege && existingAdmin.role !== USER_ROLE.SUPER_ADMIN) {
+      if (
+        isSuperAdminPrivilege &&
+        existingAdmin.role !== USER_ROLE.SUPER_ADMIN
+      ) {
         return res
           .status(404)
           .json({ error: 'You are not authorized to access' });

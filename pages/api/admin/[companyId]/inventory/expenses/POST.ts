@@ -703,7 +703,7 @@ export const createFifo = async (
 
   const allNegativeFifo = await prisma.fifo.findMany({
     where: {
-      companyId, 
+      companyId,
       quantity: {
         lt: 0,
       },

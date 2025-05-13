@@ -39,7 +39,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { startDate, endDate }: IQuery = req.query;
 
-
     if (!startDate || !endDate) {
       return res.status(404).json({
         error: 'Date Range Is Not Provided',

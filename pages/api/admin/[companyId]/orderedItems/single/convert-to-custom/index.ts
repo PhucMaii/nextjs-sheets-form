@@ -114,17 +114,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    await createOrderedItems(
-      Number(companyId),
-      existingOrder,
-      [
-        {
-          ...customAmount,
-          inventoryUnit: targetUnit,
-          inventoryUnitId: targetUnit?.id,
-        },
-      ],
-    );
+    await createOrderedItems(Number(companyId), existingOrder, [
+      {
+        ...customAmount,
+        inventoryUnit: targetUnit,
+        inventoryUnitId: targetUnit?.id,
+      },
+    ]);
 
     // Delete prev ordered item
     await prisma.orderedItems.delete({

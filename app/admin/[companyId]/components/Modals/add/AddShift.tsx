@@ -63,6 +63,7 @@ export const AddShift = ({
       try {
         const response = await axios.get(getAdminApiUrl(companyId, '/routes'));
         const data = groupBy(response.data.data, (route: any) => route.day);
+        console.log('data', { data, response });
         setAllRoutes(data);
       } catch (error) {
         console.error('Error fetching routes:', error);
@@ -210,6 +211,7 @@ export const AddShift = ({
               >
                 {sortedDays.length > 0 &&
                   allRoutes &&
+                  Object.keys(allRoutes).length > 0 &&
                   sortedDays.map((day: string) => [
                     <ListSubheader key={`subheader-${day}`}>
                       {day}

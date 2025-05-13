@@ -13,7 +13,6 @@ const UserContextAPI = ({ children }: { children: ReactNode }) => {
     revalidateOnFocus: false,
   });
 
-
   const {
     data: user,
     mutate,

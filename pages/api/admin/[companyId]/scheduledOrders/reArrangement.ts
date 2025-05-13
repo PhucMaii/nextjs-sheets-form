@@ -49,7 +49,7 @@ export default async function reArrangement(
         },
       },
     });
-    
+
     return res.status(200).json({
       data: updatedScheduledOrders,
       message: 'Rearrange Successfully',

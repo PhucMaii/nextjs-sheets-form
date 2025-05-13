@@ -25,7 +25,7 @@ export default function AuthenGuard({ children }: any) {
   } = useSWR('/api/auth/session', fetcher, {
     revalidateOnFocus: false,
   });
-  console.log('pathname?.split("/")[2]"', pathname?.split("/")[2]);
+  console.log('pathname?.split("/")[2]"', pathname?.split('/')[2]);
   console.log('session?.user.companyId', session?.user?.companyId);
   useEffect(() => {
     if (

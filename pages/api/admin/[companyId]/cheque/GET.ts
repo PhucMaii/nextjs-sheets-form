@@ -11,7 +11,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const { userId }: IQuery = req.query;
     const { companyId } = req.query;
-    
+
     if (!userId) {
       return res.status(404).json({
         error: 'You are missing body data',

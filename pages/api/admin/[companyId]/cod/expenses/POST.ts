@@ -30,7 +30,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         error: 'Company ID is required',
       });
     }
-    
+
     const {
       createdAt,
       createdBy,

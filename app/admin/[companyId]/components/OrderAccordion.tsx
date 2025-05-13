@@ -719,7 +719,9 @@ const OrderAccordion = ({
               {discountPrice > 0 &&
                 discountPrice.toFixed(2) !== order.totalPrice.toFixed(2) &&
                 DiscountText}
-              <Button variant="outlined">${order?.totalPrice?.toFixed(2)}</Button>
+              <Button variant="outlined">
+                ${order?.totalPrice?.toFixed(2)}
+              </Button>
             </Box>
           </Grid>
         </Grid>

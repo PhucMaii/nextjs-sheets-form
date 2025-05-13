@@ -5,7 +5,7 @@ import { Autocomplete, Box, Grid, TextField, Typography } from '@mui/material';
 import { IDayRange, UserType } from '@/app/utils/type';
 import { ShadowSection } from '../reports/styled';
 import { LoadingButton } from '@mui/lab';
-import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+// import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { SWRFetchData } from '@/app/utils/db';
 import { USER_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import { generateCurrentTime, generateMonthRange } from '@/app/utils/time';
@@ -34,7 +34,7 @@ export default function BlockingPage() {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [isFetching, setIsFetching] = useState<boolean>(false);
+  // const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
   const [targetRange, setTargetRange] = useState<any>(null);
@@ -49,17 +49,17 @@ export default function BlockingPage() {
 
   // Data Fetching
   const [clientList] = SWRFetchData(getAdminApiUrl(companyId, '/clients'));
-  const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
+  const [unavailableRanges, mutateRange] = SWRFetchData(
     `${apiURL}?userId=${selectedClient?.id || 'All Clients'}&date=${selectedDate}`,
   );
 
-  useEffect(() => {
-    if (!unavailableRanges && isValidating) {
-      setIsFetching(true);
-    } else if (unavailableRanges) {
-      setIsFetching(false);
-    }
-  }, [selectedClient, unavailableRanges]);
+  // useEffect(() => {
+  //   if (!unavailableRanges && isValidating) {
+  //     setIsFetching(true);
+  //   } else if (unavailableRanges) {
+  //     setIsFetching(false);
+  //   }
+  // }, [selectedClient, unavailableRanges]);
 
   // Reset when switching
   useEffect(() => {
@@ -305,11 +305,9 @@ export default function BlockingPage() {
           Unavailable Ranges:
         </Typography>
         <Box display="flex" flexDirection="column" gap={2} mt={2}>
-          {isFetching ? (
-            <LoadingComponent />
-          ) : unavailableRanges &&
-            selectedClient?.clientName === 'All Clients' &&
-            Object.keys(unavailableRanges.data).length > 0 ? (
+          {unavailableRanges &&
+          selectedClient?.clientName === 'All Clients' &&
+          Object.keys(unavailableRanges.data).length > 0 ? (
             Object.keys(unavailableRanges.data).map(
               (targetClient: string, clientIndex: number) => {
                 return (

@@ -74,9 +74,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       updatedOrderedItem = await createOrderedItems(
         Number(companyId),
         existingOrder,
-        [
-          { ...targetItem, price, quantity },
-        ],
+        [{ ...targetItem, price, quantity }],
       );
     } else {
       const existingOrderedItem = await prisma.orderedItems.findUnique({

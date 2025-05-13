@@ -7,16 +7,17 @@ interface IQuery {
   startDate?: string;
   endDate?: string;
   driverId?: number;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { startDate, endDate, driverId }: IQuery = req.query;
+    const { startDate, endDate, driverId, companyId }: IQuery = req.query;
 
-    if (!startDate || !endDate) {
-      return res.status(400).json({ error: 'Missing startDate or endDate' });
+    if (!startDate || !endDate || !companyId) {
+      return res.status(400).json({ error: 'Missing startDate or endDate or companyId' });
     }
 
     const formattedStartDate = formatDate(startDate);
@@ -31,6 +32,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       date: {
         in: listOfDateString,
       },
+      companyId: Number(companyId),
     };
 
     if (driverId && driverId > 0) {

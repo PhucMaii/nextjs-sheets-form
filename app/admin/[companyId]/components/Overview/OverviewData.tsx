@@ -20,7 +20,7 @@ interface IProps {
 
 export default function OverviewData({ isMinify, overviewData }: IProps) {
   const revenue = useMemo(() => {
-    if (!overviewData) {
+    if (!overviewData || !overviewData.revenue) {
       return 0;
     }
 
@@ -28,11 +28,11 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
       return minifyNumber(overviewData.revenue);
     }
 
-    return overviewData.revenue.toFixed(2);
+    return overviewData?.revenue?.toFixed(2);
   }, [isMinify, overviewData]);
 
   const expenses = useMemo(() => {
-    if (!overviewData) {
+    if (!overviewData || !overviewData.expenses) {
       return 0;
     }
 
@@ -40,7 +40,7 @@ export default function OverviewData({ isMinify, overviewData }: IProps) {
       return minifyNumber(overviewData.expenses);
     }
 
-    return overviewData.expenses.toFixed(2);
+    return overviewData?.expenses?.toFixed(2);
   }, [isMinify, overviewData]);
 
   const profit = useMemo(() => {

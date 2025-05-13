@@ -22,7 +22,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { startDate, endDate, companyId }: IQuery = req.query;
 
     if (!startDate || !endDate || !companyId) {
-      return res.status(400).json({ error: 'Missing startDate or endDate or companyId' });
+      return res
+        .status(400)
+        .json({ error: 'Missing startDate or endDate or companyId' });
     }
 
     const formattedStartDate = formatDate(startDate);

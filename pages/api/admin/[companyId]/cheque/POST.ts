@@ -18,7 +18,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { companyId } = req.query;
-    
+
     const {
       fileKeyFront,
       fileKeyBack,

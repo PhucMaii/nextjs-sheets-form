@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShadowSection } from '../reports/styled';
 import {
   Box,
@@ -11,17 +11,16 @@ import {
 } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { UserContext } from '@/app/context/UserContextAPI';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 import { API_URL, getAdminApiUrl } from '@/app/utils/enum';
 import useNotification from '@/hooks/useNotification';
 import { useParams } from 'next/navigation';
+import { fetchApi } from '@/app/utils/db';
 
 export default function EditProfile() {
   const { companyId }: any = useParams();
-  const [email, setEmail] = useState<string>('');
-  const [name, setName] = useState<string>('');
+  const [employee, setEmployee] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [passwordGroup, setPasswordGroup] = useState<any>({
     oldPassword: '',
@@ -38,14 +37,26 @@ export default function EditProfile() {
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   // Context
-  const { user } = useContext(UserContext);
+  // const { user } = useContext(UserContext);
+
+  // useEffect(() => {
+  //   if (user) {
+  //     setEmail(user.email);
+  //     setName(user.clientName);
+  //   }
+  // }, [user]);
 
   useEffect(() => {
-    if (user) {
-      setEmail(user.email);
-      setName(user.clientName);
-    }
-  }, [user]);
+    fetchEmployee();
+  }, []);
+
+  const fetchEmployee = async () => {
+    const data = await fetchApi(
+      getAdminApiUrl(companyId, '/profile'),
+      showNotification,
+    );
+    setEmployee(data);
+  };
 
   const checkPasswordInput = () => {
     if (
@@ -74,9 +85,9 @@ export default function EditProfile() {
     try {
       setIsSubmitting(true);
       const response = await axios.put(getAdminApiUrl(companyId, '/profile'), {
-        email,
-        name,
-        id: user.id,
+        email: employee?.email,
+        name: employee?.name,
+        id: employee?.id,
       });
 
       if (response.data.error) {
@@ -138,8 +149,8 @@ export default function EditProfile() {
             variant="outlined"
             // label="Name"
             placeholder="Please enter your name..."
-            value={name}
-            onChange={(e: any) => setName(e.target.value)}
+            value={employee?.name}
+            onChange={(e: any) => setEmployee({ ...employee, name: e.target.value })}
           />
         </Box>
         <Box display="flex" flexDirection="column" gap={1}>
@@ -150,8 +161,8 @@ export default function EditProfile() {
             variant="outlined"
             // label="Name"
             placeholder="Please enter your email..."
-            value={email}
-            onChange={(e: any) => setEmail(e.target.value)}
+            value={employee?.email}
+            onChange={(e: any) => setEmployee({ ...employee, email: e.target.value })}
           />
         </Box>
         <Box display="flex" justifyContent="right" mt={2}>
