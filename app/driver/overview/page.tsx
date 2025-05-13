@@ -22,7 +22,7 @@ export default function OverviewPage() {
   // Data Fetching
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orders, mutate, isValidating] = SWRFetchData(
-    `${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`,
+    `${API_URL.DRIVER}/orders?deliveryDate=${today}`,
   );
 
   useEffect(() => {

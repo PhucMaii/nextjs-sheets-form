@@ -25,7 +25,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const session: any = await getServerSession(req, res, authOptions);
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingDriver = await prisma.employee.findUnique({
       where: {
         id: Number(session?.user?.id),
       },
@@ -79,6 +79,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         userId: {
           in: userIds,
         },
+        companyId: session?.user?.companyId,
       },
       include: {
         user: {
@@ -104,6 +105,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           in: userIds,
         },
         day,
+        companyId: session?.user?.companyId,
       },
       include: {
         user: true,

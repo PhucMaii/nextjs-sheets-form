@@ -44,7 +44,8 @@ export const checkIsDriverInDate = async (date: string, driverId: number) => {
   const existedDriverInDate = await prisma.codBoard.findMany({
     where: {
       date,
-      driverId,
+      // driverId,
+      employeeId: driverId,
     },
   });
   return existedDriverInDate.length > 0;

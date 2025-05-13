@@ -2,7 +2,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { FC, useEffect } from 'react';
 import LoadingComponent from '../app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
-import { API_URL, USER_ROLE } from '../app/utils/enum';
+import { USER_ROLE } from '../app/utils/enum';
 import useSWR from 'swr';
 
 export const SplashScreen: FC = () => (

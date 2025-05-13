@@ -1,8 +1,10 @@
+import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   driverId: number;
+  employeeCode: string;
   hourlyRate: number;
   updatedName: string;
 }
@@ -11,7 +13,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { driverId, hourlyRate, updatedName }: IBody = req.body;
+    const { driverId, employeeCode, hourlyRate, updatedName }: IBody = req.body;
 
     const { companyId } = req.query;
 
@@ -25,7 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingDriver = await prisma.employee.findUnique({
       where: {
         id: driverId,
       },
@@ -37,12 +39,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const sameDriverName = await prisma.driver.findFirst({
+    const sameDriverName = await prisma.employee.findFirst({
       where: {
         name: updatedName,
         id: {
           not: driverId,
         },
+        role: USER_ROLE.DRIVER,
       },
     });
 
@@ -52,13 +55,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const updatedDriver = await prisma.driver.update({
+    const updatedDriver = await prisma.employee.update({
       where: {
         id: driverId,
       },
       data: {
         name: updatedName,
         hourlyRate,
+        employeeCode,
       },
     });
 

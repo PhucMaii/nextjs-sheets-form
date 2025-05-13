@@ -2,6 +2,7 @@ import { days } from '@/app/lib/constant';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../../utils/date';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IQuery {
   date?: string;
@@ -43,9 +44,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // TODO: Fetch all drivers from employee table where role === driver
-    const drivers = await prisma.driver.findMany({
+    const drivers = await prisma.employee.findMany({
       where: {
         companyId: Number(companyId),
+        role: USER_ROLE.DRIVER,
       },
       include: {
         routes: true,

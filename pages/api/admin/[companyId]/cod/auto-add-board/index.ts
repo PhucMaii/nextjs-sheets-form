@@ -169,7 +169,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return {
         date: todayString,
         cash: 0,
-        driverId: route.driverId,
+        // driverId: route.driverId,
+        employeeId: route.employeeId,
         note: '',
         status: COD_STATUS.IN_PROCESS,
         createdAt: `${date} ${time}`,
@@ -314,7 +315,8 @@ export const insertOrdersToSelectedBoards = async (
     let noRouteBoard = await prisma.codBoard.findFirst({
       where: {
         date,
-        driverId: -1,
+        // driverId: -1,
+        employeeId: -1,
       },
     });
 
@@ -324,7 +326,8 @@ export const insertOrdersToSelectedBoards = async (
         data: {
           date,
           cash: 0,
-          driverId: -1,
+          // driverId: -1,
+          employeeId: -1,
           note: '',
           status: COD_STATUS.IN_PROCESS,
           createdAt: `${date} ${time}`,
@@ -349,7 +352,7 @@ export const insertOrdersToSelectedBoards = async (
 
   for (const board of selectedBoards) {
     const selectedRoute = routeOnDate.find(
-      (route: any) => route.driverId === board.driverId,
+      (route: any) => route.employeeId === board.employeeId,
     );
 
     if (!selectedRoute) {

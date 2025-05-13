@@ -25,14 +25,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Check if driver has route today
     const route = await prisma.route.findFirst({
       where: {
-        driverId: driver.id,
+        // driverId: driver.id,
+        employeeId: driver.id,
         day,
       },
     });
 
     const shiftSession = await prisma.shiftSession.findMany({
       where: {
-        driverId: driver.id,
+        // driverId: driver.id,
+        employeeId: driver.id,
         date: today.date,
       },
     });

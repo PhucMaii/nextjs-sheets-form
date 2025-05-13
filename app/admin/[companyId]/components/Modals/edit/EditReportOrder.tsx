@@ -8,7 +8,7 @@ import React from 'react';
 import { BoxModal } from '../styled';
 import { Order } from '../../../orders/page';
 import {} from '@/app/utils/time';
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { getAdminApiUrl, USER_ROLE } from '@/app/utils/enum';
 import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
@@ -35,7 +35,10 @@ const EditReportOrder = ({
 }: PropTypes) => {
   const { companyId }: any = useParams();
 
-  const [sellingItems] = SWRFetchData(`${API_URL.ITEM}?userId=${order.userId}`);
+  // const [sellingItems] = SWRFetchData(`${API_URL.ITEM}?userId=${order.userId}`);
+  const [sellingItems] = SWRFetchData(
+    getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
+  );
 
   const onUpdateItem = async (orderParam: Order) => {
     try {

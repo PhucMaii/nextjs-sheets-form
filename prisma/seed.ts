@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -253,6 +253,24 @@ async function main() {
     data: { companyId: 1 },
   });
 }
+
+// async function main() {
+//   const routes = await prisma.route.findMany({
+//     where: {
+//       companyId: 1,
+//     },
+//   });
+
+//   for (const route of routes) {
+//     await prisma.route.update({
+//       where: {
+//         id: route.id,
+//       },
+//       data: { employeeId: route.driverId },
+//     });
+//   }
+  
+// }
 
 main()
   .then(() => prisma.$disconnect())

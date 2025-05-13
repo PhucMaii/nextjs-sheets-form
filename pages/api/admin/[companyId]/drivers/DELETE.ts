@@ -20,7 +20,7 @@ export default async function DELETE(
       });
     }
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingDriver = await prisma.employee.findUnique({
       where: {
         id: Number(driverId),
       },
@@ -32,7 +32,7 @@ export default async function DELETE(
       });
     }
 
-    await prisma.driver.delete({
+    await prisma.employee.delete({
       where: {
         id: existingDriver.id,
       },

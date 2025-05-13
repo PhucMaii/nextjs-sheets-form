@@ -28,7 +28,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const currentShift = await prisma.shiftSession.findFirst({
       where: {
-        driverId: driver.id,
+        // driverId: driver.id,
+        employeeId: driver.id,
         date: today.date,
       },
     });
@@ -50,12 +51,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const shiftSession = await prisma.shiftSession.create({
         data: {
           driverId: driver.id,
+          employeeId: driver.id,
           date: today.date,
           startedAt: today.dateAndTime,
           isActive: true,
           routeId: targetRoute?.id || null,
           status: SHIFT_STATUS.UNPAID,
           role,
+          companyId: driver.companyId,
         },
       });
       return res.status(200).json({
@@ -89,23 +92,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await prisma.shiftSession.create({
         data: {
           driverId: driver.id,
+          employeeId: driver.id,
           date: today.date,
           startedAt: today.dateAndTime,
           isActive: true,
           routeId: targetRoute?.id || null,
           status: SHIFT_STATUS.UNPAID,
           role,
+          companyId: driver.companyId,
         },
       });
     } else {
       await prisma.shiftSession.create({
         data: {
           driverId: driver.id,
+          employeeId: driver.id,
           date: today.date,
           startedAt: today.dateAndTime,
           isActive: true,
           status: SHIFT_STATUS.UNPAID,
           role,
+          companyId: driver.companyId,
         },
       });
     }

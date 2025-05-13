@@ -254,7 +254,7 @@ export const getCreatedBy = async (
   let createdBy = '';
 
   if (createdByRole === USER_ROLE.DRIVER) {
-    const driverCreate: any = await prisma.driver.findUnique({
+    const driverCreate: any = await prisma.employee.findUnique({
       where: {
         id: Number(session.user.id),
       },

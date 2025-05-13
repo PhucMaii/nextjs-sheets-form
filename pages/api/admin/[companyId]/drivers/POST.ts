@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { USER_ROLE } from '@/app/utils/enum';
 
 interface IBody {
+  employeeCode: string;
   driverName: string;
   driverPassword: string;
   hourlyRate: number;
@@ -13,7 +14,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { driverName, driverPassword, hourlyRate }: IBody = req.body;
+    const { employeeCode, driverName, driverPassword, hourlyRate }: IBody =
+      req.body;
 
     const { companyId } = req.query;
 
@@ -21,9 +23,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Company ID is required' });
     }
 
-    const sameDriverName = await prisma.driver.findFirst({
+    const sameDriverName = await prisma.employee.findFirst({
       where: {
         name: driverName,
+        role: USER_ROLE.DRIVER,
       },
     });
 
@@ -35,9 +38,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const hashPassword = await bcrypt.hash(driverPassword, 12);
 
-    const newDriver = await prisma.driver.create({
+    const newDriver = await prisma.employee.create({
       data: {
         name: driverName,
+        employeeCode,
         password: hashPassword,
         hourlyRate,
         role: USER_ROLE.DRIVER,

@@ -7,7 +7,7 @@ import { API_URL, USER_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import SingleFieldEdit from './edit/SingleFieldEdit';
 import axios from 'axios';
 import DeleteModal from './delete/DeleteModal';
-import { SWRFetchData } from '@/app/utils/db';
+// import { SWRFetchData } from '@/app/utils/db';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
 import { onUpdateOrder } from '@/app/utils/orders';
 import { useParams } from 'next/navigation';
@@ -28,10 +28,9 @@ const OrderDetails = ({
 
   const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
-  const [clientItems] = SWRFetchData(
-    getAdminApiUrl(companyId, `/items?categoryId=${order?.user?.categoryId}`),
-  );
+  const [clientItems, setClientItems] = useState<any>([]);
 
+  console.log('order?.user?.categoryId', order?.user?.categoryId);
   useEffect(() => {
     if (order?.user?.categoryId) {
       fetchClientItems();
@@ -46,8 +45,13 @@ const OrderDetails = ({
           `/items?categoryId=${order?.user?.categoryId}`,
         ),
       );
-      
-      
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      setClientItems(response.data.data);
     } catch (error: any) {
       console.log('Fail to fetch client items: ', error);
     }

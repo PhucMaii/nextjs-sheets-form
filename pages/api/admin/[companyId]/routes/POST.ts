@@ -24,7 +24,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const existedRoute = await prisma.route.findFirst({
       where: {
         day,
-        driverId,
+        employeeId: driverId,
       },
     });
 
@@ -38,6 +38,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         day,
         driverId,
+        employeeId: driverId,
         name,
         companyId: Number(companyId),
       },
@@ -52,7 +53,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         id: newRoute.id,
       },
       include: {
-        driver: true,
+        employee: true,
       },
     });
 

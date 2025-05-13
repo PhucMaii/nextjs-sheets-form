@@ -25,7 +25,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       where: { id },
       include: {
         route: true,
-        driver: true,
+        // driver: true,
+        employee: true,
       },
     });
 
@@ -74,7 +75,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Handle update cost if anything hours or driverId changed
     if (updatedFields.hours || updatedFields.driverId) {
-      const driver = await prisma.driver.findUnique({
+      const driver = await prisma.employee.findUnique({
         where: { id: updatedFields.driverId || existingShift.driverId },
         include: {
           routes: true,

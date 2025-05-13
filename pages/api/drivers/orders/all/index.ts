@@ -1,7 +1,9 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth';
 
 const prisma = new PrismaClient();
 
@@ -12,10 +14,15 @@ interface IQuery {
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { deliveryDate }: IQuery = req.query;
+    
+    const session: any = await getServerSession(req, res, authOptions);
+
+    const driver = session?.user;
 
     const deliveryOrders = await prisma.orders.findMany({
       where: {
         deliveryDate,
+        companyId: driver?.companyId,
         status: {
           in: [
             ORDER_STATUS.INCOMPLETED,

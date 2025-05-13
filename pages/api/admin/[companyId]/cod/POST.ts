@@ -43,7 +43,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const existedDriverInDate = await prisma.codBoard.findMany({
         where: {
           date,
-          driverId,
+          // driverId,
+          employeeId: driverId,
           companyId: Number(companyId),
         },
       });
@@ -62,7 +63,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         date,
         note,
         cash,
-        driverId,
+        // driverId,
+        employeeId: driverId,
         status: COD_STATUS.IN_PROCESS,
         companyId: Number(companyId),
       },
@@ -100,7 +102,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const selectedRoute = await prisma.route.findFirst({
       where: {
         day,
-        driverId,
+        // driverId,
+        employeeId: driverId,
         companyId: Number(companyId),
       },
       include: {

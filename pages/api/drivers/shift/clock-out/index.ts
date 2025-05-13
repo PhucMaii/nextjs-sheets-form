@@ -20,7 +20,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const shiftSession = await prisma.shiftSession.findUnique({
       where: {
         id: shiftId,
-        driverId: driver.id,
+        // driverId: driver.id,
+        employeeId: driver.id,
         date: today.date,
       },
     });

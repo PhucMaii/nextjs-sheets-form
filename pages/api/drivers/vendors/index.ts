@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
+import { getDriverInfo } from '../../utils/auth';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'GET') {
@@ -9,7 +10,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
 
+    const driver: any = await getDriverInfo(req, res);
+
     const vendors = await prisma.vendor.findMany({
+      where: {
+        companyId: driver.companyId,
+      },
       include: {
         vendorItem: {
           include: {

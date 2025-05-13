@@ -1,7 +1,9 @@
 import { generateListOfDateString } from '@/app/utils/time';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -22,6 +24,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const session: any = await getServerSession(req, res, authOptions);
+
+    const driver = session?.user;
+
     // Generate list of day string
     const normalizedStartDate = normalizeDate(new Date(startDate));
     const normalizedEndDate = normalizeDate(new Date(endDate));
@@ -36,6 +42,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         deliveryDate: {
           in: listOfDateString,
         },
+        companyId: driver?.companyId,
       },
       include: {
         items: true,

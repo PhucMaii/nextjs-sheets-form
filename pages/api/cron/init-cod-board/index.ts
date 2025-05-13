@@ -40,7 +40,7 @@ export default async function handler(req: any, res: any) {
         day,
       },
       include: {
-        driver: true,
+        employee: true,
         clients: true,
       },
     });
@@ -50,10 +50,12 @@ export default async function handler(req: any, res: any) {
         date: date,
         cash: 0,
         driverId: route.driverId,
+        employeeId: route.employeeId,
         note: '',
         status: COD_STATUS.IN_PROCESS,
         createdAt: `${date} ${time}`,
         createdBy: `System`,
+        companyId: route.companyId,
       };
     });
 

@@ -78,6 +78,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         date: date,
         driverId: driver.id,
+        companyId: driver.companyId,
       },
       include: {
         expense: true,
@@ -98,7 +99,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     if (invoice && invoice.trim() !== '') {
       // Check if vendor has expense on that date
-      const isExpenseValid = await checkIsExpenseValid(invoice, date, vendors);
+      const isExpenseValid = await checkIsExpenseValid(
+        driver.companyId,
+        invoice,
+        date,
+        vendors,
+      );
 
       if (!isExpenseValid.ok) {
         return res.status(409).json({ error: isExpenseValid.error });
@@ -119,6 +125,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt: createdAt,
         codBoardId: dateBoard.id,
         createdBy,
+        companyId: driver.companyId,
       },
     });
 
