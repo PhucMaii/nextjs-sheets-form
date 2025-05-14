@@ -110,7 +110,7 @@ export default function ClientsPage() {
   }, [debouncedKeywords, baseUsersList]);
 
   const directToClientDetails = (clientData: any) => {
-    router.push('/admin/clients/' + clientData.id);
+    router.push(`/admin/${companyId}/clients/${clientData.id}`);
   };
 
   const numberOfUserUsingApp = useCallback(() => {

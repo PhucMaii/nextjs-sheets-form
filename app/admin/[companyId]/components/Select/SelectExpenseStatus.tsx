@@ -13,7 +13,13 @@ interface IProps {
 
 export default function SelectExpenseStatus({ value, onChange }: IProps) {
   return (
-    <Select value={value} onChange={onChange}>
+    <Select
+      value={value}
+      onChange={onChange}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
       {transactionStatusList.map((status: TRANSACTION_STATUS) => {
         return (
           <MenuItem key={status} value={status}>

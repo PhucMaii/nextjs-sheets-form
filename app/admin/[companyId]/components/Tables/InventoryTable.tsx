@@ -59,8 +59,6 @@ const InventoryTable = ({
     inventoryItem: inventoryItems[0],
   });
 
-  console.log('re render');
-
   const router = useRouter();
 
   const handleDelete = async (targetObj: IInventoryItem) => {
@@ -265,7 +263,9 @@ const InventoryTable = ({
                         onClick={(e: any) => {
                           e.stopPropagation();
                           e.preventDefault();
-                          router.push(`/admin/bulk/selling-items/${item.id}`);
+                          router.push(
+                            `/admin/${companyId}/bulk/selling-items/${item.id}`,
+                          );
                         }}
                       >
                         <Box display="flex" gap={1} alignItems="center">

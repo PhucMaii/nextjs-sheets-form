@@ -105,7 +105,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    const formattedCreatedBy = await getCreatedBy(req, res, createdBy);
+    const session = await getServerSession(req, res, authOptions);
+    const formattedCreatedBy = await getCreatedBy(
+      req,
+      res,
+      session?.user?.role as USER_ROLE || createdBy,
+    );
 
     // Check is delivery date in client's vacation range
     if (isCheckUnavailableRange) {

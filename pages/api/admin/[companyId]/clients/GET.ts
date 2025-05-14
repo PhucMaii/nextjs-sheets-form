@@ -1,3 +1,4 @@
+import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -21,7 +22,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Get all clients
     const clientList = await prisma.user.findMany({
       where: {
-        role: 'client',
+        role: USER_ROLE.CLIENT,
         companyId: Number(companyId),
       },
       include: {

@@ -52,7 +52,7 @@ export default function ClientDetails({ clientId }: IProps) {
         pr={6}
         sx={{ boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px' }}
       >
-        <IconButton onClick={() => router.push('/admin/clients')}>
+        <IconButton onClick={() => router.push(`/admin/${companyId}/clients`)}>
           <ArrowBackIcon fontSize="medium" />
         </IconButton>
         <Box>
