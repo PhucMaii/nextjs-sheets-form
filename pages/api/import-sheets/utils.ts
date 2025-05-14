@@ -264,7 +264,7 @@ export const getCreatedBy = async (
       },
     });
 
-    const capitalizeRole = createdByRole.charAt(0).toUpperCase() + createdByRole.slice(1);
+    const capitalizeRole = createdByRole === createdByRole.charAt(0).toUpperCase() + createdByRole.slice(1);
     createdBy = `${capitalizeRole} - ${driverCreate.name}`;
   } else if (createdByRole === USER_ROLE.CLIENT) {
     const userCreate: any = await prisma.user.findUnique({

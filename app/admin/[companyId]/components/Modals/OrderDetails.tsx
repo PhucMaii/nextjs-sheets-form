@@ -46,6 +46,8 @@ const OrderDetails = ({
         ),
       );
 
+      console.log('response.data.data', response.data.data);
+
       if (response.data.error) {
         showNotification('error', response.data.error);
         return;
@@ -218,7 +220,7 @@ const OrderDetails = ({
             defaultDeliveryDate={order?.deliveryDate}
             defaultOrder={order}
             defaultOrderedItems={order?.items}
-            items={clientItems?.data || []}
+            items={clientItems || []}
             isModal
             onSubmit={handleUpdateOrder}
             role={USER_ROLE.ADMIN}

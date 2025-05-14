@@ -136,7 +136,7 @@ export const onUpdateOrder = async (
 ) => {
   try {
     const response = await axios.put(
-      getAdminApiUrl(companyId, '/orderedItems/single'),
+      getAdminApiUrl(companyId, '/orderedItems'),
       {
         updatedItems: orderParam.items,
         orderId,

@@ -35,6 +35,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: 'Company ID is required' });
     }
 
+    console.log('req.body', req.body);
+
     const prisma = new PrismaClient();
     const { id, orderId, quantity, price, itemId } = req.body as IBody;
 
