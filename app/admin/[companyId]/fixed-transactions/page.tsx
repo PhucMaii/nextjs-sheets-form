@@ -116,7 +116,7 @@ export default function FixedTransactionsPage() {
         <Grid item xs={12} md={6} lg={4}>
           <OverviewCard
             text="Total Fixed Transactions"
-            value={overview?.totalFixedTransactions || 0}
+            value={overview?.totalFixedTransactions?.toFixed(2) || 0}
             icon={
               <AttachMoneyIcon
                 sx={{ fontSize: '2rem', color: 'primary.main' }}

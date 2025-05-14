@@ -142,6 +142,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const routeOnDate: any = await prisma.route.findMany({
       where: {
         day,
+        companyId: Number(companyId),
       },
       include: {
         driver: true,
@@ -152,6 +153,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // If there are new orders that have not been added
     if (boards.length > 0 && newBoardOrders.length > 0) {
       await insertOrdersToSelectedBoards(
+        Number(companyId),
         newBoardOrders,
         boards,
         routeOnDate,
@@ -175,6 +177,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: COD_STATUS.IN_PROCESS,
         createdAt: `${date} ${time}`,
         createdBy: `Admin - ${user.clientName}`,
+        companyId: Number(companyId),
       };
     });
 
@@ -185,6 +188,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const newBoards: any = await prisma.codBoard.findMany({
       where: {
         date: todayString,
+        companyId: Number(companyId),
       },
     });
 
@@ -194,6 +198,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: {
           not: ORDER_STATUS.VOID,
         },
+        companyId: Number(companyId),
         user: {
           preference: {
             paymentType: {
@@ -224,6 +229,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Add Orders Into Boards
     await insertOrdersToSelectedBoards(
+      Number(companyId),
       dateOrders,
       newBoards,
       routeOnDate,
@@ -274,6 +280,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 export default withAdminAuthGuard(handler);
 
 export const insertOrdersToSelectedBoards = async (
+  companyId: number,
   orders: Order[],
   selectedBoards: IBoard[],
   routeOnDate: IRoutes[],
@@ -317,6 +324,7 @@ export const insertOrdersToSelectedBoards = async (
         date,
         // driverId: -1,
         employeeId: -1,
+        companyId,
       },
     });
 
@@ -332,6 +340,7 @@ export const insertOrdersToSelectedBoards = async (
           status: COD_STATUS.IN_PROCESS,
           createdAt: `${date} ${time}`,
           createdBy: `Admin - ${user.clientName}`,
+          companyId,
         },
       });
     }
@@ -383,6 +392,7 @@ export const insertOrdersToSelectedBoards = async (
           deliveryDate: {
             in: [...dayList, date],
           },
+          companyId,
           status: {
             in: [
               ORDER_STATUS.DELIVERED,

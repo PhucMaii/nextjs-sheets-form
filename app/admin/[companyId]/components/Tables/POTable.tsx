@@ -115,7 +115,9 @@ export default function POTable({
                     backgroundColor: grey[100],
                   },
                 }}
-                onClick={() => router.push(`/admin/purchase-orders/${po.id}`)}
+                onClick={() =>
+                  router.push(`/admin/${companyId}/purchase-orders/${po.id}`)
+                }
               >
                 <TableCell sx={{ fontWeight: 'bold' }}>
                   <Box display="flex" alignItems="center" gap={1}>

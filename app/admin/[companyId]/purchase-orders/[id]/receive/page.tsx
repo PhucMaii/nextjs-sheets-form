@@ -18,7 +18,7 @@ import { LoadingButton } from '@mui/lab';
 import ReceivedProgress from '@/app/admin/[companyId]/components/ReceivedProgress';
 
 export default function ReceiveInventory() {
-  const { id }: any = useParams();
+  const { id, companyId }: any = useParams();
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -59,7 +59,10 @@ export default function ReceiveInventory() {
     fetchPoItems();
   }, []);
 
+  console.log(poItems, 'PO ITEMS');
+
   const fetchPoItems = async () => {
+    console.log('Running fetchPoItems');
     try {
       const res = await axios.get(
         getAdminApiUrl(id, `/purchase-orders?id=${id}`),
@@ -113,7 +116,7 @@ export default function ReceiveInventory() {
       }
 
       showNotification('success', response.data.message);
-      router.push(`/admin/purchase-orders/${id}`);
+      router.push(`/admin/${companyId}/purchase-orders/${id}`);
     } catch (error) {
       console.error(error);
       showNotification('error', 'Error saving receive');

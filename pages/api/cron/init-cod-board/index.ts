@@ -106,6 +106,7 @@ export default async function handler(req: any, res: any) {
 
     // Add Orders Into Boards
     await insertOrdersToSelectedBoards(
+      1, // Temporary only update for companyId 1
       dateOrders,
       newBoards,
       routeOnDate,

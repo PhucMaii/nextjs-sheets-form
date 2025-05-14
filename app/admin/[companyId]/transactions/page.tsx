@@ -72,7 +72,7 @@ export default function Transactions() {
       setIsLoading(true);
       setSelectedExpenses([]);
     }
-  }, [expenses?.data, isValidating, dateRange]);
+  }, [expenses?.data, dateRange]);
 
   // console.log(displayTransactions, 'displayTransactions');
 

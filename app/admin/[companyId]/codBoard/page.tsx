@@ -66,9 +66,9 @@ export default function CodBoard() {
         ),
   );
 
-  useEffect(() => {
-    handleAutoAddBoard();
-  }, [date, selectedBoard]);
+  // useEffect(() => {
+  //   handleAutoAddBoard();
+  // }, [date, selectedBoard]);
 
   useEffect(() => {
     if (!codBoards) {

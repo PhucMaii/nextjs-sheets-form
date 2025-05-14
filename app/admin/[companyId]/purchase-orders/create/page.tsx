@@ -178,7 +178,7 @@ export default function CreatePO() {
       showNotification('success', response.data.message);
 
       setTimeout(() => {
-        router.push(`/admin/purchase-orders`);
+        router.push(`/admin/${companyId}/purchase-orders`);
       }, 2500);
     } catch (error) {
       console.log(error, 'Something went wrong');
@@ -332,43 +332,8 @@ export default function CreatePO() {
                   value={searchKeywords}
                   onChange={(e) => setSearchKeywords(e.target.value)}
                   placeholder="Search Items"
+                  onClick={() => setIsOpenModalInventoryItemSearch(true)}
                 />
-                {/* <Autocomplete
-                  size="small"
-                  options={selectedVendor?.vendorItem || []}
-                  getOptionLabel={(option: any) => {
-                    console.log(option, 'OPTION');
-                    return option?.inventoryItem?.sku
-                      ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
-                      : option?.inventoryItem?.name;
-                  }}
-                  renderOption={(props, option, { selected }) => {
-                    const { key, ...optionProps } = props;
-                    return (
-                      <li key={key} {...optionProps}>
-                        <FormControlLabel
-                          label={
-                            option?.inventoryItem?.sku
-                              ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
-                              : option?.inventoryItem?.name
-                          }
-                          control={<Checkbox checked={selected} />}
-                        />
-                      </li>
-                    );
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Search Items" />
-                  )}
-                  multiple
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  onChange={(event, newValue) => {
-                    onSelectItem(newValue);
-                  }}
-                  disableCloseOnSelect
-                /> */}
               </Box>
 
               {/* Display items */}
@@ -390,158 +355,6 @@ export default function CreatePO() {
                           }));
                         }}
                       />
-                      // <Box
-                      //   key={item.id}
-                      //   display="flex"
-                      //   flexDirection="column"
-                      //   gap={2}
-                      // >
-                      //   <Grid
-                      //     container
-                      //     key={item.id}
-                      //     display="flex"
-                      //     alignItems="center"
-                      //     spacing={1}
-                      //   >
-                      //     <Grid item xs={12}>
-                      //       <Typography variant="h6">
-                      //         {item?.inventoryItem?.sku
-                      //           ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
-                      //           : item?.inventoryItem?.name}
-                      //       </Typography>
-                      //     </Grid>
-                      //     <Grid item xs={12}>
-                      //       <UnitRadio
-                      //         units={item?.unit}
-                      //         value={JSON.stringify(item?.inventoryUnit || {})}
-                      //         onChange={(e: any) => {
-                      //           setPO((prevState: any) => ({
-                      //             ...prevState,
-                      //             items: prevState.items.map((i: any) => {
-                      //               if (i.id === item.id) {
-                      //                 const tax =
-                      //                   JSON.parse(e.target.value).unitPrice *
-                      //                     (item?.inventoryItem?.hasGST
-                      //                       ? gstRate
-                      //                       : 0) +
-                      //                   JSON.parse(e.target.value).unitPrice *
-                      //                     (item?.inventoryItem?.hasPST
-                      //                       ? pstRate
-                      //                       : 0);
-
-                      //                 const costPerItem = JSON.parse(
-                      //                   e.target.value,
-                      //                 ).unitPrice;
-
-                      //                 const total = calculateItemTotal({
-                      //                   ...i,
-                      //                   costPerItem,
-                      //                   tax,
-                      //                 });
-                      //                 return {
-                      //                   ...i,
-                      //                   inventoryUnit: JSON.parse(
-                      //                     e.target.value,
-                      //                   ),
-                      //                   costPerItem,
-                      //                   tax,
-                      //                   total,
-                      //                 };
-                      //               }
-                      //               return i;
-                      //             }),
-                      //           }));
-                      //         }}
-                      //       />
-                      //     </Grid>
-                      //     <Grid item xs={3.8} lg={3}>
-                      //       <FormControl fullWidth>
-                      //         <InputLabel htmlFor="item-quantity">
-                      //           Quantity
-                      //         </InputLabel>
-                      //         <OutlinedInput
-                      //           id="item-quantity"
-                      //           size="small"
-                      //           placeholder="Quantity"
-                      //           label="Quantity"
-                      //           sx={{ width: '100%' }}
-                      //           value={item?.orderedQty || 0}
-                      //           onChange={(e) =>
-                      //             onChangeItem(
-                      //               item,
-                      //               'orderedQty',
-                      //               Number(e.target.value),
-                      //             )
-                      //           }
-                      //         />
-                      //       </FormControl>
-                      //     </Grid>
-                      //     <Grid item xs={3.8} lg={3}>
-                      //       <FormControl fullWidth>
-                      //         <InputLabel htmlFor="item-cost">Cost</InputLabel>
-                      //         <OutlinedInput
-                      //           id="item-cost"
-                      //           size="small"
-                      //           placeholder="Cost"
-                      //           sx={{ width: '100%' }}
-                      //           value={item?.costPerItem || 0}
-                      //           startAdornment={
-                      //             <InputAdornment position="start">
-                      //               <Typography>$</Typography>
-                      //             </InputAdornment>
-                      //           }
-                      //           type="number"
-                      //           onChange={(e) =>
-                      //             onChangeItem(
-                      //               item,
-                      //               'costPerItem',
-                      //               Number(e.target.value),
-                      //             )
-                      //           }
-                      //           label="Cost"
-                      //         />
-                      //       </FormControl>
-                      //     </Grid>
-                      //     <Grid item xs={3.8} lg={3}>
-                      //       <FormControl fullWidth>
-                      //         <InputLabel htmlFor="item-tax">Tax</InputLabel>
-                      //         <OutlinedInput
-                      //           id="item-tax"
-                      //           size="small"
-                      //           placeholder="Tax"
-                      //           sx={{ width: '100%' }}
-                      //           value={item?.tax || 0}
-                      //           startAdornment={
-                      //             <InputAdornment position="start">
-                      //               <Typography>$</Typography>
-                      //             </InputAdornment>
-                      //           }
-                      //           onChange={(e) =>
-                      //             onChangeItem(
-                      //               item,
-                      //               'tax',
-                      //               Number(e.target.value),
-                      //             )
-                      //           }
-                      //           label="Tax"
-                      //           type="number"
-                      //         />
-                      //       </FormControl>
-                      //     </Grid>
-                      //     <Grid item xs={10} lg={2} textAlign="right">
-                      //       <Typography>
-                      //         Total: ${item?.total?.toFixed(2) || 0}
-                      //       </Typography>
-                      //     </Grid>
-                      //     <Grid item xs={1} lg={0.5} textAlign="right">
-                      //       <IconButton onClick={() => onDeleteItem(item)}>
-                      //         <Trash2Icon />
-                      //       </IconButton>
-                      //     </Grid>
-                      //   </Grid>
-
-                      //   <Divider />
-                      // </Box>
                     );
                   })}
               </Box>

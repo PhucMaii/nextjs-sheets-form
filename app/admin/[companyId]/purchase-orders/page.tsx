@@ -163,7 +163,9 @@ export default function PurchaseOrders() {
           </Grid>
           <Grid item xs={4} md={1}>
             <Button
-              onClick={() => router.push('/admin/purchase-orders/create')}
+              onClick={() =>
+                router.push(`/admin/${companyId}/purchase-orders/create`)
+              }
               variant="contained"
             >
               + Create

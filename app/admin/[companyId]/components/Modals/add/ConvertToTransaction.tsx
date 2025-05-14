@@ -179,7 +179,7 @@ export default function ConvertToTransaction({
 
       showNotification('success', res.data.message);
       onClose();
-      router.push(`/admin/purchase-orders`);
+      router.push(`/admin/${companyId}/purchase-orders`);
     } catch (error: any) {
       showNotification('error', error.message);
     } finally {

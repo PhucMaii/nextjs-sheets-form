@@ -237,7 +237,7 @@ export default function PurchaseOrder() {
   };
 
   const directToReceive = () => {
-    router.push(`/admin/purchase-orders/${id}/receive`);
+    router.push(`/admin/${companyId}/purchase-orders/${id}/receive`);
   };
 
   const handlePrintInvoice = useReactToPrint({
@@ -338,7 +338,7 @@ export default function PurchaseOrder() {
                 ) {
                   setIsEditMode(false);
                 } else {
-                  router.push('/admin/purchase-orders');
+                  router.push(`/admin/${companyId}/purchase-orders`);
                 }
               }}
             >
@@ -421,43 +421,8 @@ export default function PurchaseOrder() {
                       label="Search Items"
                       value={searchKeywords}
                       onChange={(e) => setSearchKeywords(e.target.value)}
+                      onClick={() => setIsOpenModalInventoryItemSearch(true)}
                     />
-                    {/* <Autocomplete
-                      size="small"
-                      value={selectedItems}
-                      options={po?.vendor?.vendorItem || []}
-                      getOptionLabel={(option) =>
-                        option?.inventoryItem?.sku
-                          ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
-                          : option?.inventoryItem?.name
-                      }
-                      renderOption={(props, option, { selected }) => {
-                        const { key, ...optionProps } = props;
-                        return (
-                          <li key={key} {...optionProps}>
-                            <FormControlLabel
-                              label={
-                                option?.inventoryItem?.sku
-                                  ? `${option?.inventoryItem?.sku} | ${option?.inventoryItem?.name}`
-                                  : option?.inventoryItem?.name
-                              }
-                              control={<Checkbox checked={selected} />}
-                            />
-                          </li>
-                        );
-                      }}
-                      renderInput={(params) => (
-                        <TextField {...params} label="Search Items" />
-                      )}
-                      multiple
-                      isOptionEqualToValue={(option, value) =>
-                        option.id === value.id
-                      }
-                      onChange={(event, newValue) => {
-                        onSelectItem(newValue);
-                      }}
-                      disableCloseOnSelect
-                    /> */}
                   </Box>
                 ) : (
                   <Typography>Ordered Items</Typography>
