@@ -28,9 +28,10 @@ export default function DriverTable({
     <Paper sx={{ overflow: 'scroll' }}>
       <Table>
         <TableHead>
-          <TableRow>
+          <TableRow>π
             <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
+            <TableCell>Employee Code</TableCell>
             <TableCell>Total Routes</TableCell>
             <TableCell>Hourly Rate</TableCell>
             <TableCell></TableCell>
@@ -43,6 +44,7 @@ export default function DriverTable({
                 <TableRow key={index}>
                   <TableCell>{driver.id}</TableCell>
                   <TableCell>{driver.name}</TableCell>
+                  <TableCell>{driver?.employeeCode}</TableCell>
                   <TableCell>{driver.routes.length}</TableCell>
                   <TableCell>${driver?.hourlyRate?.toFixed(2)}</TableCell>
                   <TableCell>

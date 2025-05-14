@@ -4,6 +4,7 @@ import {
   CodBoard,
   DayRange,
   Driver,
+  Employee,
   Expense,
   Fifo,
   FixedTransaction,
@@ -191,7 +192,7 @@ export interface IUserRoutes extends UserRoute {
   user: UserType;
 }
 
-export interface IDriver extends Driver {
+export interface IDriver extends Employee {
   routes: IRoutes[];
 }
 

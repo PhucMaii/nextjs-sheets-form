@@ -28,8 +28,7 @@ export default function EditDriver({
 }: IProps) {
   const { companyId }: any = useParams();
 
-  const [updatedName, setUpdatedName] = useState<string>(driver.name);
-  const [hourlyRate, setHourlyRate] = useState<number>(driver?.hourlyRate || 0);
+  const [updatedDriver, setUpdatedDriver] = useState<IDriver>(driver);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
@@ -39,8 +38,9 @@ export default function EditDriver({
 
       const response = await axios.put(getAdminApiUrl(companyId, '/drivers'), {
         driverId: driver.id,
-        updatedName: updatedName.toUpperCase(),
-        hourlyRate,
+        updatedName: updatedDriver.name,
+        hourlyRate: updatedDriver.hourlyRate,
+        employeeCode: updatedDriver.employeeCode,
       });
 
       if (response.data.error) {
@@ -80,16 +80,36 @@ export default function EditDriver({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="subtitle1">Name</Typography>
               <TextField
-                value={updatedName}
-                onChange={(e: any) => setUpdatedName(e.target.value)}
+                value={updatedDriver.name}
+                onChange={(e: any) =>
+                  setUpdatedDriver({ ...updatedDriver, name: e.target.value })
+                }
+                // label="Name"
+              />
+            </Box>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="subtitle1">Employee Code</Typography>
+              <TextField
+                value={updatedDriver.employeeCode}
+                onChange={(e: any) =>
+                  setUpdatedDriver({
+                    ...updatedDriver,
+                    employeeCode: e.target.value,
+                  })
+                }
                 // label="Name"
               />
             </Box>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="subtitle1">Hourly Rate</Typography>
               <TextField
-                value={hourlyRate}
-                onChange={(e: any) => setHourlyRate(+e.target.value)}
+                value={updatedDriver.hourlyRate}
+                onChange={(e: any) =>
+                  setUpdatedDriver({
+                    ...updatedDriver,
+                    hourlyRate: +e.target.value,
+                  })
+                }
                 // label="Name"
                 type="number"
               />

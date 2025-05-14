@@ -28,6 +28,7 @@ export default function AddDriver({
   const { companyId }: any = useParams();
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
+  const [employeeCode, setEmployeeCode] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [hourlyRate, setHourlyRate] = useState<number>(0);
 
@@ -99,14 +100,32 @@ export default function AddDriver({
               fullWidth
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
+            <Typography>
+              Employee Code (auto generated if not provided):
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              value={employeeCode}
+              onChange={(e: any) => setEmployeeCode(e.target.value)}
+              label="Employee Code"
+              placeholder="Enter driver employee code..."
+              fullWidth
+              type="number"
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Typography>Hourly Rate:</Typography>
+          </Grid>
+          <Grid item xs={12} md={6}>
             <TextField
               value={hourlyRate}
               onChange={(e: any) => setHourlyRate(+e.target.value)}
               label="Hourly Rate"
               placeholder="Enter driver hourly rate..."
               fullWidth
-              type="number"
             />
           </Grid>
         </Grid>

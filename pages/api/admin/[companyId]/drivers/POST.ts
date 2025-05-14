@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { USER_ROLE } from '@/app/utils/enum';
+import { generateEmployeeCode } from '@/pages/api/utils/drivers';
 
 interface IBody {
   employeeCode: string;
@@ -36,12 +37,29 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    let code: string = employeeCode || generateEmployeeCode();
+
+    // Check if the employee code is already in use
+    while (code) {
+      const sameEmployeeCode = await prisma.employee.findFirst({
+        where: {
+          employeeCode: code.toString(),
+        },
+      });
+
+      if (sameEmployeeCode) {
+        code = generateEmployeeCode();
+      } else {
+        break;
+      }
+    }
+
     const hashPassword = await bcrypt.hash(driverPassword, 12);
 
     const newDriver = await prisma.employee.create({
       data: {
         name: driverName,
-        employeeCode,
+        employeeCode: code,
         password: hashPassword,
         hourlyRate,
         role: USER_ROLE.DRIVER,
