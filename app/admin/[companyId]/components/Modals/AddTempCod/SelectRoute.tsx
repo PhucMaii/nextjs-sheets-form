@@ -16,10 +16,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { days } from '@/app/lib/constant';
 import { filterByRoute } from '@/app/utils/array';
 import useCODAndWCOD from '@/hooks/useCODAndWCOD';
+import { useParams } from 'next/navigation';
 
 interface IProps {
   codData: any;
@@ -40,11 +41,12 @@ export default function SelectRoute({
   showNotification,
   onClose,
 }: IProps) {
+  const { companyId }: any = useParams();
   const [currentRoute, setCurrentRoute] = useState<number>(0);
   const selectedDate = new Date(date);
   // Data Fetching
   const [routes] = SWRFetchData(
-    `${API_URL.ROUTES}?day=${days[selectedDate.getDay()]}`,
+    getAdminApiUrl(companyId, `/routes?day=${days[selectedDate.getDay()]}`),
   );
 
   useEffect(() => {

@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { memo } from 'react';
-import { API_URL, USER_CATEGORIZED } from '@/app/utils/enum';
+import { getAdminApiUrl, USER_CATEGORIZED } from '@/app/utils/enum';
 import { UserType } from '@/app/utils/type';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import { TableComponents, TableVirtuoso } from 'react-virtuoso';
@@ -25,6 +25,7 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import EditClient from '../Modals/edit/EditClient';
 import { renderType } from '@/app/lib/render';
 import { grey } from '@mui/material/colors';
+import { useParams } from 'next/navigation';
 
 interface PropTypes {
   categories: Category[];
@@ -51,12 +52,13 @@ const ClientsTable = ({
   mutateClients,
   handleDirectToDetails,
 }: PropTypes) => {
+  const { companyId }: any = useParams();
   const windowDimensions = useWindowDimensions();
 
   const handleDeleteClient = async (client: UserType) => {
     try {
       const response = await axios.delete(
-        `${API_URL.CLIENTS}?userId=${client.id}`,
+        getAdminApiUrl(companyId, `/clients?userId=${client.id}`),
       );
 
       if (response.data.error) {

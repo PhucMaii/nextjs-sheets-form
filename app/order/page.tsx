@@ -69,7 +69,7 @@ export default function OrderForm() {
 
   const minDate = today.startOf('day');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [items, _mutate, isValidating] = SWRFetchData(API_URL.CLIENT_ITEM);
+  const [items, _mutate, isValidating] = SWRFetchData('/api/item');
 
   useEffect(() => {
     if (!items && isValidating) {

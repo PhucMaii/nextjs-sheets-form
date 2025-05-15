@@ -31,7 +31,7 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { OrderedItems, IRoutes, ScheduledOrder } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, getAdminApiUrl } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import AddOrder from '../components/Modals/add/AddOrder';
 import useDebounce from '@/hooks/useDebounce';
 import ErrorComponent from '../components/ErrorComponent';
@@ -274,12 +274,14 @@ export default function ScheduledOrderPage() {
   const createScheduledOrder = async (userId: number, items: any) => {
     try {
       const totalPrice = calculateTotalBillOneOrder(items);
-      const response = await axios.post(API_URL.SCHEDULED_ORDER, {
-        userId,
-        items,
-        day: days[dayIndex],
-        routeId: routes[routeIndex].id,
-        newTotalPrice: totalPrice,
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/scheduledOrders'),
+        {
+          userId,
+          items,
+          day: days[dayIndex],
+          routeId: routes[routeIndex].id,
+          newTotalPrice: totalPrice,
       });
 
       if (response.data.error) {
@@ -299,7 +301,7 @@ export default function ScheduledOrderPage() {
   const deleteRoute = async (targetRoute: IRoutes) => {
     try {
       const response = await axios.delete(
-        `${API_URL.ROUTES}?routeId=${targetRoute.id}`,
+        getAdminApiUrl(companyId, `/routes?routeId=${targetRoute.id}`),
       );
 
       if (response.data.error) {
@@ -331,10 +333,12 @@ export default function ScheduledOrderPage() {
 
   const deleteSelectedOrders = async () => {
     try {
-      const response = await axios.delete(API_URL.SCHEDULED_ORDER, {
-        data: {
-          scheduleOrderList: selectedOrders,
-          routeId: routes[routeIndex].id,
+      const response = await axios.delete(
+        getAdminApiUrl(companyId, '/scheduledOrders'),
+        {
+          data: {
+            scheduleOrderList: selectedOrders,
+            routeId: routes[routeIndex].id,
         },
       });
       mutateOrders();

@@ -13,11 +13,13 @@ interface IBody {
   userId: number;
   createdAt: string;
   role: USER_ROLE;
+  companyId: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { startDate, endDate, userId, createdAt, role }: IBody = req.body;
+    const { startDate, endDate, userId, createdAt, role, companyId }: IBody =
+      req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -48,6 +50,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     // Check is same start date or same end date exist
     const isRangeValid = await handleCheckRangeValid(
+      companyId,
       startDate,
       endDate,
       userId,
@@ -81,6 +84,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         userId,
         createdAt,
         createdBy,
+        companyId,
       },
     });
 
@@ -156,6 +160,7 @@ export const getOrdersByDateRange = async (
 };
 
 export const handleCheckRangeValid = async (
+  companyId: number,
   startDate: Date | string,
   endDate: Date | string,
   userId: number,
@@ -163,6 +168,7 @@ export const handleCheckRangeValid = async (
 ) => {
   const sameStartDate = await prisma.dayRange.findFirst({
     where: {
+      companyId,
       id: {
         not: avoidId,
       },
@@ -177,6 +183,7 @@ export const handleCheckRangeValid = async (
 
   const sameEndDate = await prisma.dayRange.findFirst({
     where: {
+      companyId,
       endDate,
       userId,
     },

@@ -24,7 +24,7 @@ import { useParams } from 'next/navigation';
 export default function BlockingPage() {
   const { companyId }: any = useParams();
 
-  const apiURL = getAdminApiUrl(companyId, '/unavailable_days');
+  const apiURL = '/api/unavailable_days';
 
   const [blockOrdersProps, setBlockOrdersProps] = useState<any>({
     open: false,
@@ -50,7 +50,7 @@ export default function BlockingPage() {
   // Data Fetching
   const [clientList] = SWRFetchData(getAdminApiUrl(companyId, '/clients'));
   const [unavailableRanges, mutateRange] = SWRFetchData(
-    `${apiURL}?userId=${selectedClient?.id || 'All Clients'}&date=${selectedDate}`,
+    `${apiURL}?userId=${selectedClient?.id || 'All Clients'}&date=${selectedDate}&companyId=${companyId}`,
   );
 
   // useEffect(() => {
@@ -96,6 +96,7 @@ export default function BlockingPage() {
         userId: selectedClient?.id,
         createdAt,
         role: USER_ROLE.ADMIN,
+        companyId: Number(companyId),
       });
 
       // This means if error and stil return data
@@ -166,6 +167,7 @@ export default function BlockingPage() {
         startDate: updatedDateRange[0],
         endDate: updatedDateRange[1],
         userId: updatedRange.userId,
+        companyId: Number(companyId),
       });
 
       if (response.data.error) {

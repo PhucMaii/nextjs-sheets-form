@@ -13,7 +13,6 @@ import { Order } from '@/app/admin/[companyId]/orders/page';
 import { BoxModal } from '../../admin/[companyId]/components/Modals/styled';
 import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
 import { LoadingButton } from '@mui/lab';
 import OrderAccordion from '../OrderAccordion';
 
@@ -48,7 +47,7 @@ export default function OverrideOrder({
 
       //   return { ...item, id: sameItemName.id };
       // });
-      const response = await axios.put(API_URL.CLIENT_ORDER, {
+      const response = await axios.put('/api/order', {
         deliveryDate: selectedOrder.deliveryDate,
         note: selectedOrder.note,
         items: itemsNo0,

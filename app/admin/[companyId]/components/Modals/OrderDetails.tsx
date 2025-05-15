@@ -3,7 +3,7 @@ import React, { memo, useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import { Order } from '../../orders/page';
-import { API_URL, USER_ROLE, getAdminApiUrl } from '@/app/utils/enum';
+import { USER_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import SingleFieldEdit from './edit/SingleFieldEdit';
 import axios from 'axios';
 import DeleteModal from './delete/DeleteModal';
@@ -144,7 +144,7 @@ const OrderDetails = ({
       return;
     }
     try {
-      const response = await axios.put(API_URL.ORDER, {
+      const response = await axios.put(getAdminApiUrl(companyId, '/orders'), {
         orderId: order.id,
         note: updatedNote,
       });

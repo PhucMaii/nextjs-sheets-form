@@ -5,10 +5,11 @@ import ModalHead from '@/app/lib/ModalHead';
 import { ModalProps } from '../type';
 import useSelectDate from '@/hooks/useSelectDate';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, ORDER_STATUS } from '@/app/utils/enum';
+import { getAdminApiUrl, ORDER_STATUS } from '@/app/utils/enum';
 import { grey } from '@mui/material/colors';
 import SelectRoute from './SelectRoute';
 import SelectOrder from './SelectOrder';
+import { useParams } from 'next/navigation';
 
 interface IProps extends ModalProps {
   currentDate: string;
@@ -25,11 +26,13 @@ export default function AddTempCOD({
   currentDate,
   showNotification,
 }: IProps) {
+  const { companyId }: any = useParams();
+
   const { date, SelectDate } = useSelectDate('', true);
   const [currentTab, setCurrentTab] = useState<number>(0);
 
   const [orders] = SWRFetchData(
-    `${API_URL.ORDER}?date=${date}&status=${ORDER_STATUS.NONE}`,
+    getAdminApiUrl(companyId, `/orders?date=${date}&status=${ORDER_STATUS.NONE}`),
   );
 
   return (

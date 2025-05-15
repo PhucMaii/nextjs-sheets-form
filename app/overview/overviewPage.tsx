@@ -4,7 +4,7 @@ import { limitOrderHour } from '../lib/constant';
 import { Order } from '../admin/[companyId]/orders/page';
 import { UserType } from '../utils/type';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS } from '../utils/enum';
+import { ORDER_STATUS } from '../utils/enum';
 import { YYYYMMDDFormat, generateMonthRange } from '../utils/time';
 import Sidebar from '../components/Sidebar';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
@@ -47,7 +47,7 @@ export default function MainPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [clientOrders, _mutate, isValidating] = SWRFetchData(
-    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function MainPage() {
 
   const handleDeleteOrder = async (orderId: number) => {
     try {
-      const response = await axios.put(`${API_URL.CLIENT_ORDER}/status`, {
+      const response = await axios.put(`/api/order/status`, {
         orderId,
         updatedStatus: ORDER_STATUS.VOID,
       });

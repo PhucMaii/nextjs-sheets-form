@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -252,6 +252,10 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 //   await prisma.lossReport.updateMany({
 //     data: { companyId: 1 },
 //   });
+
+//   await prisma.dayRange.updateMany({
+//     data: { companyId: 1 },
+//   });
 // }
 
 // async function main() {
@@ -273,29 +277,9 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 // }
 
 async function main() {
-  const password = await bcrypt.hash('test123', 12);
-  const packagingEmployee = await prisma.employee.create({
-    data: {
-      name: 'Packaging Admin',
-      companyId: 2,
-      role: 'super admin',
-      password,
-      employeeCode: '1111',
-    },
-  });
-
-  const beanSproutsEmployee = await prisma.employee.create({
-    data: {
-      name: 'Bean Sprouts Admin',
-      companyId: 3,
-      role: 'super admin',
-      password,
-      employeeCode: '2222',
-    },
-  });
-
-  console.log('packagingEmployee', packagingEmployee);
-  console.log('beanSproutsEmployee', beanSproutsEmployee);
+      await prisma.dayRange.updateMany({
+      data: { companyId: 1 },
+    });
 }
 
 main()

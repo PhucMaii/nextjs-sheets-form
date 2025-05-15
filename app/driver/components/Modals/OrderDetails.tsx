@@ -19,7 +19,7 @@ export default function OrderDetails({
   order,
   showNotification,
 }: IProps) {
-  const [items] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${order.userId}`);
+  const [items] = SWRFetchData(`/api/item?userId=${order.userId}`);
   const onUpdateOrder = async (orderParam: Order) => {
     try {
       const response = await axios.put(

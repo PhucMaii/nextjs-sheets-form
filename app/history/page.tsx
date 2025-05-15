@@ -20,7 +20,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import { generateMonthRange } from '../utils/time';
 import { Order } from '../admin/[companyId]/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';
-import { API_URL, ORDER_STATUS } from '../utils/enum';
+import { ORDER_STATUS } from '../utils/enum';
 import OrderAccordion from '../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
@@ -66,7 +66,7 @@ export default function HistoryPage() {
   // }, []);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderData, _mutateOrders, isValidating] = SWRFetchData(
-    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   // const currentMonthBill = useMemo(() => {

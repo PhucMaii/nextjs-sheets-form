@@ -4,7 +4,7 @@ import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { AlertColor, Box, Divider, Modal, Typography } from '@mui/material';
 import axios from 'axios';
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { USER_ROLE } from '@/app/utils/enum';
 import OrderView, { ORDER_USAGE_PURPOSE } from '../OrderView';
 import { SWRFetchData } from '@/app/utils/db';
 
@@ -21,7 +21,7 @@ export default function EditOrder({
   showNotification,
   handleUpdateOrderUI,
 }: PropTypes) {
-  const [items] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${order.userId}`);
+  const [items] = SWRFetchData(`/api/item?userId=${order.userId}`);
 
   // const handleChangeItem = (e: any, itemId: number) => {
   //   const newItemList = itemList.map((item: Item) => {
@@ -36,7 +36,7 @@ export default function EditOrder({
 
   const onOverrideOrder = async (orderParam: Order) => {
     try {
-      const response = await axios.put(API_URL.CLIENT_ORDER, {
+      const response = await axios.put('/api/order', {
         deliveryDate: orderParam.deliveryDate,
         note: orderParam.note,
         items: orderParam.items,

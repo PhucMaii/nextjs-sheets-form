@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { Order } from '../../../orders/page';
 import { ScheduledOrder } from '@/app/utils/type';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -25,6 +25,7 @@ import {
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LoadingButton } from '@mui/lab';
 import { pusherClient } from '@/app/pusher';
+import { useParams } from 'next/navigation';
 // import { checkIsPreOrderQualified } from '@/app/utils/orders';
 
 interface PropTypes extends ModalProps {
@@ -46,6 +47,8 @@ export default function EditDeliveryDate({
   // progress,
   mutateOrders,
 }: PropTypes) {
+  const { companyId }: any = useParams();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
@@ -144,7 +147,7 @@ export default function EditDeliveryDate({
       //   setProgress((orderIndex + 1 / scheduleOrderList.length) * 100);
       // }
 
-      const response = await axios.post(API_URL.ORDER, submittedData);
+      const response = await axios.post(getAdminApiUrl(companyId, '/orders'), submittedData);
       if (response.data.error) {
         setIsLoading(false);
         showNotification('error', response.data.error);
@@ -166,7 +169,7 @@ export default function EditDeliveryDate({
     }
     try {
       setIsLoading(true);
-      const response = await axios.put(API_URL.ORDER, {
+      const response = await axios.put(getAdminApiUrl(companyId, '/orders'), {
         orderId: order.id,
         deliveryDate: updatedDate,
       });

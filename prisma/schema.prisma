@@ -44,6 +44,7 @@ model Company {
   vendorItems       VendorItem[]
   scheduledOrders   ScheduleOrders[]
   lossReports       LossReport[]
+  unavailableRanges DayRange[]
 }
 
 model Employee {
@@ -321,12 +322,15 @@ model UserRoute {
 
 model DayRange {
   id         Int      @id @default(autoincrement())
+  companyId  Int?
   startDate  DateTime
   endDate    DateTime
   userId     Int
   createdAt  String?
   createdBy  String?
   isArchived Boolean?
+
+  company    Company? @relation(fields: [companyId], references: [id])
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

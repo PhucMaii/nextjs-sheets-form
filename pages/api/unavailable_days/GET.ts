@@ -5,13 +5,14 @@ import { convertToPSTDate, normalizeDate } from '../utils/date';
 interface IQuery {
   userId?: string;
   date?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { userId, date }: IQuery = req.query;
+    const { userId, date, companyId }: IQuery = req.query;
 
     if (!userId) {
       return res.status(404).json({
@@ -21,6 +22,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     if (userId === 'All Clients' && date) {
       const allRanges = await prisma.dayRange.findMany({
+        where: {
+          companyId: Number(companyId),
+        },
         include: {
           user: true,
         },
