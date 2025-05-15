@@ -47,10 +47,13 @@ export default function StatementPage() {
     return { title: `${month}/${year}`, totalPrice };
   }, [currentMonthOrders]);
 
+  console.log(prevStatements);
+
   const sortedLatestGroupOrders = useMemo(() => {
     if (!prevStatements) {
       return [];
     }
+
     return Object.keys(prevStatements).sort((mmyyA: string, mmyyB: string) => {
       const [monthA, yearA] = mmyyA.split('/');
       const [monthB, yearB] = mmyyB.split('/');

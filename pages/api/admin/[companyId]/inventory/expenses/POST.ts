@@ -687,6 +687,7 @@ export const checkAndUpdateUnits = async (
         ratio: sortedNewUnits[newIndex]?.ratio,
         createdAt,
         createdBy,
+        companyId,
       },
     });
     newIndex++;
