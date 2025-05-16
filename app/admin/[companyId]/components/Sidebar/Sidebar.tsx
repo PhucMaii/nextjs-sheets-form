@@ -5,12 +5,10 @@ import {
   Button,
   Divider,
   Drawer,
-  FormControlLabel,
   IconButton,
   List,
   ListItemIcon,
   ListItemText,
-  Switch,
   Toolbar,
   Typography,
   useMediaQuery,
@@ -24,7 +22,7 @@ import React, {
   useState,
 } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-import { adminTabs, tabs } from '../../../../lib/constant';
+import { adminTabs } from '../../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -34,14 +32,7 @@ import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primary } from '@/theme/color';
-import { MaintenanceContext } from '@/app/context/MaintenanceProvider';
-import { generateMonthRange, generateRecommendDate } from '@/app/utils/time';
-import axios from 'axios';
-import { API_URL } from '@/app/utils/enum';
-import StatusText from '../StatusText';
-import { LoadingButton } from '@mui/lab';
-import { SWRFetchData } from '@/app/utils/db';
-import ErrorIcon from '@mui/icons-material/Error';
+import { UserContext } from '@/app/context/UserContextAPI';
 
 interface PropTypes {
   children: ReactNode;
@@ -53,15 +44,10 @@ const drawerWidth = 210;
 export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
-  const { isMaintenance, setIsMaintenance } = useContext(MaintenanceContext);
-  const url = process.env.NEXT_PUBLIC_WEB_URL;
-
-  const recommendDateRange = generateMonthRange();
-
+  const { user } = useContext(UserContext);
   const { companyId }: any = useParams();
 
   const singlePrintRef: any = useRef();
@@ -92,13 +78,34 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
     content: () => singlePrintRef.current,
   });
 
-  const handleAllPrint = useReactToPrint({
-    content: () => allPrintRef.current,
-  });
-
   useEffect(() => {
-    setCurrentTab(pathname);
-  }, [pathname]);
+    // Check if user has access to the page
+    if (user?.role === 'admin') {
+      // Get the first 3 parts of the pathname
+      const pathPage = pathname.split('/').slice(0, 4).join('/');
+      console.log(pathPage);
+
+      const targetPage = Object.values(adminTabs)
+        .flat()
+        .find(
+          (tab: any) => tab.path.replace('[companyId]', companyId) === pathPage,
+        );
+
+        const pageAccess = user?.adminPages.find(
+          (page: any) => page.pageId === targetPage?.id,
+        );
+
+      if (pageAccess) {
+        setCurrentTab(pathname);
+      } else {
+        signOut({
+          callbackUrl: `https://www.supremesprouts.com/auth/login`,
+        });
+      }
+    } else {
+      setCurrentTab(pathname);
+    }
+  }, [pathname, user, companyId]);
 
   const handleChangeTab = (path: string) => {
     router.push(path.replace('[companyId]', companyId));
@@ -181,6 +188,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
         <Box display="flex" flexDirection="column" rowGap={2}>
           {Object.keys(adminTabs).map((section: string, index: number) => {
             const sectionKey = section as keyof typeof adminTabs;
+
             return (
               <Fragment key={index}>
                 <Typography
@@ -191,6 +199,19 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
                   {section}
                 </Typography>
                 {adminTabs[sectionKey].map((tab: any, index: number) => {
+                  // If user is admin, check if they have access to the page
+                  if (user?.role === 'admin') {
+                    const pageAccess = user?.adminPages.find(
+                      (page: any) => page.pageId === tab.id,
+                    );
+
+                    // console.log(pageAccess);
+
+                    if (!pageAccess) {
+                      return null;
+                    }
+                  }
+
                   return (
                     <ListItemButtonStyled
                       $textColor={primary.main}

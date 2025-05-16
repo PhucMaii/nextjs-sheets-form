@@ -45,6 +45,34 @@ model Company {
   scheduledOrders   ScheduleOrders[]
   lossReports       LossReport[]
   unavailableRanges DayRange[]
+  companyPages      CompanyPage[]
+}
+
+model PageView {
+  id            Int      @id @default(autoincrement())
+  title         String
+  createdAt     String?
+
+  companyPages  CompanyPage[]
+  adminPages    AdminPage[]
+}
+
+model CompanyPage {
+  id        Int      @id  @default(autoincrement())
+  companyId Int
+  pageId    Int
+
+  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pageView  PageView    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+model AdminPage {
+  id           Int     @id  @default(autoincrement())
+  employeeId   Int
+  pageId       Int
+
+  employee     Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  pageView     PageView   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 }
 
 model Employee {
@@ -63,6 +91,7 @@ model Employee {
   shiftSessions ShiftSession[]
   routes        Route[]
   CodBoard      CodBoard[]
+  adminPages     AdminPage[]
 
   company Company @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

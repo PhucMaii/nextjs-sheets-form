@@ -69,7 +69,7 @@ export default function AccountPage() {
     setIsFetching(true);
     try {
       const response = await axios.get(
-        `${API_URL.USER}?id=${session?.user?.id}`,
+        `${API_URL.USER}?id=${session?.user?.id}&role=${session?.user?.role}`,
       );
 
       if (response.data.error) {

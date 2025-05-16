@@ -375,7 +375,7 @@ export default function EditInventory({
                 variant="contained"
                 size="small"
                 onClick={() =>
-                  router.push(`/admin/bulk/selling-items/${inventoryItem.id}`)
+                  router.push(`/admin/${companyId}/inventory/bulk/selling-items/${inventoryItem.id}`)
                 }
               >
                 <Box display="flex" alignItems="center">

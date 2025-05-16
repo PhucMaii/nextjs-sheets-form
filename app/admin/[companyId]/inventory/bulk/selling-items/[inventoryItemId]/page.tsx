@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../../../components/Sidebar/Sidebar';
 import {
   DataGrid,
   GridColDef,
@@ -23,6 +22,7 @@ import AddItem from '@/app/admin/[companyId]/components/Modals/add/AddItem';
 import { IItem } from '@/app/utils/type';
 import { generateCurrentTime } from '@/app/utils/time';
 import BulkEditItem from '@/app/admin/[companyId]/components/Bulk/BulkEditItem';
+import Sidebar from '@/app/admin/[companyId]/components/Sidebar/Sidebar';
 // import AddItem from '@/app/admin/components/Modals/add/AddItem';
 
 function OptionsEditCell(props: GridRenderEditCellParams) {

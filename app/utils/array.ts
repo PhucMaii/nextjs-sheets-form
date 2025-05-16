@@ -197,6 +197,18 @@ export const compareTwoArrays = (arr1: any[], arr2: any[]) => {
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 };
 
+export const compareTwoArraysWithFields = (arr1: any[], arr2: any[], fields: string[]) => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  return arr1.every((item1: any) => {
+    return arr2.some((item2: any) => {
+      return fields.every((field: string) => item1[field] === item2[field]);
+    });
+  });
+};
+
 export const getUniqueUnitRatios = (units: any[]) => {
   if (!units) {
     return [];

@@ -54,7 +54,7 @@ export default function LoginPage() {
 
         const session: any = await getSession();
         const response = await axios.get(
-          `${API_URL.USER}?id=${session?.user.id}`,
+          `${API_URL.USER}?id=${session?.user.id}&role=${session?.user.role}`,
         );
         const userData = response.data.data;
 

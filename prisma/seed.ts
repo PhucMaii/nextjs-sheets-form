@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-// import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -85,7 +85,11 @@ export const getTodayDate = (
   const day = dateSplitted[1].padStart(2, '0');
   const year = dateSplitted[2];
 
-  return { date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1] };
+  return {
+    date: `${month}/${day}/20${year}`,
+    time: pstDate.split(',')[1],
+    dateAndTime: `${month}/${day}/20${year} ${pstDate.split(',')[1]}`,
+  };
 };
 
 export const YYYYMMDDFormat = (date: Date) => {
@@ -277,9 +281,43 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 // }
 
 async function main() {
-      await prisma.dayRange.updateMany({
-      data: { companyId: 1 },
-    });
+  await prisma.adminPage.create({
+    data: {
+      pageId: 21,
+      employeeId: 13,
+    }
+  });
+
+  await prisma.adminPage.create({
+    data: {
+      pageId: 21,
+      employeeId: 14,
+    }
+  });
+
+  await prisma.adminPage.create({
+    data: {
+      pageId: 21,
+      employeeId: 15,
+    }
+  });
+
+  await prisma.adminPage.create({
+    data: {
+      pageId: 21,
+      employeeId: 17,
+    }
+  });
+
+  await prisma.adminPage.create({
+    data: {
+      pageId: 21,
+      employeeId: 18,
+    }
+  });
+  
+  
+  
 }
 
 main()

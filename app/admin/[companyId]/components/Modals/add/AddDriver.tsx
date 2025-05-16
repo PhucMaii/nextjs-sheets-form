@@ -42,6 +42,8 @@ export default function AddDriver({
         driverName: name.toUpperCase(),
         driverPassword: password,
         hourlyRate,
+        employeeCode,
+        role: EMPLOYEE_ROLE.DRIVER,
       });
 
       if (response.data.error) {

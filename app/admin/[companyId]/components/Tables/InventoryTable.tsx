@@ -264,7 +264,7 @@ const InventoryTable = ({
                           e.stopPropagation();
                           e.preventDefault();
                           router.push(
-                            `/admin/${companyId}/bulk/selling-items/${item.id}`,
+                            `/admin/${companyId}/inventory/bulk/selling-items/${item.id}`,
                           );
                         }}
                       >

@@ -12,6 +12,9 @@ import {
 import React from 'react';
 import EditDriver from '../Modals/edit/EditDriver';
 import DeleteDriver from '../Modals/delete/DeleteDriver';
+import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { grey } from '@mui/material/colors';
 
 interface IProps {
   drivers: IDriver[];
@@ -24,6 +27,9 @@ export default function DriverTable({
   showNotification,
   mutateDrivers,
 }: IProps) {
+  const router = useRouter();
+  const { companyId }: any = useParams();
+
   return (
     <Paper sx={{ overflow: 'scroll' }}>
       <Table>
@@ -42,7 +48,18 @@ export default function DriverTable({
           {drivers.length > 0 &&
             drivers.map((driver: IDriver, index: number) => {
               return (
-                <TableRow key={index}>
+                <TableRow
+                  key={index}
+                  sx={{
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: grey[100],
+                    },
+                  }}
+                  onClick={() =>
+                    router.push(`/admin/${companyId}/employees/${driver.id}`)
+                  }
+                >
                   <TableCell>{driver.id}</TableCell>
                   <TableCell>{driver.name}</TableCell>
                   <TableCell>{driver?.employeeCode}</TableCell>

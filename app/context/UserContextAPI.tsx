@@ -18,7 +18,9 @@ const UserContextAPI = ({ children }: { children: ReactNode }) => {
     mutate,
     isValidating,
   } = useSWR(
-    session?.user ? '/api/user?id=' + session.user.id : null,
+    session?.user
+      ? `/api/user?id=${session.user.id}&role=${session.user.role}`
+      : null,
     fetcher,
     {
       refreshInterval: 1000,

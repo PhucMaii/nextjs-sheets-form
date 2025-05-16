@@ -52,7 +52,7 @@ export default function DriverManagement() {
       />
       {NotificationComp}
       <Typography variant="h5" color={blueGrey[800]}>
-        Driver Management
+        Employees
       </Typography>
 
       <ShadowSection>
@@ -64,7 +64,7 @@ export default function DriverManagement() {
             variant="fullWidth"
           >
             <Tab
-              label={`All Drivers (${drivers?.data?.length || 0})`}
+              label={`All Employees (${drivers?.data?.length || 0})`}
               aria-controls={`tabpanel-0`}
               value={0}
             />
