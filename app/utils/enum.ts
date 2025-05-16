@@ -88,9 +88,17 @@ export enum PAYMENT_METHOD_TYPE {
 export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',
-  DRIVER = 'driver',
-  SYSTEM = 'system',
   SUPER_ADMIN = 'super admin',
+  DRIVER = 'driver',
+  WAREHOUSE = 'warehouse',
+  SYSTEM = 'system',
+}
+
+export enum EMPLOYEE_ROLE {
+  ADMIN = 'admin',
+  SUPER_ADMIN = 'super admin',
+  DRIVER = 'driver',
+  WAREHOUSE = 'warehouse',
 }
 
 export enum FLAG_ORDER_TYPE {

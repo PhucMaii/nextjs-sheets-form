@@ -11,7 +11,8 @@ import {
   normalizeDate,
   // normalizeDate,
 } from '@/pages/api/utils/date';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { checkHasClientOrder } from '@/pages/api/import-sheets/utils';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { categorizeUser } from '@/pages/api/utils/user';
@@ -49,7 +50,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Get person create info
-    const adminCreate: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminCreate: any = session?.user;
 
     // Update to start track inventory when admin start pre order
     // const { date, time } = getTodayDate();
@@ -216,7 +218,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           scheduleOrder.user,
           scheduleOrder.items,
           deliveryDate,
-          `Admin - ${adminCreate.clientName}`,
+          `Admin - ${adminCreate.name}`,
           '',
         );
 

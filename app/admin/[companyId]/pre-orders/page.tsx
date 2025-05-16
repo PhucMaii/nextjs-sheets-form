@@ -440,19 +440,18 @@ export default function ScheduledOrderPage() {
   //   setOrderList(newOrderList);
   // };
 
-  const handleUpdateRouteUI = (targetRoute: IRoutes) => {
-    const newRoutes = routes.map((route: IRoutes) => {
-      if (route.id === targetRoute.id) {
-        return targetRoute;
-      }
-      return route;
-    });
+  // const handleUpdateRouteUI = (targetRoute: IRoutes) => {
+  //   const newRoutes = routes.map((route: IRoutes) => {
+  //     if (route.id === targetRoute.id) {
+  //       return targetRoute;
+  //     }
+  //     return route;
+  //   });
 
-    // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
-    mutateClients();
-
-    setRoutes(newRoutes);
-  };
+  //   // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
+  //   // fetchRoutes();
+  //   setRoutes(newRoutes);
+  // };
 
   // const saveOrderArrangement = async () => {
   //   try {
@@ -559,7 +558,7 @@ export default function ScheduledOrderPage() {
           driverList={drivers?.data || []}
           // clientList={clients?.data?.clientList || []}
           day={days[dayIndex]}
-          handleUpdateRouteUI={handleUpdateRouteUI}
+          // handleUpdateRouteUI={}
           showNotification={showNotification}
           route={routes[routeIndex]}
         />
@@ -685,7 +684,7 @@ export default function ScheduledOrderPage() {
                           <Tab
                             key={index}
                             id={`simple-tab-${route.name}`}
-                            label={`${route.name} - ${route?.driver?.name}`}
+                            label={`${route.name} - ${route?.employee?.name}`}
                             aria-controls={`tabpanel-${route.name}`}
                             value={index}
                           />

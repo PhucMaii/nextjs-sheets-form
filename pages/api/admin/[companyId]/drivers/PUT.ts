@@ -1,4 +1,3 @@
-import { USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -7,13 +6,14 @@ interface IBody {
   employeeCode: string;
   hourlyRate: number;
   updatedName: string;
+  role: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { driverId, employeeCode, hourlyRate, updatedName }: IBody = req.body;
+    const { driverId, employeeCode, hourlyRate, updatedName, role }: IBody = req.body;
 
     const { companyId } = req.query;
 
@@ -45,7 +45,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: {
           not: driverId,
         },
-        role: USER_ROLE.DRIVER,
+        // role: USER_ROLE.DRIVER,
       },
     });
 
@@ -63,6 +63,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         name: updatedName,
         hourlyRate,
         employeeCode,
+        role,
       },
     });
 

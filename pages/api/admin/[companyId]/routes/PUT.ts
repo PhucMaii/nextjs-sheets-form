@@ -27,6 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     if (driverId) {
       updateOptions.driverId = driverId;
+      updateOptions.employeeId = driverId;
     }
 
     const existingRoute = await prisma.route.findUnique({

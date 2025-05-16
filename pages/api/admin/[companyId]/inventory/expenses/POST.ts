@@ -2,11 +2,12 @@ import { otherTypeId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IInventoryUnit, IVendorItem } from '@/app/utils/type';
 import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { deleteInventoryUnit } from '@/pages/api/utils/inventoryUnit';
 import { infoBackground } from '@/theme/color';
 import { InventoryUnit, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   date: string;
@@ -74,7 +75,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Payment Method Not Found' });
     }
 
-    const user: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
 
     const vendors = items.reduce((acc: any, item: any) => {
       if (!acc.includes(item.vendorId)) {
@@ -97,7 +99,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    const createdBy = `Admin - ${user?.clientName}`;
+    const createdBy = `Admin - ${user?.name}`;
     console.log(codBoardId, 'codBoardId');
 
     const newExpense = await prisma.expense.create({

@@ -4,7 +4,8 @@ import { generateListOfDateString } from '@/prisma/seed';
 import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import withAuthGuard from '../utils/withAuthGuard';
-import { getUserInfo } from '../utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { groupOrderByMMYYYY } from '@/pages/api/admin/[companyId]/clients/debt';
 import {
   calculateTotalPrice,
@@ -19,7 +20,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    const user = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
 
     if (!user) {
       return res.status(404).json({ error: 'User Not Found in DB' });

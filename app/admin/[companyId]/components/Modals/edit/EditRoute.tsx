@@ -25,7 +25,6 @@ interface IEditRouteModal extends ModalProps {
   // clientList: UserType[];
   day: string;
   showNotification: (type: AlertColor, message: string) => void;
-  handleUpdateRouteUI: (targetRoute: IRoutes) => void;
 }
 
 // const convertFromUserRouteToUser = (clientList: IUserRoutes[]) => {
@@ -44,7 +43,7 @@ export default function EditRoute({
   // clientList,
   day,
   showNotification,
-  handleUpdateRouteUI,
+  // handleUpdateRouteUI,
 }: IEditRouteModal) {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [updatedRoute, setUpdatedRoute] = useState<IRoutes>(route);
@@ -97,7 +96,7 @@ export default function EditRoute({
         return;
       }
 
-      handleUpdateRouteUI(response.data.data);
+      // handleUpdateRouteUI(response.data.data);
 
       showNotification('success', response.data.message);
       setIsUpdating(false);
@@ -155,7 +154,7 @@ export default function EditRoute({
                   })
                 }
               >
-                <MenuItem value={-1}>-- Choose a driver --</MenuItem>
+                <MenuItem value={-1} disabled>-- Choose a driver --</MenuItem>
                 {driverList &&
                   driverList.map((driver: Driver) => {
                     return (
@@ -167,43 +166,6 @@ export default function EditRoute({
               </Select>
             </Box>
           </Grid>
-          {/* <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Clients:</Typography>
-              <Autocomplete
-                multiple
-                options={clientList}
-                disableCloseOnSelect
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                getOptionLabel={(option: UserType) =>
-                  `${option.clientName} - ${option.clientId}`
-                }
-                renderOption={(props, option, { selected }) => (
-                  <li {...props}>
-                    <Checkbox
-                      icon={<CheckBoxOutlineBlankIcon />}
-                      checkedIcon={<CheckBoxIcon />}
-                      style={{ marginRight: 8 }}
-                      checked={selected}
-                    />
-                    {option.clientName} - {option.clientId}
-                  </li>
-                )}
-                style={{ width: '100%' }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Clients"
-                    placeholder="-- Choose clients --"
-                  />
-                )}
-                value={selectedClients}
-                onChange={(e, newValue: UserType[]) =>
-                  setSelectedClients(newValue)
-                }
-              />
-            </Box>
-          </Grid> */}
         </Grid>
       </BoxModal>
     </Modal>

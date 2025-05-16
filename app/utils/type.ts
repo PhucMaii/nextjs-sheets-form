@@ -185,6 +185,7 @@ export interface ScheduledOrder {
 
 export interface IRoutes extends Route {
   driver?: Driver;
+  employee?: Employee;
   clients?: IUserRoutes[];
 }
 

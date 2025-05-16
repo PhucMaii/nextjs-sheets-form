@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
-import { USER_ROLE } from '@/app/utils/enum';
 import { generateEmployeeCode } from '@/pages/api/utils/drivers';
 
 interface IBody {
@@ -9,13 +8,14 @@ interface IBody {
   driverName: string;
   driverPassword: string;
   hourlyRate: number;
+  role: string;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { employeeCode, driverName, driverPassword, hourlyRate }: IBody =
+    const { employeeCode, driverName, driverPassword, hourlyRate, role }: IBody =
       req.body;
 
     const { companyId } = req.query;
@@ -27,7 +27,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const sameDriverName = await prisma.employee.findFirst({
       where: {
         name: driverName,
-        role: USER_ROLE.DRIVER,
+        // role: USER_ROLE.DRIVER,
       },
     });
 
@@ -62,8 +62,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         employeeCode: code,
         password: hashPassword,
         hourlyRate,
-        role: USER_ROLE.DRIVER,
+        // role: USER_ROLE.DRIVER,
         companyId: Number(companyId),
+        role,
       },
     });
 

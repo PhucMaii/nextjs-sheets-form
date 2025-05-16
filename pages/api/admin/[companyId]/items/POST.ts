@@ -2,7 +2,8 @@ import { IItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits } from '../inventory/expenses/POST';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   newItem: IItem;
@@ -53,8 +54,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const user = await getUserInfo(req, res);
-    const createdBy = `Admin - ${user?.clientName}`;
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
+    const createdBy = `Admin - ${user?.name}`;
 
     for (const vItem of selectedInventoryItem.vendorItem) {
       const clientVendorItemUnits = newItem.units.filter(

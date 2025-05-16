@@ -1,5 +1,6 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
@@ -12,7 +13,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { id, status, updatedOrderIds } = req.body as any;
 
-    const adminCreate: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminCreate: any = session?.user;
 
     const updateTime = new Date();
     if (id) {
@@ -34,7 +36,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: {
           status,
-          updatedBy: `Admin - ${adminCreate.clientName}`,
+          updatedBy: `Admin - ${adminCreate.name}`,
           updateTime,
           isVoid: false,
         },

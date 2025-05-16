@@ -1,7 +1,8 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import {
   restockInventoryItem,
   subtractInventoryItem,
@@ -51,7 +52,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Get person update info
-    const adminUpdate: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminUpdate: any = session?.user;
 
     const updateTime = new Date();
     const updatedOrder = await prisma.orders.update({
@@ -60,7 +62,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         ...updateData,
-        updatedBy: `Admin - ${adminUpdate.clientName}`,
+        updatedBy: `Admin - ${adminUpdate.name}`,
         updateTime,
         isVoid: false,
       },

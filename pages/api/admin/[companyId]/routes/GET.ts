@@ -50,7 +50,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           companyId: Number(companyId),
         },
         include: {
-          driver: true,
+          // driver: true,
+          employee: true,
           clients: {
             where: {
               user: {
@@ -132,7 +133,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         companyId: Number(companyId),
       },
       include: {
-        driver: true,
+        // driver: true,
+        employee: true,
         clients: {
           include: {
             user: {

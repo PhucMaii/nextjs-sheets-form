@@ -1,6 +1,7 @@
 import { PO_STATUS, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IPOItem } from '@/app/utils/type';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
@@ -66,9 +67,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await Promise.all(poItemPromises);
 
     const today = getTodayDate();
-    const adminUser: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminUser: any = session?.user;
 
-    const createdBy = `Admin - ${adminUser.clientName}`;
+    const createdBy = `Admin - ${adminUser.name}`;
     // Convert to transaction
     const newTransaction = await prisma.expense.create({
       data: {

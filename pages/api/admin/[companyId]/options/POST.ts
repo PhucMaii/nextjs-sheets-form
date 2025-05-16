@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 const prisma = new PrismaClient();
 
@@ -54,7 +55,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // }
 
     const today = getTodayDate();
-    const admin = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
     const newOption = await prisma.option.create({
       data: {
         name,
@@ -64,7 +66,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         itemId,
         inventoryItemId,
         createdAt: today.dateAndTime,
-        createdBy: `Admin - ${admin?.clientName}`,
+        createdBy: `Admin - ${admin?.name}`,
       },
     });
 
@@ -110,7 +112,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         itemId: item.id,
         inventoryItemId,
         createdAt: today.dateAndTime,
-        createdBy: `Admin - ${admin?.clientName}`,
+        createdBy: `Admin - ${admin?.name}`,
       };
     });
 

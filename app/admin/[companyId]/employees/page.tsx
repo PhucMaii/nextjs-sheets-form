@@ -83,7 +83,7 @@ export default function DriverManagement() {
                 onClick={() => setIsOpenAddDriver(true)}
                 variant="contained"
               >
-                New Driver
+                + New Employee
               </Button>
             </Box>
             <DriverTable

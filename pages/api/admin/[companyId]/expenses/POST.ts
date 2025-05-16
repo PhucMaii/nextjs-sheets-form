@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   amount: number;
@@ -41,7 +42,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Company ID is required' });
     }
 
-    const adminUser = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminUser: any = session?.user;
 
     if (!adminUser) {
       return res.status(401).json({

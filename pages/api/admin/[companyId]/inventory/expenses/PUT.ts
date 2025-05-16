@@ -1,9 +1,10 @@
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { Fifo, OrderedItems, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits, createFifo } from './POST';
 import { IInventoryUnit } from '@/app/utils/type';
 import { subtractInventoryItem } from '../../orderedItems/single';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IPurchasedItem {
   id: number; // Inventory Item Id
@@ -161,8 +162,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (isOrderedItemsChange) {
-      const user = await getUserInfo(req, res);
-      const createdBy = `Admin - ${user?.clientName}`;
+      const session: any = await getServerSession(req, res, authOptions);
+      const user: any = session?.user;
+      const createdBy = `Admin - ${user?.name}`;
 
       const vendorItems = await prisma.vendorItem.findMany({
         where: {

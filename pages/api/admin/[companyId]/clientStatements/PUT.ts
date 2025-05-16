@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '../../../utils/auth';
 import { getTodayDate } from '../../../utils/date';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   month: string;
@@ -39,8 +40,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const admin: any = await getUserInfo(req, res);
-    const createdBy = `Admin - ${admin.clientName}`;
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
+    const createdBy = `Admin - ${admin.name}`;
     const { date, time } = getTodayDate();
 
     const nonExistentClientStatements = clientIds

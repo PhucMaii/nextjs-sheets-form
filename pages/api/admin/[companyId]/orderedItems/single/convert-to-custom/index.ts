@@ -2,7 +2,8 @@ import { IInventoryUnit } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { generateOrderTotalPrice } from '../../PUT';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
@@ -90,7 +91,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const adminUpdate = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminUpdate: any = session?.user;
     const updatedAt = getTodayDate();
     const dbUnits = await prisma.inventoryUnit.findMany({
       where: {
@@ -104,7 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       customAmount?.units || [],
       customAmount.inventoryUnit.vendorItemId,
       `${updatedAt.date} ${updatedAt.time}`,
-      `Admin - ${adminUpdate?.clientName}`,
+      `Admin - ${adminUpdate?.name}`,
     );
 
     const targetUnit = await prisma.inventoryUnit.findFirst({
@@ -175,7 +177,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
-        updatedBy: `Admin - ${adminUpdate?.clientName}`,
+        updatedBy: `Admin - ${adminUpdate?.name}`,
         updateTime: updatedTime,
       },
       include: {

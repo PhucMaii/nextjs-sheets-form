@@ -3,7 +3,9 @@ import {
   Box,
   Button,
   Divider,
+  MenuItem,
   Modal,
+  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -12,7 +14,7 @@ import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { IDriver } from '@/app/utils/type';
 import axios from 'axios';
-import { getAdminApiUrl } from '@/app/utils/enum';
+import { EMPLOYEE_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 
 interface IProps {
@@ -41,6 +43,7 @@ export default function EditDriver({
         updatedName: updatedDriver.name,
         hourlyRate: updatedDriver.hourlyRate,
         employeeCode: updatedDriver.employeeCode,
+        role: updatedDriver.role,
       });
 
       if (response.data.error) {
@@ -99,6 +102,23 @@ export default function EditDriver({
                 }
                 // label="Name"
               />
+            </Box>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="subtitle1">Role</Typography>
+              <Select
+                value={updatedDriver.role}
+                onChange={(e: any) =>
+                  setUpdatedDriver({ ...updatedDriver, role: e.target.value })
+                }
+              >
+                {
+                  Object.values(EMPLOYEE_ROLE).map((role) => (
+                    <MenuItem key={role} value={role}>
+                      {role}
+                    </MenuItem>
+                  ))
+                }
+              </Select>
             </Box>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="subtitle1">Hourly Rate</Typography>

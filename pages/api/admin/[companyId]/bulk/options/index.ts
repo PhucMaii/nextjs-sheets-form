@@ -1,8 +1,9 @@
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth';
 
 interface IProps {
   inventoryItemId: number;
@@ -57,7 +58,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Create new options
     // Each loop -> create new updated options for each item
     const today = getTodayDate();
-    const admin: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
     const promiseOptions = items.map((item: any) => {
       return prisma.option.createMany({
         data: updatedOptions.map((option: any) => {

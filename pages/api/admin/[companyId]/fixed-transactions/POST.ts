@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate, normalizeDate } from '@/pages/api/utils/date';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { RECURRENCE_TYPE, FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 interface IBody {
   title: string;
   defaultAmount?: number;
@@ -79,7 +80,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const today = getTodayDate();
-    const admin: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
 
     // Calculate next due date
     // const nextDueDate = calculateNextDueDate(initialDueDate, recurrence);

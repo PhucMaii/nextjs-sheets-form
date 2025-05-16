@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   name: string;
@@ -40,7 +41,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const admin: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
 
     const newVendor = await prisma.vendor.create({
       data: {
@@ -50,7 +52,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         email,
         joinedDate,
         createdAt,
-        createdBy: `Admin - ${admin.clientName}`,
+        createdBy: `Admin - ${admin.name}`,
         companyId: Number(companyId),
       },
     });

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   updatedData: any;
@@ -12,7 +13,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const user: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
 
     const { updatedData, methodId, updatedAt }: IBody = req.body;
 
@@ -59,7 +61,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       data: {
         ...updatedData,
         updatedAt,
-        updatedBy: `Admin - ${user.clientName}`,
+        updatedBy: `Admin - ${user.name}`,
       },
       include: {
         transactions: true,

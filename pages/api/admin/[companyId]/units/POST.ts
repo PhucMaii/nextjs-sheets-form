@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   name: string;
@@ -48,7 +49,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const user = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
 
     const newUnit = await prisma.inventoryUnit.create({
       data: {
@@ -57,7 +59,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         unitPrice: price,
         vendorItemId,
         createdAt,
-        createdBy: 'Admin - ' + user?.clientName,
+        createdBy: 'Admin - ' + user?.name,
         companyId: Number(companyId),
       },
     });

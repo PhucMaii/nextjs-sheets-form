@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
 import { generateOrderTotalPrice } from '../PUT';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import {
   checkOrderValidToAffectInventory,
   formatItemsWithTotalPrice,
@@ -11,6 +10,8 @@ import { IInventoryUnit } from '@/app/utils/type';
 import { getAllUnitsByInventoryItemId } from '@/pages/api/utils/units';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   id: number;
@@ -123,7 +124,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Get admin update info
-    const adminUpdate: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminUpdate: any = session?.user;
 
     const orderedItems = await prisma.orderedItems.findMany({
       where: {
@@ -150,7 +152,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
-        updatedBy: `Admin - ${adminUpdate.clientName}`,
+        updatedBy: `Admin - ${adminUpdate.name}`,
         updateTime: updatedTime,
       },
       include: {

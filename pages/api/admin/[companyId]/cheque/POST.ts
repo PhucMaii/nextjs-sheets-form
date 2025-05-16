@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   fileKeyFront: string;
@@ -41,7 +42,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const admin: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
+
     const { dateAndTime } = getTodayDate();
 
     const newCheque = await prisma.cheque.create({

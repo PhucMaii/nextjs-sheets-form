@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { checkAndUpdateUnits } from './expenses/POST';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   id: number;
@@ -119,8 +120,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const user: any = await getUserInfo(req, res);
-    const createdBy = `Admin - ${user.clientName}`;
+    const session: any = await getServerSession(req, res, authOptions);
+    const employee: any = session?.user;
+    const createdBy = `Admin - ${employee.name}`;
 
     let dbInventoryItemLeft = existingInventoryItem.vendorItem;
     for (const updatedVendorItem of vendorItems) {

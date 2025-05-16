@@ -4,8 +4,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { generateOrderTotalPrice } from '../../orderedItems/PUT';
 import { checkAndUpdateUnits } from '../../inventory/expenses/POST';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   orderId: number;
@@ -37,7 +38,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { date, time } = getTodayDate();
-    const createdBy = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
+    const createdBy = `Admin - ${user.name}`;
     const dbUnits = await prisma.inventoryUnit.findMany({
       where: {
         vendorItemId: customAmount.inventoryUnit.vendorItemId,
@@ -52,7 +55,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       customAmount?.units || [],
       customAmount.inventoryUnit.vendorItemId,
       `${date} ${time}`,
-      `Admin - ${createdBy?.clientName}`,
+      createdBy,
     );
 
     const targetUnit = await prisma.inventoryUnit.findFirst({

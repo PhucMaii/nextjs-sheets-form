@@ -5,9 +5,10 @@ import { restockInventoryItem, updateSingleInventoryItem } from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
-import { getUserInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -170,7 +171,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Get admin update info
-    const adminUpdate: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const adminUpdate: any = session?.user;
     // await updateOrderTotalPrice(
     //   orderId,
     //   newTotalPrice,
@@ -203,7 +205,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
-        updatedBy: `Admin - ${adminUpdate.clientName}`,
+        updatedBy: `Admin - ${adminUpdate.name}`,
         updateTime,
       },
       include: {

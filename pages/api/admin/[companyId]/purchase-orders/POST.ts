@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { PO_STATUS } from '@/app/utils/enum';
 import { generatePurchaseOrderTemplate } from '@/config/email';
 import emailHandler from '@/pages/api/utils/email';
@@ -40,7 +41,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const totalCost = subtotal + tax - (purchaseOrder?.discount || 0);
 
     const today = getTodayDate();
-    const admin: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
 
     // Set up the purchase order
     const newPurchaseOrder: any = await prisma.pO.create({
@@ -56,7 +58,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         note: purchaseOrder.note,
         discount: purchaseOrder.discount,
         createdAt: today.dateAndTime,
-        createdBy: `Admin - ${admin.clientName}`,
+        createdBy: `Admin - ${admin.name}`,
         subtotal,
         tax,
         vendor: {

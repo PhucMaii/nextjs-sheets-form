@@ -2,7 +2,9 @@ import {
   AlertColor,
   Divider,
   Grid,
+  MenuItem,
   Modal,
+  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -11,7 +13,7 @@ import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import axios from 'axios';
-import { getAdminApiUrl } from '@/app/utils/enum';
+import { EMPLOYEE_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 
 interface IProps extends ModalProps {
@@ -114,6 +116,18 @@ export default function AddDriver({
               fullWidth
               type="number"
             />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Typography>Role:</Typography>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Select>
+              {Object.values(EMPLOYEE_ROLE).map((role) => (
+                <MenuItem key={role} value={role}>
+                  {role}
+                </MenuItem>
+              ))}
+            </Select>
           </Grid>
 
           <Grid item xs={12} md={6}>

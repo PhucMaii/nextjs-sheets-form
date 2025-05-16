@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { MEDIA_TYPE } from '@/app/utils/enum';
 import { InventoryUnit } from '@prisma/client';
@@ -40,7 +41,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const admin: any = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const admin: any = session?.user;
     const today = getTodayDate();
 
     const newProductLoss = await prisma.lossReport.create({
@@ -54,7 +56,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         reportedDate: productLoss.reportedDate,
         reportedBy: productLoss.reportedBy,
         createdAt: today.dateAndTime,
-        createdBy: `${admin?.role || 'Admin'} - ${admin?.clientName}`,
+        createdBy: `${admin?.role || 'Admin'} - ${admin?.name}`,
         companyId: Number(companyId),
       },
     });
@@ -66,7 +68,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           lossReportId: newProductLoss.id,
           fileKey,
           createdAt: today.dateAndTime,
-          createdBy: `${admin?.role || 'Admin'} - ${admin?.clientName}`,
+          createdBy: `${admin?.role || 'Admin'} - ${admin?.name}`,
         })),
       });
     }

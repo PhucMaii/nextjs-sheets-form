@@ -41,6 +41,7 @@ import { amber, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { AccessTime } from '@mui/icons-material';
 import ReportIcon from '@mui/icons-material/Report';
+import BadgeIcon from '@mui/icons-material/Badge';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 export const mainPaymentMethodId = 4;
@@ -227,9 +228,9 @@ export const adminTabs = {
       path: '/admin/[companyId]/clients',
     },
     {
-      name: 'Drivers',
-      icon: LocalShippingIcon,
-      path: '/admin/[companyId]/drivers',
+      name: 'Employees',
+      icon: BadgeIcon,
+      path: '/admin/[companyId]/employees',
     },
     {
       name: 'Vendors',

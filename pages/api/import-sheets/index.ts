@@ -154,7 +154,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ) {
         const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
         const newOrder: any = await createOrder(
-          existingUser?.companyId || -1,
+          existingUser?.companyId || 1,
           existingUser,
           itemsWithNo0,
           deliveryDate,
@@ -272,7 +272,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // )
     const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
     const newOrder: any = await createOrder(
-      existingUser?.companyId || -1,
+      existingUser?.companyId || 1,
       existingUser,
       itemsWithNo0,
       deliveryDate,

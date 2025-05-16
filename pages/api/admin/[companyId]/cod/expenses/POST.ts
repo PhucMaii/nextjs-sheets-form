@@ -1,8 +1,9 @@
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth';
 
 interface IBody {
   date: string;
@@ -114,7 +115,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     //   });
     // }
 
-    const user = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
 
     const newExpense = await prisma.expense.create({
       data: {

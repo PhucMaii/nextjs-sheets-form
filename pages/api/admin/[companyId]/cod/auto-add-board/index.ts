@@ -4,7 +4,7 @@ import { filterByRoute } from '@/app/utils/array';
 import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
 import { IBoard, IRoutes } from '@/app/utils/type';
-import { getUserInfo } from '@/pages/api/utils/auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import {
   generate7DaysBefore,
   getTodayDate,
@@ -13,6 +13,7 @@ import {
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth';
 
 interface IBody {
   todayString: string;
@@ -35,7 +36,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { todayString }: IBody = req.body;
 
-    const user = await getUserInfo(req, res);
+    const session: any = await getServerSession(req, res, authOptions);
+    const user: any = session?.user;
 
     if (!user) {
       return res.status(401).json({
