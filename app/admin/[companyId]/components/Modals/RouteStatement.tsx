@@ -260,7 +260,7 @@ const RouteStatement = ({ open, onClose, currentDateRange }: IProps) => {
                         onChange={() => handleSelectRoute(route.id)}
                       />
                       <Typography>
-                        {route.name} - {route.driver.name}
+                        {route.name} - {route?.employee?.name}
                       </Typography>
                     </Box>
                   );

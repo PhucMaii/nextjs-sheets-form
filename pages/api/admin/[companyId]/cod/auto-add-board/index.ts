@@ -147,6 +147,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         companyId: Number(companyId),
       },
       include: {
+        employee: true,
         driver: true,
         clients: true,
       },

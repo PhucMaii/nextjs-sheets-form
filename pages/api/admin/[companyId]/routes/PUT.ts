@@ -115,6 +115,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       data: updateOptions,
       include: {
         driver: true,
+        employee: true,
         clients: {
           include: {
             user: true,

@@ -23,6 +23,7 @@ export default async function handler(
       },
       include: {
         driver: true,
+        employee: true,
         route: true,
       },
     });

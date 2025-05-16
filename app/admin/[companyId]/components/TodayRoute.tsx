@@ -48,8 +48,8 @@ export default function TodayRoute({
 
         newRouteData.push({
           ...analysisOrders,
-          driverId: route.driverId,
-          driverName: route.driver.name,
+          driverId: route.employeeId,
+          driverName: route.employee.name,
         });
       }
 
@@ -105,8 +105,8 @@ export default function TodayRoute({
             routeData.map((route: any, index: number) => {
               return (
                 <TableRow key={index}>
-                  <TableCell>{route.driverId}</TableCell>
-                  <TableCell>{route.driverName}</TableCell>
+                  <TableCell>{route?.employee?.id}</TableCell>
+                  <TableCell>{route?.employee?.name}</TableCell>
                   <TableCell>{route?.delivered?.length || 0}</TableCell>
                   <TableCell>{route?.orders?.length || 0}</TableCell>
                   <TableCell>

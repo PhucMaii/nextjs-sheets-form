@@ -29,6 +29,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           driver: true,
+          employee: true,
           expense: {
             include: {
               paymentMethod: true,
@@ -53,6 +54,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                       route: {
                         include: {
                           driver: true,
+                          employee: true,
                         },
                       },
                     },
@@ -200,6 +202,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           driver: true,
+          employee: true,
           expense: {
             include: {
               paymentMethod: true,

@@ -121,7 +121,7 @@ export default function AddDriver({
             <Typography>Role:</Typography>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Select>
+            <Select fullWidth size="small">
               {Object.values(EMPLOYEE_ROLE).map((role) => (
                 <MenuItem key={role} value={role}>
                   {role}

@@ -142,6 +142,7 @@ export const getOrdersByDateRange = async (
               route: {
                 include: {
                   driver: true,
+                  employee: true,
                 },
               },
             },

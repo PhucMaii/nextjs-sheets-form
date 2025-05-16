@@ -51,6 +51,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 route: {
                   include: {
                     driver: true,
+                    employee: true,
                   },
                 },
               },

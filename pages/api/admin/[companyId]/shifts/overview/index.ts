@@ -44,6 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         driver: true,
+        employee: true,
       },
     });
 

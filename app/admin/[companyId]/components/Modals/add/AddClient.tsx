@@ -220,7 +220,7 @@ export default function AddClient({
                 onDataReceived={(data) => setDeliveryAddress(data)}
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            {/* <Grid item xs={12} md={6}>
               <Typography variant="h6">Role:</Typography>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -233,7 +233,7 @@ export default function AddClient({
                 <MenuItem value={USER_ROLE.CLIENT}>Client</MenuItem>
                 <MenuItem value={USER_ROLE.ADMIN}>Admin</MenuItem>
               </Select>
-            </Grid>
+            </Grid> */}
           </Grid>
           <Typography sx={{ mt: 2 }} variant="h5" fontWeight="bold">
             User Preference
