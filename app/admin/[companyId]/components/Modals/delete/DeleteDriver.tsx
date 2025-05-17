@@ -1,5 +1,5 @@
 import { AlertColor, Box, Button, Modal, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { BoxModal } from '../styled';
 import { errorColor } from '@/theme/color';
 import { grey } from '@mui/material/colors';
@@ -7,8 +7,9 @@ import { LoadingButton } from '@mui/lab';
 import ErrorIcon from '@mui/icons-material/Error';
 import { IDriver } from '@/app/utils/type';
 import axios from 'axios';
-import { getAdminApiUrl } from '@/app/utils/enum';
+import { EMPLOYEE_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
+import { UserContext } from '@/app/context/UserContextAPI';
 
 interface IProps {
   driver: IDriver;
@@ -21,11 +22,16 @@ export default function DeleteDriver({
   showNotification,
   mutateDrivers,
 }: IProps) {
+  const { user }: any = useContext(UserContext);
   const { companyId }: any = useParams();
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleDeleteDriver = async () => {
+    if (user?.role !== EMPLOYEE_ROLE.SUPER_ADMIN) {
+      showNotification('error', 'You are not authorized to delete a driver');
+      return;
+    }
     try {
       setIsDeleting(true);
       const response = await axios.delete(

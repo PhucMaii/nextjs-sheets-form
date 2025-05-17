@@ -33,6 +33,7 @@ import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primary } from '@/theme/color';
 import { UserContext } from '@/app/context/UserContextAPI';
+import { EMPLOYEE_ROLE } from '@/app/utils/enum';
 
 interface PropTypes {
   children: ReactNode;
@@ -55,18 +56,18 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
-    pusherClient?.subscribe('admin');
-    pusherClient?.subscribe('override-order');
-    pusherClient?.subscribe('void-order');
+    pusherClient?.subscribe(`admin-${companyId}`);
+    pusherClient?.subscribe(`override-order-${companyId}`);
+    pusherClient?.subscribe(`void-order-${companyId}`);
 
     pusherClient?.bind('incoming-order', (order: Order) => {
       setSingleOrder(order);
     });
 
     return () => {
-      pusherClient?.unsubscribe('admin');
-      pusherClient?.unsubscribe('override-order');
-      pusherClient?.unsubscribe('void-order');
+      pusherClient?.unsubscribe(`admin-${companyId}`);
+      pusherClient?.unsubscribe(`override-order-${companyId}`);
+      pusherClient?.unsubscribe(`void-order-${companyId}`);
     };
   }, []);
 
@@ -80,7 +81,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
 
   useEffect(() => {
     // Check if user has access to the page
-    if (user?.role === 'admin') {
+    if (user?.role === EMPLOYEE_ROLE.ADMIN) {
       // Get the first 3 parts of the pathname
       const pathPage = pathname.split('/').slice(0, 4).join('/');
       console.log(pathPage);

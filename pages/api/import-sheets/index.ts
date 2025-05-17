@@ -178,7 +178,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           newOrder.items,
         );
 
-        await pusherServer?.trigger('admin', 'incoming-order', {
+        await pusherServer?.trigger(`admin-${existingUser.companyId}`, 'incoming-order', {
           ...newOrder,
           items: itemListWithTotalPrice,
           ...existingUser,
@@ -293,7 +293,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return item.quantity > 0;
     });
 
-    await pusherServer?.trigger('admin', 'incoming-order', {
+    await pusherServer?.trigger(`admin-${existingUser.companyId}`, 'incoming-order', {
       ...newOrder,
       items: itemHasQuantity,
       ...existingUser,

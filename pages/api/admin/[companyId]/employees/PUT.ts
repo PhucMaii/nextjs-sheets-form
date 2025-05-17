@@ -31,8 +31,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const isPageViewChanged = compareTwoArraysWithFields(employee.adminPages, pageViews, ['pageId', 'employeeId']);
-    if (employee.adminPages.length === 0 || isPageViewChanged) {
+    const isSamePageViews = compareTwoArraysWithFields(employee.adminPages, pageViews, ['pageId', 'employeeId']);
+    console.log({
+      adminPages: employee.adminPages,
+      pageViews,
+      isSamePageViews,
+    })
+    if (employee.adminPages.length === 0 || !isSamePageViews) {
       await prisma.adminPage.deleteMany({
         where: {
           employeeId: employeeId,

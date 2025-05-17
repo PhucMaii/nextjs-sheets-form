@@ -117,7 +117,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         // Check if the order has no items existed
         if (scheduleOrder.totalPrice === 0) {
           await pusherServer?.trigger(
-            'admin-schedule-order',
+            `admin-schedule-order-${companyId}`,
             'pre-order',
             returnOrder,
           );
@@ -139,7 +139,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
 
         if (existingOrder) {
-          await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+          await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
             id: existingOrder?.id,
           });
           console.log({
@@ -155,7 +155,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         // Check if user is inactive
         if (scheduleOrder?.user?.type === USER_CATEGORIZED.INACTIVE) {
-          await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+          await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
             id: returnOrder?.id,
           });
           console.log({
@@ -199,7 +199,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
 
         if (trackIndex <= unavailableRanges.length - 1) {
-          await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+          await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
             id: returnOrder?.id,
           });
           console.log({
@@ -231,7 +231,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
         updatedOrderList.push(newOrder);
 
-        await pusherServer?.trigger('admin-schedule-order', 'pre-order', {
+        await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
           id: newOrder?.id,
         });
         console.log({

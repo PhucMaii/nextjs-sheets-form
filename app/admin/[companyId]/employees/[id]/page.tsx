@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import {
   Box,
@@ -21,8 +21,10 @@ import PageViewTable from '../../components/Tables/PageViewTable';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import { ArrowLeftIcon } from 'lucide-react';
+import { UserContext } from '@/app/context/UserContextAPI';
 
 export default function EmployeeDetailPage() {
+  const { user }: any = useContext(UserContext);
   const { id, companyId }: any = useParams();
   const router = useRouter();
 
@@ -33,7 +35,13 @@ export default function EmployeeDetailPage() {
 
   const { showNotification, NotificationComp } = useNotification();
 
-  console.log(employee);
+  useEffect(() => {
+    if (user && user?.role !== EMPLOYEE_ROLE.SUPER_ADMIN) {
+      showNotification('error', 'You are not authorized to view this page');
+      router.push(`/admin/${companyId}/employees`);
+      return;
+    }
+  }, [user, companyId, router]);
 
   useEffect(() => {
     const fetchEmployee = async () => {

@@ -286,7 +286,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const itemsWithTotalPrice = formatItemsWithTotalPrice(updatedOrderedItems);
 
-    await pusherServer?.trigger('override-order', 'incoming-order', {
+    await pusherServer?.trigger(`override-order-${existingUser.companyId}`, 'incoming-order', {
       ...existingUser,
       ...newOrder,
       items: itemsWithTotalPrice,

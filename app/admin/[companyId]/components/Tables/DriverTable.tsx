@@ -9,12 +9,14 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React from 'react';
-import EditDriver from '../Modals/edit/EditDriver';
+import React, { useContext } from 'react';
+// import EditDriver from '../Modals/edit/EditDriver';
 import DeleteDriver from '../Modals/delete/DeleteDriver';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { grey } from '@mui/material/colors';
+import { UserContext } from '@/app/context/UserContextAPI';
+import { EMPLOYEE_ROLE } from '@/app/utils/enum';
 
 interface IProps {
   drivers: IDriver[];
@@ -27,6 +29,8 @@ export default function DriverTable({
   showNotification,
   mutateDrivers,
 }: IProps) {
+  const { user } = useContext(UserContext);
+
   const router = useRouter();
   const { companyId }: any = useParams();
 
@@ -56,9 +60,12 @@ export default function DriverTable({
                       backgroundColor: grey[100],
                     },
                   }}
-                  onClick={() =>
-                    router.push(`/admin/${companyId}/employees/${driver.id}`)
-                  }
+                  onClick={() => {
+                    if (user?.role !== EMPLOYEE_ROLE.SUPER_ADMIN) {
+                      return;
+                    }
+                    router.push(`/admin/${companyId}/employees/${driver.id}`);
+                  }}
                 >
                   <TableCell>{driver.id}</TableCell>
                   <TableCell>{driver.name}</TableCell>
@@ -68,16 +75,16 @@ export default function DriverTable({
                   <TableCell>${driver?.hourlyRate?.toFixed(2)}</TableCell>
                   <TableCell>
                     <Box display="flex" flexDirection="row" gap={1}>
-                      <DeleteDriver
+                      {user?.role === EMPLOYEE_ROLE.SUPER_ADMIN && <DeleteDriver
                         driver={driver}
                         showNotification={showNotification}
                         mutateDrivers={mutateDrivers}
-                      />
-                      <EditDriver
+                      />}
+                      {/* <EditDriver
                         driver={driver}
                         showNotification={showNotification}
                         mutateDrivers={mutateDrivers}
-                      />
+                      /> */}
                     </Box>
                   </TableCell>
                 </TableRow>

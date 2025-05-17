@@ -63,7 +63,7 @@ export default function EditDeliveryDate({
   });
 
   useEffect(() => {
-    pusherClient?.subscribe('admin-schedule-order');
+    pusherClient?.subscribe(`admin-schedule-order-${companyId}`);
 
     const handleReceiveOrder = (incomingOrder: Order) => {
       const sameIdOrder = createdOrders.some(
@@ -77,7 +77,7 @@ export default function EditDeliveryDate({
     pusherClient?.bind('pre-order', handleReceiveOrder);
 
     return () => {
-      pusherClient?.unsubscribe('admin-schedule-order');
+      pusherClient?.unsubscribe(`admin-schedule-order-${companyId}`);
     };
   }, []);
 

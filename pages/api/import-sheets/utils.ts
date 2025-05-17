@@ -226,7 +226,7 @@ export const overrideOrder = async (
       newNote,
     );
 
-    await pusherServer?.trigger('override-order', 'incoming-order', {
+    await pusherServer?.trigger(`override-order-${user.companyId}`, 'incoming-order', {
       ...updatedOrder,
       items: itemList,
       ...user,

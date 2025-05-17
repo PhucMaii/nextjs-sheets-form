@@ -166,7 +166,7 @@ export default function LoginPage() {
             </form>
           </Paper>
           <Box display="flex" justifyContent="flex-start">
-            <Link href="/driver/login">Sign in here as a driver</Link>
+            <Link href="/driver/login">Sign in here as an employee</Link>
           </Box>
         </Box>
       </FadeIn>

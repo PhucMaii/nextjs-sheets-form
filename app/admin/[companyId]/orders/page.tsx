@@ -238,9 +238,9 @@ export default function Orders() {
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
-    pusherClient?.subscribe('admin');
-    pusherClient?.subscribe('override-order');
-    pusherClient?.subscribe('void-order');
+    pusherClient?.subscribe(`admin-${companyId}`);
+    pusherClient?.subscribe(`override-order-${companyId}`);
+    pusherClient?.subscribe(`void-order-${companyId}`);
 
     pusherClient?.bind('incoming-order', (order: Order) => {
       setIncomingOrder(order);
@@ -248,9 +248,9 @@ export default function Orders() {
     });
 
     return () => {
-      pusherClient?.unsubscribe('admin');
-      pusherClient?.unsubscribe('override-order');
-      pusherClient?.unsubscribe('void-order');
+      pusherClient?.unsubscribe(`admin-${companyId}`);
+      pusherClient?.unsubscribe(`override-order-${companyId}`);
+      pusherClient?.unsubscribe(`void-order-${companyId}`);
     };
   }, [date]);
 
