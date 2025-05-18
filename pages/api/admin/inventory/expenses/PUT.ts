@@ -161,12 +161,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      console.log({updatedItems}, 'updatedItems');
+
       const allFifos = await prisma.fifo.findMany({});
       const newAddedItems = [];
       // Update inventory units
       for (const item of updatedItems) {
         const vendorItem = vendorItems.find((vendorItem: any) => {
-          return vendorItem.id === item?.inventoryUnit?.vendorItemId;
+          return vendorItem.id === item?.vendorItemId;
         });
 
         if (!vendorItem) {
