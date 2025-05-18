@@ -32,6 +32,11 @@ const usePageViews = (initialSelectedPageViews: any[]) => {
     }
   }, [initialSelectedPageViews]); 
 
+  console.log({
+    pageViews,
+    selectedPageViews,
+  })
+
   const renderPageViewSearch = () => {
     return (
       <Autocomplete
@@ -39,34 +44,50 @@ const usePageViews = (initialSelectedPageViews: any[]) => {
         getOptionLabel={(option: any) => option?.title}
         renderInput={(params) => <TextField {...params} label="Page View" />}
         value={selectedPageViews}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
         onChange={(e, newValue: any) => {
           setSelectedPageViews(newValue);
         }}
         sx={{ width: 'auto' }}
-        renderOption={(props, option) => {
+        renderOption={(props, option, { selected }) => {
+          console.log(option, 'option in renderOption');
+          console.log(selected, 'selected in renderOption');
           if (!option) return null;
-          if (!pageViews || pageViews?.length === 0) return null;
-          const isSelected = selectedPageViews?.find(
+
+          
+          // if (!pageViews || pageViews?.length === 0) return null;
+          const isSelected = selectedPageViews?.some(
             (item: any) => item.id === option.id,
           );
+
+          if (option.id === 2) {
+            console.log({
+              option,
+              isSelected,
+            })
+          }
 
           return (
             <li {...props}>
               <Checkbox
-                checked={isSelected}
-                onChange={(e: any) => {
-                  e.stopPropagation();
+                checked={selected}
+                // onChange={(e: any) => {
+                //   e.stopPropagation();
 
-                  if (isSelected) {
-                    setSelectedPageViews(
-                      selectedPageViews?.filter(
-                        (item: any) => item.id !== option.id,
-                      ),
-                    );
-                  } else {
-                    setSelectedPageViews([...selectedPageViews, option]);
-                  }
-                }}
+                //   if (option.id === 2) {
+                //     console.log('isSelected in onChange', selected);
+                //   }
+
+                //   if (selected) {
+                //     setSelectedPageViews((prev: any) =>
+                //       prev?.filter(
+                //         (item: any) => item.id !== option.id,
+                //       ),
+                //     );
+                //   } else {
+                //     setSelectedPageViews((prev: any) => [...prev, option]);
+                //   }
+                // }}
               />
               {option.title}
             </li>
@@ -78,7 +99,7 @@ const usePageViews = (initialSelectedPageViews: any[]) => {
     );
   };
 
-  return { pageViews, renderPageViewSearch, selectedPageViews };
+  return { pageViews, renderPageViewSearch, selectedPageViews, setSelectedPageViews };
 };
 
 export default usePageViews;

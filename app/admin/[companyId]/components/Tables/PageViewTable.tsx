@@ -10,7 +10,12 @@ import {
 import { Trash2Icon } from 'lucide-react';
 import React from 'react';
 
-export default function PageViewTable({ pageViews }: { pageViews: any[] }) {
+export default function PageViewTable({ pageViews, setPageViews }: { pageViews: any[], setPageViews: any }) {
+
+  const onRemove = (pageView: any) => {
+    setPageViews((prev: any) => prev.filter((item: any) => item.id !== pageView.id));
+  }
+
   return (
     <TableContainer>
       <Table>
@@ -28,7 +33,7 @@ export default function PageViewTable({ pageViews }: { pageViews: any[] }) {
               <TableCell>{pageView.id}</TableCell>
               <TableCell>{pageView.title}</TableCell>
               <TableCell sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <IconButton>
+                <IconButton onClick={() => onRemove(pageView)}>
                   <Trash2Icon />
                 </IconButton>
               </TableCell>

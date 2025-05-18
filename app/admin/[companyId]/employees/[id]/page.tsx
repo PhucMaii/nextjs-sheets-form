@@ -31,7 +31,7 @@ export default function EmployeeDetailPage() {
   const [employee, setEmployee] = useState<any>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const { renderPageViewSearch, selectedPageViews } = usePageViews(employee?.adminPages || []);
+  const { renderPageViewSearch, selectedPageViews, setSelectedPageViews } = usePageViews(employee?.adminPages || []);
 
   const { showNotification, NotificationComp } = useNotification();
 
@@ -205,7 +205,7 @@ export default function EmployeeDetailPage() {
                 {renderPageViewSearch()}
               </Grid>
 
-              <PageViewTable pageViews={selectedPageViews} />
+              <PageViewTable pageViews={selectedPageViews} setPageViews={setSelectedPageViews} />
             </>
           )}
 
