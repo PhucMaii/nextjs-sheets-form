@@ -26,14 +26,17 @@ import { adminTabs } from '../../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { blueGrey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primary } from '@/theme/color';
 import { UserContext } from '@/app/context/UserContextAPI';
-import { EMPLOYEE_ROLE } from '@/app/utils/enum';
+import { EMPLOYEE_ROLE, getAdminApiUrl } from '@/app/utils/enum';
+import { SWRFetchData } from '@/app/utils/db';
+import { LoadingButton } from '@mui/lab';
+import axios from 'axios';
 
 interface PropTypes {
   children: ReactNode;
@@ -45,14 +48,36 @@ const drawerWidth = 210;
 export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
+  const [isConverting, setIsConverting] = useState<boolean>(false);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
   const { user } = useContext(UserContext);
+
   const { companyId }: any = useParams();
 
+  // WILL BE REMOVED AFTER FEW DAYS
+  const [noCompanyOrders] = SWRFetchData(
+    getAdminApiUrl(companyId, '/orders/no-company'),
+  );
+
+  const convertNoCompanyOrders = async () => {
+    try {
+      setIsConverting(true);
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/orders/no-company'),
+        {
+          orderIds: noCompanyOrders.data.map((order: any) => order.id),
+        },
+      );
+    } catch (error: any) {
+      console.error('Internal Server Error: ', error);
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
   const singlePrintRef: any = useRef();
-  const allPrintRef: any = useRef();
 
   // Subscribe admin whenever they logged in
   useEffect(() => {
@@ -92,9 +117,9 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
           (tab: any) => tab.path.replace('[companyId]', companyId) === pathPage,
         );
 
-        const pageAccess = user?.adminPages.find(
-          (page: any) => page.pageId === targetPage?.id,
-        );
+      const pageAccess = user?.adminPages.find(
+        (page: any) => page.pageId === targetPage?.id,
+      );
 
       if (pageAccess) {
         setCurrentTab(pathname);
@@ -154,6 +179,33 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
         component="nav"
         aria-labelledby="nested-list-subheader"
       >
+        {noCompanyOrders && noCompanyOrders?.data?.length > 0 && (
+          <Toolbar
+            sx={{ mt: 2, backgroundColor: grey[100], p: 2, borderRadius: 1 }}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={1}
+            >
+              <Typography variant="h5">
+                {noCompanyOrders.data.length}
+              </Typography>
+              <Typography variant="caption">Unknown Company Orders</Typography>
+
+              <LoadingButton
+                loading={isConverting}
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={convertNoCompanyOrders}
+              >
+                Convert
+              </LoadingButton>
+            </Box>
+          </Toolbar>
+        )}
         {/* {bugOrders && bugOrders?.data?.length > 0 && (
           <Toolbar sx={{ mt: 2 }}>
             <Box display="flex" flexDirection="column" rowGap={2}>

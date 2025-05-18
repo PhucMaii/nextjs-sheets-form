@@ -148,7 +148,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         employee: true,
-        driver: true,
+        // driver: true,
         clients: true,
       },
     });

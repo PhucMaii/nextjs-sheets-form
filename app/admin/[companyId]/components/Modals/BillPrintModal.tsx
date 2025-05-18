@@ -332,7 +332,7 @@ const BillPrintModal = ({
                               onChange={(e: any) => handleSelectRoute(e, route)}
                             />
                           }
-                          label={`${route.name} - ${route?.driver?.name}`}
+                          label={`${route.name} - ${route?.employee?.name}`}
                         />
                       );
                     })}

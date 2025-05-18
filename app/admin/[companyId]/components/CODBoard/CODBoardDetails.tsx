@@ -429,7 +429,7 @@ export default function CODBoardDetails({
         onClose={() => setOpen('isOpenAddExpense', false)}
         defaultValue={{
           date: boardData?.date,
-          spentBy: `Driver - ${boardData?.driver?.name || 'N/A'}`,
+          spentBy: `Driver - ${boardData?.employee?.name || 'N/A'}`,
         }}
         // handleAddExpenseId={handleAddExpenseId}
         codBoardId={boardData?.id}
@@ -472,8 +472,8 @@ export default function CODBoardDetails({
 
           <Box display="flex" alignItems="center" gap={1}>
             <Typography variant="h5" color={blueGrey[800]}>
-              {boardResponse?.data?.driver?.name
-                ? `${boardResponse?.data?.driver?.name}'s Board`
+              {boardResponse?.data?.employee?.name
+                ? `${boardResponse?.data?.employee?.name}'s Board`
                 : 'No Route Board'}
             </Typography>
             <AssignmentIndIcon

@@ -203,7 +203,7 @@ type Cash = {
 };
 
 export interface IBoard extends CodBoard {
-  driver: IDriver;
+  employee: Employee;
   uncollected: Cash;
   collected: Cash;
   boardClients: UserType[];

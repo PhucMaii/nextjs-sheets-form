@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -120,147 +120,149 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-// async function main() {
-//   // Update all models with companyId to have companyId = 1
-//   const BATCH_SIZE = 99999; // Process 1000 records at a time
+async function main() {
+  // Update all models with companyId to have companyId = 1
+  const BATCH_SIZE = 99999; // Process 1000 records at a time
 
-//   // Process orderedItems in batches
-//   let processed = 0;
-//   let hasMore = true;
+  // Process orderedItems in batches
+  let processed = 0;
+  let hasMore = true;
 
-//   while (hasMore) {
-//     const batch = await prisma.orderedItems.findMany({
-//       take: BATCH_SIZE,
-//       skip: processed,
-//       where: {
-//         companyId: null,
-//       },
-//     });
+  while (hasMore) {
+    const batch = await prisma.orderedItems.findMany({
+      take: BATCH_SIZE,
+      skip: processed,
+      where: {
+        companyId: null,
+      },
+    });
 
-//     if (batch.length === 0) {
-//       hasMore = false;
-//       continue;
-//     }
+    if (batch.length === 0) {
+      hasMore = false;
+      continue;
+    }
 
-//     const ids = batch.map((item) => item.id);
-//     await prisma.orderedItems.updateMany({
-//       where: {
-//         id: {
-//           in: ids,
-//         },
-//       },
-//       data: { companyId: 1 },
-//     });
+    const ids = batch.map((item) => item.id);
+    await prisma.orderedItems.updateMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      data: { companyId: 1 },
+    });
 
-//     processed += batch.length;
-//     console.log(`Processed ${processed} records for orderedItems`);
-//   }
+    processed += batch.length;
+    console.log(`Processed ${processed} records for orderedItems`);
+  }
 
-//   // Update other models directly
-//   await prisma.employee.updateMany({
-//     data: { companyId: 1 },
-//   });
+  // Update other models directly
+  await prisma.employee.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.user.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.user.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.category.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.category.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.item.updateMany({
-//     data: { companyId: 1 },
-//   });
+  
 
-//   await prisma.orders.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.item.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.scheduleOrders.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.orders.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.route.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.scheduleOrders.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.announcement.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.route.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.codBoard.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.announcement.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.paymentMethod.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.codBoard.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.fixedTransaction.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.paymentMethod.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.expense.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.fixedTransaction.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.vendor.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.expense.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.inventoryItem.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.vendor.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.itemType.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.inventoryItem.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.vendorItem.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.itemType.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.fifo.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.vendorItem.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.inventoryUnit.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.fifo.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.action.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.inventoryUnit.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.cheque.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.action.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.clientStatement.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.cheque.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.promotion.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.clientStatement.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.shiftSession.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.promotion.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.pO.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.shiftSession.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.lossReport.updateMany({
-//     data: { companyId: 1 },
-//   });
+  await prisma.pO.updateMany({
+    data: { companyId: 1 },
+  });
 
-//   await prisma.dayRange.updateMany({
-//     data: { companyId: 1 },
-//   });
-// }
+  await prisma.lossReport.updateMany({
+    data: { companyId: 1 },
+  });
+
+  await prisma.dayRange.updateMany({
+    data: { companyId: 1 },
+  });
+}
 
 // async function main() {
 //   const routes = await prisma.route.findMany({
@@ -280,45 +282,6 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 
 // }
 
-async function main() {
-  await prisma.adminPage.create({
-    data: {
-      pageId: 21,
-      employeeId: 13,
-    }
-  });
-
-  await prisma.adminPage.create({
-    data: {
-      pageId: 21,
-      employeeId: 14,
-    }
-  });
-
-  await prisma.adminPage.create({
-    data: {
-      pageId: 21,
-      employeeId: 15,
-    }
-  });
-
-  await prisma.adminPage.create({
-    data: {
-      pageId: 21,
-      employeeId: 17,
-    }
-  });
-
-  await prisma.adminPage.create({
-    data: {
-      pageId: 21,
-      employeeId: 18,
-    }
-  });
-  
-  
-  
-}
 
 main()
   .then(() => prisma.$disconnect())
