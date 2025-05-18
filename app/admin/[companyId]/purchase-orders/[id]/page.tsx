@@ -62,6 +62,12 @@ export default function PurchaseOrder() {
   const poInvoiceRef = useRef(null);
 
   useEffect(() => {
+    if (debouncedSearch) {
+      setIsOpenModalInventoryItemSearch(true);
+    }
+  }, [debouncedSearch]);
+
+  useEffect(() => {
     if (po?.poItems) {
       const newSelectedItems = po?.poItems.map((item: any) => {
         const vendorItem = po?.vendor?.vendorItem.find(
@@ -415,7 +421,7 @@ export default function PurchaseOrder() {
                 </Box>
                 {/* Items */}
                 {isEditMode ? (
-                  <Box display="flex" flexDirection="column" gap={1}>
+                  <Box display="flex" flexDirection="column" gap={1} onClick={() => setIsOpenModalInventoryItemSearch(true)}>
                     <Typography>Search Items</Typography>
                     <TextField
                       label="Search Items"

@@ -211,15 +211,18 @@ export default function CardManagement() {
 
     if (
       selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED ||
-      selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED
+      selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED ||
+      selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION
     ) {
       return {
         id: -1,
         name:
           selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED
             ? 'Custom Purchased'
-            : 'Stock Purchased',
-        type: PAYMENT_METHOD_TYPE.CASH,
+            : selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED
+              ? 'Stock Purchased'
+              : 'Fixed Transaction',
+        type: selectedViewObj.type,
         transactions: [],
         balance: 0,
         createdAt: '',
@@ -435,6 +438,14 @@ export default function CardManagement() {
                 })}
               >
                 Stock Purchased
+              </MenuItem>
+              <MenuItem
+                value={JSON.stringify({
+                  type: VIEW_TYPE.FIXED_TRANSACTION,
+                  id: 1,
+                })}
+              >
+                Fixed Transaction
               </MenuItem>
               <MenuItem
                 value={JSON.stringify({

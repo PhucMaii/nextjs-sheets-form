@@ -724,8 +724,8 @@ const EditStockPurchased = ({
                           {item?.inventoryItem?.sku
                             ? `${item?.inventoryItem?.sku} | ${item?.inventoryItem?.name}`
                             : item?.inventoryItem?.name
-                              ? item.inventoryItem.name
-                              : item.name}
+                              ? item?.inventoryItem?.name
+                              : item?.name}
                         </Typography>
                         <IconButton
                           onClick={() => removeItem(item.id)}

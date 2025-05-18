@@ -219,6 +219,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
 
       expenses = [...stockPurchased];
+    } else if (type && type === VIEW_TYPE.FIXED_TRANSACTION) {
+      const fixedTransaction = await getTransactions({
+        date: {
+          in: listOfDateString,
+        },
+        fixedTransactionId: {
+          not: null,
+        },
+      });
+
+      expenses = [...fixedTransaction];
     }
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);

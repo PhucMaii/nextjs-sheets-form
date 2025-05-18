@@ -58,6 +58,7 @@ export default function ReceiveInventory() {
   useEffect(() => {
     fetchPoItems();
   }, []);
+  
 
   console.log(poItems, 'PO ITEMS');
 

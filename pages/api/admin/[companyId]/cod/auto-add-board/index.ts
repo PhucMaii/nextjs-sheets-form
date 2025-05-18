@@ -179,7 +179,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         note: '',
         status: COD_STATUS.IN_PROCESS,
         createdAt: `${date} ${time}`,
-        createdBy: `Admin - ${user.clientName}`,
+        createdBy: `Admin - ${user.name}`,
         companyId: Number(companyId),
       };
     });

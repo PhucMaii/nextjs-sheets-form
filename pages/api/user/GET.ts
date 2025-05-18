@@ -6,10 +6,12 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const prisma = new PrismaClient();
 
-    const userId: string = req.query.id as string;
-    const role: string = req.query.role as string;
+    const userId: string = req.query.id as any;
+    const role: string = req.query.role as any;
 
-    if (role === 'client') {
+    // console.log({role, compare: role == undefined}, 'role')
+
+    if (!role || role === 'undefined') {
       const existingUser = await prisma.user.findUnique({
         where: {
           id: parseInt(userId),

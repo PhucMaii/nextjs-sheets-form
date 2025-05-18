@@ -251,7 +251,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
           let actualQuantity = item?.quantity || 1;
           if (item?.option?.name) {
-            actualQuantity = actualQuantity * item?.option?.ratio;
+            console.log({option: item?.option, item}, 'item?.option?.ratio');
+            actualQuantity = actualQuantity * (item?.option?.ratio || 1);
           }
 
           allManifestSummary[itemKey] =

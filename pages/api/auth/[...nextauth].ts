@@ -87,7 +87,7 @@ export const authOptions: NextAuthOptions = {
           ...token,
           ...user,
           id: user.id,
-          role: user.role,
+          role: token.role,
           // clientId: user.clientId,
           // clientName: user.clientName,
           // contactNumber: user.contactNumber,
