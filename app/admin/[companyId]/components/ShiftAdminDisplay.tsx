@@ -63,7 +63,7 @@ export default function ShiftAdminDisplay({
             type={shift?.status === SHIFT_STATUS.UNPAID ? 'error' : 'success'}
           />
           <Typography variant="h6" fontWeight="semibold">
-            {shift?.driver?.name}
+            {shift?.employee?.name}
           </Typography>
           <Typography>
             {shift?.route?.name ? shift?.route?.name : shift?.role}
@@ -94,7 +94,7 @@ export default function ShiftAdminDisplay({
                 {shift?.hours !== null ? shift.hours?.toFixed(2) : 'Ongoing'}
               </Typography>
               <Typography variant="h6" fontWeight="regular">
-                Hourly Rate: ${shift?.driver?.hourlyRate}
+                Hourly Rate: ${shift?.employee?.hourlyRate}
               </Typography>
             </Box>
             {shift?.isActive && (

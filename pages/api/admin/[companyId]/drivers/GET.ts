@@ -2,6 +2,7 @@ import { days } from '@/app/lib/constant';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../../utils/date';
+import { USER_ROLE } from '@/app/utils/enum';
 // import { USER_ROLE } from '@/app/utils/enum';
 // import { USER_ROLE } from '@/app/utils/enum';
 
@@ -49,7 +50,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const drivers = await prisma.employee.findMany({
       where: {
         companyId: Number(companyId),
-        // role: USER_ROLE.DRIVER,
+        role: USER_ROLE.DRIVER,
       },
       include: {
         routes: true,

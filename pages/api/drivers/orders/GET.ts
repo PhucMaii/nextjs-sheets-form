@@ -54,7 +54,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     if (!targetRoute) {
       return res.status(200).json({
         data: {
-          driver: existingDriver,
+          employee: existingDriver,
           deliveryOrders: [],
           manifest: {},
           codAmount: 0,
@@ -158,7 +158,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     return res.status(200).json({
       data: {
-        driver: existingDriver,
+        employee: existingDriver,
         deliveryOrders: sortedDeliveryOrders,
         manifest,
         codAmount,

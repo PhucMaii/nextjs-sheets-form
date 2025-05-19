@@ -28,7 +28,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: Number(id),
         },
         include: {
-          driver: true,
           employee: true,
           expense: {
             include: {
@@ -94,7 +93,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             ...order,
             items: formattedItems,
             orderRoute: orderRoute
-              ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
+              ? `${orderRoute.route.name} - ${orderRoute?.route?.employee?.name}`
               : 'No route - N/A',
           };
         },
@@ -417,11 +416,10 @@ const formatBoards = (boards: any) => {
       note: codBoard.note,
       cash: codBoard.cash,
       status: codBoard.status,
-      driver: codBoard.driver,
+      employee: codBoard.employee,
       createdAt: codBoard.createdAt,
       date: codBoard.date,
       id: codBoard.id,
-      // driverId: codBoard.driverId,
       employeeId: codBoard.employeeId,
       orders: codBoard.orders,
       createdBy: codBoard.createdBy,

@@ -53,7 +53,7 @@ export default async function handler(
       // });
 
       const orderDeliveredByDriver = todayOrders.filter((order) => {
-        return order.deliveredBy === shift.driver.name;
+        return order.deliveredBy === shift.employee.name;
       });
 
       // Get the latest order delivered by driver
@@ -75,7 +75,7 @@ export default async function handler(
             endedAt: latestOrder.deliveredAt,
             hours,
             isActive: false,
-            cost: hours * (shift?.driver?.hourlyRate || 1),
+            cost: hours * (shift?.employee?.hourlyRate || 1),
           },
         });
       } else {
@@ -88,7 +88,7 @@ export default async function handler(
             endedAt: today.dateAndTime,
             isActive: false,
             hours,
-            cost: hours * (shift?.driver?.hourlyRate || 1),
+            cost: hours * (shift?.employee?.hourlyRate || 1),
           },
         });
       }

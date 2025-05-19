@@ -168,7 +168,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           : null,
         multipleOrders: sameClientOrder.length > 1 ? true : false,
         orderRoute: orderRoute
-          ? `${orderRoute.route.name} - ${orderRoute.route.driver.name}`
+          ? `${orderRoute.route.name} - ${orderRoute.route?.employee?.name}`
           : 'No route - N/A',
         profit,
       };

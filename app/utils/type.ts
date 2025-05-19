@@ -274,6 +274,7 @@ export interface IOption extends Option {
 }
 
 export interface IShiftSession extends ShiftSession {
+  employee: Employee;
   driver: IDriver;
   route?: IRoutes;
 }

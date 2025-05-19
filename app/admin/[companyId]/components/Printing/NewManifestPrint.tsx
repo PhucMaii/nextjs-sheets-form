@@ -76,7 +76,7 @@ export const NewManifestPrint = forwardRef(
                   >
                     <Typography variant="h5">
                       Driver:{' '}
-                      {manifest[routeId]?.route?.driver?.name || 'Unknown'}
+                      {manifest[routeId]?.route?.employee?.name || 'Unknown'}
                     </Typography>
                     <Typography>{currentDate}</Typography>
                   </Box>

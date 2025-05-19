@@ -77,7 +77,7 @@ export default function ShiftPage() {
 
     return unpaidShifts.reduce((acc: any, shift: any) => {
       const existedDriver = acc.find(
-        (driver: any) => driver.id === shift.driverId,
+        (driver: any) => driver.id === shift.employeeId,
       );
 
       if (existedDriver) {
@@ -86,11 +86,11 @@ export default function ShiftPage() {
         existedDriver.total += shift.cost;
       } else {
         acc.push({
-          id: shift.driverId,
-          name: shift.driver.name,
+          id: shift?.employeeId || shift?.driverId,
+          name: shift?.employee?.name || shift?.driver?.name,
           hours: shift.hours,
           shifts: 1,
-          hourlyRate: shift.driver.hourlyRate,
+          hourlyRate: shift?.employee?.hourlyRate || shift?.driver?.hourlyRate,
           total: shift.cost,
         });
       }
@@ -130,8 +130,8 @@ export default function ShiftPage() {
     }
 
     return shiftSessions?.data?.reduce((acc: number[], shift: any) => {
-      if (!acc.includes(shift.driverId)) {
-        acc.push(shift.driverId);
+      if (!acc.includes(shift.employeeId)) {
+        acc.push(shift.employeeId);
       }
 
       return acc;

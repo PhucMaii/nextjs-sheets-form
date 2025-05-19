@@ -302,7 +302,7 @@ const RouteStatement = ({ open, onClose, currentDateRange }: IProps) => {
                     clientOrders[index - 1]?.route?.id ? (
                       <Typography variant="h6" sx={{ mt: 2 }}>
                         {clientOrder?.route?.name} -{' '}
-                        {clientOrder?.route?.driver?.name}
+                        {clientOrder?.route?.employee?.name}
                       </Typography>
                     ) : null}
                     <Box display="flex" alignItems="center" gap={1}>

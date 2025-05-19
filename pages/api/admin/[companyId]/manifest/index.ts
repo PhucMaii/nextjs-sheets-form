@@ -63,7 +63,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         companyId: Number(companyId),
       },
       include: {
-        driver: true,
         employee: true,
       },
     });

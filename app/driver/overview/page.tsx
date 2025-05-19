@@ -35,7 +35,7 @@ export default function OverviewPage() {
     <Sidebar>
       {/* <LoadingModal open={isValidating} /> */}
       <Typography variant="h5" fontWeight="bold">
-        Welcome back, {orders?.data.driver.name || ''}
+        Welcome back, {orders?.data.employee.name || ''}
       </Typography>
       <Typography variant="subtitle1">We wish you have a good day</Typography>
       <Grid container spacing={2} my={2}>
