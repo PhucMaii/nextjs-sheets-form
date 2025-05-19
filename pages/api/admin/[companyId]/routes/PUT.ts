@@ -5,7 +5,7 @@ interface BodyTypes {
   routeId: number;
   name?: string;
   day?: string;
-  driverId?: number;
+  employeeId?: number;
   // updatedClients?: UserType[];
 }
 
@@ -13,7 +13,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { routeId, day, name, driverId }: BodyTypes = req.body;
+    const { routeId, day, name, employeeId }: BodyTypes = req.body;
 
     const updateOptions: any = {};
 
@@ -25,9 +25,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateOptions.name = name;
     }
 
-    if (driverId) {
-      updateOptions.driverId = driverId;
-      updateOptions.employeeId = driverId;
+    if (employeeId) {
+      updateOptions.employeeId = employeeId;
     }
 
     const existingRoute = await prisma.route.findUnique({
@@ -50,17 +49,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Check if driver id already existed in selected day in other route
-    if (driverId) {
+    if (employeeId) {
       const checkIsRouteNotValid = await prisma.route.findFirst({
         where: {
           day,
-          driverId,
+          employeeId,
         },
       });
 
       if (checkIsRouteNotValid) {
         return res.status(500).json({
-          error: 'Driver Existed In This Route Already',
+          error: 'Employee Existed In This Route Already',
         });
       }
     }
@@ -114,7 +113,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: updateOptions,
       include: {
-        driver: true,
         employee: true,
         clients: {
           include: {

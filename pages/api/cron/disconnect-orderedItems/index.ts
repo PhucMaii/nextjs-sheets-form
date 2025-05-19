@@ -19,6 +19,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         name: ACTION.DISCONNECT_ORDERED_ITEMS,
         date: date,
+        companyId: 1,
       },
     });
 
@@ -41,6 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         Orders: {
           deliveryDate: threeMonthsAgoString,
         },
+        companyId: 1,
       },
       data: {
         inventoryItemId: null,
@@ -53,6 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await prisma.orders.updateMany({
       where: {
         deliveryDate: threeMonthsAgoString,
+        companyId: 1,
       },
       data: {
         type: TYPE.LOCKED,
@@ -67,6 +70,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         description: 'Disconnect Ordered Items For ' + threeMonthsAgoString,
         createdAt: `${date} ${time}`,
         createdBy: USER_ROLE.SYSTEM,
+        companyId: 1,
       },
     });
 

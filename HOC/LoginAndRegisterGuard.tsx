@@ -31,8 +31,11 @@ export default function LoginAndRegisterGuard({ children }: any) {
   useEffect(() => {
     if (session?.user?.role === 'driver') {
       router.push('/driver/overview');
-    } else if (session?.user?.role === 'admin') {
-      router.push('/admin/orders');
+    } else if (
+      session?.user?.role === 'admin' ||
+      session?.user?.role === 'super admin'
+    ) {
+      router.push(`/admin/${session?.user?.companyId}/orders`);
     } else if (session?.user?.role === 'client') {
       router.push('/');
     }

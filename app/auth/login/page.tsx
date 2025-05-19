@@ -70,7 +70,7 @@ export default function LoginPage() {
           if (userData.role === 'client') {
             router.push('/');
           } else {
-            router.push('/admin/orders');
+            router.push(`/admin/${userData.companyId}/orders`);
           }
         }, 500);
       } catch (error: any) {

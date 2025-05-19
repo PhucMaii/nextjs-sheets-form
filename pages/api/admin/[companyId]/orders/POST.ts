@@ -1,8 +1,8 @@
-import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import { EMPLOYEE_ROLE, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
-import { sendEmail } from '@/pages/api/utils/email';
+// import { sendEmail } from '@/pages/api/utils/email';
 import { pusherServer } from '@/app/pusher';
 import {
   checkOrderDeliveryDateValid,
@@ -73,7 +73,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     //   });
     // }
 
-    const isSendToAdmin = false;
+    // const isSendToAdmin = false;
     const updatedOrderList: any = [];
 
     const scheduleOrderList: any = await prisma.scheduleOrders.findMany({
@@ -213,22 +213,24 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           continue;
         }
 
+        const role = session?.user?.role === EMPLOYEE_ROLE.SUPER_ADMIN ? 'S Admin' : 'Admin';
+
         const newOrder: any = await createOrder(
           Number(companyId),
           scheduleOrder.user,
           scheduleOrder.items,
           deliveryDate,
-          `Admin - ${adminCreate.name}`,
+          `${role} - ${adminCreate.name}`,
           '',
         );
 
-        await sendEmail(
-          scheduleOrder.user,
-          newOrder,
-          newOrder.id,
-          deliveryDate,
-          isSendToAdmin,
-        );
+        // await sendEmail(
+        //   scheduleOrder.user,
+        //   newOrder,
+        //   newOrder.id,
+        //   deliveryDate,
+        //   isSendToAdmin,
+        // );
         updatedOrderList.push(newOrder);
 
         await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {

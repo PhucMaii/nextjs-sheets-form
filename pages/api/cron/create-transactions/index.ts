@@ -23,6 +23,7 @@ export default async function handler(
       where: {
         status: FIXED_TRANSACTION_STATUS.ACTIVE,
         nextDueDate: todayDate.date,
+        companyId: 1,
       },
     });
 
@@ -44,6 +45,7 @@ export default async function handler(
           status: transaction.defaultTransactionStatus,
           discount: 0,
           fixedTransactionId: transaction.id,
+          companyId: 1,
         },
       });
 

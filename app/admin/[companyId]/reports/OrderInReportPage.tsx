@@ -193,7 +193,7 @@ export default function OrderInReportPage({
         getAdminApiUrl(companyId, '/clients/orders'),
         {
           data: {
-            orderIds: selectedOrders,
+            orderList: selectedOrders,
           },
         },
       );

@@ -80,8 +80,8 @@ export default function EditRoute({
         updatedValue.name = updatedRoute.name;
       }
 
-      if (updatedRoute.driverId !== route.driverId) {
-        updatedValue.driverId = updatedRoute.driverId;
+      if (updatedRoute.employeeId !== route.employeeId) {
+        updatedValue.employeeId = updatedRoute.employeeId;
       }
       const response = await axios.put(getAdminApiUrl(companyId, '/routes'), {
         routeId: route.id,
@@ -146,11 +146,11 @@ export default function EditRoute({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Driver:</Typography>
               <Select
-                value={updatedRoute?.driverId}
+                value={updatedRoute?.employeeId || -1}
                 onChange={(e) =>
                   setUpdatedRoute({
                     ...updatedRoute,
-                    driverId: +e.target.value,
+                    employeeId: +e.target.value,
                   })
                 }
               >

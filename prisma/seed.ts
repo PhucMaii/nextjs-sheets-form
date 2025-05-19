@@ -157,9 +157,6 @@ async function main() {
   }
 
   // Update other models directly
-  await prisma.employee.updateMany({
-    data: { companyId: 1 },
-  });
 
   await prisma.user.updateMany({
     data: { companyId: 1 },
@@ -259,9 +256,18 @@ async function main() {
     data: { companyId: 1 },
   });
 
+  await prisma.pOItem.updateMany({
+    data: { companyId: 1 },
+  });
+
   await prisma.dayRange.updateMany({
     data: { companyId: 1 },
   });
+
+  await prisma.route.updateMany({
+    data: { companyId: 1 },
+  });
+
 }
 
 // async function main() {
