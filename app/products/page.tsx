@@ -20,8 +20,7 @@ import { green, grey } from '@mui/material/colors';
 import * as LucideIcons from 'lucide-react';
 import ProductListing from '../components/ProductListingPage/ProductListing';
 import useDebounce from '@/hooks/useDebounce';
-import ErrorComponent from '../admin/components/ErrorComponent';
-import RequestToJoinModal from '../components/Modals/RequestToJoinModal';
+import RequestToJoinModal from '@/app/components/Modals/RequestToJoinModal';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { onSearchItems } from '../utils/array';
 import useNotification from '@/hooks/useNotification';
@@ -29,6 +28,7 @@ import './style.css';
 import { maxWidth } from '../lib/constant';
 import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 import NavbarWrapper from '../lib/NavbarWrapper';
+import ErrorComponent from '../admin/[companyId]/components/ErrorComponent';
 
 // interface ProductPageProps {
 //   typeName?: string;

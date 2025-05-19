@@ -4,7 +4,6 @@ import NavbarWrapper from '../../lib/NavbarWrapper';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { grey } from '@mui/material/colors';
-import { ShadowSection } from '../../admin/reports/styled';
 import useNotification from '@/hooks/useNotification';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { USER_CATEGORIZED } from '../../utils/enum';
 import Link from 'next/link';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 
 export default function ApplicatinForm() {
   const [clientInfo, setClientInfo] = useState<any>({

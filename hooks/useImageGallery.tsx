@@ -1,12 +1,17 @@
-import { generateImgUrl, getAllS3Images } from '@/app/lib/s3';
+import FileUpload from '@/app/admin/[companyId]/components/FileUpload';
+import { getAllS3Images } from '@/app/lib/s3';
 import { primaryColor } from '@/theme/color';
 import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
+import useNotification from './useNotification';
+import DisplayFile from '@/app/admin/[companyId]/components/Modals/DisplayFile';
 
 const useImageGallery = (
   from: string = '',
   initialSelectedImage: string = '',
   width: string | number,
+  folder: string = '',
+  isIncludeUploadImg: boolean = false,
 ) => {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] =
@@ -22,6 +27,8 @@ const useImageGallery = (
     getImages();
   }, []);
 
+  const { showNotification } = useNotification();
+
   const onSelectImage = (image: string) => {
     setSelectedImage(() => (image === selectedImage ? '' : image));
   };
@@ -30,8 +37,6 @@ const useImageGallery = (
     <Box
       sx={{
         width,
-        overflowX: 'auto', // Enables horizontal scrolling
-        whiteSpace: 'nowrap', // Prevents wrapping
       }}
     >
       <Box
@@ -40,6 +45,9 @@ const useImageGallery = (
         sx={{
           whitespace: 'nowrap',
           paddingBottom: 2,
+          width,
+          overflowX: 'auto', // Enables horizontal scrolling
+          whiteSpace: 'nowrap', // Prevents wrapping
         }}
       >
         {galleryImages.length > 0 &&
@@ -59,7 +67,7 @@ const useImageGallery = (
               //     border: selectedImage === image ? `2px solid ${primaryColor}` : 'none',
               //   }}
             >
-              <img
+              {/* <img
                 key={key}
                 src={generateImgUrl(image)}
                 alt={image}
@@ -72,10 +80,33 @@ const useImageGallery = (
                       ? `4px solid ${primaryColor}`
                       : 'none',
                 }}
+              /> */}
+              <DisplayFile
+                fileKey={image}
+                width="100px"
+                height="100px"
+                style={{
+                  borderRadius: '10px',
+                  border:
+                    selectedImage === image
+                      ? `4px solid ${primaryColor}`
+                      : 'none',
+                }}
               />
             </Box>
           ))}
       </Box>
+
+      {isIncludeUploadImg && (
+        <FileUpload
+          showNotification={showNotification}
+          fileName={`${folder + Date.now()}`}
+          uploadLocation={`products/export/${folder} + ${Date.now()}`}
+          onUploadImageUI={(fileKey: string) => {
+            setSelectedImage(fileKey);
+          }}
+        />
+      )}
     </Box>
   );
 

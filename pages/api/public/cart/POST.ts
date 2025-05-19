@@ -2,8 +2,8 @@
 import { ICartItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { generateOrderTotalPrice } from '../../admin/orderedItems/PUT';
 import { getTodayDate } from '../../utils/date';
+import { generateOrderTotalPrice } from '../../admin/[companyId]/orderedItems/PUT';
 
 interface IBody {
   items: ICartItem[];

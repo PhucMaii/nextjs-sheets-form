@@ -1,7 +1,7 @@
 import { Divider, Grid, Modal } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { BoxModal } from '../admin/components/Modals/styled';
-import ModalHead from '../lib/ModalHead';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
+import ModalHead from '@/app/lib/ModalHead';
 import { primaryColor } from '@/theme/color';
 import { ItemButton } from './OrderView';
 import { grey } from '@mui/material/colors';

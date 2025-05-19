@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import emailHandler from '../utils/email';
 import { signUpRequest } from '@/config/email';
 import { verifyDeliveryAddress } from '../utils/address';
-import { generateLatLng } from '../admin/clients/POST';
+import { generateLatLng } from '../admin/[companyId]/clients/POST';
 import { createGuest } from '../public/create-guest';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
 
@@ -55,7 +55,7 @@ export default async function handler(
     }
 
     // Create guest
-    const newGuest = await createGuest({
+    const newGuest = await createGuest(1, {
       clientName: name,
       email,
       guestSessionId,

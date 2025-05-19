@@ -1,6 +1,7 @@
-import { API_URL } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 const useApiDebtData = (
   userId: number,
@@ -11,6 +12,7 @@ const useApiDebtData = (
   const [debtData, setDebtData] = useState<any>();
   const [sortDebtKeys, setSortDebtKeys] = useState<any>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { companyId }: any = useParams();
 
   useEffect(() => {
     if (userId) {
@@ -32,7 +34,10 @@ const useApiDebtData = (
   const fetchDebtData = async () => {
     try {
       const response = await axios.get(
-        `${API_URL.CLIENTS}/debt?userId=${userId}&endMonth=${endMonth}&endYear=${endYear}`,
+        getAdminApiUrl(
+          companyId,
+          `/clients/debt?userId=${userId}&endMonth=${endMonth}&endYear=${endYear}`,
+        ),
       );
 
       if (response.data.error) {

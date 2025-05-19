@@ -1,4 +1,4 @@
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { API_URL, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import { User } from '@prisma/client';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
@@ -32,6 +32,7 @@ const initialState: UserState = {
   subCategoryId: -1,
   userPreferenceId: -1,
   categoryId: -1,
+  companyId: 1,
   role: USER_ROLE.GUEST,
   createdAt: '',
   guestSessionId: null,

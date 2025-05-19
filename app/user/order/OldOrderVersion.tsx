@@ -1,6 +1,5 @@
-import React, { useContext, useState, useCallback } from 'react';
-import SearchItem from '../../components/Modals/SearchItem';
-import OrderOnVacationModal from '../../admin/components/Modals/OrderOnVacationModal';
+import React, { useCallback, useContext, useState } from 'react';
+import OrderOnVacationModal from '@/app/admin/[companyId]/components/Modals/OrderOnVacationModal';
 import { Box, Grid, IconButton, TextField, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -15,6 +14,7 @@ import {
 import SellingItemName from '../../components/SellingItemName';
 import { FLAG_ORDER_TYPE } from '../../utils/enum';
 import { UserContext } from '../../context/UserContextAPI';
+import SearchItem from '@/app/components/Modals/SearchItem';
 
 export default function OldOrderVersion({
   itemList,

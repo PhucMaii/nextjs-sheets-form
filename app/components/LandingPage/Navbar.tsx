@@ -24,7 +24,7 @@ import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
+import { ListItemButtonStyled } from '@/app/admin/[companyId]/components/Sidebar/styled';
 import { HomeIcon, ShoppingBagIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';

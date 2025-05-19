@@ -3,10 +3,10 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/app/pusher';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { generateOrderTemplate } from '@/config/email';
-import emailHandler from '../../utils/email';
-import { restockInventoryItem } from '../../admin/orderedItems/single';
+import emailHandler from '@/pages/api/utils/email';
+import { restockInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { testAccountId } from '@/app/lib/constant';
 
 interface BodyTypes {
@@ -162,7 +162,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       htmlTemplate,
     );
 
-    await pusherServer?.trigger('void-order', 'incoming-order', {
+    await pusherServer?.trigger(`void-order-${existingUser.companyId}`, 'incoming-order', {
       ...existingUser,
       ...existingOrder,
       items: itemList,

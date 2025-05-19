@@ -1,23 +1,23 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { limitOrderHour } from '../../lib/constant';
-import { Order } from '../../admin/orders/page';
-import { UserType } from '../../utils/type';
+import { limitOrderHour } from '@/app/lib/constant';
+import { Order } from '@/app/admin/[companyId]/orders/page';
+import { UserType } from '@/app/utils/type';
 import axios from 'axios';
-import { API_URL, ORDER_STATUS } from '../../utils/enum';
-import { YYYYMMDDFormat, generateMonthRange } from '../../utils/time';
-import Sidebar from '../../components/Sidebar';
-import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import { ORDER_STATUS } from '@/app/utils/enum';
+import { YYYYMMDDFormat, generateMonthRange } from '@/app/utils/time';
+import Sidebar from '@/app/components/Sidebar';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { Box, Divider, Grid, IconButton, Typography } from '@mui/material';
-import OverviewCard from '../../admin/components/OverviewCard/OverviewCard';
+import OverviewCard from '@/app/admin/[companyId]/components/OverviewCard/OverviewCard';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { blue, blueGrey } from '@mui/material/colors';
-import OrderAccordion from '../../components/OrderAccordion';
 import { useRouter } from 'next/navigation';
 import useNotification from '@/hooks/useNotification';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import { SWRFetchData } from '../../utils/db';
+import OrderAccordion from '@/app/components/OrderAccordion';
 
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
@@ -31,7 +31,7 @@ export default function MainPage() {
     }
     return false;
   });
-  const [userOrder, setUserOrder] = useState<Order | null>(null);
+  const [userOrders, setUserOrders] = useState<Order[]>([]);
   const [thisMonthOrders, setThisMonthOrders] = useState<Order[]>([]);
   // const [totalBill, setTotalBill] = useState<number>(0);
 
@@ -47,7 +47,7 @@ export default function MainPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [clientOrders, _mutate, isValidating] = SWRFetchData(
-    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function MainPage() {
 
   const handleDeleteOrder = async (orderId: number) => {
     try {
-      const response = await axios.put(`${API_URL.CLIENT_ORDER}/status`, {
+      const response = await axios.put(`/api/order/status`, {
         orderId,
         updatedStatus: ORDER_STATUS.VOID,
       });
@@ -87,7 +87,11 @@ export default function MainPage() {
       });
 
       showNotification('success', response.data.message);
-      setUserOrder(null);
+
+      const newUserOrders = userOrders.filter(
+        (order: Order) => order.id !== orderId,
+      );
+      setUserOrders(newUserOrders);
       setThisMonthOrders(newThisMonthOrders);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
@@ -102,12 +106,16 @@ export default function MainPage() {
     }
     const formattedDate = YYYYMMDDFormat(dateObj);
     const userOrderList = clientOrders.data.userOrders;
-    const orderToday = userOrderList.find((order: Order) => {
-      return order.deliveryDate === formattedDate;
-    });
+    const orderToday = userOrderList
+      .filter((order: Order) => {
+        return order.deliveryDate === formattedDate;
+      })
+      .map((order: Order) => {
+        return { ...clientOrders.data.user, ...order };
+      });
 
     setClient(clientOrders.data.user);
-    setUserOrder({ ...clientOrders.data.user, ...orderToday });
+    setUserOrders(orderToday);
 
     const orderList = filterDateRangeOrders(
       clientOrders.data.userOrders,
@@ -119,7 +127,6 @@ export default function MainPage() {
   };
 
   const handleUpdateOrderUI = (updatedOrder: Order) => {
-    setUserOrder(updatedOrder);
     const newOrders = thisMonthOrders.map((order: Order) => {
       if (order.id === updatedOrder.id) {
         return updatedOrder;
@@ -127,7 +134,15 @@ export default function MainPage() {
       return order;
     });
 
+    const todayOrders = userOrders.map((order: Order) => {
+      if (order.id === updatedOrder.id) {
+        return updatedOrder;
+      }
+      return order;
+    });
+
     setThisMonthOrders(newOrders);
+    setUserOrders(todayOrders);
   };
 
   if (isValidating && !clientOrders) {
@@ -210,14 +225,17 @@ export default function MainPage() {
           Order
         </Typography>
       </Divider>
-      {userOrder?.items ? (
-        <OrderAccordion
-          handleDeleteOrder={handleDeleteOrder}
-          order={userOrder}
-          showNotification={showNotification}
-          handleUpdateOrderUI={handleUpdateOrderUI}
-          isEdit
-        />
+      {userOrders.length > 0 ? (
+        userOrders.map((order: Order) => (
+          <OrderAccordion
+            key={order.id}
+            handleDeleteOrder={handleDeleteOrder}
+            order={order}
+            showNotification={showNotification}
+            handleUpdateOrderUI={handleUpdateOrderUI}
+            isEdit
+          />
+        ))
       ) : (
         <Box
           display="flex"

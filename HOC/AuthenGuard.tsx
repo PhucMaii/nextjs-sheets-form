@@ -2,7 +2,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { FC, useEffect } from 'react';
 import LoadingComponent from '../app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
-import { API_URL, USER_ROLE } from '../app/utils/enum';
+import { USER_ROLE } from '../app/utils/enum';
 import useSWR from 'swr';
 
 export const SplashScreen: FC = () => (
@@ -26,55 +26,37 @@ export default function AuthenGuard({ children }: any) {
     revalidateOnFocus: false,
   });
 
-  const { data: user } = useSWR(
-    session?.user && !session.user.name
-      ? `${API_URL.USER}?id=${session?.user.id}`
-      : null,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    },
-  );
-
-  const { data: driver } = useSWR(
-    session?.user?.name ? `${API_URL.DRIVER}?id=${session?.user?.id}` : null,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    },
-  );
-
   useEffect(() => {
     if (
       (sessionError ||
         (!isSessionValidating && Object.keys(session).length === 0)) &&
-      !pathname?.startsWith('/') &&
-      pathname !== '/driver/login'
-    ) {
-      router.push('/auth/login');
-    } else if (
-      user &&
       (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
-      user.data.role === USER_ROLE.CLIENT
+      pathname !== '/driver/login'
+      // pathname !== '/auth/login'
     ) {
       router.push('/');
     } else if (
-      user &&
+      session?.user &&
       !pathname?.startsWith('/user') &&
-      user.data.role === 'client'
+      session.user.role === USER_ROLE.CLIENT
     ) {
       router.push('/user/overview');
     } else if (
-      user &&
-      !pathname?.startsWith('/admin') &&
-      (user.data.role === USER_ROLE.ADMIN ||
-        user.data.role === USER_ROLE.SUPER_ADMIN)
+      session?.user &&
+      (session?.user.role === USER_ROLE.ADMIN ||
+        session?.user.role === USER_ROLE.SUPER_ADMIN) &&
+      (!pathname?.startsWith('/admin') ||
+        session?.user.companyId !== Number(pathname?.split('/')[2]))
     ) {
-      router.push('/admin/orders');
-    } else if (driver && !pathname?.startsWith('/driver')) {
+      router.push(`/admin/${session?.user.companyId}/orders`);
+    } else if (
+      session?.user &&
+      session?.user.role === USER_ROLE.DRIVER &&
+      !pathname?.startsWith('/driver')
+    ) {
       router.push('/driver/overview');
     }
-  }, [pathname, session, user, driver]);
+  }, [pathname, session]);
 
   return children;
 }

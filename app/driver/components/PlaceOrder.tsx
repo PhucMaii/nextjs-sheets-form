@@ -13,7 +13,7 @@ import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -29,7 +29,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [items, mutateItems] = SWRFetchData(
-    `${API_URL.CLIENT_ITEM}?userId=${selectedClient?.id}`,
+    `/api/item?userId=${selectedClient?.id}`,
   );
 
   // useEffect(() => {

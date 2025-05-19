@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import axios from 'axios';
-import { ShadowSection } from '../admin/reports/styled';
+import { ShadowSection } from '../admin/[companyId]/reports/styled';
 import { blueGrey, grey } from '@mui/material/colors';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { UserContext } from '../context/UserContextAPI';
@@ -47,10 +47,13 @@ export default function StatementPage() {
     return { title: `${month}/${year}`, totalPrice };
   }, [currentMonthOrders]);
 
+  console.log(prevStatements);
+
   const sortedLatestGroupOrders = useMemo(() => {
     if (!prevStatements) {
       return [];
     }
+
     return Object.keys(prevStatements).sort((mmyyA: string, mmyyB: string) => {
       const [monthA, yearA] = mmyyA.split('/');
       const [monthB, yearB] = mmyyB.split('/');

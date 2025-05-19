@@ -30,7 +30,6 @@ const withPWA = require('next-pwa')({
     /react-loadable-manifest\.json$/,
   ],
   // runtimeCaching,
-
 });
 
 module.exports = withBundlerAnalyzer(withPWA(nextConfig));

@@ -18,7 +18,7 @@ import {
   PAYMENT_TYPE,
   TRANSACTION_STATUS,
 } from '../utils/enum';
-import { COLOR_TYPE } from '../admin/components/StatusText';
+import { COLOR_TYPE } from '../admin/[companyId]/components/StatusText';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import PendingIcon from '@mui/icons-material/Pending';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -42,6 +42,8 @@ import { amber, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { AccessTime } from '@mui/icons-material';
 import ReportIcon from '@mui/icons-material/Report';
+import BadgeIcon from '@mui/icons-material/Badge';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -186,109 +188,141 @@ export const limitOrderMinutes = 30;
 export const adminTabs = {
   Admin: [
     {
+      id: 1,
       name: 'Overview',
       icon: DashboardIcon,
-      path: '/admin/overview',
+      path: '/admin/[companyId]/overview',
     },
     {
+      id: 2,
       name: 'Orders',
       icon: ReceiptLongIcon,
-      path: '/admin/orders',
+      path: '/admin/[companyId]/orders',
     },
     {
+      id: 3,
       name: 'Reports',
       icon: ArticleIcon,
-      path: '/admin/reports',
+      path: '/admin/[companyId]/reports',
     },
     {
+      id: 4,
       name: 'Settings',
       icon: SettingsIcon,
-      path: '/admin/settings',
+      path: '/admin/[companyId]/settings',
     },
   ],
   Manage: [
     {
+      id: 21,
       name: 'Expenses',
       icon: PaymentIcon,
-      path: '/admin/cards',
+      path: '/admin/[companyId]/cards',
     },
     {
+      id: 5,
       name: 'Inventory',
       icon: InventoryIcon,
-      path: '/admin/inventory',
+      path: '/admin/[companyId]/inventory',
     },
     {
+      id: 6,
       name: 'Items',
       icon: SellIcon,
-      path: '/admin/items',
+      path: '/admin/[companyId]/items',
     },
     {
+      id: 7,
       name: 'Users',
       icon: PeopleIcon,
-      path: '/admin/clients',
+      path: '/admin/[companyId]/clients',
     },
     {
-      name: 'Drivers',
-      icon: LocalShippingIcon,
-      path: '/admin/drivers',
+      id: 8,
+      name: 'Employees',
+      icon: BadgeIcon,
+      path: '/admin/[companyId]/employees',
     },
     {
+      id: 9,
       name: 'Vendors',
       icon: StoreIcon,
-      path: '/admin/vendors',
+      path: '/admin/[companyId]/vendors',
     },
   ],
   Others: [
     {
+      id: 10,
       name: 'Transactions',
       icon: SyncAltIcon,
-      path: '/admin/transactions',
+      path: '/admin/[companyId]/transactions',
     },
     {
+      id: 11,
+      name: 'Fixed Transactions',
+      icon: AutorenewIcon,
+      path: '/admin/[companyId]/fixed-transactions',
+    },
+    {
+      id: 12,
       name: 'Purchase Orders',
       icon: LocalMallIcon,
-      path: '/admin/purchase-orders',
+      path: '/admin/[companyId]/purchase-orders',
     },
     {
+      id: 13,
       name: 'C.O.D',
       icon: PaymentsIcon,
-      path: '/admin/codBoard',
+      path: '/admin/[companyId]/codBoard',
     },
     {
+      id: 14,
       name: 'Pre Orders',
       icon: PendingActionsIcon,
-      path: '/admin/pre-orders',
+      path: '/admin/[companyId]/pre-orders',
     },
     {
+      id: 15,
       name: 'Shifts',
       icon: AccessTime,
-      path: '/admin/shifts',
+      path: '/admin/[companyId]/shifts',
     },
     {
+      id: 16,
       name: 'Order Layout',
       icon: WysiwygIcon,
-      path: '/admin/order-layout',
+      path: '/admin/[companyId]/order-layout',
     },
     {
       name: 'Website',
       icon: LanguageIcon,
-      path: '/admin/website',
+      path: '/admin/[companyId]/website',
+      id: 22,
+    },
+    {
+      name: 'Promotions',
+      icon: CampaignIcon,
+      path: '/admin/[companyId]/promotions',
+      id: 17,
     },
     { name: 'Promotions', icon: CampaignIcon, path: '/admin/promotions' },
     {
+      id: 18,
       name: 'Statements',
       icon: DocumentScannerIcon,
-      path: '/admin/statements',
+      path: '/admin/[companyId]/statements',
     },
     {
+      id: 19,
       name: 'Product Loss',
       icon: ReportIcon,
-      path: '/admin/product-loss',
+      path: '/admin/[companyId]/product-loss',
     },
     {
+      id: 20,
       name: 'Blocking',
       icon: AppBlockingIcon,
-      path: '/admin/blocking',
+      path: '/admin/[companyId]/blocking',
     },
   ],
 };

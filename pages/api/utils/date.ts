@@ -1,4 +1,4 @@
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { limitOrderHour } from '@/app/lib/constant';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { Expense } from '@prisma/client';

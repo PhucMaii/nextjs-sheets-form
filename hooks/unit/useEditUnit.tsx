@@ -8,12 +8,12 @@ import {
 } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { useMultipleBoolean } from '../useMultipleBoolean';
-import AddUnit from '@/app/admin/components/Modals/add/AddUnit';
-import EditUnit from '@/app/admin/components/Modals/edit/EditUnit';
-import UnitRadio from '@/app/admin/components/Radio/UnitRadio';
+import AddUnit from '@/app/admin/[companyId]/components/Modals/add/AddUnit';
+import EditUnit from '@/app/admin/[companyId]/components/Modals/edit/EditUnit';
+import UnitRadio from '@/app/admin/[companyId]/components/Radio/UnitRadio';
 import AddIcon from '@mui/icons-material/Add';
 import { USER_ROLE } from '@/app/utils/enum';
-import ErrorComponent from '@/app/admin/components/ErrorComponent';
+import ErrorComponent from '@/app/admin/[companyId]/components/ErrorComponent';
 
 const useEditUnit = (
   initialUnits: IInventoryUnit[] = [],

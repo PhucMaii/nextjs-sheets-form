@@ -10,8 +10,8 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { ModalProps } from '../admin/components/Modals/type';
-import { BoxModal } from '../admin/components/Modals/styled';
+import { ModalProps } from '../admin/[companyId]/components/Modals/type';
+import { BoxModal } from '../admin/[companyId]/components/Modals/styled';
 import ModalHead from '../lib/ModalHead';
 import { ItemButton } from './OrderView';
 import { grey } from '@mui/material/colors';

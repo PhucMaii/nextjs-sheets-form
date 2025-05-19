@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { createGuest } from '../../public/create-guest';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
-import { createOrder } from '../../admin/orders/POST';
+import { createOrder } from '../../admin/[companyId]/orders/POST';
 import { convertCartItemsToOrderItems } from '../../public/place-order';
 import { sendEmail, sendWelcomeEmail } from '../../utils/email';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -48,7 +48,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const clientInfo = JSON.parse(session.metadata.clientData);
 
       // Convert to pending client
-      const newGuest = await createGuest({
+      const newGuest = await createGuest(1, {
         ...clientInfo,
         type: USER_CATEGORIZED.PENDING,
       });
@@ -87,6 +87,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const formattedItems = convertCartItemsToOrderItems(cart.items);
       // Create order
       const newOrder = await createOrder(
+        1,
         newGuest,
         formattedItems,
         session.metadata.deliveryDate,

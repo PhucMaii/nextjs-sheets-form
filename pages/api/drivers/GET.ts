@@ -17,7 +17,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const driver = await prisma.driver.findUnique({
+    const driver = await prisma.employee.findUnique({
       where: {
         id: Number(id),
       },

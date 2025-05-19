@@ -7,6 +7,7 @@ import {
   getTodayDate,
 } from '../../utils/date';
 import { days } from '@/app/lib/constant';
+import { USER_ROLE } from '@/app/utils/enum';
 // import { getDriverInfo } from '../../utils/auth';
 
 const prisma = new PrismaClient();
@@ -27,7 +28,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     // Check if this is driver
-    const drivers: any = await prisma.driver.findMany({
+    const drivers: any = await prisma.employee.findMany({
+      where: {
+        companyId: 1,
+        role: USER_ROLE.DRIVER,
+      },
       include: {
         routes: true,
       },
@@ -67,16 +72,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         await webpush.sendNotification(
           subscription,
           JSON.stringify({
-            message:
-              'Good morning ' +
-              driver.name,
+            message: 'Good morning ' + driver.name,
             body: 'Clock in now to view your route for today 🚚. Have a safe drive!',
           }),
         );
       } catch (error: any) {
         console.log('🔔 Error send push notification to driver: ', error);
         if (error.statusCode === 410 || error.statusCode === 404) {
-          await prisma.driver.update({
+          await prisma.employee.update({
             where: {
               id: driver.id,
             },

@@ -15,12 +15,20 @@ export enum API_URL {
   CLIENT_ORDER = '/api/order',
   CATEGORIES = '/api/admin/categories',
   SCHEDULED_ORDER = '/api/admin/scheduledOrders',
-  SUBCATEGORIES = '/api/admin/subcategories',
   ROUTES = '/api/admin/routes',
   ADMIN_DRIVERS = '/api/admin/drivers',
   PUBLIC = '/api/public',
   DRIVER_ORDERS = '/api/drivers/orders',
 }
+
+// Helper function to get admin API URL with companyId
+export const getAdminApiUrl = (
+  companyId: string,
+  path: string,
+  query?: string,
+) => {
+  return `/api/admin/${companyId}${path}${query ? `?${query}` : ''}`;
+};
 
 export enum VIEW_TYPE {
   STOCK_PURCHASED = 'stock_purchased',
@@ -28,6 +36,7 @@ export enum VIEW_TYPE {
   VENDOR = 'vendor',
   PAYMENT_METHOD = 'paymentMethod',
   ALL = 'all',
+  FIXED_TRANSACTION = 'fixed_transaction',
 }
 
 export enum COD_STATUS {
@@ -81,10 +90,18 @@ export enum PAYMENT_METHOD_TYPE {
 export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',
-  DRIVER = 'driver',
-  GUEST = 'guest',
-  SYSTEM = 'system',
   SUPER_ADMIN = 'super admin',
+  DRIVER = 'driver',
+  WAREHOUSE = 'warehouse',
+  SYSTEM = 'system',
+  GUEST = 'guest',
+}
+
+export enum EMPLOYEE_ROLE {
+  ADMIN = 'admin',
+  SUPER_ADMIN = 'super admin',
+  DRIVER = 'driver',
+  WAREHOUSE = 'warehouse',
 }
 
 export enum FLAG_ORDER_TYPE {
@@ -158,4 +175,20 @@ export enum MEDIA_TYPE {
   INVENTORY_ITEM = 'inventory item',
   CHEQUE = 'cheque',
   OTHER = 'other',
+}
+
+export enum RECURRENCE_TYPE {
+  MONTHLY = 'monthly',
+  BI_WEEKLY = 'bi-weekly',
+  WEEKLY = 'weekly',
+  DAILY = 'daily',
+  YEARLY = 'yearly',
+}
+
+export enum FIXED_TRANSACTION_STATUS {
+  ACTIVE = 'Active',
+  PENDING = 'Pending',
+  COMPLETED = 'Completed',
+  CANCELLED = 'Cancelled',
+  ARCHIVED = 'Archived',
 }

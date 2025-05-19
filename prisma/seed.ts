@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+// import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -84,7 +85,11 @@ export const getTodayDate = (
   const day = dateSplitted[1].padStart(2, '0');
   const year = dateSplitted[2];
 
-  return { date: `${month}/${day}/20${year}`, time: pstDate.split(',')[1] };
+  return {
+    date: `${month}/${day}/20${year}`,
+    time: pstDate.split(',')[1],
+    dateAndTime: `${month}/${day}/20${year} ${pstDate.split(',')[1]}`,
+  };
 };
 
 export const YYYYMMDDFormat = (date: Date) => {
@@ -115,14 +120,35 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-
 async function main() {
-  await prisma.driver.updateMany({
+  const today = getTodayDate();
+  await prisma.pageView.create({
     data: {
-      notification: undefined,
-    }  
+      title: 'Website',
+      createdAt: today.dateAndTime,
+    }
   })
+
 }
+
+// async function main() {
+//   const routes = await prisma.route.findMany({
+//     where: {
+//       companyId: 1,
+//     },
+//   });
+
+//   for (const route of routes) {
+//     await prisma.route.update({
+//       where: {
+//         id: route.id,
+//       },
+//       data: { employeeId: route.driverId },
+//     });
+//   }
+
+// }
+
 
 main()
   .then(() => prisma.$disconnect())

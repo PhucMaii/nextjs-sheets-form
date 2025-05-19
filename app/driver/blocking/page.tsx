@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { ShadowSection } from '@/app/admin/reports/styled';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import {
   Autocomplete,
   Box,
@@ -16,15 +16,20 @@ import { IDayRange, UserType } from '@/app/utils/type';
 import { generateCurrentTime, generateMonthRange } from '@/app/utils/time';
 import { LoadingButton } from '@mui/lab';
 import AddIcon from '@mui/icons-material/Add';
-import DateRange from '@/app/admin/components/Modals/DateRangeModal';
+import DateRange from '@/app/admin/[companyId]/components/Modals/DateRangeModal';
 import axios from 'axios';
-import DayRange from '@/app/admin/components/DayRange';
-import ErrorComponent from '@/app/admin/components/ErrorComponent';
+import DayRange from '@/app/admin/[companyId]/components/DayRange';
+import ErrorComponent from '@/app/admin/[companyId]/components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import useNotification from '@/hooks/useNotification';
+import BlockOrders from '@/app/admin/[companyId]/components/Modals/BlockOrders';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
+  const [blockOrdersProps, setBlockOrdersProps] = useState<any>({
+    open: false,
+    orders: [],
+  });
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
@@ -40,11 +45,11 @@ export default function BlockingPage() {
 
   const { showNotification, NotificationComp } = useNotification();
   const mdDown = useMediaQuery((them: any) => them.breakpoints.down('md'));
-// 
+  //
   // Data Fetching
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   const [unavailableRanges, mutateRange, isValidating] = SWRFetchData(
-    `${apiURL}?userId=${selectedClient?.id}`,
+    `${apiURL}?userId=${selectedClient?.id}&date=${newDateRange[0]}`,
   );
 
   useEffect(() => {
@@ -87,8 +92,12 @@ export default function BlockingPage() {
         role: USER_ROLE.DRIVER,
       });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
+      if (response.data.error && response.data.data) {
+        setBlockOrdersProps({
+          open: true,
+          orders: response.data.data,
+        });
+        // showNotification('error', response.data.error);
         setIsAdding(false);
         return;
       }
@@ -184,6 +193,17 @@ export default function BlockingPage() {
   return (
     <Sidebar>
       {NotificationComp}
+      <BlockOrders
+        open={blockOrdersProps.open}
+        onClose={() =>
+          setBlockOrdersProps({ ...blockOrdersProps, open: false })
+        }
+        orders={blockOrdersProps.orders}
+        showNotification={showNotification}
+        startDate={newDateRange[0]}
+        endDate={newDateRange[1]}
+        role={USER_ROLE.DRIVER}
+      />
       <DateRange
         open={isSelectRangeOpen}
         onClose={() => setIsSelectRangeOpen(false)}
@@ -252,7 +272,7 @@ export default function BlockingPage() {
         <Box display="flex" flexDirection="column" gap={3} mt={2}>
           {isFetching ? (
             <LoadingComponent />
-          ) : unavailableRanges && unavailableRanges?.data.length > 0 ? (
+          ) : unavailableRanges && unavailableRanges?.data?.length > 0 ? (
             unavailableRanges.data.map((range: IDayRange, index: number) => {
               return (
                 <DayRange

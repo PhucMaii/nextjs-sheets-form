@@ -17,7 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const driverData: any = await getDriverInfo(req, res);
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingDriver = await prisma.employee.findUnique({
       where: {
         id: driverData.id,
       },
@@ -29,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    await prisma.driver.update({
+    await prisma.employee.update({
       where: {
         id: existingDriver.id,
       },

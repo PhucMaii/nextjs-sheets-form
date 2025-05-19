@@ -40,12 +40,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const shiftSession = await prisma.shiftSession.create({
       data: {
         driverId: driver.id,
+        employeeId: driver.id,
         date: today.date,
         startedAt: today.dateAndTime,
         isActive: true,
         routeId: targetRoute?.id,
         status: SHIFT_STATUS.UNPAID,
         role,
+        companyId: driver.companyId,
       },
     });
 

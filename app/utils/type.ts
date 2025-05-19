@@ -6,8 +6,10 @@ import {
   CodBoard,
   DayRange,
   Driver,
+  Employee,
   Expense,
   Fifo,
+  FixedTransaction,
   InventoryItem,
   InventoryUnit,
   ItemPreference,
@@ -29,7 +31,7 @@ import {
   VendorItem,
 } from '@prisma/client';
 import { Session } from 'next-auth';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import { STOCK_STATUS, USER_CATEGORIZED, USER_ROLE } from './enum';
 
 export interface IDayRange extends DayRange {}
@@ -84,12 +86,13 @@ export interface FetchForm {
 }
 
 export interface SessionWithId extends Session {
-  user: {
-    name?: string | null | undefined;
-    email?: string | null | undefined;
-    image?: string | null | undefined;
-    id?: string | null | undefined;
-  };
+  // user: {
+  //   name?: string | null | undefined;
+  //   email?: string | null | undefined;
+  //   image?: string | null | undefined;
+  //   id?: string | null | undefined;
+  //   role?: USER_ROLE;
+  // };
 }
 
 export interface SessionClientType {
@@ -187,6 +190,7 @@ export interface ScheduledOrder {
 
 export interface IRoutes extends Route {
   driver?: Driver;
+  employee?: Employee;
   clients?: IUserRoutes[];
 }
 
@@ -194,7 +198,7 @@ export interface IUserRoutes extends UserRoute {
   user: UserType;
 }
 
-export interface IDriver extends Driver {
+export interface IDriver extends Employee {
   routes: IRoutes[];
 }
 
@@ -204,7 +208,7 @@ type Cash = {
 };
 
 export interface IBoard extends CodBoard {
-  driver: IDriver;
+  employee: Employee;
   uncollected: Cash;
   collected: Cash;
   boardClients: UserType[];
@@ -309,6 +313,7 @@ export interface IOption extends Option {
 }
 
 export interface IShiftSession extends ShiftSession {
+  employee: Employee;
   driver: IDriver;
   route?: IRoutes;
 }
@@ -326,4 +331,8 @@ export interface IPOItem extends POItem {
 export interface IProductLoss extends LossReport {
   inventoryItem?: IInventoryItem;
   inventoryUnit?: IInventoryUnit;
+}
+
+export interface IFixedTransaction extends FixedTransaction {
+  paymentMethod: IPaymentMethod;
 }

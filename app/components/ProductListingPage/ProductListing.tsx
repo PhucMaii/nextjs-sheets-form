@@ -9,7 +9,7 @@ import { AppDispatch, RootState } from '@/state/store';
 import { LoadingButton } from '@mui/lab';
 import { AlertColor, Box, Typography } from '@mui/material';
 import { green, grey, red } from '@mui/material/colors';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ChooseOption from '../ChooseOption';
 import { OnSaleBadge } from '../OrderView';
@@ -28,12 +28,24 @@ export default function ProductListing({
   containerStyle,
 }: IProps) {
   const [isOpenChooseOption, setIsOpenChooseOption] = useState<boolean>(false);
+
+  const [img, setImg] = useState<string | undefined>(undefined);
   // const [cartId, setCartId] = useLocalStorage('cartId', '');
 
   const cart = useSelector((state: RootState) => state.cart);
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    if (product?.image || product?.inventoryItem?.image) {
+      generateImgUrl(product?.image || product?.inventoryItem?.image).then(
+        (img) => {
+          setImg(img);
+        },
+      );
+    }
+  }, [product]);
 
   // Discount Percentage for options
   const discountPercent = useMemo(() => {
@@ -133,11 +145,7 @@ export default function ProductListing({
           </Box>
         )}
         <img
-          src={
-            product?.image || product?.inventoryItem?.image
-              ? generateImgUrl(product?.image || product?.inventoryItem?.image)
-              : '/images/landing/image_not_found.jpeg'
-          }
+          src={img || '/images/landing/image_not_found.jpeg'}
           alt={product?.name || product?.inventoryItem?.name}
           width="100%"
           height={200}

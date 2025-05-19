@@ -1,5 +1,5 @@
-import { BoxModal } from '@/app/admin/components/Modals/styled';
-import { ModalProps } from '@/app/admin/components/Modals/type';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import useNotification from '@/hooks/useNotification';
 import { AppDispatch } from '@/state/store';

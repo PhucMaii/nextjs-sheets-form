@@ -1,11 +1,17 @@
-import { USER_ROLE } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../utils/auth';
+import { formatDateString } from '../utils/date';
+import { generateListOfDateString } from '@/app/utils/time';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
+
+const prisma = new PrismaClient();
 
 interface IBody {
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   userId: number;
   createdAt: string;
   role: USER_ROLE;
@@ -13,8 +19,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { startDate, endDate, userId, createdAt, role }: IBody = req.body;
 
     const existingUser = await prisma.user.findUnique({
@@ -37,36 +41,46 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const driver: any = await getDriverInfo(req, res);
       createdBy = driver.name;
     } else if (role === USER_ROLE.ADMIN) {
-      createdBy = `Admin - ${existingUser.clientName}`;
+      const session: any = await getServerSession(req, res, authOptions);
+      const admin: any = session?.user;
+      createdBy = `Admin - ${admin?.name}`;
     } else if (role === USER_ROLE.SUPER_ADMIN) {
-      createdBy = `S Admin - ${existingUser.clientName}`;
+      const session: any = await getServerSession(req, res, authOptions);
+      const admin: any = session?.user;
+      createdBy = `S Admin - ${admin?.name}`;
     }
+
+    const session: any = await getServerSession(req, res, authOptions);
+    const companyId = Number(session?.user?.companyId);
 
     // Check is same start date or same end date exist
     const isRangeValid = await handleCheckRangeValid(
-      prisma,
+      companyId,
       startDate,
       endDate,
       userId,
     );
+
     if (!isRangeValid.isValid) {
       return res.status(400).json({
         error: isRangeValid.message,
       });
     }
 
+    // Check if order exist
+    const orders = await getOrdersByDateRange(startDate, endDate, userId);
+
+    if (orders.length > 0) {
+      return res.status(200).json({
+        error: 'Order Exist',
+        data: orders,
+      });
+    }
     // const pstStartDate = convertToPSTDate(startDate);
     // const pstEndDate = convertToPSTDate(endDate);
 
     const utcStartDate = new Date(startDate);
     const utcEndDate = new Date(endDate);
-
-    // console.log({
-    //   startDate,
-    //   endDate,
-    //   pstStartDate,
-    //   pstEndDate,
-    // });
 
     const newUnavailableRange = await prisma.dayRange.create({
       data: {
@@ -75,6 +89,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         userId,
         createdAt,
         createdBy,
+        companyId,
       },
     });
 
@@ -90,15 +105,76 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
+export const getOrdersByDateRange = async (
+  startDate: Date | string,
+  endDate: Date | string,
+  userId: number,
+) => {
+  const normalizeStartDate = formatDateString(startDate);
+  const normalizeEndDate = formatDateString(endDate);
+
+  const listOfDates = generateListOfDateString(
+    new Date(normalizeStartDate),
+    new Date(normalizeEndDate),
+  );
+
+  console.log({
+    startDate,
+    endDate,
+    normalizeStartDate,
+    normalizeEndDate,
+    listOfDates,
+  });
+  const orders = await prisma.orders.findMany({
+    where: {
+      deliveryDate: {
+        in: listOfDates,
+      },
+      userId,
+      status: {
+        not: ORDER_STATUS.VOID,
+      },
+    },
+    include: {
+      user: {
+        include: {
+          routes: {
+            include: {
+              route: {
+                include: {
+                  driver: true,
+                  employee: true,
+                },
+              },
+            },
+          },
+          preference: true,
+          category: true,
+        },
+      },
+      items: {
+        include: {
+          inventoryItem: true,
+          inventoryUnit: true,
+          fifo: true,
+        },
+      },
+    },
+  });
+
+  return orders;
+};
+
 export const handleCheckRangeValid = async (
-  prisma: PrismaClient,
-  startDate: Date,
-  endDate: Date,
+  companyId: number,
+  startDate: Date | string,
+  endDate: Date | string,
   userId: number,
   avoidId: number = 0,
 ) => {
   const sameStartDate = await prisma.dayRange.findFirst({
     where: {
+      companyId,
       id: {
         not: avoidId,
       },
@@ -113,6 +189,7 @@ export const handleCheckRangeValid = async (
 
   const sameEndDate = await prisma.dayRange.findFirst({
     where: {
+      companyId,
       endDate,
       userId,
     },

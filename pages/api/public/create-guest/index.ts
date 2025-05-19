@@ -2,7 +2,7 @@ import { USER_ROLE } from '@/app/utils/enum';
 import { verifySessionId } from '@/app/utils/security';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { generateLatLng } from '../../admin/clients/POST';
+import { generateLatLng } from '../../admin/[companyId]/clients/POST';
 import bcrypt from 'bcryptjs';
 import { verifyDeliveryAddress } from '../../utils/address';
 import emailHandler from '../../utils/email';
@@ -34,7 +34,7 @@ export default async function handler(
       deliveryAddress,
     }: IBody = req.body;
 
-    const newGuest = await createGuest({
+    const newGuest = await createGuest(1, {
       guestSessionId,
       guestSessionSignature,
       clientName: name,
@@ -142,7 +142,7 @@ const generateGuestClientId = async () => {
   return clientId;
 };
 
-export const createGuest = async (client: any) => {
+export const createGuest = async (companyId: number, client: any) => {
   const prisma = new PrismaClient();
   try {
     if (!client.guestSessionId || !client.guestSessionSignature) {
@@ -196,8 +196,6 @@ export const createGuest = async (client: any) => {
 
     const { date, time } = getTodayDate();
 
-    console.log(client.guestSessionId);
-
     const newGuest = await prisma.user.create({
       data: {
         clientName: client.clientName,
@@ -215,6 +213,7 @@ export const createGuest = async (client: any) => {
         guestSessionId: client.guestSessionId,
         createdAt: `${date} ${time}`,
         type: client?.type,
+        companyId,
       },
     });
 

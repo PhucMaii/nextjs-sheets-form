@@ -1,5 +1,7 @@
-import StatusText, { COLOR_TYPE } from '@/app/admin/components/StatusText';
-import { ShadowSection } from '@/app/admin/reports/styled';
+import StatusText, {
+  COLOR_TYPE,
+} from '@/app/admin/[companyId]/components/StatusText';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import {
   AlertColor,
   Box,
@@ -14,12 +16,12 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import SellIcon from '@mui/icons-material/Sell';
 import AssistantDirectionIcon from '@mui/icons-material/AssistantDirection';
-import { Item, Order } from '@/app/admin/orders/page';
+import { Item, Order } from '@/app/admin/[companyId]/orders/page';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
 import { API_URL, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
-import ClientDetailsModal from '@/app/admin/components/Modals/ClientDetailsModal';
+import ClientDetailsModal from '@/app/admin/[companyId]/components/Modals/ClientDetailsModal';
 import { OrderedItems } from '@/app/utils/type';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';

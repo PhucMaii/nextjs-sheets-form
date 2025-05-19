@@ -15,11 +15,10 @@ type Props = {
 };
 
 export const Providers = ({ children }: Props) => {
-
   useEffect(() => {
     registerSW();
-  }, [])
-  
+  }, []);
+
   return (
     <SessionProvider>
       <AuthenGuard>

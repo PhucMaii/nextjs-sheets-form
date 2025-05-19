@@ -1,0 +1,4 @@
+.fc .fc-daygrid-day-top {
+  display: block !important;
+  flex-direction: column !important;
+}

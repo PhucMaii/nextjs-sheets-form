@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createOrder } from '../../admin/orders/POST';
+import { createOrder } from '../../admin/[companyId]/orders/POST';
 import { checkOrderDeliveryDateValid } from '../../utils/date';
 import { createGuest } from '../create-guest';
 import { sendEmail } from '../../utils/email';
@@ -40,7 +40,7 @@ export default async function handler(
 
     let user;
     if (!userId && !guestSessionId) {
-      user = await createGuest({
+      user = await createGuest(1, {
         ...req.body.client,
         type: USER_CATEGORIZED.GUEST,
       });
@@ -54,7 +54,7 @@ export default async function handler(
       });
 
       if (!user) {
-        user = await createGuest({
+        user = await createGuest(1, {
           ...req.body.client,
           type: USER_CATEGORIZED.GUEST,
         });
@@ -131,6 +131,7 @@ export default async function handler(
     // Create order
     // const { date, time } = getTodayDate();
     const newOrder = await createOrder(
+      1,
       user,
       formattedItems,
       deliveryDate,

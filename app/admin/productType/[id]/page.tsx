@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../../components/Sidebar/Sidebar';
+import Sidebar from '../../[companyId]/components/Sidebar/Sidebar';
 import {
   Box,
   Button,
@@ -13,19 +13,19 @@ import {
 } from '@mui/material';
 import { useParams, useRouter } from 'next/navigation';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
-import AddItemIntoType from '../../components/Modals/add/AddItemIntoType';
+import AddItemIntoType from '../../[companyId]/components/Modals/add/AddItemIntoType';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useNotification from '@/hooks/useNotification';
-import Product from '../../components/Settings/ProductType/Product';
-import ErrorComponent from '../../components/ErrorComponent';
+import Product from '../../[companyId]/components/Settings/ProductType/Product';
+import ErrorComponent from '../../[companyId]/components/ErrorComponent';
 import useDebounce from '@/hooks/useDebounce';
 import { IItemPreference } from '@/app/utils/type';
 
 export default function page() {
-  const params = useParams();
+  const params: any = useParams();
   const id = params?.id as string;
   const router = useRouter();
 
@@ -39,7 +39,7 @@ export default function page() {
     editItemPreference: false,
   });
   const { showNotification, NotificationComp } = useNotification();
-  const [type] = SWRFetchData(`${API_URL.ADMIN}/productTypes?id=${id}`);
+  const [type] = SWRFetchData(getAdminApiUrl(params?.companyId, `/productTypes?id=${id}`));
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 

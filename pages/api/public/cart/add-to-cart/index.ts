@@ -1,5 +1,5 @@
 import { ICartItem } from '@/app/utils/type';
-import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
+import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';

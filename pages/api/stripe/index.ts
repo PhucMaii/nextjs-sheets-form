@@ -6,8 +6,8 @@ import { convertCartItemsToOrderItems } from '../public/place-order';
 // import { getTodayDate } from '../utils/date';
 import { withGuestSessionGuard } from '../utils/withGuestSessionGuard';
 import { calculateShippingFee } from '@/app/utils/shipping';
-import { generateLatLng } from '../admin/clients/POST';
 import { verifyDeliveryAddress } from '../utils/address';
+import { generateLatLng } from '../admin/[companyId]/clients/POST';
 // import { ORDER_STATUS } from '@/app/utils/enum';
 // import { generateCostAndProfit } from '../admin/orderedItems/single';
 

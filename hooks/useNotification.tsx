@@ -1,5 +1,5 @@
 import React from 'react';
-import NotificationPopup from '@/app/admin/components/Notification';
+import NotificationPopup from '@/app/admin/[companyId]/components/Notification';
 import { Notification } from '@/app/utils/type';
 import { AlertColor } from '@mui/material';
 import { useState } from 'react';

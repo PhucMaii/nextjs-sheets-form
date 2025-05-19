@@ -20,7 +20,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
 import { driverTabs } from '@/app/lib/constant';
-import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
+import { ListItemButtonStyled } from '@/app/admin/[companyId]/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { primary } from '@/theme/color';
 import ShiftModal, { ShiftType } from './Modals/ShiftModal';
@@ -65,7 +65,10 @@ export default function Sidebar({ children }: IProps) {
   const router = useRouter();
   const pathname: any = usePathname();
 
-  const isForceToClockIn = todaySession?.data?.length === 0 && todaySession?.isWorkingDay && pathname === '/driver/orders';
+  const isForceToClockIn =
+    todaySession?.data?.length === 0 &&
+    todaySession?.isWorkingDay &&
+    pathname === '/driver/orders';
 
   useEffect(() => {
     setCurrentTab(pathname);
@@ -81,7 +84,10 @@ export default function Sidebar({ children }: IProps) {
         setShiftSession(currentShift);
         setShiftModalProps({ open: false, type: null });
         // No shift session and is working day => Force to clock in
-      } else if (todaySession?.data?.length === 0 && todaySession?.isWorkingDay) {
+      } else if (
+        todaySession?.data?.length === 0 &&
+        todaySession?.isWorkingDay
+      ) {
         setShiftSession(null);
         setShiftModalProps({ open: true, type: ShiftType.CLOCK_IN });
         // setIsAsked(true);
@@ -118,7 +124,6 @@ export default function Sidebar({ children }: IProps) {
       showNotification('error', 'Fail to confirm allow notification: ' + error);
     }
   };
-
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -195,7 +200,12 @@ export default function Sidebar({ children }: IProps) {
             onOpenSwitchRole={() => setIsOpenSwitchRole(true)}
           />
         ) : (
-          <Box display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="flex-end"
+            gap={1}
+          >
             <IconButton onClick={confirmAllowNotification}>
               <CircleNotificationsIcon />
             </IconButton>

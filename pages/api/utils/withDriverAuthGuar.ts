@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
+import { USER_ROLE } from '@/app/utils/enum';
 
 export type HandlerFunction = (
   req: NextApiRequest,
@@ -20,9 +21,10 @@ const withDriverAuthGuard =
         return res.status(401).json({ error: 'You are not authenticated' });
       }
 
-      const existingDriver = await prisma.driver.findUnique({
+      const existingDriver = await prisma.employee.findUnique({
         where: {
           id: Number(session.user.id),
+          role: USER_ROLE.DRIVER,
         },
       });
 

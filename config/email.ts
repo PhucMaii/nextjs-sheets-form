@@ -237,6 +237,7 @@ export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
         <tr>
           <td style="border: 1px solid #ccc; padding: 8px 12px;">${item.inventoryItem.name}</td>
           <td style="border: 1px solid #ccc; padding: 8px 12px;">${item.orderedQty}</td>
+          <td style="border: 1px solid #ccc; padding: 8px 12px;">${item?.note || ''}</td>
         </tr>
       `;
   }
@@ -256,6 +257,7 @@ export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
         <tr>
           <th style="border: 1px solid #ccc; padding: 8px 12px; background-color: #f2f2f2; text-align: left;">Item Name</th>
           <th style="border: 1px solid #ccc; padding: 8px 12px; background-color: #f2f2f2; text-align: left;">Quantity</th>
+          <th style="border: 1px solid #ccc; padding: 8px 12px; background-color: #f2f2f2; text-align: left;">Note</th>
         </tr>
       </thead>
       <tbody>

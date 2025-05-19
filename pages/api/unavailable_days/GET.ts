@@ -1,6 +1,8 @@
 import { DayRange, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { convertToPSTDate, normalizeDate } from '../utils/date';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IQuery {
   userId?: string;
@@ -13,6 +15,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const { userId, date }: IQuery = req.query;
 
+    const session: any = await getServerSession(req, res, authOptions);
+    const companyId = Number(session?.user?.companyId);
+
     if (!userId) {
       return res.status(404).json({
         error: 'User Id Is Missing',
@@ -21,6 +26,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     if (userId === 'All Clients' && date) {
       const allRanges = await prisma.dayRange.findMany({
+        where: {
+          companyId,
+        },
         include: {
           user: true,
         },

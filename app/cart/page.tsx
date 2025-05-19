@@ -6,16 +6,16 @@ import {
   landingPagePrimaryColor,
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
-import { ShadowSection } from '../admin/reports/styled';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import useNotification from '@/hooks/useNotification';
 import { ShoppingBagIcon } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
-import CartItemTable from '../components/CartPage/CartItemTable';
+import CartItemTable from '@/app/components/CartPage/CartItemTable';
 import { useRouter } from 'next/navigation';
-import OrderSummary from '../components/CartPage/OrderSummary';
+import OrderSummary from '@/app/components/CartPage/OrderSummary';
 import { ArrowBack } from '@mui/icons-material';
-import { maxWidth } from '../lib/constant';
+import { maxWidth } from '@/app/lib/constant';
 
 export default function CartPage() {
   const router = useRouter();

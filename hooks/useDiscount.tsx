@@ -1,10 +1,14 @@
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { IItem } from '@/app/utils/type';
 import { Typography } from '@mui/material';
 import React, { useMemo } from 'react';
 
 export const useDiscount = (items: IItem[], order: Order) => {
   const discountPrice = useMemo(() => {
+    if (!items || items.length === 0) {
+      return 0;
+    }
+
     const isDiscount = items.some(
       (item: any) => item?.isShowDiscount && item?.prevPrice,
     );
